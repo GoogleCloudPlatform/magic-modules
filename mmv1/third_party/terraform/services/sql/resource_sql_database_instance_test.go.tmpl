@@ -1727,6 +1727,7 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 		"orgId": envvar.GetTestOrgFromEnv(t),
 		"billingAccount": envvar.GetTestBillingAccountFromEnv(t),
 		"cloneSourceProject": envvar.GetTestProjectFromEnv(),
+		"cloneDestinationProject": acctest.BootstrapProject(t, "tf-ccp-", envvar.GetTestBillingAccountFromEnv(t), []string{}).ProjectId,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -8297,37 +8298,33 @@ data "google_sql_backup_run" "backup" {
 
 func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
+data "google_project" "project" {
   provider = google-beta
-  name                = "tf-test-cpc-%{random_suffix}"
-  project_id          = "tf-test-cpc-%{random_suffix}"
-  org_id              = "%{orgId}"
-  billing_account     = "%{billingAccount}"
-  deletion_policy     = "DELETE"
+  project_id          = "%{cloneDestinationProject}"
 }
 
 resource "time_sleep" "wait_60_seconds" {
   create_duration = "60s"
-  depends_on = [google_project.project]
+  depends_on = [data.google_project.project]
 }
 
-resource "google_project_service" "apigee" {
+resource "google_project_service" "sql" {
   provider = google-beta
-  project = google_project.project.project_id
-  service = "apigee.googleapis.com"
+  project = data.google_project.project.project_id
+  service = "sqladmin.googleapis.com"
   depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project_service" "compute" {
   provider = google-beta
-  project = google_project.project.project_id
+  project = data.google_project.project.project_id
   service = "compute.googleapis.com"
-  depends_on = [google_project_service.apigee]
+  depends_on = [google_project_service.sql]
 }
 
 resource "google_project_service" "servicenetworking" {
   provider = google-beta
-  project = google_project.project.project_id
+  project = data.google_project.project.project_id
   service = "servicenetworking.googleapis.com"
   depends_on = [google_project_service.compute]
 }
@@ -8337,28 +8334,28 @@ resource "time_sleep" "wait_300_seconds" {
   depends_on = [google_project_service.servicenetworking]
 }
 
-resource "google_compute_network" "apigee_network" {
+resource "google_compute_network" "sql_network" {
   provider = google-beta
-  name       = "apigee-network"
-  project    = google_project.project.project_id
+  name       = "sql-network"
+  project    = data.google_project.project.project_id
   depends_on = [time_sleep.wait_300_seconds]
 }
 
-resource "google_compute_global_address" "apigee_range" {
+resource "google_compute_global_address" "sql_range" {
   provider = google-beta
-  name          = "apigee-range"
+  name          = "sql-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  network       = google_compute_network.apigee_network.id
-  project       = google_project.project.project_id
+  network       = google_compute_network.sql_network.id
+  project       = data.google_project.project.project_id
 }
 
-resource "google_service_networking_connection" "apigee_vpc_connection" {
+resource "google_service_networking_connection" "sql_vpc_connection" {
   provider = google-beta
-  network                 = google_compute_network.apigee_network.id
+  network                 = google_compute_network.sql_network.id
   service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.apigee_range.name]
+  reserved_peering_ranges = [google_compute_global_address.sql_range.name]
   depends_on              = [google_project_service.servicenetworking]
   deletion_policy         = "ABANDON"
 }
@@ -8368,13 +8365,13 @@ resource "google_sql_database_instance" "instance" {
 	name             = "tf-test-cpc-%{random_suffix}"
 	database_version = "POSTGRES_11"
 	region           = "us-central1"
-	project = google_project.project.project_id
+	project = data.google_project.project.project_id
 
 	settings {
 		tier = "db-custom-2-3840"
 		edition = "ENTERPRISE"
 		ip_configuration {
-			private_network = google_compute_network.apigee_network.self_link
+			private_network = google_compute_network.sql_network.self_link
 		}
 		backup_configuration {
 			enabled                        = true
@@ -8393,7 +8390,7 @@ resource "google_sql_database_instance" "instance" {
 	lifecycle{
 		ignore_changes = [clone[0].point_in_time]
 	}
-	depends_on = [google_service_networking_connection.apigee_vpc_connection]
+	depends_on = [google_service_networking_connection.sql_vpc_connection]
 }
 
 resource "google_sql_database_instance" "source_instance" {

@@ -1635,8 +1635,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 			if cloneContext != nil {
 				cloneContext.DestinationInstanceName = name
 				{{- if ne $.TargetVersionName "ga" }}
-				cloneContext.DestinationProject = project
-				cloneContext.DestinationNetwork = network
+				if cloneSourceProject != "" {
+					cloneContext.DestinationProject = project
+					cloneContext.DestinationNetwork = network
+				}
 				{{- end }}
 				clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
 				{{- if ne $.TargetVersionName "ga" }}
