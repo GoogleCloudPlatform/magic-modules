@@ -412,6 +412,7 @@ properties:
       Default value is INSTANCES.
       When target_type is INTERNAL_MANAGED_LB, target_forwarding_rules must be set
     required: false
+    default_from_api: true
     enum_values:
       - 'INSTANCES'
       - 'INTERNAL_MANAGED_LB'
