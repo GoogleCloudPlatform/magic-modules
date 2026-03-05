@@ -1720,17 +1720,14 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 
 {{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
-	// Sqladmin client
-	//acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	cloneDestinationProject := envvar.GetTestProjectFromEnv()
-	cloneSourceProject := acctest.BootstrapProject(t, "tf-cpc-", envvar.GetTestBillingAccountFromEnv(t), []string{"sqladmin.googleapis.com"}).ProjectId //"sdeekshaa-playground"
+	cloneSourceProject := envvar.GetTestDestinationProjectFromEnv()
 
 	context := map[string]interface{}{
 		"random_suffix":           acctest.RandString(t, 10),
 		"original_db_name":        acctest.BootstrapSharedSQLInstanceBackupRun(t, cloneSourceProject),
-		//"destinationNetwork":	   acctest.BootstrapSharedServiceNetworkingConnection(t, "test-cross-project-clone", acctest.ServiceNetworkWithProjectID(cloneDestinationProject)),
 		"cloneSourceProject":      cloneSourceProject,
 		"cloneDestinationProject": cloneDestinationProject,
 	}
@@ -8338,11 +8335,6 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 				name = "%{original_db_name}"
 				project = "${data.google_project.source_project.project_id}"
 			}
-
-			//data "google_compute_network" "servicenet" {
-			//	name = "%{destinationNetwork}"
-			//	project = "${data.google_project.destination_project.project_id}"
-			//}
 
 			data "google_project" "source_project" {
 				project_id = "%{cloneSourceProject}"
