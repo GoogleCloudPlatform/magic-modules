@@ -69,15 +69,16 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
+  - name: "displayName"
+    type: String
+    description: |
+      The display name of the Space.
+    required: true
   - name: "name"
     type: String
     description: |
       Identifier. Id of the space. This field is used as the resource name, and must follow AIP-122 guidelines.
     output: true
-  - name: "displayName"
-    type: String
-    description: |
-      The display name of the Space.
   - name: "createTime"
     type: String
     description: |

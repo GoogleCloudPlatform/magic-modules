@@ -14,7 +14,7 @@ func TestAccApigeeSpace_basicTest(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"space_id":      "test-space",
+		"space_id":        "test-space",
 		"display_name":    "Test Space",
 		"random_suffix":   acctest.RandString(t, 10),
 	}
@@ -25,7 +25,7 @@ func TestAccApigeeSpace_basicTest(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckApigeeSpaceDestroyProducer(t),
+		CheckDestroy: testAccCheckApigeeSpaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeSpace_basicTest(context),
@@ -107,4 +107,3 @@ resource "google_apigee_space" "primary" {
 }
 `, context)
 }
-
