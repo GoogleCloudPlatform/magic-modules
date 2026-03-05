@@ -14,6 +14,7 @@
 ---
 name: 'Logging'
 display_name: 'Cloud (Stackdriver) Logging'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://logging.googleapis.com/v2/'
