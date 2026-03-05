@@ -30,8 +30,8 @@ func TestAccDataSourceParameterManagerParameters_basic(t *testing.T) {
 						"data.google_parameter_manager_parameters.parameters-datasource",
 						"google_parameter_manager_parameter.parameters",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":              {},
+							"project":         {},
 							"deletion_policy": {},
 						},
 					),
@@ -88,8 +88,8 @@ func TestAccDataSourceParameterManagerParameters_filter(t *testing.T) {
 						"google_parameter_manager_parameter.parameters-1",
 						"google_parameter_manager_parameter.parameters-2",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":              {},
+							"project":         {},
 							"deletion_policy": {},
 						},
 					),
