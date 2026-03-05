@@ -54,6 +54,14 @@ type Resource struct {
 	// organization variant, however most resources do not need it.
 	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
 
+	// ApiResourceField indicates what field on the API resource is managed by a resource.
+	// This is generally relevant for fine-grained resources. For example,
+	// google_compute_router_nat manages the `nat` field on the `Router` resource. Can be
+	// set to "." to indicate explicitly that the resource's fields aren't
+	// "nested", even if the resource uses NestedQuery. This is useful for resources that
+	// use "list" instead of "get" as the read endpoint.
+	ApiResourceField string `yaml:"api_resource_field,omitempty"`
+
 	// [Required] A description of the resource that's surfaced in provider
 	// documentation.
 	Description string
@@ -322,11 +330,6 @@ type Resource struct {
 
 	// The version name provided by the user through CI
 	TargetVersionName string `yaml:"-"`
-
-	// ApiResourceField indicates what field on the API resource is managed by a resource.
-	// This is generally relevant for fine-grained resources. For example,
-	// google_compute_router_nat manages the `nat` field on the `Router` resource.
-	ApiResourceField string `yaml:"api_resource_field,omitempty"`
 
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
