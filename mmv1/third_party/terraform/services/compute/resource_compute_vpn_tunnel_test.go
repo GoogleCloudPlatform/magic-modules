@@ -129,8 +129,6 @@ func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 	})
 }
 
-
-{{- if ne $.TargetVersionName "ga" -}}
 // TestAccComputeVpnTunnel_resourceManagerTags tests the 'resource_manager_tags' block in the google_compute_vpn_tunnel resource.
 func TestAccComputeVpnTunnel_resourceManagerTags(t *testing.T) {
 	t.Parallel()
@@ -149,7 +147,7 @@ func TestAccComputeVpnTunnel_resourceManagerTags(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -164,7 +162,6 @@ func TestAccComputeVpnTunnel_resourceManagerTags(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 // TestAccComputeVpnTunnel_cipherSuite tests the 'cipher_suite' block in the google_compute_vpn_tunnel resource.
 func TestAccComputeVpnTunnel_cipherSuite(t *testing.T) {
@@ -550,31 +547,25 @@ resource "google_compute_vpn_tunnel" "foobar" {
 `, suffix)
 }
 
-
-{{- if ne $.TargetVersionName "ga" }}
 func testAccComputeVpnTunnel_resourceManagerTags(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network" "foobar" {
-  provider = google-beta
   name                    = "tf-test-%{suffix}"
   auto_create_subnetworks = "true"
 }
 
 resource "google_compute_address" "foobar" {
-  provider = google-beta
   name   = "tf-test-%{suffix}"
   region = "us-central1"
 }
 
 resource "google_compute_vpn_gateway" "foobar" {
-  provider = google-beta
   name    = "tf-test-%{suffix}"
   network = google_compute_network.foobar.self_link
   region  = google_compute_address.foobar.region
 }
 
 resource "google_compute_forwarding_rule" "foobar_esp" {
-  provider = google-beta
   name        = "tf-test-%{suffix}-esp"
   region      = google_compute_vpn_gateway.foobar.region
   ip_protocol = "ESP"
@@ -583,7 +574,6 @@ resource "google_compute_forwarding_rule" "foobar_esp" {
 }
 
 resource "google_compute_forwarding_rule" "foobar_udp500" {
-  provider = google-beta
   name        = "tf-test-%{suffix}-udp500"
   region      = google_compute_forwarding_rule.foobar_esp.region
   ip_protocol = "UDP"
@@ -593,7 +583,6 @@ resource "google_compute_forwarding_rule" "foobar_udp500" {
 }
 
 resource "google_compute_forwarding_rule" "foobar_udp4500" {
-  provider = google-beta
   name        = "tf-test-%{suffix}-udp4500"
   region      = google_compute_forwarding_rule.foobar_udp500.region
   ip_protocol = "UDP"
@@ -603,7 +592,6 @@ resource "google_compute_forwarding_rule" "foobar_udp4500" {
 }
 
 resource "google_compute_vpn_tunnel" "foobar" {
-  provider = google-beta
   name               = "tf-test-%{suffix}"
   region             = google_compute_forwarding_rule.foobar_udp4500.region
   target_vpn_gateway = google_compute_vpn_gateway.foobar.self_link
@@ -617,5 +605,3 @@ resource "google_compute_vpn_tunnel" "foobar" {
 }
 `, context)
 }
-{{- end }}
-

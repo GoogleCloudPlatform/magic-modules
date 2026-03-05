@@ -6,11 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-
-{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-{{- end }}
-
 )
 
 func TestAccComputeExternalVPNGateway_updateLabels(t *testing.T) {
@@ -110,8 +106,6 @@ resource "google_compute_external_vpn_gateway" "external_gateway" {
 `, suffix, ipv6_address)
 }
 
-
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeExternalVPNGateway_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
@@ -129,7 +123,7 @@ func TestAccComputeExternalVPNGateway_resourceManagerTags(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeExternalVPNGateway_resourceManagerTags(context),
@@ -147,7 +141,6 @@ func TestAccComputeExternalVPNGateway_resourceManagerTags(t *testing.T) {
 func testAccComputeExternalVPNGateway_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  provider = google-beta
   name            = "tf-test-external-gateway-%{suffix}"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
@@ -164,4 +157,3 @@ resource "google_compute_external_vpn_gateway" "external_gateway" {
 }
 `, context)
 }
-{{- end }}
