@@ -49,6 +49,7 @@ examples:
       org_id: "ORG_ID"
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    external_providers: ["time"]
   - name: "apigee_space_basic"
     exclude_test: true
   # This is a more verbose version of the above that creates all
