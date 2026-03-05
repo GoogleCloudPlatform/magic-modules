@@ -1722,8 +1722,8 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	t.Parallel()
 
-	cloneDestinationProject := envvar.GetTestProjectFromEnv()
-	cloneSourceProject := envvar.GetTestDestinationProjectFromEnv(t)
+	cloneDestinationProject := envvar.GetTestDestinationProjectFromEnv(t)
+	cloneSourceProject := envvar.GetTestProjectFromEnv()
 
 	context := map[string]interface{}{
 		"random_suffix":           acctest.RandString(t, 10),
@@ -1734,7 +1734,7 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_crossProjectClone(context),
