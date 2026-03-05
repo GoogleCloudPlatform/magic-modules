@@ -20,9 +20,11 @@ references:
   guides: {}
   api: https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addAssociation
 base_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}
-immutable: true
+immutable: false
 self_link: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}
 create_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addAssociation
+update_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/patchAssociation
+update_verb: POST
 delete_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}
 delete_verb: POST
 kind: compute#firewallPolicyAssociation
@@ -38,6 +40,16 @@ api_resource_field: associations
 examples:
   - name: region_network_firewall_policy_association
     primary_resource_id: default
+    vars:
+      association_name: my-association
+      network_name: my-network
+      policy_name: my-policy
+    test_env_vars:
+      project_name: PROJECT_NAME
+      region: REGION
+  - name: region_network_firewall_policy_association_multi
+    min_version: beta
+    primary_resource_id: association
     vars:
       association_name: my-association
       network_name: my-network
@@ -77,3 +89,9 @@ properties:
     description: |
       The short name of the firewall policy of the association.
     output: true
+  - name: priority
+    min_version: beta
+    description: |
+      An integer indicating the priority of an association.
+    type: Integer
+    default_from_api: true
