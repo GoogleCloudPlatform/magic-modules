@@ -515,7 +515,6 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
 		})
 	}
   }
-  depends_on = [google_dataplex_glossary_term.term_test_id_full]
 }
 `, context)
 }
