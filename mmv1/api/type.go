@@ -237,10 +237,6 @@ type Type struct {
 	// The name of the key. Used in the Terraform schema as a field name.
 	KeyName string `yaml:"key_name,omitempty"`
 
-	// Deprecated. A description of the key's format. Used in Terraform to describe
-	// the field in documentation.
-	KeyDescription string `yaml:"key_description,omitempty"`
-
 	// ====================
 	// KeyValuePairs Fields
 	// ====================
@@ -526,10 +522,6 @@ func (t *Type) Validate(rName string) (es []error) {
 
 	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
-	}
-
-	if t.KeyDescription != "" {
-		es = append(es, fmt.Errorf("property %s key_description can't be set in resource %s; it's deprecated", fullFieldPath, rName))
 	}
 
 	t.validateLabelsField()
