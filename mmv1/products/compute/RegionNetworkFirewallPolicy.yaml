@@ -31,6 +31,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
 legacy_long_form_project: true
 examples:
