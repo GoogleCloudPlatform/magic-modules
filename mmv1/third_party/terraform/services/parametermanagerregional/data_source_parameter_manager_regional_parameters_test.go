@@ -32,6 +32,7 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameters_basic(t *testin
 						map[string]struct{}{
 							"id":      {},
 							"project": {},
+							"deletion_policy": {},
 						},
 					),
 				),
@@ -91,6 +92,7 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameters_filter(t *testi
 						map[string]struct{}{
 							"id":      {},
 							"project": {},
+							"deletion_policy": {},
 						},
 					),
 				),

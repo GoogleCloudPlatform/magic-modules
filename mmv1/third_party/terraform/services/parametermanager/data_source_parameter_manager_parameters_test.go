@@ -32,6 +32,7 @@ func TestAccDataSourceParameterManagerParameters_basic(t *testing.T) {
 						map[string]struct{}{
 							"id":      {},
 							"project": {},
+							"deletion_policy": {},
 						},
 					),
 				),
@@ -89,6 +90,7 @@ func TestAccDataSourceParameterManagerParameters_filter(t *testing.T) {
 						map[string]struct{}{
 							"id":      {},
 							"project": {},
+							"deletion_policy": {},
 						},
 					),
 				),
