@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -119,6 +120,124 @@ func TestAccComputeResourcePolicy_guestFlushEmptyValue(t *testing.T) {
 	})
 }
 
+func TestAccComputeResourcePolicy_workloadPolicyAcceleratorTopologyMode(t *testing.T) {
+	if !testAccComputeResourcePolicySupportsAcceleratorTopologyMode() {
+		t.Skip("accelerator_topology_mode is available only in beta provider schema")
+	}
+
+	t.Parallel()
+
+	context_1 := map[string]interface{}{
+		"suffix":                    fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"accelerator_topology_mode": "AUTO_CONNECT",
+		"vm_count":                  "vm_count = 2",
+		"collocation":               "collocation = \"COLLOCATED\"",
+		"tpu_topology":              "4x4",
+	}
+
+	context_2 := map[string]interface{}{
+		"suffix":                    context_1["suffix"],
+		"accelerator_topology_mode": "PROVISION_ONLY",
+		"vm_count":                  "",
+		"collocation":               "collocation = \"COLLOCATED\"",
+		"tpu_topology":              "4x4x4",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeResourcePolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeResourcePolicy_workloadPolicyAcceleratorTopologyMode(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_resource_policy.foo", "workload_policy.0.accelerator_topology_mode", "AUTO_CONNECT"),
+				),
+			},
+			{
+				Config: testAccComputeResourcePolicy_workloadPolicyAcceleratorTopologyMode(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_resource_policy.foo", "workload_policy.0.accelerator_topology_mode", "PROVISION_ONLY"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeResourcePolicy_groupPlacementPolicyAcceleratorTopologyMode(t *testing.T) {
+	if !testAccComputeResourcePolicySupportsAcceleratorTopologyMode() {
+		t.Skip("accelerator_topology_mode is available only in beta provider schema")
+	}
+
+	t.Parallel()
+
+	context_1 := map[string]interface{}{
+		"suffix":                    fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"accelerator_topology_mode": "AUTO_CONNECT",
+		"vm_count":                  "vm_count = 2",
+		"collocation":               "collocation = \"COLLOCATED\"",
+		"tpu_topology":              "4x4",
+	}
+
+	context_2 := map[string]interface{}{
+		"suffix":                    context_1["suffix"],
+		"accelerator_topology_mode": "PROVISION_ONLY",
+		"vm_count":                  "",
+		"collocation":               "collocation = \"COLLOCATED\"",
+		"tpu_topology":              "4x4x4",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeResourcePolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeResourcePolicy_groupPlacementPolicyAcceleratorTopologyMode(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_resource_policy.foo", "group_placement_policy.0.accelerator_topology_mode", "AUTO_CONNECT"),
+				),
+			},
+			{
+				Config: testAccComputeResourcePolicy_groupPlacementPolicyAcceleratorTopologyMode(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_resource_policy.foo", "group_placement_policy.0.accelerator_topology_mode", "PROVISION_ONLY"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeResourcePolicySupportsAcceleratorTopologyMode() bool {
+	resourceSchema := compute.ResourceComputeResourcePolicy().Schema
+
+	workloadPolicy, ok := resourceSchema["workload_policy"]
+	if !ok {
+		return false
+	}
+	workloadPolicyElem, ok := workloadPolicy.Elem.(*schema.Resource)
+	if !ok {
+		return false
+	}
+	if _, ok := workloadPolicyElem.Schema["accelerator_topology_mode"]; !ok {
+		return false
+	}
+
+	groupPlacementPolicy, ok := resourceSchema["group_placement_policy"]
+	if !ok {
+		return false
+	}
+	groupPlacementPolicyElem, ok := groupPlacementPolicy.Elem.(*schema.Resource)
+	if !ok {
+		return false
+	}
+	if _, ok := groupPlacementPolicyElem.Schema["accelerator_topology_mode"]; !ok {
+		return false
+	}
+
+	return true
+}
+
 func testAccComputeResourcePolicy_attached(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -183,6 +302,35 @@ resource "google_compute_resource_policy" "foo" {
 	  }
 	}
 	%{snapshot_properties}
+  }
+}
+`, context)
+}
+
+func testAccComputeResourcePolicy_workloadPolicyAcceleratorTopologyMode(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_resource_policy" "foo" {
+  name   = "tf-test-gce-policy%{suffix}"
+  region = "europe-west1"
+  workload_policy {
+    type                      = "HIGH_THROUGHPUT"
+		accelerator_topology      = "4x4x4"
+    accelerator_topology_mode = "%{accelerator_topology_mode}"
+  }
+}
+`, context)
+}
+
+func testAccComputeResourcePolicy_groupPlacementPolicyAcceleratorTopologyMode(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_resource_policy" "foo" {
+  name   = "tf-test-gce-policy%{suffix}"
+  region = "us-central1"
+  group_placement_policy {
+		%{vm_count}
+		%{collocation}
+		tpu_topology              = "%{tpu_topology}"
+    accelerator_topology_mode = "%{accelerator_topology_mode}"
   }
 }
 `, context)

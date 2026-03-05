@@ -329,6 +329,16 @@ properties:
           Specifies the shape of the TPU slice.
         immutable: true
         min_version: beta
+      - name: acceleratorTopologyMode
+        type: Enum
+        description: |
+          Specifies the connection mode for the accelerator topology. If not specified, the default is AUTO_CONNECT.
+        immutable: true
+        enum_values:
+          - AUTO_CONNECT
+          - PROVISION_ONLY
+        default_value: AUTO_CONNECT
+        min_version: beta
   - name: instanceSchedulePolicy
     type: NestedObject
     description: |
@@ -430,3 +440,13 @@ properties:
         immutable: true
         conflicts:
           - workload_policy.0.max_topology_distance
+      - name: acceleratorTopologyMode
+        type: Enum
+        description: |
+          Specifies the connection mode for the accelerator topology. If not specified, the default is AUTO_CONNECT.
+        immutable: true
+        enum_values:
+          - AUTO_CONNECT
+          - PROVISION_ONLY
+        default_value: AUTO_CONNECT
+        min_version: beta
