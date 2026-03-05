@@ -579,8 +579,19 @@ func (t Type) Lineage() []string {
 // include the field on the API resource that the fine-grained resource manages.
 func (t Type) ApiLineage() []string {
 	if t.ParentMetadata == nil {
-		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "" {
-			return []string{t.ResourceMetadata.ApiResourceField, t.ApiName}
+		// The special value "." indicates that the resource's shouldn't be considered "nested"
+		// even if it has NestedQuery set.
+		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "." {
+			if t.ResourceMetadata.ApiResourceField != "" {
+				return []string{t.ResourceMetadata.ApiResourceField, t.ApiName}
+			} else if t.ResourceMetadata.NestedQuery != nil {
+				// Handle `items` as a special case since that's a common container field name for a list endpoint,
+				// not a fine-grained field name within a resource.
+				keys := t.ResourceMetadata.NestedQuery.Keys
+				if len(keys) > 1 || keys[0] != "items" {
+					return append(t.ResourceMetadata.NestedQuery.Keys, t.ApiName)
+				}
+			}
 		}
 		return []string{t.ApiName}
 	}
