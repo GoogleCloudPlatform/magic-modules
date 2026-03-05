@@ -441,6 +441,7 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"../cmd/tfplan2cai/main.go":                                                             "third_party/tgc/cmd/tfplan2cai/main.go",
 		"../cmd/tfplan2cai/root.go":                                                             "third_party/tgc/cmd/tfplan2cai/root.go",
 		"tfplan2cai.go":                                                                         "third_party/tgc/tfplan2cai.go",
+		"tfplan_to_cai_test.go":                                                                 "third_party/tgc/tfplan_to_cai_test.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
