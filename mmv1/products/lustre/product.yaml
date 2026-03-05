@@ -16,6 +16,7 @@ name: Lustre
 display_name: Google Cloud Managed Lustre
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+deletion_policy_opt_in: true
 versions:
   - base_url: https://lustre.googleapis.com/v1/
     name: ga
