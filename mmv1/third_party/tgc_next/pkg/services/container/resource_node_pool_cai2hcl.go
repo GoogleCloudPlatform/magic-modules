@@ -267,6 +267,8 @@ func flattenNodeNetworkConfig(c interface{}, d *schema.ResourceData, prefix stri
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(config["additionalPodNetworkConfigs"]),
 		}
 
+		// enable_private_nodes = false and the field not in HCL behaves the same, as this field is in ForceSendFields and the false value is included in the API request when it is not specified in config.
+		// Only convert the field enable_private_nodes when its value is true in CAI asset.
 		if v, ok := config["enablePrivateNodes"].(bool); ok && v {
 			transformed["enable_private_nodes"] = v
 		}
