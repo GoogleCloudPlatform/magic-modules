@@ -106,8 +106,8 @@ type Step struct {
 	// Whether to skip import tests for this test step
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
-	// Whether to skip generating docs for this test step
-	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
+	// Whether to generate docs for this test step (override sample's exclude_basic_doc)
+	IncludeStepDoc bool `yaml:"include_step_doc,omitempty"`
 
 	DocumentationHCLText string `yaml:"-"`
 	TestHCLText          string `yaml:"-"`
