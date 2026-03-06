@@ -266,6 +266,9 @@ type Config struct {
 
 	{{ range $product := $.Products }}
 	{{ $product.Name }}BasePath string
+	{{- if $product.Version.RepEnabled }}
+	{{ $product.Name }}RepBasePath string
+	{{- end -}}
 	{{- end }}
 
 	CloudBillingBasePath string
@@ -289,6 +292,9 @@ type Config struct {
 
 	RequestBatcherServiceUsage *RequestBatcher
 	RequestBatcherIam          *RequestBatcher
+
+	PreferGlobalEndpoints bool
+	PreferRegionalEndpoints bool
 }
 
 {{- range $product := $.Products }}
@@ -1638,4 +1644,19 @@ func GetUniverseDomainFromMeta(meta interface{}) string {
 		return "googleapis.com"
 	}
 	return config.UniverseDomain
+}
+
+func ResourceBasePath(basePath, repPath, basePathKey string, config *Config) string {
+    // If default has been overridden, use override
+    if basePath != DefaultBasePaths[basePathKey] {
+        return basePath
+    }
+    // If REP preferred, default to REP
+    if config.PreferRegionalEndpoints {
+        return repPath
+    }
+    if config.PreferGlobalEndpoints {
+        return basePath
+    }
+    return repPath
 }
