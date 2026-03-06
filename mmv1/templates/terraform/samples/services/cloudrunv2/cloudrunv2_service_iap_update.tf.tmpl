@@ -1,0 +1,13 @@
+resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.PrefixedVars "cloud_run_service_name"}}"
+  location = "us-central1"
+  deletion_protection = false
+  ingress = "INGRESS_TRAFFIC_ALL"
+  iap_enabled = "{{index $.Vars "iap_enabled"}}"
+  test_name     = "{{index $.Vars "test_name"}}"
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
