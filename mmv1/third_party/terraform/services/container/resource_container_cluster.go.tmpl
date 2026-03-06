@@ -1287,6 +1287,14 @@ func ResourceContainerCluster() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"last_minor_version_disruption_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"last_disruption_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 								},
 							},
 						},
@@ -7759,6 +7767,8 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 			{
 				"minor_version_disruption_interval": mp.DisruptionBudget.MinorVersionDisruptionInterval,
 				"patch_version_disruption_interval": mp.DisruptionBudget.PatchVersionDisruptionInterval,
+				"last_minor_version_disruption_time": mp.DisruptionBudget.LastMinorVersionDisruptionTime,
+				"last_disruption_time": mp.DisruptionBudget.LastDisruptionTime,
 			},
 		}
 	}
