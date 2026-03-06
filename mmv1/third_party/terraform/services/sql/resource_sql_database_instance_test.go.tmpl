@@ -8311,18 +8311,11 @@ resource "time_sleep" "wait_60_seconds" {
   depends_on = [google_project.project]
 }
 
-resource "google_project_service" "sql" {
-  provider = google-beta
-  project = google_project.project.project_id
-  service = "sqladmin.googleapis.com"
-  depends_on = [time_sleep.wait_60_seconds]
-}
-
 resource "google_project_service" "compute" {
   provider = google-beta
   project = google_project.project.project_id
   service = "compute.googleapis.com"
-  depends_on = [google_project_service.sql]
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project_service" "servicenetworking" {
@@ -8398,7 +8391,7 @@ resource "google_sql_database_instance" "instance" {
 
 resource "google_sql_database_instance" "source_instance" {
 	provider = google-beta
-	name = "tf-test-cpcsource-%{random_suffix}"
+	name = "tf-test-source-%{random_suffix}"
 	database_version = "POSTGRES_11"
 	region           = "us-central1"
 	deletion_protection = false
