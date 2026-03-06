@@ -7763,13 +7763,18 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 	}
 	var budget []map[string]interface{}
 	if mp.DisruptionBudget != nil {
-	    budget = []map[string]interface{}{
-			{
-				"minor_version_disruption_interval": mp.DisruptionBudget.MinorVersionDisruptionInterval,
-				"patch_version_disruption_interval": mp.DisruptionBudget.PatchVersionDisruptionInterval,
-				"last_minor_version_disruption_time": mp.DisruptionBudget.LastMinorVersionDisruptionTime,
-				"last_disruption_time": mp.DisruptionBudget.LastDisruptionTime,
-			},
+	    budget = []map[string]interface{}{}
+		if mp.DisruptionBudget.MinorVersionDisruptionInterval != "" {
+			budget[0]["minor_version_disruption_interval"] = mp.DisruptionBudget.MinorVersionDisruptionInterval
+		}
+		if mp.DisruptionBudget.PatchVersionDisruptionInterval != "" {
+			budget[0]["patch_version_disruption_interval"] = mp.DisruptionBudget.PatchVersionDisruptionInterval
+		}
+		if mp.DisruptionBudget.LastMinorVersionDisruptionTime != "" {
+			budget[0]["last_minor_version_disruption_time"] = mp.DisruptionBudget.LastMinorVersionDisruptionTime
+		}
+		if mp.DisruptionBudget.LastDisruptionTime != "" {
+			budget[0]["last_disruption_time"] = mp.DisruptionBudget.LastDisruptionTime
 		}
 	}
 
