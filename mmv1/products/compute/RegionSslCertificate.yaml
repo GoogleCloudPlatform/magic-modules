@@ -23,7 +23,6 @@ references:
   guides:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSslCertificates'
-include_in_tgc_next: true
 docs:
   optional_properties: |
     * `name_prefix` - (Optional) Creates a unique name beginning with the
@@ -49,6 +48,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
   constants: 'templates/terraform/constants/compute_certificate.go.tmpl'

@@ -15,6 +15,13 @@
 //
 // ----------------------------------------------------------------------------
 
+{{ $needsPlancheck := false -}}
+{{- range $s := $.Res.TestSamples -}}
+  {{- if gt (len $s.TestSteps) 1 -}}
+    {{- $needsPlancheck = true -}}
+  {{- end -}}
+{{- end -}}
+
 package {{ $.Res.PackageName }}_test
 
 import (
@@ -26,7 +33,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if $needsPlancheck }}
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+{{- end }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"{{ $.ImportPath }}/acctest"
@@ -57,6 +66,10 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	t.Skip("{{$s.SkipTest}}")
 	{{- end }}
 
+	{{- if $s.SkipFunc }}
+	{{$s.SkipFunc}}
+	{{- end}}
+
 	{{- if $s.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}
@@ -73,18 +86,31 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	})
 	{{- end }}
 
+	{{- $stepCount := len $s.TestSteps }}
+	{{- if gt $stepCount 1 }}
+	randomSuffix := acctest.RandString(t, 10)
+	{{- end }}
+
 	{{- range $i, $st := $s.TestSteps }}
 	{{- if eq $i 0 }}
 
 	context := map[string]interface{}{
 	{{- else }}
+	
 	context_{{ $i }} := map[string]interface{}{
 	{{- end }}
 		{{- template "EnvVarContext" dict "TestEnvVars" $st.TestEnvVars "HasNewLine" false}}
-		{{- range $varKey, $varVal := $st.TestVarsOverrides }}
-		"{{$varKey}}": {{$varVal}},
+		{{- range $varKey, $varVal := $st.Vars }}
+		"{{$varKey}}": {{ $varVal }},
 		{{- end }}
+		{{- range $varKey, $varVal := $st.TestVarsOverrides }}
+		"{{$varKey}}": {{ $varVal }},
+		{{- end }}
+	{{- if gt $stepCount 1 }}
+		"random_suffix": randomSuffix,
+	{{- else }}
 		"random_suffix": acctest.RandString(t, 10),
+	{{- end }}
 	}
 	{{- end }}
 

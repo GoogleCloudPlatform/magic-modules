@@ -63,27 +63,23 @@ sweeper:
 examples:
   - name: 'snapshot_basic'
     primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
   - name: 'snapshot_basic_2'
     primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
   - name: 'snapshot_basic_source_instant_snapshot'
     primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
       instant_snapshot_name: 'my-instant-snapshot'
   - name: 'snapshot_chainname'
     primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-snapshot-chainname%s", context["random_suffix"])'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
