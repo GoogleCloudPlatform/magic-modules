@@ -3307,8 +3307,13 @@ func flattenFastSocket(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	enabled, ok := c["enabled"].(bool)
+	if !ok {
+		enabled = false
+	}
+
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}
