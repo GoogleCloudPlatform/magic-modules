@@ -31,7 +31,7 @@ type Step struct {
 	OicsVarsOverrides    map[string]string `yaml:"oics_vars_overrides,omitempty"`
 	IgnoreReadExtra      []string          `yaml:"ignore_read_extra,omitempty"`
 	ExcludeImportTest    bool              `yaml:"exclude_import_test,omitempty"`
-	ExcludeDocs          bool              `yaml:"exclude_docs,omitempty"`
+	IncludeStepDoc       bool              `yaml:"include_step_doc,omitempty"` // Opt-in for ANY step
 	DocumentationHCLText string            `yaml:"-"`
 	TestHCLText          string            `yaml:"-"`
 	OicsHCLText          string            `yaml:"-"`
@@ -52,6 +52,7 @@ type Sample struct {
 	PrimaryResourceType string      `yaml:"primary_resource_type,omitempty"`
 	PrimaryResourceName string      `yaml:"primary_resource_name,omitempty"`
 	ExcludeTest         bool        `yaml:"exclude_test,omitempty"`
+	ExcludeBasicDoc     bool        `yaml:"exclude_basic_doc,omitempty"` // Opt-out for FIRST step
 	Steps               []Step      `yaml:"steps"`
 	NewConfigFuncs      []Step      `yaml:"-"`
 	RegionOverride      string      `yaml:"region_override,omitempty"`
@@ -76,7 +77,7 @@ type OldExample struct {
 	RegionOverride      string            `yaml:"region_override,omitempty"`
 	ConfigPath          string            `yaml:"config_path,omitempty"`
 	SkipVcr             bool              `yaml:"skip_vcr,omitempty"`
-	SkipFunc            string      `yaml:"skip_func,omitempty"`
+	SkipFunc            string            `yaml:"skip_func,omitempty"`
 	SkipTest            string            `yaml:"skip_test,omitempty"`
 	ExternalProviders   []string          `yaml:"external_providers,omitempty"`
 	TGCSkipTest         string            `yaml:"tgc_skip_test,omitempty"`
@@ -261,6 +262,7 @@ func transformExamplesToSamples(oldExamples []OldExample, filePath, serviceName 
 			PrimaryResourceId:   old.PrimaryResourceId,
 			PrimaryResourceType: old.PrimaryResourceType,
 			PrimaryResourceName: old.PrimaryResourceName,
+			ExcludeBasicDoc:     old.ExcludeDocs,
 			ExcludeTest:         old.ExcludeTest,
 			RegionOverride:      old.RegionOverride,
 			TGCSkipTest:         old.TGCSkipTest,
@@ -274,7 +276,6 @@ func transformExamplesToSamples(oldExamples []OldExample, filePath, serviceName 
 					OicsVarsOverrides: old.OicsVarsOverrides,
 					IgnoreReadExtra:   old.IgnoreReadExtra,
 					ExcludeImportTest: old.ExcludeImportTest,
-					ExcludeDocs:       old.ExcludeDocs,
 				},
 			},
 		}
