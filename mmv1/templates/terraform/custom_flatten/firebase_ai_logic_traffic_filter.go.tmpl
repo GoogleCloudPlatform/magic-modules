@@ -1,0 +1,36 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	original, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+
+	// 1. If the API returned the field (e.g., when it is true), use it.
+	if val, ok := original["templateOnly"]; ok {
+		transformed["template_only"] = val
+	} else {
+		// 2. The API dropped the field (because false is the protobuf zero-value).
+		// We look at the Terraform state to see if the user had this block configured.
+		oldRaw := d.Get("traffic_filter")
+		if oldList, ok := oldRaw.([]interface{}); ok && len(oldList) > 0 && oldList[0] != nil {
+			oldMap := oldList[0].(map[string]interface{})
+			// Inject the user's state value back in so Terraform doesn't see a diff
+			if templateOnly, ok := oldMap["template_only"].(bool); ok && !templateOnly {
+				transformed["template_only"] = templateOnly
+			}
+		}
+	}
+
+	// 3. If the API returned an empty object `{}` AND the user didn't configure the block,
+	// return nil to prevent Terraform from trying to add an empty block to the state.
+	if len(transformed) == 0 {
+		return nil
+	}
+
+	return []interface{}{transformed}
+}
