@@ -64,16 +64,9 @@ type vcrCassetteUpdateRecordingResult struct {
 }
 
 var vcrCassetteUpdateCmd = &cobra.Command{
-	Use:   "vcr-cassette-update",
+	Use:   "vcr-ga-gce",
 	Short: "Update VCR cassettes",
-	Long: `This command is triggered in .ci/gcb-vcr-nightly.yml to update vcr cassettes.
-
-	The command expects the following as arguments:
-	1. Build ID
-
-	It then performs the following operations:
-	1. Run VCR replay and record (if applicable).
-	2. Update vcr cassettes fixture.
+	Long: `This command is triggered in .ci/gcb-vcr-ga-gce.yml to update vcr ga gce cassettes.
 	`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -114,33 +107,32 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 }
 
 func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
-	if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
+	if err := vt.FetchCassettes(provider.GA, "main", ""); err != nil {
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
-	bucketPrefix := fmt.Sprintf("gs://vcr-nightly/beta/%s/%s", today, buildID)
-
-	// main cassettes backup
-	// incase nightly run goes wrong. this will be used to restore the cassettes
-	cassettePath := vt.CassettePath(provider.Beta)
-	args := []string{"-m", "-q", "cp", filepath.Join(cassettePath, "*"), bucketPrefix + "/main_cassettes_backup/fixtures/"}
-	if _, err := rnr.Run("gsutil", args, nil); err != nil {
-		return fmt.Errorf("error backup cassettes: %w", err)
-	}
+	bucketPrefix := fmt.Sprintf("gs://vcr-nightly/ga/%s/%s", today, buildID)
 
 	providerRepo := &source.Repo{
-		Name: provider.Beta.RepoName(),
+		Name: provider.GA.RepoName(),
 	}
 	ctlr.SetPath(providerRepo)
 	if err := ctlr.Clone(providerRepo); err != nil {
 		return fmt.Errorf("error cloning provider: %w", err)
 	}
-	vt.SetRepoPath(provider.Beta, providerRepo.Path)
+	vt.SetRepoPath(provider.GA, providerRepo.Path)
+
+	var testDirs []string
+	service := "apikeys"
+	servicePath := "./" + filepath.Join(provider.GA.ProviderName(), "services", service)
+	testDirs = append(testDirs, servicePath)
+	
 
 	fmt.Println("running tests in REPLAYING mode now")
 	replayingResult, replayingErr := vt.Run(vcr.RunOptions{
 		Mode:    vcr.Replaying,
-		Version: provider.Beta,
+		Version: provider.GA,
+		TestDirs: testDirs,
 	})
 
 	// upload replay build and test logs
@@ -149,7 +141,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		fmt.Printf("Warning: error uploading replaying test log: %s\n", err)
 	}
 
-	testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
+	testLogPath := vt.LogPath(vcr.Replaying, provider.GA)
 	if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
 		fmt.Printf("Warning: error uploading replaying build log: %s\n", err)
 	}
@@ -174,7 +166,8 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
 			Mode:    vcr.Recording,
-			Version: provider.Beta,
+			Version: provider.GA,
+			TestDirs:         testDirs,
 			Tests:   replayingResult.FailedTests,
 		})
 
@@ -185,14 +178,14 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 			fmt.Printf("Warning: error uploading recording test log: %s\n", err)
 		}
 
-		testLogPath := vt.LogPath(vcr.Recording, provider.Beta)
+		testLogPath := vt.LogPath(vcr.Recording, provider.GA)
 		if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
 			fmt.Printf("Warning: error uploading recording build log: %s\n", err)
 		}
 
 		if len(recordingResult.PassedTests) > 0 {
-			cassettesPath := vt.CassettePath(provider.Beta)
-			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
+			cassettesPath := vt.CassettePath(provider.GA)
+			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/ga/fixtures/", rnr); err != nil {
 				// There could be cases that the tests do not generate any cassettes.
 				fmt.Printf("Warning: error uploading cassettes: %s\n", err)
 			}
