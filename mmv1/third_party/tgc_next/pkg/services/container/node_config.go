@@ -3307,6 +3307,8 @@ func flattenFastSocket(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	// Default enabled to false if missing. The field is required in the schema,
+	// but the API may not return it if the value is false.
 	enabled, ok := c["enabled"].(bool)
 	if !ok {
 		enabled = false
