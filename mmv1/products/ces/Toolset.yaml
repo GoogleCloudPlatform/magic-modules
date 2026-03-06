@@ -251,6 +251,13 @@ properties:
                   CES service agent
                   `service-@gcp-sa-ces.iam.gserviceaccount.com`.
                 required: true
+              - name: scopes
+                type: Array
+                description: |-
+                  The OAuth scopes to grant. If not specified, the default scope
+                  `https://www.googleapis.com/auth/cloud-platform` is used.
+                item_type:
+                  type: String
           - name: serviceAgentIdTokenAuthConfig
             type: NestedObject
             description: |-
@@ -434,6 +441,13 @@ properties:
                   CES service agent
                   `service-@gcp-sa-ces.iam.gserviceaccount.com`.
                 required: true
+              - name: scopes
+                type: Array
+                description: |-
+                  The OAuth scopes to grant. If not specified, the default scope
+                  `https://www.googleapis.com/auth/cloud-platform` is used.
+                item_type:
+                  type: String
           - name: serviceAgentIdTokenAuthConfig
             type: NestedObject
             description: |-
