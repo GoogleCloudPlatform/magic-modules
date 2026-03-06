@@ -74,8 +74,10 @@ virtual_fields:
     type: Boolean
     default_value: false
 tgc_tests:
-  - name: 'TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdateDisableAutoscaling'
-    skip: 'sometimes the CAI asset data for step3 is unavailable'
+  - name: TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdateDisableAutoscaling
+    skip: sometimes the CAI asset data for step3 is unavailable
+  - name: TestAccSpannerInstance_freeInstanceBasicUpdate
+    skip: sometimes the CAI asset data for step3 is unavailable
 parameters:
 properties:
   - name: 'name'
