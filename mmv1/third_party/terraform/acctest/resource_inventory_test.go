@@ -275,7 +275,7 @@ func TestValidateResourceMetadata(t *testing.T) {
 
 			// Allowlist google_biglake_iceberg resources as a pre-existing case.
 			// This product doesn't have a version in the base_url because resources & IAM have different base_urls. (Resources include an `iceberg` prefix that isn't present for IAM URLs.)
-			ignoredResources := []string{"google_biglake_iceberg_catalog", "google_biglake_iceberg_namespace"}
+			ignoredResources := []string{"google_biglake_iceberg_catalog", "google_biglake_iceberg_namespace", "google_biglake_iceberg_table"}
 			if r.ApiVersion == "" && !slices.Contains(ignoredResources, resourceName) {
 				t.Errorf("%s: `api_version` is required and not set", r.FileName)
 			}
