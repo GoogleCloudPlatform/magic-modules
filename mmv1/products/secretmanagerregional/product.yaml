@@ -15,6 +15,7 @@
 name: 'SecretManagerRegional'
 legacy_name: 'secret_manager'
 display_name: 'Secret Manager'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://secretmanager.{{location}}.rep.googleapis.com/v1/'
