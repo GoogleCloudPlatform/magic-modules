@@ -38,13 +38,22 @@ type Options struct {
 
 // Convert converts terraform json plan to CAI Assets.
 func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset, error) {
+	changes, err := tfplan.ReadResourceChanges(jsonPlan)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertChanges(ctx, jsonPlan, changes, o)
+}
+
+// ConvertChanges converts terraform json plan to CAI Assets.
+func ConvertChanges(ctx context.Context, jsonPlan []byte, changes []tfplan.ResourceChange, o *Options) ([]caiasset.Asset, error) {
 	if o == nil || o.ErrorLogger == nil {
 		return nil, fmt.Errorf("logger is not initialized")
 	}
 
 	// IAM resource resolver, do not run until IAM resources included
 	resolvers.NewIamAdvancedResolver(o.ErrorLogger).Resolve(jsonPlan)
-	resourceDataMap := resolvers.NewDefaultPreResolver(o.ErrorLogger).Resolve(jsonPlan)
+	resourceDataMap := resolvers.NewDefaultPreResolver(o.ErrorLogger).Resolve(changes)
 
 	// TODO: add remaining advanced resolvers for resources
 	ParentResolver := resolvers.NewParentResourceResolver(o.ErrorLogger)
