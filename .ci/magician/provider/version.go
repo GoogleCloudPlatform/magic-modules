@@ -36,9 +36,9 @@ func (v Version) ProviderName() string {
 }
 
 func (v Version) BucketPath() string {
-	if v == GA {
-		return ""
-	}
+	// if v == GA {
+	// 	return ""
+	// }
 	return v.String() + "/"
 }
 

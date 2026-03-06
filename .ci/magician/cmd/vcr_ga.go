@@ -126,12 +126,11 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	service := "apikeys"
 	servicePath := "./" + filepath.Join(provider.GA.ProviderName(), "services", service)
 	testDirs = append(testDirs, servicePath)
-	
 
 	fmt.Println("running tests in REPLAYING mode now")
 	replayingResult, replayingErr := vt.Run(vcr.RunOptions{
-		Mode:    vcr.Replaying,
-		Version: provider.GA,
+		Mode:     vcr.Replaying,
+		Version:  provider.GA,
 		TestDirs: testDirs,
 	})
 
@@ -165,10 +164,10 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		fmt.Println("running tests in RECORDING mode now")
 
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
-			Mode:    vcr.Recording,
-			Version: provider.GA,
-			TestDirs:         testDirs,
-			Tests:   replayingResult.FailedTests,
+			Mode:     vcr.Recording,
+			Version:  provider.GA,
+			TestDirs: testDirs,
+			Tests:    replayingResult.FailedTests,
 		})
 
 		// upload build and test logs first to preserve debugging logs in case
