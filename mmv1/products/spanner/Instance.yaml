@@ -270,18 +270,68 @@ properties:
               properties:
                 - name: 'autoscalingLimits'
                   type: NestedObject
-                  required: true
                   properties:
                     - name: 'minNodes'
                       type: Integer
-                      required: true
                       description: |
                         The minimum number of nodes for this specific replica.
+                      exactly_one_of:
+                        - 'min_nodes'
+                        - 'min_processing_units'
+                      required_with:
+                        - 'max_nodes'
                     - name: 'maxNodes'
                       type: Integer
-                      required: true
                       description: |
                         The maximum number of nodes for this specific replica.
+                      exactly_one_of:
+                        - 'max_nodes'
+                        - 'max_processing_units'
+                      required_with:
+                        - 'min_nodes'
+                    - name: 'minProcessingUnits'
+                      type: Integer
+                      description: |
+                        The minimum number of processing units for this specific replica.
+                        If set, this number should be multiples of 1000.
+                      exactly_one_of:
+                        - 'min_nodes'
+                        - 'min_processing_units'
+                      required_with:
+                        - 'max_processing_units'
+                    - name: 'maxProcessingUnits'
+                      type: Integer
+                      description: |
+                        The maximum number of processing units for this specific replica.
+                        If set, this number should be multiples of 1000 and be greater than or equal to
+                        min_processing_units.
+                      exactly_one_of:
+                        - 'max_nodes'
+                        - 'max_processing_units'
+                      required_with:
+                        - 'min_processing_units'
+                - name: 'autoscalingTargetHighPriorityCpuUtilizationPercent'
+                  type: Integer
+                  description: |
+                    The target high priority cpu utilization percentage that the autoscaler
+                    should be trying to achieve for this replica.
+                    This number is on a scale from 0 (no utilization) to 100 (full utilization).
+                - name: 'autoscalingTargetTotalCpuUtilizationPercent'
+                  type: Integer
+                  description: |
+                    The target total cpu utilization percentage that the autoscaler
+                    should be trying to achieve for this replica.
+                    This number is on a scale from 0 (no utilization) to 100 (full utilization).
+                - name: 'disableHighPriorityCpuAutoscaling'
+                  type: Boolean
+                  description: |
+                    If true, disables high priority CPU autoscaling for this replica and ignores
+                    high_priority_cpu_utilization_percent in the top-level autoscaling configuration.
+                - name: 'disableTotalCpuAutoscaling'
+                  type: Boolean
+                  description: |
+                    If true, disables total CPU autoscaling for this replica and ignores
+                    total_cpu_utilization_percent in the top-level autoscaling configuration.
   - name: 'edition'
     type: Enum
     description: |
