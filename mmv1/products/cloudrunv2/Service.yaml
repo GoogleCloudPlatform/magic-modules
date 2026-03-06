@@ -174,6 +174,28 @@ examples:
     ignore_read_extra:
       - 'deletion_protection'
     exclude_docs: true
+samples:
+  - name: cloudrunv2_service_iap_update
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_service_iap_update
+        prefixed_vars:
+          cloud_run_service_name: 'cloudrun-iap-service'
+        vars:
+          test_name: '"test-name"'
+          iap_enabled: 'true'
+        ignore_read_extra:
+          - deletion_protection
+        exclude_docs: true
+      - name: cloudrunv2_service_iap_update
+        prefixed_vars:
+          cloud_run_service_name: 'cloudrun-iap-service'
+        vars:
+          test_name: 'test_name'
+          iap_enabled: 'false'
+        ignore_read_extra:
+          - deletion_protection
+        exclude_docs: true
 virtual_fields:
   - name: 'deletion_protection'
     description: |
