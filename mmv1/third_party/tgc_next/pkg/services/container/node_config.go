@@ -2556,8 +2556,15 @@ func flattenEphemeralStorageLocalSsdConfig(v interface{}) []map[string]interface
 		return nil
 	}
 
+	// Default localSsdCount to 0 if missing. The field is required in the schema,
+	// but the API may not return it if the value is 0.
+	localSsdCount := c["localSsdCount"]
+	if localSsdCount == nil {
+		localSsdCount = 0
+	}
+
 	transformed := map[string]interface{}{
-		"local_ssd_count":  c["localSsdCount"],
+		"local_ssd_count":  localSsdCount,
 		"data_cache_count": c["dataCacheCount"],
 	}
 
@@ -3300,8 +3307,15 @@ func flattenFastSocket(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	// Default enabled to false if missing. The field is required in the schema,
+	// but the API may not return it if the value is false.
+	enabled, ok := c["enabled"].(bool)
+	if !ok {
+		enabled = false
+	}
+
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}
