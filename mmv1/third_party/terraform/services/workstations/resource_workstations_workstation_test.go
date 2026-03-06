@@ -1,9 +1,8 @@
 package workstations_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -29,7 +28,7 @@ func TestAccWorkstationsWorkstation_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
 			},
-      {
+			{
 				Config: testAccWorkstationsWorkstation_modified(context),
 			},
 			{
@@ -41,7 +40,6 @@ func TestAccWorkstationsWorkstation_update(t *testing.T) {
 		},
 	})
 }
-
 
 func testAccWorkstationsWorkstation_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -147,4 +145,3 @@ resource "google_workstations_workstation" "default" {
 }
 `, context)
 }
-{{- end }}
