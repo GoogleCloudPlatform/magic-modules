@@ -14,6 +14,7 @@
 ---
 name: 'TpuV2'
 display_name: 'Cloud TPU v2'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     # The v2alpha1 version of the Cloud TPU API is best suited for the google-beta Terraform provider.
