@@ -123,7 +123,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	vt.SetRepoPath(provider.GA, providerRepo.Path)
 
 	var testDirs []string
-	service := "apikeys"
+	service := "compute"
 	servicePath := "./" + filepath.Join(provider.GA.ProviderName(), "services", service)
 	testDirs = append(testDirs, servicePath)
 
