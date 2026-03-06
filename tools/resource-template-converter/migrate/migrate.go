@@ -76,6 +76,7 @@ type OldExample struct {
 	RegionOverride      string            `yaml:"region_override,omitempty"`
 	ConfigPath          string            `yaml:"config_path,omitempty"`
 	SkipVcr             bool              `yaml:"skip_vcr,omitempty"`
+	SkipFunc            string      `yaml:"skip_func,omitempty"`
 	SkipTest            string            `yaml:"skip_test,omitempty"`
 	ExternalProviders   []string          `yaml:"external_providers,omitempty"`
 	TGCSkipTest         string            `yaml:"tgc_skip_test,omitempty"`
