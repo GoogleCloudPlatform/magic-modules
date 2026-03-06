@@ -256,6 +256,8 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `resource_policies` - (Optional) Resource policies for this managed instance group. Structure is [documented below](#nested_resource_policies).
 
+* `target_size_policy` - (Optional [Beta](../guides/provider_versions.html.markdown)) The target size policy for the instance group. Structure is [documented below](#nested_target_size_policy).
+
 - - -
 
 The `standby_policy` block supports:
@@ -437,6 +439,10 @@ params{
 <a name="nested_resource_policies"></a>The `resource_policies` block supports:
 
 * `workload_policy` - (Optional) The URL of the workload policy that is specified for this managed instance group. It can be a full or partial URL.
+
+<a name="nested_target_size_policy"></a>The `target_size_policy` block supports:
+
+* `mode` - (Required) The mode of the target size policy. Values: "BULK", "INDIVIDUAL".
 
 ## Attributes Reference
 
