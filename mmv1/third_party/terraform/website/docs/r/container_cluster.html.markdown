@@ -272,6 +272,8 @@ region are guaranteed to support the same version.
     to say "these are the _only_ node pools associated with this cluster", use the
     [google_container_node_pool](container_node_pool.html) resource instead of this property.
 
+* `best_effort_provisioning` - (Optional) Best-effort provisioning allows node pool creations to automatically ignore stockout errors once the minimum number of nodes have been provisioned. Structure is [documented below](#nested_best_effort_provisioning).
+
 * `node_pool_auto_config` - (Optional) Node pool configs that apply to auto-provisioned node pools in
     [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
     [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters. Structure is [documented below](#nested_node_pool_auto_config).
@@ -1273,6 +1275,11 @@ The `node_config_defaults` block supports:
 * `logging_variant` (Optional) The type of logging agent that is deployed by default for newly created node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
 
 * `gcfs_config` (Optional) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
+
+<a name="nested_best_effort_provisioning"></a>The `best_effort_provisioning` block supports:
+
+* `enabled` - (Optional) If `true`, best-effort provisioning is enabled.
+* `min_provision_nodes` - (Optional) Minimum number of nodes to be provisioned.
 
 <a name="nested_notification_config"></a>The `notification_config` block supports:
 
