@@ -556,3 +556,65 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 }
 `)
 }
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_identityTypeServiceAccount(),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.effective_identity"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_identityTypeAgentIdentity(),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.effective_identity"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_identityTypeServiceAccount() string {
+	return fmt.Sprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  provider = google-beta
+
+  display_name = "sample-reasoning-engine"
+  description  = "A reasoning engine for identity type testing"
+  region       = "us-central1"
+
+  spec {
+    identity_type = "SERVICE_ACCOUNT"
+  }
+}
+`)
+}
+
+func testAccVertexAIReasoningEngine_identityTypeAgentIdentity() string {
+	return fmt.Sprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  provider = google-beta
+
+  display_name = "sample-reasoning-engine"
+  description  = "A reasoning engine for identity type testing"
+  region       = "us-central1"
+
+  spec {
+    identity_type = "AGENT_IDENTITY"
+  }
+}
+`)
+}
