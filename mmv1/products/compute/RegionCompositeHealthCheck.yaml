@@ -23,7 +23,6 @@ references:
   guides:
     'Health checks overview': 'https://cloud.google.com/load-balancing/docs/health-check-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionCompositeHealthChecks'
-min_version: beta
 
 # URL for the resource's standard List method. https://google.aip.dev/132
 # Terraform field names enclosed in double curly braces are replaced with
@@ -146,6 +145,5 @@ examples:
     vars:
       name: "test-composite-health-check"
       description: "Example composite health check basic"
-    min_version: 'beta'
     test_env_vars:
       project: 'PROJECT_NAME'

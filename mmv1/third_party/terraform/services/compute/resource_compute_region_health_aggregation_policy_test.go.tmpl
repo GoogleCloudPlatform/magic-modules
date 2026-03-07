@@ -1,5 +1,5 @@
 package compute_test
-{{ if ne $.TargetVersionName `ga` -}}
+
 import (
   "testing"
 
@@ -21,7 +21,7 @@ func TestAccComputeRegionHealthAggregationPolicy_update(t *testing.T) {
 
   acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
     CheckDestroy:             testAccCheckComputeRegionHealthAggregationPolicyDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -54,13 +54,13 @@ func TestAccComputeRegionHealthAggregationPolicy_update(t *testing.T) {
 
 func testAccComputeRegionHealthAggregationPolicy_basic(context map[string]interface{}) string {
   return acctest.Nprintf(`
-    data "google_project" "project" { provider = google-beta }
+    data "google_project" "project" { provider = google }
 
     resource "google_compute_region_health_aggregation_policy" "example_test_health_aggregation_policy" {
       name        = "tf-test-health-aggregation-policy-%{random_suffix}"
       description = "Example health aggregation policy %{random_suffix}"
       region      = "%{region}"
-      provider    = google-beta
+      provider    = google
     }
   `, context)
 }
@@ -73,8 +73,7 @@ resource "google_compute_region_health_aggregation_policy" "example_test_health_
   min_healthy_threshold = 2
   healthy_percent_threshold = 90
   region      = "%{region}"
-  provider    = google-beta
+  provider    = google
 }
 `, context)
 }
-{{- end }}

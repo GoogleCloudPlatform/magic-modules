@@ -1,12 +1,12 @@
 resource "google_compute_region_health_aggregation_policy" "hap" {
-  provider    = google-beta
+  provider    = google
   name        = "{{index $.Vars "name"}}-hap"
   description = "health aggregation policy for health source"
   region      = "us-central1"
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
+  provider = google
   name     = "{{index $.Vars "name"}}-hc"
   http_health_check {
     port = 80
@@ -14,7 +14,7 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
-  provider              = google-beta
+  provider              = google
   name                  = "{{index $.Vars "name"}}-bs"
   region                = "us-central1"
   health_checks         = [google_compute_health_check.default.id]
@@ -22,7 +22,7 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_region_health_source" "{{$.PrimaryResourceId}}" {
-  provider                  = google-beta
+  provider                  = google
   name                      = "{{index $.Vars "name"}}"
   description               = "{{index $.Vars "description"}}"
   region                    = "us-central1"
