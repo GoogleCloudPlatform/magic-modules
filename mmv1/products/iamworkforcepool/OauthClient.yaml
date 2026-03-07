@@ -151,3 +151,8 @@ properties:
     required: true
     item_type:
       type: String
+  - name: pkceEnforced
+    type: Boolean
+    description: |-
+      Whether PKCE (RFC 7636) will be enforced for the OauthClient.
+      For public clients, this field must to be true.
