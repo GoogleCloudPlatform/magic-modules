@@ -107,6 +107,19 @@ properties:
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
+  - name: 'httpFilters'
+    type: Array
+    description: |
+      URLs to **networkservices.HttpFilter** resources enabled for xDS clients using this configuration.
+      This field only applies when the forwarding rule that references this target proxy has a
+      **loadBalancingScheme** set to INTERNAL_SELF_MANAGED.
+    send_empty_value: true
+    update_url: 'projects/{{project}}/global/targetHttpProxies/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'httpFilters'
+    fingerprint_name: 'fingerprint'
+    item_type:
+      type: String
   - name: 'httpKeepAliveTimeoutSec'
     type: Integer
     description: |
