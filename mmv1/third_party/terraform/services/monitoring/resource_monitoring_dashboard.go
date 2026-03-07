@@ -14,32 +14,76 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// This recursive function takes an old map and a new map and is intended to remove the computed keys
-// from the old json string (stored in state) so that it doesn't show a diff if it's not defined in the
-// new map's json string (defined in config)
+// Computed fields that GCP automatically adds to dashboard JSON
+var computedFields = map[string]bool{
+	"etag":       true,
+	"name":       true,
+	"createTime": true,
+	"updateTime": true,
+}
+
+// This recursive function removes computed keys from both old and new maps to ensure
+// proper diff suppression. It handles the case where GCP adds computed fields that
+// weren't in the original configuration.
 func removeComputedKeys(old map[string]interface{}, new map[string]interface{}) map[string]interface{} {
+	// Create a copy of old to avoid modifying the original
+	oldCopy := make(map[string]interface{})
 	for k, v := range old {
-		if _, ok := old[k]; ok && new[k] == nil {
-			delete(old, k)
+		oldCopy[k] = v
+	}
+
+	// Remove computed fields from both old and new maps
+	for k := range oldCopy {
+		if computedFields[k] {
+			delete(oldCopy, k)
 			continue
 		}
 
-		if reflect.ValueOf(v).Kind() == reflect.Map {
-			old[k] = removeComputedKeys(v.(map[string]interface{}), new[k].(map[string]interface{}))
-			continue
-		}
-
-		if reflect.ValueOf(v).Kind() == reflect.Slice {
-			for i, j := range v.([]interface{}) {
-				if reflect.ValueOf(j).Kind() == reflect.Map && len(new[k].([]interface{})) > i {
-					old[k].([]interface{})[i] = removeComputedKeys(j.(map[string]interface{}), new[k].([]interface{})[i].(map[string]interface{}))
-				}
+		// Handle nested maps
+		if oldVal, ok := oldCopy[k].(map[string]interface{}); ok {
+			if newVal, ok := new[k].(map[string]interface{}); ok {
+				oldCopy[k] = removeComputedKeys(oldVal, newVal)
+			} else {
+				// If new doesn't have this key, remove it from old
+				delete(oldCopy, k)
 			}
 			continue
 		}
+
+		// Handle slices
+		if oldVal, ok := oldCopy[k].([]interface{}); ok {
+			if newVal, ok := new[k].([]interface{}); ok {
+				newSlice := make([]interface{}, len(oldVal))
+				for i, oldItem := range oldVal {
+					if i < len(newVal) {
+						if oldMap, ok := oldItem.(map[string]interface{}); ok {
+							if newMap, ok := newVal[i].(map[string]interface{}); ok {
+								newSlice[i] = removeComputedKeys(oldMap, newMap)
+							} else {
+								newSlice[i] = oldItem
+							}
+						} else {
+							newSlice[i] = oldItem
+						}
+					} else {
+						newSlice[i] = oldItem
+					}
+				}
+				oldCopy[k] = newSlice
+			} else {
+				// If new doesn't have this key, remove it from old
+				delete(oldCopy, k)
+			}
+			continue
+		}
+
+		// If new doesn't have this key, remove it from old
+		if _, exists := new[k]; !exists {
+			delete(oldCopy, k)
+		}
 	}
 
-	return old
+	return oldCopy
 }
 
 func monitoringDashboardDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -52,7 +96,10 @@ func monitoringDashboardDiffSuppress(k, old, new string, d *schema.ResourceData)
 		return false
 	}
 
+	// Remove computed fields from both old and new maps
 	oldMap = removeComputedKeys(oldMap, newMap)
+	newMap = removeComputedKeys(newMap, oldMap)
+
 	return reflect.DeepEqual(oldMap, newMap)
 }
 
