@@ -182,6 +182,7 @@ properties:
       - name: 'env'
         type: Array
         description: 'Environment variables to be passed to the container.'
+        is_missing_in_cai: true
         item_type:
           type: NestedObject
           properties:
@@ -198,6 +199,7 @@ properties:
       - name: 'postStartupScriptConfig'
         type: NestedObject
         description: 'Post startup script config.'
+        is_missing_in_cai: true
         properties:
           - name: 'postStartupScript'
             type: String

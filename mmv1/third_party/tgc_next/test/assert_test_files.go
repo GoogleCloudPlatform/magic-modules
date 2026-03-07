@@ -66,16 +66,21 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 		t.Run(stepName, func(t *testing.T) {
 			retries := 0
 			tName := fmt.Sprintf("%s_%s", subTestName, stepName)
+			var attemptErrors []error
 			flakyAction := func(ctx context.Context) error {
 				testData, err := prepareTestData(subTestName, stepN, retries)
 				retries++
 				log.Printf("%s: Starting the attempt %d", tName, retries)
 				if err != nil {
-					return fmt.Errorf("%s: error preparing the input data: %v", tName, err)
+					err = fmt.Errorf("%s: error preparing the input data: %v", tName, err)
+					attemptErrors = append(attemptErrors, err)
+					return err
 				}
 
 				if testData == nil {
-					return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
+					err = retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
+					attemptErrors = append(attemptErrors, err)
+					return err
 				}
 
 				// If the primary resource is specified, only test the primary resource.
@@ -86,6 +91,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 					t.Logf("%s: Test for the primary resource %s begins.", tName, primaryResource)
 					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
 					if err != nil {
+						attemptErrors = append(attemptErrors, err)
 						return err
 					}
 				} else {
@@ -95,6 +101,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 						}
 						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
 						if err != nil {
+							attemptErrors = append(attemptErrors, err)
 							return err
 						}
 					}
@@ -109,10 +116,18 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 			t.Logf("%s: Starting test with retry logic.", tName)
 
 			if err := retry.Do(context.Background(), backoffPolicy, flakyAction); err != nil {
-				if strings.Contains(err.Error(), "test data is unavailable") {
-					t.Skipf("%s: Test skipped because data was unavailable after all retries: %v", tName, err)
+				allUnavailable := len(attemptErrors) > 0
+				for _, e := range attemptErrors {
+					if !strings.Contains(e.Error(), "test data is unavailable") {
+						allUnavailable = false
+						break
+					}
+				}
+
+				if allUnavailable {
+					t.Skipf("%s: Test skipped because data was unavailable after all %d attempts: %v", tName, len(attemptErrors), err)
 				} else {
-					t.Fatalf("%s: Failed after all attempts %d: %v", tName, maxAttempts, err)
+					t.Fatalf("%s: Failed after %d attempts. Last error: %v", tName, len(attemptErrors), err)
 				}
 			}
 		})
@@ -129,7 +144,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	if testData.Cai == nil {
 		log.Printf("SKIP: cai asset is unavailable for resource %s", testData.ResourceAddress)
-		return nil
+		return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 	}
 
 	assets := make([]caiasset.Asset, 0)
@@ -146,12 +161,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if !tfplan2caiSupported && !cai2hclSupported {
-		if primaryResource {
-			return fmt.Errorf("conversion of the primary resource %s is not supported in tgc", testData.ResourceAddress)
-		} else {
-			log.Printf("SKIP: conversion of the resource %s is not supported in tgc.", resourceType)
-			return nil
-		}
+		return fmt.Errorf("conversion of the resource %s is not supported in tgc", testData.ResourceAddress)
 	}
 
 	if !(tfplan2caiSupported && cai2hclSupported) {
