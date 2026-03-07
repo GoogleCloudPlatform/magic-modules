@@ -5963,8 +5963,12 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	if disruptionBudget, ok := maintenancePolicy["disruption_budget"]; ok && len(disruptionBudget.([]interface{})) > 0 {
 		db := disruptionBudget.([]interface{})[0].(map[string]interface{})
 		budget := &container.DisruptionBudget{}
-		budget.MinorVersionDisruptionInterval = db["minor_version_disruption_interval"].(string)
-		budget.PatchVersionDisruptionInterval = db["patch_version_disruption_interval"].(string)
+		if _, ok := db["minor_version_disruption_interval"]; ok {
+			budget.MinorVersionDisruptionInterval = db["minor_version_disruption_interval"].(string)
+		}
+		if _, ok := db["patch_version_disruption_interval"]; ok {
+			budget.PatchVersionDisruptionInterval = db["patch_version_disruption_interval"].(string)
+		}
 	}
 
 	if dailyMaintenanceWindow, ok := maintenancePolicy["daily_maintenance_window"]; ok && len(dailyMaintenanceWindow.([]interface{})) > 0 {
@@ -7764,17 +7768,25 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 	var budget []map[string]interface{}
 	if mp.DisruptionBudget != nil {
 	    budget = []map[string]interface{}{}
+		isSet := false
 		if mp.DisruptionBudget.MinorVersionDisruptionInterval != "" {
 			budget[0]["minor_version_disruption_interval"] = mp.DisruptionBudget.MinorVersionDisruptionInterval
+			isSet = true
 		}
 		if mp.DisruptionBudget.PatchVersionDisruptionInterval != "" {
 			budget[0]["patch_version_disruption_interval"] = mp.DisruptionBudget.PatchVersionDisruptionInterval
+			isSet = true
 		}
 		if mp.DisruptionBudget.LastMinorVersionDisruptionTime != "" {
 			budget[0]["last_minor_version_disruption_time"] = mp.DisruptionBudget.LastMinorVersionDisruptionTime
+			isSet = true
 		}
 		if mp.DisruptionBudget.LastDisruptionTime != "" {
 			budget[0]["last_disruption_time"] = mp.DisruptionBudget.LastDisruptionTime
+			isSet = true
+		}
+		if !isSet {
+			budget = nil
 		}
 	}
 
