@@ -144,6 +144,14 @@ fun BuildSteps.saveArtifactsToGCS() {
             chmod 600 google-account.json
             gcloud auth activate-service-account --key-file=google-account.json
 
+            # %system.build.start.date% is a TeamCity parameter that evaluates to the timestamp when the build started.
+            # Using this ensures all tests in the same Nightly run get the same date, even if they cross midnight.
+            RAW_DATE="%system.build.start.date%"
+            # TeamCity start format is strictly YYYYMMDDTHHmmss+ZZZZ (e.g., 20241027T040001+0000)
+            # We use `cut` to slice out the Year, Month, and Date strings sequentially to build YYYY-MM-DD
+            BUILD_DATE=$(echo ${'$'}RAW_DATE | cut -c 1-4)-$(echo ${'$'}RAW_DATE | cut -c 5-6)-$(echo ${'$'}RAW_DATE | cut -c 7-8)
+            echo "BUILD_DATE: ${'$'}{BUILD_DATE}"
+
             # Get current date for nightly tests
             CURRENT_DATE=$(date +"%%Y-%%m-%%d") 
             // "%%" is used to escape "%" see details at https://www.jetbrains.com/help/teamcity/9.0/defining-and-using-build-parameters-in-build-configuration.html#using-build-parameters-in-build-configuration-settings
@@ -159,6 +167,7 @@ fun BuildSteps.saveArtifactsToGCS() {
                 FOLDER="manual/%teamcity.project.id%/${'$'}{BRANCH_NAME}"
             fi
 
+            echo "Uploading artifacts to GCS folder: ${'$'}{FOLDER}"
             # Copy logs to GCS
             gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
 
