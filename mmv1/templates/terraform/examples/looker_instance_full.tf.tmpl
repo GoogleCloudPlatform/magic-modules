@@ -4,6 +4,7 @@ resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
   region             = "us-central1"
   public_ip_enabled  = true
   gemini_enabled     = true
+  catalog_integration_enabled = true
   admin_settings {
     allowed_email_domains = ["google.com"]
   }
