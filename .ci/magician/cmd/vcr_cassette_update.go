@@ -123,8 +123,8 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	// main cassettes backup
 	// incase nightly run goes wrong. this will be used to restore the cassettes
 	cassettePath := vt.CassettePath(provider.Beta)
-	args := []string{"-m", "-q", "cp", filepath.Join(cassettePath, "*"), bucketPrefix + "/main_cassettes_backup/fixtures/"}
-	if _, err := rnr.Run("gsutil", args, nil); err != nil {
+	args := []string{"storage", "cp", filepath.Join(cassettePath, "*"), bucketPrefix + "/main_cassettes_backup/fixtures/"}
+	if _, err := rnr.Run("gcloud", args, nil); err != nil {
 		return fmt.Errorf("error backup cassettes: %w", err)
 	}
 
@@ -222,18 +222,18 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 }
 
 func uploadLogsToGCS(src, dest string, rnr ExecRunner) (string, error) {
-	return uploadToGCS(src, dest, []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r"}, rnr)
+	return uploadToGCS(src, dest, []string{"storage", "cp", "--content-type=text/plain", "--recursive"}, rnr)
 }
 
 func uploadCassettesToGCS(src, dest string, rnr ExecRunner) (string, error) {
-	return uploadToGCS(src, dest, []string{"-m", "-q", "cp"}, rnr)
+	return uploadToGCS(src, dest, []string{"storage", "cp"}, rnr)
 }
 
 func uploadToGCS(src, dest string, opts []string, rnr ExecRunner) (string, error) {
 	fmt.Printf("uploading from %s to %s\n", src, dest)
 	args := append(opts, src, dest)
-	fmt.Println("gsutil", args)
-	return rnr.Run("gsutil", args, nil)
+	fmt.Println("gcloud", args)
+	return rnr.Run("gcloud", args, nil)
 }
 
 func formatVCRCassettesUpdateReplaying(data vcrCassetteUpdateReplayingResult) (string, error) {
