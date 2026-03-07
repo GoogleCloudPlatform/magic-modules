@@ -122,8 +122,16 @@
 		return nil, err
 	}
 
+	// Only instances with SERVER_AUTHENTICATION mode have certificate authority set.
+	// We skip this call if the serverCaMode is SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA.
+	transitMode, transitOk := res["transitEncryptionMode"].(string)
+	caMode, caOk := res["serverCaMode"].(string)
+
+	isServerAuth := transitOk && transitMode == "SERVER_AUTHENTICATION"
+	isCustomerManaged := caOk && caMode == "SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA"
+
 	// Only instances with SERVER_AUTHENTICATION mode have certificate authority set
-	if v, ok := res["transitEncryptionMode"].(string); ok && v=="SERVER_AUTHENTICATION" {
+	if isServerAuth && !isCustomerManaged {
 		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}MemorystoreBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance_id{{"}}"}}/certificateAuthority")
 		if err != nil {
 			return nil, err

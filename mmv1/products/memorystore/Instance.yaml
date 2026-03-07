@@ -113,6 +113,23 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
     ignore_read_extra:
       - 'update_time'
+  - name: 'memorystore_instance_flexible_ca'
+    primary_resource_id: 'test-instance'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-memorystore.iam.gserviceaccount.com"
+        role: "roles/privateca.certificateRequester"
+    vars:
+      instance_name: 'ca-instance'
+      policy_name: 'ca-policy'
+      subnet_name: 'ca-subnet'
+      network_name: 'ca-network'
+      ca_pool_name: 'ca-pool'
+      ca_auth_id: 'ca-auth'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
     description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`."
@@ -861,3 +878,22 @@ properties:
               description: The certificates that form the CA chain, from leaf to root order
               item_type:
                 type: String
+  - name: 'serverCaMode'
+    type: Enum
+    immutable: true
+    description: |
+      The serverCaMode for the TLS enabled Memorystore instance.
+      If not provided, SERVER_CA_MODE_GOOGLE_MANAGED_PER_INSTANCE_CA will be used as default
+    required: false
+    default_from_api: true
+    enum_values:
+      - SERVER_CA_MODE_GOOGLE_MANAGED_PER_INSTANCE_CA
+      - SERVER_CA_MODE_GOOGLE_MANAGED_SHARED_CA
+      - SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA
+  - name: 'serverCaPool'
+    type: String
+    immutable: true
+    description: |
+      The resource name of the server CA pool for an instance with SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA
+      as the server_ca_mode.
+      Format: projects/{project}/locations/{region}/caPools/{caPoolId}
