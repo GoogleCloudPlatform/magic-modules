@@ -82,6 +82,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 
 	cluster := &container.Cluster{
 		Name:                        clusterName,
+		Location:                    location,
 		InitialNodeCount:            int64(d.Get("initial_node_count").(int)),
 		MaintenancePolicy:           expandMaintenancePolicy(d, config),
 		ControlPlaneEndpointsConfig: expandControlPlaneEndpointsConfig(d),
@@ -296,7 +297,10 @@ func expandEnterpriseConfig(configured interface{}) *container.EnterpriseConfig 
 	}
 
 	ec := &container.EnterpriseConfig{}
-	enterpriseConfig := l[0].(map[string]interface{})
+	enterpriseConfig, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	if v, ok := enterpriseConfig["cluster_tier"]; ok {
 		ec.ClusterTier = v.(string)
 	}
@@ -313,7 +317,10 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		return nil
 	}
 
-	config := l[0].(map[string]interface{})
+	config, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	ac := &container.AddonsConfig{}
 
 	if v, ok := config["http_load_balancing"]; ok && len(v.([]interface{})) > 0 {
@@ -544,7 +551,10 @@ func expandNetworkTierConfig(configured interface{}) *container.NetworkTierConfi
 		return nil
 	}
 
-	config := l[0].(map[string]interface{})
+	config, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	return &container.NetworkTierConfig{
 		NetworkTier: config["network_tier"].(string),
 	}
@@ -556,8 +566,12 @@ func expandAutoIpamConfig(configured interface{}) *container.AutoIpamConfig {
 		return nil
 	}
 
+	config, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	return &container.AutoIpamConfig{
-		Enabled: l[0].(map[string]interface{})["enabled"].(bool),
+		Enabled: config["enabled"].(bool),
 	}
 }
 
@@ -597,14 +611,12 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 	configured := d.Get("maintenance_policy")
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return &container.MaintenancePolicy{
-			ResourceVersion: resourceVersion,
-			Window: &container.MaintenanceWindow{
-				MaintenanceExclusions: exclusions,
-			},
-		}
+		return nil
 	}
-	maintenancePolicy := l[0].(map[string]interface{})
+	maintenancePolicy, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 
 	if maintenanceExclusions, ok := maintenancePolicy["maintenance_exclusion"]; ok {
 		for k := range exclusions {
@@ -1514,19 +1526,6 @@ func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults 
 		nodePoolDefaults.NodeConfigDefaults = expandNodeConfigDefaults(v)
 	}
 	return nodePoolDefaults
-}
-
-func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interface{} {
-	if c == nil {
-		return nil
-	}
-
-	result := make(map[string]interface{})
-	if c.NodeConfigDefaults != nil {
-		result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
-	}
-
-	return []map[string]interface{}{result}
 }
 
 func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoConfig {
