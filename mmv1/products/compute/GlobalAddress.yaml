@@ -147,3 +147,12 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
+  - name: 'subnetwork'
+    type: ResourceRef
+    description: |
+      The URL of the subnetwork in which to reserve the address. If an IP address
+      is specified, it must be within the subnetwork's IP range. This field can
+      only be used with INTERNAL type with a GCE_ENDPOINT or DNS_RESOLVER purpose.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Subnetwork'
+    imports: 'selfLink'
