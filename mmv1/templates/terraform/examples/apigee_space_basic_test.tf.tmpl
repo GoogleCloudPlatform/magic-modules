@@ -60,4 +60,5 @@ resource "google_apigee_organization" "apigee_org" {
 resource "google_apigee_space" "{{$.PrimaryResourceId}}" {
   org_id     = google_apigee_organization.apigee_org.id
   space_id = "{{index $.Vars "space_id"}}"
+  display_name = "{{index $.Vars "space_id"}}"
 }
