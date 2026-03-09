@@ -165,7 +165,7 @@ func ignoreField(r, f string) bool {
 func underscore(source string) string {
 	tmp := regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`).ReplaceAllString(source, "${1}_${2}")
 	tmp = regexp.MustCompile(`([a-z\d])([A-Z])`).ReplaceAllString(tmp, "${1}_${2}")
-	tmp = strings.Replace(tmp, "-", "_", 1)
+	tmp = strings.ReplaceAll(tmp, "-", "_")
 	// skip this because we want to operate on nested api fields
 	// tmp = strings.Replace(tmp, ".", "_", 1)
 	tmp = strings.ToLower(tmp)
