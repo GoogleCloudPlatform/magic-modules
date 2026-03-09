@@ -73,9 +73,6 @@ func IsDefaultLineage(lineage, apiLineage []string) bool {
 		if part != google.Underscore(apiPart) {
 			return false
 		}
-		if strings.Contains(apiPart, "-") {
-			return false
-		}
 	}
 	return true
 }
