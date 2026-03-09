@@ -61,6 +61,7 @@ parameters:
   - name: firewallPolicy
     type: ResourceRef
     required: true
+    immutable: true
     description: |
       The firewall policy of the resource.
     url_param_only: true
@@ -69,6 +70,7 @@ parameters:
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
   - name: region
     type: String
+    immutable: true
     description: The location of this resource.
     url_param_only: true
     default_from_api: true
@@ -76,11 +78,13 @@ properties:
   - name: name
     type: String
     required: true
+    immutable: true
     description: |
       The name for an association.
   - name: attachmentTarget
     type: String
     required: true
+    immutable: true
     description: |
       The target that the firewall policy is attached to.
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
