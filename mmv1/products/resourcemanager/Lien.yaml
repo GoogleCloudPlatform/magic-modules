@@ -13,6 +13,7 @@
 
 ---
 name: 'Lien'
+api_resource_field: "."
 description:
   A Lien represents an encumbrance on the actions that can be performed on a
   resource.

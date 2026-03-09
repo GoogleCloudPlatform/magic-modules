@@ -52,6 +52,24 @@ examples:
       udp4500_forwarding_rule_name: 'fr-udp4500'
       vpn_tunnel_name: 'tunnel1'
       route_name: 'route1'
+  - name: 'target_vpn_gateway_tags'
+    primary_resource_id: 'target_gateway_tags'
+    vars:
+      target_vpn_gateway_name: 'vpn-1'
+      network_name: 'network-1'
+      address_name: 'vpn-static-ip'
+      esp_forwarding_rule_name: 'fr-esp'
+      udp500_forwarding_rule_name: 'fr-udp500'
+      udp4500_forwarding_rule_name: 'fr-udp4500'
+      vpn_tunnel_name: 'tunnel1'
+      route_name: 'route1'
+      tag_key: 'tagkey'
+      tag_value: 'tagvalue'
+      org_id: '123456789'
+    test_vars_overrides:
+      'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
+      'org_id': 'envvar.GetTestOrgFromEnv(t)'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -93,7 +111,6 @@ properties:
     type: NestedObject
     ignore_read: true
     immutable: true
-    min_version: 'beta'
     description: |
      Additional params passed with the request, but not persisted as part of resource payload
     properties:
