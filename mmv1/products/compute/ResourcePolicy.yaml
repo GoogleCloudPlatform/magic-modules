@@ -80,6 +80,10 @@ examples:
     primary_resource_id: bar
     vars:
       name: gce-policy
+  - name: resource_policy_workload_policy_accelerator_topology_mode
+    primary_resource_id: bar
+    vars:
+      name: gce-policy
   - name: resource_policy_workload_policy_max_topology_distance
     primary_resource_id: bar
     vars:
@@ -414,10 +418,11 @@ properties:
         type: Enum
         description: |
           The maximum topology distance. This field can be set only when the workload policy type is HIGH_THROUGHPUT
-          and cannot be set if accelerator topology is set.
+          and cannot be set if accelerator topology or accelerator topology mode is set.
         immutable: true
         conflicts:
           - workload_policy.0.accelerator_topology
+          - workload_policy.0.accelerator_topology_mode
         enum_values:
           - BLOCK
           - CLUSTER
@@ -427,6 +432,22 @@ properties:
         description: |
           The accelerator topology. This field can be set only when the workload policy type is HIGH_THROUGHPUT
           and cannot be set if max topology distance is set.
+        immutable: true
+        conflicts:
+          - workload_policy.0.max_topology_distance
+      - name: acceleratorTopologyMode
+        type: Enum
+        description: |
+          Specifies the connection mode for the accelerator topology.
+          Supported values are:
+            * `AUTO_CONNECT`: The interconnected chips are pre-configured at the time of VM creation.
+            * `PROVISION_ONLY`: The interconnected chips are connected on demand. At the time of VM creation, the chips are not connected.
+
+          If not specified, the default is AUTO_CONNECT.
+          This field can be set only when the workload policy type is HIGH_THROUGHPUT and cannot be set if max topology distance is set.
+        enum_values:
+          - AUTO_CONNECT
+          - PROVISION_ONLY
         immutable: true
         conflicts:
           - workload_policy.0.max_topology_distance
