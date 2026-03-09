@@ -237,10 +237,6 @@ type Type struct {
 	// The name of the key. Used in the Terraform schema as a field name.
 	KeyName string `yaml:"key_name,omitempty"`
 
-	// Deprecated. A description of the key's format. Used in Terraform to describe
-	// the field in documentation.
-	KeyDescription string `yaml:"key_description,omitempty"`
-
 	// ====================
 	// KeyValuePairs Fields
 	// ====================
@@ -528,10 +524,6 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
 	}
 
-	if t.KeyDescription != "" {
-		es = append(es, fmt.Errorf("property %s key_description can't be set in resource %s; it's deprecated", fullFieldPath, rName))
-	}
-
 	t.validateLabelsField()
 
 	switch {
@@ -587,8 +579,19 @@ func (t Type) Lineage() []string {
 // include the field on the API resource that the fine-grained resource manages.
 func (t Type) ApiLineage() []string {
 	if t.ParentMetadata == nil {
-		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "" {
-			return []string{t.ResourceMetadata.ApiResourceField, t.ApiName}
+		// The special value "." indicates that the resource's shouldn't be considered "nested"
+		// even if it has NestedQuery set.
+		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "." {
+			if t.ResourceMetadata.ApiResourceField != "" {
+				return []string{t.ResourceMetadata.ApiResourceField, t.ApiName}
+			} else if t.ResourceMetadata.NestedQuery != nil {
+				// Handle `items` as a special case since that's a common container field name for a list endpoint,
+				// not a fine-grained field name within a resource.
+				keys := t.ResourceMetadata.NestedQuery.Keys
+				if len(keys) > 1 || keys[0] != "items" {
+					return append(t.ResourceMetadata.NestedQuery.Keys, t.ApiName)
+				}
+			}
 		}
 		return []string{t.ApiName}
 	}

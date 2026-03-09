@@ -133,6 +133,10 @@ service/cloudfunctions:
 service/cloudidentity-groups:
   resources:
   - google_cloud_identity_group.*
+service/cloudidentity-policy:
+  resources:
+  - google_cloud_identity_policy
+  - google_cloud_identity_policies
 service/cloudkms:
   resources:
   - google_kms_.*
@@ -218,7 +222,6 @@ service/compute-l7-load-balancer:
   - google_compute_backend_bucket_signed_url_key
   - google_compute_backend_service
   - google_compute_backend_service_signed_url_key
-  - google_compute_region_backend_bucket.*
   - google_compute_region_backend_service
   - google_compute_global_forwarding_rule
   - google_compute_forwarding_rule.*
@@ -289,6 +292,7 @@ service/compute-router:
   - google_compute_router_interface
   - google_compute_router_peer
   - google_compute_router_route_policy
+  - google_compute_router_named_set
   - google_compute_router_status
 service/compute-security-policy:
   resources:
@@ -378,6 +382,7 @@ service/dialogflow-cx:
   - google_dialogflow_encryption_spec
   - google_dialogflow_entity_type
   - google_dialogflow_fulfillment
+  - google_dialogflow_generator
   - google_dialogflow_intent
   - google_dialogflow_version
 service/discoveryengine:
@@ -449,6 +454,9 @@ service/firestore-dataplane:
 service/gce-preview-feature:
   resources:
   - google_compute_preview_feature
+service/gce-rollout-plan:
+  resources:
+  - google_compute_rollout_plan
 service/gemini:
   resources:
   - google_gemini_.*
@@ -469,6 +477,9 @@ service/gkeonprem:
 service/healthcare:
   resources:
   - google_healthcare_.*
+service/hypercomputecluster:
+  resources:
+  - google_hypercomputecluster_cluster
 service/iam-core:
   resources:
   - google_organization_iam_custom_role
@@ -765,6 +776,9 @@ service/tpu:
 service/transcoder:
   resources:
   - google_transcoder_.*
+service/vectorsearch:
+  resources:
+  - google_vector_search_.*
 service/vmwareengine:
   resources:
   - google_vmwareengine_.*

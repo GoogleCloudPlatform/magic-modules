@@ -40,8 +40,8 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-custom_code:
 include_in_tgc_next: true
+custom_code:
 schema_version: 1
 state_upgraders: true
 examples:
@@ -192,7 +192,6 @@ properties:
     type: NestedObject
     ignore_read: true
     immutable: true
-    min_version: 'beta'
     description: |
      Additional params passed with the request, but not persisted as part of resource payload
     properties:

@@ -15,11 +15,13 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//mmv1/api",
+        "//mmv1/api/metadata",
         "//mmv1/api/product",
         "//mmv1/api/resource",
         "//mmv1/google",
         "@com_github_golang_glog//:glog",
         "@com_github_otiai10_copy//:copy",
+        "@in_gopkg_yaml_v3//:yaml_v3",
         "@org_golang_x_exp//slices",
     ],
 )

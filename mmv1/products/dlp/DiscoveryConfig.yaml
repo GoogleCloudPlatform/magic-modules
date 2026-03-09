@@ -162,7 +162,23 @@ properties:
           properties:
             - name: 'profileTable'
               type: NestedObject
-              description: Store all table and column profiles in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery
+              description: |
+                Store all table and column profiles in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery.
+                The system will create a new dataset and table for you if none are are provided. The dataset will be named `sensitive_data_protection_discovery`
+                and table will be named `discovery_profiles`. This table will be placed in the same project as the container project running the scan.
+              properties:
+                - name: 'projectId'
+                  type: String
+                  description: The Google Cloud Platform project ID of the project containing the table. If omitted, the project ID is inferred from the API call.
+                - name: 'datasetId'
+                  type: String
+                  description: Dataset Id of the table
+                - name: 'tableId'
+                  type: String
+                  description: Name of the table
+            - name: 'sampleFindingsTable'
+              type: NestedObject
+              description: Store sample findings in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery
               properties:
                 - name: 'projectId'
                   type: String
@@ -279,6 +295,22 @@ properties:
           properties:
             # Meant to be an empty object with no properties.
             []
+        - name: 'publishToChronicle'
+          type: NestedObject
+          description: Publishes generated data profiles to Google Security Operations. For more information, see [Use Sensitive Data Protection data in context-aware analytics](https://cloud.google.com/chronicle/docs/detection/usecase-dlp-high-risk-user-download).
+          send_empty_value: true
+          allow_empty_object: true
+          properties:
+            # Meant to be an empty object with no properties.
+            []
+        - name: 'publishToScc'
+          type: NestedObject
+          description: Publishes findings to Security Command Center for each data profile.
+          send_empty_value: true
+          allow_empty_object: true
+          properties:
+            # Meant to be an empty object with no properties.
+            []
   - name: 'targets'
     type: Array
     description: Target to match against for determining what to scan and how frequently
@@ -329,6 +361,12 @@ properties:
                   type: NestedObject
                   description: The table to scan. Discovery configurations including this can only include one DiscoveryTarget (the DiscoveryTarget with this TableReference).
                   properties:
+                    - name: 'projectId'
+                      type: String
+                      description: |
+                        The Google Cloud project ID of the project containing the table.
+                        If omitted, the project ID is inferred from the parent project.
+                        This field is required if the parent resource is an organization.
                     - name: 'datasetId'
                       type: String
                       description: Dataset ID of the table.

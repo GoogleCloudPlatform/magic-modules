@@ -48,7 +48,6 @@ examples:
     primary_resource_id: example_batch_spark
     ignore_read_extra:
       - runtime_config.0.properties
-    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
     vars:
       prevent_destroy: "true"
       subnetwork_name: default
@@ -61,7 +60,6 @@ examples:
     primary_resource_id: example_batch_spark
     ignore_read_extra:
       - runtime_config.0.properties
-    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
     vars:
       bucket_name: dataproc-bucket
       dataproc_batch: dataproc-batch
@@ -76,7 +74,6 @@ examples:
     primary_resource_id: example_batch_sparsql
     ignore_read_extra:
       - runtime_config.0.properties
-    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
     vars:
       prevent_destroy: "true"
       subnetwork_name: default
@@ -89,7 +86,6 @@ examples:
     primary_resource_id: example_batch_pyspark
     ignore_read_extra:
       - runtime_config.0.properties
-    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
     vars:
       prevent_destroy: "true"
       subnetwork_name: default
@@ -102,7 +98,6 @@ examples:
     primary_resource_id: example_batch_sparkr
     ignore_read_extra:
       - runtime_config.0.properties
-    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
     vars:
       prevent_destroy: "true"
       subnetwork_name: default
@@ -115,7 +110,6 @@ examples:
     primary_resource_id: example_batch_autotuning
     ignore_read_extra:
       - runtime_config.0.properties
-    primary_resource_name: fmt.Sprintf("tf-test-batch-autotuning%s", context["random_suffix"])
     vars:
       prevent_destroy: "true"
       subnetwork_name: default
