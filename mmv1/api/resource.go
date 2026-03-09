@@ -2514,9 +2514,25 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		}
 	}
 
-	for _, e := range r.Examples {
-		for _, p := range e.IgnoreReadExtra {
-			props = append(props, strings.ReplaceAll(p, ".0.", "."))
+	if r.Samples != nil && r.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", r.Name)
+	}
+
+	if r.Examples != nil {
+		for _, e := range r.Examples {
+			for _, p := range e.IgnoreReadExtra {
+				props = append(props, strings.ReplaceAll(p, ".0.", "."))
+			}
+		}
+	}
+
+	if r.Samples != nil {
+		for _, s := range r.Samples {
+			for _, st := range s.Steps {
+				for _, p := range st.IgnoreReadExtra {
+					props = append(props, strings.ReplaceAll(p, ".0.", "."))
+				}
+			}
 		}
 	}
 
