@@ -264,9 +264,6 @@ properties:
         type: NestedObject
         description: |-
           Tiering policy for the volume.
-        update_mask_fields:
-          - 'tiering_policy.cooling_threshold_days'
-          - 'tiering_policy.tier_action'
         properties:
           - name: 'coolingThresholdDays'
             type: Integer
