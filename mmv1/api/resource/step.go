@@ -326,6 +326,9 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	for key, value := range originalPrefixedVars {
 		testPrefixedVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
 	}
+	for key, value := range originalVars {
+		testVars[key] = value
+	}
 
 	// Apply overrides from YAML
 	for key, value := range s.OicsVarsOverrides {
