@@ -1639,17 +1639,25 @@ func GetUniverseDomainFromMeta(meta interface{}) string {
 	return config.UniverseDomain
 }
 
-func ResourceBasePath(basePath, repPath, basePathKey string, config *Config) string {
+// Returns the base path for a resource taking into account the following rules:
+// Overridden path takes precedence over everything
+// Regional endpoint should be returned if preferred
+// Global endpoint should be returned if preferred
+// If no preferences, return regional endpoint
+func ResourceBasePath(basePath, repPath, basePathKey string, config *Config, location string) string {
+	path := repPath
     // If default has been overridden, use override
     if basePath != DefaultBasePaths[basePathKey] {
-        return basePath
+        path = basePath
     }
     // If REP preferred, default to REP
     if config.PreferRegionalEndpoints {
-        return repPath
+        path = repPath
     }
     if config.PreferGlobalEndpoints {
-        return basePath
+        path = basePath
     }
-    return repPath
+    // Still try to replace location even if it may not exist, this allows
+    // for products that only support REP on their base_url
+    return strings.ReplaceAll(path, "{{"{{"}}location{{"}}"}}", location)
 }

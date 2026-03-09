@@ -153,7 +153,7 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		}
 
 		loc := tpgresource.LocationFromId(urlFormatted)
-		basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.Res.ProductMetadata.Name}}BasePath, config.{{$.Res.ProductMetadata.Name}}RepBasePath, "{{$.Res.ProductMetadata.Name}}", config), loc)
+		basePath := transport_tpg.ResourceBasePath(config.{{$.Res.ProductMetadata.Name}}BasePath, config.{{$.Res.ProductMetadata.Name}}RepBasePath, "{{$.Res.ProductMetadata.Name}}", config, loc)
 		url := fmt.Sprintf("%s%s", basePath, urlFormatted)
 		{{- else }}
 

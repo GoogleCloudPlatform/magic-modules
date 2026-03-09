@@ -265,11 +265,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     loc := tpgresource.LocationFromId(urlFormatted)
 
-    basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config), loc)
+    basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
     
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.CreateUri}}")
     url = fmt.Sprintf("%s%s", basePath, url)
 {{ else }}
+
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
 {{- end }}
     if err != nil {
@@ -509,12 +510,11 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         }
         loc := tpgresource.LocationFromId(urlFormatted)
 
-        basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config), loc)
+        basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
 
         url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}")
         url = fmt.Sprintf("%s%s", basePath, url)
 {{ else }}
-
         url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
 {{- end }}
 
@@ -615,7 +615,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
     loc := tpgresource.LocationFromId(urlFormatted)
 
-    basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config), loc)
+    basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
     
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
     url = fmt.Sprintf("%s%s", basePath, url)
@@ -623,7 +623,6 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
 {{- end }}
-
     if err != nil {
         return err
     }
@@ -859,7 +858,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     }
     loc := tpgresource.LocationFromId(urlFormatted)
 
-    basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config), loc)
+    basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
     
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.UpdateUri }}")
     url = fmt.Sprintf("%s%s", basePath, url)
@@ -971,7 +970,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         }
         loc := tpgresource.LocationFromId(urlFormatted)
 
-        basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config), loc)
+        basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
         
         getUrl, err := tpgresource.ReplaceVars(d, config, "{{ $.UpdateUri }}")
         getUrl = fmt.Sprintf("%s%s", basePath, getUrl)
@@ -1195,7 +1194,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     }
     loc := tpgresource.LocationFromId(urlFormatted)
 
-    basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config), loc)
+    basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
     
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.DeleteUri}}")
     url = fmt.Sprintf("%s%s", basePath, url)
