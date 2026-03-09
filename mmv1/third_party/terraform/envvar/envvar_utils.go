@@ -41,10 +41,6 @@ var ProjectEnvVars = []string{
 	"CLOUDSDK_CORE_PROJECT",
 }
 
-var cloneProjectEnvVars = []string{
-	"GOOGLE_CLONE_DESTINATION_PROJECT",
-}
-
 var RegionEnvVars = []string{
 	"GOOGLE_REGION",
 	"GCLOUD_REGION",
@@ -236,11 +232,6 @@ func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
 func GetTestVmwareengineProjectFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, vmwareengineProjectEnvVars...)
 	return transport_tpg.MultiEnvSearch(vmwareengineProjectEnvVars)
-}
-
-func GetTestDestinationProjectFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, cloneProjectEnvVars...)
-	return transport_tpg.MultiEnvSearch(cloneProjectEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {

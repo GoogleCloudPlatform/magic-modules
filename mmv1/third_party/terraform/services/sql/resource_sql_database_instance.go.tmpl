@@ -1572,6 +1572,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	
 	{{- if ne $.TargetVersionName "ga" }}
 	cloneSourceProject := expandCloneSourceProject(d.Get("clone").([]interface{}))
+	if cloneSourceProject == "" {
+		cloneSourceProject = project
+	}
 	{{- end }}
 	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
 
