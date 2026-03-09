@@ -131,9 +131,10 @@ tgc:
 		&& go run . --version ga --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
 		&& go run . --version ga --provider tgc_next --output $(OUTPUT_PATH) $(mmv1_compile);\
 
-tf-oics:
-	cd mmv1;\
-		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);\
+tf-oics: prepare-temp
+	cd $(TEMP_DIR)/mmv1;\
+		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);
+	$(MAKE) clean-temp\
 
 test:
 	cd mmv1; \
