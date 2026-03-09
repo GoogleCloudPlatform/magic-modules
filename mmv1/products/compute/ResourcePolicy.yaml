@@ -438,7 +438,13 @@ properties:
       - name: acceleratorTopologyMode
         type: Enum
         description: |
-          The accelerator topology mode. Accepts values like AUTO_CONNECT and PROVISION_ONLY. This field can be set only when the workload policy type is HIGH_THROUGHPUT and cannot be set if max topology distance is set.
+          Specifies the connection mode for the accelerator topology.
+          Supported values are:
+            * `AUTO_CONNECT`: The interconnected chips are pre-configured at the time of VM creation.
+            * `PROVISION_ONLY`: The interconnected chips are connected on demand. At the time of VM creation, the chips are not connected.
+          
+          If not specified, the default is AUTO_CONNECT.
+          This field can be set only when the workload policy type is HIGH_THROUGHPUT and cannot be set if max topology distance is set.
         enum_values:
           - AUTO_CONNECT
           - PROVISION_ONLY
