@@ -33,6 +33,7 @@ resource "google_dialogflow_version" "version" {
   depends_on = [google_dialogflow_agent.basic_agent]
 }
 resource "google_dialogflow_environment" "basic_environment" {
+  project = google_project.project.project_id
   environmentid = "basic-environment"
   description = "basic environment"
   depends_on = [google_dialogflow_agent.basic_agent]
