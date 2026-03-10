@@ -88,21 +88,11 @@ terraform {
 
 ## Provider
 
-### Provider-level change example header
-
-Description of the change and how users should adjust their configuration (if needed).
-
 ### Resource import formats have improved validation
 
 Throughout the provider there were many resources which erroneously gave false positives to poorly formatted import input if a subset of the provided input was valid to their configured import formats. All GCP resource IDs supplied to "terraform import" must match the documentation specified import formats exactly.
 
 ## Datasources
-
-## Datasource: `google_product_datasource`
-
-### Datasource-level change example header
-
-Description of the change and how users should adjust their configuration (if needed).
 
 ## Datasource: `google_service_account_key`
 
@@ -136,12 +126,16 @@ Previously the `certs_info` field was set as an optional value, but the configur
 
 `public_repository` fields have had their default values removed. If your state has been reliant on them, they will need to be manually included into your configuration now.
 
+## Resource: `google_beyondcorp_application` is now removed
+
+`google_beyondcorp_application`, the associated IAM resources `google_beyondcorp_application_iam_binding`, `google_beyondcorp_application_iam_member`, and `google_beyondcorp_application_iam_policy`, and the `google_beyondcorp_application_iam_policy` datasource have been removed. 
+Use `google_beyondcorp_security_gateway_application` instead.
+
 ## Resource: `google_bigquery_table`
 
 ### `view.use_legacy_sql` no longer has a default value of `True`
 
-The `view.use_legacy_sql` field no longer has a default value. Configurations that relied on the old default will show no diff in the plan, and there will be no change to existing views. For a new view, leaving this field unspecified in the configuration will result in the view being created with no `use_legacy_sql` value, which the API interprets as a `true` and assumes the legacy SQL dialect for its query. See the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#ViewDefinition) for more details.
-The `view.use_legacy_sql` field no longer has a default value. Configurations that relied on the old default will show no diff in the plan, and there will be no change to existing views. For a new view, leaving this field unspecified in the configuration will result in the view being created with no `use_legacy_sql` value, which the API interprets as a `true` and assumes the legacy SQL dialect for its query. See the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#ViewDefinition) for more details.
+The `view.use_legacy_sql` field no longer has a default value. Configurations that relied on the old default will show no diff in the plan, and there will be no change to existing views. For newly created views, leaving this field unspecified in the configuration will result in the view being created with no `use_legacy_sql` value, which the API interprets as a `true` and assumes the legacy SQL dialect for its query. See the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#ViewDefinition) for more details.
 
 ## Resource: `google_bigtable_table_iam_binding`
 
@@ -219,58 +213,6 @@ Remove `post_startup_script_config` from your configuration after upgrade.
 
 `enable_flow_logs` has been removed in favor of `log_config`.
 
-## Resource: `google_compute_instance_template`
-
-### The resource will no longer use hardcoded values
-
-`disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values and instead will be set by the API. This shouldn't have any effect on the functionality of the resource.
-
-## Resource: `google_compute_region_instance_template`
-
-### The resource will no longer use hardcoded values
-
-`disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values and instead will be set by the API. This shouldn't have any effect on the functionality of the resource.
-
-## Resource: `google_notebooks_location` is now removed
-
-This resource is not functional.
-
-## Resource: `google_storage_bucket`
-
-### `retention_period` changed to `string` data type
-
-`retention_period` was changed to the [`string` data type](https://developer.hashicorp.com/terraform/language/expressions/types#string) to handle higher values for the bucket's retention period.
-
-Terraform [Type Conversion](https://developer.hashicorp.com/terraform/language/expressions/types#type-conversion) will handle the change automatically for most configurations, and they will not need to be modified.
-
-To reflect the new type explicitly, surround the current integer value in quotes, i.e. `retention_period = 10` -> `retention_period = "10"`.
-
-## Resource: `google_compute_instance_template`
-
-### The resource will no longer use hardcoded values
-
-`disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values and instead will be set by the API. This shouldn't have any effect on the functionality of the resource.
-
-## Resource: `google_compute_region_instance_template`
-
-### The resource will no longer use hardcoded values
-
-`disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values and instead will be set by the API. This shouldn't have any effect on the functionality of the resource.
-
-## Resource: `google_notebooks_location` is now removed
-
-This resource is not functional.
-
-## Resource: `google_storage_bucket`
-
-### `retention_period` changed to `string` data type
-
-`retention_period` was changed to the [`string` data type](https://developer.hashicorp.com/terraform/language/expressions/types#string) to handle higher values for the bucket's retention period.
-
-Terraform [Type Conversion](https://developer.hashicorp.com/terraform/language/expressions/types#type-conversion) will handle the change automatically for most configurations, and they will not need to be modified.
-
-To reflect the new type explicitly, surround the current integer value in quotes, i.e. `retention_period = 10` -> `retention_period = "10"`.
-
 ## Resource: `google_gke_hub_feature_membership`
 
 ### `configmanagement.binauthz` is now removed
@@ -283,93 +225,19 @@ Remove `configmanagement.binauthz` from your configuration after upgrade.
 
 Remove `description` from your configuration after upgrade.
 
-## Resource: `google_colab_runtime_template`
+## Resource: `google_memorystore_instance`
 
-### `post_startup_script_config` is now removed.
-
-Remove `post_startup_script_config` from your configuration after upgrade.
+ `allow_fewer_zones_deployment` has been removed because it isn't user-configurable.
 
 ## Resource: `google_network_services_lb_traffic_extension`
 
 ### `load_balancing_scheme` is now required
 
-`load_balancing_scheme` is now a required field.
+`load_balancing_scheme` is now a required field. This field was already required for resource functionality so no change to your configuration should be necessary.
 
-## Resource: `google_storage_transfer_job`
+## Resource: `google_notebooks_location` is now removed
 
-### `transfer_spec.gcs_data_sink.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
-
-### `transfer_spec.gcs_data_source.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
-
-### `replication_spec.gcs_data_source.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
-
-### `replication_spec.gcs_data_sink.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
-
-## Resource: `google_cloudfunctions2_function`
-
-### `event_trigger.event_type` is now required
-
-The `event_type` field is now required when `event_trigger` is configured.
-
-### `service_config.service` is changed from `Argument` to `Attribute`
-
-Remove `service_config.service` from your configuration after upgrade.
-
-## Resource: `google_cloud_run_v2_worker_pool`
-
-### `template.containers.depends_on` is removed as it is not supported.
-
-Remove `template.containers.depends_on` from your configuration after upgrade.
-`load_balancing_scheme` is now a required field.
-
-## Resource: `google_storage_transfer_job`
-
-### `transfer_spec.gcs_data_sink.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
-
-### `transfer_spec.gcs_data_source.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
-
-### `replication_spec.gcs_data_source.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
-
-### `replication_spec.gcs_data_sink.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
-
-## Resource: `google_cloudfunctions2_function`
-
-### `event_trigger.event_type` is now required
-
-The `event_type` field is now required when `event_trigger` is configured.
-
-### `service_config.service` is changed from `Argument` to `Attribute`
-
-Remove `service_config.service` from your configuration after upgrade.
-
-## Resource: `google_cloud_run_v2_worker_pool`
-
-### `template.containers.depends_on` is removed as it is not supported.
-
-Remove `template.containers.depends_on` from your configuration after upgrade.
-
-## Resource: `google_vertex_ai_endpoint`
-
-### `enable_secure_private_service_connect` is removed as it is not available in the GA version of the API, only in the beta version.
-
-## Resource: `google_vertex_ai_index`
-
-### `metadata`, and `metadata.config` are now required. Resource creation would fail without these attributes already, so no change is necessary to existing configurations.
-
-## Resource: `google_tpu_node` is now removed
-
-`google_tpu_node` is removed in favor of `google_tpu_v2_vm`. For moving from TPU Node to TPU VM architecture, see https://cloud.google.com/tpu/docs/system-architecture-tpu-vm#from-tpu-node-to-tpu-vm.
-## Resource: `google_vertex_ai_endpoint`
-
-### `enable_secure_private_service_connect` is removed as it is not available in the GA version of the API, only in the beta version.
-
-## Resource: `google_vertex_ai_index`
-
-### `metadata`, and `metadata.config` are now required. Resource creation would fail without these attributes already, so no change is necessary to existing configurations.
-
-## Resource: `google_tpu_node` is now removed
-
-`google_tpu_node` is removed in favor of `google_tpu_v2_vm`. For moving from TPU Node to TPU VM architecture, see https://cloud.google.com/tpu/docs/system-architecture-tpu-vm#from-tpu-node-to-tpu-vm.
+This resource is not functional and can safely be removed from your configuration.
 
 ## Resource: `google_project_service`
 
