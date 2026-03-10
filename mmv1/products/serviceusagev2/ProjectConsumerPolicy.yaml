@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'ConsumerPolicy'
+name: 'ProjectConsumerPolicy'
 description: |
   Consumer Policy is a set of rules that define what services or service groups
   can be used for a cloud resource hierarchy. This resource manages the consumer
@@ -52,11 +52,11 @@ async:
     resource_inside_response: true
 exclude_sweeper: true
 custom_code:
-  custom_update: 'templates/terraform/custom_update/consumer_policy.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/clear_consumer_policy.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/consumer_policy.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/project_consumer_policy.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_project_consumer_policy.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/project_consumer_policy.go.tmpl'
 examples:
-  - name: 'service_usage_consumer_policy_basic'
+  - name: 'service_usage_project_consumer_policy_basic'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:

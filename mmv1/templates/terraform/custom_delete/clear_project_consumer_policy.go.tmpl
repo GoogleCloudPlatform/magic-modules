@@ -1,6 +1,6 @@
 project, err := tpgresource.GetProject(d, config)
 if err != nil {
-return fmt.Errorf("Error fetching project for ConsumerPolicy: %s", err)
+return fmt.Errorf("Error fetching project for ProjectConsumerPolicy: %s", err)
 }
 
 obj := make(map[string]interface{})
@@ -11,7 +11,7 @@ if err != nil {
 return err
 }
 
-log.Printf("[DEBUG] Emptying ConsumerPolicy %q: %#v", d.Id(), obj)
+log.Printf("[DEBUG] Emptying ProjectConsumerPolicy %q: %#v", d.Id(), obj)
 
 // Add force parameter to allow destructive policy changes
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"})
@@ -30,17 +30,17 @@ Timeout:   d.Timeout(schema.TimeoutDelete),
 })
 
 if err != nil {
-return fmt.Errorf("Error emptying ConsumerPolicy %q: %s", d.Id(), err)
+return fmt.Errorf("Error emptying ProjectConsumerPolicy %q: %s", d.Id(), err)
 }
 
 err = ServiceUsageV2OperationWaitTime(
-config, res, project, "Deleting ConsumerPolicy", userAgent,
+config, res, project, "Deleting ProjectConsumerPolicy", userAgent,
 d.Timeout(schema.TimeoutDelete))
 
 if err != nil {
 return err
 }
 
-log.Printf("[DEBUG] Finished emptying ConsumerPolicy %q: %#v", d.Id(), res)
+log.Printf("[DEBUG] Finished emptying ProjectConsumerPolicy %q: %#v", d.Id(), res)
 
 return nil

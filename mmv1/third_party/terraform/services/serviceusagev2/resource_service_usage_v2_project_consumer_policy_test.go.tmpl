@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
+func TestAccServiceUsageV2ProjectConsumerPolicy_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -21,31 +21,31 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckServiceUsageV2ConsumerPolicyDestroyProducer(t),
+		CheckDestroy:             testAccCheckServiceUsageV2ProjectConsumerPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceUsageV2ConsumerPolicy_basic(context),
+				Config: testAccServiceUsageV2ProjectConsumerPolicy_basic(context),
 			},
 			{
-				ResourceName:            "google_service_usage_v2_consumer_policy.default",
+				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
 			},
 			{
-				Config: testAccServiceUsageV2ConsumerPolicy_update(context),
+				Config: testAccServiceUsageV2ProjectConsumerPolicy_update(context),
 			},
 			{
-				ResourceName:            "google_service_usage_v2_consumer_policy.default",
+				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
 			},
 			{
-				Config: testAccServiceUsageV2ConsumerPolicy_removeService(context),
+				Config: testAccServiceUsageV2ProjectConsumerPolicy_removeService(context),
 			},
 			{
-				ResourceName:            "google_service_usage_v2_consumer_policy.default",
+				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
@@ -54,9 +54,9 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 	})
 }
 
-func testAccServiceUsageV2ConsumerPolicy_basic(context map[string]interface{}) string {
+func testAccServiceUsageV2ProjectConsumerPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_usage_v2_consumer_policy" "default" {
+resource "google_service_usage_v2_project_consumer_policy" "default" {
   provider = google-beta
 
   enable_rules {
@@ -68,9 +68,9 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 `, context)
 }
 
-func testAccServiceUsageV2ConsumerPolicy_update(context map[string]interface{}) string {
+func testAccServiceUsageV2ProjectConsumerPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_usage_v2_consumer_policy" "default" {
+resource "google_service_usage_v2_project_consumer_policy" "default" {
   provider = google-beta
   force    = true
 
@@ -84,9 +84,9 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 `, context)
 }
 
-func testAccServiceUsageV2ConsumerPolicy_removeService(context map[string]interface{}) string {
+func testAccServiceUsageV2ProjectConsumerPolicy_removeService(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_usage_v2_consumer_policy" "default" {
+resource "google_service_usage_v2_project_consumer_policy" "default" {
   provider = google-beta
   force    = true
 

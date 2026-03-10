@@ -7,12 +7,12 @@ billingProject := ""
 
 project, err := tpgresource.GetProject(d, config)
 if err != nil {
-	return fmt.Errorf("Error fetching project for ConsumerPolicy: %s", err)
+	return fmt.Errorf("Error fetching project for ProjectConsumerPolicy: %s", err)
 }
 billingProject = project
 
 obj := make(map[string]interface{})
-enableRulesProp, err := expandServiceUsageV2ConsumerPolicyEnableRules(d.Get("enable_rules"), d, config)
+enableRulesProp, err := expandServiceUsageV2ProjectConsumerPolicyEnableRules(d.Get("enable_rules"), d, config)
 if err != nil {
 	return err
 } else if v, ok := d.GetOkExists("enable_rules"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, enableRulesProp)) {
@@ -24,7 +24,7 @@ if err != nil {
 	return err
 }
 
-log.Printf("[DEBUG] Updating ConsumerPolicy %q: %#v", d.Id(), obj)
+log.Printf("[DEBUG] Updating ProjectConsumerPolicy %q: %#v", d.Id(), obj)
 
 // Add force parameter if specified
 if v, ok := d.GetOk("force"); ok && v.(bool) {
@@ -52,17 +52,17 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 })
 
 if err != nil {
-	return fmt.Errorf("Error updating ConsumerPolicy %q: %s", d.Id(), err)
+	return fmt.Errorf("Error updating ProjectConsumerPolicy %q: %s", d.Id(), err)
 } else {
-	log.Printf("[DEBUG] Finished updating ConsumerPolicy %q: %#v", d.Id(), res)
+	log.Printf("[DEBUG] Finished updating ProjectConsumerPolicy %q: %#v", d.Id(), res)
 }
 
 err = ServiceUsageV2OperationWaitTime(
-	config, res, project, "Updating ConsumerPolicy", userAgent,
+	config, res, project, "Updating ProjectConsumerPolicy", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
 	return err
 }
 
-return resourceServiceUsageV2ConsumerPolicyRead(d, meta)
+return resourceServiceUsageV2ProjectConsumerPolicyRead(d, meta)
