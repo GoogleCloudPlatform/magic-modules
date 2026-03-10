@@ -30,17 +30,6 @@ import_format:
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_space.go.tmpl"
 autogen_async: true
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_attribute: 'space_id'
-  fetch_iam_policy_verb: 'GET'
-  set_iam_policy_verb: 'POST'
-  wrapped_policy_obj: false
-  allowed_iam_role: 'roles/apigee.spaceViewer'
-  import_format:
-    - "{{org_id}}/spaces/{{space_id}}"
-    - "{{org_id}}/{{space_id}}"
-    - "{{space_id}}"
 examples:
   - name: "apigee_space_basic_test"
     primary_resource_id: "space"
