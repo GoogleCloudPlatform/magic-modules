@@ -1,4 +1,4 @@
-module github.com/hashicorp/terraform-provider-google
+module github.com/hashicorp/terraform-provider-google-beta
 
 go 1.24.0
 
@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.8
 	cloud.google.com/go/bigquery v1.72.0
 	cloud.google.com/go/bigtable v1.41.0
-	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.83.0
+	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.84.0
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/dnaeon/go-vcr v1.0.1
@@ -26,7 +26,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-mux v0.20.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.39.0
-	github.com/hashicorp/terraform-plugin-testing v1.14.1-0.20260310205519-d49c6538c533
+	github.com/hashicorp/terraform-plugin-testing v1.14.1-0.20260310021125-d08683d4e93d
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/hashstructure v1.1.0
 	github.com/sirupsen/logrus v1.8.3
