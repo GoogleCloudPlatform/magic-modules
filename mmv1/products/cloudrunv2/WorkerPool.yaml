@@ -288,14 +288,17 @@ properties:
         enum_values:
           - 'AUTOMATIC'
           - 'MANUAL'
+        deprecation_message: '`scalingMode` is deprecated as WorkerPool does not support auto scaling and will be removed in a future major release.'
       - name: 'minInstanceCount'
         type: Integer
         description: |
           The minimum count of instances distributed among revisions based on the specified instance split percentages.
+        deprecation_message: '`minInstanceCount` is deprecated as WorkerPool does not support auto scaling and will be removed in a future major release.'
       - name: 'maxInstanceCount'
         type: Integer
         description: |
           The maximum count of instances distributed among revisions based on the specified instance split percentages.
+        deprecation_message: '`maxInstanceCount` is deprecated as WorkerPool does not support auto scaling and will be removed in a future major release.'
       - name: 'manualInstanceCount'
         type: Integer
         description: |
