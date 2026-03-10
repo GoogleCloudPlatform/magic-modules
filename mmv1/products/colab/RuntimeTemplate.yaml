@@ -40,10 +40,10 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
     - '{{runtime_template}}'
+include_in_tgc_next: true
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
     vars:
       runtime_template_name: 'colab-runtime-template'
   - name: 'colab_runtime_template_no_name'
@@ -51,7 +51,6 @@ examples:
     exclude_import_test: true
   - name: 'colab_runtime_template_full'
     primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
     vars:
       runtime_template_name: 'colab-runtime-template'
       network_name: 'colab-test-default'
@@ -183,6 +182,7 @@ properties:
       - name: 'env'
         type: Array
         description: 'Environment variables to be passed to the container.'
+        is_missing_in_cai: true
         item_type:
           type: NestedObject
           properties:
@@ -199,6 +199,7 @@ properties:
       - name: 'postStartupScriptConfig'
         type: NestedObject
         description: 'Post startup script config.'
+        is_missing_in_cai: true
         properties:
           - name: 'postStartupScript'
             type: String

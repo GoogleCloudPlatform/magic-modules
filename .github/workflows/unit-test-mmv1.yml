@@ -15,7 +15,6 @@ concurrency:
   group: ${{ github.event_name == 'merge_group' && format('mmv1-merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('mmv1-pr-{0}', github.event.pull_request.number) || format('mmv1-commit-{0}', github.sha) }}
   cancel-in-progress: true
 
-
 jobs:
   version-guard-check:
     runs-on: ubuntu-22.04
@@ -120,6 +119,7 @@ jobs:
         with:
           path: repo
           fetch-depth: 0
+
       - name: Merge base branch
         if: github.event_name == 'pull_request'
         run: |
@@ -128,10 +128,14 @@ jobs:
           git config user.email "magic-modules@google.com"
           git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
           git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+      
       - name: Set up Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version: '^1.24'
+          cache-dependency-path: |
+            repo/mmv1/go.mod
+
       - name: Run mmv1 unit tests
         run: |
           cd repo

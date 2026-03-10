@@ -1,0 +1,7 @@
+{{ if ne $.TargetVersionName `ga` -}}
+if _, ok := d.GetOkExists("erase_windows_vss_signature"); !ok {
+     if err := d.Set("erase_windows_vss_signature", false); err != nil {
+           return fmt.Errorf("Error setting erase_windows_vss_signature: %s", err)
+     }
+}
+{{- end }}

@@ -41,7 +41,6 @@ exclude_tgc: true
 examples:
   - name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-run-service%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloud-run-service'
 parameters:

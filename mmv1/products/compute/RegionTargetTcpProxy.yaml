@@ -33,6 +33,7 @@ sweeper:
 async:
   operation:
     base_url: '{{op_id}}'
+include_in_tgc_next: true
 examples:
   - name: region_target_tcp_proxy_basic
     primary_resource_id: default

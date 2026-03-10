@@ -71,21 +71,18 @@ sweeper:
 examples:
   - name: 'cloud_run_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'cloud_run_service_gpu'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'cloud_run_service_sql'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
       cloud_run_sql_name: 'cloudrun-sql'
@@ -98,14 +95,12 @@ examples:
       - 'autogenerate_revision_name'
   - name: 'cloud_run_service_noauth'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multiple_environment_variables'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
@@ -115,7 +110,6 @@ examples:
     exclude_docs: true
   - name: 'cloud_run_service_secret_environment_variables'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
       secret_id: 'secret'
@@ -126,7 +120,6 @@ examples:
     exclude_docs: true
   - name: 'cloud_run_service_secret_volumes'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
       secret_id: 'secret'
@@ -154,7 +147,6 @@ examples:
       project: 'PROJECT_NAME'
   - name: 'cloud_run_service_iap'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:

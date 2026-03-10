@@ -78,7 +78,6 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'network_security_security_profile_url_filtering'
-    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-security-profile'
@@ -243,7 +242,6 @@ properties:
       - 'customMirroringProfile'
       - 'customInterceptProfile'
   - name: 'urlFilteringProfile'
-    min_version: 'beta'
     type: NestedObject
     is_missing_in_cai: true
     description: The url filtering configuration for the security profile.
