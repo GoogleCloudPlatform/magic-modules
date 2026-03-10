@@ -617,7 +617,7 @@ resource "google_storage_bucket_iam_policy" "foo" {
 func testAccStorageBucketIamPolicy_destroy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "accessor" {
-  account_id = "pub-sub-test-service-account"
+  account_id = "pub-sub-test-sa-%{random_suffix}"
 }
 
 resource "google_storage_bucket" "test_bucket" {
@@ -645,7 +645,7 @@ resource "google_storage_bucket_iam_policy" "bucket_policy" {
 }
 
 resource "google_pubsub_topic" "topic" {
-  name = "sd-pubsub-test-bucket-topic"
+  name = "sd-pubsub-test-bucket-topic-%{random_suffix}"
 }
 
 resource "google_storage_notification" "storage_notification" {
@@ -653,7 +653,10 @@ resource "google_storage_notification" "storage_notification" {
   payload_format = "JSON_API_V1"
   topic          = google_pubsub_topic.topic.id
 
-  depends_on = [google_pubsub_topic_iam_policy.topic_policy]
+  depends_on = [
+    google_pubsub_topic_iam_policy.topic_policy,
+    google_storage_bucket_iam_policy.bucket_policy
+  ]
 }
 
 data "google_storage_project_service_account" "gcs_account" {}

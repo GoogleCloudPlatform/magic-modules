@@ -35,7 +35,6 @@ custom_code:
 examples:
   - name: 'pubsub_lite_topic_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
     vars:
       reservation_name: 'example-reservation'
       topic_name: 'example-topic'

@@ -1,0 +1,26 @@
+resource "google_compute_snapshot" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "{{index $.Vars "snapshot_name"}}"
+  source_disk = google_compute_disk.persistent.id
+  zone        = "us-central1-a"
+  labels = {
+    my_label = "value"
+  }
+  storage_locations = ["us-central1"]
+  guest_flush = true
+}
+
+data "google_compute_image" "debian" {
+  provider = google-beta
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "persistent" {
+  provider = google-beta
+  name  = "{{index $.Vars "disk_name"}}"
+  image = data.google_compute_image.debian.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}

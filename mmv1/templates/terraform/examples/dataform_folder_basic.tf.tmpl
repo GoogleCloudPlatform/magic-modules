@@ -1,0 +1,5 @@
+resource "google_dataform_folder" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  region = "us-central1"
+  display_name = "Basic Folder-%{random_suffix}"
+}

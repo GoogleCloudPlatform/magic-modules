@@ -13,6 +13,7 @@
 
 ---
 name: 'CertificateIssuanceConfig'
+include_in_tgc_next: true
 description: |
   Certificate represents a HTTP-reachable backend for a Certificate.
 references:

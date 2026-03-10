@@ -107,6 +107,7 @@ func diffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
 			return true
 		}
 	}
+
 	// For any other source_ranges value diff, don't suppress
 	return false
 }

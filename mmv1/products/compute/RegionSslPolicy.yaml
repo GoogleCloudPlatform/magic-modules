@@ -38,6 +38,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_ssl_policy.tmpl'
 custom_diff:
@@ -85,22 +86,27 @@ properties:
       See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
       for information on what cipher suites each profile provides. If
       `CUSTOM` is used, the `custom_features` attribute **must be set**.
+      If set to `FIPS_202205`, `minTlsVersion` must also be set to
+      `TLS_1_2`.
     default_value: "COMPATIBLE"
     enum_values:
       - 'COMPATIBLE'
       - 'MODERN'
       - 'RESTRICTED'
       - 'CUSTOM'
+      - 'FIPS_202205'
   - name: 'minTlsVersion'
     type: Enum
     description: |
       The minimum version of SSL protocol that can be used by the clients
-      to establish a connection with the load balancer.
+      to establish a connection with the load balancer. When set to
+      `TLS_1_3`, the profile field must be set to `RESTRICTED`.
     default_value: "TLS_1_0"
     enum_values:
       - 'TLS_1_0'
       - 'TLS_1_1'
       - 'TLS_1_2'
+      - 'TLS_1_3'
   - name: 'enabledFeatures'
     type: Array
     description: 'The list of features enabled in the SSL policy.'

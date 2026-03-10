@@ -80,3 +80,4 @@ properties:
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
+    client_side: true

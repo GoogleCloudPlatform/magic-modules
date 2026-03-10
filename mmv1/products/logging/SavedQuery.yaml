@@ -1,0 +1,171 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'SavedQuery'
+api_variant_patterns:
+  - 'billingAccounts/{billingAccount}/locations/{location}/savedQueries/{savedQuery}'
+  - 'folders/{folder}/locations/{location}/savedQueries/{savedQuery}'
+  - 'organizations/{organization}/locations/{location}/savedQueries/{savedQuery}'
+  - 'projects/{project}/locations/{location}/savedQueries/{savedQuery}'
+description: |
+  Describes a query that has been saved by a user.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
+    'Save and share queries': 'https://docs.cloud.google.com/logging/docs/view/building-queries#saved-queries'
+    'Save and share SQL queries': 'https://docs.cloud.google.com/logging/docs/analyze/save-share-query'
+  api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.savedQueries'
+base_url: '{{parent}}/locations/{{location}}/savedQueries'
+self_link: '{{parent}}/locations/{{location}}/savedQueries/{{name}}'
+create_url: '{{parent}}/locations/{{location}}/savedQueries?savedQueryId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/locations/{{location}}/savedQueries/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+examples:
+  - name: 'logging_saved_query_basic'
+    primary_resource_id: 'saved_query'
+    vars:
+      logging_saved_query_name: 'my-saved-query'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'logging_saved_query_no_description'
+    primary_resource_id: 'saved_query'
+    vars:
+      logging_saved_query_name: 'my-saved-query-no-description'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    exclude_docs: true
+  - name: 'logging_saved_query_private'
+    primary_resource_id: 'saved_query'
+    vars:
+      logging_saved_query_name: 'my-saved-query-private'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'logging_saved_query_summary_fields'
+    primary_resource_id: 'saved_query'
+    vars:
+      logging_saved_query_name: 'my-saved-query-summary-fields'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'logging_saved_query_sql_basic'
+    primary_resource_id: 'saved_query'
+    vars:
+      logging_saved_query_name: 'my-saved-query-sql'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+parameters:
+  - name: 'parent'
+    type: String
+    description: The parent of the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the resource see
+      [supported regions](https://docs.cloud.google.com/logging/docs/region-support#bucket-regions).
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The name of the saved query. For example: `my-saved-query`
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'displayName'
+    type: String
+    description: |
+      The user-visible display name of the saved query.
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      A description of the saved query.
+  - name: 'createTime'
+    type: String
+    output: true
+    description: |
+      Output only. The creation timestamp of the saved query.
+  - name: 'updateTime'
+    type: String
+    output: true
+    description: |
+      Output only. The last update timestamp of the saved query.
+  - name: 'visibility'
+    type: Enum
+    description: |
+      The visibility of the saved query.
+    required: true
+    enum_values:
+      - 'SHARED'
+      - 'PRIVATE'
+  - name: 'loggingQuery'
+    type: NestedObject
+    description: |
+      The contents of the saved query.
+    exactly_one_of:
+      - 'loggingQuery'
+      - 'opsAnalyticsQuery'
+    properties:
+      - name: 'filter'
+        type: String
+        description: |
+          An [advanced logs filter](https://cloud.google.com/logging/docs/view/advanced-filters) which
+          is used to match log entries.
+        required: true
+      - name: 'summaryFieldStart'
+        type: Integer
+        description: |
+          Characters will be counted from the start of the string.
+        conflicts:
+          - 'loggingQuery.0.summaryFieldEnd'
+      - name: 'summaryFieldEnd'
+        type: Integer
+        description: |
+          Characters will be counted from the end of the string.
+        conflicts:
+          - 'loggingQuery.0.summaryFieldStart'
+      - name: 'summaryFields'
+        type: Array
+        description: |
+          The names of the fields to display in the summary.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'field'
+              type: String
+              description: |
+                The field from the LogEntry to include in the summary line.
+  - name: 'opsAnalyticsQuery'
+    type: NestedObject
+    description: |
+      The contents of the saved query.
+    exactly_one_of:
+      - 'opsAnalyticsQuery'
+      - 'loggingQuery'
+    properties:
+      - name: 'sqlQueryText'
+        type: String
+        description: |
+          A logs analytics SQL query, which generally follows BigQuery format.
+        required: true

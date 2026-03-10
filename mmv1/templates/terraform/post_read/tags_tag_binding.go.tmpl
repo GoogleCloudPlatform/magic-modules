@@ -1,0 +1,63 @@
+
+	v, ok := res["tagBindings"]
+	if !ok || v == nil {
+		log.Printf("[DEBUG] Removing TagsTagBinding because it no longer exists, API response missing tagBindings key.")
+		d.SetId("")
+		return nil
+	}
+
+	items, ok := v.([]interface{})
+	if !ok {
+		log.Printf("[DEBUG] Removing TagsTagBinding because it no longer exists, API response has invalid format.")
+		d.SetId("")
+		return nil
+	}
+
+	expectedName := d.Get("name")
+	expectedFlattenedName := flattenTagsTagBindingName(expectedName, d, meta.(*transport_tpg.Config))
+
+	var foundItem map[string]interface{}
+	for _, itemRaw := range items {
+		if itemRaw == nil {
+			continue
+		}
+
+		item := itemRaw.(map[string]interface{})
+		itemName := flattenTagsTagBindingName(item["name"], d, meta.(*transport_tpg.Config))
+		// IsEmptyValue check so that if one is nil and the other is "", that's considered a match
+		if !(tpgresource.IsEmptyValue(reflect.ValueOf(itemName)) && tpgresource.IsEmptyValue(reflect.ValueOf(expectedFlattenedName))) && !reflect.DeepEqual(itemName, expectedFlattenedName) {
+			log.Printf("[DEBUG] Skipping item with name= %#v, looking for %#v)", itemName, expectedFlattenedName)
+			continue
+		}
+		foundItem = item
+		break
+	}
+
+	if foundItem == nil {
+		log.Printf("[DEBUG] Removing TagsTagBinding because it no longer exists.")
+		d.SetId("")
+		return nil
+	}
+
+	log.Printf("[DEBUG] Found matching item for %s", expectedFlattenedName)
+	res = foundItem
+
+	// Initialize tag_value in state ONLY if it's not set (e.g., after import)
+	if _, ok := d.GetOk("tag_value"); !ok {
+		var initialTagValue string
+		if tv, ok := res["tagValue"].(string); ok {
+			initialTagValue = tv
+		} else if tv, ok := res["tagValueNamespacedName"].(string); ok {
+			initialTagValue = tv
+		} else {
+			return fmt.Errorf("API response for %s is missing 'tagValueNamespacedName'", res["name"])
+		}
+
+		if err := d.Set("tag_value", initialTagValue); err != nil {
+			return fmt.Errorf("Error initializing tag_value: %s", err)
+		}
+		log.Printf("[DEBUG] Read: Initialized tag_value in state to: %s", initialTagValue)
+	} else {
+		// Do not change the existing d.Get("tag_value") format to maintain backward compatibility.
+		log.Printf("[DEBUG] Read: Existing tag_value in state: %s.", d.Get("tag_value").(string))
+	}

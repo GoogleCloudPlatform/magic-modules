@@ -1,0 +1,88 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'UllMirroringEngine'
+description: |-
+  A Mirroring Engine is a logical representation of the underlying infrastructure
+  that is used to manage and monitor the ULL Mirroring setup.
+min_version: 'beta'
+id_format: 'projects/{{project}}/locations/{{location}}/ullMirroringEngines/{{ull_mirroring_engine_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/ullMirroringEngines'
+self_link: 'projects/{{project}}/locations/{{location}}/ullMirroringEngines/{{ull_mirroring_engine_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/ullMirroringEngines?ullMirroringEngineId={{ull_mirroring_engine_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/ullMirroringEngines/{{ull_mirroring_engine_id}}
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+examples:
+  - name: 'network_security_ull_mirroring_engine_basic'
+    config_path: 'templates/terraform/examples/network_security_ull_mirroring_engine_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      ull_mirroring_engine_id: 'example-ull-eng'
+    exclude_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |-
+      The cloud location of the engine, e.g. `us-south1-d` or `us-south1-e`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'ullMirroringEngineId'
+    type: String
+    description: |-
+      The ID to use for the new engine, which will become the final
+      component of the engine's resource name.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of this engine, for example:
+      `projects/123456789/locations/us-south1-d/ullMirroringEngines/my-engine`.
+      See https://google.aip.dev/122 for more details.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |-
+      The timestamp when the resource was created.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |-
+      The timestamp when the resource was most recently updated.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |-
+      Labels are key/value pairs that help to organize and filter resources.
+  - name: 'reconciling'
+    type: Boolean
+    description: |-
+      The current state of the resource does not match the user's intended state,
+      and the system is working to reconcile them. This is part of the normal
+      operation. See https://google.aip.dev/128.
+    output: true

@@ -1,0 +1,35 @@
+resource "google_dataplex_data_product" "example" {
+  project         = "{{index $.TestEnvVars "project_name"}}"
+  location        = "us-central1"
+  data_product_id = "tf-test-dp-%{random_suffix}"
+  display_name    = "Parent Data Product"
+  owner_emails    = ["gterraformtestuser@gmail.com"]
+
+  access_groups {
+    id           = "analyst"
+    group_id     = "analyst"
+    display_name = "Data Analyst"
+    principal {
+      google_group = "tf-test-analysts-%{random_suffix}@example.com"
+    }
+  }
+
+  provider = google-beta
+}
+
+resource "google_bigquery_dataset" "example" {
+  project    = "{{index $.TestEnvVars "project_name"}}"
+  dataset_id = "tf_test_dataset_%{random_suffix}"
+  location   = "us-central1"
+  provider   = google-beta
+}
+
+resource "google_dataplex_data_asset" "{{$.PrimaryResourceId}}" {
+  project         = "{{index $.TestEnvVars "project_name"}}"
+  location        = "us-central1"
+  data_product_id = google_dataplex_data_product.example.data_product_id
+  data_asset_id   = "{{index $.Vars "data_asset_id"}}"
+  resource        = "//bigquery.googleapis.com/projects/${google_bigquery_dataset.example.project}/datasets/${google_bigquery_dataset.example.dataset_id}"
+
+  provider = google-beta
+}

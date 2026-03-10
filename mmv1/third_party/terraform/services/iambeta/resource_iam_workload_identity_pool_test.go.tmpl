@@ -210,7 +210,7 @@ resource "google_iam_workload_identity_pool" "my_pool" {
       "us-central2" : "projects/project-bar/locations/us-central2/caPools/ca-pool-bar"
       "asia-east1" : "projects/project-foo/locations/asia-east1/caPools/ca-pool-foo"
     }
-    lifetime                   = "36000s"
+    lifetime                   = "172800s"
     rotation_window_percentage = 75
     key_algorithm              = "RSA_4096"
   }

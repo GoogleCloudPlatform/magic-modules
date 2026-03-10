@@ -62,9 +62,16 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 				// Skip the project field.
 				continue
 			}
-			if strings.Contains(resource, "iam") && field == "condition" {
-				// Skip the condition field of iam resources because some iam resources do not support it.
-				continue
+			// Ignore condition fields on iam resources because we always generate them whether or not
+			// they're supported.
+			// Longer-term fix tracked at https://github.com/hashicorp/terraform-provider-google/issues/18412
+			if strings.HasPrefix(field, "condition.") {
+				switch {
+				case strings.HasSuffix(resource, "_iam_member"),
+					strings.HasSuffix(resource, "_iam_policy"),
+					strings.HasSuffix(resource, "_iam_binding"):
+					continue
+				}
 			}
 			if fieldDiff.New == nil {
 				// Skip deleted fields.

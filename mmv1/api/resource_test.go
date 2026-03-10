@@ -204,123 +204,6 @@ func TestResourceServiceVersion(t *testing.T) {
 	}
 }
 
-func TestLeafProperties(t *testing.T) {
-	t.Parallel()
-
-	cases := []struct {
-		description string
-		obj         Resource
-		expected    Type
-	}{
-		{
-			description: "non-nested type",
-			obj: Resource{
-				BaseUrl: "test",
-				Properties: []*Type{
-					{
-						Name: "basic",
-						Type: "String",
-					},
-				},
-			},
-			expected: Type{
-				Name: "basic",
-			},
-		},
-		{
-			description: "nested type",
-			obj: Resource{
-				BaseUrl: "test",
-				Properties: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "NestedObject",
-								Properties: []*Type{
-									{
-										Name: "bars",
-										Type: "Array",
-										ItemType: &Type{
-											Type: "NestedObject",
-											Properties: []*Type{
-												{
-													Name: "fooBar",
-													Type: "String",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "fooBar",
-			},
-		},
-		{
-			description: "nested virtual",
-			obj: Resource{
-				BaseUrl: "test",
-				VirtualFields: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "String",
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "foo",
-			},
-		},
-		{
-			description: "nested param",
-			obj: Resource{
-				BaseUrl: "test",
-				Parameters: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "String",
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "foo",
-			},
-		},
-	}
-
-	for _, tc := range cases {
-		tc := tc
-
-		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
-
-			tc.obj.SetDefault(nil)
-			if got, want := tc.obj.LeafProperties(), tc.expected; got[0].Name != want.Name {
-				t.Errorf("expected %q to be %q", got[0].Name, want.Name)
-			}
-		})
-	}
-}
-
 // TestMagicianLocation verifies that the current package is being executed from within
 // the RELATIVE_MAGICIAN_LOCATION ("mmv1/") directory structure. This ensures that references
 // to files relative to this location will remain valid even if the repository structure
@@ -515,13 +398,15 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 func TestResourceAddExtraFields(t *testing.T) {
 	t.Parallel()
 
-	createTestResource := func(name string) *Resource {
-		return &Resource{
+	createTestResource := func(name, pn string) *Resource {
+		r := &Resource{
 			Name: name,
 			ProductMetadata: &Product{
 				Name: "testproduct",
 			},
 		}
+		r.ProductMetadata.SetCompiler(pn)
+		return r
 	}
 
 	createTestType := func(name, typeStr string, options ...func(*Type)) *Type {
@@ -556,7 +441,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("WriteOnly property adds companion fields", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		writeOnlyProp := createTestType("password", "String",
 			withWriteOnly(true),
 			withRequired(true),
@@ -601,10 +486,32 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 	})
 
+	t.Run("WriteOnly property doesn't add companion fields for tgc", func(t *testing.T) {
+		t.Parallel()
+
+		resource := createTestResource("testresource", "terraformgoogleconversionnext")
+		writeOnlyProp := createTestType("password", "String",
+			withWriteOnly(true),
+			withRequired(true),
+			withDescription("A password field"),
+		)
+
+		props := []*Type{writeOnlyProp}
+		result := resource.AddExtraFields(props, nil)
+
+		if len(result) != 1 {
+			t.Errorf("Expected 1 property as WriteOnly fields should not be added, got %d", len(result))
+		}
+
+		if writeOnlyProp.WriteOnly {
+			t.Error("Original WriteOnly property should have WriteOnly set to false after processing")
+		}
+	})
+
 	t.Run("KeyValueLabels property adds terraform and effective labels", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		labelsType := &Type{
 			Name:        "labels",
 			Type:        "KeyValueLabels",
@@ -657,7 +564,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueLabels with ExcludeAttributionLabel adds different CustomDiff", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		resource.ExcludeAttributionLabel = true
 
 		labelsType := &Type{
@@ -677,7 +584,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueLabels with metadata parent adds metadata CustomDiff", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		parent := &Type{Name: "metadata"}
 
 		labelsType := &Type{
@@ -697,7 +604,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueAnnotations property adds effective annotations", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		annotationsType := &Type{
 			Name:        "annotations",
 			Type:        "KeyValueAnnotations",
@@ -738,7 +645,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("NestedObject with properties processes recursively", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 
 		nestedWriteOnly := createTestType("nestedPassword", "String", withWriteOnly(true))
 		nestedObject := createTestType("config", "NestedObject", withProperties([]*Type{nestedWriteOnly}))
@@ -762,7 +669,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Empty NestedObject properties are not processed", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		emptyNestedObject := createTestType("config", "NestedObject", withProperties([]*Type{}))
 
 		props := []*Type{emptyNestedObject}
@@ -779,7 +686,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("WriteOnly property already ending with Wo is skipped", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		woProperty := createTestType("passwordWo", "String", withWriteOnly(true))
 
 		props := []*Type{woProperty}
@@ -797,7 +704,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Regular properties are passed through unchanged", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		regularProp := createTestType("name", "String", withRequired(true))
 
 		props := []*Type{regularProp}
@@ -818,7 +725,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Multiple property types processed correctly", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 
 		regularProp := createTestType("name", "String")
 		writeOnlyProp := createTestType("password", "String", withWriteOnly(true))
@@ -844,4 +751,85 @@ func TestResourceAddExtraFields(t *testing.T) {
 			}
 		}
 	})
+}
+
+// findMmv1Dir locates the mmv1 directory from the test file path.
+func findMmv1Dir(t *testing.T) string {
+	t.Helper()
+
+	_, testFilePath, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("Failed to get current test file path")
+	}
+
+	// testFilePath is mmv1/api/resource_test.go, navigate up to mmv1/
+	dir := filepath.Dir(testFilePath)
+	for {
+		if filepath.Base(dir) == "mmv1" {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			t.Fatal("Could not find mmv1 directory in parent directories")
+		}
+		dir = parent
+	}
+}
+
+// findNestedProperty finds a property by name within a slice of Type properties.
+func findNestedProperty(t *testing.T, properties []*Type, parentName, childName string) *Type {
+	t.Helper()
+
+	for _, prop := range properties {
+		if prop.Name == childName {
+			return prop
+		}
+	}
+	t.Fatalf("property %q not found in %q", childName, parentName)
+	return nil
+}
+
+func TestIapOAuth2ClientIdSendEmptyValue(t *testing.T) {
+	t.Parallel()
+
+	mmv1Dir := findMmv1Dir(t)
+
+	cases := []struct {
+		name     string
+		yamlFile string
+	}{
+		{
+			name:     "BackendService",
+			yamlFile: filepath.Join(mmv1Dir, "products", "compute", "BackendService.yaml"),
+		},
+		{
+			name:     "RegionBackendService",
+			yamlFile: filepath.Join(mmv1Dir, "products", "compute", "RegionBackendService.yaml"),
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			resource := &Resource{}
+			Compile(tc.yamlFile, resource)
+
+			iapProp := findNestedProperty(t, resource.Properties, tc.name, "iap")
+			oauth2ClientId := findNestedProperty(t, iapProp.Properties, "iap", "oauth2ClientId")
+			oauth2ClientSecret := findNestedProperty(t, iapProp.Properties, "iap", "oauth2ClientSecret")
+
+			if !oauth2ClientId.SendEmptyValue {
+				t.Error("oauth2ClientId should have send_empty_value: true to prevent perpetual diff when using Google-managed OAuth client")
+			}
+			if !oauth2ClientSecret.SendEmptyValue {
+				t.Errorf("oauth2ClientSecret should have send_empty_value: true (expected to already be set)")
+			}
+
+			if oauth2ClientId.SendEmptyValue != oauth2ClientSecret.SendEmptyValue {
+				t.Errorf("oauth2ClientId and oauth2ClientSecret should have the same send_empty_value setting, got oauth2ClientId=%v, oauth2ClientSecret=%v",
+					oauth2ClientId.SendEmptyValue, oauth2ClientSecret.SendEmptyValue)
+			}
+		})
+	}
 }

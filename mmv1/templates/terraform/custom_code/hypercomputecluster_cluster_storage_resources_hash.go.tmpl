@@ -1,0 +1,8 @@
+func resourceHypercomputeclusterClusterResourceHash(v interface{}) int {
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	if v, ok := m["id"]; ok {
+		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
+	}
+	return schema.HashString(buf.String())
+}

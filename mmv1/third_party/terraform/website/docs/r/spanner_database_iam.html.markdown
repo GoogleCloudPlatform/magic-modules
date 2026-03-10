@@ -49,7 +49,7 @@ data "google_iam_policy" "admin" {
     members = [
       "user:jane@example.com",
     ]
-    
+
     condition {
       title       = "My Role"
       description = "Grant permissions on my_role"
@@ -90,7 +90,7 @@ resource "google_spanner_database_iam_binding" "database" {
   members = [
     "user:jane@example.com",
   ]
-  
+
   condition {
     title       = "My Role"
     description = "Grant permissions on my_role"
@@ -118,7 +118,7 @@ resource "google_spanner_database_iam_member" "database" {
   database = "your-database-name"
   role     = "roles/compute.networkUser"
   member   = "user:jane@example.com"
-  
+
   condition {
     title       = "My Role"
     description = "Grant permissions on my_role"
@@ -251,3 +251,7 @@ The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/c
 ```
 $ terraform import google_spanner_database_iam_policy.default {{project}}/{{instance}}/{{database}}
 ```
+
+## User Project Overrides
+
+This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).

@@ -1,0 +1,18 @@
+# Use existing filestore instance
+data "google_filestore_instance" "test_instance" {
+  name     = "fs-instance"
+  location = "{{index $.TestEnvVars "zone"}}"
+}
+
+# Create a VmwareEngine Datastore, referencing the filestore instance
+resource "google_vmwareengine_datastore" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "resource_name"}}"
+  location    = "{{index $.TestEnvVars "zone"}}"
+  description = "example google_file_service.filestore datastore."
+
+  nfs_datastore {
+    google_file_service {
+      filestore_instance = google_filestore_instance.test_instance.id
+    }
+  }
+}

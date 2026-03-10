@@ -1,0 +1,33 @@
+data "google_project" "project" {}
+
+resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "policy_name"}}"
+  location    = "us-west1"
+
+  target {
+    resources = [ "projects/${data.google_project.project.project_id}/locations/us-west1/agentGateways/gateway1" ]
+  }
+
+  policy_profile = "REQUEST_AUTHZ"
+  action = "ALLOW"
+
+  http_rules {
+    to {
+      operations {
+        mcp {
+          base_protocol_methods_option = "MATCH_BASE_PROTOCOL_METHODS"
+          methods {
+            name = "tools"
+          }
+
+          methods {
+            name = "tools/call"
+            params {
+              exact = "foo"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+resource "google_compute_region_composite_health_check" "{{$.PrimaryResourceId}}" {
+  provider           = google-beta
+  name               = "{{index $.Vars "name"}}"
+  description        = "test regional composite health check resource"
+  region             = "us-central1"
+  health_sources     = [google_compute_region_health_source.default.id]
+  health_destination = google_compute_forwarding_rule.default.id
+}
+
+resource "google_compute_region_health_source" "default" {
+  provider                  = google-beta
+  name                      = "{{index $.Vars "name"}}-hs"
+  region                    = "us-central1"
+  source_type               = "BACKEND_SERVICE"
+  sources                   = [google_compute_region_backend_service.default.id]
+  health_aggregation_policy = google_compute_region_health_aggregation_policy.hap.id
+}
+
+resource "google_compute_region_health_aggregation_policy" "hap" {
+  provider    = google-beta
+  name        = "{{index $.Vars "name"}}-hap"
+  description = "health aggregation policy for health source"
+  region      = "us-central1"
+}
+
+resource "google_compute_health_check" "default" {
+  provider = google-beta
+  name     = "{{index $.Vars "name"}}-hc"
+  http_health_check {
+    port = 80
+  }
+}
+
+resource "google_compute_region_backend_service" "default" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "name"}}-bs"
+  region                = "us-central1"
+  health_checks         = [google_compute_health_check.default.id]
+  load_balancing_scheme = "INTERNAL"
+}
+
+resource "google_compute_forwarding_rule" "default" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "name"}}-fr"
+  region                = "us-central1"
+  load_balancing_scheme = "INTERNAL"
+  backend_service       = google_compute_region_backend_service.default.id
+  network               = google_compute_network.default.id
+  subnetwork            = google_compute_subnetwork.default.id
+  ip_protocol           = "TCP"
+  all_ports             = true
+}
+
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "{{index $.Vars "name"}}-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider      = google-beta
+  name          = "{{index $.Vars "name"}}-sub"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+}

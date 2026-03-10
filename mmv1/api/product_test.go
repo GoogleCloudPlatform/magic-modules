@@ -139,22 +139,28 @@ func TestProductServiceName(t *testing.T) {
 		{
 			description: "standard BaseUrl",
 			obj: Product{
-				BaseUrl: "https://abc.googleapis.com/beta/",
+				Version: &product.Version{
+					BaseUrl: "https://abc.googleapis.com/beta/",
+				},
 			},
 			expected: "abc.googleapis.com",
 		},
 		{
 			description: "BaseUrl with locational subdomain",
 			obj: Product{
-				BaseUrl: "https://{{location}}-abc.googleapis.com/ga/",
+				Version: &product.Version{
+					BaseUrl: "https://{{location}}-abc.googleapis.com/ga/",
+				},
 			},
 			expected: "abc.googleapis.com",
 		},
 		{
 			description: "BaseUrl and CaiBaseUrl",
 			obj: Product{
-				BaseUrl:    "https://abc.googleapis.com/ga/",
-				CaiBaseUrl: "https://def.googleapis.com/ga/",
+				Version: &product.Version{
+					BaseUrl:    "https://abc.googleapis.com/ga/",
+					CaiBaseUrl: "https://def.googleapis.com/ga/",
+				},
 			},
 			expected: "def.googleapis.com",
 		},
@@ -184,43 +190,55 @@ func TestProductServiceVersion(t *testing.T) {
 		{
 			description: "standard BaseUrl",
 			obj: Product{
-				BaseUrl: "https://abc.googleapis.com/v1/",
+				Version: &product.Version{
+					BaseUrl: "https://abc.googleapis.com/v1/",
+				},
 			},
 			expected: "v1",
 		},
 		{
 			description: "BaseUrl without trailing /",
 			obj: Product{
-				BaseUrl: "https://abc.googleapis.com/v1",
+				Version: &product.Version{
+					BaseUrl: "https://abc.googleapis.com/v1",
+				},
 			},
 			expected: "v1",
 		},
 		{
 			description: "BaseUrl with version of beta",
 			obj: Product{
-				BaseUrl: "https://abc.googleapis.com/beta/",
+				Version: &product.Version{
+					BaseUrl: "https://abc.googleapis.com/beta/",
+				},
 			},
 			expected: "beta",
 		},
 		{
 			description: "BaseUrl without valid version",
 			obj: Product{
-				BaseUrl: "https://abc.googleapis.com/other/",
+				Version: &product.Version{
+					BaseUrl: "https://abc.googleapis.com/other/",
+				},
 			},
 			expected: "",
 		},
 		{
 			description: "BaseUrl with additional value in path",
 			obj: Product{
-				BaseUrl: "https://abc.googleapis.com/compute/v1/",
+				Version: &product.Version{
+					BaseUrl: "https://abc.googleapis.com/compute/v1/",
+				},
 			},
 			expected: "v1",
 		},
 		{
 			description: "standard BaseUrl",
 			obj: Product{
-				BaseUrl:    "https://{{location}}-abc.googleapis.com/",
-				CaiBaseUrl: "https://abc.googleapis.com/v1/",
+				Version: &product.Version{
+					BaseUrl:    "https://{{location}}-abc.googleapis.com/",
+					CaiBaseUrl: "https://abc.googleapis.com/v1/",
+				},
 			},
 			expected: "v1",
 		},

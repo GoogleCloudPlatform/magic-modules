@@ -50,7 +50,6 @@ iam_policy:
 examples:
   - name: 'gkehub_scope_basic'
     primary_resource_id: 'scope'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])'
     vars:
       resource_name: 'my-scope'
     test_env_vars:

@@ -41,6 +41,9 @@ examples:
     primary_resource_id: 'basic_test_case'
     vars:
       agent_name: 'dialogflowcx-agent'
+    # Skip in VCR until the test issue is resolved
+    # https://github.com/hashicorp/terraform-provider-google/issues/21532
+    skip_vcr: true
 parameters:
   - name: 'parent'
     type: String

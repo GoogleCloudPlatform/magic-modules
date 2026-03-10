@@ -113,7 +113,7 @@ resource "google_apphub_application" "my_apphub_application" {
 
 resource "google_developer_connect_insights_config" "insights_config" {
   location = "us-central1"
-  insights_config_id = "tf-test-ic%{random_suffix}"
+  insights_config_id = "tf-test-ic-apphub-%{random_suffix}"
   project = google_project.project.project_id
   annotations = {}
   labels = {}

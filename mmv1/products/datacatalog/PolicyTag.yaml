@@ -43,12 +43,10 @@ custom_code:
 examples:
   - name: 'data_catalog_taxonomies_policy_tag_basic'
     primary_resource_id: 'basic_policy_tag'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_policy_tag%s", context["random_suffix"])'
     vars:
       taxonomy_display_name: 'taxonomy_display_name'
   - name: 'data_catalog_taxonomies_policy_tag_child_policies'
     primary_resource_id: 'child_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_child_tag%s", context["random_suffix"])'
     vars:
       taxonomy_display_name: 'taxonomy_display_name'
 parameters:

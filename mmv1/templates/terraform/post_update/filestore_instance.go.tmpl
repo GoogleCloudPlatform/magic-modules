@@ -1,0 +1,42 @@
+
+if d.HasChange("desired_replica_state") {
+	log.Printf("[DEBUG] desired_replica_state has changed")
+	billingProject := ""
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	  billingProject = bp
+	}
+
+	desired_replica_state := d.Get("desired_replica_state").(string)
+	log.Printf("[DEBUG] desired_replica_state: %s", desired_replica_state)
+
+	effective_replication := d.Get("effective_replication").([]interface{})
+	if len(effective_replication) > 0 {
+		effective_replication_map := effective_replication[0].(map[string]interface{})
+		replicas := effective_replication_map["replicas"].([]interface{})
+		if len(replicas) > 0 {
+			replica := replicas[0].(map[string]interface{})
+			state := replica["state"].(string)
+			log.Printf("[DEBUG] current replica state: %s", state)
+
+			if desired_replica_state == "PAUSED" && state == "READY" {
+				log.Printf("[DEBUG] Pausing replica")
+				if err := ModifyFilestoreInstanceReplica(config, d, project, billingProject, userAgent, "pauseReplica"); err != nil {
+					return err
+				}
+			} else if desired_replica_state == "READY" && state == "PAUSED" {
+				log.Printf("[DEBUG] Resuming replica")
+				if err := ModifyFilestoreInstanceReplica(config, d, project, billingProject, userAgent, "resumeReplica"); err != nil {
+					return err
+				}
+			} else {
+				log.Printf("[DEBUG] No state transition needed")
+			}
+		} else {
+			log.Printf("[DEBUG] No replicas found in effective_replication")
+		}
+	} else {
+		log.Printf("[DEBUG] effective_replication is empty")
+	}
+} else {
+	log.Printf("[DEBUG] desired_replica_state has NOT changed")
+}

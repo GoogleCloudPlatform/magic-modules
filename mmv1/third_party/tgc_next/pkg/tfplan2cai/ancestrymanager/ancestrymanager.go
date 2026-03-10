@@ -397,11 +397,15 @@ func (m *manager) SetAncestors(d tpgresource.TerraformResourceData, config *tran
 	return nil
 }
 
-// type NoOpAncestryManager struct{}
+type NoOpAncestryManager struct{}
 
-// func (*NoOpAncestryManager) Ancestors(config *transport_tpg.Config, tfData tpgresource.TerraformResourceData, cai *resources.Asset) ([]string, string, error) {
-// 	return nil, "", nil
-// }
+func (*NoOpAncestryManager) Ancestors(config *transport_tpg.Config, tfData tpgresource.TerraformResourceData, cai *caiasset.Asset) ([]string, string, error) {
+	return nil, "", nil
+}
+
+func (*NoOpAncestryManager) SetAncestors(d tpgresource.TerraformResourceData, config *transport_tpg.Config, cai *caiasset.Asset) error {
+	return nil
+}
 
 func ensurePrefix(s, pre string) string {
 	if strings.HasPrefix(s, pre) {

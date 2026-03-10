@@ -51,7 +51,7 @@ examples:
     vars:
       policy_name: 'my-policy'
       association_name: 'my-association'
-      folder_name: 'my-folder'
+      folder_name: 'folder-fpa'
     test_env_vars:
       org_id: 'ORG_ID'
     exclude_test: true
@@ -60,7 +60,7 @@ examples:
     vars:
       policy_name: 'my-policy'
       association_name: 'my-association'
-      folder_name: 'my-folder'
+      folder_name: 'folder-fpas'
     test_env_vars:
       org_id: 'ORG_ID'
     exclude_test: true

@@ -120,7 +120,7 @@ The following environment variables are required:
 		if err != nil {
 			return err
 		}
-		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr)
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr, false)
 		if err != nil {
 			return err
 		}

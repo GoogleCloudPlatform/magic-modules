@@ -77,7 +77,6 @@ properties:
     required: true
     key_name: 'assessment'
     value_type:
-      name: profileAssessmentConfig
       type: NestedObject
       properties:
         - name: 'weight'

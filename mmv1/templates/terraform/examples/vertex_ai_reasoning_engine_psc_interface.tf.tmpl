@@ -1,0 +1,97 @@
+# When PSC-I is configured, Agent deletion will fail,
+# although the agent will be deleted.
+# Bug at https://github.com/hashicorp/terraform-provider-google/issues/25637
+
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "name"}}"
+  description  = "A basic reasoning engine"
+  region       = "us-central1"
+
+  spec {
+    agent_framework = "google-adk"
+
+    package_spec {
+      python_version           = "3.11"
+      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_tar_gz.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pickle.name}"
+      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
+    }
+
+    deployment_spec {
+
+      psc_interface_config {
+        network_attachment = google_compute_network_attachment.network_attachment.id
+
+        dns_peering_configs {
+          domain         = "example.com."
+          target_project = data.google_project.project.project_id
+          target_network = google_compute_network.network.name
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    time_sleep.wait_35_minutes
+  ]
+}
+
+resource "google_storage_bucket_object" "bucket_obj_requirements_txt" {
+  name   = "requirements.txt"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/requirements_adk.txt"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_pickle" {
+  name   = "code.pkl"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/pickle_adk.pkl"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
+  name   = "dependencies.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/dependencies_adk.tar.gz"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.Vars "bucket_name"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+# Destroy network attachment 35 minutes after reasoning engine is deleted.
+# It guarantees that the network attachment has no more active PSC interfaces.
+resource "time_sleep" "wait_35_minutes" {
+  destroy_duration = "35m"
+
+  depends_on = [
+    google_compute_network_attachment.network_attachment
+  ]
+}
+
+resource "google_compute_network_attachment" "network_attachment" {
+  name                  = "{{index $.Vars "network_attachment_name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_MANUAL"
+
+  subnetworks = [
+    google_compute_subnetwork.subnetwork.id
+  ]
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  region        = "us-central1"
+  ip_cidr_range = "10.0.0.0/16"
+  network       = google_compute_network.network.id
+}
+
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+data "google_project" "project" {
+}

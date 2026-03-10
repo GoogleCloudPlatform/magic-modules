@@ -1,0 +1,72 @@
+package observability_test
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"org_id":              orgId,
+		"folder_display_name": folderDisplayName,
+		"location":            "us",
+	}
+	dataResourceName := "data.google_observability_folder_settings.settings"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObservabilityFolderSettings_datasource(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_folder_settings.settings"),
+				),
+			},
+		},
+	})
+}
+
+func testAccObservabilityFolderSettings_datasource(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "test" {
+	provider            = google-beta
+	display_name        = "%{folder_display_name}"
+	parent              = "organizations/%{org_id}"
+	deletion_protection = false
+}
+
+resource "time_sleep" "wait_for_folder" {
+	create_duration = "90s"
+	depends_on      = [google_folder.test]
+}
+
+resource "google_observability_folder_settings" "settings" {
+	provider     = google-beta
+	folder       = google_folder.test.folder_id
+	location     = "%{location}"
+	kms_key_name = ""
+	depends_on   = [time_sleep.wait_for_folder]
+}
+
+data "google_observability_folder_settings" "settings" {
+	provider   = google-beta
+	folder     = google_folder.test.folder_id
+	location   = "%{location}"
+	depends_on = [time_sleep.wait_for_folder]
+}
+`, context)
+}
+{{- end }}

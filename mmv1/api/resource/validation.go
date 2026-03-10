@@ -16,6 +16,6 @@ package resource
 // Support for schema ValidateFunc functionality.
 type Validation struct {
 	// Ensures the value matches this regex
-	Regex    string
-	Function string
+	Regex    string `yaml:"regex,omitempty"`
+	Function string `yaml:"function,omitempty"`
 }

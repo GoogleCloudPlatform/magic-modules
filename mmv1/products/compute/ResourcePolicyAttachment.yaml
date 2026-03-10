@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'ResourcePolicyAttachment'
+name: ResourcePolicyAttachment
 api_resource_type_kind: Instance
 description: |
   Adds existing resource policies to a compute instance. You can only add one policy
@@ -21,25 +21,12 @@ description: |
   This resource can be used instead of setting the resource_policy directly in the
   compute instance resource to avoid dependency issues when using instance-level IAM
   permissions.
-docs:
-id_format: '{{project}}/{{zone}}/{{instance}}/{{name}}'
-base_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
-self_link: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
-create_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/addResourcePolicies'
-delete_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies'
-delete_verb: 'POST'
+base_url: projects/{{project}}/zones/{{zone}}/instances/{{instance}}
 immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
+self_link: projects/{{project}}/zones/{{zone}}/instances/{{instance}}
+create_url: projects/{{project}}/zones/{{zone}}/instances/{{instance}}/addResourcePolicies
+delete_url: projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies
+delete_verb: POST
 identity:
   - name
 nested_query:
@@ -47,38 +34,41 @@ nested_query:
     - resourcePolicies
   is_list_of_ids: true
   modify_by_patch: false
+id_format: '{{project}}/{{zone}}/{{instance}}/{{name}}'
+async:
+  operation:
+    base_url: '{{op_id}}'
 custom_code:
-  encoder: 'templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl'
-  decoder: 'templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl'
+  encoder: templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl
+  decoder: templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl
+  pre_delete: templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl
 examples:
-  - name: 'compute_resource_policy_attachment_basic'
-    primary_resource_id: 'attachment'
+  - name: compute_resource_policy_attachment_basic
+    primary_resource_id: attachment
     vars:
-      instance_name: 'my-instance'
-      policy_name: 'my-resource-policy'
+      instance_name: my-instance
+      policy_name: my-resource-policy
 parameters:
-  - name: 'instance'
+  - name: instance
     type: ResourceRef
+    required: true
     description: |
       The name of the instance in which the resource policies are attached to.
     url_param_only: true
-    required: true
-    resource: 'Instance'
-    imports: 'name'
-  - name: 'zone'
+    resource: Instance
+    imports: name
+  - name: zone
     type: ResourceRef
-    description: 'A reference to the zone where the instance resides.'
+    description: A reference to the zone where the instance resides.
     url_param_only: true
-    required: false
+    resource: Zone
+    imports: name
     ignore_read: true
     default_from_api: true
-    resource: 'Zone'
-    imports: 'name'
 properties:
-  - name: 'name'
+  - name: name
     type: String
+    required: true
     description: |
       The resource policy to be attached to the instance for scheduling start/stop
       operations. Do not specify the self link.
-    required: true

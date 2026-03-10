@@ -28,9 +28,16 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 )
 
+var (
+	_ = fmt.Sprintf
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+)
+
 {{ if $.Res.TestSamples }}
-{{ $sample := $.FirstTestConfig }}
-{{ $step := $.FirstTestConfig }}
+{{ $config := $.Res.FirstTestConfig }}
+{{ $sample := $config.Sample }}
+{{ $step := $config.Step }}
 func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 	t.Parallel()
 
@@ -63,13 +70,13 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 			{
 				Config: testAcc{{ $step.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
 				Check: resource.ComposeTestCheckFunc(
-					{{- if gt (len ($.Res.IgnoreReadPropertiesStep $st)) 0 }}
+					{{- if gt (len ($.Res.IgnoreReadProperties $step)) 0 }}
 						acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 							"data.{{ $sample.ResourceType $.Res.TerraformName }}.default",
 							"{{ $sample.ResourceType $.Res.TerraformName }}.{{ $sample.PrimaryResourceId }}",
-							map[string]struct{}{
-								{{- range $prop := $.Res.IgnoreReadPropertiesStep $st }}
-								"{{ $prop }}": {},
+							[]string{
+								{{- range $prop := $.Res.IgnoreReadProperties $step }}
+								"{{ $prop }}",
 								{{- end }}
 							},
 						),

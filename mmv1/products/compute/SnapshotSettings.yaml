@@ -77,11 +77,7 @@ properties:
           locations listed in this field. Keys are Cloud Storage bucket locations.
           Only one location can be specified.
         key_name: 'location'
-        key_description: |
-          Name of the location. It should be one of the Cloud Storage buckets.
-          Only one location can be specified.
         value_type:
-          name: location
           type: NestedObject
           properties:
             - name: 'name'

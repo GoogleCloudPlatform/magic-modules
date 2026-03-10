@@ -19,4 +19,15 @@
 // Package {{ lower $.Name }} contains resources, datasources, etc. for the {{ lower $.DisplayName }} service.
 package {{ lower $.Name }}
 
+import (
+    "{{ $.ImportPath }}/registry"
+)
+
 const ProductName = "{{ lower $.Name }}"
+
+func init() {
+    registry.Product{
+        Name: "{{ lower $.Name }}",
+	    BaseUrl: "{{ $.Version.BaseUrl }}",
+    }.Register()
+}

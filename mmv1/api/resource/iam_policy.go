@@ -14,7 +14,7 @@
 package resource
 
 import (
-	"log"
+	"fmt"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
@@ -83,6 +83,9 @@ type IamPolicy struct {
 	// Resource name may need a custom diff suppress function. Default is to use
 	// CompareSelfLinkOrResourceName
 	CustomDiffSuppress *string `yaml:"custom_diff_suppress,omitempty"`
+
+	// ImportStateIDFuncs may use a custom template if default funcs don't work.
+	CustomImportStateIDFuncs string `yaml:"custom_import_state_id_funcs"`
 
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
@@ -173,19 +176,21 @@ func (p *IamPolicy) MarshalYAML() (interface{}, error) {
 	return (*iamPolicyAlias)(clone.(*IamPolicy)), nil
 }
 
-func (p *IamPolicy) Validate(rName string) {
+func (p *IamPolicy) Validate(rName string) (es []error) {
 	allowed := []string{"GET", "POST"}
 	if !slices.Contains(allowed, p.FetchIamPolicyVerb) {
-		log.Fatalf("Value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName))
 	}
 
 	allowed = []string{"POST", "PUT"}
 	if !slices.Contains(allowed, p.SetIamPolicyVerb) {
-		log.Fatalf("Value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName))
 	}
 
 	allowed = []string{"REQUEST_BODY", "QUERY_PARAM", "QUERY_PARAM_NESTED"}
 	if p.IamConditionsRequestType != "" && !slices.Contains(allowed, p.IamConditionsRequestType) {
-		log.Fatalf("Value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName))
 	}
+
+	return es
 }

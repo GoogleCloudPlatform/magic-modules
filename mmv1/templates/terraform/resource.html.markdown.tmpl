@@ -26,7 +26,7 @@ description: |-
 {{ $.FormatDocDescription $.Description false }}
 {{ if eq $.MinVersion "beta"}}
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 {{- end }}
 {{ if or $.References.Api $.References.Guides }}
 To get more information about {{$.Name}}, see:
@@ -56,7 +56,7 @@ To get more information about {{$.Name}}, see:
 {{- if $.SensitiveProps }}
 ~> **Warning:** All arguments including the following potentially sensitive
 values will be stored in the raw state as plain text: {{ $.SensitivePropsToString }}.
-[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
+[Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 {{ end }}
 {{- if $.WriteOnlyProps }}
 ~> **Note:**  All arguments marked as write-only values will not be stored in the state: {{ $.WriteOnlyPropsToString }}.

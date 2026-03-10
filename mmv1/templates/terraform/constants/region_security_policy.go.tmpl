@@ -1,4 +1,4 @@
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 func resourceComputeRegionSecurityPolicySpecRulesDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
     oldCount, newCount := d.GetChange("rules.#")
     var count int

@@ -1,0 +1,41 @@
+resource "google_folder" "test_folder" {
+  provider            = "google-beta"
+  display_name        = "tf-test-%{random_suffix}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+# Wait for the folder to be created and recognized by the Observability API
+resource "time_sleep" "wait_for_settings_propagation" {
+  create_duration = "90s"
+  depends_on      = [google_folder.test_folder]
+}
+
+data "google_observability_folder_settings" "settings_data" {
+  provider   = "google-beta"
+  folder     = google_folder.test_folder.folder_id
+  location   = "us"
+  depends_on = [time_sleep.wait_for_settings_propagation]
+}
+
+# Add a delay to allow the service account to propagate
+resource "time_sleep" "wait_for_sa_propagation" {
+  create_duration = "90s"
+  depends_on      = [data.google_observability_folder_settings.settings_data]
+}
+
+resource "google_kms_crypto_key_iam_member" "iam" {
+  provider      = "google-beta"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_observability_folder_settings.settings_data.service_account_id}"
+  depends_on    = [time_sleep.wait_for_sa_propagation]
+}
+
+resource "google_observability_folder_settings" "primary" {
+  provider     = "google-beta"
+  location     = "us"
+  folder       = google_folder.test_folder.folder_id
+  kms_key_name = "{{index $.Vars "kms_key_name"}}"
+  depends_on   = [google_kms_crypto_key_iam_member.iam]
+}

@@ -13,13 +13,14 @@
 
 ---
 name: 'Lien'
+api_resource_field: "."
 description:
   A Lien represents an encumbrance on the actions that can be performed on a
   resource.
 references:
   guides:
-    'Create a Lien': 'https://cloud.google.com/resource-manager/docs/project-liens'
-  api: 'https://cloud.google.com/resource-manager/reference/rest'
+    'Create a Lien': 'https://docs.cloud.google.com/resource-manager/docs/project-liens'
+  api: 'https://docs.cloud.google.com/resource-manager/reference/rest'
 docs:
 id_format: '{{name}}'
 base_url: 'liens'

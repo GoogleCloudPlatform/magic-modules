@@ -666,7 +666,7 @@ properties:
     description: |
       Optional. Configuration for publishing transcription intermediate results. Event will be sent in format of ConversationEvent. If configured, the following information will be populated as ConversationEvent Pub/Sub message attributes: - "participant_id" - "participantRole" - "message_id"
     properties:
-      - type: string
+      - type: String
         name: 'topic'
         description: |
           Name of the Pub/Sub topic to publish conversation events like CONVERSATION_STARTED as serialized ConversationEvent protos.

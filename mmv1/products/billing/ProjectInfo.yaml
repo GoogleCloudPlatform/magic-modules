@@ -12,44 +12,38 @@
 # limitations under the License.
 
 ---
-name: 'ProjectInfo'
+name: ProjectInfo
 api_resource_type_kind: ProjectBillingInfo
 description: |
   Billing information for a project.
 references:
   guides:
-    'Enable, disable, or change billing for a project': 'https://cloud.google.com/billing/docs/how-to/modify-project'
-  api: 'https://cloud.google.com/billing/docs/reference/rest/v1/projects'
-docs:
-id_format: 'projects/{{project}}'
-base_url: 'projects/{{project}}/billingInfo'
-cai_asset_name_format: 'projects/{{project}}/billingInfo'
-create_verb: 'PUT'
-delete_verb: 'PUT'
+    Enable, disable, or change billing for a project: https://cloud.google.com/billing/docs/how-to/modify-project
+  api: https://cloud.google.com/billing/docs/reference/rest/v1/projects
+base_url: projects/{{project}}/billingInfo
+create_verb: PUT
+delete_verb: PUT
+id_format: projects/{{project}}
 import_format:
-  - 'projects/{{%project}}'
+  - projects/{{%project}}
   - '{{%project}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+cai_asset_name_format: projects/{{project}}/billingInfo
 custom_code:
-  encoder: 'templates/terraform/encoders/billing_project_info.go.tmpl'
-  decoder: 'templates/terraform/decoders/billing_project_info.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/billing_project_info.go.tmpl'
+  encoder: templates/terraform/encoders/billing_project_info.go.tmpl
+  decoder: templates/terraform/decoders/billing_project_info.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/billing_project_info.go.tmpl
 examples:
-  - name: 'billing_project_info_basic'
-    primary_resource_id: 'default'
-    test_env_vars:
-      billing_account: 'BILLING_ACCT'
-      org_id: 'ORG_ID'
+  - name: billing_project_info_basic
+    primary_resource_id: default
     exclude_import_test: true
-parameters:
+    test_env_vars:
+      billing_account: BILLING_ACCT
+      org_id: ORG_ID
 properties:
-  - name: 'billing_account'
+  - name: billing_account
     type: String
+    required: true
     description: |
       The ID of the billing account associated with the project, if
       any. Set to empty string to disable billing for the project.
       For example, `"012345-567890-ABCDEF"` or `""`.
-    required: true

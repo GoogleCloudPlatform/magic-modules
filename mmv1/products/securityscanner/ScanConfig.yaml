@@ -12,186 +12,180 @@
 # limitations under the License.
 
 ---
-name: 'ScanConfig'
+name: ScanConfig
 description: |
   A ScanConfig resource contains the configurations to launch a scan.
-min_version: 'beta'
 references:
   guides:
-    'Using Cloud Security Scanner': 'https://cloud.google.com/security-scanner/docs/scanning'
-  api: 'https://cloud.google.com/security-scanner/docs/reference/rest/v1beta/projects.scanConfigs'
-docs:
-base_url: 'projects/{{project}}/scanConfigs'
+    Using Cloud Security Scanner: https://cloud.google.com/security-scanner/docs/scanning
+  api: https://cloud.google.com/security-scanner/docs/reference/rest/v1beta/projects.scanConfigs
+base_url: projects/{{project}}/scanConfigs
+min_version: beta
 self_link: '{{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+  custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
 examples:
-  - name: 'scan_config_basic'
-    primary_resource_id: 'scan-config'
-    min_version: 'beta'
+  - name: scan_config_basic
+    primary_resource_id: scan-config
+    min_version: beta
     vars:
-      address_name: 'scan-basic-static-ip'
-      scan_config_name: 'terraform-scan-config'
-parameters:
+      address_name: scan-basic-static-ip
+      scan_config_name: terraform-scan-config
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       A server defined name for this index. Format:
       `projects/{{project}}/scanConfigs/{{server_generated_id}}`
-    min_version: 'beta'
     output: true
-  - name: 'displayName'
+    min_version: beta
+  - name: displayName
     type: String
+    required: true
     description: |
       The user provider display name of the ScanConfig.
-    min_version: 'beta'
-    required: true
-  - name: 'maxQps'
+    min_version: beta
+  - name: maxQps
     type: Integer
+    default_value: 15
     description: |
       The maximum QPS during scanning. A valid value ranges from 5 to 20 inclusively.
       Defaults to 15.
-    min_version: 'beta'
+    min_version: beta
     validation:
-      function: 'validation.IntBetween(5, 20)'
-    default_value: 15
-  - name: 'startingUrls'
+      function: validation.IntBetween(5, 20)
+  - name: startingUrls
     type: Array
+    required: true
     description: |
       The starting URLs from which the scanner finds site pages.
-    min_version: 'beta'
-    required: true
+    min_version: beta
     item_type:
       type: String
-  - name: 'authentication'
+  - name: authentication
     type: NestedObject
     description: |
       The authentication configuration.
       If specified, service will use the authentication configuration during scanning.
-    min_version: 'beta'
+    min_version: beta
     properties:
-      - name: 'googleAccount'
+      - name: googleAccount
         type: NestedObject
         description: |
           Describes authentication configuration that uses a Google account.
-        min_version: 'beta'
+        min_version: beta
         at_least_one_of:
-          - 'authentication.0.google_account'
-          - 'authentication.0.custom_account'
+          - authentication.0.google_account
+          - authentication.0.custom_account
         properties:
-          - name: 'username'
+          - name: username
             type: String
+            required: true
             description: |
               The user name of the Google account.
-            min_version: 'beta'
-            required: true
-          - name: 'password'
+            min_version: beta
+          - name: password
             type: String
+            required: true
             description: |
               The password of the Google account. The credential is stored encrypted
               in GCP.
-            min_version: 'beta'
-            required: true
             immutable: true
+            min_version: beta
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_custom_password.go.tmpl'
-      - name: 'customAccount'
+            custom_flatten: templates/terraform/custom_flatten/scan_config_auth_custom_password.go.tmpl
+      - name: customAccount
         type: NestedObject
         description: |
           Describes authentication configuration that uses a custom account.
-        min_version: 'beta'
+        min_version: beta
         at_least_one_of:
-          - 'authentication.0.google_account'
-          - 'authentication.0.custom_account'
+          - authentication.0.google_account
+          - authentication.0.custom_account
         properties:
-          - name: 'username'
+          - name: username
             type: String
+            required: true
             description: |
               The user name of the custom account.
-            min_version: 'beta'
-            required: true
-          - name: 'password'
+            min_version: beta
+          - name: password
             type: String
+            required: true
             description: |
               The password of the custom account. The credential is stored encrypted
               in GCP.
-            min_version: 'beta'
-            required: true
             immutable: true
+            min_version: beta
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_google_password.go.tmpl'
-          - name: 'loginUrl'
+            custom_flatten: templates/terraform/custom_flatten/scan_config_auth_google_password.go.tmpl
+          - name: loginUrl
             type: String
+            required: true
             description: |
               The login form URL of the website.
-            min_version: 'beta'
-            required: true
-  - name: 'userAgent'
+            min_version: beta
+  - name: userAgent
     type: Enum
+    default_value: CHROME_LINUX
     description: Type of the user agents used for scanning
-    min_version: 'beta'
-    default_value: "CHROME_LINUX"
+    min_version: beta
     enum_values:
-      - 'USER_AGENT_UNSPECIFIED'
-      - 'CHROME_LINUX'
-      - 'CHROME_ANDROID'
-      - 'SAFARI_IPHONE'
-  - name: 'blacklistPatterns'
+      - USER_AGENT_UNSPECIFIED
+      - CHROME_LINUX
+      - CHROME_ANDROID
+      - SAFARI_IPHONE
+  - name: blacklistPatterns
     type: Array
     description: |
       The blacklist URL patterns as described in
       https://cloud.google.com/security-scanner/docs/excluded-urls
-    min_version: 'beta'
+    min_version: beta
     item_type:
       type: String
-  - name: 'schedule'
+  - name: schedule
     type: NestedObject
     description: |
       The schedule of the ScanConfig
-    min_version: 'beta'
+    min_version: beta
     properties:
-      - name: 'scheduleTime'
+      - name: scheduleTime
         type: Time
         description: |
           A timestamp indicates when the next run will be scheduled. The value is refreshed
           by the server after each run. If unspecified, it will default to current server time,
           which means the scan will be scheduled to start immediately.
-        min_version: 'beta'
-      - name: 'intervalDurationDays'
+        min_version: beta
+      - name: intervalDurationDays
         type: Integer
+        required: true
         description: |
           The duration of time between executions in days
-        min_version: 'beta'
-        required: true
-  - name: 'targetPlatforms'
+        min_version: beta
+  - name: targetPlatforms
     type: Array
     description: |
       Set of Cloud Platforms targeted by the scan. If empty, APP_ENGINE will be used as a default.
-    min_version: 'beta'
+    min_version: beta
     item_type:
       type: Enum
       description: |
         This field only has a name and description because of MM
         limitations. It should not appear in downstreams.
       enum_values:
-        - 'APP_ENGINE'
-        - 'COMPUTE'
-  - name: 'exportToSecurityCommandCenter'
+        - APP_ENGINE
+        - COMPUTE
+  - name: exportToSecurityCommandCenter
     type: Enum
+    default_value: ENABLED
     description: |
       Controls export of scan configurations and results to Cloud Security Command Center.
-    min_version: 'beta'
-    default_value: "ENABLED"
+    min_version: beta
     enum_values:
-      - 'ENABLED'
-      - 'DISABLED'
+      - ENABLED
+      - DISABLED

@@ -1,0 +1,156 @@
+package firebaseailogic_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"google.golang.org/api/googleapi"
+)
+
+var (
+	_ = fmt.Sprintf
+	_ = log.Print
+	_ = strconv.Atoi
+	_ = strings.Trim
+	_ = time.Now
+	_ = resource.TestMain
+	_ = terraform.NewState
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+	_ = transport_tpg.Config{}
+	_ = googleapi.Error{}
+)
+
+func TestAccFirebaseAILogicConfig_firebaseailogicConfigUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy:             testAccCheckFirebaseAILogicConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(context, "key1", 0.5, "ALL"),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"generative_language_config.0.api_key", "generative_language_config.0.api_key_wo", "location"},
+			},
+			{
+				Config: testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(context, "key2", 1.0, "NONE"),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"generative_language_config.0.api_key", "generative_language_config.0.api_key_wo", "location"},
+			},
+		},
+	})
+}
+
+func testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(
+	context map[string]interface{}, apiKeyId string, samplingRate float32, telemetryMode string) string {
+	context["api_key_id"] = apiKeyId
+	context["sampling_rate"] = samplingRate
+	context["telemetry_mode"] = telemetryMode
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider = google-beta
+
+  project_id      = "update%{random_suffix}"
+  name            = "Firebase Project"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_firebase_project" "default" {
+  provider = google-beta
+
+  project  = google_project.project.project_id
+}
+
+resource "google_project_service" "firebase" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = "firebase.googleapis.com"
+}
+
+resource "google_project_service" "ailogic" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = "firebasevertexai.googleapis.com"
+}
+
+resource "google_apikeys_key" "gemini" {
+  provider  = google-beta
+  project  = google_project.project.project_id
+
+  name         = "tf-test-%{api_key_id}-%{random_suffix}"
+  display_name = "Gemini Developer API key"
+
+  restrictions {
+    api_targets {
+      service = "generativelanguage.googleapis.com"
+    }
+  }
+}
+
+# It takes a while for permissions to propagate
+# If your Terraform setup has a retry mechanism, this wait is unnecessary
+resource "time_sleep" "wait_30s" {
+  depends_on = [
+    google_project_service.ailogic,
+    google_project_service.firebase
+  ]
+
+  create_duration = "30s"
+}
+
+resource "google_firebase_ai_logic_config" "default" {
+  provider  = google-beta
+  project   = google_firebase_project.default.project
+  location  = "global"
+
+  generative_language_config {
+    api_key = google_apikeys_key.gemini.key_string
+  }
+
+  telemetry_config {
+    mode = "%{telemetry_mode}"
+    sampling_rate = %{sampling_rate}
+  }
+
+  depends_on = [time_sleep.wait_30s]
+}
+`, context)
+}
+
+{{ end }}

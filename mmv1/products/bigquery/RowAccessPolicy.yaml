@@ -16,47 +16,46 @@ name: RowAccessPolicy
 description: Represents access on a subset of rows on the specified table, defined by its filter predicate. Access to the subset of rows is controlled by its IAM policy.
 base_url: projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAccessPolicies
 self_link: projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAccessPolicies/{{policy_id}}
-id_format: projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAccessPolicies/{{policy_id}}
 import_format:
   - projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAccessPolicies/{{policy_id}}
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/bigquery_row_access_policy.go.tmpl'
+  pre_delete: templates/terraform/pre_delete/bigquery_row_access_policy.go.tmpl
 examples:
-  - name: 'bigquery_row_access_policy_basic'
-    primary_resource_id: 'example'
+  - name: bigquery_row_access_policy_basic
+    primary_resource_id: example
     vars:
-      dataset_id: 'dataset_id'
-      table_id: 'table_id'
-      policy_id: 'policy_id'
-parameters:
+      dataset_id: dataset_id
+      policy_id: policy_id
+      table_id: table_id
 properties:
   - name: rowAccessPolicyReference
     type: NestedObject
-    description: Id path of a row access policy.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/bigquery_row_access_policy_ref.go.tmpl'
+    description: Id path of a row access policy.
     flatten_object: true
+    custom_expand: templates/terraform/custom_expand/bigquery_row_access_policy_ref.go.tmpl
     properties:
       - name: datasetId
         type: String
-        description: The ID of the dataset containing this row access policy.
         required: true
+        description: The ID of the dataset containing this row access policy.
         immutable: true
       - name: tableId
         type: String
-        description: The ID of the table containing this row access policy.
         required: true
+        description: The ID of the table containing this row access policy.
         immutable: true
       - name: policyId
         type: String
+        required: true
         description: |-
           The ID of the row access policy. The ID must contain only
           letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum
           length is 256 characters.
-        required: true
         immutable: true
   - name: filterPredicate
     type: String
+    required: true
     description: |-
       A SQL boolean expression that represents the rows defined by this row
       access policy, similar to the boolean expression in a WHERE clause of a
@@ -68,7 +67,6 @@ properties:
       date_field = CAST('2019-9-27' as DATE)
       nullable_field is not NULL
       numeric_field BETWEEN 1.0 AND 5.0
-    required: true
   - name: creationTime
     type: String
     description: |-
@@ -106,6 +104,6 @@ properties:
       the internet, including authenticated and unauthenticated users. Because
       BigQuery requires authentication before a user can access the service,
       allUsers includes only authenticated users.
+    ignore_read: true
     item_type:
       type: String
-    ignore_read: true

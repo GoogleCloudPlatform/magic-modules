@@ -12,71 +12,64 @@
 # limitations under the License.
 
 ---
-name: 'DomainMapping'
-kind: 'DomainMapping'
-description: |-
-  Resource to hold the state and status of a user's domain mapping.
+name: DomainMapping
+description: Resource to hold the state and status of a user's domain mapping.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/run/docs/mapping-custom-domains'
-  api: 'https://cloud.google.com/run/docs/reference/rest/v1/projects.locations.domainmappings'
-docs:
-id_format: 'locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}'
-base_url: 'apis/domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings'
-cai_base_url: 'projects/{{project}}/locations/{{location}}/DomainMappings'
-cai_asset_name_format: 'projects/{{project}}/locations/{{location}}/domainmappings/{{name}}'
+    Official Documentation: https://cloud.google.com/run/docs/mapping-custom-domains
+  api: https://cloud.google.com/run/docs/reference/rest/v1/projects.locations.domainmappings
+base_url: apis/domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
 immutable: true
+cai_base_url: projects/{{project}}/locations/{{location}}/DomainMappings
+kind: DomainMapping
+id_format: locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
 import_format:
-  - 'locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  type: 'PollAsync'
-  check_response_func_existence: 'PollCheckKnativeStatusFunc(res)'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
-  suppress_error: false
-  target_occurrences: 1
-  actions: ['create', 'update']
-custom_code:
-  constants: 'templates/terraform/constants/cloud_run_domain_mapping.go.tmpl'
-  encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl'
-  decoder: 'templates/terraform/decoders/cloud_run.go.tmpl'
+  - locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
 custom_diff:
-  - 'hasMetadata'
+  - hasMetadata
+async:
+  type: PollAsync
+  actions:
+    - create
+    - update
+  check_response_func_existence: PollCheckKnativeStatusFunc(res)
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  target_occurrences: 1
 error_retry_predicates:
-
-  - 'transport_tpg.IsCloudRunCreationConflict'
+  - transport_tpg.IsCloudRunCreationConflict
 schema_version: 1
 state_upgraders: true
+cai_asset_name_format: projects/{{project}}/locations/{{location}}/domainmappings/{{name}}
+custom_code:
+  encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
+  decoder: templates/terraform/decoders/cloud_run.go.tmpl
+  constants: templates/terraform/constants/cloud_run_domain_mapping.go.tmpl
 examples:
-  - name: 'cloud_run_domain_mapping_basic'
-    primary_resource_id: 'default'
+  - name: cloud_run_domain_mapping_basic
+    primary_resource_id: default
     vars:
-      cloud_run_service_name: 'cloudrun-srv'
+      cloud_run_service_name: cloudrun-srv
     test_env_vars:
-      namespace: 'PROJECT_NAME'
+      namespace: PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
+    required: true
     description: The location of the cloud run instance. eg us-central1
     url_param_only: true
-    required: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
-    description: |-
-      Name should be a [verified](https://support.google.com/webmasters/answer/9008080) domain
-    url_param_only: true
     required: true
+    description: Name should be a [verified](https://support.google.com/webmasters/answer/9008080) domain
     immutable: true
-  - name: 'status'
+    url_param_only: true
+  - name: status
     type: NestedObject
     description: The current status of the DomainMapping.
     output: true
     properties:
-      - name: 'conditions'
+      - name: conditions
         type: Array
         description: |-
           Array of observed DomainMappingConditions, indicating the current state
@@ -85,31 +78,29 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'message'
+            - name: message
               type: String
-              description: |-
-                Human readable message indicating details about the current status.
+              description: Human readable message indicating details about the current status.
               output: true
-            - name: 'status'
+            - name: status
               type: String
               description: Status of the condition, one of True, False, Unknown.
               output: true
-            - name: 'reason'
+            - name: reason
               type: String
-              description: |-
-                One-word CamelCase reason for the condition's current status.
+              description: One-word CamelCase reason for the condition's current status.
               output: true
-            - name: 'type'
+            - name: type
               type: String
               description: Type of domain mapping condition.
               output: true
-      - name: 'observedGeneration'
+      - name: observedGeneration
         type: Integer
         description: |-
           ObservedGeneration is the 'Generation' of the DomainMapping that
           was last processed by the controller.
         output: true
-      - name: 'resourceRecords'
+      - name: resourceRecords
         type: Array
         description: |-
           The resource records required to configure this domain mapping. These
@@ -118,75 +109,74 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'type'
+            - name: type
               type: Enum
               description: 'Resource record type. Example: `AAAA`.'
               enum_values:
-                - 'A'
-                - 'AAAA'
-                - 'CNAME'
-            - name: 'rrdata'
+                - A
+                - AAAA
+                - CNAME
+            - name: rrdata
               type: String
               description: |-
                 Data for this record. Values vary by record type, as defined in RFC 1035
                 (section 5) and RFC 1034 (section 3.6.1).
               output: true
-            - name: 'name'
+            - name: name
               type: String
               description: |-
                 Relative name of the object affected by this record. Only applicable for
                 `CNAME` records. Example: 'www'.
               output: true
-      - name: 'mappedRouteName'
+      - name: mappedRouteName
         type: String
         description: The name of the route that the mapping currently points to.
         output: true
-  - name: 'spec'
+  - name: spec
     type: NestedObject
-    description: The spec for this DomainMapping.
     required: true
+    description: The spec for this DomainMapping.
     properties:
-      - name: 'forceOverride'
+      - name: forceOverride
         type: Boolean
         description: |-
           If set, the mapping will override any mapping set before this spec was set.
           It is recommended that the user leaves this empty to receive an error
           warning about a potential conflict and only set it once the respective UI
           has given such a warning.
-        custom_flatten: 'templates/terraform/custom_flatten/cloudrun_ignore_force_override.go.tmpl'
-      - name: 'routeName'
+        custom_flatten: templates/terraform/custom_flatten/cloudrun_ignore_force_override.go.tmpl
+      - name: routeName
         type: String
+        required: true
         description: |-
           The name of the Cloud Run Service that this DomainMapping applies to.
           The route must exist.
-        required: true
-        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
-      - name: 'certificateMode'
+        diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.tmpl
+      - name: certificateMode
         type: Enum
+        default_value: AUTOMATIC
         description: The mode of the certificate.
-        default_value: "AUTOMATIC"
         enum_values:
-          - 'NONE'
-          - 'AUTOMATIC'
-  - name: 'metadata'
+          - NONE
+          - AUTOMATIC
+  - name: metadata
     type: NestedObject
     description: Metadata associated with this DomainMapping.
     default_from_api: true
     properties:
-      - name: 'labels'
+      - name: labels
         type: KeyValueLabels
         description: |-
           Map of string keys and values that can be used to organize and categorize
           (scope and select) objects. May match selectors of replication controllers
           and routes.
           More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
-      - name: 'generation'
+      - name: generation
         type: Integer
-        description: |-
-          A sequence number representing a specific generation of the desired state.
+        description: A sequence number representing a specific generation of the desired state.
         output: true
-      - name: 'resourceVersion'
+      - name: resourceVersion
         type: String
         description: |-
           An opaque value that represents the internal version of this object that
@@ -198,12 +188,11 @@ properties:
           More info:
           https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency
         output: true
-      - name: 'selfLink'
+      - name: selfLink
         type: String
-        description: |-
-          SelfLink is a URL representing this object.
+        description: SelfLink is a URL representing this object.
         output: true
-      - name: 'uid'
+      - name: uid
         type: String
         description: |-
           UID is a unique id generated by the server on successful creation of a resource and is not
@@ -211,14 +200,14 @@ properties:
 
           More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
         output: true
-      - name: 'namespace'
+      - name: namespace
         type: String
+        required: true
         description: |-
           In Cloud Run the namespace must be equal to either the
           project ID or project number.
-        required: true
-        custom_flatten: 'templates/terraform/custom_flatten/set_to_project.go.tmpl'
-      - name: 'annotations'
+        custom_flatten: templates/terraform/custom_flatten/set_to_project.go.tmpl
+      - name: annotations
         type: KeyValueAnnotations
         description: |-
           Annotations is a key value map stored with a resource that

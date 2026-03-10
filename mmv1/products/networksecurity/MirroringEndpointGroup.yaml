@@ -55,7 +55,6 @@ examples:
   - name: 'network_security_mirroring_endpoint_group_broker_basic'
     config_path: 'templates/terraform/examples/network_security_mirroring_endpoint_group_broker_basic.tf.tmpl'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       network_name: 'example-network'
       deployment_group_id: 'example-dg'
@@ -118,7 +117,6 @@ properties:
       connected to, for example:
       `projects/123456789/locations/global/mirroringDeploymentGroups/my-dg`.
       See https://google.aip.dev/124.
-    min_version: 'beta'
     immutable: true
     item_type:
       type: String
@@ -155,7 +153,6 @@ properties:
       Possible values:
       DIRECT
       BROKER
-    min_version: 'beta'
     default_value: 'DIRECT'
     immutable: true
   - name: description

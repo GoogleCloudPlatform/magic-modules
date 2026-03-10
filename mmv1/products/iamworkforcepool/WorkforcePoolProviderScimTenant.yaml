@@ -23,7 +23,7 @@ references:
 base_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants'
 self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}'
 create_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants?workforcePoolProviderScimTenantId={{scim_tenant_id}}'
-
+delete_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}?hardDelete={{hard_delete}}'
 import_format:
   - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}'
 update_verb: 'PATCH'
@@ -42,6 +42,7 @@ examples:
       workforce_pool_id: 'example-pool'
       provider_id: 'example-prvdr'
       scim_tenant_id: 'example-scim-tenant'
+      hard_delete: 'true'
     test_env_vars:
       org_id: 'ORG_ID'
 properties:
@@ -124,3 +125,8 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: 'hardDelete'
+    type: Boolean
+    description: Deletes the SCIM tenant immediately. This operation cannot be undone.
+    url_param_only: true
+    default_value: false

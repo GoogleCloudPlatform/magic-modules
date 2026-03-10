@@ -649,6 +649,11 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 dataset_id = "dataset"
                 table_id = "table"
             }
+            sample_findings_table {
+                project_id = "%{project}"
+                dataset_id = "dataset"
+                table_id = "sample-table"
+            }
         }
     }
     actions { 
@@ -689,7 +694,10 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
         }
     }
     actions {
-	publish_to_dataplex_catalog {}
+        publish_to_dataplex_catalog {}
+    }
+    actions {
+        publish_to_scc {}
     }
     inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 	depends_on = [
@@ -828,6 +836,9 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			folder_id = 123
 		}
 	}
+    actions {
+        publish_to_chronicle {}
+    }
     inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 	status = "PAUSED"
 }
@@ -1119,6 +1130,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
         big_query_target {
             filter {
                 table_reference {
+                    project_id = "%{project}"
                     dataset_id = google_bigquery_dataset.default.dataset_id
                     table_id = google_bigquery_table.default.table_id
 				}
@@ -1269,6 +1281,23 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
         }
     }
 }
+resource "google_project_iam_member" "tag_role" {
+    project = "%{project}"
+    role    = "roles/resourcemanager.tagViewer"
+    member = "serviceAccount:service-${data.google_project.project.number}@dlp-api.iam.gserviceaccount.com"
+}
+data "google_project" "project" {
+    project_id = "%{project}"
+}
+resource "google_tags_tag_key" "tag_key" {
+    parent = "projects/${data.google_project.project.number}"
+    short_name = "tf_test_environment%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+    parent = "tagKeys/${google_tags_tag_key.tag_key.name}"
+    short_name = "tf_test_prod%{random_suffix}"
+}
 resource "google_data_loss_prevention_discovery_config" "basic" {
     parent = "projects/%{project}/locations/%{location}"
     location = "%{location}"
@@ -1283,6 +1312,11 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                                 project_id_regex = "foo-project"
                                 bucket_name_regex = "bucket"
                             }
+                        }
+                    }
+                    include_tags {
+                        tag_filters {
+                            namespaced_tag_key = "%{project}/tf_test_environment%{random_suffix}"
                         }
                     }
                 }
@@ -1315,6 +1349,11 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                             }
                         }
                     }
+                    include_tags {
+                        tag_filters {
+                            namespaced_tag_value = "%{project}/tf_test_environment%{random_suffix}/tf_test_prod%{random_suffix}"
+                        }
+                    }
                 }
             }
             disabled {}
@@ -1334,6 +1373,11 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
         }
     }
     inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+    depends_on = [
+        google_project_iam_member.tag_role,
+        google_tags_tag_key.tag_key,
+        google_tags_tag_value.tag_value,
+	]
 }
 `, context)
 }

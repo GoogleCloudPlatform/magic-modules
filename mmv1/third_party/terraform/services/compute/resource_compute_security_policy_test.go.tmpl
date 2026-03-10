@@ -295,7 +295,6 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {{- if ne $.TargetVersionName "ga" }}
 			// Add request_body_inspection_size value
 			{
 				Config: testAccComputeSecurityPolicy_withAdvancedOptionsConfig_update4(spName),
@@ -305,7 +304,6 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {{- end }}
 			{
 				Config: testAccComputeSecurityPolicy_basic(spName, "CLOUD_ARMOR"),
 			},
@@ -1517,13 +1515,10 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccComputeSecurityPolicy_withAdvancedOptionsConfig_update4(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
   name        = "%s"
-  description = "updated description changing json_parsing to STANDARD_WITH_GRAPHQL"
-
   advanced_options_config {
     json_parsing = "STANDARD_WITH_GRAPHQL"
     json_custom_config {
@@ -1539,7 +1534,6 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
-{{- end }}
 
 func testAccComputeSecurityPolicy_withoutAdaptiveProtection(spName string) string {
 	return fmt.Sprintf(`

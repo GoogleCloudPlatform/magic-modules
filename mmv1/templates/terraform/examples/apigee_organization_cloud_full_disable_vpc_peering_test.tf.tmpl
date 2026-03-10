@@ -38,7 +38,7 @@ resource "google_project_service" "kms" {
 }
 
 resource "time_sleep" "wait_for_services" {
-  create_duration = "120s"
+  create_duration = "300s"
   depends_on = [google_project_service.kms]
 }
 

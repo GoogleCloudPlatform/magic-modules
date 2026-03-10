@@ -49,6 +49,7 @@ iam_policy:
     - '{{membership_id}}'
 custom_code:
   constants: 'templates/terraform/constants/gke_hub_membership_diff.go.tmpl'
+include_in_tgc_next: true
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 schema_version: 1
@@ -56,7 +57,6 @@ state_upgraders: true
 examples:
   - name: 'gkehub_membership_regional'
     primary_resource_id: 'membership'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
       cluster_name: 'basic-cluster'
@@ -70,7 +70,6 @@ examples:
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
   - name: 'gkehub_membership_basic'
     primary_resource_id: 'membership'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
       cluster_name: 'basic-cluster'

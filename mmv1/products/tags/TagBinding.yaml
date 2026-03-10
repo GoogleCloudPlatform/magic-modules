@@ -19,8 +19,8 @@ description:
   the TagValue is applied to all the descendants of the cloud resource.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
-  api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagBindings'
+    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+  api: 'https://docs.cloud.google.com/resource-manager/reference/rest/v3/tagBindings'
 docs:
 id_format: 'tagBindings/{{name}}'
 base_url: 'tagBindings'
@@ -44,13 +44,10 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-nested_query:
-  keys:
-    - tagBindings
-  is_list_of_ids: false
-  modify_by_patch: false
 custom_code:
   custom_import: 'templates/terraform/custom_import/tags_tag_binding.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/tags_tag_binding.go.tmpl'
+  post_read: 'templates/terraform/post_read/tags_tag_binding.go.tmpl'
 examples:
   - name: 'tag_binding_basic'
     primary_resource_id: 'binding'
@@ -65,12 +62,23 @@ examples:
       'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
       'project_id': '"tf-test-" + acctest.RandString(t, 10)'
     exclude_test: true
+  - name: 'tag_binding_using_dynamic_tag_value'
+    primary_resource_id: 'binding'
+    vars:
+      key_short_name: 'keyname'
+      project_id: 'project_id'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    test_vars_overrides:
+      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'project_id': '"tf-test-" + acctest.RandString(t, 10)'
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'
     type: String
     description: |
-      The generated id for the TagBinding. This is a string of the form: `tagBindings/{full-resource-name}/{tag-value-name}`
+      The generated id for the TagBinding. This is a string of the form `tagBindings/{full-resource-name}/{tag-value-name}` or `tagBindings/{full-resource-name}/{tag-key-name}`
     output: true
     custom_flatten: 'templates/terraform/custom_flatten/tags_tag_binding_name.tmpl'
   - name: 'parent'
@@ -81,5 +89,6 @@ properties:
   - name: 'tagValue'
     type: String
     description: |
-      The TagValue of the TagBinding. Must be of the form tagValues/456.
+      The TagValue of the TagBinding. Must be either in id format `tagValues/{tag-value-id}`, or namespaced format `{parent-id}/{tag-key-short-name}/{tag-value-short-name}`.
     required: true
+    ignore_read: true

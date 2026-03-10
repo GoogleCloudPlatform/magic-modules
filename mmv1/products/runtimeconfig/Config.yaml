@@ -35,7 +35,6 @@ exclude_tgc: true
 examples:
   - name: 'runtimeconfig_config_basic'
     primary_resource_id: 'config'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       config_name: 'my-config'

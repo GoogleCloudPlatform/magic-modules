@@ -1,0 +1,368 @@
+{
+    "configuration": {
+        "provider_config": {
+            "google": {
+                "full_name": "registry.terraform.io/hashicorp/google",
+                "name": "google"
+            }
+        },
+        "root_module": {
+            "resources": [
+                {
+                    "address": "google_compute_disk.primary",
+                    "expressions": {
+                        "name": {
+                            "constant_value": "async-test-disk"
+                        },
+                        "physical_block_size_bytes": {
+                            "constant_value": 4096
+                        },
+                        "type": {
+                            "constant_value": "pd-ssd"
+                        },
+                        "zone": {
+                            "constant_value": "us-central1-a"
+                        }
+                    },
+                    "mode": "managed",
+                    "name": "primary",
+                    "provider_config_key": "google",
+                    "schema_version": 0,
+                    "type": "google_compute_disk"
+                },
+                {
+                    "address": "google_compute_disk.secondary",
+                    "expressions": {
+                        "async_primary_disk": [
+                            {
+                                "disk": {
+                                    "references": [
+                                        "google_compute_disk.primary.id",
+                                        "google_compute_disk.primary"
+                                    ]
+                                }
+                            }
+                        ],
+                        "name": {
+                            "constant_value": "async-secondary-test-disk"
+                        },
+                        "physical_block_size_bytes": {
+                            "constant_value": 4096
+                        },
+                        "type": {
+                            "constant_value": "pd-ssd"
+                        },
+                        "zone": {
+                            "constant_value": "us-east1-c"
+                        }
+                    },
+                    "mode": "managed",
+                    "name": "secondary",
+                    "provider_config_key": "google",
+                    "schema_version": 0,
+                    "type": "google_compute_disk"
+                }
+            ]
+        }
+    },
+    "errored": false,
+    "format_version": "1.2",
+    "planned_values": {
+        "root_module": {
+            "resources": [
+                {
+                    "address": "google_compute_disk.primary",
+                    "mode": "managed",
+                    "name": "primary",
+                    "provider_name": "registry.terraform.io/hashicorp/google",
+                    "schema_version": 0,
+                    "sensitive_values": {
+                        "async_primary_disk": [],
+                        "disk_encryption_key": [],
+                        "effective_labels": {},
+                        "guest_os_features": [],
+                        "licenses": [],
+                        "params": [],
+                        "source_image_encryption_key": [],
+                        "source_snapshot_encryption_key": [],
+                        "terraform_labels": {},
+                        "users": []
+                    },
+                    "type": "google_compute_disk",
+                    "values": {
+                        "architecture": null,
+                        "async_primary_disk": [],
+                        "create_snapshot_before_destroy": false,
+                        "create_snapshot_before_destroy_prefix": null,
+                        "description": null,
+                        "disk_encryption_key": [],
+                        "effective_labels": {
+                            "goog-terraform-provisioned": "true"
+                        },
+                        "image": null,
+                        "labels": null,
+                        "name": "async-test-disk",
+                        "params": [],
+                        "physical_block_size_bytes": 4096,
+                        "project": "terraform-dev-haonan",
+                        "snapshot": null,
+                        "source_disk": null,
+                        "source_image_encryption_key": [],
+                        "source_instant_snapshot": null,
+                        "source_snapshot_encryption_key": [],
+                        "source_storage_object": null,
+                        "storage_pool": null,
+                        "terraform_labels": {
+                            "goog-terraform-provisioned": "true"
+                        },
+                        "timeouts": null,
+                        "type": "pd-ssd",
+                        "zone": "us-central1-a"
+                    }
+                },
+                {
+                    "address": "google_compute_disk.secondary",
+                    "mode": "managed",
+                    "name": "secondary",
+                    "provider_name": "registry.terraform.io/hashicorp/google",
+                    "schema_version": 0,
+                    "sensitive_values": {
+                        "async_primary_disk": [
+                            {}
+                        ],
+                        "disk_encryption_key": [],
+                        "effective_labels": {},
+                        "guest_os_features": [],
+                        "licenses": [],
+                        "params": [],
+                        "source_image_encryption_key": [],
+                        "source_snapshot_encryption_key": [],
+                        "terraform_labels": {},
+                        "users": []
+                    },
+                    "type": "google_compute_disk",
+                    "values": {
+                        "architecture": null,
+                        "async_primary_disk": [
+                            {}
+                        ],
+                        "create_snapshot_before_destroy": false,
+                        "create_snapshot_before_destroy_prefix": null,
+                        "description": null,
+                        "disk_encryption_key": [],
+                        "effective_labels": {
+                            "goog-terraform-provisioned": "true"
+                        },
+                        "image": null,
+                        "labels": null,
+                        "name": "async-secondary-test-disk",
+                        "params": [],
+                        "physical_block_size_bytes": 4096,
+                        "project": "terraform-dev-haonan",
+                        "snapshot": null,
+                        "source_disk": null,
+                        "source_image_encryption_key": [],
+                        "source_instant_snapshot": null,
+                        "source_snapshot_encryption_key": [],
+                        "source_storage_object": null,
+                        "storage_pool": null,
+                        "terraform_labels": {
+                            "goog-terraform-provisioned": "true"
+                        },
+                        "timeouts": null,
+                        "type": "pd-ssd",
+                        "zone": "us-east1-c"
+                    }
+                }
+            ]
+        }
+    },
+    "relevant_attributes": [
+        {
+            "attribute": [
+                "id"
+            ],
+            "resource": "google_compute_disk.primary"
+        }
+    ],
+    "resource_changes": [
+        {
+            "address": "google_compute_disk.primary",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "after": {
+                    "architecture": null,
+                    "async_primary_disk": [],
+                    "create_snapshot_before_destroy": false,
+                    "create_snapshot_before_destroy_prefix": null,
+                    "description": null,
+                    "disk_encryption_key": [],
+                    "effective_labels": {
+                        "goog-terraform-provisioned": "true"
+                    },
+                    "image": null,
+                    "labels": null,
+                    "name": "async-test-disk",
+                    "params": [],
+                    "physical_block_size_bytes": 4096,
+                    "project": "terraform-dev-haonan",
+                    "snapshot": null,
+                    "source_disk": null,
+                    "source_image_encryption_key": [],
+                    "source_instant_snapshot": null,
+                    "source_snapshot_encryption_key": [],
+                    "source_storage_object": null,
+                    "storage_pool": null,
+                    "terraform_labels": {
+                        "goog-terraform-provisioned": "true"
+                    },
+                    "timeouts": null,
+                    "type": "pd-ssd",
+                    "zone": "us-central1-a"
+                },
+                "after_sensitive": {
+                    "async_primary_disk": [],
+                    "disk_encryption_key": [],
+                    "effective_labels": {},
+                    "guest_os_features": [],
+                    "licenses": [],
+                    "params": [],
+                    "source_image_encryption_key": [],
+                    "source_snapshot_encryption_key": [],
+                    "terraform_labels": {},
+                    "users": []
+                },
+                "after_unknown": {
+                    "access_mode": true,
+                    "async_primary_disk": [],
+                    "creation_timestamp": true,
+                    "disk_encryption_key": [],
+                    "disk_id": true,
+                    "effective_labels": {},
+                    "enable_confidential_compute": true,
+                    "guest_os_features": true,
+                    "id": true,
+                    "label_fingerprint": true,
+                    "last_attach_timestamp": true,
+                    "last_detach_timestamp": true,
+                    "licenses": true,
+                    "params": [],
+                    "provisioned_iops": true,
+                    "provisioned_throughput": true,
+                    "self_link": true,
+                    "size": true,
+                    "source_disk_id": true,
+                    "source_image_encryption_key": [],
+                    "source_image_id": true,
+                    "source_instant_snapshot_id": true,
+                    "source_snapshot_encryption_key": [],
+                    "source_snapshot_id": true,
+                    "terraform_labels": {},
+                    "users": true
+                },
+                "before": null,
+                "before_sensitive": false
+            },
+            "mode": "managed",
+            "name": "primary",
+            "provider_name": "registry.terraform.io/hashicorp/google",
+            "type": "google_compute_disk"
+        },
+        {
+            "address": "google_compute_disk.secondary",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "after": {
+                    "architecture": null,
+                    "async_primary_disk": [
+                        {}
+                    ],
+                    "create_snapshot_before_destroy": false,
+                    "create_snapshot_before_destroy_prefix": null,
+                    "description": null,
+                    "disk_encryption_key": [],
+                    "effective_labels": {
+                        "goog-terraform-provisioned": "true"
+                    },
+                    "image": null,
+                    "labels": null,
+                    "name": "async-secondary-test-disk",
+                    "params": [],
+                    "physical_block_size_bytes": 4096,
+                    "project": "terraform-dev-haonan",
+                    "snapshot": null,
+                    "source_disk": null,
+                    "source_image_encryption_key": [],
+                    "source_instant_snapshot": null,
+                    "source_snapshot_encryption_key": [],
+                    "source_storage_object": null,
+                    "storage_pool": null,
+                    "terraform_labels": {
+                        "goog-terraform-provisioned": "true"
+                    },
+                    "timeouts": null,
+                    "type": "pd-ssd",
+                    "zone": "us-east1-c"
+                },
+                "after_sensitive": {
+                    "async_primary_disk": [
+                        {}
+                    ],
+                    "disk_encryption_key": [],
+                    "effective_labels": {},
+                    "guest_os_features": [],
+                    "licenses": [],
+                    "params": [],
+                    "source_image_encryption_key": [],
+                    "source_snapshot_encryption_key": [],
+                    "terraform_labels": {},
+                    "users": []
+                },
+                "after_unknown": {
+                    "access_mode": true,
+                    "async_primary_disk": [
+                        {
+                            "disk": true
+                        }
+                    ],
+                    "creation_timestamp": true,
+                    "disk_encryption_key": [],
+                    "disk_id": true,
+                    "effective_labels": {},
+                    "enable_confidential_compute": true,
+                    "guest_os_features": true,
+                    "id": true,
+                    "label_fingerprint": true,
+                    "last_attach_timestamp": true,
+                    "last_detach_timestamp": true,
+                    "licenses": true,
+                    "params": [],
+                    "provisioned_iops": true,
+                    "provisioned_throughput": true,
+                    "self_link": true,
+                    "size": true,
+                    "source_disk_id": true,
+                    "source_image_encryption_key": [],
+                    "source_image_id": true,
+                    "source_instant_snapshot_id": true,
+                    "source_snapshot_encryption_key": [],
+                    "source_snapshot_id": true,
+                    "terraform_labels": {},
+                    "users": true
+                },
+                "before": null,
+                "before_sensitive": false
+            },
+            "mode": "managed",
+            "name": "secondary",
+            "provider_name": "registry.terraform.io/hashicorp/google",
+            "type": "google_compute_disk"
+        }
+    ],
+    "terraform_version": "1.7.2",
+    "timestamp": "2026-02-04T22:39:00Z"
+}

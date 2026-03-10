@@ -382,10 +382,7 @@ properties:
         description: |
           Scaling schedules defined for an autoscaler. Multiple schedules can be set on an autoscaler and they can overlap.
         key_name: 'name'
-        key_description: |
-          A name for the schedule.
         value_type:
-          name: scalingSchedule
           type: NestedObject
           properties:
             - name: 'minRequiredReplicas'

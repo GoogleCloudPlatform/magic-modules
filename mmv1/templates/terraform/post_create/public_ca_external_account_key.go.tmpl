@@ -1,0 +1,7 @@
+{{ range $prop := $.GettableProperties }}
+	{{ if not (or (eq $prop.Name "name") (eq $prop.Name "keyId")) }}
+	if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+	}
+	{{- end}}
+{{- end}}

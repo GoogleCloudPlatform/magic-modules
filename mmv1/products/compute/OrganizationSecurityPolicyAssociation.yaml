@@ -17,11 +17,10 @@ api_resource_type_kind: SecurityPolicy
 api_resource_field: 'associations'
 description: |
   An association for the OrganizationSecurityPolicy.
-min_version: 'beta'
 references:
   guides:
     'Associating a policy with the organization or folder': 'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addAssociation'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/organizationSecurityPolicies/addAssociation'
 docs:
 id_format: '{{policy_id}}/association/{{name}}'
 base_url: '{{policy_id}}'
@@ -45,7 +44,8 @@ read_error_transform: 'transformSecurityPolicyAssociationReadError'
 examples:
   - name: 'organization_security_policy_association_basic'
     primary_resource_id: 'policy'
-    min_version: 'beta'
+    vars:
+      short_name: "my-short-name"
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -54,7 +54,6 @@ parameters:
     description: |
       The security policy ID of the association.
     api_name: securityPolicyId
-    min_version: 'beta'
     url_param_only: true
     required: true
 properties:
@@ -62,17 +61,14 @@ properties:
     type: String
     description: |
       The name for an association.
-    min_version: 'beta'
     required: true
   - name: 'attachmentId'
     type: String
     description: |
       The resource that the security policy is attached to.
-    min_version: 'beta'
     required: true
   - name: 'displayName'
     type: String
     description: |
       The display name of the security policy of the association.
-    min_version: 'beta'
     output: true

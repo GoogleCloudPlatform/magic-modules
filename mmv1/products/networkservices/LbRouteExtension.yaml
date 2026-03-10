@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     'Configure a route extension': 'https://cloud.google.com/service-extensions/docs/configure-callout#configure_a_route_extension'
-  api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.lbRouteExtensions'
+  api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1/projects.locations.lbRouteExtensions'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions'
 self_link: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions/{{name}}'
@@ -38,11 +38,36 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  constants: 'templates/terraform/constants/network_services_lb_route_extension.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-west1"
 examples:
   - name: 'network_services_lb_route_extension_basic'
+    primary_resource_id: 'default'
+    vars:
+      ilb_network_name: 'l7-ilb-network'
+      proxy_subnet_name: 'l7-ilb-proxy-subnet'
+      backend_subnet_name: 'l7-ilb-subnet'
+      forwarding_rule_name: 'l7-ilb-forwarding-rule'
+      target_http_proxy_name: 'l7-ilb-target-http-proxy'
+      regional_url_map_name: 'l7-ilb-regional-url-map'
+      backend_service_name: 'l7-ilb-backend-subnet'
+      mig_template_name: 'l7-ilb-mig-template'
+      hc_name: 'l7-ilb-hc'
+      mig_name: 'l7-ilb-mig1'
+      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
+      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
+      vm_test_name: 'l7-ilb-test-vm'
+      lb_route_extension_name: 'l7-ilb-route-ext'
+      callouts_instance_name: 'l7-ilb-callouts-ins'
+      callouts_instance_group: 'l7-ilb-callouts-ins-group'
+      callouts_hc_name: 'l7-ilb-callouts-hc'
+      callouts_backend_name: 'l7-ilb-callouts-backend'
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
+  - name: 'network_services_lb_route_extension_observability'
     primary_resource_id: 'default'
     vars:
       ilb_network_name: 'l7-ilb-network'
@@ -105,6 +130,7 @@ properties:
       Match conditions for each extension chain are evaluated in sequence for a given request.
       The first extension chain that has a condition that matches the request is executed.
       Any subsequent extension chains do not execute. Limited to 5 extension chains per resource.
+      Further information can be found at https://cloud.google.com/service-extensions/docs/reference/rest/v1/ExtensionChain
     required: true
     item_type:
       type: NestedObject
@@ -134,6 +160,7 @@ properties:
             A set of extensions to execute for the matching request.
             At least one extension is required. Up to 3 extensions can be defined for each extension chain for
             LbTrafficExtension resource. LbRouteExtension chains are limited to 1 extension per extension chain.
+            Further documentation can be found at https://cloud.google.com/service-extensions/docs/reference/rest/v1/ExtensionChain#Extension
           required: true
           item_type:
             type: NestedObject
@@ -181,6 +208,47 @@ properties:
                   If omitted, all headers are sent. Each element is a string indicating the header name.
                 item_type:
                   type: String
+              - name: 'supportedEvents'
+                type: Array
+                is_set: true
+                description: |
+                  A set of events during request or response processing for which this extension is called.
+                  This field is optional for the LbRouteExtension resource. If unspecified, `REQUEST_HEADERS` event is assumed as supported.
+                  Possible values: `REQUEST_HEADERS`, `REQUEST_BODY`, `REQUEST_TRAILERS`.
+                item_type:
+                  type: String
+                  validation:
+                    function: 'ValidateSupportedEvent'
+              - name: 'metadata'
+                type: KeyValuePairs
+                description: |
+                  The metadata provided here is included as part of the `metadata_context` (of type `google.protobuf.Struct`)
+                  in the `ProcessingRequest` message sent to the extension server.
+                  The metadata is available under the namespace `com.google.lb_route_extension.<resource_name>.<chain_name>.<extension_name>`.
+                  The following variables are supported in the metadata: `{forwarding_rule_id}` - substituted with the forwarding rule's fully qualified resource name.
+                  This field must not be set for plugin extensions. Setting it results in a validation error.
+              - name: 'requestBodySendMode'
+                type: Enum
+                description: |
+                  Configures the send mode for request body processing.
+                  The field can only be set if `supported_events` includes `REQUEST_BODY`.
+                  If `supported_events` includes `REQUEST_BODY`, but `request_body_send_mode` is unset, the default value `STREAMED` is used.
+                  When this field is set to `FULL_DUPLEX_STREAMED`, `supported_events` must include both `REQUEST_BODY` and `REQUEST_TRAILERS`.
+                  This field can be set only when the `service` field of the extension points to a `BackendService`.
+                  Only `FULL_DUPLEX_STREAMED` mode is supported for `LbRouteExtension` resources.
+                enum_values:
+                  - 'BODY_SEND_MODE_UNSPECIFIED'
+                  - 'BODY_SEND_MODE_STREAMED'
+                  - 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
+              - name: 'observabilityMode'
+                type: Boolean
+                description: |
+                  When set to `TRUE`, enables `observability_mode` on the `ext_proc` filter.
+                  This makes `ext_proc` calls asynchronous. Envoy doesn't check for the response from `ext_proc` calls.
+                  For more information about the filter, see: https://www.envoyproxy.io/docs/envoy/v1.32.3/api-v3/extensions/filters/http/ext_proc/v3/ext_proc.proto
+                  This field is helpful when you want to try out the extension in async log-only mode.
+                  Supported by regional `LbTrafficExtension` and `LbRouteExtension` resources.
+                  Only `STREAMED` (default) body processing mode is supported.
   - name: 'loadBalancingScheme'
     type: Enum
     description: |

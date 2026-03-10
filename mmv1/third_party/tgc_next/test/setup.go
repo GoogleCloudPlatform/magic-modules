@@ -39,6 +39,7 @@ type TgcMetadataPayload struct {
 	RawConfig        string                       `json:"raw_config"`
 	ResourceMetadata map[string]*ResourceMetadata `json:"resource_metadata"`
 	PrimaryResource  string                       `json:"primary_resource"`
+	CaiReadTime      time.Time                    `json:"cai_read_time"`
 }
 
 type ResourceTestData struct {
@@ -60,7 +61,7 @@ type Resource struct {
 
 const (
 	ymdFormat   = "2006-01-02"
-	maxAttempts = 3
+	maxAttempts = 5
 )
 
 var (

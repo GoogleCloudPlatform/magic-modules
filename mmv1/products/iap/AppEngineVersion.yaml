@@ -42,7 +42,6 @@ exclude_tgc: true
 examples:
   - name: 'iap_app_engine_version'
     primary_resource_id: 'version'
-    primary_resource_name: 'envvar.GetTestProjectFromEnv(), "default", context["random_suffix"]'
 parameters:
 properties:
   - name: 'appId'

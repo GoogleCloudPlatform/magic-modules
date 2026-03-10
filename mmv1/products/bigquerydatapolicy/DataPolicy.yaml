@@ -44,13 +44,11 @@ custom_code:
 examples:
   - name: 'bigquery_datapolicy_data_policy_basic'
     primary_resource_id: 'data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
     vars:
       data_policy_id: 'data_policy'
       taxonomy: 'taxonomy'
   - name: 'bigquery_datapolicy_data_policy_routine'
     primary_resource_id: 'data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
     vars:
       data_policy_id: 'data_policy'
       taxonomy: 'taxonomy'

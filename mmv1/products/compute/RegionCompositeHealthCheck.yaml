@@ -1,0 +1,151 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# API resource name
+name: 'RegionCompositeHealthCheck'
+# Resource description for the provider documentation.
+description: |
+  A composite health check resource specifies the health source resources and
+  the health destination resource to which the aggregated health result from
+  the health source resources is delivered.
+references:
+  guides:
+    'Health checks overview': 'https://cloud.google.com/load-balancing/docs/health-check-concepts'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionCompositeHealthChecks'
+min_version: beta
+
+# URL for the resource's standard List method. https://google.aip.dev/132
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+base_url: 'projects/{{project}}/regions/{{region}}/compositeHealthChecks'
+# URL for the resource's standard Get method. https://google.aip.dev/131
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+self_link: 'projects/{{project}}/regions/{{region}}/compositeHealthChecks/{{name}}'
+
+# URL for the resource's standard Create method, including query parameters.
+# https://google.aip.dev/133
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+create_url: 'projects/{{project}}/regions/{{region}}/compositeHealthChecks'
+
+# Overrides the URL for the resource's standard Update method. (If unset, the
+# self_link URL is used by default.) https://google.aip.dev/134
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+update_url: 'projects/{{project}}/regions/{{region}}/compositeHealthChecks/{{name}}'
+# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
+update_verb: 'PATCH'
+# If true, the resource sets an `updateMask` query parameter listing modified
+# fields when updating the resource. If false, it does not.
+update_mask: true
+
+# If true, code for handling long-running operations is generated along with
+# the resource. If false, that code is not generated.
+autogen_async: true
+# Sets parameters for handling operations returned by the API.
+async:
+  # Overrides which API calls return operations. Default: ['create',
+  # 'update', 'delete']
+  # actions: ['create', 'update', 'delete']
+  operation:
+    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+
+parameters:
+  - name: 'region'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      URL of the region where the composite health check resides.
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    description: |
+      Name of the resource. Provided by the client when the resource is created.
+      The name must be 1-63 characters long, and comply with RFC1035.
+      Specifically, the name must be 1-63 characters long and match the regular
+      expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first
+      character must be a lowercase letter, and all following characters must
+      be a dash, lowercase letter, or digit, except the last character, which
+      cannot be a dash.
+
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource. Provide this property when you
+      create the resource.
+  - name: 'healthSources'
+    type: Array
+    item_type:
+      name: 'healthSource'
+      type: ResourceRef
+      resource: 'RegionHealthSource'
+      imports: 'selfLink'
+    description: |
+      URLs to the HealthSource resources whose results are AND'ed.
+      I.e. he aggregated result is is HEALTHY only if all sources
+      are HEALTHY. Must have at least 1. Must not have more than 10.
+      Must be regional and in the same region as the
+      CompositeHealthCheck. Can be mutated.
+    min_size: 1
+    max_size: 10
+  - name: 'healthDestination'
+    type: ResourceRef
+    resource: 'ForwardingRule'
+    imports: 'selfLink'
+    description: |
+      URL to the destination resource. Must be set. Must be a
+      ForwardingRule. The ForwardingRule must have
+      load balancing scheme INTERNAL or
+      INTERNAL_MANAGED and must be regional and in the same region
+      as the CompositeHealthCheck (cross-region deployment for
+      INTERNAL_MANAGED is not supported). Can be mutated.
+    required: true
+  - name: 'id'
+    type: String
+    description: 'The unique identifier for the resource. This identifier is defined by the server.'
+    output: true
+  - name: 'creationTimestamp'
+    type: String
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'selfLinkWithId'
+    type: String
+    description: 'Server-defined URL with id for the resource.'
+    output: true
+  - name: 'fingerprint'
+    type: Fingerprint
+    description: |
+      Fingerprint of this resource. A hash of the contents stored in this object.
+      This field is used in optimistic locking. This field will be ignored when
+      inserting a `CompositeHealthCheck`. An up-to-date fingerprint
+      must be provided in order to patch the CompositeHealthCheck; Otherwise,
+      the request will fail with error `412 conditionNotMet`. To see
+      the latest fingerprint, make a `get()` request to retrieve the
+      CompositeHealthCheck.
+    output: true
+
+examples:
+  - name: "compute_region_composite_health_check_basic"
+    primary_resource_id: "example_test_composite_health_check"
+    vars:
+      name: "test-composite-health-check"
+      description: "Example composite health check basic"
+    min_version: 'beta'
+    test_env_vars:
+      project: 'PROJECT_NAME'

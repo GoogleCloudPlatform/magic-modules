@@ -2900,7 +2900,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_backend_service" "lipsum" {
-  name        = "test-lipsum-backend-service-%s"
+  name        = "tf-test-lipsum-backend-service-%s"
   description = "Hello World 1234"
   protocol    = "TCP"
   timeout_sec = %v
@@ -2915,7 +2915,7 @@ resource "google_compute_backend_service" "lipsum" {
 }
 
 resource "google_compute_instance_group_manager" "foobar" {
-  name = "test-foobar-instance-group-manager-%s"
+  name = "tf-test-foobar-instance-group-manager-%s"
   version {
     instance_template = google_compute_instance_template.foobar.self_link
     name              = "primary"
@@ -2926,7 +2926,7 @@ resource "google_compute_instance_group_manager" "foobar" {
 }
 
 resource "google_compute_instance_template" "foobar" {
-  name         = "test-foobar-instance-template-%s"
+  name         = "tf-test-foobar-instance-template-%s"
   machine_type = "e2-medium"
 
   network_interface {
@@ -2941,7 +2941,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 
 resource "google_compute_health_check" "health_check" {
-  name = "test-health-check-%s"
+  name = "tf-test-health-check-%s"
   http_health_check {
     port = 80
   }

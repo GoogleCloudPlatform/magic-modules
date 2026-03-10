@@ -48,7 +48,7 @@ func NotebooksInstanceKmsDiffSuppress(_, old, new string, _ *schema.ResourceData
 	return false
 }
 
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 // waitForNotebooksInstanceActive waits for an Notebook instance to become "ACTIVE"
 func waitForNotebooksInstanceActive(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
 	return retry.Retry(timeout, func() *retry.RetryError {
@@ -88,7 +88,7 @@ func modifyNotebooksInstanceState(config *transport_tpg.Config, d *schema.Resour
 	return res, nil
 }
 
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 func waitForNotebooksOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
 	var opRes map[string]interface{}
 	err := NotebooksOperationWaitTimeWithResponse(

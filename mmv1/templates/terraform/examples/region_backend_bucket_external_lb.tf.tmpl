@@ -1,0 +1,34 @@
+resource "google_compute_region_backend_bucket" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "backend_bucket_name"}}"
+  region                = "us-east1"
+  bucket_name           = google_storage_bucket.{{$.PrimaryResourceId}}.name
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  description           = "Regional external backend bucket for static content"
+  
+  # REMOVED: compression_mode (Not supported)
+  # REMOVED: custom_response_headers (Not supported)
+}
+
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
+  name                        = "{{index $.Vars "bucket_name"}}"
+  location                    = "US-EAST1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+  
+  website {
+    main_page_suffix = "index.html"
+    not_found_page   = "404.html"
+  }
+}
+
+resource "google_storage_bucket_object" "index" {
+  name    = "index.html"
+  bucket  = google_storage_bucket.{{$.PrimaryResourceId}}.name
+  content = "<html><body><h1>Regional External LB Backend Bucket</h1></body></html>"
+}
+
+resource "google_storage_bucket_object" "static_asset" {
+  name    = "assets/style.css"
+  bucket  = google_storage_bucket.{{$.PrimaryResourceId}}.name
+  content = "body { font-family: Arial, sans-serif; }"
+}

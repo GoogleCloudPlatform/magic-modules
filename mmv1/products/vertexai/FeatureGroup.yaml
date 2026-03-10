@@ -47,7 +47,6 @@ custom_code:
 examples:
   - name: 'vertex_ai_feature_group'
     primary_resource_id: 'feature_group'
-    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_group%s", context["random_suffix"])'
     vars:
       job_id: 'job_load'
       feature_group_name: 'example_feature_group'
