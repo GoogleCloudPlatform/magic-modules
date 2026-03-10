@@ -77,6 +77,26 @@ examples:
       - 'replication_enabled'
       - 'force_stopping'
       - 'wait_for_mirror'
+
+  - name: 'netapp_volume_in_region_replication_intra_zones_file'
+    primary_resource_id: 'test_replication'
+    vars:
+      source_pool_name: 'src-pool-zonal-same'
+      destination_pool_name: 'dst-pool-zonal-same'
+      source_volume: 'src_vol_zonal_same'
+      destination_volume: 'dst_vol_zonal_same'
+      source_share_name: 'src-share-zonal-same'
+      destination_share_name: 'dst-share-zonal-same'
+      replication_name: 'rep-zonal-same'
+      network_name: 'test-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-intra-zone", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+    ignore_read_extra:
+      - 'delete_destination_volume'
+      - 'replication_enabled'
+      - 'force_stopping'
+      - 'wait_for_mirror'
+
 virtual_fields:
   - name: 'delete_destination_volume'
     description: |

@@ -1,0 +1,53 @@
+data "google_compute_network" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_netapp_storage_pool" "source_pool" {
+  name          = "{{index $.Vars "source_pool_name"}}"
+  location      = "us-central1-a"
+  service_level = "FLEX"
+  capacity_gib  = 2048
+  type          = "UNIFIED"
+  network       = data.google_compute_network.{{$.PrimaryResourceId}}.id
+}
+
+resource "google_netapp_storage_pool" "destination_pool" {
+  name          = "{{index $.Vars "destination_pool_name"}}"
+  location      = "us-central1-a"
+  service_level = "FLEX"
+  type          = "UNIFIED"
+  capacity_gib  = 2048
+  network       = data.google_compute_network.{{$.PrimaryResourceId}}.id
+}
+
+resource "google_netapp_volume" "source_volume" {
+  location     = google_netapp_storage_pool.source_pool.location
+  name         = "{{index $.Vars "source_volume"}}"
+  capacity_gib = 100
+  share_name   = "{{index $.Vars "source_share_name"}}"
+  storage_pool = google_netapp_storage_pool.source_pool.name
+  protocols = [
+    "NFSV3"
+  ]
+  deletion_policy = "FORCE"
+}
+
+resource "google_netapp_volume_replication" "{{$.PrimaryResourceId}}" {
+  depends_on           = [google_netapp_volume.source_volume]
+  location             = google_netapp_volume.source_volume.location
+  volume_name          = google_netapp_volume.source_volume.name
+  name                 = "{{index $.Vars "replication_name"}}"
+  replication_schedule = "EVERY_10_MINUTES"
+  description          = "This is an in-region replication resource (zonal same zone)"
+  destination_volume_parameters {
+    storage_pool = google_netapp_storage_pool.destination_pool.id
+    volume_id    = "{{index $.Vars "destination_volume"}}"
+    share_name   = "{{index $.Vars "destination_share_name"}}"
+    description  = "This is a replicated volume"
+  }
+  # WARNING: Setting delete_destination_volume to true, will delete the
+  # CURRENT destination volume if the replication is deleted. Omit the field 
+  # or set delete_destination_volume=false to avoid accidental volume deletion.
+  delete_destination_volume = true
+  wait_for_mirror = true
+}
