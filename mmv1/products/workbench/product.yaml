@@ -14,6 +14,7 @@
 ---
 name: 'Workbench'
 display_name: 'Vertex AI Workbench'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://notebooks.googleapis.com/v2/'
