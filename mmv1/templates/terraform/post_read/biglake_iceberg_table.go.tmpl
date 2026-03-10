@@ -1,0 +1,91 @@
+if metadata, ok := res["metadata"].(map[string]interface{}); ok {
+	// Find current schema
+	if schemas, ok := metadata["schemas"].([]interface{}); ok {
+		currentSchemaId := -1
+		if id, ok := metadata["current-schema-id"]; ok {
+			switch v := id.(type) {
+			case json.Number:
+				id64, _ := v.Int64()
+				currentSchemaId = int(id64)
+			case float64:
+				currentSchemaId = int(v)
+			case int:
+				currentSchemaId = v
+			}
+		}
+
+		for _, s := range schemas {
+			if sm, ok := s.(map[string]interface{}); ok {
+				sid := -1
+				if id, ok := sm["schema-id"]; ok {
+					switch v := id.(type) {
+					case json.Number:
+						id64, _ := v.Int64()
+						sid = int(id64)
+					case float64:
+						sid = int(v)
+					case int:
+						sid = v
+					}
+				}
+				if sid == currentSchemaId {
+					res["schema"] = sm
+					break
+				}
+			}
+		}
+		if _, ok := res["schema"]; !ok && len(schemas) > 0 {
+			res["schema"] = schemas[0]
+		}
+	}
+	// Same for partition-spec
+	if specs, ok := metadata["partition-specs"].([]interface{}); ok {
+		defaultSpecId := -1
+		if id, ok := metadata["default-spec-id"]; ok {
+			switch v := id.(type) {
+			case json.Number:
+				id64, _ := v.Int64()
+				defaultSpecId = int(id64)
+			case float64:
+				defaultSpecId = int(v)
+			case int:
+				defaultSpecId = v
+			}
+		}
+
+		for _, s := range specs {
+			if sm, ok := s.(map[string]interface{}); ok {
+				sid := -1
+				if id, ok := sm["spec-id"]; ok {
+					switch v := id.(type) {
+					case json.Number:
+						id64, _ := v.Int64()
+						sid = int(id64)
+					case float64:
+						sid = int(v)
+					case int:
+						sid = v
+					}
+				}
+				if sid == defaultSpecId {
+					res["partition-spec"] = sm
+					break
+				}
+			}
+		}
+		if _, ok := res["partition-spec"]; !ok && len(specs) > 0 {
+			res["partition-spec"] = specs[0]
+		}
+	}
+
+	res["location"] = metadata["location"]
+	res["properties"] = metadata["properties"]
+}
+
+// Extract name from ID if not present in response
+if _, ok := res["name"]; !ok {
+	if id := d.Id(); id != "" {
+		parts := strings.Split(id, "/")
+		res["name"] = parts[len(parts)-1]
+	}
+}
