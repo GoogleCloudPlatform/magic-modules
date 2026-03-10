@@ -34,7 +34,9 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'managed_zone'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
+  base_url: 'projects/{{project}}/locations/global/managedZones/{{managed_zone}}'
   import_format:
+    - 'projects/{{project}}/locations/global/managedZones/{{managed_zone}}'
     - 'projects/{{project}}/managedZones/{{managed_zone}}'
     - '{{project}}/{{managed_zone}}'
 custom_code:
