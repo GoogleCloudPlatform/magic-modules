@@ -3,8 +3,8 @@ package observability_test
 import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"testing"
 )
@@ -88,4 +88,3 @@ resource "google_project" "project-2" {
 }
 `, context)
 }
-
