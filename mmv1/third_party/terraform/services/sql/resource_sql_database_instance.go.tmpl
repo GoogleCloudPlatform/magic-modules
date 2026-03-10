@@ -1456,11 +1456,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Optional:    true,
 							Description: `The name of the target instance to restore to.`,
 						},
-						"region": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: `The region of the target instance to restore to.`,
-						},
 					},
 				},
 			},
@@ -1573,8 +1568,21 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
+	cloneContext, cloneSourceInstance := expandCloneContext(d.Get("clone").([]interface{}))
+	
+	{{- if ne $.TargetVersionName "ga" }}
+	cloneSourceProject := expandCloneSourceProject(d.Get("clone").([]interface{}))
+	if cloneSourceProject == "" {
+		cloneSourceProject = project
+	}
+	{{- end }}
 	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
+
+	if valueI, ok := d.GetOk("settings.0.auto_upgrade_enabled"); ok && !(valueI.(bool)) {
+		if err := d.Set("settings.0.auto_upgrade_enabled", nil); err != nil {
+			return err
+		}
+	}
 
 	s, ok := d.GetOk("settings")
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}), databaseVersion)
@@ -3507,7 +3515,6 @@ func expandPointInTimeRestoreContext(configured []interface{}) *sqladmin.PointIn
 		Datasource:     _pitrc["datasource"].(string),
 		AllocatedIpRange: _pitrc["allocated_ip_range"].(string),
 		TargetInstance: _pitrc["target_instance"].(string),
-		Region: _pitrc["region"].(string),
 	}
 }
 
