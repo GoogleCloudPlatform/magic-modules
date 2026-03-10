@@ -101,6 +101,14 @@ examples:
       org_id: 'ORG_ID'
       project_name: 'PROJECT_NAME'
       region: 'REGION'
+  - name: 'firewall_policy_rule_target_type_internal_managed_lb_instance_regional'
+    primary_resource_id: 'internal_managed_lb_rule'
+    min_version: "beta"
+    vars:
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
@@ -397,3 +405,28 @@ properties:
       Denotes whether the firewall policy rule is disabled.
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.
       If this is unspecified, the firewall policy rule will be enabled.
+  - name: 'targetType'
+    type: Enum
+    description: |
+      Target types of the firewall policy rule.
+      Default value is INSTANCES.
+      When target_type is INTERNAL_MANAGED_LB, target_forwarding_rules must be set
+    required: false
+    default_from_api: true
+    enum_values:
+      - 'INSTANCES'
+      - 'INTERNAL_MANAGED_LB'
+  - name: 'targetForwardingRules'
+    type: Array
+    required: false
+    description: |
+      A list of forwarding rules to which this rule applies.
+      This field allows you to control which load balancers get this rule.
+      For example, the following are valid values:
+      - https://www.googleapis.com/compute/v1/projects/project/global/forwardingRules/forwardingRule
+      - https://www.googleapis.com/compute/v1/projects/project/regions/region/forwardingRules/forwardingRule
+      - projects/project/global/forwardingRules/forwardingRule
+      - projects/project/regions/region/forwardingRules/forwardingRule
+    item_type:
+      type: String
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
