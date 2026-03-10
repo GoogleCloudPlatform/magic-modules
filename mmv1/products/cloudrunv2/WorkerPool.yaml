@@ -282,20 +282,19 @@ properties:
     properties:
       - name: 'scalingMode'
         ignore_read: true
-        type: Enum
+        type: String
         description: |
-          The scaling mode for the worker pool. It defaults to MANUAL.
-        enum_values:
-          - 'AUTOMATIC'
-          - 'MANUAL'
+          The scaling mode for the worker pool. Currently only MANUAL is supported.
       - name: 'minInstanceCount'
         type: Integer
         description: |
           The minimum count of instances distributed among revisions based on the specified instance split percentages.
+        deprecation_message: '`minInstanceCount` is deprecated as WorkerPool does not support auto scaling and will be removed in a future major release.'
       - name: 'maxInstanceCount'
         type: Integer
         description: |
           The maximum count of instances distributed among revisions based on the specified instance split percentages.
+        deprecation_message: '`maxInstanceCount` is deprecated as WorkerPool does not support auto scaling and will be removed in a future major release.'
       - name: 'manualInstanceCount'
         type: Integer
         description: |
