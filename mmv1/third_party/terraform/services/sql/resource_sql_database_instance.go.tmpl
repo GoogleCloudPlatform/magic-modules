@@ -1456,6 +1456,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Optional:    true,
 							Description: `The name of the target instance to restore to.`,
 						},
+						"region": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The region of the target instance to restore to.`,
+						},
 					},
 				},
 			},
