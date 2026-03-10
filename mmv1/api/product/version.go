@@ -31,7 +31,7 @@ type Version struct {
 	BaseUrl          string `yaml:"base_url"`
 	Name             string
 	RepUrl           string `yaml:"rep_url,omitempty"`
-	UseGlobalUrl     string `yaml:"use_global_url,omitempty"`
+	UseGlobalUrl     bool   `yaml:"use_global_url,omitempty"`
 }
 
 func (v *Version) Validate(pName string) {
@@ -52,5 +52,5 @@ func (v *Version) CompareTo(other *Version) int {
 // fully rolled out support. Keep the UseGlobalUrl flag to allow users to
 // configure using a partially rolled out REP without an endpoint override
 func (v *Version) RepEnabled() bool {
-	return v.RepUrl != "" && !UseGlobalUrl
+	return v.RepUrl != "" && !v.UseGlobalUrl
 }
