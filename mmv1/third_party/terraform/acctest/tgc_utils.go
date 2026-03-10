@@ -146,11 +146,11 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 							caiAssetName = strings.Replace(caiAssetName, projectId, projectNumber, 1)
 						}
 						metadata.CaiAssetNames = []string{caiAssetName}
+					} else {
+						if strings.HasPrefix(yamlMetadata.Resource, "google_container_") {
+							metadata.CaiAssetNames = resolveContainerCaiAssetName(yamlMetadata.CaiAssetNameFormats, rState.Primary.ID, rState.Primary.Attributes["location"])
+						}
 					}
-				}
-
-				if strings.HasPrefix(yamlMetadata.Resource, "google_container_") {
-					metadata.CaiAssetNames = resolveContainerCaiAssetName(metadata.CaiAssetNames, rState.Primary.Attributes["location"])
 				}
 			}
 
@@ -181,14 +181,13 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 
 // resolveContainerCaiAssetName determines the correct CAI asset name
 // for GKE resources based on whether the resource location is a zone or a region.
-func resolveContainerCaiAssetName(assetNames []string, location string) []string {
-	for i, assetName := range assetNames {
-		if tpgresource.IsZone(location) {
-			assetNames[i] = strings.Replace(assetName, "/locations/", "/zones/", 1)
-		}
+func resolveContainerCaiAssetName(caiAssetNameFormats []string, rName, location string) []string {
+	serviceDomain := getServiceDomain(caiAssetNameFormats[0])
+	if tpgresource.IsZone(location) {
+		rName = strings.Replace(rName, "/locations/", "/zones/", 1)
 	}
 
-	return assetNames
+	return []string{fmt.Sprintf("//%s/%s", serviceDomain, rName)}
 }
 
 func getServiceDomain(caiAssetName string) string {
