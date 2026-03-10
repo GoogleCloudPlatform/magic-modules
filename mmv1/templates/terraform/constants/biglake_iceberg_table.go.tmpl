@@ -1,0 +1,12 @@
+var icebergTableIgnoredProperties = map[string]bool{
+	"location": true,
+}
+
+func icebergTablePropertiesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// properties.KEY
+	parts := strings.Split(k, ".")
+	if len(parts) == 2 && icebergTableIgnoredProperties[parts[1]] {
+		return true
+	}
+	return false
+}
