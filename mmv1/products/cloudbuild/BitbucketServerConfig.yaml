@@ -54,6 +54,12 @@ examples:
       config_id: bbs-config
       global_address_name: private-ip-alloc
       network_name: vpc-network
+  - name: cloudbuild_bitbucket_server_config_peered_network_ip_range
+    primary_resource_id: bbs-config-with-peered-network-ip-range
+    vars:
+      config_id: bbs-config
+      global_address_name: private-ip-alloc
+      network_name: vpc-network
 parameters:
   - name: config_id
     type: String
@@ -150,3 +156,7 @@ properties:
     type: String
     description: |
       SSL certificate to use for requests to Bitbucket Server. The format should be PEM format but the extension can be one of .pem, .cer, or .crt.
+  - name: peeredNetworkIpRange
+    type: String
+    description: IP range within the peered network. This is specified in CIDR notation with a slash and the subnet prefix size. You can optionally specify an IP address before the subnet prefix value. e.g. `192.168.0.0/29` would specify an IP range starting at 192.168.0.0 with a 29 bit prefix size. `/16` would specify a prefix size of 16 bits, with an automatically determined IP within the peered VPC. If unspecified, a value of `/24` will be used. The field only has an effect if peered_network is set.
+    immutable: true
