@@ -15,6 +15,7 @@
 name: 'SecurityCenterManagement'
 legacy_name: 'scc_management'
 display_name: 'Security Command Center Management (SCC)'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://securitycentermanagement.googleapis.com/v1/'

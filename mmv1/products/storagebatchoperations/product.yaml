@@ -13,6 +13,7 @@
 ---
 name: 'StorageBatchOperations'
 display_name: 'Cloud Storage Batch Operations'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://storagebatchoperations.googleapis.com/v1/'
