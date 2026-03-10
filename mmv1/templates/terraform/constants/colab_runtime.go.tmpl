@@ -17,7 +17,7 @@ func ModifyColabRuntimeOperation(config *transport_tpg.Config, d *schema.Resourc
 	return res, nil
 }
 
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 func waitForColabOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
 	var opRes map[string]interface{}
 	err := ColabOperationWaitTimeWithResponse(

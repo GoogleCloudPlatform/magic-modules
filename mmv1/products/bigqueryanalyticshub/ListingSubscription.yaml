@@ -41,7 +41,6 @@ sweeper:
 examples:
   - name: 'bigquery_analyticshub_listing_subscription_basic'
     primary_resource_id: 'subscription'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
@@ -184,11 +183,11 @@ properties:
       type: NestedObject
       properties:
         - name: listing
-          type: string
+          type: String
           description: Output only. Listing for which linked resource is created.
           output: true
         - name: linkedDataset
-          type: string
+          type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
   - name: linkedResources
@@ -200,11 +199,11 @@ properties:
       type: NestedObject
       properties:
         - name: listing
-          type: string
+          type: String
           description: Output only. Listing for which linked resource is created.
           output: true
         - name: linkedDataset
-          type: string
+          type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
   - name: 'logLinkedDatasetQueryUserEmail'

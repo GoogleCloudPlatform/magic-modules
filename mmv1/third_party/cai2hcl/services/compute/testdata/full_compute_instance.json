@@ -179,6 +179,13 @@
             "network": "projects/test-project/global/networks/default"
           }
         ],
+        "reservationAffinity": {
+          "consumeReservationType": "SPECIFIC_RESERVATION",
+          "key": "compute.googleapis.com/reservation-name",
+          "values": [
+            "my-reservation"
+          ]
+        },
         "scheduling": {
           "automaticRestart": true
         },

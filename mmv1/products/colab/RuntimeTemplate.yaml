@@ -30,8 +30,6 @@ immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
 async:
   type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
   result:
     resource_inside_response: true
 iam_policy:
@@ -42,10 +40,10 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
     - '{{runtime_template}}'
+include_in_tgc_next: true
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
     vars:
       runtime_template_name: 'colab-runtime-template'
   - name: 'colab_runtime_template_no_name'
@@ -53,7 +51,6 @@ examples:
     exclude_import_test: true
   - name: 'colab_runtime_template_full'
     primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
     vars:
       runtime_template_name: 'colab-runtime-template'
       network_name: 'colab-test-default'
@@ -87,20 +84,14 @@ properties:
      'The machine configuration of the runtime.'
     properties:
       - name: 'machineType'
-        type: string
+        type: String
         default_from_api: true
         description: |
                 The Compute Engine machine type selected for the runtime.
       - name: 'acceleratorType'
-        type: enum
+        type: String
         description: |
                 The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
-        enum_values:
-          - 'NVIDIA_TESLA_V100'
-          - 'NVIDIA_TESLA_T4'
-          - 'NVIDIA_TESLA_A100'
-          - 'NVIDIA_A100_80GB'
-          - 'NVIDIA_L4'
       - name: 'acceleratorCount'
         type: Integer
         default_from_api: true
@@ -111,16 +102,11 @@ properties:
     description: 'The configuration for the data disk of the runtime.'
     properties:
       - name: 'diskType'
-        type: enum
+        type: String
         description: 'The type of the persistent disk.'
         default_from_api: true
-        enum_values:
-          - 'pd-standard'
-          - 'pd-ssd'
-          - 'pd-balanced'
-          - 'pd-extreme'
       - name: 'diskSizeGb'
-        type: int
+        type: String  # Integer
         default_from_api: true
         description: |
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
@@ -196,6 +182,7 @@ properties:
       - name: 'env'
         type: Array
         description: 'Environment variables to be passed to the container.'
+        is_missing_in_cai: true
         item_type:
           type: NestedObject
           properties:
@@ -212,6 +199,7 @@ properties:
       - name: 'postStartupScriptConfig'
         type: NestedObject
         description: 'Post startup script config.'
+        is_missing_in_cai: true
         properties:
           - name: 'postStartupScript'
             type: String
