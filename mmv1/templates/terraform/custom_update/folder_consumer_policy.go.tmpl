@@ -4,7 +4,7 @@ if err != nil {
 }
 
 obj := make(map[string]interface{})
-enableRulesProp, err := expandServiceUsageV2ConsumerPolicyForFolderEnableRules(d.Get("enable_rules"), d, config)
+enableRulesProp, err := expandServiceUsageV2FolderConsumerPolicyEnableRules(d.Get("enable_rules"), d, config)
 if err != nil {
 	return err
 } else if v, ok := d.GetOkExists("enable_rules"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, enableRulesProp)) {
@@ -16,7 +16,7 @@ if err != nil {
 	return err
 }
 
-log.Printf("[DEBUG] Updating ConsumerPolicyForFolder %q: %#v", d.Id(), obj)
+log.Printf("[DEBUG] Updating FolderConsumerPolicy %q: %#v", d.Id(), obj)
 
 // Add force parameter if specified
 if v, ok := d.GetOk("force"); ok && v.(bool) {
@@ -45,17 +45,17 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 })
 
 if err != nil {
-	return fmt.Errorf("Error updating ConsumerPolicyForFolder %q: %s", d.Id(), err)
+	return fmt.Errorf("Error updating FolderConsumerPolicy %q: %s", d.Id(), err)
 } else {
-	log.Printf("[DEBUG] Finished updating ConsumerPolicyForFolder %q: %#v", d.Id(), res)
+	log.Printf("[DEBUG] Finished updating FolderConsumerPolicy %q: %#v", d.Id(), res)
 }
 
 err = ServiceUsageV2OperationWaitTime(
-	config, res, project, "Updating ConsumerPolicyForFolder", userAgent,
+	config, res, project, "Updating FolderConsumerPolicy", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
 	return err
 }
 
-return resourceServiceUsageV2ConsumerPolicyForFolderRead(d, meta)
+return resourceServiceUsageV2FolderConsumerPolicyRead(d, meta)

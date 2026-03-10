@@ -5,7 +5,7 @@ resource "google_folder" "my_folder" {
   deletion_protection = false
 }
 
-resource "google_service_usage_v2_consumer_policy_for_folder" "{{$.PrimaryResourceId}}" {
+resource "google_service_usage_v2_folder_consumer_policy" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   folder   = google_folder.my_folder.folder_id
 

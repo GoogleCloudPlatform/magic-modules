@@ -1,4 +1,4 @@
-// ConsumerPolicyForFolder is a singleton resource and can't be deleted.
+// FolderConsumerPolicy is a singleton resource and can't be deleted.
 // We will check if the enableRules have been cleared
 
 config := acctest.GoogleProviderConfig(t)
@@ -27,7 +27,7 @@ return nil
 
 if enableRules, ok := res["enableRules"]; ok {
 if rules, ok := enableRules.([]interface{}); ok && len(rules) > 0 {
-return fmt.Errorf("ConsumerPolicyForFolder enableRules were not cleared")
+return fmt.Errorf("FolderConsumerPolicy enableRules were not cleared")
 }
 }
 
