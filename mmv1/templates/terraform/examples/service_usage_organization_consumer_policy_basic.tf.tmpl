@@ -1,4 +1,4 @@
-resource "google_service_usage_v2_consumer_policy_for_organization" "{{$.PrimaryResourceId}}" {
+resource "google_service_usage_v2_organization_consumer_policy" "{{$.PrimaryResourceId}}" {
   provider     = google-beta
   organization = "{{index $.TestEnvVars "org_id"}}"
 

@@ -8,7 +8,7 @@ if err != nil {
 return err
 }
 
-log.Printf("[DEBUG] Emptying ConsumerPolicyForOrganization %q: %#v", d.Id(), obj)
+log.Printf("[DEBUG] Emptying OrganizationConsumerPolicy %q: %#v", d.Id(), obj)
 
 // Add force parameter to allow destructive policy changes
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"})
@@ -31,17 +31,17 @@ Timeout:   d.Timeout(schema.TimeoutDelete),
 })
 
 if err != nil {
-return fmt.Errorf("Error emptying ConsumerPolicyForOrganization %q: %s", d.Id(), err)
+return fmt.Errorf("Error emptying OrganizationConsumerPolicy %q: %s", d.Id(), err)
 }
 
 err = ServiceUsageV2OperationWaitTime(
-config, res, billingProject, "Deleting ConsumerPolicyForOrganization", userAgent,
+config, res, billingProject, "Deleting OrganizationConsumerPolicy", userAgent,
 d.Timeout(schema.TimeoutDelete))
 
 if err != nil {
 return err
 }
 
-log.Printf("[DEBUG] Finished emptying ConsumerPolicyForOrganization %q: %#v", d.Id(), res)
+log.Printf("[DEBUG] Finished emptying OrganizationConsumerPolicy %q: %#v", d.Id(), res)
 
 return nil

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'ConsumerPolicyForOrganization'
+name: 'OrganizationConsumerPolicy'
 api_resource_type_kind: ConsumerPolicy
 description: |
   Consumer Policy is a set of rules that define what services or service groups
@@ -53,11 +53,11 @@ async:
   include_project: true
 exclude_sweeper: true
 custom_code:
-  custom_update: 'templates/terraform/custom_update/consumer_policy_for_organization.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/clear_consumer_policy_for_organization.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/consumer_policy_for_organization.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/organization_consumer_policy.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_organization_consumer_policy.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/organization_consumer_policy.go.tmpl'
 examples:
-  - name: 'service_usage_consumer_policy_organization_basic'
+  - name: 'service_usage_organization_consumer_policy_basic'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars: {}
