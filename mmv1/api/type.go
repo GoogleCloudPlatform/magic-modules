@@ -546,6 +546,11 @@ func (t *Type) Validate(rName string) (es []error) {
 	default:
 	}
 
+	// UpdateMask isn't supported on nested fields: https://github.com/hashicorp/terraform-provider-google/issues/26382
+	if t.ParentMetadata != nil && !t.ParentMetadata.FlattenObject && len(t.UpdateMaskFields) > 0 {
+		es = append(es, fmt.Errorf("property %s cannot set update_mask_fields because it is nested in resource %s", fullFieldPath, rName))
+	}
+
 	return es
 }
 
