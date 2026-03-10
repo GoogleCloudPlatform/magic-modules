@@ -35,6 +35,10 @@ examples:
     exclude_docs: true
     vars:
       name: my-reservation
+  - name: bigquery_reservation_with_reservation_group
+    primary_resource_id: reservation
+    vars:
+      name: my-reservation
 parameters:
   - name: location
     type: String
@@ -248,3 +252,6 @@ properties:
       - autoscale
     required_with:
       - scalingMode
+  - name: reservationGroup
+    type: String
+    description: 'The reservation group that this reservation belongs to. You can set this property when you create or update a reservation. Reservations do not need to belong to a reservation group. Format: projects/{project}/locations/{location}/reservationGroups/{reservation_group} or just {reservation_group}'
