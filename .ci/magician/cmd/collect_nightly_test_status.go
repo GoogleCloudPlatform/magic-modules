@@ -323,6 +323,11 @@ func categorizeError(errMsg string) string {
 		return "Precondition check failed"
 	}
 
+	// Provider Crash
+	if strings.Contains(errMsg, "panic:") {
+		return "Crash"
+	}
+
 	// Diff Category
 	if strings.Contains(errMsg, "After applying this test step, the plan was not empty") ||
 		strings.Contains(errMsg, "After applying this test step and performing a `terraform refresh`") ||
