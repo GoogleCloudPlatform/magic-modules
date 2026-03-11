@@ -47,7 +47,7 @@ examples:
     test_env_vars:
       project_name: PROJECT_NAME
       region: REGION
-  - name: region_network_firewall_policy_association_multi
+  - name: region_network_firewall_policy_association_priority
     min_version: beta
     primary_resource_id: association
     vars:
