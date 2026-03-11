@@ -1494,7 +1494,7 @@ resource "google_dataproc_cluster" "tier_cluster" {
 `, bucketName, clusterName, tierConfig, subnetworkName)
 }
 
-func TestAccDataprocCluster_withClusterType(t *testing.T) {
+func TestAccDataprocCluster_withClusterTypeSingleNode(t *testing.T) {
 	t.Parallel()
 
 	var cluster dataproc.Cluster
@@ -1516,6 +1516,24 @@ func TestAccDataprocCluster_withClusterType(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.type_cluster", "cluster_config.0.cluster_type", "SINGLE_NODE"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_withClusterTypeZeroScale(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
 			{
 				// Set type to ZERO_SCALE
 				Config: testAccDataprocCluster_withClusterType(rnd, subnetworkName, "ZERO_SCALE"),
