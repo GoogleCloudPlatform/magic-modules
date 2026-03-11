@@ -88,7 +88,8 @@ properties:
   - name: 'backendService'
     type: ResourceRef
     description: |
-      A reference to the BackendService resource.
+      A reference to the BackendService resource. This field is optional when
+      the loadBalancingScheme is set to INTERNAL_MANAGED.
     api_name: service
     required: true
     update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
@@ -102,3 +103,14 @@ properties:
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
+    - name: loadBalancingScheme
+    min_version: beta
+    type: Enum
+    description: |
+      Specifies the load balancer type. A target TCP proxy created for one type
+      of load balancer cannot be used with another. For more information, refer
+      to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
+    enum_values:
+      - 'EXTERNAL'
+      - 'EXTERNAL_MANAGED'
+      - 'INTERNAL_MANAGED'
