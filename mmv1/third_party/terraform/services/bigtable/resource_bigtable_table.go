@@ -15,7 +15,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func familyHash(v interface{}) int {
 	m := v.(map[string]interface{})
@@ -748,4 +749,13 @@ func getRowKeySchema(input interface{}) (*bigtable.StructType, error) {
 		return nil, fmt.Errorf("only struct type is accepted as row key schema")
 	}
 	return &structRks, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_bigtable_table",
+		ProductName: "bigtable",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceBigtableTable(),
+	}.Register()
 }

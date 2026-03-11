@@ -8,7 +8,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleKmsLatestCryptoKeyVersion() *schema.Resource {
 	return &schema.Resource{
@@ -176,4 +177,13 @@ func dataSourceGoogleKmsLatestCryptoKeyVersionRead(d *schema.ResourceData, meta 
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_kms_crypto_key_latest_version",
+		ProductName: "kms",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleKmsLatestCryptoKeyVersion(),
+	}.Register()
 }

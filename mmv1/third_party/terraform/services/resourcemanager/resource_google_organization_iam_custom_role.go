@@ -9,7 +9,18 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/iam/v1"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 )
+
+func init() {
+	registry.Schema{
+		Name: "google_organization_iam_custom_role",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleOrganizationIamCustomRole(),
+	}.Register()
+}
 
 func ResourceGoogleOrganizationIamCustomRole() *schema.Resource {
 	return &schema.Resource{

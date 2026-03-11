@@ -14,7 +14,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeNodeTypes() *schema.Resource {
 	return &schema.Resource{
@@ -84,4 +85,13 @@ func flattenComputeNodeTypes(nodeTypes []*compute.NodeType) []string {
 	}
 	sort.Strings(result)
 	return result
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_node_types",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeNodeTypes(),
+	}.Register()
 }

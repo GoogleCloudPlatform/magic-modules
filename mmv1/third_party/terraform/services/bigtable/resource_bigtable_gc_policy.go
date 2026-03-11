@@ -17,7 +17,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 const (
 	GCPolicyModeIntersection = "INTERSECTION"
@@ -639,4 +640,13 @@ func getMaxAgeDuration(values map[string]interface{}) (time.Duration, error) {
 	days := values["days"].(int)
 
 	return time.Hour * 24 * time.Duration(days), nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_bigtable_gc_policy",
+		ProductName: "bigtable",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceBigtableGCPolicy(),
+	}.Register()
 }

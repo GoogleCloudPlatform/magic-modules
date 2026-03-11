@@ -8,7 +8,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCloudIdentityGroupLookup() *schema.Resource {
 
@@ -98,4 +99,13 @@ func dataSourceGoogleCloudIdentityGroupLookupRead(d *schema.ResourceData, meta i
 	}
 	d.SetId(time.Now().UTC().String())
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_cloud_identity_group_lookup",
+		ProductName: "cloudidentity",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudIdentityGroupLookup(),
+	}.Register()
 }

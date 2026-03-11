@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceSqlBackupRun() *schema.Resource {
 
@@ -111,4 +112,13 @@ func dataSourceSqlBackupRunRead(d *schema.ResourceData, meta interface{}) error 
 	}
 	d.SetId(id)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_sql_backup_run",
+		ProductName: "sql",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceSqlBackupRun(),
+	}.Register()
 }

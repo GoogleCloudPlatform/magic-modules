@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeNetworkAttachment() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeNetworkAttachment().Schema)
@@ -67,4 +68,13 @@ func dataSourceComputeNetworkAttachmentRead(d *schema.ResourceData, meta interfa
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_network_attachment",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeNetworkAttachment(),
+	}.Register()
 }

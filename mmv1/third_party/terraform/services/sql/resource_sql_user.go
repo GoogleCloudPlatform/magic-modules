@@ -15,7 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
 	strippedName := strings.Split(new, "@")[0]
@@ -666,4 +667,13 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_sql_user",
+		ProductName: "sql",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceSqlUser(),
+	}.Register()
 }

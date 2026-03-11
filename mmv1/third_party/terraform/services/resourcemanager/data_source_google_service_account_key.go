@@ -11,7 +11,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleServiceAccountKey() *schema.Resource {
 	return &schema.Resource{
@@ -78,4 +79,13 @@ func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interfac
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_service_account_key",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleServiceAccountKey(),
+	}.Register()
 }

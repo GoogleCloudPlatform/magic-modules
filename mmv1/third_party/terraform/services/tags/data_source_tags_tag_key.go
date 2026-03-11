@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleTagsTagKey() *schema.Resource {
 	return &schema.Resource{
@@ -113,4 +114,13 @@ func dataSourceGoogleTagsTagKeyRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_tags_tag_key",
+		ProductName: "tags",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleTagsTagKey(),
+	}.Register()
 }

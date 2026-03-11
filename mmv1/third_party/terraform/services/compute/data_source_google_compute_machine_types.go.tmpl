@@ -13,7 +13,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeMachineTypes() *schema.Resource {
 	return &schema.Resource{
@@ -248,4 +249,13 @@ func flattenDatasourceGoogleComputeMachineTypesList(ctx context.Context, v []*co
 	}
 
 	return machineTypes
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_machine_types",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeMachineTypes(),
+	}.Register()
 }

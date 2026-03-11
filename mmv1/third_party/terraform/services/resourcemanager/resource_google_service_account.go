@@ -16,7 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iam/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceGoogleServiceAccount() *schema.Resource {
 	return &schema.Resource{
@@ -366,4 +367,13 @@ func resourceServiceAccountCustomDiff(_ context.Context, diff *schema.ResourceDi
 
 	// separate func to allow unit testing
 	return ResourceServiceAccountCustomDiffFunc(diff)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_service_account",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleServiceAccount(),
+	}.Register()
 }

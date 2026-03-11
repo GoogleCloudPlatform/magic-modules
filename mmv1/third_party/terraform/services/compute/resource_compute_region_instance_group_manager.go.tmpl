@@ -19,7 +19,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 	return &schema.Resource{
@@ -2013,4 +2014,13 @@ func isNullOrEmptyBlock(flexPolicy any) bool {
 	}
 
 	return false // Return false for non-empty flex policy
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_region_instance_group_manager",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeRegionInstanceGroupManager(),
+	}.Register()
 }

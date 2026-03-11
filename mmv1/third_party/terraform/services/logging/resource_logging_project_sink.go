@@ -10,7 +10,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 const nonUniqueWriterAccount = "serviceAccount:cloud-logs@system.gserviceaccount.com"
 
@@ -225,4 +226,13 @@ func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId("")
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_logging_project_sink",
+		ProductName: "logging",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceLoggingProjectSink(),
+	}.Register()
 }

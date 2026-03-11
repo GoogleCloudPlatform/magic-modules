@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceGoogleProjectOrganizationPolicy() *schema.Resource {
 	return &schema.Resource{
@@ -189,4 +190,13 @@ func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) erro
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
 	})
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_project_organization_policy",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleProjectOrganizationPolicy(),
+	}.Register()
 }

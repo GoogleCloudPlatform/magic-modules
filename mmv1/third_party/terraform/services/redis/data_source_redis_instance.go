@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleRedisInstance() *schema.Resource {
 	// Generate datasource schema from resource
@@ -61,4 +62,13 @@ func SetDataSourceReservedIpRange(d *schema.ResourceData) error {
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_redis_instance",
+		ProductName: "redis",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleRedisInstance(),
+	}.Register()
 }

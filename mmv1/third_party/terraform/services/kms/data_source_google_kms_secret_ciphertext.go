@@ -11,7 +11,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleKmsSecretCiphertext() *schema.Resource {
 	return &schema.Resource{
@@ -72,4 +73,13 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 	d.SetId(d.Get("crypto_key").(string))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_kms_secret_ciphertext",
+		ProductName: "kms",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleKmsSecretCiphertext(),
+	}.Register()
 }

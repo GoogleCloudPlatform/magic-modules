@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeInstanceGroupManager() *schema.Resource {
 
@@ -60,4 +61,13 @@ func dataSourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta inte
 		return errors.New("Instance Manager Group not found")
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_group_manager",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeInstanceGroupManager(),
+	}.Register()
 }

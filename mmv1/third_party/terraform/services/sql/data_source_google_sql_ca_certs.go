@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleSQLCaCerts() *schema.Resource {
 	return &schema.Resource{
@@ -96,4 +97,13 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 	d.SetId(fmt.Sprintf("projects/%s/instance/%s", project, instance))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_sql_ca_certs",
+		ProductName: "sql",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleSQLCaCerts(),
+	}.Register()
 }

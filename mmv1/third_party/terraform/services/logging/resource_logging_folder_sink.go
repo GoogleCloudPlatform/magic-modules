@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceLoggingFolderSink() *schema.Resource {
 	schm := &schema.Resource{
@@ -128,4 +129,13 @@ func resourceLoggingFolderSinkDelete(d *schema.ResourceData, meta interface{}) e
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_logging_folder_sink",
+		ProductName: "logging",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceLoggingFolderSink(),
+	}.Register()
 }

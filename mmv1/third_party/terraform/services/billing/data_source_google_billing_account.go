@@ -9,7 +9,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/cloudbilling/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleBillingAccount() *schema.Resource {
 	return &schema.Resource{
@@ -151,4 +152,13 @@ func flattenBillingProjects(billingProjects []*cloudbilling.ProjectBillingInfo) 
 	}
 
 	return projectIds
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_billing_account",
+		ProductName: "billing",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleBillingAccount(),
+	}.Register()
 }

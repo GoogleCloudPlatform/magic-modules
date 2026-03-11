@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -120,4 +121,31 @@ func getBillingAccountIamPolicyByBillingAccountName(resource string, config *tra
 	}
 
 	return v1Policy, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_billing_account_iam_binding",
+		ProductName: "billing",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(IamBillingAccountSchema, NewBillingAccountIamUpdater, BillingAccountIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_billing_account_iam_member",
+		ProductName: "billing",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(IamBillingAccountSchema, NewBillingAccountIamUpdater, BillingAccountIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_billing_account_iam_policy",
+		ProductName: "billing",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(IamBillingAccountSchema, NewBillingAccountIamUpdater, BillingAccountIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_billing_account_iam_policy",
+		ProductName: "billing",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(IamBillingAccountSchema, NewBillingAccountIamUpdater),
+	}.Register()
 }

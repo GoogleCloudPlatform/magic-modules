@@ -13,7 +13,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"golang.org/x/net/context"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 const (
 	userInfoScope = "https://www.googleapis.com/auth/userinfo.email"
@@ -123,4 +124,13 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_service_account_id_token",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleServiceAccountIdToken(),
+	}.Register()
 }

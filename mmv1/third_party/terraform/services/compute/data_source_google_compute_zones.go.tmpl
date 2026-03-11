@@ -16,7 +16,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeZones() *schema.Resource {
 	return &schema.Resource{
@@ -98,4 +99,13 @@ func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) 
 	d.SetId(fmt.Sprintf("projects/%s/regions/%s", project, region))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_zones",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeZones(),
+	}.Register()
 }

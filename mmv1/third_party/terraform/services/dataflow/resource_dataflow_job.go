@@ -18,7 +18,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	dataflow "google.golang.org/api/dataflow/v1b3"
 	"google.golang.org/api/googleapi"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 const resourceDataflowJobGoogleLabelPrefix = "goog-dataflow-provided"
 const resourceDataflowJobGoogleProvidedLabelPrefix = "labels." + resourceDataflowJobGoogleLabelPrefix
@@ -749,4 +750,13 @@ func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *transport_tpg
 			return nil
 		}
 	})
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_dataflow_job",
+		ProductName: "dataflow",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceDataflowJob(),
+	}.Register()
 }

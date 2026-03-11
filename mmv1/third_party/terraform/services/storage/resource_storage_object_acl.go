@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/storage/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceStorageObjectAcl() *schema.Resource {
 	return &schema.Resource{
@@ -406,4 +407,13 @@ func validateRoleEntityPair(v interface{}, k string) (ws []string, errors []erro
 func getValidatedRoleEntityPair(roleEntity string) *RoleEntity {
 	split := strings.Split(roleEntity, ":")
 	return &RoleEntity{Role: split[0], Entity: split[1]}
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_storage_object_acl",
+		ProductName: "storage",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceStorageObjectAcl(),
+	}.Register()
 }
