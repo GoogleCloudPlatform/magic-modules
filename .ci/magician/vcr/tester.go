@@ -516,6 +516,7 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		"storage",
 		"cp",
 		"--recursive",
+		"--content-type=text/plain",
 		filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opts.Mode.Lower())),
 		fmt.Sprintf("%sbuild-log/%s_test%s.log", bucketPath, opts.Mode.Lower(), suffix),
 	}
@@ -530,6 +531,7 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 			"storage",
 			"cp",
 			"--recursive",
+			"--content-type=text/plain",
 			filepath.Join(vt.baseDir, "testlogs", opts.Mode.Lower()+"_build", "*"),
 			fmt.Sprintf("%sbuild-log/%s_build%s/", bucketPath, opts.Mode.Lower(), suffix),
 		}
@@ -542,6 +544,7 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		"storage",
 		"cp",
 		"--recursive",
+		"--content-type=text/plain",
 		filepath.Join(logPath, "*"),
 		fmt.Sprintf("%s%s%s/", bucketPath, opts.Mode.Lower(), suffix),
 	}

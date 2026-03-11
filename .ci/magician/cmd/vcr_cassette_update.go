@@ -222,7 +222,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 }
 
 func uploadLogsToGCS(src, dest string, rnr ExecRunner) (string, error) {
-	return uploadToGCS(src, dest, []string{"storage", "cp", "--recursive"}, rnr)
+	return uploadToGCS(src, dest, []string{"storage", "cp", "--recursive", "--content-type=text/plain"}, rnr)
 }
 
 func uploadCassettesToGCS(src, dest string, rnr ExecRunner) (string, error) {
