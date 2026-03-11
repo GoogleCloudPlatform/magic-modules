@@ -42,6 +42,7 @@ examples:
       region_backend_service_name: backend-service
       region_target_tcp_proxy_name: test-proxy
   - name: region_target_tcp_proxy_backendless
+    min_version: beta
     primary_resource_id: default
     vars:
       region_target_tcp_proxy_name: test-proxy
