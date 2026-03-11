@@ -2,7 +2,6 @@ module github.com/GoogleCloudPlatform/magic-modules/tools/template-check
 
 go 1.25.0
 
-
 require (
 	github.com/google/go-cmp v0.7.0
 	github.com/spf13/cobra v1.9.1
