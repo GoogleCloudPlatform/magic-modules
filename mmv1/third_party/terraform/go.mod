@@ -26,7 +26,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-mux v0.20.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.39.0
-	github.com/hashicorp/terraform-plugin-testing v1.14.1-0.20260311043759-abdb4de3588a
+	github.com/hashicorp/terraform-plugin-testing v1.14.1-0.20260311212540-c8d3753836d3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/hashstructure v1.1.0
 	github.com/sirupsen/logrus v1.8.3
