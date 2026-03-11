@@ -142,7 +142,7 @@ properties:
   - name: 'createTime'
     type: Time
     description: |
-      Time the Instance was created in UTC. FORCE TESTS.
+      Time the Instance was created in UTC.
     output: true
   - name: 'updateTime'
     type: Time
