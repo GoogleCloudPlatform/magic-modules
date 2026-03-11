@@ -688,8 +688,11 @@ var schemaNodePool = map[string]*schema.Schema{
 				},
 				"subnetwork": {
 					Type:         schema.TypeString,
+					Optional:     true,
 					Computed:     true,
-					Description:  `The subnetwork path for the node pool. Format: projects/{project}/regions/{region}/subnetworks/{subnetwork} . If the cluster is associated with multiple subnetworks, the subnetwork for the node pool is picked based on the IP utilization during node pool creation and is immutable.`,
+					ForceNew:     true,
+					DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+					Description:  `The subnetwork name/path for the node pool. Format: subnetwork or projects/{project}/regions/{region}/subnetworks/{subnetwork}. This value may be specified via the nested network_config block (setting this attribute directly is supported for backward compatibility). Once created the node pool's subnetwork is immutable. If not set, the provider/API will choose the subnetwork (e.g. based on IP utilization) and report it here.`,
 				},
 			},
 		},
@@ -1291,8 +1294,8 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 			}
 
 			{{ if ne $.TargetVersionName `ga` -}}
-			if _, ok1 := blueGreenSettingsConfig["standard_rollout_policy"]; ok1 {
-				if _, ok2 := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok2 {
+			if s, ok1 := blueGreenSettingsConfig["standard_rollout_policy"]; ok1 && len(s.([]interface{})) > 0 {
+				if a, ok2 := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok2 && len(a.([]interface{})) > 0{
 					return nil, fmt.Errorf("`standard_rollout_policy` and `autoscaled_rollout_policy` cannot be set at the same time")
 				}
 			}
@@ -1668,6 +1671,13 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 		nnc.AcceleratorNetworkProfile = v.(string)
 	}
 	{{- end }}
+
+	// Allow user to set the top-level node-pool subnetwork via network_config.subnetwork
+	if v, ok := networkNodeConfig["subnetwork"]; ok {
+		if s, ok := v.(string); ok && s != "" {
+			nnc.Subnetwork = s
+		}
+	}
 	return nnc
 }
 

@@ -1929,7 +1929,6 @@ resource "google_cloud_run_service" "default" {
 `, name, project)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunService_cloudRunServiceIap_update(t *testing.T) {
 	t.Parallel()
 
@@ -1940,7 +1939,7 @@ func TestAccCloudRunService_cloudRunServiceIap_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1968,14 +1967,12 @@ func TestAccCloudRunService_cloudRunServiceIap_update(t *testing.T) {
 func testAccCloudRunService_cloudRunServiceIapEnabled(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_service" "default" {
-  provider = google-beta
   name     = "tf-test-cloudrun-srv%{random_suffix}"
   location = "us-central1"
 
   metadata {
     annotations = {
       "run.googleapis.com/iap-enabled": true
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -1993,7 +1990,6 @@ resource "google_cloud_run_service" "default" {
 func testAccCloudRunService_cloudRunServiceIapDisabled(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_service" "default" {
-  provider = google-beta
   name     = "tf-test-cloudrun-srv%{random_suffix}"
   location = "us-central1"
 
@@ -2013,5 +2009,4 @@ resource "google_cloud_run_service" "default" {
 }
 `, context)
 }
-{{- end }}
 

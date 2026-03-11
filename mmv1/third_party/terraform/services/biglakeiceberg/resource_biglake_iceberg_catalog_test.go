@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: MMv1     ***
@@ -102,7 +99,7 @@ resource "google_storage_bucket" "bucket_for_my_iceberg_catalog" {
 resource "google_biglake_iceberg_catalog" "my_iceberg_catalog" {
     name = "tf_test_my_iceberg_catalog%{random_suffix}"
     catalog_type = "CATALOG_TYPE_GCS_BUCKET"
-		credential_mode = "CREDENTIAL_MODE_VENDED_CREDENTIALS"
+		credential_mode = "CREDENTIAL_MODE_END_USER"
     depends_on = [
       google_storage_bucket.bucket_for_my_iceberg_catalog
     ]

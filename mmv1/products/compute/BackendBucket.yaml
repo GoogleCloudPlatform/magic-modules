@@ -41,14 +41,13 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 iam_policy:
   parent_resource_attribute: 'name'
   import_format:
     - 'projects/{{project}}/global/backendBuckets/{{name}}'
     - '{{name}}'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/compute_backend_bucket.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'
@@ -56,7 +55,6 @@ custom_code:
 examples:
   - name: 'backend_bucket_basic'
     primary_resource_id: 'image_backend'
-    primary_resource_name: 'fmt.Sprintf("tf-test-image-backend-bucket%s", context["random_suffix"])'
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'

@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"regexp"
 	"testing"
 	"time"
 
@@ -130,6 +131,33 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUp
 	})
 }
 
+func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedUpdateError(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckFirebaseAILogicPromptTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context, "Hello V1"),
+			},
+			{
+				Config:      testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context, "Hello V2"),
+				ExpectError: regexp.MustCompile("(?s)Error updating PromptTemplate.*Precondition check failed"),
+			},
+		},
+	})
+}
+
 func testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdateExample(context map[string]interface{}, message string) string {
 	context["template_message"] = message
 	return acctest.Nprintf(`
@@ -162,6 +190,77 @@ resource "google_firebase_ai_logic_prompt_template" "complex" {
   template_string = <<EOF
 ---
 model: googleai/%{model_name}
+---
+%{template_message}
+EOF
+}
+`, context)
+}
+
+func testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context map[string]interface{}, message string) string {
+	context["template_message"] = message
+	return acctest.Nprintf(`
+resource "google_firebase_ai_logic_prompt_template" "locked" {
+  provider = google-beta
+  project  = "%{project_id}"
+  location = "global"
+  template_id = "tf-test-locked-%{random_suffix}"
+  template_string = <<EOF
+---
+model: googleai/gemini-2.0-flash
+---
+%{template_message}
+EOF
+}
+
+resource "google_firebase_ai_logic_prompt_template_lock" "locked_lock" {
+  provider = google-beta
+  project  = google_firebase_ai_logic_prompt_template.locked.project
+  location = google_firebase_ai_logic_prompt_template.locked.location
+  template_id = google_firebase_ai_logic_prompt_template.locked.template_id
+}
+`, context)
+}
+
+func TestAccFirebaseAILogicPromptTemplate_regional(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"location":      "us-central1",
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseAILogicPromptTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_regionalExample(context, "Hello from US-Central1"),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.regional",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+
+func testAccFirebaseAILogicPromptTemplate_regionalExample(context map[string]interface{}, message string) string {
+	context["template_message"] = message
+	return acctest.Nprintf(`
+resource "google_firebase_ai_logic_prompt_template" "regional" {
+  provider = google-beta
+  project  = "%{project_id}"
+  location = "%{location}"
+  template_id = "tf-test-regional-%{random_suffix}"
+  template_string = <<EOF
+---
+model: googleai/gemini-2.0-flash
 ---
 %{template_message}
 EOF

@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 // ----------------------------------------------------------------------------
@@ -55,6 +55,10 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	{{- if $e.SkipTest }}
 	t.Skip("{{$e.SkipTest}}")
 	{{- end }}
+
+	{{- if $e.SkipFunc }}
+	{{$e.SkipFunc}}
+	{{- end}}
 
 	{{- if $e.SkipVcr }}
 	acctest.SkipIfVcr(t)
