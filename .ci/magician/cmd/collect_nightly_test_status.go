@@ -271,7 +271,7 @@ func convertServiceName(servicePath string) (string, error) {
 	return "", fmt.Errorf("wrong service path format for %s", servicePath)
 }
 
-// convertErrorMessage returns a concise error message, 
+// convertErrorMessage returns a concise error message,
 // preserving panics but dropping noisy debug stderr logs.
 func convertErrorMessage(rawErrorMessage string) string {
 	startMarker := "------- Stdout: -------"
