@@ -161,7 +161,7 @@ fun BuildSteps.saveArtifactsToGCS() {
 
             echo "Uploading artifacts to GCS folder: ${'$'}{FOLDER}"
             # Copy logs to GCS
-            gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
+            gcloud storage cp %teamcity.build.checkoutDir%/debug* gs://teamcity-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
 
             # Cleanup
             rm google-account.json
