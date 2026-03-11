@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var runtimeConfigFullName *regexp.Regexp = regexp.MustCompile("^projects/([^/]+)/configs/(.+)$")
 
@@ -205,3 +206,12 @@ func resourceRuntimeconfigParseFullName(fullName string) (project, name string, 
 	return matches[1], matches[2], nil
 }
 {{- end }}
+
+func init() {
+	registry.Schema{
+		Name: "google_runtimeconfig_config",
+		ProductName: "runtimeconfig",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceRuntimeconfigConfig(),
+	}.Register()
+}

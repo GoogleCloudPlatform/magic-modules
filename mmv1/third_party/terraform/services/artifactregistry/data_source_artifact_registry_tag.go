@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceArtifactRegistryTag() *schema.Resource {
 	return &schema.Resource{
@@ -119,4 +120,13 @@ func DataSourceArtifactRegistryTagRead(d *schema.ResourceData, meta interface{})
 	d.SetId(name)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_artifact_registry_tag",
+		ProductName: "artifactregistry",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceArtifactRegistryTag(),
+	}.Register()
 }

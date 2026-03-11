@@ -19,7 +19,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var instancesSelfLinkPattern = regexp.MustCompile(fmt.Sprintf(tpgresource.ZonalLinkBasePattern, "instances"))
 
@@ -587,4 +588,13 @@ func resourceTargetPoolStateImporter(d *schema.ResourceData, meta interface{}) (
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_target_pool",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeTargetPool(),
+	}.Register()
 }

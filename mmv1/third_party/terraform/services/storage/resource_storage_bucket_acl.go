@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"google.golang.org/api/storage/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceStorageBucketAcl() *schema.Resource {
 	return &schema.Resource{
@@ -427,4 +428,13 @@ func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) er
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_storage_bucket_acl",
+		ProductName: "storage",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceStorageBucketAcl(),
+	}.Register()
 }

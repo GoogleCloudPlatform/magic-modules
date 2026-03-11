@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceArtifactRegistryVersion() *schema.Resource {
 	return &schema.Resource{
@@ -203,4 +204,13 @@ func validateViewArtifactRegistryVersion(val interface{}, key string) ([]string,
 	}
 
 	return nil, errs
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_artifact_registry_version",
+		ProductName: "artifactregistry",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceArtifactRegistryVersion(),
+	}.Register()
 }

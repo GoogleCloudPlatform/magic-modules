@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCloudBackupDRService() *schema.Resource {
 
@@ -101,4 +102,13 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 	name := id[strings.LastIndex(id, "/")+1:]
 	d.Set("name", name)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_backup_dr_management_server",
+		ProductName: "backupdr",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudBackupDRService(),
+	}.Register()
 }

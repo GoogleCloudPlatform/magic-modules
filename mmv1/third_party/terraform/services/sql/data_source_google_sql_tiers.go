@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleSQLTiers() *schema.Resource {
 	return &schema.Resource{
@@ -107,4 +108,13 @@ func flattenTiers(items []*sqladmin.Tier) []map[string]interface{} {
 	}
 
 	return tiers
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_sql_tiers",
+		ProductName: "sql",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleSQLTiers(),
+	}.Register()
 }

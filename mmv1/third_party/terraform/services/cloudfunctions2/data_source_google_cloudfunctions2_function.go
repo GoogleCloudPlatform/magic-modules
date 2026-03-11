@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCloudFunctions2Function() *schema.Resource {
 	// Generate datasource schema from resource
@@ -49,4 +50,13 @@ func dataSourceGoogleCloudFunctions2FunctionRead(d *schema.ResourceData, meta in
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_cloudfunctions2_function",
+		ProductName: "cloudfunctions2",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudFunctions2Function(),
+	}.Register()
 }

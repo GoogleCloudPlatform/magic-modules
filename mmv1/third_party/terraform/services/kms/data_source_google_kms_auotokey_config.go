@@ -5,7 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleKmsAutokeyConfig() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceKMSAutokeyConfig().Schema)
@@ -33,4 +34,13 @@ func dataSourceGoogleKmsAutokeyConfigRead(d *schema.ResourceData, meta interface
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_kms_autokey_config",
+		ProductName: "kms",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleKmsAutokeyConfig(),
+	}.Register()
 }

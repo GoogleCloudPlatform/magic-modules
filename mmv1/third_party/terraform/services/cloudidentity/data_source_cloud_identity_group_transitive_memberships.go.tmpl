@@ -12,7 +12,8 @@ import (
 {{- else }}
 	"google.golang.org/api/cloudidentity/v1"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCloudIdentityGroupTransitiveMemberships() *schema.Resource {
 
@@ -176,4 +177,13 @@ func flattenCloudIdentityGroupsEntityKeyList(entityKeys []*cloudidentity.EntityK
 	}
 
 	return transformed
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_cloud_identity_group_transitive_memberships",
+		ProductName: "cloudidentity",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudIdentityGroupTransitiveMemberships(),
+	}.Register()
 }

@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleContainerCluster() *schema.Resource {
 	// Generate datasource schema from resource
@@ -61,4 +62,13 @@ func datasourceContainerClusterRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_container_cluster",
+		ProductName: "container",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleContainerCluster(),
+	}.Register()
 }

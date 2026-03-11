@@ -24,7 +24,8 @@ import (
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func buckeEncryptionEnforcementConfigSchema(encryptionType string) *schema.Schema {
 	return &schema.Schema{
@@ -2518,4 +2519,13 @@ func hierachicalNamespaceDiffSuppress(k, old, new string, r *schema.ResourceData
 	}
 
 	return false
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_storage_bucket",
+		ProductName: "storage",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceStorageBucket(),
+	}.Register()
 }

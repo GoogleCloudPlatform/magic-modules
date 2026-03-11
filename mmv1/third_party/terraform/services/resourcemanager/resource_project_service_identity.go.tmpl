@@ -12,7 +12,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceProjectServiceIdentity() *schema.Resource {
 	return &schema.Resource{
@@ -135,3 +136,12 @@ func resourceProjectServiceIdentityDelete(d *schema.ResourceData, meta interface
 	return nil
 }
 {{- end }}
+
+func init() {
+	registry.Schema{
+		Name: "google_project_service_identity",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceProjectServiceIdentity(),
+	}.Register()
+}

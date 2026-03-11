@@ -11,7 +11,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeVpnGateway() *schema.Resource {
 	return &schema.Resource{
@@ -96,4 +97,13 @@ func dataSourceGoogleComputeVpnGatewayRead(d *schema.ResourceData, meta interfac
 	}
 	d.SetId(id)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_vpn_gateway",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeVpnGateway(),
+	}.Register()
 }

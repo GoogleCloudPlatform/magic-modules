@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceOSConfigOSPolicyAssignment() *schema.Resource {
 	return &schema.Resource{
@@ -4670,4 +4671,13 @@ func expandOSConfigOSPolicyAssignmentRolloutDisruptionBudgetPercent(v interface{
 
 func expandOSConfigOSPolicyAssignmentRolloutMinWaitDuration(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_os_config_os_policy_assignment",
+		ProductName: "osconfig",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceOSConfigOSPolicyAssignment(),
+	}.Register()
 }

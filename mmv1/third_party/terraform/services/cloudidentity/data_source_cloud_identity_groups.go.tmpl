@@ -13,7 +13,8 @@ import (
 {{- else }}
 	"google.golang.org/api/cloudidentity/v1"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCloudIdentityGroups() *schema.Resource {
 	// Generate datasource schema from resource
@@ -100,4 +101,13 @@ func flattenCloudIdentityGroupsEntityKey(entityKey *cloudidentity.EntityKey) []i
 		"namespace": entityKey.Namespace,
 	}
 	return []interface{}{transformed}
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_cloud_identity_groups",
+		ProductName: "cloudidentity",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudIdentityGroups(),
+	}.Register()
 }

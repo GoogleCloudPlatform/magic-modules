@@ -17,7 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/storagetransfer/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var (
 	transferSpecObjectConditionsKeys = []string{
@@ -2048,4 +2049,13 @@ func flattenTransferJobLoggingConfig(loggingConfig *storagetransfer.LoggingConfi
 	}
 
 	return []map[string]interface{}{data}
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_storage_transfer_job",
+		ProductName: "storagetransfer",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceStorageTransferJob(),
+	}.Register()
 }

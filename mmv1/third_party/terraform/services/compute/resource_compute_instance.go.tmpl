@@ -28,7 +28,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// The range may be a:
@@ -3995,3 +3996,12 @@ func updateDisk(d *schema.ResourceData, config *transport_tpg.Config, userAgent,
 	return nil
 }
 
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeInstance(),
+	}.Register()
+}

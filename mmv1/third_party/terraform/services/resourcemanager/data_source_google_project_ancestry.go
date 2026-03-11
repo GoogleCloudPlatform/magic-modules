@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleProjectAncestry() *schema.Resource {
 	return &schema.Resource{
@@ -123,4 +124,13 @@ func datasourceGoogleProjectAncestryRead(d *schema.ResourceData, meta interface{
 	d.SetId(fmt.Sprintf("projects/%s", project))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_project_ancestry",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleProjectAncestry(),
+	}.Register()
 }

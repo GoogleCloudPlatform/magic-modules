@@ -15,7 +15,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeRegionInstanceTemplate() *schema.Resource {
 	// Generate datasource schema from resource
@@ -127,4 +128,13 @@ func retrieveInstances(d *schema.ResourceData, meta interface{}, project, region
 		return err
 	}
 	return tpgresource.SetDataSourceLabels(d)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_region_instance_template",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeRegionInstanceTemplate(),
+	}.Register()
 }

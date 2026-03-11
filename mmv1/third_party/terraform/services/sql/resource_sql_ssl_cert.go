@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceSqlSslCert() *schema.Resource {
 	return &schema.Resource{
@@ -243,4 +244,13 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_sql_ssl_cert",
+		ProductName: "sql",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceSqlSslCert(),
+	}.Register()
 }

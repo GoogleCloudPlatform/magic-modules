@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceOracleDatabaseOdbSubnet() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceOracleDatabaseOdbSubnet().Schema)
@@ -39,4 +40,13 @@ func dataSourceOracleDatabaseOdbSubnetRead(d *schema.ResourceData, meta interfac
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_oracle_database_odb_subnet",
+		ProductName: "oracledatabase",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceOracleDatabaseOdbSubnet(),
+	}.Register()
 }

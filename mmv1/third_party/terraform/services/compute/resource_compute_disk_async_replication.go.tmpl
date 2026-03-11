@@ -16,7 +16,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeDiskAsyncReplication() *schema.Resource {
 	return &schema.Resource{
@@ -300,4 +301,13 @@ func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}
 		time.Sleep(5000 * time.Millisecond)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_disk_async_replication",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeDiskAsyncReplication(),
+	}.Register()
 }

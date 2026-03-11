@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCloudBackupDRDataSourceReferences() *schema.Resource {
 	return &schema.Resource{
@@ -297,4 +298,22 @@ func flattenDataSourceReferenceToMap(data map[string]interface{}) (map[string]in
 		ref["resource_type"] = resourceInfo["type"]
 	}
 	return ref, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_backup_dr_data_source_references",
+		ProductName: "backupdr",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudBackupDRDataSourceReferences(),
+	}.Register()
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_backup_dr_data_source_reference",
+		ProductName: "backupdr",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudBackupDRDataSourceReference(),
+	}.Register()
 }

@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"go4.org/netipx"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 type googRanges struct {
 	SyncToken    string     `json:"syncToken"`
@@ -307,4 +308,13 @@ func getCidrsDifference(reference, excluded map[string][]string) (map[string][]s
 	}
 
 	return result, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_netblock_ip_ranges",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleNetblockIpRanges(),
+	}.Register()
 }

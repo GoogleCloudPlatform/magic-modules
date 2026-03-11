@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceDnsManagedZones() *schema.Resource {
 
@@ -92,4 +93,13 @@ func flattenZones(items []*dns.ManagedZone, project string) []map[string]interfa
 	}
 
 	return zones
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_dns_managed_zones",
+		ProductName: "dns",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceDnsManagedZones(),
+	}.Register()
 }

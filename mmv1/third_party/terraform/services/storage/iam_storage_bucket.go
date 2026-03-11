@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -179,4 +180,31 @@ func (u *StorageBucketIamUpdater) GetMutexKey() string {
 
 func (u *StorageBucketIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("storage bucket %q", u.GetResourceId())
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_bucket_iam_member",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(StorageBucketIamSchema, StorageBucketIamUpdaterProducer, StorageBucketIdParseFunc, tpgiamresource.IamCreateTimeOut(20)),
+	}.Register()
+	registry.Schema{
+		Name:        "google_storage_bucket_iam_binding",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(StorageBucketIamSchema, StorageBucketIamUpdaterProducer, StorageBucketIdParseFunc, tpgiamresource.IamCreateTimeOut(20)),
+	}.Register()
+	registry.Schema{
+		Name:        "google_storage_bucket_iam_policy",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(StorageBucketIamSchema, StorageBucketIamUpdaterProducer, StorageBucketIdParseFunc, tpgiamresource.IamCreateTimeOut(20)),
+	}.Register()
+	registry.Schema{
+		Name:        "google_storage_bucket_iam_policy",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(StorageBucketIamSchema, StorageBucketIamUpdaterProducer),
+	}.Register()
 }

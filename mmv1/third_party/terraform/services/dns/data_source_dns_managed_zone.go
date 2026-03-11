@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceDnsManagedZone() *schema.Resource {
 	return &schema.Resource{
@@ -104,4 +105,13 @@ func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_dns_managed_zone",
+		ProductName: "dns",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceDnsManagedZone(),
+	}.Register()
 }

@@ -19,7 +19,8 @@ import (
 
     "google.golang.org/api/googleapi"
     "google.golang.org/api/serviceusage/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 // Services that can't be user-specified but are otherwise valid. Renamed
 // services should be added to this set during major releases.
@@ -335,4 +336,13 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, err)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_project_service",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleProjectService(),
+	}.Register()
 }

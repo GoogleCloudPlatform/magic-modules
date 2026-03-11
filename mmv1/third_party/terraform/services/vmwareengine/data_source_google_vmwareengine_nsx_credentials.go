@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceVmwareengineNsxCredentials() *schema.Resource {
 	return &schema.Resource{
@@ -87,4 +88,13 @@ func flattenVmwareengineNsxCredentailsUsername(v interface{}, d *schema.Resource
 
 func flattenVmwareengineNsxCredentailsPassword(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_vmwareengine_nsx_credentials",
+		ProductName: "vmwareengine",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceVmwareengineNsxCredentials(),
+	}.Register()
 }

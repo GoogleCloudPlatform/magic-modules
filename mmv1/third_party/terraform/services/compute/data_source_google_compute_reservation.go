@@ -7,7 +7,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeReservation() *schema.Resource {
 	// Generate datasource schema from resource
@@ -44,4 +45,13 @@ func dataSourceGoogleComputeReservationRead(d *schema.ResourceData, meta interfa
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/reservations/%s", project, zone, name))
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_reservation",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeReservation(),
+	}.Register()
 }

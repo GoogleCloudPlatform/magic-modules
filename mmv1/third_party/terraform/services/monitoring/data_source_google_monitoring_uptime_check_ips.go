@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleMonitoringUptimeCheckIps() *schema.Resource {
 	return &schema.Resource{
@@ -70,4 +71,13 @@ func flattenUptimeCheckIpsList(resp map[string]interface{}) []interface{} {
 		}
 	}
 	return uptimeCheckIps
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_monitoring_uptime_check_ips",
+		ProductName: "monitoring",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleMonitoringUptimeCheckIps(),
+	}.Register()
 }

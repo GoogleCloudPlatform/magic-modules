@@ -20,7 +20,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeRouterInterface() *schema.Resource {
 	return &schema.Resource{
@@ -426,4 +427,12 @@ func resourceComputeRouterInterfaceImportState(d *schema.ResourceData, meta inte
 	}
 
 	return nil, fmt.Errorf("invalid router interface specifier. Expecting either {region}/{router}/{interface} or {project}/{region}/{router}/{interface} import id format")
+}
+func init() {
+	registry.Schema{
+		Name: "google_compute_router_interface",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeRouterInterface(),
+	}.Register()
 }

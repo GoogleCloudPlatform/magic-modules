@@ -16,7 +16,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/storage/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleStorageBucketObjectContents() *schema.Resource {
 	return &schema.Resource{
@@ -185,4 +186,13 @@ func dataSourceGoogleStorageBucketObjectContentsRead(d *schema.ResourceData, met
 
 	d.SetId(dataSourceId)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_storage_bucket_object_contents",
+		ProductName: "storage",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleStorageBucketObjectContents(),
+	}.Register()
 }

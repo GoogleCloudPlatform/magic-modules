@@ -18,7 +18,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeInstanceFromTemplate() *schema.Resource {
 	return &schema.Resource{
@@ -323,4 +324,13 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 	}
 
 	return disks, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_from_template",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeInstanceFromTemplate(),
+	}.Register()
 }

@@ -10,7 +10,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceParameterManagerRegionalRegionalParameterVersion() *schema.Resource {
 	return &schema.Resource{
@@ -183,4 +184,13 @@ func dataSourceParameterManagerRegionalRegionalParameterVersionRead(d *schema.Re
 
 	d.SetId(nameValue.(string))
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_parameter_manager_regional_parameter_version",
+		ProductName: "parametermanagerregional",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceParameterManagerRegionalRegionalParameterVersion(),
+	}.Register()
 }

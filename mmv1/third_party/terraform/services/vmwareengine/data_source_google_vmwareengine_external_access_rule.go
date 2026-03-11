@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceVmwareengineExternalAccessRule() *schema.Resource {
 
@@ -36,4 +37,13 @@ func dataSourceVmwareengineExternalAccessRuleRead(d *schema.ResourceData, meta i
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_vmwareengine_external_access_rule",
+		ProductName: "vmwareengine",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceVmwareengineExternalAccessRule(),
+	}.Register()
 }
