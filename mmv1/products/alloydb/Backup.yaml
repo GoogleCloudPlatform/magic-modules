@@ -103,7 +103,7 @@ parameters:
   - name: 'location'
     type: String
     description: |
-      The location where the alloydb backup should reside. TEST TGC INTEGRATION SKIP
+      The location where the alloydb backup should reside.
     url_param_only: true
     required: true
     immutable: true

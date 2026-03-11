@@ -66,11 +66,11 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 	changedFiles := strings.Split(strings.TrimSpace(diffs), "\n")
 
 	if !shouldRunTests(changedFiles) {
-		fmt.Println("Skipping tests: No relevant .go files changed")
+		fmt.Println("Skipping tests: No relevant go files changed")
 		return nil
 	}
 
-	fmt.Println("Running tests: Related go files changed!")
+	fmt.Println("Running tests: Relevant go files changed!")
 
 	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
 	if err := gh.PostBuildStatus(prNumber, ghRepo+"-test-integration", "pending", targetURL, mmCommit); err != nil {
