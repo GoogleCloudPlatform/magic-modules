@@ -97,7 +97,7 @@ examples:
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'debian-stable'
-      desc: 'example remote apt repository'
+      desc: 'example remote apt repository FORCE INVALIDATION'
   - name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
     vars:
