@@ -262,9 +262,9 @@ resource "google_compute_organization_security_policy_rule" "policy" {
     expr {
       expression = "request.path.contains('/folder/')"
     }
-		versioned_expr = ""
+    versioned_expr = ""
   }
-	priority = 100
+  priority = 100
 }
 `, context)
 }
@@ -291,9 +291,9 @@ resource "google_compute_organization_security_policy_rule" "policy" {
     expr {
       expression = "request.path.contains('/folder/test/')"
     }
-		versioned_expr = ""
+    versioned_expr = ""
   }
-	priority = 100
+  priority = 100
 }
 `, context)
 }
