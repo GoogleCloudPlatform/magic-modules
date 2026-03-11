@@ -8,7 +8,7 @@ resource "google_dns_managed_zone_iam_member" "condition_test" {
   project      = google_dns_managed_zone.default.project
   managed_zone = google_dns_managed_zone.default.name
   role         = "roles/dns.admin"
-  member       = "user:admin@example.com"
+  member       = "user:admin@hashicorptest.com"
 
   condition {
     title       = "Exact Record Match"
