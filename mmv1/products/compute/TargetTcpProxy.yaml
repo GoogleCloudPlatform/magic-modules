@@ -51,7 +51,7 @@ examples:
     min_version: beta
     primary_resource_id: default
     vars:
-      region_target_tcp_proxy_name: test-proxy
+      target_tcp_proxy_name: test-proxy
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -107,7 +107,7 @@ properties:
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
-    - name: loadBalancingScheme
+  - name: loadBalancingScheme
     min_version: beta
     type: Enum
     description: |
