@@ -271,25 +271,38 @@ func convertServiceName(servicePath string) (string, error) {
 	return "", fmt.Errorf("wrong service path format for %s", servicePath)
 }
 
-// convertErrorMessage returns concise error message
+// convertErrorMessage returns a concise error message,
+// preserving panics but dropping noisy debug stderr logs.
 func convertErrorMessage(rawErrorMessage string) string {
-
 	startMarker := "------- Stdout: -------"
-	endMarker := "------- Stderr: -------"
-	startIndex := strings.Index(rawErrorMessage, startMarker)
-	endIndex := strings.Index(rawErrorMessage, endMarker)
+	stderrMarker := "------- Stderr: -------"
 
+	// 1. Find the start of the Stdout section
+	startIndex := strings.Index(rawErrorMessage, startMarker)
 	if startIndex != -1 {
 		startIndex += len(startMarker)
 	} else {
 		startIndex = 0
 	}
 
+	// 2. Find where the Stderr section begins
+	endIndex := strings.Index(rawErrorMessage, stderrMarker)
+
+	// If there is no Stderr marker at all, just return everything from Stdout
 	if endIndex == -1 {
-		endIndex = len(rawErrorMessage)
+		return strings.TrimSpace(rawErrorMessage[startIndex:])
 	}
 
-	return strings.TrimSpace(rawErrorMessage[startIndex:endIndex])
+	// 3. Separate the Stdout and Stderr sections cleanly
+	stdoutPart := strings.TrimSpace(rawErrorMessage[startIndex:endIndex])
+	stderrPart := strings.TrimSpace(rawErrorMessage[endIndex+len(stderrMarker):])
+
+	// 4. If the Stderr part contains a panic, keep it. Otherwise, drop it.
+	if strings.Contains(stderrPart, "panic:") {
+		return stdoutPart + "\n" + stderrPart
+	}
+
+	return stdoutPart
 }
 
 var (
@@ -308,6 +321,11 @@ func categorizeError(errMsg string) string {
 	}
 	if strings.Contains(errMsg, "Precondition check failed") {
 		return "Precondition check failed"
+	}
+
+	// Provider Crash
+	if strings.Contains(errMsg, "panic:") {
+		return "Crash"
 	}
 
 	// Diff Category
