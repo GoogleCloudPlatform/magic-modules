@@ -41,8 +41,8 @@ examples:
       health_check_name: health-check
       region_backend_service_name: backend-service
       region_target_tcp_proxy_name: test-proxy
-  - name: 'region_target_tcp_proxy_backendless'
-    primary_resource_id: 'default'
+  - name: region_target_tcp_proxy_backendless
+    primary_resource_id: default
     vars:
       region_target_tcp_proxy_name: test-proxy
 parameters:
@@ -107,15 +107,13 @@ properties:
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
-  - name: 'loadBalancingScheme'
+  - name: loadBalancingScheme
     min_version: beta
     type: Enum
     description: |
       Specifies the load balancer type. A target TCP proxy created for one type
-      of load balancer cannot be used with another.
-
-      For more information, refer to [Summary of types of Google Cloud load
-      balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
+      of load balancer cannot be used with another. For more information, refer
+      to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
     enum_values:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL_MANAGED'
