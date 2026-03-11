@@ -95,7 +95,6 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) Convert(asset caiasset.Asset) ([
 	return blocks, nil
 }
 
-// TRIGGER TGC INTEGRATION TEST
 func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")

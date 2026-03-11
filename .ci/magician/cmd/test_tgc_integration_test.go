@@ -27,42 +27,42 @@ func TestShouldRunTests(t *testing.T) {
 	}{
 		{
 			name:         "relevant go file",
-			changedFiles: []string{"mmv1/provider/terraform_tgc.go"},
+			changedFiles: []string{"test/services/alloydb/alloydb_cluster_generated_test.go"},
 			expected:     true,
 		},
 		{
 			name:         "non-go file",
-			changedFiles: []string{"mmv1/provider/terraform_tgc.yaml"},
+			changedFiles: []string{"docs/supported_resources.md"},
 			expected:     false,
 		},
 		{
 			name:         "ignored directory cai2hcl",
-			changedFiles: []string{"cai2hcl/main.go"},
+			changedFiles: []string{"cai2hcl/services/certificatemanager/certificate.go"},
 			expected:     false,
 		},
 		{
 			name:         "ignored directory tfplan2cai",
-			changedFiles: []string{"tfplan2cai/main.go"},
+			changedFiles: []string{"tfplan2cai/converters/google/resources/services/biglakeiceberg"},
 			expected:     false,
 		},
 		{
 			name:         "pkg/services file (ignored by default)",
-			changedFiles: []string{"pkg/services/compute/compute.go"},
+			changedFiles: []string{"pkg/services/compute/compute_disk.go"},
 			expected:     false,
 		},
 		{
 			name:         "pkg/services cai2hcl file (exception)",
-			changedFiles: []string{"pkg/services/compute/compute_cai2hcl.go"},
+			changedFiles: []string{"pkg/services/compute/compute_disk_cai2hcl.go"},
 			expected:     true,
 		},
 		{
 			name:         "pkg/services tfplan2cai file (exception)",
-			changedFiles: []string{"pkg/services/compute/tfplan2cai.go"},
+			changedFiles: []string{"pkg/services/compute/compute_disk_tfplan2cai.go"},
 			expected:     true,
 		},
 		{
 			name:         "multiple files, one relevant",
-			changedFiles: []string{"README.md", "cai2hcl/main.go", "mmv1/provider/terraform_tgc.go"},
+			changedFiles: []string{"README.md", "caiasset/asset.go", "pkg/cai2hcl/converters/convert_resource.go"},
 			expected:     true,
 		},
 	}

@@ -108,7 +108,7 @@ func shouldRunTests(changedFiles []string) bool {
 
 		// Handle pkg/services/ and its exceptions
 		if strings.HasPrefix(file, "pkg/services/") {
-			if strings.HasSuffix(file, "_cai2hcl.go") || strings.HasSuffix(file, "tfplan2cai.go") {
+			if strings.HasSuffix(file, "_cai2hcl.go") || strings.HasSuffix(file, "_tfplan2cai.go") {
 				return true
 			}
 			continue
