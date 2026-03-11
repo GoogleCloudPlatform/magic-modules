@@ -93,13 +93,27 @@ properties:
     type: ResourceRef
     required: true
     description: |
-      A reference to the BackendService resource.
-    resource: RegionBackendService
-    imports: selfLink
-    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
-  - name: proxyBind
+      A reference to the BackendService resource. This field is optional when
+      the loadBalancingScheme is specified.
+    api_name: service
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'RegionBackendService'
+    imports: 'selfLink'
+  - name: 'proxyBind'
     type: Boolean
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
+  - name: 'loadBalancingScheme'
+    min_version: beta
+    type: Enum
+    description: |
+      Specifies the load balancer type. A target TCP proxy created for one type
+      of load balancer cannot be used with another.
+
+      For more information about forwarding rules, refer to
+      [Forwarding rule concepts](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts).
+    enum_values:
+      - 'EXTERNAL_MANAGED'
+      - 'INTERNAL_MANAGED'
