@@ -26,7 +26,8 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 	container "google.golang.org/api/container/v1beta1"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
 
@@ -2131,3 +2132,11 @@ func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sch
 	return nil
 }
 {{- end }}
+func init() {
+	registry.Schema{
+		Name: "google_container_node_pool",
+		ProductName: "container",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceContainerNodePool(),
+	}.Register()
+}

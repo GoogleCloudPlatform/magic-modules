@@ -5,7 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleFolderOrganizationPolicy() *schema.Resource {
 	// Generate datasource schema from resource
@@ -34,4 +35,13 @@ func datasourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta i
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_folder_organization_policy",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleFolderOrganizationPolicy(),
+	}.Register()
 }

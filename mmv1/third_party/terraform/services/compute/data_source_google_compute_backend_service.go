@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeBackendService() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeBackendService().Schema)
@@ -46,4 +47,13 @@ func dataSourceComputeBackendServiceRead(d *schema.ResourceData, meta interface{
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_backend_service",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeBackendService(),
+	}.Register()
 }

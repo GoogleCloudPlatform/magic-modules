@@ -9,7 +9,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleRuntimeconfigVariable() *schema.Resource {
 
@@ -44,3 +45,12 @@ func dataSourceGoogleRuntimeconfigVariableRead(d *schema.ResourceData, meta inte
 }
 
 {{ end }}
+
+func init() {
+	registry.Schema{
+		Name: "google_runtimeconfig_variable",
+		ProductName: "runtimeconfig",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleRuntimeconfigVariable(),
+	}.Register()
+}

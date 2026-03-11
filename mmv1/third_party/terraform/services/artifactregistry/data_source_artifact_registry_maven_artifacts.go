@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceArtifactRegistryMavenArtifacts() *schema.Resource {
 	return &schema.Resource{
@@ -164,4 +165,13 @@ func dataSourceArtifactRegistryMavenArtifactsRead(d *schema.ResourceData, meta i
 	d.SetId(resourcePath)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_artifact_registry_maven_artifacts",
+		ProductName: "artifactregistry",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceArtifactRegistryMavenArtifacts(),
+	}.Register()
 }

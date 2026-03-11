@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceSiteVerificationToken() *schema.Resource {
 	return &schema.Resource{
@@ -142,4 +143,13 @@ func expandSiteVerificationTokenIdentifier(v interface{}, d tpgresource.Terrafor
 
 func expandSiteVerificationTokenVerificationMethod(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_site_verification_token",
+		ProductName: "siteverification",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceSiteVerificationToken(),
+	}.Register()
 }

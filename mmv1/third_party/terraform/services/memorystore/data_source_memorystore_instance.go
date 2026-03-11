@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceMemorystoreInstance() *schema.Resource {
 	// Generate datasource schema from resource
@@ -53,4 +54,13 @@ func dataSourceMemorystoreInstanceRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_memorystore_instance",
+		ProductName: "memorystore",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceMemorystoreInstance(),
+	}.Register()
 }

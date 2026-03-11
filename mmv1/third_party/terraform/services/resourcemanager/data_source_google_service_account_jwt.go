@@ -13,7 +13,8 @@ import (
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleServiceAccountJwt() *schema.Resource {
 	return &schema.Resource{
@@ -106,4 +107,13 @@ func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interfac
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_service_account_jwt",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleServiceAccountJwt(),
+	}.Register()
 }

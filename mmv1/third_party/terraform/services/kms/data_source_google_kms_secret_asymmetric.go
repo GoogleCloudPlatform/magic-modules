@@ -14,7 +14,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/cloudkms/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var (
 	cryptoKeyVersionRegexp = regexp.MustCompile(`^(//[^/]*/[^/]*/)?(projects/[^/]+/locations/[^/]+/keyRings/[^/]+/cryptoKeys/[^/]+/cryptoKeyVersions/[^/]+)$`)
@@ -149,4 +150,13 @@ func validateHexadecimalUint32(i interface{}, val string) ([]string, []error) {
 		return nil, []error{fmt.Errorf("could not decode %q as a unsigned 32 bit hexadecimal integer", val)}
 	}
 	return nil, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_kms_secret_asymmetric",
+		ProductName: "kms",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleKmsSecretAsymmetric(),
+	}.Register()
 }

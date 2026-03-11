@@ -18,7 +18,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/dataproc/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
@@ -3921,4 +3922,13 @@ func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
 		subminor: matches[3],
 		osName:   matches[4],
 	}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_dataproc_cluster",
+		ProductName: "dataproc",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceDataprocCluster(),
+	}.Register()
 }

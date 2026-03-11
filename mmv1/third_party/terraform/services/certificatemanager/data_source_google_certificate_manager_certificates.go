@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/certificatemanager/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCertificateManagerCertificates() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceCertificateManagerCertificate().Schema)
@@ -135,4 +136,13 @@ func flattenCertificateManagedProvisioningIssue(v *certificatemanager.Provisioni
 	output["reason"] = v.Reason
 
 	return []interface{}{output}
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_certificate_manager_certificates",
+		ProductName: "certificatemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCertificateManagerCertificates(),
+	}.Register()
 }

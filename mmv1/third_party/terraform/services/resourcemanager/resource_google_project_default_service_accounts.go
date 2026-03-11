@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/iam/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 // ResourceGoogleProjectDefaultServiceAccounts returns a *schema.Resource that allows a customer
 // to manage all the default serviceAccounts.
@@ -220,4 +221,13 @@ func isDefaultServiceAccount(displayName string) bool {
 	}
 
 	return false
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_project_default_service_accounts",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleProjectDefaultServiceAccounts(),
+	}.Register()
 }

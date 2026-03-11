@@ -8,7 +8,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleActiveFolder() *schema.Resource {
 	return &schema.Resource{
@@ -97,4 +98,13 @@ func dataSourceGoogleActiveFolderRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_active_folder",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleActiveFolder(),
+	}.Register()
 }

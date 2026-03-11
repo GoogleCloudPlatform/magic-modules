@@ -7,7 +7,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleApphubApplication() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceApphubApplication().Schema)
@@ -42,4 +43,13 @@ func dataSourceGoogleApphubApplicationRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_apphub_application",
+		ProductName: "apphub",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleApphubApplication(),
+	}.Register()
 }

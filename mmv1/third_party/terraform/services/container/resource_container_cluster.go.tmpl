@@ -26,7 +26,8 @@ import (
 {{- else }}
 	container "google.golang.org/api/container/v1beta1"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 // Single-digit hour is equivalent to hour with leading zero e.g. suppress diff 1:00 => 01:00.
 // Assume either value could be in either format.
@@ -8958,3 +8959,12 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 	return nil
 }
 {{- end }}
+
+func init() {
+	registry.Schema{
+		Name: "google_container_cluster",
+		ProductName: "container",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceContainerCluster(),
+	}.Register()
+}

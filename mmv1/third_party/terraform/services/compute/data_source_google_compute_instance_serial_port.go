@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeInstanceSerialPort() *schema.Resource {
 	return &schema.Resource{
@@ -71,4 +72,13 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 	}
 	d.SetId(output.SelfLink)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_serial_port",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeInstanceSerialPort(),
+	}.Register()
 }

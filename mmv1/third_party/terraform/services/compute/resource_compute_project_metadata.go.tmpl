@@ -16,7 +16,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeProjectMetadata() *schema.Resource {
 	return &schema.Resource{
@@ -163,4 +164,13 @@ func resourceComputeProjectMetadataSet(projectID, userAgent string, config *tran
 
 	err := transport_tpg.MetadataRetryWrapper(createMD)
 	return err
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_project_metadata",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeProjectMetadata(),
+	}.Register()
 }

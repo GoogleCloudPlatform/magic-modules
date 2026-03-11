@@ -19,7 +19,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeSharedVpcServiceProject() *schema.Resource {
 	return &schema.Resource{
@@ -191,4 +192,12 @@ func resourceComputeSharedVpcServiceProjectUpdate(d *schema.ResourceData, meta i
 	// This update method is no-op because the only updatable fields
 	// are state/config-only, i.e. they aren't sent in requests to the API.
 	return nil
+}
+func init() {
+	registry.Schema{
+		Name: "google_compute_shared_vpc_service_project",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeSharedVpcServiceProject(),
+	}.Register()
 }

@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceApphubDiscoveredService() *schema.Resource {
 	return &schema.Resource{
@@ -168,4 +169,13 @@ func flattenApphubDiscoveredServiceDataLocation(v interface{}, d *schema.Resourc
 
 func flattenApphubDiscoveredServiceDataZone(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_apphub_discovered_service",
+		ProductName: "apphub",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceApphubDiscoveredService(),
+	}.Register()
 }

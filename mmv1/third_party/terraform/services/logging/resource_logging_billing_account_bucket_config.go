@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var loggingBillingAccountBucketConfigSchema = map[string]*schema.Schema{
 	"billing_account": {
@@ -33,4 +34,13 @@ func billingAccountBucketConfigID(d *schema.ResourceData, config *transport_tpg.
 // Create Logging Bucket config
 func ResourceLoggingBillingAccountBucketConfig() *schema.Resource {
 	return ResourceLoggingBucketConfig("billing_account", loggingBillingAccountBucketConfigSchema, billingAccountBucketConfigID)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_logging_billing_account_bucket_config",
+		ProductName: "logging",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceLoggingBillingAccountBucketConfig(),
+	}.Register()
 }

@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGooglePubsubSubscription() *schema.Resource {
 
@@ -41,4 +42,13 @@ func dataSourceGooglePubsubSubscriptionRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_pubsub_subscription",
+		ProductName: "pubsub",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGooglePubsubSubscription(),
+	}.Register()
 }

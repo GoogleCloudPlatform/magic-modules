@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceSpannerInstance() *schema.Resource {
 
@@ -45,4 +46,13 @@ func dataSourceSpannerInstanceRead(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_spanner_instance",
+		ProductName: "spanner",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceSpannerInstance(),
+	}.Register()
 }

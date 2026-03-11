@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleContainerAzureVersions() *schema.Resource {
 	return &schema.Resource{
@@ -83,4 +84,13 @@ func dataSourceGoogleContainerAzureVersionsRead(d *schema.ResourceData, meta int
 
 	d.SetId(time.Now().UTC().String())
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_container_azure_versions",
+		ProductName: "containerazure",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleContainerAzureVersions(),
+	}.Register()
 }

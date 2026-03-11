@@ -7,7 +7,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleTagsTagKeys() *schema.Resource {
 	return &schema.Resource{
@@ -73,4 +74,13 @@ func dataSourceGoogleTagsTagKeysRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_tags_tag_keys",
+		ProductName: "tags",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleTagsTagKeys(),
+	}.Register()
 }

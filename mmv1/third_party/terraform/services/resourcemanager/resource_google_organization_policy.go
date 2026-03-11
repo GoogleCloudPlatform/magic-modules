@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var schemaOrganizationPolicy = map[string]*schema.Schema{
 	// Although the API suggests that boolean_policy, list_policy, or restore_policy must be set,
@@ -480,4 +481,13 @@ func CanonicalOrgPolicyConstraint(constraint string) string {
 		return constraint
 	}
 	return "constraints/" + constraint
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_organization_policy",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleOrganizationPolicy(),
+	}.Register()
 }

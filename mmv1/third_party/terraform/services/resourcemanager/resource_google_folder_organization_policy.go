@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceGoogleFolderOrganizationPolicy() *schema.Resource {
 	return &schema.Resource{
@@ -192,4 +193,13 @@ func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
 	})
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_folder_organization_policy",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleFolderOrganizationPolicy(),
+	}.Register()
 }

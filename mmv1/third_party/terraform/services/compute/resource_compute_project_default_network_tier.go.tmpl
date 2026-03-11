@@ -18,7 +18,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeProjectDefaultNetworkTier() *schema.Resource {
 	return &schema.Resource{
@@ -122,4 +123,13 @@ func resourceComputeProjectDefaultNetworkTierDelete(d *schema.ResourceData, meta
 	log.Printf("[WARNING] Default Network Tier will be only removed from Terraform state, but will be left intact on GCP.")
 
 	return schema.RemoveFromState(d, meta)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_project_default_network_tier",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeProjectDefaultNetworkTier(),
+	}.Register()
 }

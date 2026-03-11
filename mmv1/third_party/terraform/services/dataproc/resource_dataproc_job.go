@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/dataproc/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var jobTypes = []string{"pyspark_config", "spark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config", "presto_config"}
 
@@ -1356,4 +1357,13 @@ func flattenJobPlacement(jp *dataproc.JobPlacement) []map[string]interface{} {
 			"cluster_uuid": jp.ClusterUuid,
 		},
 	}
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_dataproc_job",
+		ProductName: "dataproc",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceDataprocJob(),
+	}.Register()
 }

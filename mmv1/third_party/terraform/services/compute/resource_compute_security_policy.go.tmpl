@@ -22,7 +22,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func verifyRulePriorityCompareEmptyValues(d *schema.ResourceData, rulePriority int, schemaKey string) bool {
 	if schemaRules, ok := d.GetOk("rule"); ok {
@@ -1926,4 +1927,13 @@ func resourceSecurityPolicyStateImporter(d *schema.ResourceData, meta interface{
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_security_policy",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeSecurityPolicy(),
+	}.Register()
 }

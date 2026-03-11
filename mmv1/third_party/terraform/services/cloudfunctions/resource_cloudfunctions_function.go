@@ -19,7 +19,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var allowedIngressSettings = []string{
 	"ALLOW_ALL",
@@ -1344,4 +1345,13 @@ func flattenOnDeployUpdatePolicy(policy *cloudfunctions.OnDeployUpdatePolicy) []
 	log.Printf("flatten on_deploy_update_policy to: %s", result)
 
 	return result
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_cloudfunctions_function",
+		ProductName: "cloudfunctions",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceCloudFunctionsFunction(),
+	}.Register()
 }

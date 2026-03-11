@@ -7,7 +7,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeStoragePool() *schema.Resource {
 	// Generate datasource schema from resource
@@ -49,4 +50,13 @@ func dataSourceGoogleComputeStoragePoolRead(d *schema.ResourceData, meta interfa
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_storage_pool",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeStoragePool(),
+	}.Register()
 }

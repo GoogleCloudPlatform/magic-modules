@@ -14,7 +14,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeInstanceTemplate() *schema.Resource {
 	// Generate datasource schema from resource
@@ -116,4 +117,13 @@ func (a ByCreationTimestamp) Len() int      { return len(a) }
 func (a ByCreationTimestamp) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByCreationTimestamp) Less(i, j int) bool {
 	return a[i].CreationTimestamp > a[j].CreationTimestamp
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_template",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeInstanceTemplate(),
+	}.Register()
 }

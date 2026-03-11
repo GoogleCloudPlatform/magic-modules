@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func lbTypeNoneDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Extract the index from the key
@@ -971,4 +972,13 @@ func validateRecordNameTrailingDot(v interface{}, k string) (warnings []string, 
 		return nil, errors
 	}
 	return nil, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_dns_record_set",
+		ProductName: "dns",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceDnsRecordSet(),
+	}.Register()
 }

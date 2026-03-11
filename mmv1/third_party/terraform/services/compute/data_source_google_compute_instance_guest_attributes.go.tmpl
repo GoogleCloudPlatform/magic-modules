@@ -11,7 +11,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v1"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeInstanceGuestAttributes() *schema.Resource {
 	return &schema.Resource{
@@ -137,4 +138,13 @@ func flattenQueryValues(queryValue *compute.GuestAttributesValue) []map[string]i
 		})
 	}
 	return queryValueItems
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_guest_attributes",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeInstanceGuestAttributes(),
+	}.Register()
 }

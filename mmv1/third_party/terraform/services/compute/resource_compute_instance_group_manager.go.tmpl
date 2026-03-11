@@ -20,7 +20,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeInstanceGroupManager() *schema.Resource {
 	return &schema.Resource{
@@ -1765,4 +1766,13 @@ func resourceInstanceGroupManagerStateImporter(d *schema.ResourceData, meta inte
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_group_manager",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeInstanceGroupManager(),
+	}.Register()
 }

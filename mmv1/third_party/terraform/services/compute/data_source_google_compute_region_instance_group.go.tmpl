@@ -15,7 +15,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeRegionInstanceGroup() *schema.Resource {
 	return &schema.Resource{
@@ -166,4 +167,13 @@ func flattenNamedPorts(namedPorts []*compute.NamedPort) []map[string]interface{}
 		result = append(result, namedPortMap)
 	}
 	return result
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_region_instance_group",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeRegionInstanceGroup(),
+	}.Register()
 }

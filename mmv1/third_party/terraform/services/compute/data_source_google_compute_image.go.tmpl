@@ -15,7 +15,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeImage() *schema.Resource {
 	return &schema.Resource{
@@ -250,4 +251,13 @@ func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) 
 	d.SetId(id)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_image",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeImage(),
+	}.Register()
 }

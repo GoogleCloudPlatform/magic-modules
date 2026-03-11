@@ -11,7 +11,8 @@ import (
 {{- else }}
 	"google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeRouterStatus() *schema.Resource {
 	routeElemSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeRoute().Schema)
@@ -132,4 +133,13 @@ func flattenRoutes(routes []*compute.Route) []map[string]interface{} {
 	}
 
 	return results
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_router_status",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeRouterStatus(),
+	}.Register()
 }

@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleContainerEngineVersions() *schema.Resource {
 	return &schema.Resource{
@@ -155,4 +156,13 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 
 	d.SetId(time.Now().UTC().String())
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_container_engine_versions",
+		ProductName: "container",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleContainerEngineVersions(),
+	}.Register()
 }

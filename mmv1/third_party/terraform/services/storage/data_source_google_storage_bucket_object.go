@@ -9,7 +9,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleStorageBucketObject() *schema.Resource {
 
@@ -113,4 +114,13 @@ func flattenStorageBucketObjectGeneration(v interface{}, d *schema.ResourceData,
 	}
 
 	return v // let terraform core handle it otherwise
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_storage_bucket_object",
+		ProductName: "storage",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleStorageBucketObject(),
+	}.Register()
 }

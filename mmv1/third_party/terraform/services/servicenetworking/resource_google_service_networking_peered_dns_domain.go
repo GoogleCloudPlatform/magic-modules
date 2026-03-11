@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/servicenetworking/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 	return &schema.Resource{
@@ -263,4 +264,13 @@ func getProjectNumber(d *schema.ResourceData, config *transport_tpg.Config, proj
 	}
 
 	return strconv.FormatInt(projectCall.ProjectNumber, 10), nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_service_networking_peered_dns_domain",
+		ProductName: "servicenetworking",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleServiceNetworkingPeeredDNSDomain(),
+	}.Register()
 }

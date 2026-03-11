@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var loggingOrganizationBucketConfigSchema = map[string]*schema.Schema{
 	"organization": {
@@ -33,4 +34,13 @@ func organizationBucketConfigID(d *schema.ResourceData, config *transport_tpg.Co
 // Create Logging Bucket config
 func ResourceLoggingOrganizationBucketConfig() *schema.Resource {
 	return ResourceLoggingBucketConfig("organization", loggingOrganizationBucketConfigSchema, organizationBucketConfigID)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_logging_organization_bucket_config",
+		ProductName: "logging",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceLoggingOrganizationBucketConfig(),
+	}.Register()
 }

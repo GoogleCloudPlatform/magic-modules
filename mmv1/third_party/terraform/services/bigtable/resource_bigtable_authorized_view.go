@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 var familySubsetSchemaElem *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
@@ -460,4 +461,13 @@ func flattenSubsetViewInfo(subsetViewInfo *bigtable.SubsetViewInfo) []map[string
 	}
 
 	return subsetView
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_bigtable_authorized_view",
+		ProductName: "bigtable",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceBigtableAuthorizedView(),
+	}.Register()
 }

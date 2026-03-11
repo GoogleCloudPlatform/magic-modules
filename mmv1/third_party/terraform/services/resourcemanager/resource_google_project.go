@@ -24,7 +24,8 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/serviceusage/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 type ServicesCall interface {
 	Header() http.Header
@@ -871,4 +872,13 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 		return errwrap.Wrap(err, fmt.Errorf("failed to enable some service(s) %q for project %s", missing, project))
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_project",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleProject(),
+	}.Register()
 }

@@ -24,7 +24,8 @@ import (
 
 	"google.golang.org/api/googleapi"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 // Match fully-qualified or relative URLs
 const privateNetworkLinkRegex = "^(?:http(?:s)?://.+/)?projects/(" + verify.ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
@@ -3672,4 +3673,13 @@ func normalizeDRReplicaName(drReplicaName, project string) string {
 		return drReplicaName
 	}
 	return fmt.Sprintf("%s:%s", project, drReplicaName)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_sql_database_instance",
+		ProductName: "sql",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceSqlDatabaseInstance(),
+	}.Register()
 }

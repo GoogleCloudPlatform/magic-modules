@@ -11,7 +11,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleComputeSubnetwork() *schema.Resource {
 	return &schema.Resource{
@@ -178,4 +179,13 @@ func flattenSecondaryRanges(secondaryRanges []*compute.SubnetworkSecondaryRange)
 		secondaryRangesSchema = append(secondaryRangesSchema, data)
 	}
 	return secondaryRangesSchema
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_subnetwork",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeSubnetwork(),
+	}.Register()
 }

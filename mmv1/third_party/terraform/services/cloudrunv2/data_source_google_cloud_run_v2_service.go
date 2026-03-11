@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCloudRunV2Service() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceCloudRunV2Service().Schema)
@@ -49,4 +50,13 @@ func dataSourceGoogleCloudRunV2ServiceRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_cloud_run_v2_service",
+		ProductName: "cloudrunv2",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudRunV2Service(),
+	}.Register()
 }

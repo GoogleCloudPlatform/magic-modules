@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 // https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages#DockerImage
 type DockerImage struct {
@@ -318,4 +319,13 @@ func convertResponseToStruct(res map[string]interface{}) DockerImage {
 	}
 
 	return dockerImage
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_artifact_registry_docker_image",
+		ProductName: "artifactregistry",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceArtifactRegistryDockerImage(),
+	}.Register()
 }

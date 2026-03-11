@@ -16,7 +16,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/servicemanagement/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceEndpointsService() *schema.Resource {
 	return &schema.Resource{
@@ -435,4 +436,13 @@ func flattenServiceManagementEndpoints(endpoints []*servicemanagement.Endpoint) 
 		}
 	}
 	return flattened
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_endpoints_service",
+		ProductName: "servicemanagement",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceEndpointsService(),
+	}.Register()
 }

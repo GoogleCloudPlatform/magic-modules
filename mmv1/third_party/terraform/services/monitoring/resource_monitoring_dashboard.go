@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 // This recursive function takes an old map and a new map and is intended to remove the computed keys
 // from the old json string (stored in state) so that it doesn't show a diff if it's not defined in the
@@ -273,4 +274,13 @@ func resourceMonitoringDashboardImport(d *schema.ResourceData, meta interface{})
 	d.SetId(fmt.Sprintf("projects/%s/dashboards/%s", parts["project"], parts["id"]))
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_monitoring_dashboard",
+		ProductName: "monitoring",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceMonitoringDashboard(),
+	}.Register()
 }

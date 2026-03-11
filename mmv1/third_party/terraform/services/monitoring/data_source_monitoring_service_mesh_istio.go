@@ -2,7 +2,8 @@ package monitoring
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 // No tests are added in this PR as currently there is no TF-supported method that can be used to
 // enable both services (Cluster Istio and Mesh Istio) in GKE
@@ -51,4 +52,13 @@ func dataSourceMonitoringServiceMeshIstioRead(res map[string]interface{}, d *sch
 		return err
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_monitoring_mesh_istio_service",
+		ProductName: "monitoring",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceMonitoringServiceMeshIstio(),
+	}.Register()
 }

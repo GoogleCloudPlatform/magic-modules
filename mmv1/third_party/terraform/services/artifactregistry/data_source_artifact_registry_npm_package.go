@@ -10,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 type NpmPackage struct {
 	name        string
@@ -292,4 +293,13 @@ func convertNpmPackageResponseToStruct(res map[string]interface{}) NpmPackage {
 	}
 
 	return npmPackage
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_artifact_registry_npm_package",
+		ProductName: "artifactregistry",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceArtifactRegistryNpmPackage(),
+	}.Register()
 }

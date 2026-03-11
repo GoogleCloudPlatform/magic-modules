@@ -13,7 +13,8 @@ import (
 	"google.golang.org/api/googleapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceTagsLocationTagBinding() *schema.Resource {
 	return &schema.Resource{
@@ -461,4 +462,13 @@ func transformTagsLocationTagBindingReadError(err error) error {
     }
 
     return err
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_tags_location_tag_binding",
+		ProductName: "tags",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceTagsLocationTagBinding(),
+	}.Register()
 }

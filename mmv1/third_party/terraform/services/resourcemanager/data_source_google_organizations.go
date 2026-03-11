@@ -10,7 +10,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleOrganizations() *schema.Resource {
 	return &schema.Resource{
@@ -102,4 +103,13 @@ func datasourceGoogleOrganizationsRead(d *schema.ResourceData, meta interface{})
 	d.SetId(filter)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_organizations",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleOrganizations(),
+	}.Register()
 }

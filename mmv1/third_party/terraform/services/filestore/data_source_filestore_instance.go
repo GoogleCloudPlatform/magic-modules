@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleFilestoreInstance() *schema.Resource {
 	// Generate datasource schema from resource
@@ -56,4 +57,13 @@ func dataSourceGoogleFilestoreInstanceRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_filestore_instance",
+		ProductName: "filestore",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleFilestoreInstance(),
+	}.Register()
 }

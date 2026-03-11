@@ -16,7 +16,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"cloud.google.com/go/bigtable"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 // resourceBigtableInstanceVirtualUpdate identifies if an update to the resource includes only virtual field updates
 func resourceBigtableInstanceVirtualUpdate(d *schema.ResourceData, resourceSchema map[string]*schema.Schema) bool {
@@ -856,4 +857,13 @@ func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_bigtable_instance",
+		ProductName: "bigtable",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceBigtableInstance(),
+	}.Register()
 }

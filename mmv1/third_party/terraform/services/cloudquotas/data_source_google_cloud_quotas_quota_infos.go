@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleCloudQuotasQuotaInfos() *schema.Resource {
 	return &schema.Resource{
@@ -212,4 +213,13 @@ func flattenCloudQuotasQuotaInfo(rawQuotaInfo map[string]interface{}, d *schema.
 	quotaInfo["service_request_quota_uri"] = rawQuotaInfo["serviceRequestQuotaUri"]
 
 	return quotaInfo
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_cloud_quotas_quota_infos",
+		ProductName: "cloudquotas",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleCloudQuotasQuotaInfos(),
+	}.Register()
 }

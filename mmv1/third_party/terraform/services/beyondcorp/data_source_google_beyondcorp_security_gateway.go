@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleBeyondcorpSecurityGateway() *schema.Resource {
 
@@ -50,4 +51,13 @@ func dataSourceGoogleBeyondcorpSecurityGatewayRead(d *schema.ResourceData, meta 
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_beyondcorp_security_gateway",
+		ProductName: "beyondcorp",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleBeyondcorpSecurityGateway(),
+	}.Register()
 }

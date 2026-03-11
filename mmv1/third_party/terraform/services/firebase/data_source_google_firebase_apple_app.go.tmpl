@@ -6,7 +6,8 @@ import (
         "github.com/hashicorp/terraform-provider-google/google/tpgresource"
         transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
         "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleFirebaseAppleApp() *schema.Resource {
         // Generate datasource schema from resource
@@ -47,3 +48,12 @@ func dataSourceGoogleFirebaseAppleAppRead(d *schema.ResourceData, meta interface
         return nil
 }
 {{- end }}
+
+func init() {
+	registry.Schema{
+		Name: "google_firebase_apple_app",
+		ProductName: "firebase",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleFirebaseAppleApp(),
+	}.Register()
+}

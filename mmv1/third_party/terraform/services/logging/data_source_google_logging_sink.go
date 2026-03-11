@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceGoogleLoggingSink() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(resourceLoggingSinkSchema())
@@ -43,4 +44,13 @@ func dataSourceGoogleLoggingSinkRead(d *schema.ResourceData, meta interface{}) e
 	d.SetId(sinkId)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_logging_sink",
+		ProductName: "logging",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleLoggingSink(),
+	}.Register()
 }

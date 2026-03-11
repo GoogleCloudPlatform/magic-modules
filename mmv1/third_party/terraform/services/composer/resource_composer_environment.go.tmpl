@@ -23,7 +23,8 @@ import (
 {{- else }}
 	composer "google.golang.org/api/composer/v1beta1"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 const (
 	composerEnvironmentEnvVariablesRegexp          = "[a-zA-Z_][a-zA-Z0-9_]*."
@@ -3150,4 +3151,13 @@ func gscBucketNameDiffSuppress(_, old, new string, _ *schema.ResourceData) bool 
     return true
   }
   return false
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_composer_environment",
+		ProductName: "composer",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComposerEnvironment(),
+	}.Register()
 }

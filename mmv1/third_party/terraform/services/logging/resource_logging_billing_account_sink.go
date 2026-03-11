@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceLoggingBillingAccountSink() *schema.Resource {
 	schm := &schema.Resource{
@@ -99,4 +100,13 @@ func resourceLoggingBillingAccountSinkDelete(d *schema.ResourceData, meta interf
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_logging_billing_account_sink",
+		ProductName: "logging",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceLoggingBillingAccountSink(),
+	}.Register()
 }

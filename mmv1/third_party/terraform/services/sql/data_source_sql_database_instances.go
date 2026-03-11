@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func DataSourceSqlDatabaseInstances() *schema.Resource {
 
@@ -215,4 +216,13 @@ func flattenReplicationClusterForDataSource(replicationCluster *sqladmin.Replica
 		data["dr_replica"] = replicationCluster.DrReplica
 	}
 	return []map[string]interface{}{data}
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_sql_database_instances",
+		ProductName: "sql",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceSqlDatabaseInstances(),
+	}.Register()
 }

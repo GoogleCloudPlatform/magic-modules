@@ -16,7 +16,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 type metadataPresentBehavior bool
 
@@ -261,4 +262,13 @@ func updateComputeCommonInstanceMetadata(config *transport_tpg.Config, projectID
 	}
 
 	return transport_tpg.MetadataRetryWrapper(updateMD)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_project_metadata_item",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeProjectMetadataItem(),
+	}.Register()
 }

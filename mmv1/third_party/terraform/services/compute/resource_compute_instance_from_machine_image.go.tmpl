@@ -16,7 +16,8 @@ import (
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
-)
+
+	"github.com/hashicorp/terraform-provider-google/google/registry")
 
 func ResourceComputeInstanceFromMachineImage() *schema.Resource {
 	return &schema.Resource{
@@ -375,3 +376,11 @@ func flattenSourceMachineImageEncryptionKey(key *compute.CustomerEncryptionKey) 
 {{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
 {{- end }}
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_from_machine_image",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeInstanceFromMachineImage(),
+	}.Register()
+}
