@@ -61,10 +61,9 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 	if err != nil {
 		return fmt.Errorf("error diffing repo: %w", err)
 	}
-	
+
 	// Convert the raw diff string into a slice of strings
 	changedFiles := strings.Split(strings.TrimSpace(diffs), "\n")
-
 
 	if !shouldRunTests(changedFiles) {
 		fmt.Println("Skipping tests: No relevant .go files changed")
