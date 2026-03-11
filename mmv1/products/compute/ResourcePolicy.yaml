@@ -437,6 +437,7 @@ properties:
           - workload_policy.0.max_topology_distance
       - name: acceleratorTopologyMode
         type: Enum
+        is_missing_in_cai: true
         description: |
           Specifies the connection mode for the accelerator topology.
           Supported values are:
