@@ -96,7 +96,6 @@ properties:
       A reference to the BackendService resource. This field is optional when
       the loadBalancingScheme is set to INTERNAL_MANAGED.
     api_name: service
-    required: true
     update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
     update_verb: 'POST'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
