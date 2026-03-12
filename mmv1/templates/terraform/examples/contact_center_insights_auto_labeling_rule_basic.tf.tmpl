@@ -1,0 +1,13 @@
+resource "google_contact_center_insights_auto_labeling_rule" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "resource_name"}}"
+  auto_labeling_rule_id = "autolabelingrulebasic%{id_suffix}"
+  description = "Example auto labeling rule"
+  location = "us-central1"
+  label_key_type = "LABEL_KEY_TYPE_CUSTOM"
+  label_key = "{{index $.Vars "resource_name"}}"
+  conditions {
+    condition = "true"
+    value = "'label_value'"
+  }
+  active    = true
+}
