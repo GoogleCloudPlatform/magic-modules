@@ -59,6 +59,7 @@ func testAccServiceUsageV2OrganizationConsumerPolicy_basic(context map[string]in
 resource "google_service_usage_v2_organization_consumer_policy" "default" {
   provider     = google-beta
   organization = "%{org_id}"
+  force        = true
 
   enable_rules {
     services = [

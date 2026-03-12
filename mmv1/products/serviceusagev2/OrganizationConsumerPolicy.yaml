@@ -53,6 +53,7 @@ async:
   include_project: true
 exclude_sweeper: true
 custom_code:
+  pre_create: 'templates/terraform/pre_create/organization_consumer_policy_force.go.tmpl'
   custom_update: 'templates/terraform/custom_update/organization_consumer_policy.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/clear_organization_consumer_policy.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/organization_consumer_policy.go.tmpl'
