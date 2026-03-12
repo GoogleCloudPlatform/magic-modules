@@ -47,7 +47,6 @@ func dataSourceGoogleFirebaseWebAppRead(d *schema.ResourceData, meta interface{}
 	}
 	return nil
 }
-{{- end }}
 
 func init() {
 	registry.Schema{
@@ -57,3 +56,5 @@ func init() {
 		Schema: DataSourceGoogleFirebaseWebApp(),
 	}.Register()
 }
+
+{{- end }}
