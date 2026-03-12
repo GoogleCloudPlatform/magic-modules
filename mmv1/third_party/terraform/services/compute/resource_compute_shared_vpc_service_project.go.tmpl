@@ -193,6 +193,7 @@ func resourceComputeSharedVpcServiceProjectUpdate(d *schema.ResourceData, meta i
 	// are state/config-only, i.e. they aren't sent in requests to the API.
 	return nil
 }
+
 func init() {
 	registry.Schema{
 		Name: "google_compute_shared_vpc_service_project",

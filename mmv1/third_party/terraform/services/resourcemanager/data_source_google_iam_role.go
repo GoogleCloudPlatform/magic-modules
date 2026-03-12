@@ -69,4 +69,3 @@ func init() {
 		Schema: DataSourceGoogleIamRole(),
 	}.Register()
 }
-

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
-
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -17,8 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-
 )
+
 func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
 	strippedName := strings.Split(new, "@")[0]
 

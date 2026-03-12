@@ -13,16 +13,15 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
     tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
-
-	"github.com/hashicorp/terraform-provider-google/google/registry"
+    "github.com/hashicorp/terraform-provider-google/google/registry"
     "github.com/hashicorp/terraform-provider-google/google/tpgresource"
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
     "github.com/hashicorp/terraform-provider-google/google/verify"
 
     "google.golang.org/api/googleapi"
     "google.golang.org/api/serviceusage/v1"
-
 )
+
 // Services that can't be user-specified but are otherwise valid. Renamed
 // services should be added to this set during major releases.
 var bannedProjectServices = []string{"bigquery-json.googleapis.com"}

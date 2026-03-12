@@ -157,4 +157,3 @@ func init() {
 		Schema: DataSourceGoogleIamTestablePermissions(),
 	}.Register()
 }
-

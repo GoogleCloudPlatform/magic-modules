@@ -2,9 +2,11 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 
+  // Register services with at least one Magic Modules resource by importing them.
 	{{- range $service := $.GetMmv1ServicesInVersion $.Products }}
-	"github.com/hashicorp/terraform-provider-google/google/services/{{ $service }}"
+		"github.com/hashicorp/terraform-provider-google/google/services/{{ $service }}"
 	{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
@@ -339,7 +341,7 @@ var generatedIAMDatasources = map[string]*schema.Resource{
 	// ####### START generated IAM datasources ###########
 	{{- range $object := $.ResourcesForVersion }}
 	{{- if $object.IamClassName }}
-	"{{ $object.TerraformName }}_iam_policy": registry.DataSource("{{ $object.TerraformName }}_iam_policy"),
+		"{{ $object.TerraformName }}_iam_policy": registry.DataSource("{{ $object.TerraformName }}_iam_policy"),
 	{{- end }}
 	{{- end }}
 	// ####### END generated IAM datasources ###########
@@ -378,12 +380,12 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 var generatedResources = map[string]*schema.Resource{
 	{{- range $object := $.ResourcesForVersion }}
 	{{- if $object.ResourceName }}
-	"{{ $object.TerraformName }}": registry.Resource("{{ $object.TerraformName }}"),
+		"{{ $object.TerraformName }}": registry.Resource("{{ $object.TerraformName }}"),
 	{{- end }}
 	{{- if $object.IamClassName }}
-	"{{ $object.TerraformName }}_iam_binding": registry.Resource("{{ $object.TerraformName }}_iam_binding"),
-	"{{ $object.TerraformName }}_iam_member":  registry.Resource("{{ $object.TerraformName }}_iam_member"),
-	"{{ $object.TerraformName }}_iam_policy":  registry.Resource("{{ $object.TerraformName }}_iam_policy"),
+		"{{ $object.TerraformName }}_iam_binding": registry.Resource("{{ $object.TerraformName }}_iam_binding"),
+		"{{ $object.TerraformName }}_iam_member":  registry.Resource("{{ $object.TerraformName }}_iam_member"),
+		"{{ $object.TerraformName }}_iam_policy":  registry.Resource("{{ $object.TerraformName }}_iam_policy"),
 	{{- end }}
 	{{- end }}
 }

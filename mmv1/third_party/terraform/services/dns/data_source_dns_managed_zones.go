@@ -9,6 +9,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
 )
+
 func DataSourceDnsManagedZones() *schema.Resource {
 
 	mzSchema := DataSourceDnsManagedZone().Schema

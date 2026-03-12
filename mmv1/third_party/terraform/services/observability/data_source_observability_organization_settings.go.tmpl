@@ -37,7 +37,7 @@ func dataSourceObservabilityOrganizationSettingsRead(d *schema.ResourceData, met
 	}
 	return nil
 }
-{{- end }}
+
 func init() {
 	registry.Schema{
 		Name: "google_observability_organization_settings",
@@ -46,3 +46,4 @@ func init() {
 		Schema: DataSourceObservabilityOrganizationSettings(),
 	}.Register()
 }
+{{- end }}

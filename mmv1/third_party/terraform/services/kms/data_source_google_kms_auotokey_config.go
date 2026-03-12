@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
+
 func DataSourceGoogleKmsAutokeyConfig() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceKMSAutokeyConfig().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "folder")
