@@ -291,7 +291,7 @@ properties:
               - 'avro_format'
               - 'pubsub_avro_format'
             properties:
- # Meant to be an empty object with no properties.
+              # Meant to be an empty object with no properties.
               []
           - name: 'pubsubAvroFormat'
             type: NestedObject
@@ -307,7 +307,7 @@ properties:
               - 'avro_format'
               - 'pubsub_avro_format'
             properties:
- # Meant to be an empty object with no properties.
+              # Meant to be an empty object with no properties.
               []
           - name: 'minimumObjectCreateTime'
             type: String

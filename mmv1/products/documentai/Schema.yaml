@@ -14,7 +14,7 @@
 ---
 name: 'Schema'
 description: |
-  A Schema is a collection of SchemaVersions that defines the structure and layout of document data. 
+  A Schema is a collection of SchemaVersions that defines the structure and layout of document data.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/document-ai/docs/overview'
