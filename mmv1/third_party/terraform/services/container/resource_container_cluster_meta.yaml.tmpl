@@ -214,6 +214,8 @@ fields:
     api_field: 'maintenancePolicy.window.recurringWindow.recurrence'
   - field: 'maintenance_policy.recurring_window.start_time'
     api_field: 'maintenancePolicy.window.recurringWindow.window.startTime'
+  - api_field: 'maintenancePolicy.disruptionBudget.MinorVersionDisruptionInterval'
+  - api_field: 'maintenancePolicy.disruptionBudget.PatchVersionDisruptionInterval'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedOpentelemetryConfig.scope'
 {{- end }}
