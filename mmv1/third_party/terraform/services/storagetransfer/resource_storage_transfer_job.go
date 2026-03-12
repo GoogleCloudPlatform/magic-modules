@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/storagetransfer/v1"
 )
+
 var (
 	transferSpecObjectConditionsKeys = []string{
 		"transfer_spec.0.object_conditions.0.min_time_elapsed_since_last_modification",

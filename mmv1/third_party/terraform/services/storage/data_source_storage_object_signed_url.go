@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -27,8 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
-
-	"github.com/hashicorp/terraform-provider-google/google/registry")
+)
 
 const gcsBaseUrl = "https://storage.googleapis.com"
 const googleCredentialsEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
