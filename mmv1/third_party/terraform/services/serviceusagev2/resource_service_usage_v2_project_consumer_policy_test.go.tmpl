@@ -30,7 +30,7 @@ func TestAccServiceUsageV2ProjectConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"deletion_policy", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2ProjectConsumerPolicy_update(context),
@@ -39,7 +39,7 @@ func TestAccServiceUsageV2ProjectConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"deletion_policy", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2ProjectConsumerPolicy_removeService(context),
@@ -48,7 +48,7 @@ func TestAccServiceUsageV2ProjectConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"deletion_policy", "enable_rules.0.services"},
 			},
 		},
 	})
@@ -71,8 +71,8 @@ resource "google_service_usage_v2_project_consumer_policy" "default" {
 func testAccServiceUsageV2ProjectConsumerPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_usage_v2_project_consumer_policy" "default" {
-  provider = google-beta
-  force    = true
+  provider        = google-beta
+  deletion_policy = "FORCE"
 
   enable_rules {
     services = [
@@ -87,8 +87,8 @@ resource "google_service_usage_v2_project_consumer_policy" "default" {
 func testAccServiceUsageV2ProjectConsumerPolicy_removeService(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_usage_v2_project_consumer_policy" "default" {
-  provider = google-beta
-  force    = true
+  provider        = google-beta
+  deletion_policy = "FORCE"
 
   enable_rules {
     services = [
