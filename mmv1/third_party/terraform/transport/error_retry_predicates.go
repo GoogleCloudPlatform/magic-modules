@@ -321,8 +321,13 @@ func ServiceUsageInternalError160009(err error) (bool, string) {
 // concurrent operations (which are implemented in terms of 'edit quota').
 func IsBigqueryIAMQuotaError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 403 && strings.Contains(strings.ToLower(gerr.Body), "exceeded rate limits") {
-			return true, "Waiting for Bigquery edit quota to refresh"
+		if gerr.Code == 403 {
+			if strings.Contains(strings.ToLower(gerr.Body), "exceeded rate limits") {
+				return true, "Waiting for Bigquery edit quota to refresh"
+			}
+			if strings.Contains(gerr.Body, "rateLimitExceeded") {
+				return true, "Waiting for BigQuery rate limit to reset"
+			}
 		}
 	}
 	return false, ""
