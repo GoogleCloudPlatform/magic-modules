@@ -1,0 +1,46 @@
+rawQuery := d.Get("dashboard_query").([]interface{})
+if len(rawQuery) == 0 {
+	return fmt.Errorf("dashboard_query is empty; cannot fetch etag for update")
+}
+
+queryData := rawQuery[0].(map[string]interface{})
+queryName, ok := queryData["name"].(string)
+if !ok || queryName == "" {
+	return fmt.Errorf("dashboard_query.name is missing; required to fetch etag")
+}
+
+// 2. Construct the GET URL for the specific query
+queryUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{ChronicleBasePath}}"}}")
+if err != nil {
+	return err
+}
+
+// Ensure we don't double up slashes
+queryUrl = fmt.Sprintf("%s/%s", strings.TrimSuffix(queryUrl, "/"), strings.TrimPrefix(queryName, "/"))
+
+// 3. Perform the manual GET request to Chronicle API
+log.Printf("[DEBUG] Fetching fresh etag for query: %s", queryName)
+queryRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    queryUrl,
+	UserAgent: userAgent,
+	Timeout:   d.Timeout(schema.TimeoutRead),
+})
+if err != nil {
+	return fmt.Errorf("error retrieving etag for Chronicle Query %q: %s", queryName, err)
+}
+
+// 4. Extract Etag and inject it into the 'obj' map
+if etag, ok := queryRes["etag"].(string); ok && etag != "" {
+	log.Printf("[DEBUG] Found etag %q for query %s", etag, queryName)
+
+	if dq, ok := obj["dashboardQuery"].(map[string]interface{}); ok {
+		dq["etag"] = etag
+	} else {
+		obj["etag"] = etag
+	}
+} else {
+	log.Printf("[WARN] No etag found in response for %s, proceeding without it", queryName)
+}

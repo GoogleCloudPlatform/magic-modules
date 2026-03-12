@@ -1,0 +1,133 @@
+# A Native Dashboard is required to create a Dashboard Chart.
+resource "google_chronicle_native_dashboard" "my_dashboard" {
+  location     = "us" # Example region, adjust as necessary
+  instance     = "{{index $.TestEnvVars "chronicle_id"}}"
+  display_name = "{{index $.Vars "dashboard_name"}}"
+  description  = "{{index $.Vars "dashboard_description"}}"
+  access       = "DASHBOARD_PRIVATE"
+  type         = "CUSTOM"
+
+  # REFINED: The 'definition' wrapper is removed because flatten_object is true.
+  # 'filters' and 'charts' are now top-level blocks.
+  filters {
+    id                                    = "GlobalTimeFilter"
+    display_name                          = "Global Time Filter"
+    data_source                           = "GLOBAL"
+    is_standard_time_range_filter         = true
+    is_standard_time_range_filter_enabled = true
+    filter_operator_and_field_values {
+      filter_operator = "PAST"
+      field_values    = ["1", "DAY"]
+    }
+  }
+
+  # Note: 'charts' block is intentionally omitted here as it is managed 
+  # by the 'google_chronicle_dashboard_chart' resource lifecycle.
+}
+
+resource "google_chronicle_dashboard_chart" "my_chart" {
+  location         = google_chronicle_native_dashboard.my_dashboard.location
+  instance         = google_chronicle_native_dashboard.my_dashboard.instance
+  native_dashboard = google_chronicle_native_dashboard.my_dashboard.name
+
+  # Chart layout (satisfies the ValidateChartLayout Go logic)
+  chart_layout {
+    start_x = 0
+    span_x  = 50
+    start_y = 12
+    span_y  = 18
+  }
+
+  dashboard_chart {
+    display_name = "Data Source Health Overview"
+    description  = "Health of data sources over time"
+    tile_type    = "TILE_TYPE_VISUALIZATION"
+
+    chart_datasource {
+      data_sources = ["INGESTION_METRICS"]
+    }
+
+    visualization {
+      series {
+        series_type = "LINE"
+        encode {
+          x = "timestamp"
+          y = "total_count"
+        }
+        data_label {}
+      }
+
+      x_axes {
+        axis_type    = "CATEGORY"
+        display_name = "Date"
+      }
+
+      y_axes {
+        axis_type    = "CATEGORY"
+        display_name = "Sources"
+      }
+
+      legends {
+        top           = 12
+        legend_orient = "HORIZONTAL"
+      }
+
+      series_column = ["health_status"]
+      grouping_type = "Grouped"
+    }
+
+    drill_down_config {
+      left_drill_downs {
+        id           = "D89B834D-977A-4E0C-83B0-12AB1D05E76B"
+        display_name = "Link to the google"
+        custom_settings {
+          new_tab = true
+          external_link {
+            link = "www.google.com"
+          }
+        }
+      }
+    }
+  }
+
+  dashboard_query {
+    query = <<EOT
+$component = ingestion.component
+$collector_id = ingestion.collector_id
+$feed_id = ingestion.feed_id
+$log_type = ingestion.log_type
+$timestamp = timestamp.get_timestamp(ingestion.end_time, "%Y-%m-%d")
+$health_status = ingestion.health_status
+ingestion.log_type != ""
+ingestion.component != ""
+ingestion.component != "Normalizer"
+ingestion.collector_id != "bbbb1111-bbbb-1111-bbbb-1111bbbb1111" 
+ingestion.collector_id != "01010101-1111-0101-1111-000111110000" 
+ingestion.collector_id != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" 
+ingestion.collector_id != "aaaa2222-aaaa-2222-aaaa-2222aaaa2222" 
+ingestion.collector_id != "aaaa4444-aaaa-4444-aaaa-4444aaaa4444" 
+
+not (ingestion.component = "Ingestion API" and ingestion.collector_id = "aaaa3333-aaaa-3333-aaaa-3333aaaa3333") and
+not (ingestion.component = "Ingestion API" and ingestion.collector_id = "dddddddd-dddd-dddd-dddd-dddddddddddd")
+($feed_id != "" or $collector_id != "")
+$health_status != ""
+match:
+  $health_status,
+  $timestamp
+outcome:
+  $feeds = count_distinct($feed_id) - 1
+  $collectors = count_distinct(if($collector_id != "", strings.concat($collector_id, $log_type), "")) - 1
+  $total_count = $collectors + $feeds
+order:
+  $timestamp asc
+limit:
+  10000
+EOT
+    input {
+      relative_time {
+        time_unit      = "SECOND"
+        start_time_val = "1"
+      }
+    }
+  }
+}

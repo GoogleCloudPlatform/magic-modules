@@ -1,0 +1,6 @@
+obj = make(map[string]interface{})
+chartName := d.Id()
+if chartName == "" {
+    return fmt.Errorf("cannot delete Chronicle Dashboard Chart: resource ID is empty")
+}
+obj["dashboardChart"] = chartName // Assign the chart name to the request body
