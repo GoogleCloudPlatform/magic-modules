@@ -162,8 +162,7 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		if err != nil {
 			return err
 		}
-		{{ end }}
-
+		{{- end }}
 
 		billingProject := ""
 
