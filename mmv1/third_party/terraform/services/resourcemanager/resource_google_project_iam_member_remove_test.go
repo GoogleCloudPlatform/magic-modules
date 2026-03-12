@@ -65,7 +65,8 @@ func TestAccProjectIamMemberRemove_multipleMembersInBinding(t *testing.T) {
 					PostApplyPreRefresh: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
 					},
-				}},
+				},
+			},
 		},
 	})
 }
@@ -94,7 +95,8 @@ func TestAccProjectIamMemberRemove_memberInMultipleBindings(t *testing.T) {
 					PostApplyPreRefresh: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
 					},
-				}},
+				},
+			},
 		},
 	})
 }
