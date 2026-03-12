@@ -44,8 +44,6 @@ func dataSourceGoogleRuntimeconfigVariableRead(d *schema.ResourceData, meta inte
 	return nil
 }
 
-{{ end }}
-
 func init() {
 	registry.Schema{
 		Name: "google_runtimeconfig_variable",
@@ -54,3 +52,5 @@ func init() {
 		Schema: DataSourceGoogleRuntimeconfigVariable(),
 	}.Register()
 }
+
+{{ end }}

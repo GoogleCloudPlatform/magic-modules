@@ -41,7 +41,6 @@ func dataSourceGoogleRuntimeconfigConfigRead(d *schema.ResourceData, meta interf
 	}
 	return nil
 }
-{{- end }}
 
 func init() {
 	registry.Schema{
@@ -51,3 +50,5 @@ func init() {
 		Schema: DataSourceGoogleRuntimeconfigConfig(),
 	}.Register()
 }
+
+{{- end }}

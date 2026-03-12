@@ -205,7 +205,6 @@ func resourceRuntimeconfigParseFullName(fullName string) (project, name string, 
 	}
 	return matches[1], matches[2], nil
 }
-{{- end }}
 
 func init() {
 	registry.Schema{
@@ -215,3 +214,5 @@ func init() {
 		Schema: ResourceRuntimeconfigConfig(),
 	}.Register()
 }
+
+{{- end }}

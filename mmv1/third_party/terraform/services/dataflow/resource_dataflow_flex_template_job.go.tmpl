@@ -865,8 +865,6 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 	return nil
 }
 
-{{ end }}
-
 func init() {
 	registry.Schema{
 		Name: "google_dataflow_flex_template_job",
@@ -875,3 +873,5 @@ func init() {
 		Schema: ResourceDataflowFlexTemplateJob(),
 	}.Register()
 }
+
+{{ end }}
