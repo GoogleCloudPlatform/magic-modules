@@ -9,9 +9,9 @@ import (
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"go4.org/netipx"
-
-	"github.com/hashicorp/terraform-provider-google/google/registry")
+)
 
 type googRanges struct {
 	SyncToken    string     `json:"syncToken"`

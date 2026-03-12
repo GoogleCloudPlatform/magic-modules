@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -13,8 +14,7 @@ import (
 {{- else }}
 	"google.golang.org/api/compute/v0.beta"
 {{- end }}
-
-	"github.com/hashicorp/terraform-provider-google/google/registry")
+)
 
 func DataSourceGoogleComputeSnapshot() *schema.Resource {
 

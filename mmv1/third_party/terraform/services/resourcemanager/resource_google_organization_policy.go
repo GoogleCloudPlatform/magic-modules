@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
-	"github.com/hashicorp/terraform-provider-google/google/registry")
-
+)
 var schemaOrganizationPolicy = map[string]*schema.Schema{
 	// Although the API suggests that boolean_policy, list_policy, or restore_policy must be set,
 	// Organization policies can be "inherited from parent" in the UI, and this is the default

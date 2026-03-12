@@ -8,14 +8,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/iam/v1"
 
-	"github.com/hashicorp/terraform-provider-google/google/registry")
-
+)
 // ResourceGoogleProjectDefaultServiceAccounts returns a *schema.Resource that allows a customer
 // to manage all the default serviceAccounts.
 // It does mean that terraform tried to perform the action in the SA at some point but does not ensure that
