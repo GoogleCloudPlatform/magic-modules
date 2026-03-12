@@ -448,32 +448,32 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-                                Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "SEV", "n2d-standard-2"),
-                        },
-                        {
-                                ResourceName:            "google_container_cluster.confidential_nodes",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "SEV", "n2d-standard-2"),
+			},
 			{
-                                Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "SEV_SNP", "n2d-standard-2"),
-                        },
-                        {
-                                ResourceName:            "google_container_cluster.confidential_nodes",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
+				ResourceName:            "google_container_cluster.confidential_nodes",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
+			},
 			{
-                                Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "TDX", "c3-standard-4"),
-                        },
-                        {
-                                ResourceName:            "google_container_cluster.confidential_nodes",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "SEV_SNP", "n2d-standard-2"),
+			},
+			{
+				ResourceName:            "google_container_cluster.confidential_nodes",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
+			},
+			{
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "TDX", "c3-standard-4"),
+			},
+			{
+				ResourceName:            "google_container_cluster.confidential_nodes",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
 		},
 	})
 }
@@ -1938,7 +1938,7 @@ func TestAccContainerCluster_nodePoolWithUpgradeSettings(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-{{ if ne $.TargetVersionName `ga` -}}
+			{{ if ne $.TargetVersionName `ga` -}}
 			{
 				Config: testAccContainerCluster_nodePoolWithUpgradeSettings(clusterName, npName, networkName, subnetworkName, 0, 0, "BLUE_GREEN", "AUTOSCALED", 0, 0.0, "", "0s", ""),
 			},
@@ -1957,13 +1957,13 @@ func TestAccContainerCluster_nodePoolWithUpgradeSettings(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-{{- end }}
+			{{- end }}
 		},
 	})
 }
 
 func testAccContainerCluster_nodePoolWithUpgradeSettings(cluster, np, network, subnetwork string, maxSurge, maxUnavailable int, strategy, policy string, batchNodeCount int, batchPercentage float64, batchSoakDuration, nodePoolSoakDuration, waitForDrainDuration string) string {
-  upgradeSettings := makeUpgradeSettings(maxSurge, maxUnavailable, strategy, policy, nodePoolSoakDuration, batchNodeCount, batchPercentage, batchSoakDuration, waitForDrainDuration)
+	upgradeSettings := makeUpgradeSettings(maxSurge, maxUnavailable, strategy, policy, nodePoolSoakDuration, batchNodeCount, batchPercentage, batchSoakDuration, waitForDrainDuration)
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
 	name               = "%s"
@@ -2255,13 +2255,13 @@ func TestAccContainerCluster_withNodeConfigLinuxNodeConfig(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_container_cluster.with_linux_node_config",
-            "node_config.0.linux_node_config.0.transparent_hugepage_enabled", "TRANSPARENT_HUGEPAGE_ENABLED_ALWAYS",
+						"node_config.0.linux_node_config.0.transparent_hugepage_enabled", "TRANSPARENT_HUGEPAGE_ENABLED_ALWAYS",
 					),
 					resource.TestCheckResourceAttr(
 						"google_container_cluster.with_linux_node_config",
-            "node_config.0.linux_node_config.0.transparent_hugepage_defrag", "TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS",
-          ),
-        ),
+						"node_config.0.linux_node_config.0.transparent_hugepage_defrag", "TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS",
+					),
+				),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						acctest.ExpectNoDelete(),
@@ -2350,7 +2350,7 @@ func TestAccContainerCluster_withKubeletConfig(t *testing.T) {
 						"node_config.0.kubelet_config.0.topology_manager.0.policy", "best-effort"),
 					resource.TestCheckResourceAttr(
 						"google_container_cluster.with_kubelet_config",
-						"node_config.0.kubelet_config.0.topology_manager.0.scope", "pod"),			
+						"node_config.0.kubelet_config.0.topology_manager.0.scope", "pod"),
 				),
 			},
 			{
@@ -2816,25 +2816,25 @@ func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
 				),
 			},
 			{
-					ResourceName:            "google_container_cluster.with_node_pool_defaults",
-					ImportState:             true,
-					ImportStateVerify:       true,
-					ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ResourceName:            "google_container_cluster.with_node_pool_defaults",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-					Config: testAccContainerCluster_withNodePoolDefaults(clusterName, "false", networkName, subnetworkName),
-					Check: resource.ComposeAggregateTestCheckFunc(
+				Config: testAccContainerCluster_withNodePoolDefaults(clusterName, "false", networkName, subnetworkName),
+				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults",
-							"node_pool_defaults.0.node_config_defaults.0.gcfs_config.#", "1"),
+						"node_pool_defaults.0.node_config_defaults.0.gcfs_config.#", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults",
-							"node_pool_defaults.0.node_config_defaults.0.gcfs_config.0.enabled", "false"),
-					),
+						"node_pool_defaults.0.node_config_defaults.0.gcfs_config.0.enabled", "false"),
+				),
 			},
 			{
-					ResourceName:            "google_container_cluster.with_node_pool_defaults",
-					ImportState:             true,
-					ImportStateVerify:       true,
-					ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ResourceName:            "google_container_cluster.with_node_pool_defaults",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -2924,7 +2924,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinity(t *testing.T) {
 func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testing.T) {
 	t.Parallel()
 
-    reservationName := fmt.Sprintf("tf-test-reservation-%s", acctest.RandString(t, 10))
+	reservationName := fmt.Sprintf("tf-test-reservation-%s", acctest.RandString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
@@ -3522,9 +3522,9 @@ func TestAccContainerCluster_withNodePoolNodeDrainConfig(t *testing.T) {
 			{
 				Config: testAccContainerCluster_withNodePoolNodeDrainConfig(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-									resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_node_drain_config",
-										"node_pool.0.node_drain_config.0.respect_pdb_during_node_pool_deletion", "true"),
-								),
+					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_node_drain_config",
+						"node_pool.0.node_drain_config.0.respect_pdb_during_node_pool_deletion", "true"),
+				),
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool_node_drain_config",
@@ -3536,7 +3536,7 @@ func TestAccContainerCluster_withNodePoolNodeDrainConfig(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
+func TestAccContainerCluster_withDailyMaintenanceWindow(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -3550,7 +3550,7 @@ func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withMaintenanceWindow(clusterName, "03:00", networkName, subnetworkName),
+				Config: testAccContainerCluster_withDailyMaintenanceWindow(clusterName, "03:00", networkName, subnetworkName),
 			},
 			{
 				ResourceName:		 resourceName,
@@ -3559,14 +3559,69 @@ func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withMaintenanceWindow(clusterName, "", networkName, subnetworkName),
+				Config: testAccContainerCluster_withDailyMaintenanceWindow(clusterName, "", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr(resourceName,
 						"maintenance_policy.0.daily_maintenance_window.0.start_time"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.recurring_maintenance_window.0.window_start_time"),
 				),
 			},
 			{
 				ResourceName:		 resourceName,
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+				// maintenance_policy.# = 0 is equivalent to no maintenance policy at all,
+				// but will still cause an import diff
+				ImportStateVerifyIgnore: []string{"maintenance_policy.#", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withRecurringTimeWindow(t *testing.T) {
+	t.Parallel()
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	resourceName := "google_container_cluster.with_recurring_maintenance_window"
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withRecurringTimeWindow(cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.daily_maintenance_window.0.start_time"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.recurring_maintenance_window.0.window_start_time"),
+				),
+			},
+			{
+				ResourceName:		 resourceName,
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+
+			},
+			{
+				Config: testAccContainerCluster_withRecurringTimeWindow(cluster, "", "", networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.daily_maintenance_window.0.start_time"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.recurring_window.0.start_time"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.recurring_maintenance_window.0.window_start_time"),
+				),
+			},
+			{
+				ResourceName:		 resourceName,
+				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 				// maintenance_policy.# = 0 is equivalent to no maintenance policy at all,
@@ -3585,27 +3640,12 @@ func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withRecurringMaintenanceWindow(cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", networkName, subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr(resourceName,
-						"maintenance_policy.0.daily_maintenance_window.0.start_time"),
-				),
-			},
-			{
-				ResourceName:		 resourceName,
-				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-
-			},
-			{
-				Config: testAccContainerCluster_withRecurringMaintenanceWindow(cluster, "", "", networkName, subnetworkName),
+				Config: testAccContainerCluster_withRecurringMaintenanceWindow(cluster, 2019, 1, 1, 10, 0, "24h", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr(resourceName,
 						"maintenance_policy.0.daily_maintenance_window.0.start_time"),
@@ -3614,13 +3654,29 @@ func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:		 resourceName,
-				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-				// maintenance_policy.# = 0 is equivalent to no maintenance policy at all,
-				// but will still cause an import diff
-				ImportStateVerifyIgnore: []string{"maintenance_policy.#", "deletion_protection"},
+				ResourceName:            resourceName,
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withRecurringMaintenanceWindow(cluster, 0, 0, 0, 10, 0, "4h", networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.daily_maintenance_window.0.start_time"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.recurring_window.0.start_time"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.recurring_maintenance_window.0.delay_until.0.year"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -3678,10 +3734,10 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions(t *testing.T) {
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
 				),
 			},
 			{
@@ -3710,10 +3766,10 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions_untilEndOfSupport(t
 			{
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
-   				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
-					),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+				),
 			},
 			{
 				ResourceName:        resourceName,
@@ -3742,10 +3798,10 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_UPGRADES"),
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_UPGRADES"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
 				),
 			},
 			{
@@ -3759,10 +3815,10 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
 				Config: testAccContainerCluster_NoExclusionOptions_RecurringMaintenanceWindow(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope"),
-						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope"),
 				),
 			},
 			{
@@ -3792,8 +3848,8 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
 			},
 			{
@@ -3807,10 +3863,10 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport
 				Config: testAccContainerCluster_NoExclusionOptions_RecurringMaintenanceWindow(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior"),
-						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior"),
 				),
 			},
 			{
@@ -3843,10 +3899,10 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 				Config: testAccContainerCluster_NoExclusionOptions_RecurringMaintenanceWindow(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope"),
-						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope"),
 				),
 			},
 			{
@@ -3860,10 +3916,10 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
 				),
 			},
 			{
@@ -3877,10 +3933,10 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 				Config: testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_UPGRADES", "NO_MINOR_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_UPGRADES"),
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_UPGRADES"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
 				),
 			},
 			{
@@ -3913,10 +3969,10 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 				Config: testAccContainerCluster_NoExclusionOptions_RecurringMaintenanceWindow(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior"),
-						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior"),
+					resource.TestCheckNoResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior"),
 				),
 			},
 			{
@@ -3930,8 +3986,8 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
 			},
 			{
@@ -3945,8 +4001,8 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 				Config: testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_MINOR_OR_NODE_UPGRADES", "NO_MINOR_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+					resource.TestCheckResourceAttr(resourceName,
+						"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
 			},
 			{
@@ -4648,7 +4704,7 @@ func TestAccContainerCluster_withAutopilotKubeletConfig(t *testing.T) {
 
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4942,73 +4998,73 @@ func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
 {{ if ne $.TargetVersionName `ga` -}}
 
 func TestAccContainerCluster_withSecretSyncConfig(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
-  subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
-  pid := envvar.GetTestProjectFromEnv()
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccContainerCluster_forSecretSyncConfig(pid, clusterName, networkName, subnetworkName),
-      },
-      {
-        ResourceName:            "google_container_cluster.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection"},
-      },
-      {
-        Config: testAccContainerCluster_withSecretSyncConfigEnabled(pid, clusterName, networkName, subnetworkName),
-      },
-      {
-        ResourceName:            "google_container_cluster.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection"},
-      },
-      {
-        Config: testAccContainerCluster_withSecretSyncRotationPeriodUpdated(pid, clusterName, networkName, subnetworkName),
-      },
-      {
-        ResourceName:            "google_container_cluster.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection"},
-      },
-      {
-        Config: testAccContainerCluster_withSecretSyncConfigRotationDisabled(pid, clusterName, networkName, subnetworkName),
-      },
-      {
-        ResourceName:            "google_container_cluster.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection"},
-      },
-      {
-        Config: testAccContainerCluster_withSecretSyncConfigDisabled(pid, clusterName, networkName, subnetworkName),
-      },
-      {
-        ResourceName:            "google_container_cluster.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection"},
-      },
-	  {
-        Config: testAccContainerCluster_forSecretSyncConfig(pid, clusterName, networkName, subnetworkName),
-      },
-      {
-        ResourceName:            "google_container_cluster.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection"},
-      },
-    },
-  })
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	pid := envvar.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_forSecretSyncConfig(pid, clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withSecretSyncConfigEnabled(pid, clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withSecretSyncRotationPeriodUpdated(pid, clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withSecretSyncConfigRotationDisabled(pid, clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withSecretSyncConfigDisabled(pid, clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_forSecretSyncConfig(pid, clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
 }
 {{- end }}
 
@@ -6431,7 +6487,7 @@ func TestAccContainerCluster_withSecurityPostureConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-			 	Config: testAccContainerCluster_SetWorkloadVulnerabilityToStandard(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_SetWorkloadVulnerabilityToStandard(clusterName, networkName, subnetworkName),
 			},
 			{
 				ResourceName:      "google_container_cluster.with_security_posture_config",
@@ -6443,9 +6499,9 @@ func TestAccContainerCluster_withSecurityPostureConfig(t *testing.T) {
 				Config: testAccContainerCluster_SetWorkloadVulnerabilityToEnterprise(clusterName, networkName, subnetworkName),
 			},
 			{
-			 	ResourceName:      "google_container_cluster.with_security_posture_config",
-			 	ImportState:       true,
-			 	ImportStateVerify: true,
+				ResourceName:      "google_container_cluster.with_security_posture_config",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
@@ -6562,7 +6618,7 @@ func TestAccContainerCluster_withWorkloadALTSConfigAutopilot(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
@@ -6803,7 +6859,7 @@ func TestAccContainerCluster_WithCPAFeatures(t *testing.T) {
 	var signingCryptoKeyVersion *cloudkms.CryptoKeyVersion
 	for _, ckv := range signingKey.CryptoKeyVersions {
 		if ckv.State == "ENABLED" && ckv.Algorithm == "RSA_SIGN_PKCS1_4096_SHA256" {
-		  signingCryptoKeyVersion = ckv
+			signingCryptoKeyVersion = ckv
 		}
 	}
 	if signingCryptoKeyVersion == nil {
@@ -7185,7 +7241,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 
 	domain := "additive.autopilot.example"
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -7290,7 +7346,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPCMutation(t *testing.T) {
 
 	domain := "additive-mutating.autopilot.example"
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -7487,7 +7543,7 @@ func TestAccContainerCluster_withCpuCfsQuotaPool(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withCpuCfsQuotaPool2(clusterName, npName, networkName, subnetworkName),
-			    PlanOnly: true,
+				PlanOnly: true,
 			},
 			{
 				ResourceName:            "google_container_cluster.with_kubelet_config",
@@ -8099,7 +8155,7 @@ resource "google_container_cluster" "filtered_notification_config" {
 func testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName string, enable bool, confidentialInstanceType, machineType string) string {
 	confInsTypeString := ""
 	if confidentialInstanceType != "" {
-		 confInsTypeString = fmt.Sprintf(`confidential_instance_type = "%s"`, confidentialInstanceType)
+		confInsTypeString = fmt.Sprintf(`confidential_instance_type = "%s"`, confidentialInstanceType)
 	}
 
 	return fmt.Sprintf(`
@@ -9589,7 +9645,7 @@ resource "google_container_cluster" "with_advanced_machine_features_in_node_pool
 }
 
 func testAccContainerCluster_withNodePoolDefaults(clusterName, enabled, networkName, subnetworkName string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_pool_defaults" {
   name               = "%s"
   location           = "us-central1-f"
@@ -9676,7 +9732,7 @@ func testAccContainerCluster_withNodeConfigLinuxNodeConfig(clusterName, networkN
 		if cgroupMode != "" {
 			linuxNodeConfig = linuxNodeConfig + fmt.Sprintf(`cgroup_mode="%s"
 			`, cgroupMode)
-    }
+		}
 		if thpEnabled {
 			linuxNodeConfig = linuxNodeConfig + `
 			transparent_hugepage_defrag = "TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS"
@@ -10516,7 +10572,7 @@ resource "google_container_cluster" "with_autoprovisioning" {
         "https://www.googleapis.com/auth/devstorage.read_only",`,
 		cluster, networkName, subnetworkName)
 
-if monitoringWrite {
+	if monitoringWrite {
 		config += `
         "https://www.googleapis.com/auth/monitoring.write",
 `
@@ -10572,9 +10628,9 @@ resource "google_container_cluster" "with_autoprovisioning" {
 }
 
 func testAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(clusterName, networkName, subnetworkName string, maxSurge, maxUnavailable int, strategy string) string {
-  blueGreenSettings := ""
-  if strategy == "BLUE_GREEN" {
-    blueGreenSettings = `
+	blueGreenSettings := ""
+	if strategy == "BLUE_GREEN" {
+		blueGreenSettings = `
       blue_green_settings {
         node_pool_soak_duration = "3.500s"
         standard_rollout_policy {
@@ -10583,9 +10639,9 @@ func testAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(clusterName
         }
       }
     `
-  }
+	}
 
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
     resource "google_container_cluster" "with_autoprovisioning_upgrade_settings" {
       name               = "%s"
       location           = "us-central1-f"
@@ -11086,7 +11142,7 @@ resource "google_container_cluster" "with_node_pool_node_drain_config" {
 `, cluster, np, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_withMaintenanceWindow(clusterName, startTime, networkName, subnetworkName string) string {
+func testAccContainerCluster_withDailyMaintenanceWindow(clusterName, startTime, networkName, subnetworkName string) string {
 	maintenancePolicy := ""
 	if len(startTime) > 0 {
 		maintenancePolicy = fmt.Sprintf(`
@@ -11112,7 +11168,7 @@ resource "google_container_cluster" "with_maintenance_window" {
 `, clusterName, maintenancePolicy, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_withRecurringMaintenanceWindow(clusterName, startTime, endTime, networkName, subnetworkName string) string {
+func testAccContainerCluster_withRecurringTimeWindow(clusterName, startTime, endTime, networkName, subnetworkName string) string {
 	maintenancePolicy := ""
 	if len(startTime) > 0 {
 		maintenancePolicy = fmt.Sprintf(`
@@ -11138,6 +11194,52 @@ resource "google_container_cluster" "with_recurring_maintenance_window" {
   deletion_protection = false
 }
 `, clusterName, maintenancePolicy, networkName, subnetworkName)
+
+}
+
+func testAccContainerCluster_withRecurringMaintenanceWindow(clusterName string, startYear, startMonth, startDay, startHours, startMinutes int, duration string, networkName, subnetworkName string) string {
+	maintenancePolicy := ""
+	delayUntil := ""
+	if startYear != 0 && startMonth != 0 && startDay != 0 {
+		delayUntil = fmt.Sprintf(`
+			delay_until {
+				year  = %d
+				month = %d
+				day   = %d
+			}
+		`, startYear, startMonth, startDay)
+	}
+
+	maintenancePolicy = fmt.Sprintf(`
+		maintenance_policy {
+			recurring_maintenance_window {
+			  %s
+		
+			  window_duration = "%s"
+		
+			  window_start_time {
+				hours = %d
+				minutes = %d
+				seconds = 0
+			  }
+			  recurrence = "FREQ=DAILY"
+			}
+		}
+		`, delayUntil, duration, startHours, startMinutes)
+
+
+	return fmt.Sprintf(`
+		resource "google_container_cluster" "with_recurring_maintenance_window" {
+		  name               = "%s"
+		  location           = "us-central1-a"
+		  initial_node_count = 1
+		  %s
+		  network    = "%s"
+		  subnetwork = "%s"
+		
+		  deletion_protection = false
+		}
+	`, clusterName, maintenancePolicy, networkName, subnetworkName)
 
 }
 
@@ -11880,12 +11982,12 @@ func testAccContainerCluster_updateWorkloadIdentityConfig(projectID, clusterName
 			workload_identity_config {
 		  workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 		}`
-        } else {
+	} else {
 		workloadIdentityConfig = `
 			workload_identity_config {
 			workload_pool = ""
 		}`
-        }
+	}
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%s"
@@ -13063,7 +13165,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigEnabled(name, networkName, subnetworkName string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
   location = "us-central1-a"
 }
@@ -13083,7 +13185,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigDisabled(name, networkName, subnetworkName string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -13099,7 +13201,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigUpdated(name, networkName, subnetworkName string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -13115,7 +13217,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigPrometheusUpdated(name, networkName, subnetworkName string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -13134,7 +13236,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigPrometheusOnly(name, networkName, subnetworkName string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -13153,7 +13255,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigPrometheusOnly2(name, networkName, subnetworkName string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -13171,7 +13273,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigScopeAll(name, networkName, subnetworkName string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -13192,7 +13294,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigScopeNone(name, networkName, subnetworkName string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -13213,7 +13315,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigAdvancedDatapathObservabilityConfigEnabled(name string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
   name                    = "%s-nw"
   auto_create_subnetworks = false
@@ -13263,7 +13365,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withMonitoringConfigAdvancedDatapathObservabilityConfigDisabled(name string) string {
-       return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
   name                    = "%s-nw"
   auto_create_subnetworks = false
@@ -13870,7 +13972,7 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName, subnetworkName string, enable bool) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "google_project" "project" {
   provider   = google-beta
   project_id = "%s"
@@ -13907,7 +14009,7 @@ resource "google_container_cluster" "with_workload_alts_config" {
 }
 
 func testAccContainerCluster_withWorkloadALTSConfigAutopilot(projectID, name, networkName, subnetworkName string, enable bool) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "google_project" "project" {
   provider = google-beta
   project_id = "%s"
@@ -13934,7 +14036,7 @@ resource "google_container_cluster" "with_workload_alts_config" {
 {{ end }}
 
 func testAccContainerCluster_withAutopilotKubeletConfigBaseline(name, networkName, subnetworkName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "with_autopilot_kubelet_config" {
   name                = "%s"
   location            = "us-central1"
@@ -13948,7 +14050,7 @@ resource "google_container_cluster" "with_autopilot_kubelet_config" {
 }
 
 func testAccContainerCluster_withAutopilotKubeletConfigUpdates(name, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "with_autopilot_kubelet_config" {
   name               = "%s"
   location           = "us-central1"
@@ -13970,7 +14072,7 @@ resource "google_container_cluster" "with_autopilot_kubelet_config" {
 }
 
 func testAccContainerCluster_withAutopilot_withNodePoolDefaults(name, networkName, subnetworkName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name             = "%s"
   location         = "us-central1"
@@ -13989,7 +14091,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withAutopilot_withNodePoolAutoConfig(name, networkName, subnetworkName string, insecureKubeletReadonlyPortEnabled string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
   location = "us-central1-a"
 }
@@ -14023,7 +14125,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_withStandard_withNodePoolDefaults(name, networkName, subnetworkName string, insecureKubeletReadonlyPortEnabled string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name             = "%s"
   location         = "us-central1-a"
@@ -15577,7 +15679,7 @@ func TestAccContainerCluster_withAutopilotGcpFilestoreCsiDriver(t *testing.T) {
 
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -15651,7 +15753,7 @@ func TestAccContainerCluster_withDnsEndpoint(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -15827,7 +15929,7 @@ func TestAccContainerCluster_withCgroupMode(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -15856,7 +15958,7 @@ func TestAccContainerCluster_withCgroupModeUpdate(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -15952,7 +16054,7 @@ func TestAccContainerCluster_withEnterpriseConfig(t *testing.T) {
 }
 
 func testAccContainerCluster_updateEnterpriseConfig(projectID, clusterName, networkName, subnetworkName string, desiredTier string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%s"
 }
@@ -15973,7 +16075,7 @@ resource "google_container_cluster" "with_enterprise_config" {
 }
 
 func testAccContainerCluster_removeEnterpriseConfig(projectID, clusterName, networkName, subnetworkName string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%s"
 }
@@ -15991,41 +16093,41 @@ resource "google_container_cluster" "with_enterprise_config" {
 }
 
 func TestAccContainerCluster_disableControlPlaneIP(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
-  subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:     func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
-      },
-      {
-        ResourceName:      "google_container_cluster.primary",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"deletion_protection"},
-      },
-      {
-        Config: testAccContainerCluster_ControlPlaneIPdisabled(clusterName, networkName, subnetworkName),
-      },
-      {
-        ResourceName:      "google_container_cluster.primary",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"deletion_protection"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_ControlPlaneIPdisabled(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
 }
 
 func testAccContainerCluster_ControlPlaneIPdisabled(clusterName, networkName, subnetworkName string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -16593,7 +16695,7 @@ func TestAccContainerCluster_WithCPAFeaturesUpdate(t *testing.T) {
 	var signingCryptoKeyVersion1 *cloudkms.CryptoKeyVersion
 	for _, ckv := range signingKey1.CryptoKeyVersions {
 		if ckv.State == "ENABLED" && ckv.Algorithm == "RSA_SIGN_PKCS1_4096_SHA256" {
-		  signingCryptoKeyVersion1 = ckv
+			signingCryptoKeyVersion1 = ckv
 		}
 	}
 	if signingCryptoKeyVersion1 == nil {
@@ -16603,7 +16705,7 @@ func TestAccContainerCluster_WithCPAFeaturesUpdate(t *testing.T) {
 	var signingCryptoKeyVersion2 *cloudkms.CryptoKeyVersion
 	for _, ckv := range signingKey2.CryptoKeyVersions {
 		if ckv.State == "ENABLED" && ckv.Algorithm == "RSA_SIGN_PKCS1_4096_SHA256" {
-		  signingCryptoKeyVersion2 = ckv
+			signingCryptoKeyVersion2 = ckv
 		}
 	}
 	if signingCryptoKeyVersion2 == nil {
@@ -16974,7 +17076,7 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.node_config.0.machine_type", "a3-highgpu-8g"),
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", "auto"),
 					resource.TestCheckResourceAttrSet(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.0.network"),
-                    resource.TestCheckResourceAttrSet(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.0.subnetwork"),
+					resource.TestCheckResourceAttrSet(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.0.subnetwork"),
 				),
 			},
 			{
@@ -16990,7 +17092,7 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_nodePool_additionalNodeNetworkConfigs_manual(clusterName string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
   name                    = "%[1]s-main-net"
   auto_create_subnetworks = false
@@ -17077,7 +17179,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_nodePool_acceleratorNetworkProfile_basic(clusterName string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
   name                    = "%[1]s-main-net"
   auto_create_subnetworks = false
@@ -17145,7 +17247,7 @@ resource "google_container_cluster" "primary" {
 }
 
 func testAccContainerCluster_nodePool_acceleratorNetworkProfile_auto(clusterName string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
   name                    = "%[1]s-main-net"
   auto_create_subnetworks = false
