@@ -82,6 +82,7 @@ examples:
       name: gce-policy
   - name: resource_policy_workload_policy_accelerator_topology_mode
     primary_resource_id: bar
+    min_version: beta
     vars:
       name: gce-policy
   - name: resource_policy_workload_policy_max_topology_distance
@@ -446,6 +447,7 @@ properties:
 
           If not specified, the default is AUTO_CONNECT.
           This field can be set only when the workload policy type is HIGH_THROUGHPUT and cannot be set if max topology distance is set.
+        min_version: beta
         enum_values:
           - AUTO_CONNECT
           - PROVISION_ONLY
