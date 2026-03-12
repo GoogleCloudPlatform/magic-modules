@@ -458,7 +458,7 @@ var handwrittenResources = map[string]*schema.Resource{
 	{{- end }}
 	"google_service_networking_connection":    registry.Resource("google_service_networking_connection"),
 	"google_sql_database_instance":            registry.Resource("google_sql_database_instance"),
-	"google_sql_provision_script":                  sql.ResourceSqlProvisionScript(),
+	"google_sql_provision_script":             registry.Resource("google_sql_provision_script"),
 	"google_sql_ssl_cert":                     registry.Resource("google_sql_ssl_cert"),
 	"google_sql_user":                         registry.Resource("google_sql_user"),
 	"google_organization_iam_custom_role":     registry.Resource("google_organization_iam_custom_role"),
