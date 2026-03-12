@@ -37,7 +37,7 @@ func dataSourceObservabilityFolderSettingsRead(d *schema.ResourceData, meta inte
 	}
 	return nil
 }
-{{- end }}
+
 func init() {
 	registry.Schema{
 		Name: "google_observability_folder_settings",
@@ -46,3 +46,4 @@ func init() {
 		Schema: DataSourceObservabilityFolderSettings(),
 	}.Register()
 }
+{{- end }}

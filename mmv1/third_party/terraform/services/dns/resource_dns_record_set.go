@@ -16,8 +16,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
-
 )
+
 func lbTypeNoneDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Extract the index from the key
 	var index int

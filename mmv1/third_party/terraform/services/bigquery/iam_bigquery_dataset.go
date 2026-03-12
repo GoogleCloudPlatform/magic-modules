@@ -349,4 +349,3 @@ func init() {
 		Schema:      tpgiamresource.DataSourceIamPolicy(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater),
 	}.Register()
 }
-

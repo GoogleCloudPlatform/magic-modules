@@ -37,7 +37,6 @@ func dataSourceObservabilityProjectSettingsRead(d *schema.ResourceData, meta int
 	}
 	return nil
 }
-{{- end }}
 
 func init() {
 	registry.Schema{
@@ -47,3 +46,4 @@ func init() {
 		Schema: DataSourceObservabilityProjectSettings(),
 	}.Register()
 }
+{{- end }}

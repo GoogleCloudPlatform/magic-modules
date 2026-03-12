@@ -372,9 +372,6 @@ func flattenSourceMachineImageEncryptionKey(key *compute.CustomerEncryptionKey) 
 	return []map[string]interface{}{m}
 }
 
-{{- else }}
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-{{- end }}
 func init() {
 	registry.Schema{
 		Name: "google_compute_instance_from_machine_image",
@@ -383,3 +380,7 @@ func init() {
 		Schema: ResourceComputeInstanceFromMachineImage(),
 	}.Register()
 }
+
+{{- else }}
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+{{- end }}

@@ -428,6 +428,7 @@ func resourceComputeRouterInterfaceImportState(d *schema.ResourceData, meta inte
 
 	return nil, fmt.Errorf("invalid router interface specifier. Expecting either {region}/{router}/{interface} or {project}/{region}/{router}/{interface} import id format")
 }
+
 func init() {
 	registry.Schema{
 		Name: "google_compute_router_interface",

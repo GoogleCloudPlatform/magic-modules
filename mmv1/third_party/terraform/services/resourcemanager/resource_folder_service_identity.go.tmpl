@@ -7,15 +7,14 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
-
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 )
+
 func ResourceFolderServiceIdentity() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceFolderServiceIdentityCreate,
@@ -133,7 +132,7 @@ func resourceFolderServiceIdentityRead(d *schema.ResourceData, meta interface{})
 func resourceFolderServiceIdentityDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
-{{- end }}
+
 func init() {
 	registry.Schema{
 		Name: "google_folder_service_identity",
@@ -142,3 +141,4 @@ func init() {
 		Schema: ResourceFolderServiceIdentity(),
 	}.Register()
 }
+{{- end }}
