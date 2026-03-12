@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-
-	"github.com/hashicorp/terraform-provider-google/google/registry")
+)
 
 func DataSourceGoogleFolderOrganizationPolicy() *schema.Resource {
 	// Generate datasource schema from resource
