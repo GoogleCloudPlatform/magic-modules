@@ -90,7 +90,6 @@ var (
 	teamOwnedErrorTypes = map[string]bool{
 		"Quota":                             true,
 		"API enablement (Test environment)": true,
-		"Crash":                             true,
 	}
 )
 

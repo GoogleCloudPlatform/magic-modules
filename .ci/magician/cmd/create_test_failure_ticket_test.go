@@ -91,14 +91,6 @@ func TestIsTerraformTeamOwned(t *testing.T) {
 			},
 			want: true,
 		},
-		"GA Crash Error": {
-			tf: testFailure{
-				ErrorTypes: map[provider.Version]string{
-					provider.GA: "Crash",
-				},
-			},
-			want: true,
-		},
 		"GA Other Error": {
 			tf: testFailure{
 				ErrorTypes: map[provider.Version]string{
@@ -197,7 +189,7 @@ func TestShouldCreateTicket(t *testing.T) {
 				TestName:   "TestAccCrash",
 				ErrorTypes: map[provider.Version]string{provider.GA: "Crash"},
 				FailureRateLabels: map[provider.Version]testFailureRateLabel{
-					provider.GA:   testFailure10, // Normally wouldn't create
+					provider.GA:   testFailure100,
 					provider.Beta: testFailureNone,
 				},
 			},
@@ -248,7 +240,7 @@ func TestGetTicketLabels(t *testing.T) {
 	}{
 		"Team owned error": {
 			tf: testFailure{
-				TestName:         "TestAccTeamOwnedQuota",
+				TestName:         "TestAccComputeInstance",
 				AffectedResource: "google_compute_instance",
 				ErrorTypes:       map[provider.Version]string{provider.GA: "Quota"},
 				FailureRateLabels: map[provider.Version]testFailureRateLabel{
@@ -259,14 +251,14 @@ func TestGetTicketLabels(t *testing.T) {
 		},
 		"Crash error": {
 			tf: testFailure{
-				TestName:         "TestAccCrash",
+				TestName:         "TestAccComputeInstance",
 				AffectedResource: "google_compute_instance",
 				ErrorTypes:       map[provider.Version]string{provider.GA: "Crash"},
 				FailureRateLabels: map[provider.Version]testFailureRateLabel{
-					provider.GA: testFailure0,
+					provider.GA: testFailure100,
 				},
 			},
-			expectLabels: []string{"size/xs", "test-failure", "test-failure-0", "service/terraform", "crash"},
+			expectLabels: []string{"size/xs", "test-failure", "test-failure-100", "service/compute-instances", "crash"},
 		},
 		"Non-Team owned - has service label": {
 			tf: testFailure{
