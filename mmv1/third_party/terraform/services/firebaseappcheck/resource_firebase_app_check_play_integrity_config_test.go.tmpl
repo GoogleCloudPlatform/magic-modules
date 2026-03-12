@@ -13,10 +13,12 @@ import (
 func TestAccFirebaseAppCheckPlayIntegrityConfig_firebaseAppCheckPlayIntegrityConfigUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project_id":    envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randString,
 		"token_ttl":     "7200s",
+		"package_name":  "package.name.playintegrity" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -11,8 +11,11 @@ import (
 func TestAccApiGatewayApiConfig_apigatewayApiConfigBasicExampleUpdated(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randString,
+		"api_id":        "tf-test-api-cfg" + randString,
+		"config_id":     "tf-test-api-cfg" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -35,8 +38,10 @@ func TestAccApiGatewayApiConfig_generatedPrefix(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randString,
+		"api_id":        "tf-test-api-cfg" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
