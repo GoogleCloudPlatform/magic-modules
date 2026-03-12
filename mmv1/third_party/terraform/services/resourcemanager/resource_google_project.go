@@ -17,6 +17,8 @@ import (
 
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -25,8 +27,7 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/serviceusage/v1"
 
-	"github.com/hashicorp/terraform-provider-google/google/registry")
-
+)
 type ServicesCall interface {
 	Header() http.Header
 	Do(opts ...googleapi.CallOption) (*serviceusage.Operation, error)

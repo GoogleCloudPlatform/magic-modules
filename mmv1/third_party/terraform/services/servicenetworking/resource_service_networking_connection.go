@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -15,8 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/servicenetworking/v1"
-
-	"github.com/hashicorp/terraform-provider-google/google/registry")
+)
 
 func isInvalidAuthError(err error) (bool, string) {
 	if strings.Contains(err.Error(), "Request had invalid authentication credentials") {

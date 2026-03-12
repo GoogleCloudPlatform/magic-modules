@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
-
-	"github.com/hashicorp/terraform-provider-google/google/registry")
+)
 
 // DNSSEC Algorithm Numbers: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml
 // The following are algorithms that are supported by Cloud DNS

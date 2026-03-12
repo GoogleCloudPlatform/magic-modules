@@ -9,12 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-provider-google/google/services/billing"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudbilling/v1"
 
-	"github.com/hashicorp/terraform-provider-google/google/registry")
-
+)
 func ResourceBillingSubaccount() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBillingSubaccountCreate,

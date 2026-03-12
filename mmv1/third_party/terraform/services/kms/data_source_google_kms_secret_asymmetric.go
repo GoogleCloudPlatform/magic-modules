@@ -10,13 +10,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/cloudkms/v1"
-
-	"github.com/hashicorp/terraform-provider-google/google/registry")
-
+)
 var (
 	cryptoKeyVersionRegexp = regexp.MustCompile(`^(//[^/]*/[^/]*/)?(projects/[^/]+/locations/[^/]+/keyRings/[^/]+/cryptoKeys/[^/]+/cryptoKeyVersions/[^/]+)$`)
 )

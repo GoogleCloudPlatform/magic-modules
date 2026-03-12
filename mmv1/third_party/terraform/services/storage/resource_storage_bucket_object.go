@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -25,8 +27,7 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 
-	"github.com/hashicorp/terraform-provider-google/google/registry")
-
+)
 func ResourceStorageBucketObject() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceStorageBucketObjectCreate,

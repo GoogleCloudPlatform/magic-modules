@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -12,8 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/hashicorp/terraform-provider-google/google/registry")
+)
 
 // This recursive function takes an old map and a new map and is intended to remove the computed keys
 // from the old json string (stored in state) so that it doesn't show a diff if it's not defined in the
