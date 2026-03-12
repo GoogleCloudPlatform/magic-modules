@@ -30,7 +30,7 @@ func TestAccServiceUsageV2OrganizationConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_organization_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force", "organization", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"deletion_policy", "organization", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2OrganizationConsumerPolicy_update(context),
@@ -39,7 +39,7 @@ func TestAccServiceUsageV2OrganizationConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_organization_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force", "organization", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"deletion_policy", "organization", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2OrganizationConsumerPolicy_removeService(context),
@@ -48,7 +48,7 @@ func TestAccServiceUsageV2OrganizationConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_organization_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force", "organization", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"deletion_policy", "organization", "enable_rules.0.services"},
 			},
 		},
 	})
@@ -57,9 +57,9 @@ func TestAccServiceUsageV2OrganizationConsumerPolicy_update(t *testing.T) {
 func testAccServiceUsageV2OrganizationConsumerPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_usage_v2_organization_consumer_policy" "default" {
-  provider     = google-beta
-  organization = "%{org_id}"
-  force        = true
+  provider        = google-beta
+  organization    = "%{org_id}"
+  deletion_policy = "FORCE"
 
   enable_rules {
     services = [
@@ -73,9 +73,9 @@ resource "google_service_usage_v2_organization_consumer_policy" "default" {
 func testAccServiceUsageV2OrganizationConsumerPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_usage_v2_organization_consumer_policy" "default" {
-  provider     = google-beta
-  organization = "%{org_id}"
-  force        = true
+  provider        = google-beta
+  organization    = "%{org_id}"
+  deletion_policy = "FORCE"
 
   enable_rules {
     services = [
@@ -90,9 +90,9 @@ resource "google_service_usage_v2_organization_consumer_policy" "default" {
 func testAccServiceUsageV2OrganizationConsumerPolicy_removeService(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_usage_v2_organization_consumer_policy" "default" {
-  provider     = google-beta
-  organization = "%{org_id}"
-  force        = true
+  provider        = google-beta
+  organization    = "%{org_id}"
+  deletion_policy = "FORCE"
 
   enable_rules {
     services = [
