@@ -123,7 +123,14 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	iamClient := config.NewIamClient(userAgent)
-	sa, err = iamClient.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			var createErr error
+			sa, createErr = iamClient.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+			return createErr
+		},
+		Timeout: d.Timeout(schema.TimeoutCreate),
+	})
 	if err != nil {
 		gerr, ok := err.(*googleapi.Error)
 		alreadyExists := ok && gerr.Code == 409 && d.Get("create_ignore_already_exists").(bool)
