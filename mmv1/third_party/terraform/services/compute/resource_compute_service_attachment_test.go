@@ -663,7 +663,6 @@ resource "google_network_services_gateway" "default" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName "ga" }}
 func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) {
 	t.Parallel()
 
@@ -785,4 +784,3 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 }
 `, context)
 }
-{{ end }}
