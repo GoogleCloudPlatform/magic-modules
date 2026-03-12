@@ -217,8 +217,6 @@ func vflattenDatasourceGoogleCloudAssetResourcesSearchAllList(v interface{}) []m
 	return results
 }
 
-{{ end }}
-
 func init() {
 	registry.Schema{
 		Name: "google_cloud_asset_resources_search_all",
@@ -227,3 +225,5 @@ func init() {
 		Schema: DataSourceGoogleCloudAssetResourcesSearchAll(),
 	}.Register()
 }
+
+{{ end }}

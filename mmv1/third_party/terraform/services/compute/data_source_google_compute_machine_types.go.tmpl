@@ -11,7 +11,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 {{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/compute/v1"
-)
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
 {{- end }}
