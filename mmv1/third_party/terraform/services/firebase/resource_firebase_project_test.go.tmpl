@@ -12,9 +12,12 @@ import (
 func TestAccFirebaseProject_destroyAndReapply(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randString,
+		"instance_name": "tf-test-memory-cache" + randString,
+		"project_name":  "tf-test-my-project" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

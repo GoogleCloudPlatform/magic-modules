@@ -12,8 +12,12 @@ import (
 func TestAccApiGatewayGateway_apigatewayGatewayBasicExampleUpdated(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randString,
+		"api_id":        "tf-test-my-api" + randString,
+		"config_id":     "tf-test-my-config" + randString,
+		"gateway_id":    "tf-test-my-gateway" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

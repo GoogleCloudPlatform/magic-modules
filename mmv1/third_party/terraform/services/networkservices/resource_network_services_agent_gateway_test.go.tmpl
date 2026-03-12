@@ -16,9 +16,11 @@ func TestAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdate(t *tes
 	t.Skip("b/484137930")
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randString,
+		"name":          "tf-test-my-full-agent-gateway" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

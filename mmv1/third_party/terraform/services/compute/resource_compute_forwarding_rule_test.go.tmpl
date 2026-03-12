@@ -80,8 +80,20 @@ func TestAccComputeForwardingRule_ip(t *testing.T) {
 func TestAccComputeForwardingRule_internalTcpUdpLbWithMigBackendExampleUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"backend_service_name":          "tf-test-l4-ilb-backend-subnet" + randString,
+		"backend_subnet_name":           "tf-test-l4-ilb-subnet" + randString,
+		"forwarding_rule_name":          "tf-test-l4-ilb-forwarding-rule" + randString,
+		"fw_allow_hc_name":              "tf-test-l4-ilb-fw-allow-hc" + randString,
+		"fw_allow_ilb_ssh_name":         "tf-test-l4-ilb-fw-ssh" + randString,
+		"fw_allow_ilb_to_backends_name": "tf-test-l4-ilb-fw-allow-ilb-to-backends" + randString,
+		"hc_name":                       "tf-test-l4-ilb-hc" + randString,
+		"ilb_network_name":              "tf-test-l4-ilb-network" + randString,
+		"mig_name":                      "tf-test-l4-ilb-mig1" + randString,
+		"mig_template_name":             "tf-test-l4-ilb-mig-template" + randString,
+		"vm_test_name":                  "tf-test-l4-ilb-test-vm" + randString,
+		"random_suffix":                 randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -167,8 +179,18 @@ func TestAccComputeForwardingRule_serviceDirectoryRegistrations(t *testing.T) {
 func TestAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"consumer_network_name":          "tf-test-consumer-net" + randString,
+		"forwarding_rule_name":           "tf-test-psc-endpoint" + randString,
+		"ip_name":                       "tf-test-website-ip" + randString,
+		"producer_backend_name":          "tf-test-producer-service-backend" + randString,
+		"producer_forwarding_rule_name":  "tf-test-producer-forwarding-rule" + randString,
+		"producer_healthcheck_name":     "tf-test-producer-service-health-check" + randString,
+		"producer_network_name":          "tf-test-producer-net" + randString,
+		"producer_psc_network_name":      "tf-test-producer-psc-net" + randString,
+		"service_attachment_name":        "tf-test-producer-service" + randString,
+		"random_suffix":                  randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -254,8 +276,13 @@ func TestAccComputeForwardingRule_forwardingRulePscRecreate(t *testing.T) {
 func TestAccComputeForwardingRule_forwardingRuleRegionalSteeringExampleUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"backend_name":                  "tf-test-service-backend" + randString,
+		"external_forwarding_rule_name": "tf-test-external-forwarding-rule" + randString,
+		"forwarding_rule_name":          "tf-test-steering-rule" + randString,
+		"ip_name":                       "tf-test-website-ip" + randString,
+		"random_suffix":                 randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

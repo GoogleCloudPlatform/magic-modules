@@ -13,12 +13,15 @@ import (
 func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project_id":       envvar.GetTestProjectFromEnv(),
 		"team_id":          "9987654321",
 		"private_key_path": "test-fixtures/private-key.p8",
 		"token_ttl":        "3900s",
-		"random_suffix":    acctest.RandString(t, 10),
+		"random_suffix":    randString,
+		"bundle_id":        "bundle.id.devicecheck" + randString,
+		"key_id":           "Key ID" + randString,
 	}
 
 	contextUpdated := map[string]interface{}{
@@ -28,6 +31,8 @@ func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigU
 		"token_ttl":        "7200s",
 		// Bundle ID needs to be the same between updates but different between tests
 		"random_suffix": context["random_suffix"],
+		"bundle_id":     context["bundle_id"],
+		"key_id":        context["key_id"],
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
