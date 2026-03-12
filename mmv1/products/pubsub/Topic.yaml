@@ -79,13 +79,6 @@ examples:
       schema_name: 'example'
     test_env_vars:
       project_name: 'PROJECT_NAME'
-  - name: 'pubsub_topic_schema_settings_with_revisions'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-      schema_name: 'example-schema'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
   - name: 'pubsub_topic_ingestion_kinesis'
     primary_resource_id: 'example'
     vars:
