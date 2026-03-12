@@ -421,11 +421,9 @@ properties:
         enum_values:
           - 'SERVICE_ACCOUNT'
           - 'AGENT_IDENTITY'
-        api_name: 'identityType'
       - name: 'effectiveIdentity'
         type: String
         min_version: 'beta'
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
-        api_name: 'effectiveIdentity'

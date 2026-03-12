@@ -560,13 +560,17 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t *testing.T) {
 	t.Parallel()
 
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIReasoningEngine_identityTypeServiceAccount(),
+				Config: testAccVertexAIReasoningEngine_identityTypeServiceAccount(context),
 			},
 			{
 				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
@@ -575,7 +579,7 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t 
 				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.effective_identity"},
 			},
 			{
-				Config: testAccVertexAIReasoningEngine_identityTypeAgentIdentity(),
+				Config: testAccVertexAIReasoningEngine_identityTypeAgentIdentity(context),
 			},
 			{
 				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
@@ -587,12 +591,12 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t 
 	})
 }
 
-func testAccVertexAIReasoningEngine_identityTypeServiceAccount() string {
-	return fmt.Sprintf(`
+func testAccVertexAIReasoningEngine_identityTypeServiceAccount(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   provider = google-beta
 
-  display_name = "sample-reasoning-engine"
+  display_name = "tf-test-sample-reasoning-engine%{random_suffix}"
   description  = "A reasoning engine for identity type testing"
   region       = "us-central1"
 
@@ -600,15 +604,15 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     identity_type = "SERVICE_ACCOUNT"
   }
 }
-`)
+`, context)
 }
 
-func testAccVertexAIReasoningEngine_identityTypeAgentIdentity() string {
-	return fmt.Sprintf(`
+func testAccVertexAIReasoningEngine_identityTypeAgentIdentity(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   provider = google-beta
 
-  display_name = "sample-reasoning-engine"
+  display_name = "tf-test-sample-reasoning-engine%{random_suffix}"
   description  = "A reasoning engine for identity type testing"
   region       = "us-central1"
 
@@ -616,5 +620,5 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     identity_type = "AGENT_IDENTITY"
   }
 }
-`)
+`, context)
 }
