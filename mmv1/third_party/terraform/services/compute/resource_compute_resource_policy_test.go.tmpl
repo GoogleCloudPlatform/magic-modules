@@ -188,6 +188,7 @@ resource "google_compute_resource_policy" "foo" {
 `, context)
 }
 
+{{ if ne $.TargetVersionName `ga` }}
 func TestAccComputeResourcePolicy_withTopologyMode(t *testing.T) {
 	t.Parallel()
 
@@ -226,3 +227,4 @@ resource "google_compute_resource_policy" "bar" {
 }
 `, context)
 }
+{{ end }}
