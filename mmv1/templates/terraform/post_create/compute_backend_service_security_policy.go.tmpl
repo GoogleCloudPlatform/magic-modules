@@ -22,6 +22,7 @@ if o, n := d.GetChange("security_policy"); o.(string) != n.(string) {
     RawURL:    sUrl,
     UserAgent: userAgent,
     Body:      sBody,
+    Headers:   headers,
   })
   if err != nil {
     return errwrap.Wrapf("Error setting Backend Service security policy: {{"{{"}}err{{"}}"}}", err)
@@ -57,6 +58,7 @@ if o, n := d.GetChange("edge_security_policy"); o.(string) != n.(string) {
     RawURL:    eUrl,
     UserAgent: userAgent,
     Body:      eBody,
+    Headers:   headers,
   })
   if err != nil {
     return errwrap.Wrapf("Error setting Backend Service edge security policy: {{"{{"}}err{{"}}"}}", err)
