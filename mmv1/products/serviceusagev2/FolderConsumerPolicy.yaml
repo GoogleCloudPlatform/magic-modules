@@ -24,10 +24,6 @@ references:
     'Hierarchical Service Activation Overview': 'https://cloud.google.com/service-usage/docs/hierarchical-service-activation/overview'
     'Manage service enablement': 'https://cloud.google.com/service-usage/docs/hierarchical-service-activation/manage-enablement'
   api: 'https://cloud.google.com/service-usage/docs/reference/rest/v2beta/consumerPolicies'
-docs:
-  warning: |
-    This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-    Hierarchical Service Activation is a Preview feature.
 base_url: 'folders/{{folder}}/consumerPolicies'
 self_link: 'folders/{{folder}}/consumerPolicies/default'
 create_url: 'folders/{{folder}}/consumerPolicies/default'
@@ -38,10 +34,6 @@ delete_verb: 'PATCH'
 id_format: 'folders/{{folder}}/consumerPolicies/default'
 import_format:
   - 'folders/{{folder}}/consumerPolicies/default'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
 async:
   actions: ['create', 'update']
@@ -54,7 +46,7 @@ async:
 exclude_sweeper: true
 custom_code:
   custom_update: 'templates/terraform/custom_update/folder_consumer_policy.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/clear_folder_consumer_policy.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/folder_consumer_policy.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/folder_consumer_policy.go.tmpl'
 examples:
   - name: 'service_usage_folder_consumer_policy_basic'
@@ -66,57 +58,50 @@ examples:
       org_id: 'ORG_ID'
     ignore_read_extra:
       - 'enable_rules.0.services'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      The deletion policy for the consumer policy. Setting the policy to "FORCE" will
+      pass the force parameter to the API, which allows updates and deletions that may
+      result in the deletion of resources from affected services or loss of API access
+      for clients.
+      Possible values: DELETE, FORCE
+    type: String
+    default_value: "DELETE"
 parameters:
   - name: 'folder'
     type: String
     description: |
       The folder ID for the consumer policy.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
-  - name: 'force'
-    type: Boolean
-    description: |
-      If force is set to true, the policy update will proceed even if it may result
-      in the deletion of resources from affected services or loss of API access for
-      clients. This is required when disabling services that have been used in the
-      last 30 days or were enabled in the past 3 days. Without force, such changes
-      will return an error.
-    min_version: 'beta'
-    url_param_only: true
-    default_value: false
 properties:
   - name: 'name'
     type: String
     description: |
       Output only. The resource name of the policy.
       Format: `folders/{folder}/consumerPolicies/default`
-    min_version: 'beta'
     output: true
   - name: 'etag'
-    type: String
+    type: Fingerprint
     description: |
       An opaque tag indicating the current version of the policy, used for concurrency control.
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: Time
     description: |
       Output only. The time the policy was created.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: Time
     description: |
       Output only. The time the policy was last updated.
-    min_version: 'beta'
     output: true
   - name: 'enableRules'
     type: Array
     description: |
       Enable rules define usable services and service groups.
-    min_version: 'beta'
     item_type:
       type: NestedObject
       properties:
@@ -125,7 +110,6 @@ properties:
           description: |
             The names of the services that are enabled.
             Example: `services/storage.googleapis.com`
-          min_version: 'beta'
           custom_flatten: 'templates/terraform/custom_flatten/consumer_policy_enable_rules_services.go.tmpl'
           item_type:
             type: String

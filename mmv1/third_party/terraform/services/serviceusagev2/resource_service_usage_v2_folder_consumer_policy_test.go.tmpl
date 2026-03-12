@@ -30,7 +30,7 @@ func TestAccServiceUsageV2FolderConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_folder_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder", "force", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"folder", "deletion_policy", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2FolderConsumerPolicy_update(context),
@@ -39,7 +39,7 @@ func TestAccServiceUsageV2FolderConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_folder_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder", "force", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"folder", "deletion_policy", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2FolderConsumerPolicy_removeService(context),
@@ -48,7 +48,7 @@ func TestAccServiceUsageV2FolderConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_folder_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder", "force", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"folder", "deletion_policy", "enable_rules.0.services"},
 			},
 		},
 	})
@@ -86,9 +86,9 @@ resource "google_folder" "test" {
 }
 
 resource "google_service_usage_v2_folder_consumer_policy" "default" {
-  provider = google-beta
-  folder   = google_folder.test.folder_id
-  force    = true
+  provider        = google-beta
+  folder          = google_folder.test.folder_id
+  deletion_policy = "FORCE"
 
   enable_rules {
     services = [
@@ -110,9 +110,9 @@ resource "google_folder" "test" {
 }
 
 resource "google_service_usage_v2_folder_consumer_policy" "default" {
-  provider = google-beta
-  folder   = google_folder.test.folder_id
-  force    = true
+  provider        = google-beta
+  folder          = google_folder.test.folder_id
+  deletion_policy = "FORCE"
 
   enable_rules {
     services = [
