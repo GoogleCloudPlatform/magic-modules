@@ -108,6 +108,7 @@ func TestAccPubsubTopic_schema(t *testing.T) {
 			},
 		},
 	})
+}
 
 func TestAccPubsubTopic_schemaWithRevisions(t *testing.T) {
 	t.Parallel()
@@ -131,7 +132,6 @@ func TestAccPubsubTopic_schemaWithRevisions(t *testing.T) {
 			},
 		},
 	})
-}
 }
 
 func TestAccPubsubTopic_migration(t *testing.T) {
@@ -451,7 +451,6 @@ resource "google_pubsub_topic" "bar" {
 }
 `, schema, topic)
 }
-
 
 func testAccPubsubTopic_schemaWithRevisions(topic, schema string) string {
 	return fmt.Sprintf(`
