@@ -321,6 +321,24 @@ func findDiskByName(disksRaw interface{}, id string) map[string]interface{} {
 	return nil
 }
 
+func findDiskByName(disksRaw interface{}, id string) map[string]interface{} {
+	disks, ok := disksRaw.([]interface{})
+	if !ok {
+		return nil
+	}
+	for _, diskRaw := range disks {
+		disk, ok := diskRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		source, _ := disk["source"].(string)
+		if tpgresource.CompareSelfLinkOrResourceName("", source, id, nil) {
+			return disk
+		}
+	}
+	return nil
+}
+
 func computeAttachedDiskDefaultProviderZone(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	if diff.GetRawConfig().GetAttr("instance") == cty.UnknownVal(cty.String) {
 		return nil
