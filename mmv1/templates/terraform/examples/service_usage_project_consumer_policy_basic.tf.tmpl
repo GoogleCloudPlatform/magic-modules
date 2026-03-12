@@ -1,0 +1,10 @@
+resource "google_service_usage_v2_project_consumer_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  enable_rules {
+    services = [
+      "services/storage.googleapis.com",
+      "services/compute.googleapis.com"
+    ]
+  }
+}
