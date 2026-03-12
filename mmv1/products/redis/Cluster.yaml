@@ -225,7 +225,7 @@ examples:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
-  - name: 'redis_cluster_flexiable_ca'
+  - name: 'redis_cluster_flexible_ca'
     primary_resource_id: 'test-cluster'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
