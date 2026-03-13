@@ -219,7 +219,7 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id = "reasoning-sa-%{random_suffix}"
+  account_id = "tf-test-reasoning-sa-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer" {
