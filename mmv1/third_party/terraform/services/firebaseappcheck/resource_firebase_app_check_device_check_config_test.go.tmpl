@@ -15,7 +15,9 @@ func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigU
 
 	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":          envvar.GetTestProjectFromEnv(),
 		"project_id":       envvar.GetTestProjectFromEnv(),
+		"app_id":           "tf-test-app-" + randString,
 		"team_id":          "9987654321",
 		"private_key_path": "test-fixtures/private-key.p8",
 		"token_ttl":        "3900s",
@@ -25,7 +27,9 @@ func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigU
 	}
 
 	contextUpdated := map[string]interface{}{
+		"project":          envvar.GetTestProjectFromEnv(),
 		"project_id":       envvar.GetTestProjectFromEnv(),
+		"app_id":           "tf-test-app-" + randString,
 		"team_id":          "9987654321",
 		"private_key_path": "test-fixtures/private-key-2.p8",
 		"token_ttl":        "7200s",

@@ -7,13 +7,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccApphubApplication_applicationUpdateFull(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":         envvar.GetTestProjectFromEnv(),
+		"location":        "us-east1",
+		"random_suffix":   suffix,
+		"application_id":  "tf-test-example-application" + suffix,
+		"display_name":    "Application Full",
+		"business_name":   "Alice",
+		"business_email":  "alice@google.com",
+		"developer_name":  "Bob",
+		"developer_email": "bob@google.com",
+		"operator_name":   "Charlie",
+		"operator_email":  "charlie@google.com",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -214,6 +226,8 @@ func TestAccApphubApplication_invalidConfigFails(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "us-east1",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

@@ -11,9 +11,13 @@ import (
 func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"organization":  envvar.GetTestOrgFromEnv(t),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": suffix,
+		"topic_name":    "my-topic-" + suffix,
+		"config_id":     "my-config-" + suffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

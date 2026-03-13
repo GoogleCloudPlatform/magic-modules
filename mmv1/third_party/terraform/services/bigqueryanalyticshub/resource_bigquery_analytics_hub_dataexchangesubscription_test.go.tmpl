@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDataexchangeSubscriptionUpdate(t *testing.T) {
@@ -13,6 +14,8 @@ func TestAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDat
 
 	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":                           envvar.GetTestProjectFromEnv(),
+		"location":                          "us",
 		"random_suffix":                     randString,
 		"data_exchange_id":                  "tf_test_my_test_dataexchange" + randString,
 		"listing_dataset_id":                "tf_test_listing_src_dataset" + randString,

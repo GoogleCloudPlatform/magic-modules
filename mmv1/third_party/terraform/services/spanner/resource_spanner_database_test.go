@@ -569,8 +569,13 @@ resource "google_spanner_database" "basic" {
 func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"instance":      "tf-test-" + randString,
+		"instance_name": "tf-test-" + randString,
+		"random_suffix": randString,
+		"database_name": "tf-test-db-" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -13,10 +13,13 @@ import (
 func TestAccSecurityCenterV2ProjectNotificationConfig_updateStreamingConfigFilter(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
 		"location":      "global",
-		"random_suffix": acctest.RandString(t, 10),
+		"topic_name":    "tf-test-my-topic" + suffix,
+		"config_id":     "tf-test-my-config" + suffix,
+		"random_suffix": suffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -121,10 +124,13 @@ func TestAccSecurityCenterV2ProjectNotificationConfig_locationEu(t *testing.T) {
 	t.Skip("Skipping: CI project does not support data residency for other locations. This has to be setup during SCC Initalization")
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
 		"location":      "eu",
-		"random_suffix": acctest.RandString(t, 10),
+		"topic_name":    "tf-test-my-topic" + suffix,
+		"config_id":     "tf-test-my-config" + suffix,
+		"random_suffix": suffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -166,10 +172,13 @@ func TestAccSecurityCenterV2ProjectNotificationConfig_locationUs(t *testing.T) {
 	t.Skip("Skipping: CI project does not support data residency for other locations. This has to be setup during SCC Initalization")
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
 		"location":      "us",
-		"random_suffix": acctest.RandString(t, 10),
+		"topic_name":    "tf-test-my-topic" + suffix,
+		"config_id":     "tf-test-my-config" + suffix,
+		"random_suffix": suffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
