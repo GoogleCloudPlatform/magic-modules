@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBigqueryReservation_withDisasterRecovery_update(t *testing.T) {
@@ -76,7 +77,7 @@ func TestAccBigqueryReservation_reservationGroup_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"project":       acctest.GetTestProject(t),
+		"project":       envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -195,7 +196,7 @@ resource "google_bigquery_reservation" "reservation" {
 
   slot_capacity     = 0
   edition           = "ENTERPRISE"
-  ignore_idle_slots = true
+  ignore_idle_slots = false
   }
   `, context)
   }
@@ -209,7 +210,7 @@ resource "google_bigquery_reservation" "reservation" {
 
   slot_capacity     = 0
   edition           = "ENTERPRISE"
-  ignore_idle_slots = true
+  ignore_idle_slots = false
   reservation_group = "projects/%{project}/locations/us-west2/reservationGroups/tf-test-group-%{random_suffix}"
   }
   `, context)
