@@ -45,6 +45,9 @@ import (
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 
   "google.golang.org/api/googleapi"
+{{- if eq $.ResourceName "BigtableAppProfile" }}
+  bigtableadmin "google.golang.org/api/bigtableadmin/v2"
+{{- end }}
 )
 
 var (
