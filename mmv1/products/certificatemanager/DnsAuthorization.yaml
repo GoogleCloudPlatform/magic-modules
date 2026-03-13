@@ -35,13 +35,13 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
 schema_version: 1
 state_upgraders: true
 sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "global"
+include_in_tgc_next: true
 examples:
   - name: 'certificate_manager_dns_authorization_basic'
     primary_resource_id: 'default'
