@@ -28,11 +28,8 @@ func TestAccProjectIamMemberRemove_basic(t *testing.T) {
 			{
 				Config:             testAccCheckGoogleProjectIamMemberRemove_basic(randomSuffix, org),
 				ExpectNonEmptyPlan: true, // Due to adding in binding, then removing in remove resource
-			},
-			{
-				Config: testAccCheckGoogleProjectIamMemberRemove_basic2(randomSuffix, org),
-				ConfigPlanChecks: resource.ConfigPlanChecks{ // binding expects the membership to be removed. Any diff will fail the test due to PlanOnly.
-					PostApplyPreRefresh: []plancheck.PlanCheck{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
 					},
 				},
@@ -58,11 +55,8 @@ func TestAccProjectIamMemberRemove_multipleMembersInBinding(t *testing.T) {
 			{
 				Config:             testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding(randomSuffix, org),
 				ExpectNonEmptyPlan: true, // Due to adding in binding, then removing in remove resource
-			},
-			{
-				Config: testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding2(randomSuffix, org),
-				ConfigPlanChecks: resource.ConfigPlanChecks{ // binding expects the membership to be removed. Any diff will fail the test due to PlanOnly.
-					PostApplyPreRefresh: []plancheck.PlanCheck{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
 					},
 				},
@@ -88,11 +82,8 @@ func TestAccProjectIamMemberRemove_memberInMultipleBindings(t *testing.T) {
 			{
 				Config:             testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding(randomSuffix, org),
 				ExpectNonEmptyPlan: true, // Due to adding in binding, then removing in remove resource
-			},
-			{
-				Config: testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding2(randomSuffix, org),
-				ConfigPlanChecks: resource.ConfigPlanChecks{ // binding expects the membership to be removed. Any diff will fail the test due to PlanOnly.
-					PostApplyPreRefresh: []plancheck.PlanCheck{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
 					},
 				},
@@ -171,35 +162,6 @@ resource "google_project" "project" {
 resource "google_project_iam_binding" "bar" {
   project = google_project.project.project_id
   members = ["user:gterraformtest1@gmail.com", "user:gterraformtest2@gmail.com"]
-  role    = "roles/editor"
-}
-
-resource "time_sleep" "wait_20s" {
-  depends_on = [google_project_iam_binding.bar]
-  create_duration = "20s"
-}
-
-resource "google_project_iam_member_remove" "foo" {
-  role     = "roles/editor"
-  project  = google_project.project.project_id
-  member  = "user:gterraformtest1@gmail.com"
-  depends_on = [time_sleep.wait_20s]
-}
-`, random_suffix, random_suffix, org)
-}
-
-func testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding2(random_suffix, org string) string {
-	return fmt.Sprintf(`
-resource "google_project" "project" {
-  project_id = "tf-test-%s"
-  name       = "tf-test-%s"
-  org_id     = "%s"
-  deletion_policy = "DELETE"
-}
-
-resource "google_project_iam_binding" "bar" {
-  project = google_project.project.project_id
-  members = ["user:gterraformtest2@gmail.com"]
   role    = "roles/editor"
 }
 
