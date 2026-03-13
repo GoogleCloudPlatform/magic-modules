@@ -78,9 +78,9 @@ func dataSourceLustreInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 func init() {
 	registry.Schema{
-		Name: "google_lustre_instance",
+		Name:        "google_lustre_instance",
 		ProductName: "lustre",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceLustreInstance(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceLustreInstance(),
 	}.Register()
 }

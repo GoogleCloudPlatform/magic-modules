@@ -77,9 +77,9 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_secret_ciphertext",
+		Name:        "google_kms_secret_ciphertext",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsSecretCiphertext(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsSecretCiphertext(),
 	}.Register()
 }

@@ -48,9 +48,9 @@ func dataSourceRedisClusterRead(d *schema.ResourceData, meta interface{}) error 
 
 func init() {
 	registry.Schema{
-		Name: "google_redis_cluster",
+		Name:        "google_redis_cluster",
 		ProductName: "redis",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceRedisCluster(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceRedisCluster(),
 	}.Register()
 }

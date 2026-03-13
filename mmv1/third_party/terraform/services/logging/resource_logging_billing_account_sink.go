@@ -104,9 +104,9 @@ func resourceLoggingBillingAccountSinkDelete(d *schema.ResourceData, meta interf
 
 func init() {
 	registry.Schema{
-		Name: "google_logging_billing_account_sink",
+		Name:        "google_logging_billing_account_sink",
 		ProductName: "logging",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceLoggingBillingAccountSink(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceLoggingBillingAccountSink(),
 	}.Register()
 }

@@ -297,9 +297,9 @@ func convertNpmPackageResponseToStruct(res map[string]interface{}) NpmPackage {
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_npm_package",
+		Name:        "google_artifact_registry_npm_package",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryNpmPackage(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryNpmPackage(),
 	}.Register()
 }

@@ -128,9 +128,9 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 
 func init() {
 	registry.Schema{
-		Name: "google_service_account_id_token",
+		Name:        "google_service_account_id_token",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleServiceAccountIdToken(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleServiceAccountIdToken(),
 	}.Register()
 }

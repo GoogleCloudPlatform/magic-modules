@@ -230,9 +230,9 @@ func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) 
 
 func init() {
 	registry.Schema{
-		Name: "google_logging_project_sink",
+		Name:        "google_logging_project_sink",
 		ProductName: "logging",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceLoggingProjectSink(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceLoggingProjectSink(),
 	}.Register()
 }

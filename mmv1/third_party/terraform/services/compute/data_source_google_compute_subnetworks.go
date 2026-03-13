@@ -127,9 +127,9 @@ func dataSourceGoogleComputeSubnetworksRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_subnetworks",
+		Name:        "google_compute_subnetworks",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeSubnetworks(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeSubnetworks(),
 	}.Register()
 }

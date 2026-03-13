@@ -118,9 +118,9 @@ func flattenStorageBucketObjectGeneration(v interface{}, d *schema.ResourceData,
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_bucket_object",
+		Name:        "google_storage_bucket_object",
 		ProductName: "storage",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleStorageBucketObject(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageBucketObject(),
 	}.Register()
 }

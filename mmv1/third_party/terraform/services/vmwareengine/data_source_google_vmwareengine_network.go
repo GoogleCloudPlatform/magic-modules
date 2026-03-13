@@ -42,9 +42,9 @@ func dataSourceVmwareengineNetworkRead(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_network",
+		Name:        "google_vmwareengine_network",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineNetwork(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineNetwork(),
 	}.Register()
 }

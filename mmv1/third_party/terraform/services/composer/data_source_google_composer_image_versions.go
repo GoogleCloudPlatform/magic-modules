@@ -103,9 +103,9 @@ func flattenGoogleComposerImageVersions(resp map[string]interface{}) []interface
 
 func init() {
 	registry.Schema{
-		Name: "google_composer_image_versions",
+		Name:        "google_composer_image_versions",
 		ProductName: "composer",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComposerImageVersions(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComposerImageVersions(),
 	}.Register()
 }

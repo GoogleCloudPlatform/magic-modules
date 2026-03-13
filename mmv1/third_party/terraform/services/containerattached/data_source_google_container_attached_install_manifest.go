@@ -94,9 +94,9 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 
 func init() {
 	registry.Schema{
-		Name: "google_container_attached_install_manifest",
+		Name:        "google_container_attached_install_manifest",
 		ProductName: "containerattached",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleContainerAttachedInstallManifest(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerAttachedInstallManifest(),
 	}.Register()
 }

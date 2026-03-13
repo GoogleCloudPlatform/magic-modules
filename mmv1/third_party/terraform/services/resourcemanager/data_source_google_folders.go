@@ -168,9 +168,9 @@ func flattenDataSourceGoogleFoldersList(v interface{}) []map[string]interface{} 
 
 func init() {
 	registry.Schema{
-		Name: "google_folders",
+		Name:        "google_folders",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleFolders(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleFolders(),
 	}.Register()
 }

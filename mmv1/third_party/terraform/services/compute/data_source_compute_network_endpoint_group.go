@@ -74,9 +74,9 @@ func dataSourceComputeNetworkEndpointGroupRead(d *schema.ResourceData, meta inte
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_network_endpoint_group",
+		Name:        "google_compute_network_endpoint_group",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeNetworkEndpointGroup(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeNetworkEndpointGroup(),
 	}.Register()
 }

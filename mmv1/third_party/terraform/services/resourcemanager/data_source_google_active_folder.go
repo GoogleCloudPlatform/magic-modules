@@ -102,9 +102,9 @@ func dataSourceGoogleActiveFolderRead(d *schema.ResourceData, meta interface{}) 
 
 func init() {
 	registry.Schema{
-		Name: "google_active_folder",
+		Name:        "google_active_folder",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleActiveFolder(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleActiveFolder(),
 	}.Register()
 }

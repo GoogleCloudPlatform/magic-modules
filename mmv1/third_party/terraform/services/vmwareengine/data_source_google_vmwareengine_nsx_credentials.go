@@ -92,9 +92,9 @@ func flattenVmwareengineNsxCredentailsPassword(v interface{}, d *schema.Resource
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_nsx_credentials",
+		Name:        "google_vmwareengine_nsx_credentials",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineNsxCredentials(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineNsxCredentials(),
 	}.Register()
 }

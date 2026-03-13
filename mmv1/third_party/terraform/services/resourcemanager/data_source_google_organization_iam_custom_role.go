@@ -40,9 +40,9 @@ func dataSourceOrganizationIamCustomRoleRead(d *schema.ResourceData, meta interf
 
 func init() {
 	registry.Schema{
-		Name: "google_organization_iam_custom_role",
+		Name:        "google_organization_iam_custom_role",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleOrganizationIamCustomRole(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleOrganizationIamCustomRole(),
 	}.Register()
 }

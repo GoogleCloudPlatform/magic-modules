@@ -41,9 +41,9 @@ func dataSourceGoogleGkeHubMembershipRead(d *schema.ResourceData, meta interface
 
 func init() {
 	registry.Schema{
-		Name: "google_gke_hub_membership",
+		Name:        "google_gke_hub_membership",
 		ProductName: "gkehub",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleGkeHubMembership(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleGkeHubMembership(),
 	}.Register()
 }

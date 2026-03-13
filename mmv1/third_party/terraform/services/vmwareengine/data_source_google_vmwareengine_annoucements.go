@@ -162,9 +162,9 @@ func flattenVmwareengineAnnouncements(v interface{}, d *schema.ResourceData, con
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_announcements",
+		Name:        "google_vmwareengine_announcements",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineAnnouncements(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineAnnouncements(),
 	}.Register()
 }

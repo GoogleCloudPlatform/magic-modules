@@ -238,9 +238,9 @@ func validateViewArtifactRegistryVersions(val interface{}, key string) ([]string
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_versions",
+		Name:        "google_artifact_registry_versions",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryVersions(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryVersions(),
 	}.Register()
 }

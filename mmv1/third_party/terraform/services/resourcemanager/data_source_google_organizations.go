@@ -107,9 +107,9 @@ func datasourceGoogleOrganizationsRead(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_organizations",
+		Name:        "google_organizations",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleOrganizations(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleOrganizations(),
 	}.Register()
 }

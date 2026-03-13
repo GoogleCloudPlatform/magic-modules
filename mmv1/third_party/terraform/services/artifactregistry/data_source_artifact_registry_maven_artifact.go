@@ -284,9 +284,9 @@ func convertMavenArtifactResponseToStruct(res map[string]interface{}) MavenArtif
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_maven_artifact",
+		Name:        "google_artifact_registry_maven_artifact",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryMavenArtifact(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryMavenArtifact(),
 	}.Register()
 }

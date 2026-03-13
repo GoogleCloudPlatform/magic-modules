@@ -58,9 +58,9 @@ func containerRegistryRepoRead(d *schema.ResourceData, meta interface{}) error {
 
 func init() {
 	registry.Schema{
-		Name: "google_container_registry_repository",
+		Name:        "google_container_registry_repository",
 		ProductName: "containeranalysis",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleContainerRepo(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerRepo(),
 	}.Register()
 }

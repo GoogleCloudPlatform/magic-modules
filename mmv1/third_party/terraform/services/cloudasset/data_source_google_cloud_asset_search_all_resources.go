@@ -270,9 +270,9 @@ func flattenDatasourceGoogleCloudAssetSearchAllResources(v interface{}) []map[st
 
 func init() {
 	registry.Schema{
-		Name: "google_cloud_asset_search_all_resources",
+		Name:        "google_cloud_asset_search_all_resources",
 		ProductName: "cloudasset",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudAssetSearchAllResources(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudAssetSearchAllResources(),
 	}.Register()
 }

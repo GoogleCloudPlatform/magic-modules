@@ -127,9 +127,9 @@ func lookupOrganizationName(parent, userAgent string, d *schema.ResourceData, co
 
 func init() {
 	registry.Schema{
-		Name: "google_folder",
+		Name:        "google_folder",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleFolder(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleFolder(),
 	}.Register()
 }

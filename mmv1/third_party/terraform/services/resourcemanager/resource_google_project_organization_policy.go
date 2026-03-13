@@ -194,9 +194,9 @@ func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) erro
 
 func init() {
 	registry.Schema{
-		Name: "google_project_organization_policy",
+		Name:        "google_project_organization_policy",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleProjectOrganizationPolicy(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProjectOrganizationPolicy(),
 	}.Register()
 }

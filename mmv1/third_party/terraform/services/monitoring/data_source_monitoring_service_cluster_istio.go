@@ -67,9 +67,9 @@ func dataSourceMonitoringServiceClusterIstioRead(res map[string]interface{}, d *
 
 func init() {
 	registry.Schema{
-		Name: "google_monitoring_cluster_istio_service",
+		Name:        "google_monitoring_cluster_istio_service",
 		ProductName: "monitoring",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceMonitoringServiceClusterIstio(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceMonitoringServiceClusterIstio(),
 	}.Register()
 }

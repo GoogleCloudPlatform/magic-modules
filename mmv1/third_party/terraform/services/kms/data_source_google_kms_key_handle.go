@@ -48,9 +48,9 @@ func dataSourceGoogleKmsKeyHandleRead(d *schema.ResourceData, meta interface{}) 
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_key_handle",
+		Name:        "google_kms_key_handle",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsKeyHandle(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsKeyHandle(),
 	}.Register()
 }

@@ -38,9 +38,9 @@ func dataSourceGoogleKmsAutokeyConfigRead(d *schema.ResourceData, meta interface
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_autokey_config",
+		Name:        "google_kms_autokey_config",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsAutokeyConfig(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsAutokeyConfig(),
 	}.Register()
 }

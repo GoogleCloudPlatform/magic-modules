@@ -169,9 +169,9 @@ func dataSourceArtifactRegistryMavenArtifactsRead(d *schema.ResourceData, meta i
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_maven_artifacts",
+		Name:        "google_artifact_registry_maven_artifacts",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryMavenArtifacts(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryMavenArtifacts(),
 	}.Register()
 }

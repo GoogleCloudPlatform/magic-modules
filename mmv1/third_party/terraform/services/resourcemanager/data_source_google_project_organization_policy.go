@@ -39,9 +39,9 @@ func datasourceGoogleProjectOrganizationPolicyRead(d *schema.ResourceData, meta 
 
 func init() {
 	registry.Schema{
-		Name: "google_project_organization_policy",
+		Name:        "google_project_organization_policy",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleProjectOrganizationPolicy(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleProjectOrganizationPolicy(),
 	}.Register()
 }

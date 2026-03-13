@@ -38,9 +38,9 @@ func dataSourceOracleDatabaseCloudExadataInfrastructureRead(d *schema.ResourceDa
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_cloud_exadata_infrastructure",
+		Name:        "google_oracle_database_cloud_exadata_infrastructure",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseCloudExadataInfrastructure(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseCloudExadataInfrastructure(),
 	}.Register()
 }

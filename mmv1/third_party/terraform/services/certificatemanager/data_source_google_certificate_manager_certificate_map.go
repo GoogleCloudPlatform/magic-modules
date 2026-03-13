@@ -46,9 +46,9 @@ func dataSourceGoogleCertificateManagerCertificateMapRead(d *schema.ResourceData
 
 func init() {
 	registry.Schema{
-		Name: "google_certificate_manager_certificate_map",
+		Name:        "google_certificate_manager_certificate_map",
 		ProductName: "certificatemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCertificateManagerCertificateMap(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCertificateManagerCertificateMap(),
 	}.Register()
 }

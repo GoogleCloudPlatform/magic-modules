@@ -66,9 +66,9 @@ func dataSourceAlloydbDatabaseClusterRead(d *schema.ResourceData, meta interface
 
 func init() {
 	registry.Schema{
-		Name: "google_alloydb_cluster",
+		Name:        "google_alloydb_cluster",
 		ProductName: "alloydb",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceAlloydbDatabaseCluster(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAlloydbDatabaseCluster(),
 	}.Register()
 }

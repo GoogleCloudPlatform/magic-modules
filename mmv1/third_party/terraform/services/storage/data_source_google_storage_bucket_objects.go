@@ -157,9 +157,9 @@ func flattenDatasourceGoogleBucketObjectsList(v interface{}) []map[string]interf
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_bucket_objects",
+		Name:        "google_storage_bucket_objects",
 		ProductName: "storage",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleStorageBucketObjects(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageBucketObjects(),
 	}.Register()
 }

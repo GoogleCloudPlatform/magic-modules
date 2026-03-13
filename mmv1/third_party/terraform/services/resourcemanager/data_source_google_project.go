@@ -56,9 +56,9 @@ func datasourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error
 
 func init() {
 	registry.Schema{
-		Name: "google_project",
+		Name:        "google_project",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleProject(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleProject(),
 	}.Register()
 }

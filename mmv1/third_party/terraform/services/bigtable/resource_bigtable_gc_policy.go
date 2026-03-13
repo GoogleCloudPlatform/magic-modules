@@ -644,9 +644,9 @@ func getMaxAgeDuration(values map[string]interface{}) (time.Duration, error) {
 
 func init() {
 	registry.Schema{
-		Name: "google_bigtable_gc_policy",
+		Name:        "google_bigtable_gc_policy",
 		ProductName: "bigtable",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceBigtableGCPolicy(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigtableGCPolicy(),
 	}.Register()
 }

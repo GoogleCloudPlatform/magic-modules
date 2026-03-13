@@ -391,9 +391,9 @@ func SignString(toSign []byte, cfg *jwt.Config) ([]byte, error) {
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_object_signed_url",
+		Name:        "google_storage_object_signed_url",
 		ProductName: "storage",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleSignedUrl(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleSignedUrl(),
 	}.Register()
 }

@@ -54,9 +54,9 @@ func dataSourceGoogleCloudRunV2WorkerPoolRead(d *schema.ResourceData, meta inter
 
 func init() {
 	registry.Schema{
-		Name: "google_cloud_run_v2_worker_pool",
+		Name:        "google_cloud_run_v2_worker_pool",
 		ProductName: "cloudrunv2",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudRunV2WorkerPool(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudRunV2WorkerPool(),
 	}.Register()
 }

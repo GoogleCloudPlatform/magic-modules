@@ -91,9 +91,9 @@ func flattenCloudRunLocations(resp map[string]interface{}) []interface{} {
 
 func init() {
 	registry.Schema{
-		Name: "google_cloud_run_locations",
+		Name:        "google_cloud_run_locations",
 		ProductName: "cloudrun",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudRunLocations(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudRunLocations(),
 	}.Register()
 }

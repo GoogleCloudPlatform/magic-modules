@@ -342,9 +342,9 @@ func getGoogleFolder(folderName, userAgent string, d *schema.ResourceData, confi
 
 func init() {
 	registry.Schema{
-		Name: "google_folder",
+		Name:        "google_folder",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleFolder(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleFolder(),
 	}.Register()
 }

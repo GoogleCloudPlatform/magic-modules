@@ -164,9 +164,9 @@ func flattenApphubDiscoveredWorkloadDataZone(v interface{}, d *schema.ResourceDa
 
 func init() {
 	registry.Schema{
-		Name: "google_apphub_discovered_workload",
+		Name:        "google_apphub_discovered_workload",
 		ProductName: "apphub",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceApphubDiscoveredWorkload(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceApphubDiscoveredWorkload(),
 	}.Register()
 }

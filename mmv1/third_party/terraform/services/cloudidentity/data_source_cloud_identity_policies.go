@@ -172,9 +172,9 @@ func dataSourceGoogleCloudIdentityPoliciesRead(d *schema.ResourceData, meta inte
 
 func init() {
 	registry.Schema{
-		Name: "google_cloud_identity_policies",
+		Name:        "google_cloud_identity_policies",
 		ProductName: "cloudidentity",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudIdentityPolicies(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudIdentityPolicies(),
 	}.Register()
 }

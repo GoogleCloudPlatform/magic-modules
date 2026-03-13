@@ -39,9 +39,9 @@ func DataSourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 
 func init() {
 	registry.Schema{
-		Name: "google_service_networking_peered_dns_domain",
+		Name:        "google_service_networking_peered_dns_domain",
 		ProductName: "servicenetworking",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleServiceNetworkingPeeredDNSDomain(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleServiceNetworkingPeeredDNSDomain(),
 	}.Register()
 }

@@ -440,9 +440,9 @@ func flattenServiceManagementEndpoints(endpoints []*servicemanagement.Endpoint) 
 
 func init() {
 	registry.Schema{
-		Name: "google_endpoints_service",
+		Name:        "google_endpoints_service",
 		ProductName: "servicemanagement",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceEndpointsService(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceEndpointsService(),
 	}.Register()
 }

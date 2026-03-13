@@ -381,9 +381,9 @@ func dataSourceGoogleComputeRoutersRead(d *schema.ResourceData, meta interface{}
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_routers",
+		Name:        "google_compute_routers",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeRouters(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRouters(),
 	}.Register()
 }

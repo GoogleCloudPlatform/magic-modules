@@ -46,9 +46,9 @@ func dataSourceGooglePubsubSubscriptionRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_pubsub_subscription",
+		Name:        "google_pubsub_subscription",
 		ProductName: "pubsub",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGooglePubsubSubscription(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGooglePubsubSubscription(),
 	}.Register()
 }

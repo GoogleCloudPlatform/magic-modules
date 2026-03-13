@@ -323,9 +323,9 @@ func convertResponseToStruct(res map[string]interface{}) DockerImage {
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_docker_image",
+		Name:        "google_artifact_registry_docker_image",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryDockerImage(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryDockerImage(),
 	}.Register()
 }

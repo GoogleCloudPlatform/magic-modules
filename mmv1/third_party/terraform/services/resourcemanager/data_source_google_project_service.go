@@ -34,9 +34,9 @@ func dataSourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}
 
 func init() {
 	registry.Schema{
-		Name: "google_project_service",
+		Name:        "google_project_service",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleProjectService(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleProjectService(),
 	}.Register()
 }

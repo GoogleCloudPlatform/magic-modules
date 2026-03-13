@@ -105,9 +105,9 @@ func dataSourceGoogleComputeForwardingRulesRead(d *schema.ResourceData, meta int
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_forwarding_rules",
+		Name:        "google_compute_forwarding_rules",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeForwardingRules(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeForwardingRules(),
 	}.Register()
 }

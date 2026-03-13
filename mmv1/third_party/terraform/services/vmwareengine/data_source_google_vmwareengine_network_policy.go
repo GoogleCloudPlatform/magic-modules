@@ -42,9 +42,9 @@ func dataSourceVmwareengineNetworkPolicyRead(d *schema.ResourceData, meta interf
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_network_policy",
+		Name:        "google_vmwareengine_network_policy",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineNetworkPolicy(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineNetworkPolicy(),
 	}.Register()
 }
