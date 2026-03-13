@@ -175,7 +175,7 @@ resource "time_sleep" "wait_5_minutes" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "secret-%{random_suffix}"
+  secret_id = "tf-test-secret-%{random_suffix}"
 
   replication {
     auto {}
