@@ -52,6 +52,10 @@ func TestAcc{{$.ResourceName}}(t *testing.T) {
 		{{- range $field := $.TGCTestIgnorePropertiesToStrings }}
 			"{{ $field }}",
 		{{- end }}
+		// DEBUG WriteOnly properties:
+		{{- range $p := $.AllNestedProperties $.RootProperties }}
+			// {{ $p.Name }} - WriteOnly={{ $p.WriteOnly }} - IgnoreRead={{ $p.IgnoreRead }}
+		{{- end }}
 				},
 				"{{$.TerraformName}}",
 			)
