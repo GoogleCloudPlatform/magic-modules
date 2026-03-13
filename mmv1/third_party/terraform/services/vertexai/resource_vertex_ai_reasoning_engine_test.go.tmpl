@@ -390,7 +390,7 @@ resource "google_secret_manager_secret_iam_member" "secret_access_new" {
 }
 
 resource "google_secret_manager_secret" "secret_new" {
-  secret_id = "secret-new-%{random_suffix}"
+  secret_id = "tf-test-secret-new-%{random_suffix}"
 
   replication {
     auto {}
