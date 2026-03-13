@@ -211,7 +211,13 @@ resource "google_bigquery_reservation" "reservation" {
   slot_capacity     = 0
   edition           = "ENTERPRISE"
   ignore_idle_slots = false
-  reservation_group = "projects/%{project}/locations/us-west2/reservationGroups/tf-test-group-%{random_suffix}"
+  reservation_group = google_bigquery_reservation_group.reservation_group.id
+  }
+
+  resource "google_bigquery_reservation_group" "reservation_group" {
+  provider = google-beta
+  name     = "tf-test-group-%{random_suffix}"
+  location = "us-west2"
   }
   `, context)
   }

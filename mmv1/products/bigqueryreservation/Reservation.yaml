@@ -32,11 +32,8 @@ examples:
       name: my-reservation
   - name: bigquery_reservation_reservation_group
     primary_resource_id: reservation
-    exclude_test: true
     vars:
       name: my-reservation
-    test_env_vars:
-      project_id: PROJECT_NAME
   - name: bigquery_reservation_with_disaster_recovery
     primary_resource_id: reservation
     exclude_docs: true

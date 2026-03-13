@@ -39,18 +39,10 @@ parameters:
       Examples: US, EU, asia-northeast1. The default value is US.
     immutable: true
     url_param_only: true
+properties:
   - name: name
     type: String
     required: true
     description: |
       The name of the reservation group. This field must only contain alphanumeric characters or dash.
     immutable: true
-    url_param_only: true
-properties:
-  - name: parentGroup
-    type: String
-    output: true
-    description: |
-      The parent reservation group of the reservation group.
-      Format: projects/*/locations/*/reservationGroups/team1-prod for non-root reservation groups,
-      or projects/*/locations/* for root reservation groups.
