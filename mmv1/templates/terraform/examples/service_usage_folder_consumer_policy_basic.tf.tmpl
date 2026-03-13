@@ -1,0 +1,17 @@
+resource "google_folder" "my_folder" {
+  provider     = google-beta
+  display_name = "{{index $.Vars "folder_name"}}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+resource "google_service_usage_v2_folder_consumer_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  folder   = google_folder.my_folder.folder_id
+
+  enable_rules {
+    services = [
+      "services/storage.googleapis.com"
+    ]
+  }
+}
