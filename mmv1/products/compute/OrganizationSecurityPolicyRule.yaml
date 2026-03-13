@@ -47,6 +47,10 @@ examples:
     primary_resource_id: 'policy'
     test_env_vars:
       org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_expression'
+    primary_resource_id: 'policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
   - name: 'organization_security_policy_rule_firewall'
     min_version: 'beta'
     primary_resource_id: 'policy'
@@ -91,10 +95,19 @@ properties:
           the only supported type is "SRC_IPS_V1".
           **NOTE** : 'FIREWALL' type is deprecated. Please use 'google_compute_firewall_policy_rule' resource instead.
         default_value: "FIREWALL"
+      - name: 'expr'
+        type: NestedObject
+        description: |
+          User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header.
+        properties:
+          - name: 'expression'
+            type: String
+            description: |
+              Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
+            required: true
       - name: 'config'
         type: NestedObject
         description: The configuration options for matching the rule.
-        required: true
         properties:
           - name: 'srcIpRanges'
             type: Array
