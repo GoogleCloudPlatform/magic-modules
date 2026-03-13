@@ -2,7 +2,7 @@
 # scripts/get_unit_test_pkgs.sh
 
 # Ask Go for BOTH the Import Path and the exact Directory Path on disk, separated by a pipe '|'
-go list -e -f '{{.ImportPath}}|{{.Dir}}' ./... | grep -v "/scripts" | while IFS='|' read -r pkg dir; do
+go list -e -f '{{"{{"}}.ImportPath{{"}}"}}|{{"{{"}}.Dir{{"}}"}}' ./... | grep -v "/scripts" | while IFS='|' read -r pkg dir; do
 
     # 1. For NON-SERVICE packages:
     if [[ "$pkg" != *"/{{ $.ProviderFromVersion }}/services/"* ]]; then
