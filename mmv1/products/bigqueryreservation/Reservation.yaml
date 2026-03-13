@@ -34,6 +34,7 @@ examples:
     primary_resource_id: reservation
     vars:
       name: my-reservation
+    exclude_test: true
     test_env_vars:
       project_id: PROJECT_NAME
   - name: bigquery_reservation_with_disaster_recovery
