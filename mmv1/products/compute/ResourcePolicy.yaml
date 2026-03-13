@@ -35,6 +35,9 @@ async:
   operation:
     base_url: '{{op_id}}'
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeResourcePolicy_withTopologyMode'
+    skip: 'The test should not in GA provider'
 custom_code:
   constants: templates/terraform/constants/compute_resource_policy.go.tmpl
 examples:
