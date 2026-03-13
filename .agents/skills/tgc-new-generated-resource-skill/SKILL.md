@@ -35,9 +35,10 @@ Ensure include_in_tgc_next: true is present (top-level) in the proper place acco
       - `datastream/ConnectionProfile.yaml`
       - `secretmanager/SecretVersion.yaml`
    
-      * When d.Set() is used in `custom_flatten` to set a field, write a `custom_tgc_flatten` function to set the field in the CAI JSON.
+      * If a field's `custom_flatten` generated code panics or errors out during CAI -> HCL conversion because of a type mismatch (e.g., CAI returns an empty map `{}` but HCL expects a boolean `true`), or due to unsupported `d.Set()` / `d.Get()` operations that fail during CAI mapping.
 
-      **Solution**: Add `custom_tgc_flatten` entry pointing to a custom Go template in `templates/tgc_next/custom_flatten/`. 
+      **Solution**: Add `tgc_ignore_terraform_custom_flatten: true` to the field definition in the YAML. This tells TGC to skip executing the Magic Module's `custom_flatten` function for this field during CAI -> HCL conversion, avoiding the panic.
+      If the field still needs complex data transformation from CAI format to HCL, use a `tgc_decoder`. Add `tgc_decoder: 'templates/tgc_next/decoders/resource_name.go.tmpl'` under `custom_code` in the YAML. A `tgc_decoder` gives you direct access to safely read the raw `res map[string]interface{}` and write to the output `hclData map[string]interface{}` bypassing strict Terraform schemas and validations.
       
       **Example**:
       - `bigtable/AppProfile.yaml`
