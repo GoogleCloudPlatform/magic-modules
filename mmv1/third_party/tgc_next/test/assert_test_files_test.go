@@ -128,7 +128,11 @@ func TestCheckDiffSuppressFunc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := isDiffSuppressed(tt.key, tt.val, tt.resourceType, provider)
+			var resSchema *schema.Resource
+			if res, ok := provider.ResourcesMap[tt.resourceType]; ok {
+				resSchema = res
+			}
+			got := isDiffSuppressed(tt.key, tt.val, resSchema)
 			if got != tt.want {
 				t.Errorf("isDiffSuppressed() = %v, want %v", got, tt.want)
 			}
