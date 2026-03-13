@@ -80,9 +80,9 @@ func flattenStaticIpsList(resp map[string]interface{}) []interface{} {
 
 func init() {
 	registry.Schema{
-		Name: "google_datastream_static_ips",
+		Name:        "google_datastream_static_ips",
 		ProductName: "datastream",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleDatastreamStaticIps(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleDatastreamStaticIps(),
 	}.Register()
 }

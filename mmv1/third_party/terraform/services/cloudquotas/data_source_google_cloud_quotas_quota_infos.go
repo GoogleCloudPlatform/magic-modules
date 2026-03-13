@@ -218,9 +218,9 @@ func flattenCloudQuotasQuotaInfo(rawQuotaInfo map[string]interface{}, d *schema.
 
 func init() {
 	registry.Schema{
-		Name: "google_cloud_quotas_quota_infos",
+		Name:        "google_cloud_quotas_quota_infos",
 		ProductName: "cloudquotas",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudQuotasQuotaInfos(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudQuotasQuotaInfos(),
 	}.Register()
 }

@@ -173,9 +173,9 @@ func getDataFromName(v interface{}, part int) string {
 
 func init() {
 	registry.Schema{
-		Name: "google_secret_manager_secrets",
+		Name:        "google_secret_manager_secrets",
 		ProductName: "secretmanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSecretManagerSecrets(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSecretManagerSecrets(),
 	}.Register()
 }

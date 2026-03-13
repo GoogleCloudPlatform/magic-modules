@@ -86,9 +86,9 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_secret",
+		Name:        "google_kms_secret",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsSecret(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsSecret(),
 	}.Register()
 }

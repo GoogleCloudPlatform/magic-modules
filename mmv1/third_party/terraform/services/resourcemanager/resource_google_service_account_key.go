@@ -223,9 +223,9 @@ func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_service_account_key",
+		Name:        "google_service_account_key",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleServiceAccountKey(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleServiceAccountKey(),
 	}.Register()
 }

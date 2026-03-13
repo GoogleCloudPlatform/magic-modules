@@ -50,9 +50,9 @@ func dataSourceComputeRegionSslPolicyRead(d *schema.ResourceData, meta interface
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_region_ssl_policy",
+		Name:        "google_compute_region_ssl_policy",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleRegionComputeSslPolicy(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleRegionComputeSslPolicy(),
 	}.Register()
 }

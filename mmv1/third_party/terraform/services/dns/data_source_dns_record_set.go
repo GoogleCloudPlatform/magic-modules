@@ -90,9 +90,9 @@ func dataSourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error 
 
 func init() {
 	registry.Schema{
-		Name: "google_dns_record_set",
+		Name:        "google_dns_record_set",
 		ProductName: "dns",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceDnsRecordSet(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceDnsRecordSet(),
 	}.Register()
 }

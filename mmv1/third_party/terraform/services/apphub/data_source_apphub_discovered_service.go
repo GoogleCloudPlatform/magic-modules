@@ -173,9 +173,9 @@ func flattenApphubDiscoveredServiceDataZone(v interface{}, d *schema.ResourceDat
 
 func init() {
 	registry.Schema{
-		Name: "google_apphub_discovered_service",
+		Name:        "google_apphub_discovered_service",
 		ProductName: "apphub",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceApphubDiscoveredService(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceApphubDiscoveredService(),
 	}.Register()
 }

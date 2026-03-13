@@ -46,9 +46,9 @@ func dataSourceGooglePrivilegedAccessManagerEntitlementRead(d *schema.ResourceDa
 
 func init() {
 	registry.Schema{
-		Name: "google_privileged_access_manager_entitlement",
+		Name:        "google_privileged_access_manager_entitlement",
 		ProductName: "privilegedaccessmanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGooglePrivilegedAccessManagerEntitlement(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGooglePrivilegedAccessManagerEntitlement(),
 	}.Register()
 }

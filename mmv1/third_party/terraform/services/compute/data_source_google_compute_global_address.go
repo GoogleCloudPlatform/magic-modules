@@ -133,9 +133,9 @@ func dataSourceGoogleComputeGlobalAddressRead(d *schema.ResourceData, meta inter
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_global_address",
+		Name:        "google_compute_global_address",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeGlobalAddress(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeGlobalAddress(),
 	}.Register()
 }

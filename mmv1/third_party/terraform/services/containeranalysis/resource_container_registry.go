@@ -134,9 +134,9 @@ func resourceContainerRegistryDelete(d *schema.ResourceData, meta interface{}) e
 
 func init() {
 	registry.Schema{
-		Name: "google_container_registry",
+		Name:        "google_container_registry",
 		ProductName: "containeranalysis",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceContainerRegistry(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceContainerRegistry(),
 	}.Register()
 }

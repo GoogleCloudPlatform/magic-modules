@@ -248,9 +248,9 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_ssl_cert",
+		Name:        "google_sql_ssl_cert",
 		ProductName: "sql",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceSqlSslCert(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceSqlSslCert(),
 	}.Register()
 }

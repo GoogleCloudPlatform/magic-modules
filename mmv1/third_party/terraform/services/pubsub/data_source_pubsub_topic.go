@@ -46,9 +46,9 @@ func dataSourceGooglePubsubTopicRead(d *schema.ResourceData, meta interface{}) e
 
 func init() {
 	registry.Schema{
-		Name: "google_pubsub_topic",
+		Name:        "google_pubsub_topic",
 		ProductName: "pubsub",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGooglePubsubTopic(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGooglePubsubTopic(),
 	}.Register()
 }

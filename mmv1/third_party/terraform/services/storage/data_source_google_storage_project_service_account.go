@@ -76,9 +76,9 @@ func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, me
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_project_service_account",
+		Name:        "google_storage_project_service_account",
 		ProductName: "storage",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleStorageProjectServiceAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageProjectServiceAccount(),
 	}.Register()
 }

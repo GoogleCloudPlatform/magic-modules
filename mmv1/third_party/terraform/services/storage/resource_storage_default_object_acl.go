@@ -143,9 +143,9 @@ func resourceStorageDefaultObjectAclDelete(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_default_object_acl",
+		Name:        "google_storage_default_object_acl",
 		ProductName: "storage",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceStorageDefaultObjectAcl(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceStorageDefaultObjectAcl(),
 	}.Register()
 }

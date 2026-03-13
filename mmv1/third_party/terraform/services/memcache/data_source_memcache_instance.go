@@ -58,9 +58,9 @@ func dataSourceMemcacheInstanceRead(d *schema.ResourceData, meta interface{}) er
 
 func init() {
 	registry.Schema{
-		Name: "google_memcache_instance",
+		Name:        "google_memcache_instance",
 		ProductName: "memcache",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceMemcacheInstance(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceMemcacheInstance(),
 	}.Register()
 }

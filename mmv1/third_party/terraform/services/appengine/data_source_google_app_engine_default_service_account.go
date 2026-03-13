@@ -91,9 +91,9 @@ func dataSourceGoogleAppEngineDefaultServiceAccountRead(d *schema.ResourceData, 
 
 func init() {
 	registry.Schema{
-		Name: "google_app_engine_default_service_account",
+		Name:        "google_app_engine_default_service_account",
 		ProductName: "appengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleAppEngineDefaultServiceAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleAppEngineDefaultServiceAccount(),
 	}.Register()
 }

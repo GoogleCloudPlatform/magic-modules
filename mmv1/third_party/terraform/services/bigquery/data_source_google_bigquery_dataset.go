@@ -46,9 +46,9 @@ func dataSourceGoogleBigqueryDatasetRead(d *schema.ResourceData, meta interface{
 
 func init() {
 	registry.Schema{
-		Name: "google_bigquery_dataset",
+		Name:        "google_bigquery_dataset",
 		ProductName: "bigquery",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleBigqueryDataset(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleBigqueryDataset(),
 	}.Register()
 }

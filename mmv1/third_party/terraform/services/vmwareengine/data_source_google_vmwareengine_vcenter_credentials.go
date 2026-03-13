@@ -93,9 +93,9 @@ func flattenVmwareengineVcenterCredentailsPassword(v interface{}, d *schema.Reso
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_vcenter_credentials",
+		Name:        "google_vmwareengine_vcenter_credentials",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineVcenterCredentials(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineVcenterCredentials(),
 	}.Register()
 }

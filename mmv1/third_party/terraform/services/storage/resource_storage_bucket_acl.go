@@ -432,9 +432,9 @@ func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) er
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_bucket_acl",
+		Name:        "google_storage_bucket_acl",
 		ProductName: "storage",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceStorageBucketAcl(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceStorageBucketAcl(),
 	}.Register()
 }

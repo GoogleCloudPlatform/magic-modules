@@ -48,9 +48,9 @@ func dataSourceGoogleLoggingSinkRead(d *schema.ResourceData, meta interface{}) e
 
 func init() {
 	registry.Schema{
-		Name: "google_logging_sink",
+		Name:        "google_logging_sink",
 		ProductName: "logging",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleLoggingSink(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleLoggingSink(),
 	}.Register()
 }

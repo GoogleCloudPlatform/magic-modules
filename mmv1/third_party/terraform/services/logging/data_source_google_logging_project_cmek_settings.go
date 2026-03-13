@@ -113,9 +113,9 @@ func dataSourceGoogleLoggingProjectCmekSettingsRead(d *schema.ResourceData, meta
 
 func init() {
 	registry.Schema{
-		Name: "google_logging_project_cmek_settings",
+		Name:        "google_logging_project_cmek_settings",
 		ProductName: "logging",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleLoggingProjectCmekSettings(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleLoggingProjectCmekSettings(),
 	}.Register()
 }

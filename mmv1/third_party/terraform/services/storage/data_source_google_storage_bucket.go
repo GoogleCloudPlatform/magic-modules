@@ -43,9 +43,9 @@ func dataSourceGoogleStorageBucketRead(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_bucket",
+		Name:        "google_storage_bucket",
 		ProductName: "storage",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleStorageBucket(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageBucket(),
 	}.Register()
 }

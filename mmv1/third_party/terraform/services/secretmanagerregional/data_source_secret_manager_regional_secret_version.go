@@ -232,9 +232,9 @@ func dataSourceSecretManagerRegionalRegionalSecretVersionRead(d *schema.Resource
 
 func init() {
 	registry.Schema{
-		Name: "google_secret_manager_regional_secret_version",
+		Name:        "google_secret_manager_regional_secret_version",
 		ProductName: "secretmanagerregional",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSecretManagerRegionalRegionalSecretVersion(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSecretManagerRegionalRegionalSecretVersion(),
 	}.Register()
 }

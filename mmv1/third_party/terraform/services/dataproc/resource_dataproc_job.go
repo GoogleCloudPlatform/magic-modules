@@ -1361,9 +1361,9 @@ func flattenJobPlacement(jp *dataproc.JobPlacement) []map[string]interface{} {
 
 func init() {
 	registry.Schema{
-		Name: "google_dataproc_job",
+		Name:        "google_dataproc_job",
 		ProductName: "dataproc",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceDataprocJob(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDataprocJob(),
 	}.Register()
 }

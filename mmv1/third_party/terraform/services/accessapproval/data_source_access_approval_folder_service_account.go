@@ -73,9 +73,9 @@ func dataSourceAccessApprovalFolderServiceAccountRead(d *schema.ResourceData, me
 
 func init() {
 	registry.Schema{
-		Name: "google_access_approval_folder_service_account",
+		Name:        "google_access_approval_folder_service_account",
 		ProductName: "accessapproval",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceAccessApprovalFolderServiceAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAccessApprovalFolderServiceAccount(),
 	}.Register()
 }

@@ -151,9 +151,9 @@ func flattenTestablePermissionsList(v interface{}, custom_support_level string, 
 
 func init() {
 	registry.Schema{
-		Name: "google_iam_testable_permissions",
+		Name:        "google_iam_testable_permissions",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleIamTestablePermissions(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleIamTestablePermissions(),
 	}.Register()
 }

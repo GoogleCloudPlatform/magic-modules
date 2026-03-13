@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 )
+
 var allowedIngressSettings = []string{
 	"ALLOW_ALL",
 	"ALLOW_INTERNAL_AND_GCLB",
@@ -1348,9 +1349,9 @@ func flattenOnDeployUpdatePolicy(policy *cloudfunctions.OnDeployUpdatePolicy) []
 
 func init() {
 	registry.Schema{
-		Name: "google_cloudfunctions_function",
+		Name:        "google_cloudfunctions_function",
 		ProductName: "cloudfunctions",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceCloudFunctionsFunction(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceCloudFunctionsFunction(),
 	}.Register()
 }

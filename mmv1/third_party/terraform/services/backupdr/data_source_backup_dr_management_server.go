@@ -107,9 +107,9 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 
 func init() {
 	registry.Schema{
-		Name: "google_backup_dr_management_server",
+		Name:        "google_backup_dr_management_server",
 		ProductName: "backupdr",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudBackupDRService(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudBackupDRService(),
 	}.Register()
 }

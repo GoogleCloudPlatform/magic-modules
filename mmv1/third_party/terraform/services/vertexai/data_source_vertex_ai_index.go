@@ -47,9 +47,9 @@ func dataSourceVertexAIIndexRead(d *schema.ResourceData, meta interface{}) error
 
 func init() {
 	registry.Schema{
-		Name: "google_vertex_ai_index",
+		Name:        "google_vertex_ai_index",
 		ProductName: "vertexai",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVertexAIIndex(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVertexAIIndex(),
 	}.Register()
 }

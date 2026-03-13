@@ -57,9 +57,9 @@ func dataSourceGoogleComputeHaVpnGatewayRead(d *schema.ResourceData, meta interf
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_ha_vpn_gateway",
+		Name:        "google_compute_ha_vpn_gateway",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeHaVpnGateway(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeHaVpnGateway(),
 	}.Register()
 }

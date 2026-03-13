@@ -147,9 +147,9 @@ func expandSiteVerificationTokenVerificationMethod(v interface{}, d tpgresource.
 
 func init() {
 	registry.Schema{
-		Name: "google_site_verification_token",
+		Name:        "google_site_verification_token",
 		ProductName: "siteverification",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSiteVerificationToken(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSiteVerificationToken(),
 	}.Register()
 }

@@ -115,9 +115,9 @@ func flattenOracleDatabaseCloudVmClusters(v interface{}, d *schema.ResourceData,
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_cloud_vm_clusters",
+		Name:        "google_oracle_database_cloud_vm_clusters",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseCloudVmClusters(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseCloudVmClusters(),
 	}.Register()
 }

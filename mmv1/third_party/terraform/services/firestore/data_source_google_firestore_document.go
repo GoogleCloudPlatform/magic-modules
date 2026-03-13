@@ -53,9 +53,9 @@ func DataSourceGoogleFirestoreDocumentRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_firestore_document",
+		Name:        "google_firestore_document",
 		ProductName: "firestore",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleFirestoreDocument(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleFirestoreDocument(),
 	}.Register()
 }

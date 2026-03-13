@@ -76,9 +76,9 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_instance_serial_port",
+		Name:        "google_compute_instance_serial_port",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeInstanceSerialPort(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstanceSerialPort(),
 	}.Register()
 }

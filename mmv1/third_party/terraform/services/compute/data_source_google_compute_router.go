@@ -38,9 +38,9 @@ func dataSourceComputeRouterRead(d *schema.ResourceData, meta interface{}) error
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_router",
+		Name:        "google_compute_router",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeRouter(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRouter(),
 	}.Register()
 }

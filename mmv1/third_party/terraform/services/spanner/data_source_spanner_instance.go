@@ -51,9 +51,9 @@ func dataSourceSpannerInstanceRead(d *schema.ResourceData, meta interface{}) err
 
 func init() {
 	registry.Schema{
-		Name: "google_spanner_instance",
+		Name:        "google_spanner_instance",
 		ProductName: "spanner",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSpannerInstance(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSpannerInstance(),
 	}.Register()
 }

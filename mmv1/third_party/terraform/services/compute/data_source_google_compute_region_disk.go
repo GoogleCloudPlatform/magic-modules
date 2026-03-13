@@ -48,9 +48,9 @@ func dataSourceGoogleComputeRegionDiskRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_region_disk",
+		Name:        "google_compute_region_disk",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeRegionDisk(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRegionDisk(),
 	}.Register()
 }

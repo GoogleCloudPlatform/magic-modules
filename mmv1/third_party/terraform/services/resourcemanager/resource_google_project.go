@@ -876,9 +876,9 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 
 func init() {
 	registry.Schema{
-		Name: "google_project",
+		Name:        "google_project",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleProject(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProject(),
 	}.Register()
 }

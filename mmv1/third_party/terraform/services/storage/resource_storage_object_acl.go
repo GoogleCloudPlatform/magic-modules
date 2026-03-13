@@ -411,9 +411,9 @@ func getValidatedRoleEntityPair(roleEntity string) *RoleEntity {
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_object_acl",
+		Name:        "google_storage_object_acl",
 		ProductName: "storage",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceStorageObjectAcl(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceStorageObjectAcl(),
 	}.Register()
 }

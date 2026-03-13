@@ -71,9 +71,9 @@ func dataSourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_security_policy",
+		Name:        "google_compute_security_policy",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeSecurityPolicy(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeSecurityPolicy(),
 	}.Register()
 }

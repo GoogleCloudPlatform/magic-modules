@@ -266,9 +266,9 @@ func expandApigeeFlowhookContinueOnError(v interface{}, d tpgresource.TerraformR
 
 func init() {
 	registry.Schema{
-		Name: "google_apigee_flowhook",
+		Name:        "google_apigee_flowhook",
 		ProductName: "apigee",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceApigeeFlowhook(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceApigeeFlowhook(),
 	}.Register()
 }

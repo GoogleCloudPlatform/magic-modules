@@ -44,9 +44,9 @@ func dataSourceVPCAccessConnectorRead(d *schema.ResourceData, meta interface{}) 
 
 func init() {
 	registry.Schema{
-		Name: "google_vpc_access_connector",
+		Name:        "google_vpc_access_connector",
 		ProductName: "vpcaccess",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVPCAccessConnector(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVPCAccessConnector(),
 	}.Register()
 }

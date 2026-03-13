@@ -753,9 +753,9 @@ func getRowKeySchema(input interface{}) (*bigtable.StructType, error) {
 
 func init() {
 	registry.Schema{
-		Name: "google_bigtable_table",
+		Name:        "google_bigtable_table",
 		ProductName: "bigtable",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceBigtableTable(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigtableTable(),
 	}.Register()
 }

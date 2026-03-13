@@ -163,9 +163,9 @@ func flattenDataSourceGoogleBigQueryDatasetsList(res interface{}) []map[string]i
 
 func init() {
 	registry.Schema{
-		Name: "google_bigquery_datasets",
+		Name:        "google_bigquery_datasets",
 		ProductName: "bigquery",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleBigqueryDatasets(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleBigqueryDatasets(),
 	}.Register()
 }

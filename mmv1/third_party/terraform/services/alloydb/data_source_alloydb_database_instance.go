@@ -82,9 +82,9 @@ func dataSourceAlloydbDatabaseInstanceRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_alloydb_instance",
+		Name:        "google_alloydb_instance",
 		ProductName: "alloydb",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceAlloydbDatabaseInstance(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAlloydbDatabaseInstance(),
 	}.Register()
 }

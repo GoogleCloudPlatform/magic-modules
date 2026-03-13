@@ -405,9 +405,9 @@ func apigeeApiDetectBundleUpdate(_ context.Context, diff *schema.ResourceDiff, v
 
 func init() {
 	registry.Schema{
-		Name: "google_apigee_api",
+		Name:        "google_apigee_api",
 		ProductName: "apigee",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceApigeeApi(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceApigeeApi(),
 	}.Register()
 }

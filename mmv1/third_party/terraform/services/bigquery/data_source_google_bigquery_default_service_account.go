@@ -62,9 +62,9 @@ func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, m
 
 func init() {
 	registry.Schema{
-		Name: "google_bigquery_default_service_account",
+		Name:        "google_bigquery_default_service_account",
 		ProductName: "bigquery",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleBigqueryDefaultServiceAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleBigqueryDefaultServiceAccount(),
 	}.Register()
 }

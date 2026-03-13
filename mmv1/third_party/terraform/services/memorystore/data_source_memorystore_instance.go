@@ -58,9 +58,9 @@ func dataSourceMemorystoreInstanceRead(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_memorystore_instance",
+		Name:        "google_memorystore_instance",
 		ProductName: "memorystore",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceMemorystoreInstance(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceMemorystoreInstance(),
 	}.Register()
 }
