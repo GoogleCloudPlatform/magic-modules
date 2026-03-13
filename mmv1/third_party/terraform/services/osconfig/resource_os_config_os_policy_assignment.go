@@ -4675,9 +4675,9 @@ func expandOSConfigOSPolicyAssignmentRolloutMinWaitDuration(v interface{}, d tpg
 
 func init() {
 	registry.Schema{
-		Name: "google_os_config_os_policy_assignment",
+		Name:        "google_os_config_os_policy_assignment",
 		ProductName: "osconfig",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceOSConfigOSPolicyAssignment(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceOSConfigOSPolicyAssignment(),
 	}.Register()
 }

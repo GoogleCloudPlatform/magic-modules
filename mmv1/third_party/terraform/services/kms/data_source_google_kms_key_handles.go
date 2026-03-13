@@ -163,9 +163,9 @@ func flattenKMSKeyHandlesList(config *transport_tpg.Config, keyHandlesList inter
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_key_handles",
+		Name:        "google_kms_key_handles",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsKeyHandles(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsKeyHandles(),
 	}.Register()
 }

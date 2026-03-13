@@ -230,18 +230,18 @@ func flattenRulesConfigInfo(rules []interface{}) []map[string]interface{} {
 
 func init() {
 	registry.Schema{
-		Name: "google_backup_dr_backup_plan_association",
+		Name:        "google_backup_dr_backup_plan_association",
 		ProductName: "backupdr",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudBackupDRBackupPlanAssociation(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudBackupDRBackupPlanAssociation(),
 	}.Register()
 }
 
 func init() {
 	registry.Schema{
-		Name: "google_backup_dr_backup_plan_associations",
+		Name:        "google_backup_dr_backup_plan_associations",
 		ProductName: "backupdr",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudBackupDRBackupPlanAssociations(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudBackupDRBackupPlanAssociations(),
 	}.Register()
 }

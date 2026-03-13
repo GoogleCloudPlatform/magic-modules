@@ -36,9 +36,9 @@ func dataSourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_database_instance",
+		Name:        "google_sql_database_instance",
 		ProductName: "sql",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSqlDatabaseInstance(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlDatabaseInstance(),
 	}.Register()
 }

@@ -53,9 +53,9 @@ func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta inte
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_resource_policy",
+		Name:        "google_compute_resource_policy",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeResourcePolicy(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeResourcePolicy(),
 	}.Register()
 }

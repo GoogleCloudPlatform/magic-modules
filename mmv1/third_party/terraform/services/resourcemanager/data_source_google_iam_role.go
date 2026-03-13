@@ -63,9 +63,9 @@ func dataSourceGoogleIamRoleRead(d *schema.ResourceData, meta interface{}) error
 
 func init() {
 	registry.Schema{
-		Name: "google_iam_role",
+		Name:        "google_iam_role",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleIamRole(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleIamRole(),
 	}.Register()
 }

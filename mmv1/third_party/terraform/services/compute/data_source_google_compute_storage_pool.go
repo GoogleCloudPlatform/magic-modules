@@ -54,9 +54,9 @@ func dataSourceGoogleComputeStoragePoolRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_storage_pool",
+		Name:        "google_compute_storage_pool",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeStoragePool(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeStoragePool(),
 	}.Register()
 }

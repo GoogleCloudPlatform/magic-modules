@@ -109,9 +109,9 @@ func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) erro
 
 func init() {
 	registry.Schema{
-		Name: "google_dns_managed_zone",
+		Name:        "google_dns_managed_zone",
 		ProductName: "dns",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceDnsManagedZone(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceDnsManagedZone(),
 	}.Register()
 }

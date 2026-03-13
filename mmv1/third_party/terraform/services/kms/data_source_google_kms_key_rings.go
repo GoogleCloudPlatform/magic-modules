@@ -175,9 +175,9 @@ func flattenKMSKeyRingsList(config *transport_tpg.Config, keyRingsList interface
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_key_rings",
+		Name:        "google_kms_key_rings",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsKeyRings(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsKeyRings(),
 	}.Register()
 }

@@ -47,9 +47,9 @@ func dataSourceGoogleApphubApplicationRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_apphub_application",
+		Name:        "google_apphub_application",
 		ProductName: "apphub",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleApphubApplication(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleApphubApplication(),
 	}.Register()
 }

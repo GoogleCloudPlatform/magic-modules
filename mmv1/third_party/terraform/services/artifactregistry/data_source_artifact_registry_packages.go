@@ -183,9 +183,9 @@ func dataSourceArtifactRegistryPackagesRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_packages",
+		Name:        "google_artifact_registry_packages",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryPackages(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryPackages(),
 	}.Register()
 }

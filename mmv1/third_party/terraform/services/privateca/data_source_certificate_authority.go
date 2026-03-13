@@ -90,9 +90,9 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 
 func init() {
 	registry.Schema{
-		Name: "google_privateca_certificate_authority",
+		Name:        "google_privateca_certificate_authority",
 		ProductName: "privateca",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourcePrivatecaCertificateAuthority(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourcePrivatecaCertificateAuthority(),
 	}.Register()
 }

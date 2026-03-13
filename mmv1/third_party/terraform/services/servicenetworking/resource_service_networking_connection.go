@@ -451,9 +451,9 @@ func formatParentService(service string) string {
 
 func init() {
 	registry.Schema{
-		Name: "google_service_networking_connection",
+		Name:        "google_service_networking_connection",
 		ProductName: "servicenetworking",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceServiceNetworkingConnection(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceServiceNetworkingConnection(),
 	}.Register()
 }

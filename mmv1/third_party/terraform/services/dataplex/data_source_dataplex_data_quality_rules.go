@@ -336,9 +336,9 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_dataplex_data_quality_rules",
+		Name:        "google_dataplex_data_quality_rules",
 		ProductName: "dataplex",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceDataplexDataQualityRules(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceDataplexDataQualityRules(),
 	}.Register()
 }

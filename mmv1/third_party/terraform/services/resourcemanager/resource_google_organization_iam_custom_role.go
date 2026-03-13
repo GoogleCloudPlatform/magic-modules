@@ -14,10 +14,10 @@ import (
 
 func init() {
 	registry.Schema{
-		Name: "google_organization_iam_custom_role",
+		Name:        "google_organization_iam_custom_role",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleOrganizationIamCustomRole(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleOrganizationIamCustomRole(),
 	}.Register()
 }
 

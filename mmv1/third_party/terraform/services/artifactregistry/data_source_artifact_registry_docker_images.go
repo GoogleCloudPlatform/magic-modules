@@ -193,9 +193,9 @@ func dataSourceArtifactRegistryDockerImagesRead(d *schema.ResourceData, meta int
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_docker_images",
+		Name:        "google_artifact_registry_docker_images",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryDockerImages(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryDockerImages(),
 	}.Register()
 }

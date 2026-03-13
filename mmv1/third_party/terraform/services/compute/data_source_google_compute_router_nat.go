@@ -46,9 +46,9 @@ func dataSourceGoogleComputeRouterNatRead(d *schema.ResourceData, meta interface
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_router_nat",
+		Name:        "google_compute_router_nat",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeRouterNat(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRouterNat(),
 	}.Register()
 }

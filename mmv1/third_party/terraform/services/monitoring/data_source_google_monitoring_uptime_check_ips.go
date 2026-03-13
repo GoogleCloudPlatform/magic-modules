@@ -75,9 +75,9 @@ func flattenUptimeCheckIpsList(resp map[string]interface{}) []interface{} {
 
 func init() {
 	registry.Schema{
-		Name: "google_monitoring_uptime_check_ips",
+		Name:        "google_monitoring_uptime_check_ips",
 		ProductName: "monitoring",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleMonitoringUptimeCheckIps(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleMonitoringUptimeCheckIps(),
 	}.Register()
 }

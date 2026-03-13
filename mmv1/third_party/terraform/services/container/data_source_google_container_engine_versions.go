@@ -160,9 +160,9 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 
 func init() {
 	registry.Schema{
-		Name: "google_container_engine_versions",
+		Name:        "google_container_engine_versions",
 		ProductName: "container",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleContainerEngineVersions(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerEngineVersions(),
 	}.Register()
 }

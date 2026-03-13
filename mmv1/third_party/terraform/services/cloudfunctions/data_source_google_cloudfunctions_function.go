@@ -64,9 +64,9 @@ func dataSourceGoogleCloudFunctionsFunctionRead(d *schema.ResourceData, meta int
 
 func init() {
 	registry.Schema{
-		Name: "google_cloudfunctions_function",
+		Name:        "google_cloudfunctions_function",
 		ProductName: "cloudfunctions",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudFunctionsFunction(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudFunctionsFunction(),
 	}.Register()
 }

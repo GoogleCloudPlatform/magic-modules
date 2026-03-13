@@ -135,9 +135,9 @@ func resourceGoogleProjectIamMemberRemoveDelete(d *schema.ResourceData, meta int
 
 func init() {
 	registry.Schema{
-		Name: "google_project_iam_member_remove",
+		Name:        "google_project_iam_member_remove",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleProjectIamMemberRemove(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProjectIamMemberRemove(),
 	}.Register()
 }

@@ -112,9 +112,9 @@ func resourceComputeSharedVpcHostProjectDelete(d *schema.ResourceData, meta inte
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_shared_vpc_host_project",
+		Name:        "google_compute_shared_vpc_host_project",
 		ProductName: "compute",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceComputeSharedVpcHostProject(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceComputeSharedVpcHostProject(),
 	}.Register()
 }

@@ -234,9 +234,9 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 
 func init() {
 	registry.Schema{
-		Name: "google_alloydb_supported_database_flags",
+		Name:        "google_alloydb_supported_database_flags",
 		ProductName: "alloydb",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceAlloydbSupportedDatabaseFlags(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAlloydbSupportedDatabaseFlags(),
 	}.Register()
 }

@@ -56,9 +56,9 @@ func dataSourceGoogleComposerEnvironmentRead(d *schema.ResourceData, meta interf
 
 func init() {
 	registry.Schema{
-		Name: "google_composer_environment",
+		Name:        "google_composer_environment",
 		ProductName: "composer",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComposerEnvironment(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComposerEnvironment(),
 	}.Register()
 }

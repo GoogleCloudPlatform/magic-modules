@@ -168,9 +168,9 @@ func dataSourceGoogleComputeInterconnectLocationRead(d *schema.ResourceData, met
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_interconnect_location",
+		Name:        "google_compute_interconnect_location",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeInterconnectLocation(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInterconnectLocation(),
 	}.Register()
 }

@@ -371,9 +371,9 @@ func resourceServiceAccountCustomDiff(_ context.Context, diff *schema.ResourceDi
 
 func init() {
 	registry.Schema{
-		Name: "google_service_account",
+		Name:        "google_service_account",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleServiceAccount(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleServiceAccount(),
 	}.Register()
 }

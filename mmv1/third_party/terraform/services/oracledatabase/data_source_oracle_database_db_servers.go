@@ -249,9 +249,9 @@ func flattenOracleDatabaseDbServerPropertiesDbNodeIds(v interface{}, config *tra
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_db_servers",
+		Name:        "google_oracle_database_db_servers",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseDbServers(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseDbServers(),
 	}.Register()
 }

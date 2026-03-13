@@ -39,9 +39,9 @@ func datasourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta i
 
 func init() {
 	registry.Schema{
-		Name: "google_folder_organization_policy",
+		Name:        "google_folder_organization_policy",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleFolderOrganizationPolicy(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleFolderOrganizationPolicy(),
 	}.Register()
 }

@@ -873,9 +873,9 @@ func validateContexts(ctx context.Context, d *schema.ResourceDiff, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_bucket_object",
+		Name:        "google_storage_bucket_object",
 		ProductName: "storage",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceStorageBucketObject(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceStorageBucketObject(),
 	}.Register()
 }

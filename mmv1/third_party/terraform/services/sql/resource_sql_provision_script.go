@@ -157,9 +157,9 @@ func resourceSqlProvisionScriptDelete(d *schema.ResourceData, meta interface{}) 
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_provision_script",
+		Name:        "google_sql_provision_script",
 		ProductName: "sql",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceSqlProvisionScript(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceSqlProvisionScript(),
 	}.Register()
 }

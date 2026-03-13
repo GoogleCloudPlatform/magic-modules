@@ -56,9 +56,9 @@ func dataSourceMonitoringServiceMeshIstioRead(res map[string]interface{}, d *sch
 
 func init() {
 	registry.Schema{
-		Name: "google_monitoring_mesh_istio_service",
+		Name:        "google_monitoring_mesh_istio_service",
 		ProductName: "monitoring",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceMonitoringServiceMeshIstio(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceMonitoringServiceMeshIstio(),
 	}.Register()
 }

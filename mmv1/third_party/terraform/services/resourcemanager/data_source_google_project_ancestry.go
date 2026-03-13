@@ -128,9 +128,9 @@ func datasourceGoogleProjectAncestryRead(d *schema.ResourceData, meta interface{
 
 func init() {
 	registry.Schema{
-		Name: "google_project_ancestry",
+		Name:        "google_project_ancestry",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleProjectAncestry(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleProjectAncestry(),
 	}.Register()
 }

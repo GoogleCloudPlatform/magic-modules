@@ -130,9 +130,9 @@ func dataSourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_instance_group",
+		Name:        "google_compute_instance_group",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeInstanceGroup(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstanceGroup(),
 	}.Register()
 }

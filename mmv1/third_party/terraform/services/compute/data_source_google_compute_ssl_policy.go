@@ -51,9 +51,9 @@ func datasourceComputeSslPolicyRead(d *schema.ResourceData, meta interface{}) er
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_ssl_policy",
+		Name:        "google_compute_ssl_policy",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeSslPolicy(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeSslPolicy(),
 	}.Register()
 }

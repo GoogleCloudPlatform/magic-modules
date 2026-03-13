@@ -144,9 +144,9 @@ func dataSourceAccessContextManagerSupportedServiceRead(d *schema.ResourceData, 
 
 func init() {
 	registry.Schema{
-		Name: "google_access_context_manager_supported_service",
+		Name:        "google_access_context_manager_supported_service",
 		ProductName: "accesscontextmanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceAccessContextManagerSupportedService(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAccessContextManagerSupportedService(),
 	}.Register()
 }

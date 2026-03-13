@@ -44,9 +44,9 @@ func dataSourceOracleDatabaseOdbSubnetRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_odb_subnet",
+		Name:        "google_oracle_database_odb_subnet",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseOdbSubnet(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseOdbSubnet(),
 	}.Register()
 }

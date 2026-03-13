@@ -178,9 +178,9 @@ func getDataFromName(v interface{}, part int) string {
 
 func init() {
 	registry.Schema{
-		Name: "google_secret_manager_regional_secrets",
+		Name:        "google_secret_manager_regional_secrets",
 		ProductName: "secretmanagerregional",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSecretManagerRegionalRegionalSecrets(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSecretManagerRegionalRegionalSecrets(),
 	}.Register()
 }

@@ -52,9 +52,9 @@ func dataSourceGoogleGkeHubFeatureRead(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_gke_hub_feature",
+		Name:        "google_gke_hub_feature",
 		ProductName: "gkehub2",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleGkeHubFeature(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleGkeHubFeature(),
 	}.Register()
 }

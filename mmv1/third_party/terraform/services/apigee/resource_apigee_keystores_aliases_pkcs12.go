@@ -631,9 +631,9 @@ func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSerialNumber(v interface{},
 
 func init() {
 	registry.Schema{
-		Name: "google_apigee_keystores_aliases_pkcs12",
+		Name:        "google_apigee_keystores_aliases_pkcs12",
 		ProductName: "apigee",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceApigeeKeystoresAliasesPkcs12(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceApigeeKeystoresAliasesPkcs12(),
 	}.Register()
 }

@@ -861,9 +861,9 @@ func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([
 
 func init() {
 	registry.Schema{
-		Name: "google_bigtable_instance",
+		Name:        "google_bigtable_instance",
 		ProductName: "bigtable",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceBigtableInstance(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigtableInstance(),
 	}.Register()
 }

@@ -98,9 +98,9 @@ func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}
 
 func init() {
 	registry.Schema{
-		Name: "google_service_account",
+		Name:        "google_service_account",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleServiceAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleServiceAccount(),
 	}.Register()
 }

@@ -220,9 +220,9 @@ func flattenReplicationClusterForDataSource(replicationCluster *sqladmin.Replica
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_database_instances",
+		Name:        "google_sql_database_instances",
 		ProductName: "sql",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSqlDatabaseInstances(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlDatabaseInstances(),
 	}.Register()
 }

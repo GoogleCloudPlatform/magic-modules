@@ -405,9 +405,9 @@ func apigeeSharedflowDetectBundleUpdate(_ context.Context, diff *schema.Resource
 
 func init() {
 	registry.Schema{
-		Name: "google_apigee_sharedflow",
+		Name:        "google_apigee_sharedflow",
 		ProductName: "apigee",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceApigeeSharedFlow(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceApigeeSharedFlow(),
 	}.Register()
 }

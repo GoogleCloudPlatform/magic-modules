@@ -82,9 +82,9 @@ func containerRegistryImageRead(d *schema.ResourceData, meta interface{}) error 
 
 func init() {
 	registry.Schema{
-		Name: "google_container_registry_image",
+		Name:        "google_container_registry_image",
 		ProductName: "containeranalysis",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleContainerImage(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerImage(),
 	}.Register()
 }

@@ -78,9 +78,9 @@ func dataSourceGoogleTagsTagKeysRead(d *schema.ResourceData, meta interface{}) e
 
 func init() {
 	registry.Schema{
-		Name: "google_tags_tag_keys",
+		Name:        "google_tags_tag_keys",
 		ProductName: "tags",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleTagsTagKeys(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleTagsTagKeys(),
 	}.Register()
 }

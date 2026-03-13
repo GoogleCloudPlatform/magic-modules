@@ -53,9 +53,9 @@ func dataSourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_network_peering",
+		Name:        "google_compute_network_peering",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceComputeNetworkPeering(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceComputeNetworkPeering(),
 	}.Register()
 }

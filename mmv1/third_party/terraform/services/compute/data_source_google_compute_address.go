@@ -216,9 +216,9 @@ func ParseComputeAddressId(id string, config *transport_tpg.Config) (*ComputeAdd
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_address",
+		Name:        "google_compute_address",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeAddress(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeAddress(),
 	}.Register()
 }

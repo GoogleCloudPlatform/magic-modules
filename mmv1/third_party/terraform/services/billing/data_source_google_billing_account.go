@@ -156,9 +156,9 @@ func flattenBillingProjects(billingProjects []*cloudbilling.ProjectBillingInfo) 
 
 func init() {
 	registry.Schema{
-		Name: "google_billing_account",
+		Name:        "google_billing_account",
 		ProductName: "billing",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleBillingAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleBillingAccount(),
 	}.Register()
 }

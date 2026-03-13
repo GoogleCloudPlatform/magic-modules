@@ -55,9 +55,9 @@ func dataSourceGoogleBeyondcorpSecurityGatewayRead(d *schema.ResourceData, meta 
 
 func init() {
 	registry.Schema{
-		Name: "google_beyondcorp_security_gateway",
+		Name:        "google_beyondcorp_security_gateway",
 		ProductName: "beyondcorp",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleBeyondcorpSecurityGateway(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleBeyondcorpSecurityGateway(),
 	}.Register()
 }

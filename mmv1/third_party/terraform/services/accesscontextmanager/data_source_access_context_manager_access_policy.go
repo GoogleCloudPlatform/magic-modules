@@ -140,9 +140,9 @@ type AccessPolicy struct {
 
 func init() {
 	registry.Schema{
-		Name: "google_access_context_manager_access_policy",
+		Name:        "google_access_context_manager_access_policy",
 		ProductName: "accesscontextmanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceAccessContextManagerAccessPolicy(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAccessContextManagerAccessPolicy(),
 	}.Register()
 }

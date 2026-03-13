@@ -140,9 +140,9 @@ func flattenCertificateManagedProvisioningIssue(v *certificatemanager.Provisioni
 
 func init() {
 	registry.Schema{
-		Name: "google_certificate_manager_certificates",
+		Name:        "google_certificate_manager_certificates",
 		ProductName: "certificatemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCertificateManagerCertificates(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCertificateManagerCertificates(),
 	}.Register()
 }

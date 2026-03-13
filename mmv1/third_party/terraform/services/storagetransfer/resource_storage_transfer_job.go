@@ -2053,9 +2053,9 @@ func flattenTransferJobLoggingConfig(loggingConfig *storagetransfer.LoggingConfi
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_transfer_job",
+		Name:        "google_storage_transfer_job",
 		ProductName: "storagetransfer",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceStorageTransferJob(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceStorageTransferJob(),
 	}.Register()
 }

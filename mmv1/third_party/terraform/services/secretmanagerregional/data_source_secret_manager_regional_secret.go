@@ -49,9 +49,9 @@ func dataSourceSecretManagerRegionalRegionalSecretRead(d *schema.ResourceData, m
 
 func init() {
 	registry.Schema{
-		Name: "google_secret_manager_regional_secret",
+		Name:        "google_secret_manager_regional_secret",
 		ProductName: "secretmanagerregional",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSecretManagerRegionalRegionalSecret(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSecretManagerRegionalRegionalSecret(),
 	}.Register()
 }

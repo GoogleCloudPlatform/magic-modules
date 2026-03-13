@@ -255,9 +255,9 @@ func flattenKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, v
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_crypto_key_versions",
+		Name:        "google_kms_crypto_key_versions",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsCryptoKeyVersions(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsCryptoKeyVersions(),
 	}.Register()
 }

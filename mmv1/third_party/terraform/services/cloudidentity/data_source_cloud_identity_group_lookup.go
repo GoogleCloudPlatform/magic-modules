@@ -103,9 +103,9 @@ func dataSourceGoogleCloudIdentityGroupLookupRead(d *schema.ResourceData, meta i
 
 func init() {
 	registry.Schema{
-		Name: "google_cloud_identity_group_lookup",
+		Name:        "google_cloud_identity_group_lookup",
 		ProductName: "cloudidentity",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudIdentityGroupLookup(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudIdentityGroupLookup(),
 	}.Register()
 }

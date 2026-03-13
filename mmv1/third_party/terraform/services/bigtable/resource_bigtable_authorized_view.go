@@ -465,9 +465,9 @@ func flattenSubsetViewInfo(subsetViewInfo *bigtable.SubsetViewInfo) []map[string
 
 func init() {
 	registry.Schema{
-		Name: "google_bigtable_authorized_view",
+		Name:        "google_bigtable_authorized_view",
 		ProductName: "bigtable",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceBigtableAuthorizedView(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigtableAuthorizedView(),
 	}.Register()
 }

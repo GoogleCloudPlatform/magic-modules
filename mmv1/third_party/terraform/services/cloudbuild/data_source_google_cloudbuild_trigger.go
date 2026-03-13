@@ -49,9 +49,9 @@ func dataSourceGoogleCloudBuildTriggerRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_cloudbuild_trigger",
+		Name:        "google_cloudbuild_trigger",
 		ProductName: "cloudbuild",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudBuildTrigger(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudBuildTrigger(),
 	}.Register()
 }

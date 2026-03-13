@@ -156,9 +156,9 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 
 func init() {
 	registry.Schema{
-		Name: "google_alloydb_locations",
+		Name:        "google_alloydb_locations",
 		ProductName: "alloydb",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceAlloydbLocations(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAlloydbLocations(),
 	}.Register()
 }

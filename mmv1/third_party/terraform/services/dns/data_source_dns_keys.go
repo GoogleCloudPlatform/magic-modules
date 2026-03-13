@@ -233,9 +233,9 @@ func dataSourceDNSKeysRead(d *schema.ResourceData, meta interface{}) error {
 
 func init() {
 	registry.Schema{
-		Name: "google_dns_keys",
+		Name:        "google_dns_keys",
 		ProductName: "dns",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceDNSKeys(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceDNSKeys(),
 	}.Register()
 }

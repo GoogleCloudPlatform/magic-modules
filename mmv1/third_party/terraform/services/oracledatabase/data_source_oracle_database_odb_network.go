@@ -44,9 +44,9 @@ func dataSourceOracleDatabaseOdbNetworkRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_odb_network",
+		Name:        "google_oracle_database_odb_network",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseOdbNetwork(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseOdbNetwork(),
 	}.Register()
 }

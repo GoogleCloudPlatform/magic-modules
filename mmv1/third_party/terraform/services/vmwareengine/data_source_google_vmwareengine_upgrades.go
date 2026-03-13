@@ -472,9 +472,9 @@ func flattenVmwareengineUpgradesTimeOfDay(v interface{}, d *schema.ResourceData,
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_upgrades",
+		Name:        "google_vmwareengine_upgrades",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineUpgrades(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineUpgrades(),
 	}.Register()
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/cloudkms/v1"
 )
+
 var (
 	cryptoKeyVersionRegexp = regexp.MustCompile(`^(//[^/]*/[^/]*/)?(projects/[^/]+/locations/[^/]+/keyRings/[^/]+/cryptoKeys/[^/]+/cryptoKeyVersions/[^/]+)$`)
 )
@@ -153,9 +154,9 @@ func validateHexadecimalUint32(i interface{}, val string) ([]string, []error) {
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_secret_asymmetric",
+		Name:        "google_kms_secret_asymmetric",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsSecretAsymmetric(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsSecretAsymmetric(),
 	}.Register()
 }

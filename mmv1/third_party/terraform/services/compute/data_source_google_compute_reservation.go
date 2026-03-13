@@ -49,9 +49,9 @@ func dataSourceGoogleComputeReservationRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_reservation",
+		Name:        "google_compute_reservation",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeReservation(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeReservation(),
 	}.Register()
 }

@@ -471,9 +471,9 @@ func expandNetworkManagementConnectivityTestRunName(v interface{}, d tpgresource
 
 func init() {
 	registry.Schema{
-		Name: "google_network_management_connectivity_test_run",
+		Name:        "google_network_management_connectivity_test_run",
 		ProductName: "networkmanagement",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleNetworkManagementTestRun(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleNetworkManagementTestRun(),
 	}.Register()
 }

@@ -181,9 +181,9 @@ func dataSourceGoogleKmsLatestCryptoKeyVersionRead(d *schema.ResourceData, meta 
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_crypto_key_latest_version",
+		Name:        "google_kms_crypto_key_latest_version",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsLatestCryptoKeyVersion(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsLatestCryptoKeyVersion(),
 	}.Register()
 }

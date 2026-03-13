@@ -132,9 +132,9 @@ func resourceLoggingOrganizationSinkDelete(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_logging_organization_sink",
+		Name:        "google_logging_organization_sink",
 		ProductName: "logging",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceLoggingOrganizationSink(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceLoggingOrganizationSink(),
 	}.Register()
 }

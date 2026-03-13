@@ -42,9 +42,9 @@ func dataSourceVmwareenginePrivateCloudRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_private_cloud",
+		Name:        "google_vmwareengine_private_cloud",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareenginePrivateCloud(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareenginePrivateCloud(),
 	}.Register()
 }

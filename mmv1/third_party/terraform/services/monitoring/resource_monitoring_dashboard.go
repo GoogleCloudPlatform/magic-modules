@@ -278,9 +278,9 @@ func resourceMonitoringDashboardImport(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_monitoring_dashboard",
+		Name:        "google_monitoring_dashboard",
 		ProductName: "monitoring",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceMonitoringDashboard(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceMonitoringDashboard(),
 	}.Register()
 }

@@ -268,9 +268,9 @@ func flattenApigeeSharedflowDeploymentServiceAccount(v interface{}, d *schema.Re
 
 func init() {
 	registry.Schema{
-		Name: "google_apigee_sharedflow_deployment",
+		Name:        "google_apigee_sharedflow_deployment",
 		ProductName: "apigee",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceApigeeSharedFlowDeployment(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceApigeeSharedFlowDeployment(),
 	}.Register()
 }

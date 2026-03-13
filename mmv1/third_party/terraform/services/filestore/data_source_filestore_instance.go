@@ -61,9 +61,9 @@ func dataSourceGoogleFilestoreInstanceRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_filestore_instance",
+		Name:        "google_filestore_instance",
 		ProductName: "filestore",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleFilestoreInstance(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleFilestoreInstance(),
 	}.Register()
 }

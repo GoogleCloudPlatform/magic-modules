@@ -69,9 +69,9 @@ func dataSourceGoogleStorageTransferProjectServiceAccountRead(d *schema.Resource
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_transfer_project_service_account",
+		Name:        "google_storage_transfer_project_service_account",
 		ProductName: "storagetransfer",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleStorageTransferProjectServiceAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageTransferProjectServiceAccount(),
 	}.Register()
 }

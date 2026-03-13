@@ -49,9 +49,9 @@ func dataSourceSpannerDatabaseRead(d *schema.ResourceData, meta interface{}) err
 
 func init() {
 	registry.Schema{
-		Name: "google_spanner_database",
+		Name:        "google_spanner_database",
 		ProductName: "spanner",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSpannerDatabase(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSpannerDatabase(),
 	}.Register()
 }

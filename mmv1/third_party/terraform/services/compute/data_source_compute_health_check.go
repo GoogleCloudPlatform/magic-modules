@@ -46,9 +46,9 @@ func dataSourceGoogleComputeHealthCheckRead(d *schema.ResourceData, meta interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_health_check",
+		Name:        "google_compute_health_check",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeHealthCheck(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeHealthCheck(),
 	}.Register()
 }

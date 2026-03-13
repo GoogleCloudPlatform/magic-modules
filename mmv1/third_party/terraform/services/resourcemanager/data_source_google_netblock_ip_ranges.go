@@ -312,9 +312,9 @@ func getCidrsDifference(reference, excluded map[string][]string) (map[string][]s
 
 func init() {
 	registry.Schema{
-		Name: "google_netblock_ip_ranges",
+		Name:        "google_netblock_ip_ranges",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleNetblockIpRanges(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleNetblockIpRanges(),
 	}.Register()
 }

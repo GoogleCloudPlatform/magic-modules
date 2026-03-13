@@ -754,9 +754,9 @@ func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *transport_tpg
 
 func init() {
 	registry.Schema{
-		Name: "google_dataflow_job",
+		Name:        "google_dataflow_job",
 		ProductName: "dataflow",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceDataflowJob(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDataflowJob(),
 	}.Register()
 }

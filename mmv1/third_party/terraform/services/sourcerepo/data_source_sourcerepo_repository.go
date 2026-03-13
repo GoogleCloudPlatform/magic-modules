@@ -45,9 +45,9 @@ func dataSourceGoogleSourceRepoRepositoryRead(d *schema.ResourceData, meta inter
 
 func init() {
 	registry.Schema{
-		Name: "google_sourcerepo_repository",
+		Name:        "google_sourcerepo_repository",
 		ProductName: "sourcerepo",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleSourceRepoRepository(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleSourceRepoRepository(),
 	}.Register()
 }

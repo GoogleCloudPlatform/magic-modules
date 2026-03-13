@@ -56,9 +56,9 @@ func dataSourceMonitoringIstioCanonicalServiceRead(res map[string]interface{}, d
 
 func init() {
 	registry.Schema{
-		Name: "google_monitoring_istio_canonical_service",
+		Name:        "google_monitoring_istio_canonical_service",
 		ProductName: "monitoring",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceMonitoringIstioCanonicalService(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceMonitoringIstioCanonicalService(),
 	}.Register()
 }

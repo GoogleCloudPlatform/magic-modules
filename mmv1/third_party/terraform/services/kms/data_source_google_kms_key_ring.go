@@ -50,9 +50,9 @@ func dataSourceGoogleKmsKeyRingRead(d *schema.ResourceData, meta interface{}) er
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_key_ring",
+		Name:        "google_kms_key_ring",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsKeyRing(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsKeyRing(),
 	}.Register()
 }

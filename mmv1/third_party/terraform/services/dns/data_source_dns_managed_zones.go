@@ -97,9 +97,9 @@ func flattenZones(items []*dns.ManagedZone, project string) []map[string]interfa
 
 func init() {
 	registry.Schema{
-		Name: "google_dns_managed_zones",
+		Name:        "google_dns_managed_zones",
 		ProductName: "dns",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceDnsManagedZones(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceDnsManagedZones(),
 	}.Register()
 }

@@ -45,9 +45,9 @@ func dataSourceSqlDatabaseRead(d *schema.ResourceData, meta interface{}) error {
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_database",
+		Name:        "google_sql_database",
 		ProductName: "sql",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSqlDatabase(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlDatabase(),
 	}.Register()
 }

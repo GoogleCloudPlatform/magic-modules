@@ -277,9 +277,9 @@ func convertPythonPackageResponseToStruct(res map[string]interface{}) PythonPack
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_python_package",
+		Name:        "google_artifact_registry_python_package",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryPythonPackage(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryPythonPackage(),
 	}.Register()
 }

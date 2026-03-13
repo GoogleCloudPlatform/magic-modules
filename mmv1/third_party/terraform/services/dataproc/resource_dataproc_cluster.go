@@ -20,6 +20,7 @@ import (
 
 	"google.golang.org/api/dataproc/v1"
 )
+
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
 
@@ -3925,9 +3926,9 @@ func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
 
 func init() {
 	registry.Schema{
-		Name: "google_dataproc_cluster",
+		Name:        "google_dataproc_cluster",
 		ProductName: "dataproc",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceDataprocCluster(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDataprocCluster(),
 	}.Register()
 }

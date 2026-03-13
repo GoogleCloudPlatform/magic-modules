@@ -133,9 +133,9 @@ func resourceLoggingFolderSinkDelete(d *schema.ResourceData, meta interface{}) e
 
 func init() {
 	registry.Schema{
-		Name: "google_logging_folder_sink",
+		Name:        "google_logging_folder_sink",
 		ProductName: "logging",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceLoggingFolderSink(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceLoggingFolderSink(),
 	}.Register()
 }

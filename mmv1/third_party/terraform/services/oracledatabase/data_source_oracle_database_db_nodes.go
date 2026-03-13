@@ -216,9 +216,9 @@ func flattenOracleDatabaseDbNodePropertiesTotalCpuCoreCount(v interface{}, d *sc
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_db_nodes",
+		Name:        "google_oracle_database_db_nodes",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseDbNodes(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseDbNodes(),
 	}.Register()
 }

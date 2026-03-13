@@ -112,9 +112,9 @@ func flattenTiers(items []*sqladmin.Tier) []map[string]interface{} {
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_tiers",
+		Name:        "google_sql_tiers",
 		ProductName: "sql",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleSQLTiers(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleSQLTiers(),
 	}.Register()
 }

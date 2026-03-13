@@ -43,9 +43,9 @@ func dataSourceOracleDatabaseAutonomousDatabaseRead(d *schema.ResourceData, meta
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_autonomous_database",
+		Name:        "google_oracle_database_autonomous_database",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseAutonomousDatabase(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseAutonomousDatabase(),
 	}.Register()
 }

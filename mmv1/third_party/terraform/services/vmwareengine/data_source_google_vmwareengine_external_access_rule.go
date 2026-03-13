@@ -41,9 +41,9 @@ func dataSourceVmwareengineExternalAccessRuleRead(d *schema.ResourceData, meta i
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_external_access_rule",
+		Name:        "google_vmwareengine_external_access_rule",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineExternalAccessRule(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineExternalAccessRule(),
 	}.Register()
 }

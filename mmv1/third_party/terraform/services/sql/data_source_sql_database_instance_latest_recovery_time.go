@@ -75,9 +75,9 @@ func dataSourceSqlDatabaseInstanceLatestRecoveryTimeRead(d *schema.ResourceData,
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_database_instance_latest_recovery_time",
+		Name:        "google_sql_database_instance_latest_recovery_time",
 		ProductName: "sql",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSqlDatabaseInstanceLatestRecoveryTime(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlDatabaseInstanceLatestRecoveryTime(),
 	}.Register()
 }

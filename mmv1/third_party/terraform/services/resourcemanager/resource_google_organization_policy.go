@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
-
 )
+
 var schemaOrganizationPolicy = map[string]*schema.Schema{
 	// Although the API suggests that boolean_policy, list_policy, or restore_policy must be set,
 	// Organization policies can be "inherited from parent" in the UI, and this is the default
@@ -486,9 +486,9 @@ func CanonicalOrgPolicyConstraint(constraint string) string {
 
 func init() {
 	registry.Schema{
-		Name: "google_organization_policy",
+		Name:        "google_organization_policy",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleOrganizationPolicy(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleOrganizationPolicy(),
 	}.Register()
 }

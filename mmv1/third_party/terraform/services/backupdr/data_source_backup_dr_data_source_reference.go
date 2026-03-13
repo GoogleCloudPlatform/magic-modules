@@ -302,18 +302,18 @@ func flattenDataSourceReferenceToMap(data map[string]interface{}) (map[string]in
 
 func init() {
 	registry.Schema{
-		Name: "google_backup_dr_data_source_references",
+		Name:        "google_backup_dr_data_source_references",
 		ProductName: "backupdr",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudBackupDRDataSourceReferences(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudBackupDRDataSourceReferences(),
 	}.Register()
 }
 
 func init() {
 	registry.Schema{
-		Name: "google_backup_dr_data_source_reference",
+		Name:        "google_backup_dr_data_source_reference",
 		ProductName: "backupdr",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudBackupDRDataSourceReference(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudBackupDRDataSourceReference(),
 	}.Register()
 }

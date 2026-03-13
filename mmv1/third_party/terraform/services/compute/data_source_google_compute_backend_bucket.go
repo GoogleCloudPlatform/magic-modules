@@ -51,9 +51,9 @@ func dataSourceComputeBackendBucketRead(d *schema.ResourceData, meta interface{}
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_backend_bucket",
+		Name:        "google_compute_backend_bucket",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeBackendBucket(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeBackendBucket(),
 	}.Register()
 }

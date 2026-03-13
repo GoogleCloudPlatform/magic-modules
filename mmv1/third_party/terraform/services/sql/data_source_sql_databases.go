@@ -98,9 +98,9 @@ func flattenDatabases(fetchedDatabases []*sqladmin.Database) []map[string]interf
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_databases",
+		Name:        "google_sql_databases",
 		ProductName: "sql",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSqlDatabases(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlDatabases(),
 	}.Register()
 }

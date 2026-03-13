@@ -225,9 +225,9 @@ func isDefaultServiceAccount(displayName string) bool {
 
 func init() {
 	registry.Schema{
-		Name: "google_project_default_service_accounts",
+		Name:        "google_project_default_service_accounts",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleProjectDefaultServiceAccounts(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProjectDefaultServiceAccounts(),
 	}.Register()
 }

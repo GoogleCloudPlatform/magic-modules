@@ -101,9 +101,9 @@ func dataSourceGoogleLoggingProjectSettingsRead(d *schema.ResourceData, meta int
 
 func init() {
 	registry.Schema{
-		Name: "google_logging_project_settings",
+		Name:        "google_logging_project_settings",
 		ProductName: "logging",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleLoggingProjectSettings(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleLoggingProjectSettings(),
 	}.Register()
 }

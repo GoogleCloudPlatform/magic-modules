@@ -121,9 +121,9 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 
 func init() {
 	registry.Schema{
-		Name: "google_monitoring_notification_channel",
+		Name:        "google_monitoring_notification_channel",
 		ProductName: "monitoring",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceMonitoringNotificationChannel(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceMonitoringNotificationChannel(),
 	}.Register()
 }

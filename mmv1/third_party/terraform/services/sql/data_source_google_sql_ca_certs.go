@@ -102,9 +102,9 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_ca_certs",
+		Name:        "google_sql_ca_certs",
 		ProductName: "sql",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleSQLCaCerts(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleSQLCaCerts(),
 	}.Register()
 }

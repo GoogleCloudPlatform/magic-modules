@@ -207,9 +207,9 @@ func flattenKMSKeysList(d *schema.ResourceData, config *transport_tpg.Config, ke
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_crypto_keys",
+		Name:        "google_kms_crypto_keys",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsCryptoKeys(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsCryptoKeys(),
 	}.Register()
 }

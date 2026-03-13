@@ -91,9 +91,9 @@ func flattenArtifactRegistryLocations(resp map[string]interface{}) []interface{}
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_locations",
+		Name:        "google_artifact_registry_locations",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleArtifactRegistryLocations(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleArtifactRegistryLocations(),
 	}.Register()
 }

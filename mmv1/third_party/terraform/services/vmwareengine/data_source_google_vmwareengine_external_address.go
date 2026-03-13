@@ -41,9 +41,9 @@ func dataSourceVmwareengineExternalAddressRead(d *schema.ResourceData, meta inte
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_external_address",
+		Name:        "google_vmwareengine_external_address",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineExternalAddress(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineExternalAddress(),
 	}.Register()
 }

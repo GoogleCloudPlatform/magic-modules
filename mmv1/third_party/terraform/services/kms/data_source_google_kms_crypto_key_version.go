@@ -206,9 +206,9 @@ func flattenKmsCryptoKeyVersionPublicKeyAlgorithm(v interface{}, d *schema.Resou
 
 func init() {
 	registry.Schema{
-		Name: "google_kms_crypto_key_version",
+		Name:        "google_kms_crypto_key_version",
 		ProductName: "kms",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleKmsCryptoKeyVersion(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsCryptoKeyVersion(),
 	}.Register()
 }

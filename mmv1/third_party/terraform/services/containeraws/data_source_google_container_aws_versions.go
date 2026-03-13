@@ -88,9 +88,9 @@ func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta inter
 
 func init() {
 	registry.Schema{
-		Name: "google_container_aws_versions",
+		Name:        "google_container_aws_versions",
 		ProductName: "containeraws",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleContainerAwsVersions(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerAwsVersions(),
 	}.Register()
 }

@@ -175,9 +175,9 @@ func dataSourceArtifactRegistryRepositoriesRead(d *schema.ResourceData, meta int
 
 func init() {
 	registry.Schema{
-		Name: "google_artifact_registry_repositories",
+		Name:        "google_artifact_registry_repositories",
 		ProductName: "artifactregistry",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceArtifactRegistryRepositories(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryRepositories(),
 	}.Register()
 }

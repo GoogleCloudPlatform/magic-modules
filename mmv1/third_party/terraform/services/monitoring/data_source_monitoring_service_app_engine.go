@@ -36,9 +36,9 @@ func dataSourceMonitoringServiceAppEngineRead(res map[string]interface{}, d *sch
 
 func init() {
 	registry.Schema{
-		Name: "google_monitoring_app_engine_service",
+		Name:        "google_monitoring_app_engine_service",
 		ProductName: "monitoring",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceMonitoringServiceAppEngine(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceMonitoringServiceAppEngine(),
 	}.Register()
 }

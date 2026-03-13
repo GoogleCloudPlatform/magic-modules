@@ -107,9 +107,9 @@ func dataSourceGoogleStorageBucketObjectContentRead(d *schema.ResourceData, meta
 
 func init() {
 	registry.Schema{
-		Name: "google_storage_bucket_object_content",
+		Name:        "google_storage_bucket_object_content",
 		ProductName: "storage",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleStorageBucketObjectContent(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageBucketObjectContent(),
 	}.Register()
 }

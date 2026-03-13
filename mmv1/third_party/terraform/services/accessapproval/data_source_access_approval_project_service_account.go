@@ -73,9 +73,9 @@ func dataSourceAccessApprovalProjectServiceAccountRead(d *schema.ResourceData, m
 
 func init() {
 	registry.Schema{
-		Name: "google_access_approval_project_service_account",
+		Name:        "google_access_approval_project_service_account",
 		ProductName: "accessapproval",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceAccessApprovalProjectServiceAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAccessApprovalProjectServiceAccount(),
 	}.Register()
 }

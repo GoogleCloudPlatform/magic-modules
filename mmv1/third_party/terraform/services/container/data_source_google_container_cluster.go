@@ -66,9 +66,9 @@ func datasourceContainerClusterRead(d *schema.ResourceData, meta interface{}) er
 
 func init() {
 	registry.Schema{
-		Name: "google_container_cluster",
+		Name:        "google_container_cluster",
 		ProductName: "container",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleContainerCluster(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerCluster(),
 	}.Register()
 }

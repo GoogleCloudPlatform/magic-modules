@@ -977,9 +977,9 @@ func validateRecordNameTrailingDot(v interface{}, k string) (warnings []string, 
 
 func init() {
 	registry.Schema{
-		Name: "google_dns_record_set",
+		Name:        "google_dns_record_set",
 		ProductName: "dns",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceDnsRecordSet(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDnsRecordSet(),
 	}.Register()
 }

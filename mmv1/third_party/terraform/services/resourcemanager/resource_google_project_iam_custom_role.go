@@ -258,9 +258,9 @@ func resourceGoogleProjectIamCustomRoleImport(d *schema.ResourceData, meta inter
 
 func init() {
 	registry.Schema{
-		Name: "google_project_iam_custom_role",
+		Name:        "google_project_iam_custom_role",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleProjectIamCustomRole(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProjectIamCustomRole(),
 	}.Register()
 }

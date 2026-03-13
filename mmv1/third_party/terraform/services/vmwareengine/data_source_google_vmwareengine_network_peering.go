@@ -42,9 +42,9 @@ func dataSourceVmwareengineNetworkPeeringRead(d *schema.ResourceData, meta inter
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_network_peering",
+		Name:        "google_vmwareengine_network_peering",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineNetworkPeering(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineNetworkPeering(),
 	}.Register()
 }

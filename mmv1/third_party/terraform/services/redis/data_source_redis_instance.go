@@ -66,9 +66,9 @@ func SetDataSourceReservedIpRange(d *schema.ResourceData) error {
 
 func init() {
 	registry.Schema{
-		Name: "google_redis_instance",
+		Name:        "google_redis_instance",
 		ProductName: "redis",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleRedisInstance(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleRedisInstance(),
 	}.Register()
 }

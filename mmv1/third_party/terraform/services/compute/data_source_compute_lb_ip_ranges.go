@@ -53,9 +53,9 @@ func dataSourceGoogleComputeLbIpRangesRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_lb_ip_ranges",
+		Name:        "google_compute_lb_ip_ranges",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeLbIpRanges(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeLbIpRanges(),
 	}.Register()
 }

@@ -166,9 +166,9 @@ func getDataFromName(v interface{}, part int) string {
 
 func init() {
 	registry.Schema{
-		Name: "google_network_management_connectivity_tests",
+		Name:        "google_network_management_connectivity_tests",
 		ProductName: "networkmanagement",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleNetworkManagementConnectivityTests(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleNetworkManagementConnectivityTests(),
 	}.Register()
 }

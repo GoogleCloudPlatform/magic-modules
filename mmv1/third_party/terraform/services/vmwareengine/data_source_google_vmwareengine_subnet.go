@@ -40,9 +40,9 @@ func dataSourceVmwareengineSubnetRead(d *schema.ResourceData, meta interface{}) 
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_subnet",
+		Name:        "google_vmwareengine_subnet",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineSubnet(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineSubnet(),
 	}.Register()
 }

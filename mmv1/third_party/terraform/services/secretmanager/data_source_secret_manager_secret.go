@@ -49,9 +49,9 @@ func dataSourceSecretManagerSecretRead(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_secret_manager_secret",
+		Name:        "google_secret_manager_secret",
 		ProductName: "secretmanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSecretManagerSecret(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSecretManagerSecret(),
 	}.Register()
 }

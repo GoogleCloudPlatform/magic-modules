@@ -111,9 +111,9 @@ func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_service_account_jwt",
+		Name:        "google_service_account_jwt",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleServiceAccountJwt(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleServiceAccountJwt(),
 	}.Register()
 }

@@ -114,9 +114,9 @@ func flattenOracleDatabaseautonomousDatabases(v interface{}, d *schema.ResourceD
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_autonomous_databases",
+		Name:        "google_oracle_database_autonomous_databases",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseAutonomousDatabases(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseAutonomousDatabases(),
 	}.Register()
 }

@@ -197,9 +197,9 @@ func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error
 
 func init() {
 	registry.Schema{
-		Name: "google_folder_organization_policy",
+		Name:        "google_folder_organization_policy",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleFolderOrganizationPolicy(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleFolderOrganizationPolicy(),
 	}.Register()
 }

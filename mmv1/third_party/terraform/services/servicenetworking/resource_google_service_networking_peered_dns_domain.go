@@ -268,9 +268,9 @@ func getProjectNumber(d *schema.ResourceData, config *transport_tpg.Config, proj
 
 func init() {
 	registry.Schema{
-		Name: "google_service_networking_peered_dns_domain",
+		Name:        "google_service_networking_peered_dns_domain",
 		ProductName: "servicenetworking",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceGoogleServiceNetworkingPeeredDNSDomain(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleServiceNetworkingPeeredDNSDomain(),
 	}.Register()
 }

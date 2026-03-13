@@ -277,9 +277,9 @@ func resourceSiteVerificationOwnerImport(d *schema.ResourceData, meta interface{
 
 func init() {
 	registry.Schema{
-		Name: "google_site_verification_owner",
+		Name:        "google_site_verification_owner",
 		ProductName: "siteverification",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceSiteVerificationOwner(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceSiteVerificationOwner(),
 	}.Register()
 }

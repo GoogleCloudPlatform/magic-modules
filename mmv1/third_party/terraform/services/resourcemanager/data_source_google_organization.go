@@ -147,9 +147,9 @@ func canonicalOrganizationName(ba string) string {
 
 func init() {
 	registry.Schema{
-		Name: "google_organization",
+		Name:        "google_organization",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleOrganization(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleOrganization(),
 	}.Register()
 }

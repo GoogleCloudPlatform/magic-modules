@@ -111,9 +111,9 @@ func flattenOracleDatabaseCloudExadataInfrastructures(v interface{}, d *schema.R
 
 func init() {
 	registry.Schema{
-		Name: "google_oracle_database_cloud_exadata_infrastructures",
+		Name:        "google_oracle_database_cloud_exadata_infrastructures",
 		ProductName: "oracledatabase",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceOracleDatabaseCloudExadataInfrastructures(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseCloudExadataInfrastructures(),
 	}.Register()
 }

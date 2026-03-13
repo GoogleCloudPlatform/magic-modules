@@ -162,9 +162,9 @@ func flattenDatasourceGoogleProjectsList(v interface{}) []map[string]interface{}
 
 func init() {
 	registry.Schema{
-		Name: "google_projects",
+		Name:        "google_projects",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleProjects(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleProjects(),
 	}.Register()
 }

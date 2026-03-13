@@ -54,9 +54,9 @@ func dataSourceGoogleCloudRunV2ServiceRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_cloud_run_v2_service",
+		Name:        "google_cloud_run_v2_service",
 		ProductName: "cloudrunv2",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleCloudRunV2Service(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudRunV2Service(),
 	}.Register()
 }

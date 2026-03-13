@@ -164,9 +164,9 @@ func resourceBillingSubaccountDelete(d *schema.ResourceData, meta interface{}) e
 
 func init() {
 	registry.Schema{
-		Name: "google_billing_subaccount",
+		Name:        "google_billing_subaccount",
 		ProductName: "resourcemanager",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceBillingSubaccount(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBillingSubaccount(),
 	}.Register()
 }

@@ -671,9 +671,9 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 
 func init() {
 	registry.Schema{
-		Name: "google_sql_user",
+		Name:        "google_sql_user",
 		ProductName: "sql",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceSqlUser(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceSqlUser(),
 	}.Register()
 }

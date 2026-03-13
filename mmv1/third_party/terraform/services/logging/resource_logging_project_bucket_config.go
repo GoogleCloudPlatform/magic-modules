@@ -443,9 +443,9 @@ func enableAnalyticsBackwardsChangeDiffSuppress(k, old, new string, d *schema.Re
 
 func init() {
 	registry.Schema{
-		Name: "google_logging_project_bucket_config",
+		Name:        "google_logging_project_bucket_config",
 		ProductName: "logging",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceLoggingProjectBucketConfig(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceLoggingProjectBucketConfig(),
 	}.Register()
 }

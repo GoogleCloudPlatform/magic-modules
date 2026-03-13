@@ -60,9 +60,9 @@ func dataSourceGoogleBeyondcorpAppConnectorRead(d *schema.ResourceData, meta int
 
 func init() {
 	registry.Schema{
-		Name: "google_beyondcorp_app_connector",
+		Name:        "google_beyondcorp_app_connector",
 		ProductName: "beyondcorp",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleBeyondcorpAppConnector(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleBeyondcorpAppConnector(),
 	}.Register()
 }

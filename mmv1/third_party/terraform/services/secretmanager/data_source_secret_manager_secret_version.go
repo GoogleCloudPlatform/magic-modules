@@ -192,9 +192,9 @@ func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta inter
 
 func init() {
 	registry.Schema{
-		Name: "google_secret_manager_secret_version",
+		Name:        "google_secret_manager_secret_version",
 		ProductName: "secretmanager",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceSecretManagerSecretVersion(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSecretManagerSecretVersion(),
 	}.Register()
 }

@@ -456,9 +456,9 @@ func flattenAppEngineApplicationDispatchRules(rules []*appengine.UrlDispatchRule
 
 func init() {
 	registry.Schema{
-		Name: "google_app_engine_application",
+		Name:        "google_app_engine_application",
 		ProductName: "appengine",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceAppEngineApplication(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceAppEngineApplication(),
 	}.Register()
 }

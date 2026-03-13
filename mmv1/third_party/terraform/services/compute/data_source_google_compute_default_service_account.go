@@ -94,9 +94,9 @@ func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, me
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_default_service_account",
+		Name:        "google_compute_default_service_account",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeDefaultServiceAccount(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeDefaultServiceAccount(),
 	}.Register()
 }

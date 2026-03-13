@@ -41,9 +41,9 @@ func dataSourceVmwareengineClusterRead(d *schema.ResourceData, meta interface{})
 
 func init() {
 	registry.Schema{
-		Name: "google_vmwareengine_cluster",
+		Name:        "google_vmwareengine_cluster",
 		ProductName: "vmwareengine",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceVmwareengineCluster(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineCluster(),
 	}.Register()
 }
