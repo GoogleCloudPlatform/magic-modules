@@ -196,7 +196,7 @@ resource "google_bigquery_reservation" "reservation" {
 
   slot_capacity     = 0
   edition           = "ENTERPRISE"
-  ignore_idle_slots = true
+  ignore_idle_slots = false
   }
   `, context)
   }
@@ -210,7 +210,7 @@ resource "google_bigquery_reservation" "reservation" {
 
   slot_capacity     = 0
   edition           = "ENTERPRISE"
-  ignore_idle_slots = true
+  ignore_idle_slots = false
   reservation_group = "projects/%{project}/locations/us-west2/reservationGroups/tf-test-group-%{random_suffix}"
   }
   `, context)
