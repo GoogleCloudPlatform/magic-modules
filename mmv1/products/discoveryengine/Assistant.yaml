@@ -42,9 +42,9 @@ examples:
       data_store_id: 'example-data-store-id'
       engine_id: 'example-engine-id'
       template_id: 'ma-template-id'
-      ma_location: 'eu'
+      ma_location: 'us'
     test_vars_overrides:
-      ma_location: '"eu"'
+      ma_location: '"us"'
 parameters:
   - name: 'location'
     type: String
