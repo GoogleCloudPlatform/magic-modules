@@ -19,6 +19,7 @@ func TestAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdate(t *tes
 	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "us-central1",
 		"random_suffix": randString,
 		"name":          "tf-test-my-full-agent-gateway" + randString,
 	}

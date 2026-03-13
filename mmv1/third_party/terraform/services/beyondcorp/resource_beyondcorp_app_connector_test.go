@@ -10,8 +10,13 @@ import (
 func TestAccBeyondcorpAppConnector_beyondcorpAppConnectorUpdateExample(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":            acctest.GetTestProject(t),
+		"region":             "us-central1",
+		"random_suffix":      randString,
+		"app_connector_name": "tf-test-my-app-connector" + randString,
+		"account_id":         "tf-test-my-account" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

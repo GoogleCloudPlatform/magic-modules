@@ -4,6 +4,7 @@ package workstations_test
 import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -13,6 +14,8 @@ func TestAccWorkstationsWorkstationCluster_update(t *testing.T) {
 
 	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":                  envvar.GetTestProjectFromEnv(),
+		"location":                 "us-central1",
 		"random_suffix":            randString,
 		"workstation_cluster_name": "tf-test-workstation-cluster" + randString,
 	}
@@ -49,6 +52,8 @@ func TestAccWorkstationsWorkstationCluster_Private_update(t *testing.T) {
 
 	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":                  envvar.GetTestProjectFromEnv(),
+		"location":                 "us-central1",
 		"random_suffix":            randString,
 		"workstation_cluster_name": "tf-test-workstation-cluster-private" + randString,
 	}

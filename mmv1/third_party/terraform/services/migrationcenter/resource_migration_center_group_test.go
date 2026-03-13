@@ -6,13 +6,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccMigrationCenterGroup_migrationGroupUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "us-central1",
+		"random_suffix": randString,
+		"group_name":    "tf-test-group-test" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

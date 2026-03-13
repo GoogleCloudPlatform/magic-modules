@@ -12,9 +12,26 @@ import (
 func TestAccNetworkSecurityAuthzPolicy_networkServicesAuthzPolicyHttpRules(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"project":                      envvar.GetTestProjectFromEnv(),
+		"location":                     "us-west1",
+		"random_suffix":                randString,
+		"resource_name":                "my-authz-policy-" + randString,
+		"network_name":                 "lb-network-" + randString,
+		"subnet_name":                  "backend-subnet-" + randString,
+		"proxy_subnet_name":            "proxy-only-subnet-" + randString,
+		"address_name":                 "l7-ilb-ip-address-" + randString,
+		"health_check_name":            "l7-ilb-basic-check-" + randString,
+		"backend_url_name":             "l7-ilb-backend-service-" + randString,
+		"url_name":                     "l7-ilb-map-" + randString,
+		"target_proxy_name":            "l7-ilb-proxy-" + randString,
+		"forwarding_rule_name":         "l7-ilb-forwarding-rule-" + randString,
+		"callouts_instance_name":       "l7-ilb-callouts-ins-" + randString,
+		"callouts_instance_group_name": "l7-ilb-callouts-ins-group-" + randString,
+		"callouts_health_check_name":   "l7-ilb-callouts-healthcheck-" + randString,
+		"backend_authz_name":           "authz-service-" + randString,
+		"authz_extension_name":         "my-authz-ext-" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -411,8 +428,12 @@ func TestAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(t *te
 	t.Skip("b/484137930")
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "us-west1",
+		"random_suffix": randString,
+		"policy_name":   "my-mcp-policy-" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

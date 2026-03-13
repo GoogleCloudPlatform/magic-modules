@@ -6,13 +6,19 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccAlloydbCluster_update(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -180,8 +186,13 @@ data "google_compute_network" "default" {
 func TestAccAlloydbCluster_withSubscriptionTypeTrial(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -231,8 +242,13 @@ resource "google_compute_network" "default" {
 func TestAccAlloydbCluster_withSubscriptionTypeStandard(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -282,9 +298,14 @@ resource "google_compute_network" "default" {
 func TestAccAlloydbCluster_addAutomatedBackupPolicyAndInitialUser(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"hour":          23,
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
+		"hour":                 23,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -323,9 +344,14 @@ func TestAccAlloydbCluster_addAutomatedBackupPolicyAndInitialUser(t *testing.T) 
 func TestAccAlloydbCluster_deleteAutomatedBackupPolicyAndInitialUser(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"hour":          23,
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
+		"hour":                 23,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -363,9 +389,12 @@ func TestAccAlloydbCluster_deleteAutomatedBackupPolicyAndInitialUser(t *testing.
 func TestAccAlloydbCluster_AutomatedBackupPolicyHandlesMidnight(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"hour":          0,
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
+		"hour":                 0,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -477,8 +506,11 @@ resource "google_compute_network" "default" {
 func TestAccAlloydbCluster_missingWeeklySchedule(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -535,8 +567,13 @@ resource "google_compute_network" "default" {
 func TestAccAlloydbCluster_mandatoryFields(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -555,8 +592,13 @@ func TestAccAlloydbCluster_mandatoryFields(t *testing.T) {
 func TestAccAlloydbCluster_maximumFields(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -575,8 +617,11 @@ func TestAccAlloydbCluster_maximumFields(t *testing.T) {
 func TestAccAlloydbCluster_deleteTimeBasedRetentionPolicy(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"cluster_id":           "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -960,8 +1005,12 @@ resource "google_kms_crypto_key_iam_member" "crypto_key2" {
 func TestAccAlloydbCluster_continuousBackup_enabledByDefault(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -995,6 +1044,8 @@ func TestAccAlloydbCluster_continuousBackup_update_noChangeIfDefaultsSet(t *test
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
 		"random_suffix":        acctest.RandString(t, 10),
 		"enabled":              true,
 		"recovery_window_days": 14,
@@ -1044,6 +1095,8 @@ func TestAccAlloydbCluster_continuousBackup_noChangeIfRemoved(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
 		"random_suffix":        acctest.RandString(t, 10),
 		"enabled":              true,
 		"recovery_window_days": 14,
@@ -1084,6 +1137,8 @@ func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
 
 	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
 		"random_suffix":        suffix,
 		"enabled":              true,
 		"recovery_window_days": 15,
@@ -1449,8 +1504,10 @@ resource "google_compute_global_address" "private_ip_alloc" {
 func TestAccAlloydbCluster_withMaintenanceWindows(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1508,8 +1565,10 @@ func TestAccAlloydbCluster_withMaintenanceWindowsMissingFields(t *testing.T) {
 	t.Parallel()
 	acctest.SkipIfVcr(t)
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1596,8 +1655,10 @@ data "google_project" "project" {}
 func TestAccAlloydbCluster_withPrivateServiceConnect(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1639,8 +1700,12 @@ data "google_project" "project" {}
 func TestAccAlloydbCluster_standardClusterUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1686,8 +1751,10 @@ func TestAccAlloydbCluster_standardClusterUpdate(t *testing.T) {
 func TestAccAlloydbCluster_trialClusterUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1730,8 +1797,10 @@ func TestAccAlloydbCluster_trialClusterUpdate(t *testing.T) {
 func TestAccAlloydbCluster_standardClusterUpdateFailure(t *testing.T) {
 	t.Parallel()
 	errorPattern := `.*The request was invalid: invalid subscription_type update`
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1755,8 +1824,10 @@ func TestAccAlloydbCluster_randomPassword(t *testing.T) {
 	// Random provider causes VCR to fail
 	acctest.SkipIfVcr(t)
 	t.Parallel()
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1913,8 +1984,10 @@ resource "google_compute_network" "default" {
 func TestAccAlloydbCluster_withDefaultDataplexConfig(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1956,8 +2029,10 @@ func TestAccAlloydbCluster_withDefaultDataplexConfig(t *testing.T) {
 func TestAccAlloydbCluster_withDataplexConfigDisabled(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":        randString,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

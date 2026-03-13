@@ -5,14 +5,23 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix": acctest.RandString(t, 10),
+		"project":               envvar.GetTestProjectFromEnv(),
+		"location":              "us-central1",
+		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix":         randString,
+		"alloydb_cluster_name":  "alloydb-cluster-" + randString,
+		"alloydb_cluster_pass":  "cluster_secret-" + randString,
+		"alloydb_instance_name": "alloydb-instance-" + randString,
+		"alloydb_user_name":     "user1-" + randString,
+		"alloydb_user_pass":     "user_secret-" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -84,9 +93,17 @@ resource "google_alloydb_user" "user1" {
 func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix": acctest.RandString(t, 10),
+		"project":               envvar.GetTestProjectFromEnv(),
+		"location":              "us-central1",
+		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix":         randString,
+		"alloydb_cluster_name":  "alloydb-cluster-" + randString,
+		"alloydb_cluster_pass":  "cluster_secret-" + randString,
+		"alloydb_instance_name": "alloydb-instance-" + randString,
+		"alloydb_user_name":     "user1-" + randString,
+		"alloydb_user_pass":     "user_secret-" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -158,9 +175,16 @@ resource "google_alloydb_user" "user1" {
 func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix": acctest.RandString(t, 10),
+		"project":               envvar.GetTestProjectFromEnv(),
+		"location":              "us-central1",
+		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix":         randString,
+		"alloydb_cluster_name":  "alloydb-cluster-" + randString,
+		"alloydb_instance_name": "alloydb-instance-" + randString,
+		"alloydb_cluster_pass":  "cluster_secret-" + randString,
+		"alloydb_user_name":     "user2-" + randString + "@foo.com",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -225,9 +249,17 @@ resource "google_alloydb_user" "user2" {
 func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix": acctest.RandString(t, 10),
+		"project":               envvar.GetTestProjectFromEnv(),
+		"location":              "us-central1",
+		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix":         randString,
+		"alloydb_cluster_name":  "alloydb-cluster-" + randString,
+		"alloydb_cluster_pass":  "cluster_secret-" + randString,
+		"alloydb_instance_name": "alloydb-instance-" + randString,
+		"alloydb_user_name":     "user1-" + randString,
+		"alloydb_user_pass":     "user_secret-" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -288,9 +320,17 @@ resource "google_alloydb_user" "user1" {
 func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo_update(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix": acctest.RandString(t, 10),
+		"project":               envvar.GetTestProjectFromEnv(),
+		"location":              "us-central1",
+		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix":         randString,
+		"alloydb_cluster_name":  "alloydb-cluster-" + randString,
+		"alloydb_cluster_pass":  "cluster_secret-" + randString,
+		"alloydb_instance_name": "alloydb-instance-" + randString,
+		"alloydb_user_name":     "user1-" + randString,
+		"alloydb_user_pass":     "user_secret-" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

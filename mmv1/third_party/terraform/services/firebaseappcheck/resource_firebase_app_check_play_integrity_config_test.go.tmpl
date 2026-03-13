@@ -15,7 +15,9 @@ func TestAccFirebaseAppCheckPlayIntegrityConfig_firebaseAppCheckPlayIntegrityCon
 
 	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
 		"project_id":    envvar.GetTestProjectFromEnv(),
+		"app_id":        "tf-test-app-" + randString,
 		"random_suffix": randString,
 		"token_ttl":     "7200s",
 		"package_name":  "package.name.playintegrity" + randString,

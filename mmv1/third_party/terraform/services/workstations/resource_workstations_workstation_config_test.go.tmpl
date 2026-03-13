@@ -13,8 +13,14 @@ import (
 func TestAccWorkstationsWorkstationConfig_basic(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":            randString,
+		"workstation_cluster_name": "tf-test-workstation-cluster" + randString,
+		"workstation_config_name":  "tf-test-workstation-config" + randString,
+		"key_short_name":           "tf-test-key-" + randString,
+		"value_short_name":         "tf-test-value-" + randString,
+		"org_id":                   envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -769,6 +775,10 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 
 	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":                  envvar.GetTestProjectFromEnv(),
+		"location":                 "us-central1",
+		"workstation_cluster_id":   "tf-test-workstation-cluster" + randString,
+		"workstation_config_id":    "tf-test-workstation-config" + randString,
 		"random_suffix":            randString,
 		"project_id":               fmt.Sprintf("tf-test-proj-%s", randString),
 		"key_short_name":           fmt.Sprintf("tf-test-key-%s", randString),

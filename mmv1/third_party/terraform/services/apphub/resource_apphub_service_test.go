@@ -12,10 +12,28 @@ import (
 func TestAccApphubService_serviceUpdate(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   acctest.RandString(t, 10),
+		"project":                       envvar.GetTestProjectFromEnv(),
+		"location":                      "us-central1",
+		"org_id":                        envvar.GetTestOrgFromEnv(t),
+		"billing_account":               envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":                 suffix,
+		"application_id":                "tf-test-example-application-1" + suffix,
+		"service_project_attachment_id": "tf-test-project-1" + suffix,
+		"display_name":                  "Example Service Full",
+		"desc":                          "Register service for testing",
+		"business_name":                 "Alice",
+		"business_email":                "alice@google.com",
+		"developer_name":                "Bob",
+		"developer_email":               "bob@google.com",
+		"operator_name":                 "Charlie",
+		"operator_email":                "charlie@google.com",
+		"ilb_network":                   "tf-test-l7-ilb-network" + suffix,
+		"ilb_subnet":                    "tf-test-l7-ilb-subnet" + suffix,
+		"forwarding_rule":               "tf-test-l7-ilb-forwarding-rule" + suffix,
+		"backend_service":               "tf-test-l7-ilb-backend-subnet" + suffix,
+		"health_check":                  "tf-test-l7-ilb-hc" + suffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

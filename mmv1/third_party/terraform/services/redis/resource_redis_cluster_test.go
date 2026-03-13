@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/redis"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -1428,9 +1429,16 @@ resource "google_redis_cluster" "cluster-ms" {
 func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":                     envvar.GetTestProjectFromEnv(),
+		"region":                      "us-central1",
 		"deletion_protection_enabled": false,
-		"random_suffix":               acctest.RandString(t, 10),
+		"random_suffix":               suffix,
+		"cluster_name":                "ha-cluster-" + suffix,
+		"policy_name":                 "my-policy-" + suffix,
+		"subnet_name":                 "my-subnet-" + suffix,
+		"network_name":                "my-network-" + suffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
