@@ -19,8 +19,9 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) 
 	})
 
 	context := map[string]interface{}{
-		"bucket_name":  acctest.TestBucketName(t),
-		"kms_key_name": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name,
+		"random_suffix": acctest.RandString(t, 10),
+		"bucket_name":   acctest.TestBucketName(t),
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -174,7 +175,7 @@ resource "time_sleep" "wait_5_minutes" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "secret"
+  secret_id = "secret-%{random_suffix}"
 
   replication {
     auto {}
@@ -218,7 +219,7 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id = "reasoning-sa"
+  account_id = "reasoning-sa-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer" {
@@ -364,7 +365,7 @@ resource "time_sleep" "wait_5_minutes" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "secret"
+  secret_id = "secret-%{random_suffix}"
 
   replication {
     auto {}
@@ -389,7 +390,7 @@ resource "google_secret_manager_secret_iam_member" "secret_access_new" {
 }
 
 resource "google_secret_manager_secret" "secret_new" {
-  secret_id = "secret-new"
+  secret_id = "secret-new-%{random_suffix}"
 
   replication {
     auto {}
@@ -460,7 +461,7 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_langchain" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id = "reasoning-sa"
+  account_id = "reasoning-sa-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer" {
@@ -482,7 +483,7 @@ resource "google_project_iam_member" "sa_iam_viewer" {
 }
 
 resource "google_service_account" "service_account_new" {
-  account_id = "reasoning-sa-new"
+  account_id = "reasoning-sa-new-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer_new" {
