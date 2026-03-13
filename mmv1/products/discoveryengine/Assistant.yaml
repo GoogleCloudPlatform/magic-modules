@@ -36,6 +36,15 @@ examples:
       data_store_id: 'example-data-store-id'
       engine_id: 'example-engine-id'
       template_id: 'example-template-id'
+  - name: 'discoveryengine_assistant_with_model_armor'
+    primary_resource_id: 'with-model-armor'
+    vars:
+      data_store_id: 'example-data-store-id'
+      engine_id: 'example-engine-id'
+      template_id: 'ma-template-id'
+      ma_location: 'us'
+    test_vars_overrides:
+      ma_location: '"us"'
 parameters:
   - name: 'location'
     type: String
