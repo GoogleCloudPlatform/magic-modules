@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 {{- if ne $.TargetVersionName "ga" }}
@@ -137,4 +138,13 @@ func flattenQueryValues(queryValue *compute.GuestAttributesValue) []map[string]i
 		})
 	}
 	return queryValueItems
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_guest_attributes",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeInstanceGuestAttributes(),
+	}.Register()
 }

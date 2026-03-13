@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -192,4 +193,13 @@ func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
 	})
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_folder_organization_policy",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleFolderOrganizationPolicy(),
+	}.Register()
 }

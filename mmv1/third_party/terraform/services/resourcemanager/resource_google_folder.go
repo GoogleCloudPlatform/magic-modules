@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
@@ -336,4 +338,13 @@ func getGoogleFolder(folderName, userAgent string, d *schema.ResourceData, confi
 		return nil, err
 	}
 	return folder, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_folder",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleFolder(),
+	}.Register()
 }
