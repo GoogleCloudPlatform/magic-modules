@@ -331,12 +331,6 @@ func init() {
 		Schema:      tpgiamresource.ResourceIamBinding(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 	}.Register()
 	registry.Schema{
-		Name:        "google_bigquery_dataset_iam_member",
-		ProductName: "bigquery",
-		Type:        registry.SchemaTypeIAMResource,
-		Schema:      tpgiamresource.ResourceIamMember(IamMemberBigqueryDatasetSchema, NewBigqueryDatasetIamMemberUpdater, BigqueryDatasetIdParseFunc),
-	}.Register()
-	registry.Schema{
 		Name:        "google_bigquery_dataset_iam_policy",
 		ProductName: "bigquery",
 		Type:        registry.SchemaTypeIAMResource,
