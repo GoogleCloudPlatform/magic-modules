@@ -39,6 +39,7 @@ custom_code:
   constants: 'templates/terraform/constants/bigtable_app_profile_routing.go.tmpl'
   extra_schema_entry: 'templates/terraform/extra_schema_entry/bigtable_app_profile.go.tmpl'
   encoder: 'templates/terraform/encoders/bigtable_app_profile.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/bigtable_app_profile.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigtable_app_profile.go.tmpl'
 exclude_sweeper: true
 examples:
@@ -119,6 +120,9 @@ parameters:
       'If true, ignore safety checks when deleting/updating the app profile.'
     url_param_only: true
     default_value: false
+tgc_tests:
+  - name: 'TestAccBigtableAppProfile_updateSingleToMulti'
+    skip: 'cai asset data is not avaible for all steps'
 properties:
   - name: 'name'
     type: String
@@ -141,7 +145,7 @@ properties:
       - 'single_cluster_routing'
       - 'multi_cluster_routing_use_any'
     custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.tmpl'
-    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/bigtable_app_profile_routing.tmpl'
+    tgc_ignore_terraform_custom_flatten: true
   - name: 'singleClusterRouting'
     type: NestedObject
     is_missing_in_cai: true

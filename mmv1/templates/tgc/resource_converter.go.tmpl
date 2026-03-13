@@ -47,9 +47,7 @@ import (
   "github.com/hashicorp/terraform-provider-google-beta/google-beta/verify"
 
   "google.golang.org/api/googleapi"
-{{- if eq $.ResourceName "BigtableAppProfile" }}
-  bigtableadmin "google.golang.org/api/bigtableadmin/v2"
-{{- end }}
+
 )
 
 {{if $.CustomCode.Constants -}} 
@@ -83,6 +81,9 @@ var (
     _ = transport_tpg.Config{}
     _ = verify.ProjectRegex
     _ = googleapi.Error{}
+{{- if eq $.ResourceName "BigtableAppProfile" }}
+    _ = bigtableadmin.NewService
+{{- end }}
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
