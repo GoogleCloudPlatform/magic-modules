@@ -185,10 +185,16 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"zip_path":      "./test-fixtures/function-source-eventarc-gcs.zip",
-		"random_suffix": acctest.RandString(t, 10),
+		"project":               envvar.GetTestProjectFromEnv(),
+		"location":              "us-central1",
+		"zip_path":              "./test-fixtures/function-source-eventarc-gcs.zip",
+		"random_suffix":         randString,
+		"bucket_name_source":    "tf-test-gcf-source-bucket" + randString,
+		"bucket_name_auditlogs": "tf-test-gcf-auditlog-bucket" + randString,
+		"service_account":       "tf-test-gcf-sa" + randString,
+		"function_name":         "tf-test-gcf-function" + randString,
 	}
 
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{

@@ -6,14 +6,19 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataCatalogTagTemplate_dataCatalogTagTemplate_updateFields(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"force_delete":  true,
-		"random_suffix": acctest.RandString(t, 10),
+		"project":         envvar.GetTestProjectFromEnv(),
+		"location":        "us-central1",
+		"random_suffix":   randString,
+		"force_delete":    "true",
+		"tag_template_id": "tf_test_my_template" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

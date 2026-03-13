@@ -6,13 +6,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDataexchangeSubscriptionUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":                           envvar.GetTestProjectFromEnv(),
+		"location":                          "us",
+		"random_suffix":                     randString,
+		"data_exchange_id":                  "tf_test_my_test_dataexchange" + randString,
+		"listing_dataset_id":                "tf_test_listing_src_dataset" + randString,
+		"listing_table_id":                  "tf_test_listing_src_table" + randString,
+		"listing_id":                        "tf_test_my_test_listing" + randString,
+		"subscription_id":                   "tf_test_my_subscription_id" + randString,
+		"subscriber_contact_email":          "testuser@example.com" + randString,
+		"destination_dataset_id":            "tf_test_subscribed_dest_dataset" + randString,
+		"destination_dataset_friendly_name": "Subscribed Destination Dataset" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

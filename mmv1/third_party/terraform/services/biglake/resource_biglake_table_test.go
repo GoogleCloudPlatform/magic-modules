@@ -6,13 +6,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBiglakeTable_biglakeTable_update(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "US",
+		"random_suffix": randString,
+		"name":          "tf_test_my_table" + randString,
+		"catalog":       "tf_test_my_catalog" + randString,
+		"database":      "tf_test_my_database" + randString,
+		"bucket":        "tf_test_my_bucket" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

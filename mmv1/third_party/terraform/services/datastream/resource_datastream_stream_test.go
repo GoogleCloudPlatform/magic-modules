@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDatastreamStream_update(t *testing.T) {
@@ -14,6 +15,8 @@ func TestAccDatastreamStream_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":             envvar.GetTestProjectFromEnv(),
+		"location":            "us-central1",
 		"random_suffix":       acctest.RandString(t, 10),
 		"deletion_protection": false,
 	}
@@ -279,6 +282,8 @@ func TestAccDatastreamStream_mongoDb(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "us-central1",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

@@ -13,15 +13,20 @@ import (
 func TestAccFirebaseAppCheckRecaptchaV3Config_firebaseAppCheckRecaptchaV3ConfigUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
 		"project_id":    envvar.GetTestProjectFromEnv(),
+		"app_id":        "tf-test-app-" + randString,
 		"token_ttl":     "7200s",
 		"site_secret":   "6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX",
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randString,
 	}
 
 	contextUpdated := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
 		"project_id":    envvar.GetTestProjectFromEnv(),
+		"app_id":        "tf-test-app-" + randString,
 		"token_ttl":     "3800s",
 		"site_secret":   "7Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX",
 		"random_suffix": context["random_suffix"],

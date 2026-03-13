@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -11,8 +12,12 @@ import (
 func TestAccDialogflowCXGenerator_dialogflowcxGeneratorUpdate(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "global",
+		"random_suffix": randString,
+		"agent_name":    "tf-test-dialogflowcx-agent-fucntion" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
