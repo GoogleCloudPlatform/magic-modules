@@ -39,8 +39,6 @@ custom_code:
   constants: 'templates/terraform/constants/bigtable_app_profile_routing.go.tmpl'
   extra_schema_entry: 'templates/terraform/extra_schema_entry/bigtable_app_profile.go.tmpl'
   encoder: 'templates/terraform/encoders/bigtable_app_profile.go.tmpl'
-  # tgc_ignore_terraform_encoder: true
-  # tgc_encoder: 'templates/tgc_next/encoders/bigtable_app_profile.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigtable_app_profile.go.tmpl'
 exclude_sweeper: true
 examples:
@@ -135,7 +133,6 @@ properties:
       Long form description of the use case for this app profile.
   - name: 'multiClusterRoutingUseAny'
     type: Boolean
-    is_missing_in_cai: true
     description: |
       If true, read/write requests are routed to the nearest cluster in the instance, and will fail over to the nearest cluster that is available
       in the event of transient errors or delays. Clusters in a region are considered equidistant. Choosing this option sacrifices read-your-writes
@@ -145,8 +142,6 @@ properties:
       - 'multi_cluster_routing_use_any'
     custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.tmpl'
     custom_tgc_flatten: 'templates/tgc_next/custom_flatten/bigtable_app_profile_routing.tmpl'
-    tgc_ignore_terraform_custom_flatten: true
-    custom_expand: 'templates/terraform/custom_expand/bigtable_app_profile_routing.tmpl'
   - name: 'singleClusterRouting'
     type: NestedObject
     is_missing_in_cai: true
