@@ -1,0 +1,6 @@
+config := meta.(*transport_tpg.Config)
+_, err := tpgresource.ParseRegionalFieldValue("targetVpnGateways", d.Get("target_vpn_gateway").(string), "project", "region", "zone", d, config, true)
+if err != nil {
+	return nil, err
+}
+return obj, nil

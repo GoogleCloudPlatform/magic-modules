@@ -13,6 +13,7 @@
 
 ---
 name: 'AppProfile'
+include_in_tgc_next: true
 kind: 'bigtable#appProfile'
 description: |
   App profile is a configuration object describing how Cloud Bigtable should treat traffic from a particular end user application.
@@ -35,9 +36,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/bigtable_app_profile_routing.go.tmpl'
   extra_schema_entry: 'templates/terraform/extra_schema_entry/bigtable_app_profile.go.tmpl'
   encoder: 'templates/terraform/encoders/bigtable_app_profile.go.tmpl'
+  tgc_ignore_terraform_encoder: true
+  tgc_encoder: 'templates/tgc_next/encoders/bigtable_app_profile.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigtable_app_profile.go.tmpl'
 exclude_sweeper: true
 examples:
@@ -127,10 +129,12 @@ properties:
     output: true
   - name: 'description'
     type: String
+    is_missing_in_cai: true
     description: |
       Long form description of the use case for this app profile.
   - name: 'multiClusterRoutingUseAny'
     type: Boolean
+    is_missing_in_cai: true
     description: |
       If true, read/write requests are routed to the nearest cluster in the instance, and will fail over to the nearest cluster that is available
       in the event of transient errors or delays. Clusters in a region are considered equidistant. Choosing this option sacrifices read-your-writes
@@ -150,11 +154,13 @@ properties:
     properties:
       - name: 'clusterId'
         type: String
+        is_missing_in_cai: true
         description: |
           The cluster to which read/write requests should be routed.
         required: true
       - name: 'allowTransactionalWrites'
         type: Boolean
+        is_missing_in_cai: true
         description: |
           If true, CheckAndMutateRow and ReadModifyWriteRow requests are allowed by this app profile.
           It is unsafe to send these requests to the same table/row/column in multiple clusters.
@@ -168,6 +174,7 @@ properties:
     properties:
       - name: 'priority'
         type: Enum
+        is_missing_in_cai: true
         description: |
           The priority of requests sent using this app profile.
         required: true
@@ -184,6 +191,7 @@ properties:
     properties:
       - name: 'computeBillingOwner'
         type: Enum
+        is_missing_in_cai: true
         description: |
           The Compute Billing Owner for this Data Boost App Profile.
         required: true
