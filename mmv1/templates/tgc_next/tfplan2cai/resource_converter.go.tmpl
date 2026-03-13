@@ -73,6 +73,9 @@ var (
     _ = transport_tpg.Config{}
     _ = verify.ProjectRegex
     _ = googleapi.Error{}
+{{- if eq $.ResourceName "BigtableAppProfile" }}
+    _ = bigtableadmin.NewService
+{{- end }}
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}

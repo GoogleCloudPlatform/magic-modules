@@ -63,6 +63,9 @@ var (
     _ = tpgresource.GetRegion
     _ = transport_tpg.Config{}
     _ = verify.ProjectRegex
+{{- if eq $.ResourceName "BigtableAppProfile" }}
+    _ = bigtableadmin.NewService
+{{- end }}
 )
 
 {{ if $.DefineAssetTypeForResourceInProduct -}}
