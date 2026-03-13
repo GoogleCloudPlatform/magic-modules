@@ -1,5 +1,4 @@
 package workstations_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -147,4 +146,3 @@ resource "google_workstations_workstation" "default" {
 }
 `, context)
 }
-{{- end }}
