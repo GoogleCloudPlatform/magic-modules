@@ -650,7 +650,6 @@ properties:
               - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
             item_type:
               type: String
-            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
           - name: 'queryStringWhitelist'
             type: Array
             description: |
@@ -662,7 +661,6 @@ properties:
               delimiters.
             is_set: true
             send_empty_value: true
-            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
             at_least_one_of:
               - 'cdn_policy.0.cache_key_policy.0.include_host'
               - 'cdn_policy.0.cache_key_policy.0.include_protocol'
