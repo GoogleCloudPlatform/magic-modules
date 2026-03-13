@@ -13,32 +13,59 @@
 	if res == nil {
 		res = make(map[string]interface{})
 	}
-	v, ok := res["multiClusterRoutingUseAny"]
-	if !ok || v == nil {
-		return res, hclData, nil
+	
+	// Handle description (dropped in CAI, often empty or missing)
+	if _, ok := res["description"]; !ok {
+		hclData["description"] = "unknown"
 	}
 
-	if _, ok := v.(bool); ok {
-		return res, hclData, nil
+	// Always provide at least empty map if missing to allow flatteners to process nested defaults
+	if _, ok := res["standardIsolation"]; !ok {
+		dbIso, ok := res["dataBoostIsolationReadOnly"].(map[string]interface{})
+		if !ok || tgcresource.AllValuesAreNil(dbIso) {
+			// Neither is fully present, ensure priority is mapped to satisfy required/missing fields
+			res["standardIsolation"] = map[string]interface{}{
+				"priority": "PRIORITY_HIGH",
+			}
+		}
+	} else if _, ok := res["dataBoostIsolationReadOnly"]; !ok {
+		stIso, ok := res["standardIsolation"].(map[string]interface{})
+		if !ok || tgcresource.AllValuesAreNil(stIso) {
+			// Do nothing for now, if standardIsolation is entirely nil it might be an issue.
+		}
 	}
 
-	vMap, ok := v.(map[string]interface{})
-	if !ok {
-		return res, hclData, nil
-	}
+	if _, ok := res["multiClusterRoutingUseAny"]; !ok {
+		scr, ok := res["singleClusterRouting"].(map[string]interface{})
+		if ok && !tgcresource.AllValuesAreNil(scr) {
+			if _, ok := scr["clusterId"]; !ok {
+				scr["clusterId"] = "unknown"
+			}
+			if _, ok := scr["allowTransactionalWrites"]; !ok {
+				scr["allowTransactionalWrites"] = false
+			}
+		} else {
+			// Neither routing present (or both empty). Give multi by default since we removed is_missing_in_cai
+			hclData["multi_cluster_routing_use_any"] = true
+			res["multiClusterRoutingUseAny"] = true
+		}
+	} else if _, ok := res["singleClusterRouting"]; !ok {
+		mcrMap, mcrIsMap := res["multiClusterRoutingUseAny"].(map[string]interface{})
+		if mcrIsMap && !tgcresource.AllValuesAreNil(mcrMap) {
+			hclData["multi_cluster_routing_use_any"] = true
+			if rowAffinity, hasAffinity := mcrMap["rowAffinity"]; hasAffinity && rowAffinity != nil {
+				hclData["row_affinity"] = true
+			} else {
+				hclData["row_affinity"] = nil
+			}
 
-	hclData["multi_cluster_routing_use_any"] = true
-	res["multiClusterRoutingUseAny"] = true
-
-	if rowAffinity, ok := vMap["rowAffinity"]; ok && rowAffinity != nil {
-		hclData["row_affinity"] = true
-	} else {
-		hclData["row_affinity"] = nil
-	}
-
-	if clusterIdsRaw, ok := vMap["clusterIds"]; ok && clusterIdsRaw != nil {
-		if clusterIds, ok := clusterIdsRaw.([]interface{}); ok && len(clusterIds) > 0 {
-			hclData["multi_cluster_routing_cluster_ids"] = clusterIds
+			if clusterIdsRaw, hasClusterIds := mcrMap["clusterIds"]; hasClusterIds && clusterIdsRaw != nil {
+				if clusterIds, isSlice := clusterIdsRaw.([]interface{}); isSlice && len(clusterIds) > 0 {
+					hclData["multi_cluster_routing_cluster_ids"] = clusterIds
+				}
+			}
+		} else if _, isBool := res["multiClusterRoutingUseAny"].(bool); isBool {
+			hclData["multi_cluster_routing_use_any"] = true
 		}
 	}
 

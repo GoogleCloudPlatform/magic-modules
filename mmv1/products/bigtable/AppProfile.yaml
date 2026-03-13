@@ -123,6 +123,8 @@ parameters:
 tgc_tests:
   - name: 'TestAccBigtableAppProfile_updateSingleToMulti'
     skip: 'cai asset data is not avaible for all steps'
+  - name: 'TestAccBigtableAppProfile_updateStandardIsolationToDataBoost'
+    skip: 'cai asset data is not avaible for all steps'
 properties:
   - name: 'name'
     type: String
@@ -132,7 +134,7 @@ properties:
     output: true
   - name: 'description'
     type: String
-    is_missing_in_cai: true
+
     description: |
       Long form description of the use case for this app profile.
   - name: 'multiClusterRoutingUseAny'
@@ -148,7 +150,7 @@ properties:
     tgc_ignore_terraform_custom_flatten: true
   - name: 'singleClusterRouting'
     type: NestedObject
-    is_missing_in_cai: true
+
     description: |
       Use a single-cluster routing policy.
     exactly_one_of:
@@ -157,13 +159,13 @@ properties:
     properties:
       - name: 'clusterId'
         type: String
-        is_missing_in_cai: true
+
         description: |
           The cluster to which read/write requests should be routed.
         required: true
       - name: 'allowTransactionalWrites'
         type: Boolean
-        is_missing_in_cai: true
+
         description: |
           If true, CheckAndMutateRow and ReadModifyWriteRow requests are allowed by this app profile.
           It is unsafe to send these requests to the same table/row/column in multiple clusters.
@@ -177,7 +179,7 @@ properties:
     properties:
       - name: 'priority'
         type: Enum
-        is_missing_in_cai: true
+
         description: |
           The priority of requests sent using this app profile.
         required: true
@@ -194,7 +196,7 @@ properties:
     properties:
       - name: 'computeBillingOwner'
         type: Enum
-        is_missing_in_cai: true
+
         description: |
           The Compute Billing Owner for this Data Boost App Profile.
         required: true
