@@ -180,6 +180,7 @@ type Type struct {
 	// (`[field_name]_wo` and `[field_name]_wo_version`).
 	// For more information, see: https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
 	WriteOnly bool `yaml:"write_only,omitempty"`
+	WriteOnlyConfigured bool `yaml:"-"`
 
 	// TODO: remove this field after all references are migrated
 	// see: https://github.com/GoogleCloudPlatform/magic-modules/pull/14933#pullrequestreview-3166578379

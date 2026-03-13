@@ -895,6 +895,7 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 }
 
 func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
+	propWithWoConfigured.WriteOnlyConfigured = true
 	propWithWoConfigured.WriteOnly = false
 	propWithWoConfigured.Sensitive = true
 	if len(propWithWoConfigured.RequiredWith) > 0 {
@@ -2509,8 +2510,14 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
-			props = append(props, strings.Join(tp.Lineage(), "."))
+		} else {
+			if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy || tp.WriteOnlyConfigured {
+				props = append(props, strings.Join(tp.Lineage(), "."))
+			}
+			if tp.WriteOnlyConfigured {
+				props = append(props, strings.Join(tp.Lineage(), ".")+"_wo")
+				props = append(props, strings.Join(tp.Lineage(), ".")+"_wo_version")
+			}
 		}
 	}
 

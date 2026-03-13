@@ -13,7 +13,11 @@
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	d.Set("row_affinity", nil)
 	if v == nil {
-		return false
+		return nil
+	}
+
+	if _, ok := v.(bool); ok {
+		return v
 	}
 
 	if v.(map[string]interface{})["rowAffinity"] != nil {
