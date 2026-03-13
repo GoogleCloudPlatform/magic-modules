@@ -825,6 +825,23 @@ func (t Type) NestedProperties() []*Type {
 	return props
 }
 
+func (t Type) NestedPropertiesWithExcluded() []*Type {
+	props := make([]*Type, 0)
+
+	switch {
+	case t.IsA("Array"):
+		if t.ItemType.IsA("NestedObject") {
+			props = t.ItemType.NestedPropertiesWithExcluded()
+		}
+	case t.IsA("NestedObject"):
+		props = t.Properties
+	case t.IsA("Map"):
+		props = t.ValueType.NestedPropertiesWithExcluded()
+	default:
+	}
+	return props
+}
+
 // Returns write-only properties for this property.
 func (t Type) WriteOnlyProperties() []*Type {
 	props := make([]*Type, 0)
@@ -1128,6 +1145,20 @@ func (t *Type) RootProperties() []*Type {
 	for _, p := range t.UserProperties() {
 		if p.FlattenObject {
 			props = google.Concat(props, p.RootProperties())
+		} else {
+			props = append(props, p)
+		}
+	}
+	return props
+}
+
+// Returns the list of top-level properties once any nested objects with
+// flatten_object set to true have been collapsed, including excluded properties
+func (t *Type) RootPropertiesWithExcluded() []*Type {
+	props := make([]*Type, 0)
+	for _, p := range t.Properties {
+		if p.FlattenObject {
+			props = google.Concat(props, p.RootPropertiesWithExcluded())
 		} else {
 			props = append(props, p)
 		}
