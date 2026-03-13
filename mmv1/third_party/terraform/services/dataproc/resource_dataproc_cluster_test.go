@@ -1510,7 +1510,7 @@ func TestAccDataprocCluster_withClusterTypeSingleNode(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Set type to SINGLE_NODE
-				Config: testAccDataprocCluster_withClusterType(rnd, subnetworkName, "SINGLE_NODE"),
+				Config: testAccDataprocCluster_withClusterTypeSingleNode(rnd, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.type_cluster", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.type_cluster", "cluster_config.0.cluster_type", "SINGLE_NODE"),
@@ -1536,7 +1536,7 @@ func TestAccDataprocCluster_withClusterTypeZeroScale(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Set type to ZERO_SCALE
-				Config: testAccDataprocCluster_withClusterType(rnd, subnetworkName, "ZERO_SCALE"),
+				Config: testAccDataprocCluster_withClusterTypeZeroScale(rnd, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.type_cluster", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.type_cluster", "cluster_config.0.cluster_type", "ZERO_SCALE"),
@@ -1546,11 +1546,30 @@ func TestAccDataprocCluster_withClusterTypeZeroScale(t *testing.T) {
 	})
 }
 
-func testAccDataprocCluster_withClusterType(rnd, subnetworkName, clusterType string) string {
-	typeConfig := ""
-	if clusterType != "" {
-		typeConfig = fmt.Sprintf(`cluster_type = "%s"`, clusterType)
-	}
+func testAccDataprocCluster_withClusterTypeSingleNode(rnd, subnetworkName string) string {
+	clusterName := fmt.Sprintf("tf-test-dproc-type-%s", rnd)
+
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "type_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+	cluster_type = "SINGLE_NODE"
+
+    software_config {
+      image_version = "2.3.4-debian12"
+    }
+
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+  }
+}
+`, clusterName, subnetworkName)
+}
+
+func testAccDataprocCluster_withClusterTypeZeroScale(rnd, subnetworkName string) string {
 	clusterName := fmt.Sprintf("tf-test-dproc-type-%s", rnd)
 	bucketName := clusterName + "-temp-bucket"
 
@@ -1562,14 +1581,12 @@ resource "google_storage_bucket" "bucket" {
 	uniform_bucket_level_access = "true"
 }
 
-
-
 resource "google_dataproc_cluster" "type_cluster" {
   name   = "%s"
   region = "us-central1"
 
   cluster_config {
-	%s
+	cluster_type = "ZERO_SCALE"
 
     software_config {
       image_version = "2.3.4-debian12"
@@ -1583,7 +1600,7 @@ resource "google_dataproc_cluster" "type_cluster" {
     }
   }
 }
-`, bucketName, clusterName, typeConfig, bucketName, subnetworkName)
+`, bucketName, clusterName, bucketName, subnetworkName)
 }
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
