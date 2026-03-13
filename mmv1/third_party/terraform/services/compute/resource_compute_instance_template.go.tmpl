@@ -47,6 +47,7 @@ var (
 		"scheduling.0.preemption_notice_duration",
 {{- end }}
 		"scheduling.0.local_ssd_recovery_timeout",
+		"scheduling.0.location_hint",
 	}
 
 	shieldedInstanceTemplateConfigKeys = []string{
@@ -759,6 +760,13 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 				Description: `The scheduling strategy to use.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"location_hint": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: schedulingInstTemplateKeys,
+							Description:  `An opaque location hint used to place the instance close to other resources.`,
+						},
 						"preemptible": {
 							Type:         schema.TypeBool,
 							Optional:     true,

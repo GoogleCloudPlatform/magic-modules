@@ -871,11 +871,13 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	return hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
 		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
 		hasGracefulShutdownChangedWithReboot(d, oScheduling, newScheduling) ||
-		hasTerminationTimeChanged(oScheduling, newScheduling)
+		hasTerminationTimeChanged(oScheduling, newScheduling) ||
+		oScheduling["location_hint"] != newScheduling["location_hint"]
 {{- else }}
 	return (hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
 		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
-		hasTerminationTimeChanged(oScheduling, newScheduling))
+		hasTerminationTimeChanged(oScheduling, newScheduling) ||
+		oScheduling["location_hint"] != newScheduling["location_hint"])
 {{- end }}
 }
 

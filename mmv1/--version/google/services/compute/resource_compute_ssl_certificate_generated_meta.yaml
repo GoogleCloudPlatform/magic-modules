@@ -1,0 +1,20 @@
+resource: google_compute_ssl_certificate
+generation_type: mmv1
+source_file: products/compute/SslCertificate.yaml
+api_service_name: compute.googleapis.com
+api_version: v1
+api_resource_type_kind: SslCertificate
+fields:
+    - api_field: certificate
+    - api_field: id
+      field: certificate_id
+    - api_field: creationTimestamp
+    - api_field: description
+    - api_field: expireTime
+    - api_field: name
+    - api_field: privateKey
+    - api_field: privateKey
+      field: private_key_wo
+    - field: private_key_wo_version
+      provider_only: true
+    - api_field: selfLink

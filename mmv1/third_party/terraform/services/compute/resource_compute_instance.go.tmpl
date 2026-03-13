@@ -126,6 +126,7 @@ var (
 		"scheduling.0.preemption_notice_duration",
 {{- end }}
 		"scheduling.0.local_ssd_recovery_timeout",
+		"scheduling.0.location_hint",
 	}
 
 	shieldedInstanceConfigKeys = []string{
@@ -1088,6 +1089,12 @@ func ResourceComputeInstance() *schema.Resource {
 					// diff on schema.Set. If changes are made to this block, they must be reflected in that
 					// method. See schedulingHasChangeWithoutReboot in compute_instance_helpers.go
 					Schema: map[string]*schema.Schema{
+						"location_hint": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							AtLeastOneOf: schedulingKeys,
+							Description:  `An opaque location hint used to place the instance close to other resources.`,
+						},
 						"on_host_maintenance": {
 							Type:         schema.TypeString,
 							Optional:     true,
