@@ -1,0 +1,11 @@
+resource "google_service_usage_v2_organization_consumer_policy" "{{$.PrimaryResourceId}}" {
+  provider        = google-beta
+  organization    = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "FORCE"
+
+  enable_rules {
+    services = [
+      "services/storage.googleapis.com"
+    ]
+  }
+}
