@@ -173,6 +173,7 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateMaintenanceInterval(&instanceTemplate, "PERIODIC"),
+					testAccCheckComputeInstanceTemplateLocationHint(&instanceTemplate, "custom-hint"),
 				),
 			},
 			{
@@ -2470,6 +2471,15 @@ func testAccCheckComputeInstanceTemplateMaintenanceInterval(instanceTemplate *co
 		return nil
 	}
 }
+
+func testAccCheckComputeInstanceTemplateLocationHint(instanceTemplate *compute.InstanceTemplate, location_hint string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instanceTemplate.Properties.Scheduling.LocationHint != location_hint {
+			return fmt.Errorf("Expected location_hint value %v, got %v", location_hint, instanceTemplate.Properties.Scheduling.LocationHint)
+		}
+		return nil
+	}
+}
 {{- end }}
 
 func testAccCheckComputeInstanceTemplateProvisioningModel(instanceTemplate *compute.InstanceTemplate, provisioning_model string) resource.TestCheckFunc {
@@ -3118,6 +3128,7 @@ resource "google_compute_instance_template" "foobar" {
     preemptible       = false
     automatic_restart = true
     maintenance_interval = "PERIODIC"
+    location_hint     = "custom-hint"
   }
 
   metadata = {

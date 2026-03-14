@@ -411,6 +411,31 @@ func TestAccComputeInstanceFromTemplate_overrideScheduling(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceFromTemplate_location_hint(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	templateName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	templateDisk := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_template.foobar"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromTemplate_location_hint(templateDisk, templateName, instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.location_hint", "custom-hint"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstanceFromTemplate_TerminationTime(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
@@ -1608,6 +1633,60 @@ resource "google_compute_instance_from_template" "inst" {
   }
 }
 `, templateDisk, overrideDisk, template, instance)
+}
+
+func testAccComputeInstanceFromTemplate_location_hint(templateDisk, template, instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  disk {
+    source      = google_compute_disk.foobar.name
+    auto_delete = false
+    boot        = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  scheduling {
+    automatic_restart = true
+  }
+
+  can_ip_forward = true
+}
+
+resource "google_compute_instance_from_template" "foobar" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar.self_link
+
+  scheduling {
+    automatic_restart = true
+    location_hint     = "custom-hint"
+  }
+}
+`, templateDisk, template, instance)
 }
 
 func testAccComputeInstanceFromTemplate_overrideScheduling(templateDisk, template, instance string) string {
