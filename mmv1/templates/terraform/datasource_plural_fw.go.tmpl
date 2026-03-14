@@ -1,0 +1,284 @@
+{{/* The license inside this block applies to this file
+  Copyright 2025 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
+{{/*{{$.CodeHeader TemplatePath}}*/}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+
+    "fmt"
+    "log"
+    "net/http"
+    "reflect"
+{{- if $.SupportsIndirectUserProjectOverride }}
+    "regexp"
+{{- end }}
+{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
+    "strings"
+{{- end }}
+    "time"
+
+{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
+{{/*     # set of imports, which will never guess the major version correctly. */}}
+{{/*
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+     */}}
+    "github.com/hashicorp/go-cty/cty"
+
+    "github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"{{ $.ImportPath }}/fwmodels"
+	"{{ $.ImportPath }}/fwresource"
+	"{{ $.ImportPath }}/fwtransport"
+
+    "{{ $.ImportPath }}/tpgresource"
+    transport_tpg "{{ $.ImportPath }}/transport"
+    "{{ $.ImportPath }}/verify"
+
+{{ if $.FlattenedProperties }}
+    "google.golang.org/api/googleapi"
+{{- end}}
+)
+
+{{if $.CustomCode.DSConstants -}} 
+    {{- $.CustomTemplate $.CustomCode.DSConstants true -}}
+{{- end}}
+
+var (
+	_ datasource.DataSource                = &{{$.ResourceName}}sDataSource{}
+	_ datasource.DataSourceWithConfigure   = &{{$.ResourceName}}sDataSource{}
+)
+
+func New{{$.ResourceName}}sDataSource() datasource.DataSource {
+	return &{{$.ResourceName}}sDataSource{}
+}
+
+type {{$.ResourceName}}sDataSource struct {
+	providerConfig *transport_tpg.Config
+}
+
+type {{$.ResourceName}}sPluralModel struct {
+	{{$.ResourceName}}   types.List     `tfsdk:"{{ underscore $.ResourceName }}"`
+
+	Filter		types.String `tfdfk:"filter"`
+	{{ if $.HasProject -}}
+	Project		types.String `tfsdk:"project"`
+    {{- end }}
+	{{ if $.HasRegion -}}
+	Region		types.String `tfsdk:"region"`
+    {{- end }}
+	{{ if $.HasZone -}}
+	Zone		types.String `tfsdk:"zone"`
+    {{- end }}
+}
+{{/* TODO logic for generating double nested models?
+type {{$.ResourceName}}ReadOnlyModel struct {
+	{{- range $prop := $.OrderProperties $.GettableProperties }}
+		{{  if .FlattenObject -}}
+      		{{  range $p := .ResourceMetadata.OrderProperties .UserProperties -}}
+	{{ camelize .Name "upper" }} types.{{ .GetFWType }} `tfsdk:"{{ underscore .Name }}"`
+      		{{  end -}}
+    	{{  else }}
+    {{- camelize .Name "upper" }} types.{{ .GetFWType }} `tfsdk:"{{ underscore .Name }}"`
+    	{{- end }}
+	{{- end }}
+}
+*/}}
+
+// Metadata returns the resource type name.
+func (d *{{$.ResourceName}}sDataSource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_fw_{{ underscore $.ResourceName}}s"
+}
+
+func (r *{{$.ResourceName}}sDataSource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	p, ok := req.ProviderData.(*transport_tpg.Config)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+		return
+	}
+
+	r.providerConfig = p
+}
+
+func (d *{{$.ResourceName}}sDataSource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"{{underscore $.ResourceName -}}s": schema.ListAttribute{
+				Computed:    true,
+				ElementType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+				      {{- range $prop := .OrderProperties $.GettableProperties }}
+			      		{{ template "ROSchemaFieldsFW" $prop -}}
+				      {{- end }}
+					},
+				},
+			},
+{{ if $.HasProject -}}
+			"project": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+{{- end}}
+{{ if $.HasRegion -}}
+			"region": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+{{- end}}
+{{ if $.HasZone -}}
+			"zone": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+{{- end}}
+        },
+	}
+}
+
+func (r *{{$.ResourceName}}sDataSource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data {{$.ResourceName}}sModel
+	var metaData *fwmodels.ProviderMetaModel
+
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read Terraform configuration data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	tflog.Trace(ctx, "read {{$.Name}} resource")
+
+    // read back {{$.Name}}
+	r.{{$.ResourceName}}sRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *{{$.ResourceName}}sDataSource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diag *diag.Diagnostics) {
+	var metaData *fwmodels.ProviderMetaModel
+    //load default values
+{{ if $.HasProject -}}
+    project := sDataSource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+{{ if $.HasRegion -}}
+	region := sDataSource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+{{ if $.HasZone -}}
+	zone := sDataSource.GetZoneFramework(data.Zone, types.StringValue(r.providerConfig.Zone), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+
+	var schemaDefaultVals fwtransport.DefaultVars
+{{ if $.HasProject -}}
+	schemaDefaultVals.Project = project
+{{- end }}
+{{ if $.HasRegion -}}
+	schemaDefaultVals.Region = region
+{{- end }}
+{{ if $.HasZone -}}
+	schemaDefaultVals.Zone = zone
+{{- end }}
+
+	// Use provider_meta to set User-Agent
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
+
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    log.Printf("[DEBUG] Refreshing {{ $.Name -}} data: %s", data.Id.ValueString())
+
+    headers := make(http.Header)
+{{- if $.CustomCode.PreRead }}
+    {{ $.CustomTemplate $.CustomCode.PreRead false -}}
+{{- end}}
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+        Config: r.providerConfig,
+        Method: "LIST",
+        Project: billingProject.ValueString(),
+        RawURL: url,
+        UserAgent: userAgent,
+        Timeout: createTimeout,
+        Headers: headers,
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    }, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		fwtransport.HandleNotFoundError(ctx, err, &resp.State, fmt.Sprintf("{{ $.ResourceName }} %s", data.Id.ValueString()), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+    }
+{{/* #TODO load into models
+{{ range $prop := $.OrderProperties $.AllUserProperties }}
+	data.{{camelize $prop.Name "upper"}} = res["{{ $prop.ApiName -}}"]
+    {{$prop.ApiName}}Prop, diags := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{ end }}*/}}
+
+	tflog.Trace(ctx, "refreshed {{$.Name}} resource data")
+
+
+}
