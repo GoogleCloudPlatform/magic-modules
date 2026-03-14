@@ -387,6 +387,8 @@ resource "google_secret_manager_secret_iam_member" "secret_access_new" {
   secret_id  = google_secret_manager_secret.secret.id
   role       = "roles/secretmanager.secretAccessor"
   member     = google_service_account.service_account_new.member
+
+  depends_on = [google_secret_manager_secret_iam_member.secret_access]
 }
 
 resource "google_secret_manager_secret" "secret_new" {
