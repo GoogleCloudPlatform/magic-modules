@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -173,6 +174,16 @@ func Provider() *schema.Provider {
 
 			"terraform_attribution_label_addition_strategy": {
 				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"prefer_global_endpoints": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
+			"prefer_regional_endpoints": {
+				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
@@ -407,6 +418,9 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// Generated products
 	{{- range $product := $.Products }}
 	config.{{ $product.Name }}BasePath = d.Get("{{ underscore $product.Name }}_custom_endpoint").(string)
+	{{- if $product.Version.RepEnabled }}
+	config.{{ $product.Name }}RepBasePath = "{{ $product.Version.RepUrl }}"
+	{{- end -}}
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
@@ -449,6 +463,14 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		}
 	} else if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
 		return nil, diag.FromErr(fmt.Errorf("Universe domain mismatch: Universe domain '%s' was found in credentials without a corresponding 'universe_domain' provider configuration set. Please set 'universe_domain' to '%s' or use different credentials.", config.UniverseDomain, config.UniverseDomain))
+	}
+
+	// Verify that prefer global and regional configurations are not in conflict
+	if d.Get("prefer_global_endpoints").(bool) && d.Get("prefer_regional_endpoints").(bool) {
+		return nil, diag.FromErr(errors.New("Found conflict between prefer_global_endpoints and prefer_regional_endpoints, only one of these may be set at a time."))
+	} else {
+		config.PreferGlobalEndpoints = d.Get("prefer_global_endpoints").(bool)
+		config.PreferRegionalEndpoints = d.Get("prefer_regional_endpoints").(bool)
 	}
 
 	return &config, nil
