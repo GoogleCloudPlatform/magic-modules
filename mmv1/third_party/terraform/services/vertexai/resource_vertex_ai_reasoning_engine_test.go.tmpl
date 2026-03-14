@@ -219,7 +219,7 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id = "tf-test-reasoning-sa-%{random_suffix}"
+  account_id = "tf-test-re-sa-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer" {
@@ -461,7 +461,7 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_langchain" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id = "tf-test-reasoning-sa-%{random_suffix}"
+  account_id = "tf-test-re-sa-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer" {
@@ -483,7 +483,7 @@ resource "google_project_iam_member" "sa_iam_viewer" {
 }
 
 resource "google_service_account" "service_account_new" {
-  account_id = "tf-test-reasoning-sa-new-%{random_suffix}"
+  account_id = "tf-test-re-sa-new-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer_new" {
