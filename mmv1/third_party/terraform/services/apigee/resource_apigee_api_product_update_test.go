@@ -371,7 +371,7 @@ resource "google_apigee_environment" "env_hom" {
 }
 resource "google_apigee_api_product" "apigee_api_product" {
   org_id        = google_apigee_organization.apigee_org.id
-  name              = "tf-test%{random_suffix}"
+  name              = "tf-TEST%{random_suffix}"
   display_name  = "My full API Product"
 
   approval_type = "auto"
