@@ -39,6 +39,7 @@ var (
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
 		"scheduling.0.termination_time",
+		"scheduling.0.location_hint",
 {{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
 		"scheduling.0.host_error_timeout_seconds",
@@ -801,6 +802,13 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							ForceNew:     true,
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Minimum number of cpus for the instance.`,
+						},
+						"location_hint": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: schedulingInstTemplateKeys,
+							Description:  `An opaque location hint used to place the instance close to other resources. This field is for use by internal tools that use the public API.`,
 						},
 						"provisioning_model": {
 							Type:         schema.TypeString,
