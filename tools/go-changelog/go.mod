@@ -1,8 +1,6 @@
 module github.com/hashicorp/go-changelog
 
-go 1.24.0
-
-toolchain go1.24.8
+go 1.25.0
 
 require (
 	github.com/go-git/go-billy/v5 v5.6.2
