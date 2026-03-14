@@ -317,6 +317,11 @@ properties:
     type: Boolean
     description: |
       Gemini enablement for Looker (Google Cloud Core).
+  - name: 'catalogIntegrationEnabled'
+    type: Boolean
+    description: |
+      Catalog Integration Enablement for Looker (Google Cloud Core).
+    default_value: true
   - name: 'ingressPrivateIp'
     type: String
     description: |
