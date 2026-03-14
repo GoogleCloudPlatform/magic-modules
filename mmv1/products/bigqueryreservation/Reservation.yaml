@@ -30,6 +30,10 @@ examples:
     primary_resource_id: reservation
     vars:
       name: my-reservation
+  - name: bigquery_reservation_reservation_group
+    primary_resource_id: reservation
+    vars:
+      name: my-reservation
   - name: bigquery_reservation_with_disaster_recovery
     primary_resource_id: reservation
     exclude_docs: true
@@ -201,6 +205,13 @@ properties:
       - AUTOSCALE_ONLY
       - IDLE_SLOTS_ONLY
       - ALL_SLOTS
+  - name: reservationGroup
+    type: String
+    description: |
+      The resource name of the reservation group that this reservation belongs to.
+      Example: projects/myproject/locations/us/reservationGroups/mygroup.
+    min_version: beta
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: maxSlots
     type: Integer
     description: |
