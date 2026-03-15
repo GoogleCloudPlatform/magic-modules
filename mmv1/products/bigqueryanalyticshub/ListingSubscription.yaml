@@ -49,7 +49,6 @@ examples:
       description: 'example data exchange'
   - name: 'bigquery_analyticshub_listing_subscription_multiregion'
     primary_resource_id: 'subscription'
-    min_version: beta
     exclude_test: true
     vars:
       data_exchange_id: 'my_data_exchange'
@@ -119,7 +118,6 @@ properties:
       - name: 'replicaLocations'
         is_set: true
         type: Array
-        min_version: 'beta'
         set_hash_func: 'tpgresource.CaseInsensitiveHash'
         description: |
           List of regions where the subscriber wants dataset replicas.
