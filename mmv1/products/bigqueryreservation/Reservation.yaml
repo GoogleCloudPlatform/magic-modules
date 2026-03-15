@@ -248,3 +248,9 @@ properties:
       - autoscale
     required_with:
       - scalingMode
+  - name: reservationGroup
+    type: ResourceRef
+    description: |
+      The reservation group that this reservation belongs to.
+    resource: ReservationGroup
+    imports: name
