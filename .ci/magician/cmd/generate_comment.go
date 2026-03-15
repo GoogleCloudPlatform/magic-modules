@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -224,6 +225,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	// Initialize repos
 	data := diffCommentData{}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
+		log.Printf("cloning repo %s/%s\n", repo.Owner, repo.Name)
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
 		repo.Cloned = true
@@ -246,6 +248,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				continue
 			}
 			rnr.PushDir(repo.Path)
+			log.Printf("building repo %s/%s\n", repo.Owner, repo.Name)
 			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
 				fmt.Printf("Failed to build branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
@@ -255,6 +258,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			ctlr.Checkout(repo, newBranch)
 		}
 	}
+	log.Println("finished cloning repos")
 
 	diffs := []Diff{}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
@@ -262,6 +266,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
 			continue
 		}
+		log.Printf("diffing repo %s/%s\n", repo.Owner, repo.Name)
 		shortStat, err := ctlr.DiffShortStat(repo, oldBranch, newBranch)
 		if err != nil {
 			fmt.Println("Failed to compute repo diff --shortstat: ", err)
@@ -318,6 +323,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Println("Skipping diff processor; no diff: ", repo.Name)
 			continue
 		}
+
+		log.Printf("compiling diff processor for %s/%s\n", repo.Owner, repo.Name)
 		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
 		if err != nil {
 			fmt.Println("building diff processor: ", err)
@@ -325,6 +332,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			continue
 		}
 
+		log.Printf("compute breaking changes for %s/%s\n", repo.Owner, repo.Name)
 		breakingChanges, err := computeBreakingChanges(diffProcessorPath, rnr)
 		if err != nil {
 			fmt.Println("computing breaking changes: ", err)
@@ -335,6 +343,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 
 		if repo.Name == "terraform-provider-google-beta" {
+			log.Printf("run missing test detector for %s/%s\n", repo.Owner, repo.Name)
 			// Run missing test detector (currently only for beta)
 			missingTests, err := detectMissingTests(diffProcessorPath, repo.Path, rnr)
 			if err != nil {
@@ -356,6 +365,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 
+		log.Printf("compute affected resource for %s/%s\n", repo.Owner, repo.Name)
 		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
@@ -369,6 +379,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			uniqueAffectedResources[resource] = struct{}{}
 		}
 	}
+
+	log.Println("finished detecting diff")
 	breakingChangesSlice := maps.Values(uniqueBreakingChanges)
 	sort.Slice(breakingChangesSlice, func(i, j int) bool {
 		return breakingChangesSlice[i].Message < breakingChangesSlice[j].Message
