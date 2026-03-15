@@ -19,8 +19,7 @@ references:
   api: https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservationGroups
 base_url: projects/{{project}}/locations/{{location}}/reservationGroups
 create_url: projects/{{project}}/locations/{{location}}/reservationGroups?reservationGroupId={{name}}
-update_mask: true
-update_verb: PATCH
+immutable: true
 id_format: projects/{{project}}/locations/{{location}}/reservationGroups/{{name}}
 exclude_sweeper: true
 examples:
