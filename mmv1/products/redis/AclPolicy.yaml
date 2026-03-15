@@ -1,0 +1,97 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AclPolicy
+description: Description
+min_version: beta
+base_url: projects/{{project}}/locations/{{location}}/aclPolicies
+self_link: projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
+create_url: projects/{{project}}/locations/{{location}}/aclPolicies?aclPolicyId={{acl_policy_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: QWNsUG9saWN5
+autogen_async: true
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: aclPolicyId
+    type: String
+    required: true
+    description: |-
+      The logical name of the ACL Policy in the customer project
+      with the following restrictions:
+
+      * Must contain only lowercase letters, numbers, and hyphens.
+      * Must start with a letter.
+      * Must be between 1-63 characters.
+      * Must end with a number or a letter.
+      * Must be unique within the customer project / location
+    immutable: true
+    url_param_only: true
+properties:
+  - name: etag
+    type: String
+    description: Etag for the ACL policy.
+    output: true
+  - name: name
+    type: String
+    description: Identifier. Full resource path of the ACL policy.
+    output: true
+  - name: rules
+    type: Array
+    required: true
+    description: The ACL rules within the ACL policy.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: rule
+          type: String
+          required: true
+          description: |-
+            The rule to be applied to the username. Ex: "on >password123 ~* +@all"
+            The format of the rule is defined by Redis OSS:
+            https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/
+        - name: username
+          type: String
+          required: true
+          description: |-
+            Specifies the IAM user or service account to be added to the ACL policy.
+            This username will be directly set on the Redis OSS.
+  - name: state
+    type: String
+    description: |-
+      The state of the ACL policy.
+      Possible values:
+      ACTIVE
+      UPDATING
+      DELETING
+    output: true
+  - name: version
+    type: String
+    description: The version of the ACL policy. Used in drift resolution.
+    output: true

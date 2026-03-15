@@ -284,6 +284,10 @@ properties:
       IAM_AUTH
     immutable: true
     default_from_api: true
+  - name: aclPolicy
+    type: String
+    description: |
+      Optional. The name of the ACL policy to attach to the instance.
   - name: transitEncryptionMode
     type: String
     description: "Optional. Immutable. In-transit encryption mode of the instance. \n Possible values:\n TRANSIT_ENCRYPTION_DISABLED\nSERVER_AUTHENTICATION"
