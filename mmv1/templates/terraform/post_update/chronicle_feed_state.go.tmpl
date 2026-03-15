@@ -1,0 +1,28 @@
+// Handle Enable/Disable state changes
+if d.HasChange("enabled") {
+	_, newEnabled := d.GetChange("enabled")
+	var stateUrl string
+
+	if newEnabled.(bool) {
+		stateUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ChronicleBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/feeds/{{"{{"}}feed{{"}}"}}:enable")
+	} else {
+		stateUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ChronicleBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/feeds/{{"{{"}}feed{{"}}"}}:disable")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    stateUrl,
+		UserAgent: userAgent,
+		Body:      nil,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error changing Feed state: %s", err)
+	}
+}
