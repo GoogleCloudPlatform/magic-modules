@@ -37,6 +37,7 @@ parameters:
       Examples: US, EU, asia-northeast1. The default value is US.
     immutable: true
     url_param_only: true
+properties:
   - name: name
     type: String
     required: true
