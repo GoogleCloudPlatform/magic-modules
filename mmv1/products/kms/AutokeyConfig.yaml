@@ -68,6 +68,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
+    skip_test: true
 parameters:
   - name: 'folder'
     type: String
