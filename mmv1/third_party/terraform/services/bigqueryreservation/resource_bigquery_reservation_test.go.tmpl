@@ -128,6 +128,11 @@ resource "google_bigquery_reservation" "reservation" {
 
 func testAccBigqueryReservation_reservationGroup_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_bigquery_reservation_group" "reservation_group" {
+  name     = "tf-test-res-group-%{random_suffix}"
+  location = "us-west2"
+}
+
 resource "google_bigquery_reservation" "reservation" {
   name           = "tf-test-reservation-%{random_suffix}"
   location       = "us-west2"
