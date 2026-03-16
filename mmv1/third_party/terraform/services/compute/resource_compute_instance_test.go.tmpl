@@ -3701,6 +3701,28 @@ func TestAccComputeInstance_queueCount(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_flexStart(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_flexStart(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
 func TestAccComputeInstance_spotVM(t *testing.T) {
 	t.Parallel()
 
@@ -11272,6 +11294,41 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network = "default"
     queue_count = 2
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_flexStart(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2204-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    provisioning_model = "FLEX_START"
+    automatic_restart = false
+    instance_termination_action = "DELETE"
+    max_run_duration {
+      nanos = 0
+      seconds = 3600
+    }
   }
 }
 `, instance)
