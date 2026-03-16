@@ -49,9 +49,9 @@ func TestAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyRoutineUpda
 		"project":        envvar.GetTestProjectFromEnv(),
 		"location":       "us-central1",
 		"random_suffix":  randString,
-		"data_policy_id": "tf-test-data-policy-" + randString,
-		"taxonomy":       "tf-test-taxonomy-" + randString,
-		"dataset_id":     "tf_test_dataset_" + randString,
+		"data_policy_id": "tf_test_data_policy" + randString,
+		"taxonomy":       "taxonomy" + randString,
+		"dataset_id":     "tf_test_dataset_id" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -119,7 +119,7 @@ func testAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyRoutineUpda
 	return acctest.Nprintf(`
 resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   location         = "us-central1"
-  data_policy_id   = "tf_test_data_policy%{random_suffix}"
+  data_policy_id   = "%{data_policy_id}"
   policy_tag       = google_data_catalog_policy_tag.policy_tag.name
   data_policy_type = "DATA_MASKING_POLICY"  
   data_masking_policy {
@@ -135,15 +135,16 @@ resource "google_data_catalog_policy_tag" "policy_tag" {
   
 resource "google_data_catalog_taxonomy" "taxonomy" {
   region                 = "us-central1"
-  display_name           = "taxonomy%{random_suffix}"
+  display_name           = "%{taxonomy}"
   description            = "A collection of policy tags"
   activated_policy_types = ["FINE_GRAINED_ACCESS_CONTROL"]
 }
 
 resource "google_bigquery_dataset" "test" {
-  dataset_id = "tf_test_dataset_id%{random_suffix}"
+  dataset_id = "%{dataset_id}"
   location   = "us-central1"
 }
+
 
 resource "google_bigquery_routine" "custom_masking_routine" {
 	dataset_id           = google_bigquery_dataset.test.dataset_id

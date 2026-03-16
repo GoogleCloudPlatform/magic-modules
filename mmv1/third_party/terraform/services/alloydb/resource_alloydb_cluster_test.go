@@ -19,6 +19,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 		"random_suffix":        randString,
 		"cluster_id":           "tf-test-alloydb-cluster" + randString,
 		"alloydb_cluster_name": "tf-test-alloydb-cluster" + randString,
+		"alloydb_cluster_pass": "tf_test_cluster_secret" + randString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1043,10 +1044,12 @@ func TestAccAlloydbCluster_continuousBackup_enabledByDefault(t *testing.T) {
 func TestAccAlloydbCluster_continuousBackup_update_noChangeIfDefaultsSet(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project":              envvar.GetTestProjectFromEnv(),
 		"location":             "us-central1",
-		"random_suffix":        acctest.RandString(t, 10),
+		"random_suffix":        suffix,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + suffix,
 		"enabled":              true,
 		"recovery_window_days": 14,
 	}
@@ -1140,11 +1143,15 @@ func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
 		"project":              envvar.GetTestProjectFromEnv(),
 		"location":             "us-central1",
 		"random_suffix":        suffix,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + suffix,
 		"enabled":              true,
 		"recovery_window_days": 15,
 	}
 	context2 := map[string]interface{}{
+		"project":              envvar.GetTestProjectFromEnv(),
+		"location":             "us-central1",
 		"random_suffix":        suffix,
+		"alloydb_cluster_name": "tf-test-alloydb-cluster" + suffix,
 		"enabled":              false,
 		"recovery_window_days": 14,
 	}
