@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-description: Always-on system prompt for initial workspace triage
+description: Always-on system prompt for TGC development
 ---
 
 # TGC development Rules
