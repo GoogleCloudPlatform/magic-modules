@@ -73,12 +73,18 @@ resource "google_discovery_engine_search_engine" "basic" {
   common_config {
     company_name = "Example Company Name"
   }
+  app_type = "APP_TYPE_INTRANET"
   search_engine_config {
     search_tier = "SEARCH_TIER_ENTERPRISE"
+    required_subscription_tier = "SUBSCRIPTION_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
+  features = {
+    "agent-sharing-without-admin-approval" = "FEATURE_STATE_ON"
+    "disable-agent-sharing" = "FEATURE_STATE_OFF"
+  }
   knowledge_graph_config {
-    enable_cloud_knowledge_graph = true
+    enable_cloud_knowledge_graph = false
     enable_private_knowledge_graph = true
   }
 }
@@ -112,20 +118,25 @@ resource "google_discovery_engine_search_engine" "basic" {
   display_name = "Updated Example Display Name"
   data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
   industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
+  disable_analytics = true
   common_config {
     company_name = "Updated Example Company Name"
   }
+  app_type = "APP_TYPE_INTRANET"
   search_engine_config {
     search_tier = "SEARCH_TIER_STANDARD"
+    required_subscription_tier = "SUBSCRIPTION_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
   features = {
     feedback = "FEATURE_STATE_OFF"
+    "agent-sharing-without-admin-approval" = "FEATURE_STATE_ON"
+    "disable-agent-sharing" = "FEATURE_STATE_OFF"
   }
   knowledge_graph_config {
     enable_cloud_knowledge_graph = false
     cloud_knowledge_graph_types = ["foobar"]
-    enable_private_knowledge_graph = false
+    enable_private_knowledge_graph = true
     feature_config {
       disable_private_kg_query_understanding = true
       disable_private_kg_enrichment = true

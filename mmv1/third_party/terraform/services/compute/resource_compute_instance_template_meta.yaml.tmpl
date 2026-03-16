@@ -86,6 +86,8 @@ fields:
     api_field: 'properties.disks.initializeParams.sourceSnapshotEncryptionKey.rawKey'
   - field: 'disk.source_snapshot_encryption_key.rsa_encrypted_key'
     api_field: 'properties.disks.initializeParams.sourceSnapshotEncryptionKey.rsaEncryptedKey'
+  - field: 'disk.storage_pool'
+    api_field: 'properties.disks.initializeParams.storagePool'
   - field: 'disk.type'
     api_field: 'properties.disks.type'
   - field: 'effective_labels'
@@ -238,6 +240,10 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'properties.scheduling.skipGuestOsShutdown'
     field: 'scheduling.skip_guest_os_shutdown'
+  - field: 'scheduling.preemption_notice_duration.nanos'
+    api_field: 'properties.scheduling.preemptionNoticeDuration.nanos'
+  - field: 'scheduling.preemption_notice_duration.seconds'
+    api_field: 'properties.scheduling.preemptionNoticeDuration.seconds'
 {{- end }}
   - api_field: 'properties.scheduling.terminationTime'
     field: 'scheduling.termination_time'

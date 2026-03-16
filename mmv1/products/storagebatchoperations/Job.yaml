@@ -10,280 +10,280 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
-name: 'Job'
-kind: 'storagebatchoperations#jobs'
-id_format: 'projects/{{project}}/locations/global/jobs/{{job_id}}'
-base_url: 'projects/{{project}}/locations/global/jobs'
-self_link: 'projects/{{project}}/locations/global/jobs/{{job_id}}'
-create_url: 'projects/{{project}}/locations/global/jobs?jobId={{job_id}}'
-delete_url: 'projects/{{project}}/locations/global/jobs/{{job_id}}'
-import_format:
-  - 'projects/{{project}}/locations/global/jobs/{{job_id}}'
-timeouts:
-  insert_minutes: 120
-  update_minutes: 120
-  delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
+name: Job
 description: |
   Storage Batch Operations (SBO) is a Cloud Storage management feature that offers a
   seamless experience to perform single batch operations on millions of GCS objects in a
   serverless manner.
-examples:
-  - name: 'storage_batch_operations'
-    config_path: 'templates/terraform/examples/storage_batch_operations_job.tf.tmpl'
-    primary_resource_id: 'tf-job'
-    vars:
-      bucket_name: 'tf-sample-bucket'
-      job_id: 'tf-job'
-    ignore_read_extra:
-      - 'delete_protection'
+base_url: projects/{{project}}/locations/global/jobs
+self_link: projects/{{project}}/locations/global/jobs/{{job_id}}
+create_url: projects/{{project}}/locations/global/jobs?jobId={{job_id}}
+delete_url: projects/{{project}}/locations/global/jobs/{{job_id}}
+kind: storagebatchoperations#jobs
+import_format:
+  - projects/{{project}}/locations/global/jobs/{{job_id}}
+timeouts:
+  insert_minutes: 120
+  update_minutes: 120
+  delete_minutes: 20
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+  result:
+    resource_inside_response: true
+autogen_async: true
 custom_code:
-  custom_update: 'templates/terraform/custom_update/storage_batch_operations_job.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/storage_batch_operations_job.go.tmpl'
+  custom_update: templates/terraform/custom_update/storage_batch_operations_job.go.tmpl
+  pre_delete: templates/terraform/pre_delete/storage_batch_operations_job.go.tmpl
+examples:
+  - name: storage_batch_operations
+    primary_resource_id: tf-job
+    ignore_read_extra:
+      - delete_protection
+    config_path: templates/terraform/examples/storage_batch_operations_job.tf.tmpl
+    vars:
+      bucket_name: tf-sample-bucket
+      job_id: tf-job
 virtual_fields:
-  - name: 'delete_protection'
-    description: |
-      If set to `true`, the storage batch operation job will not be deleted and new job will be created.
+  - name: delete_protection
     type: Boolean
     default_value: true
+    description: |
+      If set to `true`, the storage batch operation job will not be deleted and new job will be created.
+    client_side: true
 parameters:
-  - name: 'jobId'
+  - name: jobId
     type: String
-    description: 'The ID of the job.'
-    url_param_only: true
+    description: The ID of the job.
     immutable: true
+    url_param_only: true
     validation:
-      regex: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?.$'
+      regex: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?.$
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The timestamp at which this storage batch operation was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The timestamp at which this storage batch operation was most recently updated.
     output: true
-  - name: 'scheduleTime'
+  - name: scheduleTime
     type: String
     description: |
       The time that the job was scheduled.
     output: true
-  - name: 'completeTime'
+  - name: completeTime
     type: String
     description: |
       The time that the job was completed.
     output: true
-  - name: 'state'
+  - name: state
     type: String
     description: |
       State of the job.
     output: true
-  - name: 'bucketList'
+  - name: bucketList
     type: NestedObject
     description: List of buckets and their objects to be transformed. Currently, only one bucket configuration is supported. If multiple buckets are specified, an error will be returned
     immutable: true
     min_size: 1
     max_size: 1
     properties:
-      - name: 'buckets'
+      - name: buckets
         type: Array
-        min_size: 1
-        max_size: 1
         required: true
         description: List of buckets and their objects to be transformed.
         immutable: true
+        min_size: 1
+        max_size: 1
         item_type:
           type: NestedObject
           properties:
-            - name: 'bucket'
+            - name: bucket
               type: String
               required: true
+              description: Bucket name for the objects to be transformed.
               immutable: true
-              description: 'Bucket name for the objects to be transformed.'
-            - name: 'prefixList'
+            - name: prefixList
               type: NestedObject
+              description: Specifies objects matching a prefix set.
               immutable: true
+              exactly_one_of:
+                - bucket_list.0.buckets.0.prefix_list
+                - bucket_list.0.buckets.0.manifest
               min_size: 1
               max_size: 1
-              description: 'Specifies objects matching a prefix set.'
-              exactly_one_of:
-                - 'bucket_list.0.buckets.0.prefix_list'
-                - 'bucket_list.0.buckets.0.manifest'
               properties:
-                - name: 'includedObjectPrefixes'
+                - name: includedObjectPrefixes
                   type: Array
                   immutable: true
                   min_size: 1
                   item_type:
                     type: String
-            - name: 'manifest'
+            - name: manifest
               type: NestedObject
+              description: contain the manifest source file that is a CSV file in a Google Cloud Storage bucket.
               immutable: true
-              required: false
               exactly_one_of:
-                - 'bucket_list.0.buckets.0.prefix_list'
-                - 'bucket_list.0.buckets.0.manifest'
-              description: 'contain the manifest source file that is a CSV file in a Google Cloud Storage bucket.'
+                - bucket_list.0.buckets.0.prefix_list
+                - bucket_list.0.buckets.0.manifest
               properties:
-                - name: 'manifestLocation'
+                - name: manifestLocation
                   type: String
+                  description: Specifies objects in a manifest file.
                   immutable: true
-                  description: 'Specifies objects in a manifest file.'
-  - name: 'deleteObject'
+  - name: deleteObject
     type: NestedObject
-    description: 'allows batch operations to delete objects in bucket'
+    description: allows batch operations to delete objects in bucket
     immutable: true
+    exactly_one_of:
+      - delete_object
+      - put_metadata
+      - rewrite_object
+      - put_object_hold
+    custom_flatten: templates/terraform/custom_flatten/storage_batch_operations_job_delete_object.go.tmpl
     properties:
-      - name: 'permanentObjectDeletionEnabled'
+      - name: permanentObjectDeletionEnabled
         type: Boolean
-        description: 'enable flag to permanently delete object and all object versions if versioning is enabled on bucket.'
-        immutable: true
         required: true
+        description: enable flag to permanently delete object and all object versions if versioning is enabled on bucket.
+        immutable: true
         send_empty_value: true
-    exactly_one_of:
-      - 'delete_object'
-      - 'put_metadata'
-      - 'rewrite_object'
-      - 'put_object_hold'
-    custom_flatten: 'templates/terraform/custom_flatten/storage_batch_operations_job_delete_object.go.tmpl'
-  - name: 'putMetadata'
+  - name: putMetadata
     type: NestedObject
-    description: 'allows batch operations to update metadata for objects in bucket'
+    description: allows batch operations to update metadata for objects in bucket
     immutable: true
     exactly_one_of:
-      - 'delete_object'
-      - 'put_metadata'
-      - 'rewrite_object'
-      - 'put_object_hold'
+      - delete_object
+      - put_metadata
+      - rewrite_object
+      - put_object_hold
     properties:
-      - name: 'customTime'
+      - name: customTime
         type: String
-        immutable: true
-        description: 'Updates the objects fixed custom time metadata.'
-        at_least_one_of:
-          - 'put_metadata.0.content_disposition'
-          - 'put_metadata.0.content_encoding'
-          - 'put_metadata.0.content_language'
-          - 'put_metadata.0.content_type'
-          - 'put_metadata.0.cache_control'
-          - 'put_metadata.0.custom_metadata'
-          - 'put_metadata.0.custom_time'
-      - name: 'contentDisposition'
-        type: String
-        description: 'Content-Disposition of the object data.'
+        description: Updates the objects fixed custom time metadata.
         immutable: true
         at_least_one_of:
-          - 'put_metadata.0.content_disposition'
-          - 'put_metadata.0.content_encoding'
-          - 'put_metadata.0.content_language'
-          - 'put_metadata.0.content_type'
-          - 'put_metadata.0.cache_control'
-          - 'put_metadata.0.custom_metadata'
-          - 'put_metadata.0.custom_time'
-      - name: 'contentEncoding'
+          - put_metadata.0.content_disposition
+          - put_metadata.0.content_encoding
+          - put_metadata.0.content_language
+          - put_metadata.0.content_type
+          - put_metadata.0.cache_control
+          - put_metadata.0.custom_metadata
+          - put_metadata.0.custom_time
+      - name: contentDisposition
         type: String
-        description: 'Content Encoding of the object data.'
+        description: Content-Disposition of the object data.
         immutable: true
         at_least_one_of:
-          - 'put_metadata.0.content_disposition'
-          - 'put_metadata.0.content_encoding'
-          - 'put_metadata.0.content_language'
-          - 'put_metadata.0.content_type'
-          - 'put_metadata.0.cache_control'
-          - 'put_metadata.0.custom_metadata'
-          - 'put_metadata.0.custom_time'
-      - name: 'contentType'
+          - put_metadata.0.content_disposition
+          - put_metadata.0.content_encoding
+          - put_metadata.0.content_language
+          - put_metadata.0.content_type
+          - put_metadata.0.cache_control
+          - put_metadata.0.custom_metadata
+          - put_metadata.0.custom_time
+      - name: contentEncoding
         type: String
-        description: 'Content-Type of the object data.'
+        description: Content Encoding of the object data.
         immutable: true
         at_least_one_of:
-          - 'put_metadata.0.content_disposition'
-          - 'put_metadata.0.content_encoding'
-          - 'put_metadata.0.content_language'
-          - 'put_metadata.0.content_type'
-          - 'put_metadata.0.cache_control'
-          - 'put_metadata.0.custom_metadata'
-          - 'put_metadata.0.custom_time'
-      - name: 'contentLanguage'
+          - put_metadata.0.content_disposition
+          - put_metadata.0.content_encoding
+          - put_metadata.0.content_language
+          - put_metadata.0.content_type
+          - put_metadata.0.cache_control
+          - put_metadata.0.custom_metadata
+          - put_metadata.0.custom_time
+      - name: contentType
         type: String
-        description: 'Content-Language of the object data.'
+        description: Content-Type of the object data.
         immutable: true
         at_least_one_of:
-          - 'put_metadata.0.content_disposition'
-          - 'put_metadata.0.content_encoding'
-          - 'put_metadata.0.content_language'
-          - 'put_metadata.0.content_type'
-          - 'put_metadata.0.cache_control'
-          - 'put_metadata.0.custom_metadata'
-          - 'put_metadata.0.custom_time'
-      - name: 'cacheControl'
+          - put_metadata.0.content_disposition
+          - put_metadata.0.content_encoding
+          - put_metadata.0.content_language
+          - put_metadata.0.content_type
+          - put_metadata.0.cache_control
+          - put_metadata.0.custom_metadata
+          - put_metadata.0.custom_time
+      - name: contentLanguage
         type: String
-        description: 'Cache-Control directive to specify caching behavior of object data. If omitted and object is accessible to all anonymous users, the default will be public, max-age=3600'
+        description: Content-Language of the object data.
         immutable: true
         at_least_one_of:
-          - 'put_metadata.0.content_disposition'
-          - 'put_metadata.0.content_encoding'
-          - 'put_metadata.0.content_language'
-          - 'put_metadata.0.content_type'
-          - 'put_metadata.0.cache_control'
-          - 'put_metadata.0.custom_metadata'
-          - 'put_metadata.0.custom_time'
-      - name: 'customMetadata'
+          - put_metadata.0.content_disposition
+          - put_metadata.0.content_encoding
+          - put_metadata.0.content_language
+          - put_metadata.0.content_type
+          - put_metadata.0.cache_control
+          - put_metadata.0.custom_metadata
+          - put_metadata.0.custom_time
+      - name: cacheControl
+        type: String
+        description: Cache-Control directive to specify caching behavior of object data. If omitted and object is accessible to all anonymous users, the default will be public, max-age=3600
+        immutable: true
+        at_least_one_of:
+          - put_metadata.0.content_disposition
+          - put_metadata.0.content_encoding
+          - put_metadata.0.content_language
+          - put_metadata.0.content_type
+          - put_metadata.0.cache_control
+          - put_metadata.0.custom_metadata
+          - put_metadata.0.custom_time
+      - name: customMetadata
         type: KeyValuePairs
-        description: 'User-provided metadata, in key/value pairs.'
+        description: User-provided metadata, in key/value pairs.
         immutable: true
         at_least_one_of:
-          - 'put_metadata.0.content_disposition'
-          - 'put_metadata.0.content_encoding'
-          - 'put_metadata.0.content_language'
-          - 'put_metadata.0.content_type'
-          - 'put_metadata.0.cache_control'
-          - 'put_metadata.0.custom_metadata'
-          - 'put_metadata.0.custom_time'
-  - name: 'rewriteObject'
+          - put_metadata.0.content_disposition
+          - put_metadata.0.content_encoding
+          - put_metadata.0.content_language
+          - put_metadata.0.content_type
+          - put_metadata.0.cache_control
+          - put_metadata.0.custom_metadata
+          - put_metadata.0.custom_time
+  - name: rewriteObject
     type: NestedObject
-    description: 'allows to update encryption key for objects in bucket.'
+    description: allows to update encryption key for objects in bucket.
     immutable: true
     exactly_one_of:
-      - 'delete_object'
-      - 'put_metadata'
-      - 'rewrite_object'
-      - 'put_object_hold'
+      - delete_object
+      - put_metadata
+      - rewrite_object
+      - put_object_hold
     properties:
-      - name: 'kmsKey'
+      - name: kmsKey
         type: String
-        description: 'valid kms key'
-        immutable: true
         required: true
-  - name: 'putObjectHold'
+        description: valid kms key
+        immutable: true
+  - name: putObjectHold
     type: NestedObject
-    description: 'allows to update temporary hold or eventBased hold for objects in bucket.'
+    description: allows to update temporary hold or eventBased hold for objects in bucket.
     immutable: true
     exactly_one_of:
-      - 'delete_object'
-      - 'put_metadata'
-      - 'rewrite_object'
-      - 'put_object_hold'
+      - delete_object
+      - put_metadata
+      - rewrite_object
+      - put_object_hold
     properties:
-      - name: 'eventBasedHold'
+      - name: eventBasedHold
         type: String
+        description: set/unset to update event based hold for objects.
         immutable: true
-        description: 'set/unset to update event based hold for objects.'
         validation:
-          function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
-      - name: 'temporaryHold'
+          function: validation.StringInSlice([]string{"SET", "UNSET"}, false)
+      - name: temporaryHold
         type: String
+        description: set/unset to update temporary based hold for objects.
         immutable: true
-        description: 'set/unset to update temporary based hold for objects.'
         validation:
-          function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
+          function: validation.StringInSlice([]string{"SET", "UNSET"}, false)

@@ -214,6 +214,10 @@ fields:
     api_field: 'maintenancePolicy.window.recurringWindow.recurrence'
   - field: 'maintenance_policy.recurring_window.start_time'
     api_field: 'maintenancePolicy.window.recurringWindow.window.startTime'
+  - api_field: 'maintenancePolicy.disruptionBudget.lastDisruptionTime'  
+  - api_field: 'maintenancePolicy.disruptionBudget.lastMinorVersionDisruptionTime'  
+  - api_field: 'maintenancePolicy.disruptionBudget.MinorVersionDisruptionInterval'
+  - api_field: 'maintenancePolicy.disruptionBudget.PatchVersionDisruptionInterval'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedOpentelemetryConfig.scope'
 {{- end }}
@@ -370,6 +374,7 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'nodeConfig.sandboxConfig.sandboxType'
 {{- end }}
+  - api_field: 'nodeConfig.sandboxConfig.type'
   - api_field: 'nodeConfig.secondaryBootDisks.diskImage'
   - api_field: 'nodeConfig.secondaryBootDisks.mode'
   - api_field: 'nodeConfig.serviceAccount'
@@ -666,6 +671,8 @@ fields:
   - field: 'node_pool.node_config.sandbox_config.sandbox_type'
     api_field: 'nodePools.config.sandboxConfig.sandboxType'
 {{- end }}
+  - field: 'node_pool.node_config.sandbox_config.type'
+    api_field: 'nodePools.config.sandboxConfig.type'
   - field: 'node_pool.node_config.secondary_boot_disks.disk_image'
     api_field: 'nodePools.config.secondaryBootDisks.diskImage'
   - field: 'node_pool.node_config.secondary_boot_disks.mode'
@@ -827,6 +834,7 @@ fields:
   - api_field: 'userManagedKeysConfig.aggregationCa'
   - api_field: 'userManagedKeysConfig.clusterCa'
   - api_field: 'userManagedKeysConfig.controlPlaneDiskEncryptionKey'
+  - api_field: 'userManagedKeysConfig.controlPlaneDiskEncryptionKeyVersions'
   - api_field: 'userManagedKeysConfig.etcdApiCa'
   - api_field: 'userManagedKeysConfig.etcdPeerCa'
   - api_field: 'userManagedKeysConfig.gkeopsEtcdBackupEncryptionKey'

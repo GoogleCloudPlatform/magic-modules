@@ -48,7 +48,7 @@ func (a Async) IsA(asyncType string) bool {
 // The main implementation of Operation,
 // corresponding to common GCP Operation resources.
 type Operation struct {
-	Timeouts         *Timeouts
+	Timeouts         *Timeouts `yaml:"timeouts,omitempty"`
 	OpAsyncOperation `yaml:",inline"`
 }
 

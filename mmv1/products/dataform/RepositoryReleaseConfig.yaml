@@ -12,162 +12,137 @@
 # limitations under the License.
 
 ---
-name: 'RepositoryReleaseConfig'
+name: RepositoryReleaseConfig
 api_resource_type_kind: ReleaseConfig
-description: |-
-  A resource represents a Dataform release configuration
-min_version: 'beta'
+description: A resource represents a Dataform release configuration
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dataform/docs/release-configurations'
-  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories.releaseConfigs'
-docs:
-id_format: 'projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}'
-base_url: 'projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs'
-create_url: 'projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs?releaseConfigId={{name}}'
-update_verb: 'PATCH'
+    Official Documentation: https://cloud.google.com/dataform/docs/release-configurations
+  api: https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories.releaseConfigs
+base_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs
+min_version: beta
+create_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs?releaseConfigId={{name}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
 import_format:
-  - 'projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-custom_code:
+  - projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
 examples:
-  - name: 'dataform_repository_release_config'
-    primary_resource_id: 'release'
-    min_version: 'beta'
+  - name: dataform_repository_release_config
+    primary_resource_id: release
+    min_version: beta
     vars:
-      release_name: 'my_release'
-      git_repository_name: 'my/repository'
-      dataform_repository_name: 'dataform_repository'
-      data: 'secret-data'
-      secret_name: 'my_secret'
+      data: secret-data
+      dataform_repository_name: dataform_repository
+      git_repository_name: my/repository
+      release_name: my_release
+      secret_name: my_secret
 parameters:
-  - name: 'region'
+  - name: region
     type: String
-    description: 'A reference to the region'
-    min_version: 'beta'
-    url_param_only: true
+    description: A reference to the region
     immutable: true
-  - name: 'repository'
+    url_param_only: true
+    min_version: beta
+  - name: repository
     type: String
-    description: 'A reference to the Dataform repository'
-    min_version: 'beta'
-    url_param_only: true
+    description: A reference to the Dataform repository
     immutable: true
+    url_param_only: true
+    min_version: beta
 properties:
-  - name: 'name'
+  - name: name
     type: String
+    required: true
     description: The release's name.
-    min_version: 'beta'
-    required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'gitCommitish'
+    min_version: beta
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: gitCommitish
     type: String
-    description:
-      Git commit/tag/branch name at which the repository should be compiled.
-      Must exist in the remote repository.
-    min_version: 'beta'
     required: true
-  - name: 'cronSchedule'
+    description: Git commit/tag/branch name at which the repository should be compiled. Must exist in the remote repository.
+    min_version: beta
+  - name: cronSchedule
     type: String
-    description:
-      Optional. Optional schedule (in cron format) for automatic creation of compilation results.
-    min_version: 'beta'
-  - name: 'timeZone'
+    description: Optional. Optional schedule (in cron format) for automatic creation of compilation results.
+    min_version: beta
+  - name: timeZone
     type: String
-    description:
-      Optional. Specifies the time zone to be used when interpreting cronSchedule.
-      Must be a time zone name from the time zone database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-      If left unspecified, the default is UTC.
-    min_version: 'beta'
-  - name: 'codeCompilationConfig'
+    description: Optional. Specifies the time zone to be used when interpreting cronSchedule. Must be a time zone name from the time zone database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). If left unspecified, the default is UTC.
+    min_version: beta
+  - name: codeCompilationConfig
     type: NestedObject
-    description:
-      Optional. If set, fields of codeCompilationConfig override the default compilation
-      settings that are specified in dataform.json.
-    min_version: 'beta'
+    description: Optional. If set, fields of codeCompilationConfig override the default compilation settings that are specified in dataform.json.
+    min_version: beta
     properties:
-      - name: 'defaultDatabase'
+      - name: defaultDatabase
         type: String
         description: Optional. The default database (Google Cloud project ID).
-        min_version: 'beta'
-      - name: 'defaultSchema'
+        min_version: beta
+      - name: defaultSchema
         type: String
         description: Optional. The default schema (BigQuery dataset ID).
-        min_version: 'beta'
-      - name: 'defaultLocation'
+        min_version: beta
+      - name: defaultLocation
         type: String
         description: |-
           Optional. The default BigQuery location to use. Defaults to "US".
           See the BigQuery docs for a full list of locations: https://cloud.google.com/bigquery/docs/locations.
-        min_version: 'beta'
-      - name: 'assertionSchema'
+        min_version: beta
+      - name: assertionSchema
         type: String
         description: Optional. The default schema (BigQuery dataset ID) for assertions.
-        min_version: 'beta'
-      - name: 'vars'
+        min_version: beta
+      - name: vars
         type: KeyValuePairs
         description: |-
           Optional. User-defined variables that are made available to project code during compilation.
           An object containing a list of "key": value pairs.
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-        min_version: 'beta'
-      - name: 'databaseSuffix'
+        min_version: beta
+      - name: databaseSuffix
         type: String
         description: Optional. The suffix that should be appended to all database (Google Cloud project ID) names.
-        min_version: 'beta'
-      - name: 'schemaSuffix'
+        min_version: beta
+      - name: schemaSuffix
         type: String
         description: Optional. The suffix that should be appended to all schema (BigQuery dataset ID) names.
-        min_version: 'beta'
-      - name: 'tablePrefix'
+        min_version: beta
+      - name: tablePrefix
         type: String
         description: Optional. The prefix that should be prepended to all table names.
-        min_version: 'beta'
-  - name: 'recentScheduledReleaseRecords'
+        min_version: beta
+  - name: recentScheduledReleaseRecords
     type: Array
-    description:
-      Records of the 10 most recent scheduled release attempts,
-      ordered in in descending order of releaseTime.
-      Updated whenever automatic creation of a compilation result is triggered by cronSchedule.
-    min_version: 'beta'
+    description: Records of the 10 most recent scheduled release attempts, ordered in in descending order of releaseTime. Updated whenever automatic creation of a compilation result is triggered by cronSchedule.
     output: true
+    min_version: beta
     item_type:
       type: NestedObject
       properties:
-        - name: 'releaseTime'
+        - name: releaseTime
           type: String
           description: The timestamp of this release attempt.
-          min_version: 'beta'
           output: true
-        - name: 'compilationResult'
+          min_version: beta
+        - name: compilationResult
           type: String
-          description:
-            The name of the created compilation result, if one was successfully created.
-            Must be in the format projects/*/locations/*/repositories/*/compilationResults/*.
-          min_version: 'beta'
+          description: The name of the created compilation result, if one was successfully created. Must be in the format projects/*/locations/*/repositories/*/compilationResults/*.
           output: true
-        - name: 'errorStatus'
+          min_version: beta
+        - name: errorStatus
           type: NestedObject
-          description:
-            The error status encountered upon this attempt to create the compilation
-            result, if the attempt was unsuccessful.
-          min_version: 'beta'
+          description: The error status encountered upon this attempt to create the compilation result, if the attempt was unsuccessful.
           output: true
+          min_version: beta
           properties:
-            - name: 'code'
+            - name: code
               type: Integer
               description: The status code, which should be an enum value of google.rpc.Code.
-              min_version: 'beta'
               output: true
-            - name: 'message'
+              min_version: beta
+            - name: message
               type: String
-              description:
-                A developer-facing error message, which should be in English.
-                Any user-facing error message should be localized and sent in
-                the google.rpc.Status.details field, or localized by the client.
-              min_version: 'beta'
+              description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
               output: true
+              min_version: beta

@@ -68,7 +68,7 @@ properties:
     type: String
     required: true
     immutable: true
-    url_param_only: true
+    ignore_read: true
     description: |
       Identifier of the GCP Organization. For GCP org, this field should be organization number.
   - name: 'editionConfig'
