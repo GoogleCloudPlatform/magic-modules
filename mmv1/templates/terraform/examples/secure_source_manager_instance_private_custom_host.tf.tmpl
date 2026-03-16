@@ -63,8 +63,8 @@ resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
     ca_pool = google_privateca_ca_pool.ca_pool.id
     custom_host_config {
       api = "api.example.com"
-      git_http = "github.example.com"
-      git_ssh = "gitlab.example.com"
+      git_http = "git-http.example.com"
+      git_ssh = "git-ssh.example.com"
       html   = "html.example.com"
     }
   }
