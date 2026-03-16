@@ -4,6 +4,16 @@ func revisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v i
 		return fmt.Errorf("google_cloud_run_service: `template.metadata.name` cannot be set while `autogenerate_revision_name` is true. Please remove the field or set `autogenerate_revision_name` to false.")
 	}
 
+	// Mutually exclusive VPC annotations
+	if annotations, ok := diff.GetOk("template.0.metadata.0.annotations"); ok {
+		annotationsMap := annotations.(map[string]interface{})
+		_, hasDirectVPC := annotationsMap["run.googleapis.com/network-interfaces"]
+		_, hasVPCConnector := annotationsMap["run.googleapis.com/vpc-access-connector"]
+		if hasDirectVPC && hasVPCConnector {
+			return fmt.Errorf("google_cloud_run_service: `run.googleapis.com/network-interfaces` and `run.googleapis.com/vpc-access-connector` cannot both be set.")
+		}
+	}
+
 	return nil
 }
 
