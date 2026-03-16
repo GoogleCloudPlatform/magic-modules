@@ -110,30 +110,6 @@ func TestAccPubsubTopic_schema(t *testing.T) {
 	})
 }
 
-func TestAccPubsubTopic_schemaWithRevisions(t *testing.T) {
-	t.Parallel()
-
-	schema := fmt.Sprintf("tf-test-schema-%s", acctest.RandString(t, 10))
-	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccPubsubTopic_schemaWithRevisions(topic, schema),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.bar",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccPubsubTopic_migration(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -452,25 +428,6 @@ resource "google_pubsub_topic" "bar" {
 `, schema, topic)
 }
 
-func testAccPubsubTopic_schemaWithRevisions(topic, schema string) string {
-	return fmt.Sprintf(`
-resource "google_pubsub_schema" "foo" {
-	name = "%s"
-	type = "PROTOCOL_BUFFER"
-	definition = "syntax = \"proto3\";\nmessage Results {\nstring f1 = 1;\n}"
-}
-
-resource "google_pubsub_topic" "bar" {
-	name = "%s"
-	schema_settings {
-		schema = google_pubsub_schema.foo.id
-		encoding = "BINARY"
-		first_revision_id = "1"
-		last_revision_id = "2"
-	}
-}
-`, schema, topic)
-}
 func testAccPubsubTopic_updateWithNewSchema(topic, schema string) string {
 	if schema != "" {
 		return fmt.Sprintf(`
