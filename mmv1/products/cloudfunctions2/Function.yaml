@@ -566,7 +566,7 @@ properties:
           'The Serverless VPC Access connector that this cloud function can
           connect to.'
         conflicts:
-          - direct_vpc_network_interface
+          - service_config.0.direct_vpc_network_interface
       - name: 'vpcConnectorEgressSettings'
         type: Enum
         description: 'Available egress settings.'
@@ -578,7 +578,7 @@ properties:
         type: Array
         description: 'The Direct VPC network interface for the Cloud Function. Currently only a single Direct VPC is supported.'
         conflicts:
-          - vpc_connector
+          - service_config.0.vpc_connector
         item_type:
           type: NestedObject
           properties:

@@ -725,7 +725,7 @@ properties:
                 description: |-
                   VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
                 conflicts:
-                  - network_interfaces
+                  - template.0.vpc_access.0.network_interfaces
               - name: 'egress'
                 type: Enum
                 description: |-
@@ -739,7 +739,7 @@ properties:
                 description: |-
                   Direct VPC egress settings. Currently only single network interface is supported.
                 conflicts:
-                  - connector
+                  - template.0.vpc_acces.0.connector
                 item_type:
                   type: NestedObject
                   properties:
