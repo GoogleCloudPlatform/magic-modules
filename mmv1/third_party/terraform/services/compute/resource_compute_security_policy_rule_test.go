@@ -1403,7 +1403,7 @@ resource "google_compute_security_policy_rule" "policy_rule" {
         interval_sec = 10
       }
     }
-	preview = true
+  preview = true
 }
 `, context)
 }
@@ -1425,7 +1425,7 @@ resource "google_compute_security_policy_rule" "policy_rule" {
         expression = "request.path == 'my-path' && token.recaptcha_action.score <= 0.5"
       }
     }
-  	preview = true
+    preview = true
 }
 `, context)
 }
