@@ -144,8 +144,8 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)
-
 		{{ if $.Res.ProductMetadata.Version.RepEnabled }}
+
 		urlFormatted, err := tpgresource.ReplaceVarsForTest(config, rs, "{{$.Res.SelfLinkUri}}")
 
 		if err != nil {
@@ -156,9 +156,7 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		basePath := transport_tpg.ResourceBasePath(config.{{$.Res.ProductMetadata.Name}}BasePath, config.{{$.Res.ProductMetadata.Name}}RepBasePath, "{{$.Res.ProductMetadata.Name}}", config, loc)
 		url := fmt.Sprintf("%s%s", basePath, urlFormatted)
 		{{- else }}
-
 		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}{{$.Res.ProductMetadata.Name}}{{"BasePath}}"}}{{$.Res.SelfLinkUri}}")
-
 		if err != nil {
 			return err
 		}
