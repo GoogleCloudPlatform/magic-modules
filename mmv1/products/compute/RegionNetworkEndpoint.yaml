@@ -74,7 +74,6 @@ examples:
       network_name: 'network'
   - name: 'region_network_endpoint_portmap'
     primary_resource_id: 'region_network_endpoint_portmap'
-    min_version: 'beta'
     vars:
       network_name: 'network'
       subnetwork_name: 'subnetwork'
@@ -140,7 +139,6 @@ properties:
     type: Integer
     description: |
       Client destination port for the `GCE_VM_IP_PORTMAP` NEG.
-    min_version: 'beta'
     custom_flatten: 'templates/terraform/custom_flatten/float64_to_int.go.tmpl'
   - name: 'instance'
     type: ResourceRef
@@ -149,4 +147,3 @@ properties:
       This is required for network endpoints of type GCE_VM_IP_PORTMAP.
     resource: 'Instance'
     imports: 'name'
-    min_version: 'beta'

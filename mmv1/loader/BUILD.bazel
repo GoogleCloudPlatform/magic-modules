@@ -11,6 +11,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//mmv1/api",
+        "//mmv1/google",
         "@com_github_golang_glog//:glog",
         "@org_golang_x_exp//slices",
     ],

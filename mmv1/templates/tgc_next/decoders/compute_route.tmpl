@@ -1,0 +1,8 @@
+// next_hop_ip is Computed + Optional and conflict with next_hop_ilb
+if _, ok := res["nextHopIp"]; ok {
+	if _, ok := res["nextHopIlb"]; ok {
+		delete(res, "nextHopIp")
+	}
+}
+
+return res, hclData, nil

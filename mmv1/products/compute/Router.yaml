@@ -51,6 +51,7 @@ sweeper:
     - region: "us-central1"
     - region: "us-east1"
     - region: "us-east4"
+include_in_tgc_next: true
 examples:
   - name: 'router_basic'
     primary_resource_id: 'foobar'

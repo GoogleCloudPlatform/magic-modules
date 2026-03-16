@@ -1,0 +1,19 @@
+---
+steps:
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: collect-nightly-test-status
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["TEAMCITY_TOKEN"]
+      args:
+        - 'collect-nightly-test-status'
+        - $_CUSTOM_DATE
+
+timeout: 3600s
+options:
+    machineType: 'N1_HIGHCPU_32'
+
+logsBucket: 'gs://cloudbuild-ingest-test-data-logs'
+availableSecrets:
+  secretManager:
+    - versionName: projects/673497134629/secrets/teamcity-token/versions/latest
+      env: TEAMCITY_TOKEN

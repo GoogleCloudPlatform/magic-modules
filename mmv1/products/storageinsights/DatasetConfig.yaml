@@ -119,6 +119,11 @@ properties:
     description: |
       Number of days of history that must be retained.
     required: true
+  - name: 'activityDataRetentionPeriodDays'
+    type: Integer
+    default_from_api: true
+    description: |
+      Number of days of activity data that must be retained. If not specified, retentionPeriodDays will be used. Set to 0 to turn off the activity data.
   - name: 'link'
     type: NestedObject
     description: |

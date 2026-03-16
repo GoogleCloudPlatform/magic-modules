@@ -64,7 +64,6 @@ sweeper:
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-region-service%s", context["random_suffix"])'
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
@@ -139,6 +138,16 @@ examples:
       network_name: 'network'
     exclude_test: true
   - name: 'region_backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
@@ -879,6 +888,7 @@ properties:
         type: String
         description: |
           OAuth2 Client ID for IAP
+        send_empty_value: true
       - name: 'oauth2ClientSecret'
         type: String
         description: |
@@ -914,6 +924,7 @@ properties:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL'
       - 'INTERNAL_MANAGED'
+      - 'INTERNAL_SELF_MANAGED'
   - name: 'localityLbPolicy'
     type: Enum
     description: |
@@ -1030,7 +1041,6 @@ properties:
     type: NestedObject
     description: |
       Configures traffic steering properties of internal passthrough Network Load Balancers.
-    min_version: beta
     properties:
       - name: 'zonalAffinity'
         type: NestedObject
@@ -1046,7 +1056,6 @@ properties:
               - 'ZONAL_AFFINITY_SPILL_CROSS_ZONE'
               - 'ZONAL_AFFINITY_STAY_WITHIN_ZONE'
             default_value: 'ZONAL_AFFINITY_DISABLED'
-            min_version: beta
           - name: 'spilloverRatio'
             type: Double
             description: |
@@ -1055,7 +1064,6 @@ properties:
               distributes new connections to all healthy endpoints in the local zone only. When the ratio of the count
               of healthy backend endpoints in a zone to the count of backend endpoints in that same zone is below this
               threshold, the load balancer distributes all new connections to all healthy endpoints across all zones.
-            min_version: beta
   - name: 'outlierDetection'
     type: NestedObject
     description: |
@@ -1555,6 +1563,28 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+      - name: 'forwardProxy'
+        type: NestedObject
+        description: |
+          Dynamic Forwarding Proxy configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling dynamic forwarding proxy.
+            immutable: true
+            required: true
+          - name: 'proxyMode'
+            type: Enum
+            min_version: beta
+            description: |
+              Determines the dynamic forwarding proxy mode
+            enum_values:
+              - 'DIRECT_FORWARDING'
+              - 'CLOUD_RUN'
+            required: true
   - name: 'haPolicy'
     type: NestedObject
     description: |

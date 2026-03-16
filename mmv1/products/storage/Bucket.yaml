@@ -39,7 +39,6 @@ custom_code:
 examples:
   - name: 'storage_bucket_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])'
     vars:
       name: 'my-bucket'
 parameters:

@@ -102,6 +102,7 @@ properties:
     min_version: 'beta'
     output: true
   - name: 'release_id'
+    api_name: 'name'
     type: String
     description: The unique identifier for the Release.
     min_version: 'beta'

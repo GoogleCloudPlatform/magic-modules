@@ -29,7 +29,9 @@ func TestAcc{{$.ResourceName}}(t *testing.T) {
 {{- range $t := $.TGCTests }}
 		{
 			Name:  "{{ $t.Name }}",
+		{{- if $t.Skip }}
 			Skip:  "{{ $t.Skip }}",
+		{{- end }}
 		},
 {{- end }}
 	}

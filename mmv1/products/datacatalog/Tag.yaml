@@ -13,6 +13,7 @@
 
 ---
 name: 'Tag'
+api_resource_field: "."
 description: |
   Tags are used to attach custom metadata to Data Catalog resources. Tags conform to the specifications within their tag template.
 
@@ -138,10 +139,9 @@ properties:
     required: true
     key_name: 'field_name'
     value_type:
-      name: field_value
       type: NestedObject
       properties:
-        - name: 'display_name'
+        - name: 'displayName'
           type: String
           description: |
             The display name of this field

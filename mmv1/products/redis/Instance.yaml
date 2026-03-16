@@ -44,6 +44,7 @@ custom_code:
   encoder: 'templates/terraform/encoders/redis_location_id_for_fallback_zone.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_instance.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/redis_instance.go.tmpl'
+  tgc_ignore_terraform_decoder: true
 custom_diff:
   - 'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)'
   - 'tpgresource.DefaultProviderProject'

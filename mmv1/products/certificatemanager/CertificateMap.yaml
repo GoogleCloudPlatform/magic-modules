@@ -36,7 +36,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'certificate_manager_certificate_map_basic'
     primary_resource_id: 'default'
