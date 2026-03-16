@@ -132,7 +132,7 @@ resource "google_kms_ekm_connection_iam_policy" "policy" {
 func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "vpc-project" {
-  project_id = "cloud-ekm-refekm-playground"
+  project_id = "refekm-gdu-prod"
 }
 data "google_project" "project" {
 }
