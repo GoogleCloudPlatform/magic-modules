@@ -1,4 +1,5 @@
 package compute_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -7,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestAccComputeRolloutPlan_basic(t *testing.T) {
+func TestAccComputeRolloutPlan_complex(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -18,7 +19,7 @@ func TestAccComputeRolloutPlan_basic(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRolloutPlan_basic(context),
@@ -35,6 +36,20 @@ func TestAccComputeRolloutPlan_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccComputeRolloutPlan_complex(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("tf-test-rollout-plan-%s", context["random_suffix"])),
+					resource.TestCheckResourceAttr(resourceName, "waves.0.orchestration_options.0.max_concurrent_locations", "1"),
+					resource.TestCheckResourceAttr(resourceName, "waves.0.orchestration_options.0.delays.0.duration", "60s"),
+					resource.TestCheckResourceAttr(resourceName, "waves.0.validation.0.type", "time"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -42,6 +57,7 @@ func TestAccComputeRolloutPlan_basic(t *testing.T) {
 func testAccComputeRolloutPlan_basic(context map[string]interface{}) string {
 	return fmt.Sprintf(`
 resource "google_compute_rollout_plan" "acceptance" {
+  provider       = google-beta
   name           = "tf-test-rollout-plan-%s"
   description    = "A test rollout plan"
   location_scope = "ZONAL"
@@ -61,42 +77,10 @@ resource "google_compute_rollout_plan" "acceptance" {
 `, context["random_suffix"])
 }
 
-func TestAccComputeRolloutPlan_complex(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	resourceName := "google_compute_rollout_plan.complex"
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRolloutPlan_complex(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("tf-test-rollout-plan-%s", context["random_suffix"])),
-					resource.TestCheckResourceAttr(resourceName, "waves.0.orchestration_options.0.max_concurrent_locations", "1"),
-					resource.TestCheckResourceAttr(resourceName, "waves.0.orchestration_options.0.delays.0.duration", "60s"),
-					resource.TestCheckResourceAttr(resourceName, "waves.0.validation.0.type", "time"),
-				),
-			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func testAccComputeRolloutPlan_complex(context map[string]interface{}) string {
 	return fmt.Sprintf(`
-data "google_client_config" "current" {}
-
 resource "google_compute_rollout_plan" "complex" {
+  provider       = google-beta
   name           = "tf-test-rollout-plan-%s"
   description    = "A complex test rollout plan"
   location_scope = "ZONAL"
@@ -127,3 +111,5 @@ resource "google_compute_rollout_plan" "complex" {
 }
 `, context["random_suffix"])
 }
+
+{{ end }}
