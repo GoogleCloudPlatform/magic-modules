@@ -97,9 +97,6 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	context_{{ $i }} := map[string]interface{}{
 	{{- end }}
 		{{- template "EnvVarContext" dict "TestEnvVars" $st.TestEnvVars "HasNewLine" false}}
-		{{- range $varKey, $varVal := $st.Vars }}
-		"{{$varKey}}": {{ $varVal }},
-		{{- end }}
 		{{- range $varKey, $varVal := $st.TestContextVars }}
 		"{{$varKey}}": {{ $varVal }},
 		{{- end }}

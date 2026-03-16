@@ -21,6 +21,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -114,6 +115,10 @@ type Step struct {
 	OicsHCLText          string            `yaml:"-"`
 	PrimaryResourceId    string            `yaml:"-"`
 	TestContextVars      map[string]string `yaml:"-"`
+}
+
+func (s *Step) ShouldGenerateDoc(index int, sample *Sample) bool {
+	return s.IncludeStepDoc || (index == 0 && !sample.ExcludeBasicDoc)
 }
 
 func (s *Step) TestStepSlug(productName, resourceName string) string {
@@ -216,7 +221,13 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 
 	for key, value := range originalVars {
 		testVars[key] = fmt.Sprintf("%%{%s}", key)
-		testContextVars[key] = fmt.Sprintf("%s", value)
+		if _, err := strconv.ParseBool(value); err == nil {
+			testContextVars[key] = value
+		} else if _, err := strconv.ParseInt(value, 10, 64); err == nil {
+			testContextVars[key] = value
+		} else {
+			testContextVars[key] = fmt.Sprintf("%#v", value)
+		}
 	}
 
 	// Apply overrides from YAML
