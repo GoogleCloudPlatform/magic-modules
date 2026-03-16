@@ -1,0 +1,21 @@
+resource "google_chronicle_native_dashboard" "my_basic_dashboard" {
+  provider     = google-beta
+  location     = "us"
+  instance     = "{{index $.TestEnvVars "chronicle_id"}}"
+  display_name = "{{index $.Vars "dashboard_name"}}"
+  description  = "{{index $.Vars "dashboard_description"}}"
+  access       = "DASHBOARD_PRIVATE"
+  type         = "CUSTOM"
+
+  filters {
+    id                                    = "GlobalTimeFilter"
+    display_name                          = "Global Time Filter"
+    data_source                           = "GLOBAL"
+    is_standard_time_range_filter         = true
+    is_standard_time_range_filter_enabled = true
+    filter_operator_and_field_values {
+      filter_operator = "PAST"
+      field_values    = ["1", "DAY"]
+    }
+  }
+}
