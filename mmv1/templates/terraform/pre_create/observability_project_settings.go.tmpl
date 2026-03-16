@@ -1,0 +1,14 @@
+var masks []string
+if !d.GetRawConfig().GetAttr("default_storage_location").IsNull() {
+	masks = append(masks, "defaultStorageLocation")
+}
+if !d.GetRawConfig().GetAttr("kms_key_name").IsNull() {
+	masks = append(masks, "kmsKeyName")
+}
+
+if len(masks) > 0 {
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(masks, ",")})
+	if err != nil {
+		return err
+	}
+}

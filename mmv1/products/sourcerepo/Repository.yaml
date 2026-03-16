@@ -50,7 +50,6 @@ exclude_tgc: true
 examples:
   - name: 'sourcerepo_repository_basic'
     primary_resource_id: 'my-repo'
-    primary_resource_name: 'fmt.Sprintf("my/repository%s", context["random_suffix"])'
     vars:
       repository_name: 'my/repository'
   - name: 'sourcerepo_repository_full'
@@ -88,12 +87,7 @@ properties:
     key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
     set_hash_func: 'resourceSourceRepoRepositoryPubSubConfigsHash'
     key_name: 'topic'
-    key_description: |
-      A Cloud Pub/Sub topic in this repo's project. Values are of the form
-      `projects/<project>/topics/<topic>` or `<topic>` (where the topic will
-      be inferred).
     value_type:
-      name: pubsubConfig
       type: NestedObject
       properties:
         - name: 'messageFormat'

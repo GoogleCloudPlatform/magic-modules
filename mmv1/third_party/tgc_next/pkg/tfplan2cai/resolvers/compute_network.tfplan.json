@@ -1,0 +1,283 @@
+{
+    "format_version": "1.2",
+    "terraform_version": "1.7.2",
+    "planned_values": {
+        "root_module": {
+            "resources": [
+                {
+                    "address": "google_compute_network.peered_network",
+                    "mode": "managed",
+                    "type": "google_compute_network",
+                    "name": "peered_network",
+                    "provider_name": "registry.terraform.io/hashicorp/google",
+                    "schema_version": 0,
+                    "values": {
+                        "auto_create_subnetworks": false,
+                        "delete_default_routes_on_create": false,
+                        "description": null,
+                        "enable_ula_internal_ipv6": null,
+                        "name": "network-peering-test-nw",
+                        "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL",
+                        "network_profile": null,
+                        "params": [],
+                        "project": "terraform-dev-haonan",
+                        "timeouts": null
+                    },
+                    "sensitive_values": {
+                        "params": []
+                    }
+                },
+                {
+                    "address": "google_vmwareengine_network.vmware_network",
+                    "mode": "managed",
+                    "type": "google_vmwareengine_network",
+                    "name": "vmware_network",
+                    "provider_name": "registry.terraform.io/hashicorp/google",
+                    "schema_version": 0,
+                    "values": {
+                        "description": "VMware Engine network for peering test",
+                        "location": "global",
+                        "name": "network-peering-test-ven",
+                        "project": "terraform-dev-haonan",
+                        "timeouts": null,
+                        "type": "STANDARD"
+                    },
+                    "sensitive_values": {
+                        "vpc_networks": []
+                    }
+                },
+                {
+                    "address": "google_vmwareengine_network_peering.peering",
+                    "mode": "managed",
+                    "type": "google_vmwareengine_network_peering",
+                    "name": "peering",
+                    "provider_name": "registry.terraform.io/hashicorp/google",
+                    "schema_version": 0,
+                    "values": {
+                        "description": null,
+                        "export_custom_routes": true,
+                        "export_custom_routes_with_public_ip": true,
+                        "import_custom_routes": true,
+                        "import_custom_routes_with_public_ip": true,
+                        "name": "network-peering-test",
+                        "peer_network_type": "STANDARD",
+                        "project": "terraform-dev-haonan",
+                        "timeouts": null
+                    },
+                    "sensitive_values": {}
+                }
+            ]
+        }
+    },
+    "resource_changes": [
+        {
+            "address": "google_compute_network.peered_network",
+            "mode": "managed",
+            "type": "google_compute_network",
+            "name": "peered_network",
+            "provider_name": "registry.terraform.io/hashicorp/google",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "before": null,
+                "after": {
+                    "auto_create_subnetworks": false,
+                    "delete_default_routes_on_create": false,
+                    "description": null,
+                    "enable_ula_internal_ipv6": null,
+                    "name": "network-peering-test-nw",
+                    "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL",
+                    "network_profile": null,
+                    "params": [],
+                    "project": "terraform-dev-haonan",
+                    "timeouts": null
+                },
+                "after_unknown": {
+                    "bgp_always_compare_med": true,
+                    "bgp_best_path_selection_mode": true,
+                    "bgp_inter_region_cost": true,
+                    "gateway_ipv4": true,
+                    "id": true,
+                    "internal_ipv6_range": true,
+                    "mtu": true,
+                    "network_id": true,
+                    "numeric_id": true,
+                    "params": [],
+                    "routing_mode": true,
+                    "self_link": true
+                },
+                "before_sensitive": false,
+                "after_sensitive": {
+                    "params": []
+                }
+            }
+        },
+        {
+            "address": "google_vmwareengine_network.vmware_network",
+            "mode": "managed",
+            "type": "google_vmwareengine_network",
+            "name": "vmware_network",
+            "provider_name": "registry.terraform.io/hashicorp/google",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "before": null,
+                "after": {
+                    "description": "VMware Engine network for peering test",
+                    "location": "global",
+                    "name": "network-peering-test-ven",
+                    "project": "terraform-dev-haonan",
+                    "timeouts": null,
+                    "type": "STANDARD"
+                },
+                "after_unknown": {
+                    "create_time": true,
+                    "etag": true,
+                    "id": true,
+                    "state": true,
+                    "uid": true,
+                    "update_time": true,
+                    "vpc_networks": true
+                },
+                "before_sensitive": false,
+                "after_sensitive": {
+                    "vpc_networks": []
+                }
+            }
+        },
+        {
+            "address": "google_vmwareengine_network_peering.peering",
+            "mode": "managed",
+            "type": "google_vmwareengine_network_peering",
+            "name": "peering",
+            "provider_name": "registry.terraform.io/hashicorp/google",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "before": null,
+                "after": {
+                    "description": null,
+                    "export_custom_routes": true,
+                    "export_custom_routes_with_public_ip": true,
+                    "import_custom_routes": true,
+                    "import_custom_routes_with_public_ip": true,
+                    "name": "network-peering-test",
+                    "peer_network": "#######@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",
+                    "peer_network_type": "STANDARD",
+                    "project": "terraform-dev-haonan",
+                    "timeouts": null
+                },
+                "after_unknown": {
+                    "create_time": true,
+                    "id": true,
+                    "peer_network": true,
+                    "state": true,
+                    "state_details": true,
+                    "uid": true,
+                    "update_time": true,
+                    "vmware_engine_network": true,
+                    "vmware_engine_network_canonical": true
+                },
+                "before_sensitive": false,
+                "after_sensitive": {}
+            }
+        }
+    ],
+    "configuration": {
+        "provider_config": {
+            "google": {
+                "name": "google",
+                "full_name": "registry.terraform.io/hashicorp/google"
+            }
+        },
+        "root_module": {
+            "resources": [
+                {
+                    "address": "google_compute_network.peered_network",
+                    "mode": "managed",
+                    "type": "google_compute_network",
+                    "name": "peered_network",
+                    "provider_config_key": "google",
+                    "expressions": {
+                        "auto_create_subnetworks": {
+                            "constant_value": false
+                        },
+                        "name": {
+                            "constant_value": "network-peering-test-nw"
+                        }
+                    },
+                    "schema_version": 0
+                },
+                {
+                    "address": "google_vmwareengine_network.vmware_network",
+                    "mode": "managed",
+                    "type": "google_vmwareengine_network",
+                    "name": "vmware_network",
+                    "provider_config_key": "google",
+                    "expressions": {
+                        "description": {
+                            "constant_value": "VMware Engine network for peering test"
+                        },
+                        "location": {
+                            "constant_value": "global"
+                        },
+                        "name": {
+                            "constant_value": "network-peering-test-ven"
+                        },
+                        "type": {
+                            "constant_value": "STANDARD"
+                        }
+                    },
+                    "schema_version": 0
+                },
+                {
+                    "address": "google_vmwareengine_network_peering.peering",
+                    "mode": "managed",
+                    "type": "google_vmwareengine_network_peering",
+                    "name": "peering",
+                    "provider_config_key": "google",
+                    "expressions": {
+                        "name": {
+                            "constant_value": "network-peering-test"
+                        },
+                        "peer_network": {
+                            "references": [
+                                "google_compute_network.peered_network.id",
+                                "google_compute_network.peered_network"
+                            ]
+                        },
+                        "peer_network_type": {
+                            "constant_value": "STANDARD"
+                        },
+                        "vmware_engine_network": {
+                            "references": [
+                                "google_vmwareengine_network.vmware_network.id",
+                                "google_vmwareengine_network.vmware_network"
+                            ]
+                        }
+                    },
+                    "schema_version": 0
+                }
+            ]
+        }
+    },
+    "relevant_attributes": [
+        {
+            "resource": "google_compute_network.peered_network",
+            "attribute": [
+                "id"
+            ]
+        },
+        {
+            "resource": "google_vmwareengine_network.vmware_network",
+            "attribute": [
+                "id"
+            ]
+        }
+    ],
+    "timestamp": "2025-11-18T22:42:04Z",
+    "errored": false
+}
