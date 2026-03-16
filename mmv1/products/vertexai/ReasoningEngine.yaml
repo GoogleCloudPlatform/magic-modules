@@ -134,6 +134,7 @@ properties:
         required: true
   - name: 'spec'
     type: NestedObject
+    default_from_api: true
     description: |-
       Optional. Configurations of the ReasoningEngine.
     properties:
@@ -407,3 +408,22 @@ properties:
           project's Cloud Storage and "roles/aiplatform.user" for using Vertex
           extensions. If not specified, the Vertex AI Reasoning Engine service
           Agent in the project will be used.
+      - name: 'identityType'
+        type: Enum
+        min_version: 'beta'
+        description: |-
+          Optional. The identity type to use for the Reasoning Engine.
+          If not specified, the `service_account` field will be used if set,
+          otherwise the default Vertex AI Reasoning Engine Service Agent in the project will be used.
+          Possible values:
+          * `SERVICE_ACCOUNT`: Use a custom service account if the `service_account` field is set, otherwise use the default Vertex AI Reasoning Engine Service Agent in the project.
+          * `AGENT_IDENTITY`: Use Agent Identity. The `service_account` field must not be set.
+        enum_values:
+          - 'SERVICE_ACCOUNT'
+          - 'AGENT_IDENTITY'
+      - name: 'effectiveIdentity'
+        type: String
+        min_version: 'beta'
+        description: |-
+          The identity to use for the Reasoning Engine.
+        output: true
