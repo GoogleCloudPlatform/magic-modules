@@ -272,6 +272,13 @@ func schemaNodeConfig() *schema.Schema {
 
 				"boot_disk": schemaBootDiskConfig(),
 
+				"gpudirect_strategy": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Computed:    true,
+					Description: `The type of GPU direct strategy to enable on the node.`
+				},
+
 				"guest_accelerator": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -1488,6 +1495,12 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.MachineType = v.(string)
 	}
 
+	if v, ok := nodeConfig["gpudirect_strategy"]; ok {
+		nc.GpuDirectConfig = &container.GpuDirectConfig{
+			GpuDirectStrategy: v.(string),
+		}
+	}
+
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
 		accels := v.([]interface{})
 		guestAccelerators := make([]*container.AcceleratorConfig, 0, len(accels))
@@ -2696,12 +2709,17 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		}
 	}
 
+	if c.GPUDirectConfig == nil {
+		c.GPUDirectConfig = &container.GPUDirectConfig{}
+	}
+
 	config = append(config, map[string]interface{}{
 		"machine_type":             c.MachineType,
 		"containerd_config":        flattenContainerdConfig(c.ContainerdConfig),
 		"disk_size_gb":             c.DiskSizeGb,
 		"disk_type":                c.DiskType,
 		"boot_disk":                flattenBootDiskConfig(c.BootDisk),
+		"gpudirect_strategy": c.GPUDirectConfig.GpuDirectStrategy,
 		"guest_accelerator":        flattenContainerGuestAccelerators(c.Accelerators),
 		"local_ssd_count":          c.LocalSsdCount,
 		"logging_variant":          flattenLoggingVariant(c.LoggingConfig),
