@@ -47,6 +47,13 @@ examples:
       target_tcp_proxy_name: 'test-proxy'
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+  - name: 'target_tcp_proxy_basic_beta'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      target_tcp_proxy_name: 'test-proxy'
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - name: target_tcp_proxy_backendless
     min_version: beta
     primary_resource_id: default
