@@ -36,4 +36,18 @@ If you added or modified a resource, you must run its corresponding integration 
    make test-integration-local TESTPATH=./test/services/alloydb TESTARGS='-run=TestAccAlloydbBackup' > debug_output/raw_logs/alloydbBackup.log 2>&1
    ```
 
-> **Note**: Every time you run an integration test, save the logs to a unique file so you don't overwrite the output of previous runs.
+**Note**: Every time you run an integration test, save the logs to a unique file so you don't overwrite the output of previous runs.
+
+### Using the Automation Script
+
+You can also use the included script to quickly run integration tests. It handles the `WRITE_FILES` export, creating the output directory, formatting a unique timestamped log file, and executing the `make test-integration-local` command.
+
+1. Navigate to the `magic-modules` directory or ensure `GOPATH` is set correctly.
+2. Run the script from the `scripts` file, passing the test path and test name:
+   ```bash
+   .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh <test-path> <test-name>
+   ```
+   **Example**:
+   ```bash
+   .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh ./test/services/alloydb TestAccAlloydbBackup
+   ```
