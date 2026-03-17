@@ -28,17 +28,26 @@ func TestAccKMSAutokeyConfig_kmsAutokeyUpdate(t *testing.T) {
 		},
 		CheckDestroy: testAccCheckKMSAutokeyConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
-      {
-        Config: testAccKMSAutokeyConfig_kmsAutokey(context),
-      },
-      {
-        ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"folder"},
-      },
+			{
+			 	Config: testAccKMSAutokeyConfig_kmsAutokey(context),
+			},
+			{
+				ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
+			},
 			{
 				Config: testAccKMSAutokeyConfig_kmsAutokeyDedicatedKeyProject(context),
+			},
+			{
+				ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
+			},
+			{
+			 	Config: testAccKMSAutokeyConfig_kmsAutokey(context),
 			},
 			{
 				ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
@@ -55,24 +64,33 @@ func TestAccKMSAutokeyConfig_kmsAutokeyUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"folder"},
 			},
-      {
-        Config: testAccKMSAutokeyConfig_kmsAutokeyDedicatedKeyProject(context),
-      },
-      {
-        ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"folder"},
-      },
-      {
-        Config: testAccKMSAutokeyConfig_kmsAutokeyDisabled(context),
-      },
-      {
-        ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"folder"},
-      },
+			{
+			 	Config: testAccKMSAutokeyConfig_kmsAutokeyDedicatedKeyProject(context),
+			},
+			{
+				ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
+			},
+			{
+			  Config: testAccKMSAutokeyConfig_kmsAutokeyDisabled(context),
+			},
+			{
+				ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
+			},
+			{
+			 	Config: testAccKMSAutokeyConfig_kmsAutokey(context),
+			},
+			{
+				ResourceName:            "google_kms_autokey_config.example-autokeyconfig",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
+			},
 		},
 	})
 }
