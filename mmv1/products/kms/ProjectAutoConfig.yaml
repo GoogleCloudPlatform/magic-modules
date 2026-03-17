@@ -49,7 +49,6 @@ custom_code:
   post_update: 'templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/kms_project_autokey_config.go.tmpl'
 exclude_sweeper: true
-include_in_tgc_next: true
 examples:
   - name: 'kms_autokey_config_project'
     primary_resource_id: 'example-autokeyconfig-project'
