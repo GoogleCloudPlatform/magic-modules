@@ -1496,9 +1496,7 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 	}
 
 	if v, ok := nodeConfig["gpudirect_strategy"]; ok {
-		nc.GpuDirectConfig = &container.GpuDirectConfig{
-			GpuDirectStrategy: v.(string),
-		}
+		nc.GpuDirectConfig = expandGpuDirectConfig(v)
 	}
 
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
@@ -1853,6 +1851,27 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 	}
 
 	return nc
+}
+
+func expandGpuDirectConfig(v interface{}) *container.GpuDirectConfig {
+	if v == nil {
+		return nil
+	}
+
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+
+	cfg := ls[0].(map[string]interface{})
+
+	if v, ok := cfg["gpu_direct_strategy"]; ok {
+		return &container.GpuDirectConfig{
+			GpuDirectStrategy: v.(string),
+		}
+	}
+
+	return nil
 }
 
 func expandBootDiskConfig(v interface{}) *container.BootDisk {
@@ -2709,9 +2728,6 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		}
 	}
 
-	if c.GPUDirectConfig == nil {
-		c.GPUDirectConfig = &container.GPUDirectConfig{}
-	}
 
 	config = append(config, map[string]interface{}{
 		"machine_type":             c.MachineType,
@@ -2719,7 +2735,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"disk_size_gb":             c.DiskSizeGb,
 		"disk_type":                c.DiskType,
 		"boot_disk":                flattenBootDiskConfig(c.BootDisk),
-		"gpudirect_strategy": c.GPUDirectConfig.GpuDirectStrategy,
+		"gpudirect_strategy": 		flattenGpuDirectConfig(c.GpuDirectConfig),
 		"guest_accelerator":        flattenContainerGuestAccelerators(c.Accelerators),
 		"local_ssd_count":          c.LocalSsdCount,
 		"logging_variant":          flattenLoggingVariant(c.LoggingConfig),
@@ -2802,6 +2818,15 @@ func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]int
 	}
 
 	return rmt
+}
+
+// GpuDirectConfig only has one field, flatten directly to string.
+func flattenGpuDirectConfig(c *container.GpuDirectConfig) string {
+	if c == nil {
+		return nil
+	}
+
+	return c.GpuDirectStrategy
 }
 
 func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) []map[string]interface{} {
