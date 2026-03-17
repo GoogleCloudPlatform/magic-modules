@@ -26,12 +26,12 @@ var ORDER = []string{"ga", "beta", "nightly", "alpha", "private", "internal"}
 // a superset of beta, and beta a superset of GA. Each version will have a
 // different version url.
 type Version struct {
-	CaiBaseUrl        string `yaml:"cai_base_url,omitempty"`
-	CaiLegacyBaseUrl  string `yaml:"cai_legacy_base_url,omitempty"`
-	BaseUrl           string `yaml:"base_url"`
-	Name              string
-	RepUrl            string `yaml:"rep_url,omitempty"`
-	DefaultRepEnabled bool   `yaml:"default_rep_enabled,omitempty"`
+	CaiBaseUrl       string `yaml:"cai_base_url,omitempty"`
+	CaiLegacyBaseUrl string `yaml:"cai_legacy_base_url,omitempty"`
+	BaseUrl          string `yaml:"base_url"`
+	Name             string
+	RepUrl           string `yaml:"rep_url,omitempty"`
+	UseGlobalUrl     bool   `yaml:"use_global_url,omitempty"`
 }
 
 func (v *Version) Validate(pName string) {
@@ -52,5 +52,5 @@ func (v *Version) CompareTo(other *Version) int {
 // fully rolled out support. Keep the UseGlobalUrl flag to allow users to
 // configure using a partially rolled out REP without an endpoint override
 func (v *Version) RepEnabled() bool {
-	return v.RepUrl != "" && v.DefaultRepEnabled
+	return v.RepUrl != "" && !v.UseGlobalUrl
 }
