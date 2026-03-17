@@ -8,15 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-{{- if eq $.TargetVersionName "ga" }}
-	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws"
-{{- else }}
-	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws/beta"
-{{- end }}
-
-	"github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -40,7 +32,7 @@ func ResourceContainerAwsNodePool() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 {{- if ne $.TargetVersionName "ga" }}
-			tpgdclresource.ResourceContainerAwsNodePoolCustomizeDiffFunc,
+			dcl.ResourceContainerAwsNodePoolCustomizeDiffFunc,
 {{- end }}
 			tpgresource.SetAnnotationsDiff,
 		),
@@ -600,7 +592,7 @@ func resourceContainerAwsNodePoolCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	obj := &containeraws.NodePool{
+	obj := &NodePool{
 		Autoscaling:       expandContainerAwsNodePoolAutoscaling(d.Get("autoscaling")),
 		Cluster:           dcl.String(d.Get("cluster").(string)),
 		Config:            expandContainerAwsNodePoolConfig(d.Get("config")),
@@ -621,7 +613,7 @@ func resourceContainerAwsNodePoolCreate(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id)
-	directive := tpgdclresource.CreateDirective
+	directive := dcl.CreateDirective
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -631,7 +623,7 @@ func resourceContainerAwsNodePoolCreate(d *schema.ResourceData, meta interface{}
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	client := NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -660,7 +652,7 @@ func resourceContainerAwsNodePoolRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	obj := &containeraws.NodePool{
+	obj := &NodePool{
 		Autoscaling:       expandContainerAwsNodePoolAutoscaling(d.Get("autoscaling")),
 		Cluster:           dcl.String(d.Get("cluster").(string)),
 		Config:            expandContainerAwsNodePoolConfig(d.Get("config")),
@@ -685,7 +677,7 @@ func resourceContainerAwsNodePoolRead(d *schema.ResourceData, meta interface{}) 
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	client := NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -695,7 +687,7 @@ func resourceContainerAwsNodePoolRead(d *schema.ResourceData, meta interface{}) 
 	res, err := client.GetNodePool(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("ContainerAwsNodePool %q", d.Id())
-		return tpgdclresource.HandleNotFoundDCLError(err, d, resourceName)
+		return dcl.HandleNotFoundDCLError(err, d, resourceName)
 	}
 
 	if err = d.Set("autoscaling", flattenContainerAwsNodePoolAutoscaling(res.Autoscaling)); err != nil {
@@ -728,7 +720,7 @@ func resourceContainerAwsNodePoolRead(d *schema.ResourceData, meta interface{}) 
 	if err = d.Set("kubelet_config", flattenContainerAwsNodePoolKubeletConfig(res.KubeletConfig)); err != nil {
 		return fmt.Errorf("error setting kubelet_config in state: %s", err)
 	}
-	if err = d.Set("management", tpgresource.FlattenContainerAwsNodePoolManagement(res.Management, d, config)); err != nil {
+	if err = d.Set("management", flattenContainerAwsNodePoolManagement(res.Management)); err != nil {
 		return fmt.Errorf("error setting management in state: %s", err)
 	}
 	if err = d.Set("project", res.Project); err != nil {
@@ -768,7 +760,7 @@ func resourceContainerAwsNodePoolUpdate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	obj := &containeraws.NodePool{
+	obj := &NodePool{
 		Autoscaling:       expandContainerAwsNodePoolAutoscaling(d.Get("autoscaling")),
 		Cluster:           dcl.String(d.Get("cluster").(string)),
 		Config:            expandContainerAwsNodePoolConfig(d.Get("config")),
@@ -783,7 +775,7 @@ func resourceContainerAwsNodePoolUpdate(d *schema.ResourceData, meta interface{}
 		Project:           dcl.String(project),
 		UpdateSettings:    expandContainerAwsNodePoolUpdateSettings(d.Get("update_settings")),
 	}
-	directive := tpgdclresource.UpdateDirective
+	directive := dcl.UpdateDirective
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -794,7 +786,7 @@ func resourceContainerAwsNodePoolUpdate(d *schema.ResourceData, meta interface{}
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
+	client := NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -823,7 +815,7 @@ func resourceContainerAwsNodePoolDelete(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	obj := &containeraws.NodePool{
+	obj := &NodePool{
 		Autoscaling:       expandContainerAwsNodePoolAutoscaling(d.Get("autoscaling")),
 		Cluster:           dcl.String(d.Get("cluster").(string)),
 		Config:            expandContainerAwsNodePoolConfig(d.Get("config")),
@@ -849,7 +841,7 @@ func resourceContainerAwsNodePoolDelete(d *schema.ResourceData, meta interface{}
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+	client := NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -885,22 +877,22 @@ func resourceContainerAwsNodePoolImport(d *schema.ResourceData, meta interface{}
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandContainerAwsNodePoolAutoscaling(o interface{}) *containeraws.NodePoolAutoscaling {
+func expandContainerAwsNodePoolAutoscaling(o interface{}) *NodePoolAutoscaling {
 	if o == nil {
-		return containeraws.EmptyNodePoolAutoscaling
+		return EmptyNodePoolAutoscaling
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyNodePoolAutoscaling
+		return EmptyNodePoolAutoscaling
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolAutoscaling{
+	return &NodePoolAutoscaling{
 		MaxNodeCount: dcl.Int64(int64(obj["max_node_count"].(int))),
 		MinNodeCount: dcl.Int64(int64(obj["min_node_count"].(int))),
 	}
 }
 
-func flattenContainerAwsNodePoolAutoscaling(obj *containeraws.NodePoolAutoscaling) interface{} {
+func flattenContainerAwsNodePoolAutoscaling(obj *NodePoolAutoscaling) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -913,16 +905,16 @@ func flattenContainerAwsNodePoolAutoscaling(obj *containeraws.NodePoolAutoscalin
 
 }
 
-func expandContainerAwsNodePoolConfig(o interface{}) *containeraws.NodePoolConfig {
+func expandContainerAwsNodePoolConfig(o interface{}) *NodePoolConfig {
 	if o == nil {
-		return containeraws.EmptyNodePoolConfig
+		return EmptyNodePoolConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyNodePoolConfig
+		return EmptyNodePoolConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolConfig{
+	return &NodePoolConfig{
 		ConfigEncryption:             expandContainerAwsNodePoolConfigConfigEncryption(obj["config_encryption"]),
 		IamInstanceProfile:           dcl.String(obj["iam_instance_profile"].(string)),
 		AutoscalingMetricsCollection: expandContainerAwsNodePoolConfigAutoscalingMetricsCollection(obj["autoscaling_metrics_collection"]),
@@ -934,7 +926,7 @@ func expandContainerAwsNodePoolConfig(o interface{}) *containeraws.NodePoolConfi
 		Labels:                       tpgresource.CheckStringMap(obj["labels"]),
 		ProxyConfig:                  expandContainerAwsNodePoolConfigProxyConfig(obj["proxy_config"]),
 		RootVolume:                   expandContainerAwsNodePoolConfigRootVolume(obj["root_volume"]),
-		SecurityGroupIds:             tpgdclresource.ExpandStringArray(obj["security_group_ids"]),
+		SecurityGroupIds:             dcl.ExpandStringArray(obj["security_group_ids"]),
 {{- if ne $.TargetVersionName "ga" }}
 		SpotConfig:                   expandContainerAwsNodePoolConfigSpotConfig(obj["spot_config"]),
 {{- end }}
@@ -944,7 +936,7 @@ func expandContainerAwsNodePoolConfig(o interface{}) *containeraws.NodePoolConfi
 	}
 }
 
-func flattenContainerAwsNodePoolConfig(obj *containeraws.NodePoolConfig) interface{} {
+func flattenContainerAwsNodePoolConfig(obj *NodePoolConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -973,21 +965,21 @@ func flattenContainerAwsNodePoolConfig(obj *containeraws.NodePoolConfig) interfa
 
 }
 
-func expandContainerAwsNodePoolConfigConfigEncryption(o interface{}) *containeraws.NodePoolConfigConfigEncryption {
+func expandContainerAwsNodePoolConfigConfigEncryption(o interface{}) *NodePoolConfigConfigEncryption {
 	if o == nil {
-		return containeraws.EmptyNodePoolConfigConfigEncryption
+		return EmptyNodePoolConfigConfigEncryption
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyNodePoolConfigConfigEncryption
+		return EmptyNodePoolConfigConfigEncryption
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolConfigConfigEncryption{
+	return &NodePoolConfigConfigEncryption{
 		KmsKeyArn: dcl.String(obj["kms_key_arn"].(string)),
 	}
 }
 
-func flattenContainerAwsNodePoolConfigConfigEncryption(obj *containeraws.NodePoolConfigConfigEncryption) interface{} {
+func flattenContainerAwsNodePoolConfigConfigEncryption(obj *NodePoolConfigConfigEncryption) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -999,22 +991,22 @@ func flattenContainerAwsNodePoolConfigConfigEncryption(obj *containeraws.NodePoo
 
 }
 
-func expandContainerAwsNodePoolConfigAutoscalingMetricsCollection(o interface{}) *containeraws.NodePoolConfigAutoscalingMetricsCollection {
+func expandContainerAwsNodePoolConfigAutoscalingMetricsCollection(o interface{}) *NodePoolConfigAutoscalingMetricsCollection {
 	if o == nil {
-		return containeraws.EmptyNodePoolConfigAutoscalingMetricsCollection
+		return EmptyNodePoolConfigAutoscalingMetricsCollection
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyNodePoolConfigAutoscalingMetricsCollection
+		return EmptyNodePoolConfigAutoscalingMetricsCollection
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolConfigAutoscalingMetricsCollection{
+	return &NodePoolConfigAutoscalingMetricsCollection{
 		Granularity: dcl.String(obj["granularity"].(string)),
-		Metrics:     tpgdclresource.ExpandStringArray(obj["metrics"]),
+		Metrics:     dcl.ExpandStringArray(obj["metrics"]),
 	}
 }
 
-func flattenContainerAwsNodePoolConfigAutoscalingMetricsCollection(obj *containeraws.NodePoolConfigAutoscalingMetricsCollection) interface{} {
+func flattenContainerAwsNodePoolConfigAutoscalingMetricsCollection(obj *NodePoolConfigAutoscalingMetricsCollection) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1028,7 +1020,7 @@ func flattenContainerAwsNodePoolConfigAutoscalingMetricsCollection(obj *containe
 
 }
 
-func expandContainerAwsNodePoolConfigInstancePlacement(o interface{}) *containeraws.NodePoolConfigInstancePlacement {
+func expandContainerAwsNodePoolConfigInstancePlacement(o interface{}) *NodePoolConfigInstancePlacement {
 	if o == nil {
 		return nil
 	}
@@ -1037,12 +1029,12 @@ func expandContainerAwsNodePoolConfigInstancePlacement(o interface{}) *container
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolConfigInstancePlacement{
-		Tenancy: containeraws.NodePoolConfigInstancePlacementTenancyEnumRef(obj["tenancy"].(string)),
+	return &NodePoolConfigInstancePlacement{
+		Tenancy: NodePoolConfigInstancePlacementTenancyEnumRef(obj["tenancy"].(string)),
 	}
 }
 
-func flattenContainerAwsNodePoolConfigInstancePlacement(obj *containeraws.NodePoolConfigInstancePlacement) interface{} {
+func flattenContainerAwsNodePoolConfigInstancePlacement(obj *NodePoolConfigInstancePlacement) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1055,22 +1047,22 @@ func flattenContainerAwsNodePoolConfigInstancePlacement(obj *containeraws.NodePo
 
 }
 
-func expandContainerAwsNodePoolConfigProxyConfig(o interface{}) *containeraws.NodePoolConfigProxyConfig {
+func expandContainerAwsNodePoolConfigProxyConfig(o interface{}) *NodePoolConfigProxyConfig {
 	if o == nil {
-		return containeraws.EmptyNodePoolConfigProxyConfig
+		return EmptyNodePoolConfigProxyConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyNodePoolConfigProxyConfig
+		return EmptyNodePoolConfigProxyConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolConfigProxyConfig{
+	return &NodePoolConfigProxyConfig{
 		SecretArn:     dcl.String(obj["secret_arn"].(string)),
 		SecretVersion: dcl.String(obj["secret_version"].(string)),
 	}
 }
 
-func flattenContainerAwsNodePoolConfigProxyConfig(obj *containeraws.NodePoolConfigProxyConfig) interface{} {
+func flattenContainerAwsNodePoolConfigProxyConfig(obj *NodePoolConfigProxyConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1083,7 +1075,7 @@ func flattenContainerAwsNodePoolConfigProxyConfig(obj *containeraws.NodePoolConf
 
 }
 
-func expandContainerAwsNodePoolConfigRootVolume(o interface{}) *containeraws.NodePoolConfigRootVolume {
+func expandContainerAwsNodePoolConfigRootVolume(o interface{}) *NodePoolConfigRootVolume {
 	if o == nil {
 		return nil
 	}
@@ -1092,16 +1084,16 @@ func expandContainerAwsNodePoolConfigRootVolume(o interface{}) *containeraws.Nod
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolConfigRootVolume{
+	return &NodePoolConfigRootVolume{
 		Iops:       dcl.Int64OrNil(int64(obj["iops"].(int))),
 		KmsKeyArn:  dcl.String(obj["kms_key_arn"].(string)),
 		SizeGib:    dcl.Int64OrNil(int64(obj["size_gib"].(int))),
 		Throughput: dcl.Int64OrNil(int64(obj["throughput"].(int))),
-		VolumeType: containeraws.NodePoolConfigRootVolumeVolumeTypeEnumRef(obj["volume_type"].(string)),
+		VolumeType: NodePoolConfigRootVolumeVolumeTypeEnumRef(obj["volume_type"].(string)),
 	}
 }
 
-func flattenContainerAwsNodePoolConfigRootVolume(obj *containeraws.NodePoolConfigRootVolume) interface{} {
+func flattenContainerAwsNodePoolConfigRootVolume(obj *NodePoolConfigRootVolume) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1118,21 +1110,21 @@ func flattenContainerAwsNodePoolConfigRootVolume(obj *containeraws.NodePoolConfi
 }
 
 {{- if ne $.TargetVersionName "ga" }}
-func expandContainerAwsNodePoolConfigSpotConfig(o interface{}) *containeraws.NodePoolConfigSpotConfig {
+func expandContainerAwsNodePoolConfigSpotConfig(o interface{}) *NodePoolConfigSpotConfig {
 	if o == nil {
-		return containeraws.EmptyNodePoolConfigSpotConfig
+		return EmptyNodePoolConfigSpotConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyNodePoolConfigSpotConfig
+		return EmptyNodePoolConfigSpotConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolConfigSpotConfig{
-		InstanceTypes: tpgdclresource.ExpandStringArray(obj["instance_types"]),
+	return &NodePoolConfigSpotConfig{
+		InstanceTypes: dcl.ExpandStringArray(obj["instance_types"]),
 	}
 }
 
-func flattenContainerAwsNodePoolConfigSpotConfig(obj *containeraws.NodePoolConfigSpotConfig) interface{} {
+func flattenContainerAwsNodePoolConfigSpotConfig(obj *NodePoolConfigSpotConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1145,21 +1137,21 @@ func flattenContainerAwsNodePoolConfigSpotConfig(obj *containeraws.NodePoolConfi
 }
 
 {{- end }}
-func expandContainerAwsNodePoolConfigSshConfig(o interface{}) *containeraws.NodePoolConfigSshConfig {
+func expandContainerAwsNodePoolConfigSshConfig(o interface{}) *NodePoolConfigSshConfig {
 	if o == nil {
-		return containeraws.EmptyNodePoolConfigSshConfig
+		return EmptyNodePoolConfigSshConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyNodePoolConfigSshConfig
+		return EmptyNodePoolConfigSshConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolConfigSshConfig{
+	return &NodePoolConfigSshConfig{
 		Ec2KeyPair: dcl.String(obj["ec2_key_pair"].(string)),
 	}
 }
 
-func flattenContainerAwsNodePoolConfigSshConfig(obj *containeraws.NodePoolConfigSshConfig) interface{} {
+func flattenContainerAwsNodePoolConfigSshConfig(obj *NodePoolConfigSshConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1170,17 +1162,17 @@ func flattenContainerAwsNodePoolConfigSshConfig(obj *containeraws.NodePoolConfig
 	return []interface{}{transformed}
 
 }
-func expandContainerAwsNodePoolConfigTaintsArray(o interface{}) []containeraws.NodePoolConfigTaints {
+func expandContainerAwsNodePoolConfigTaintsArray(o interface{}) []NodePoolConfigTaints {
 	if o == nil {
-		return make([]containeraws.NodePoolConfigTaints, 0)
+		return make([]NodePoolConfigTaints, 0)
 	}
 
 	objs := o.([]interface{})
 	if len(objs) == 0 || objs[0] == nil {
-		return make([]containeraws.NodePoolConfigTaints, 0)
+		return make([]NodePoolConfigTaints, 0)
 	}
 
-	items := make([]containeraws.NodePoolConfigTaints, 0, len(objs))
+	items := make([]NodePoolConfigTaints, 0, len(objs))
 	for _, item := range objs {
 		i := expandContainerAwsNodePoolConfigTaints(item)
 		items = append(items, *i)
@@ -1189,20 +1181,20 @@ func expandContainerAwsNodePoolConfigTaintsArray(o interface{}) []containeraws.N
 	return items
 }
 
-func expandContainerAwsNodePoolConfigTaints(o interface{}) *containeraws.NodePoolConfigTaints {
+func expandContainerAwsNodePoolConfigTaints(o interface{}) *NodePoolConfigTaints {
 	if o == nil {
-		return containeraws.EmptyNodePoolConfigTaints
+		return EmptyNodePoolConfigTaints
 	}
 
 	obj := o.(map[string]interface{})
-	return &containeraws.NodePoolConfigTaints{
-		Effect: containeraws.NodePoolConfigTaintsEffectEnumRef(obj["effect"].(string)),
+	return &NodePoolConfigTaints{
+		Effect: NodePoolConfigTaintsEffectEnumRef(obj["effect"].(string)),
 		Key:    dcl.String(obj["key"].(string)),
 		Value:  dcl.String(obj["value"].(string)),
 	}
 }
 
-func flattenContainerAwsNodePoolConfigTaintsArray(objs []containeraws.NodePoolConfigTaints) []interface{} {
+func flattenContainerAwsNodePoolConfigTaintsArray(objs []NodePoolConfigTaints) []interface{} {
 	if objs == nil {
 		return nil
 	}
@@ -1216,7 +1208,7 @@ func flattenContainerAwsNodePoolConfigTaintsArray(objs []containeraws.NodePoolCo
 	return items
 }
 
-func flattenContainerAwsNodePoolConfigTaints(obj *containeraws.NodePoolConfigTaints) interface{} {
+func flattenContainerAwsNodePoolConfigTaints(obj *NodePoolConfigTaints) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1230,21 +1222,21 @@ func flattenContainerAwsNodePoolConfigTaints(obj *containeraws.NodePoolConfigTai
 
 }
 
-func expandContainerAwsNodePoolMaxPodsConstraint(o interface{}) *containeraws.NodePoolMaxPodsConstraint {
+func expandContainerAwsNodePoolMaxPodsConstraint(o interface{}) *NodePoolMaxPodsConstraint {
 	if o == nil {
-		return containeraws.EmptyNodePoolMaxPodsConstraint
+		return EmptyNodePoolMaxPodsConstraint
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyNodePoolMaxPodsConstraint
+		return EmptyNodePoolMaxPodsConstraint
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolMaxPodsConstraint{
+	return &NodePoolMaxPodsConstraint{
 		MaxPodsPerNode: dcl.Int64(int64(obj["max_pods_per_node"].(int))),
 	}
 }
 
-func flattenContainerAwsNodePoolMaxPodsConstraint(obj *containeraws.NodePoolMaxPodsConstraint) interface{} {
+func flattenContainerAwsNodePoolMaxPodsConstraint(obj *NodePoolMaxPodsConstraint) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1256,7 +1248,7 @@ func flattenContainerAwsNodePoolMaxPodsConstraint(obj *containeraws.NodePoolMaxP
 
 }
 
-func expandContainerAwsNodePoolKubeletConfig(o interface{}) *containeraws.NodePoolKubeletConfig {
+func expandContainerAwsNodePoolKubeletConfig(o interface{}) *NodePoolKubeletConfig {
 	if o == nil {
 		return nil
 	}
@@ -1265,15 +1257,15 @@ func expandContainerAwsNodePoolKubeletConfig(o interface{}) *containeraws.NodePo
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolKubeletConfig{
+	return &NodePoolKubeletConfig{
 		CpuCfsQuota:       dcl.Bool(obj["cpu_cfs_quota"].(bool)),
 		CpuCfsQuotaPeriod: dcl.String(obj["cpu_cfs_quota_period"].(string)),
-		CpuManagerPolicy:  containeraws.NodePoolKubeletConfigCpuManagerPolicyEnumRef(obj["cpu_manager_policy"].(string)),
+		CpuManagerPolicy:  NodePoolKubeletConfigCpuManagerPolicyEnumRef(obj["cpu_manager_policy"].(string)),
 		PodPidsLimit:      dcl.Int64(int64(obj["pod_pids_limit"].(int))),
 	}
 }
 
-func flattenContainerAwsNodePoolKubeletConfig(obj *containeraws.NodePoolKubeletConfig) interface{} {
+func flattenContainerAwsNodePoolKubeletConfig(obj *NodePoolKubeletConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1288,7 +1280,7 @@ func flattenContainerAwsNodePoolKubeletConfig(obj *containeraws.NodePoolKubeletC
 
 }
 
-func expandContainerAwsNodePoolManagement(o interface{}) *containeraws.NodePoolManagement {
+func expandContainerAwsNodePoolManagement(o interface{}) *NodePoolManagement {
 	if o == nil {
 		return nil
 	}
@@ -1297,12 +1289,12 @@ func expandContainerAwsNodePoolManagement(o interface{}) *containeraws.NodePoolM
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolManagement{
+	return &NodePoolManagement{
 		AutoRepair: dcl.Bool(obj["auto_repair"].(bool)),
 	}
 }
 
-func flattenContainerAwsNodePoolManagement(obj *containeraws.NodePoolManagement) interface{} {
+func flattenContainerAwsNodePoolManagement(obj *NodePoolManagement) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1314,7 +1306,7 @@ func flattenContainerAwsNodePoolManagement(obj *containeraws.NodePoolManagement)
 
 }
 
-func expandContainerAwsNodePoolUpdateSettings(o interface{}) *containeraws.NodePoolUpdateSettings {
+func expandContainerAwsNodePoolUpdateSettings(o interface{}) *NodePoolUpdateSettings {
 	if o == nil {
 		return nil
 	}
@@ -1323,12 +1315,12 @@ func expandContainerAwsNodePoolUpdateSettings(o interface{}) *containeraws.NodeP
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolUpdateSettings{
+	return &NodePoolUpdateSettings{
 		SurgeSettings: expandContainerAwsNodePoolUpdateSettingsSurgeSettings(obj["surge_settings"]),
 	}
 }
 
-func flattenContainerAwsNodePoolUpdateSettings(obj *containeraws.NodePoolUpdateSettings) interface{} {
+func flattenContainerAwsNodePoolUpdateSettings(obj *NodePoolUpdateSettings) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1340,7 +1332,7 @@ func flattenContainerAwsNodePoolUpdateSettings(obj *containeraws.NodePoolUpdateS
 
 }
 
-func expandContainerAwsNodePoolUpdateSettingsSurgeSettings(o interface{}) *containeraws.NodePoolUpdateSettingsSurgeSettings {
+func expandContainerAwsNodePoolUpdateSettingsSurgeSettings(o interface{}) *NodePoolUpdateSettingsSurgeSettings {
 	if o == nil {
 		return nil
 	}
@@ -1349,13 +1341,13 @@ func expandContainerAwsNodePoolUpdateSettingsSurgeSettings(o interface{}) *conta
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.NodePoolUpdateSettingsSurgeSettings{
+	return &NodePoolUpdateSettingsSurgeSettings{
 		MaxSurge:       dcl.Int64OrNil(int64(obj["max_surge"].(int))),
 		MaxUnavailable: dcl.Int64OrNil(int64(obj["max_unavailable"].(int))),
 	}
 }
 
-func flattenContainerAwsNodePoolUpdateSettingsSurgeSettings(obj *containeraws.NodePoolUpdateSettingsSurgeSettings) interface{} {
+func flattenContainerAwsNodePoolUpdateSettingsSurgeSettings(obj *NodePoolUpdateSettingsSurgeSettings) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}

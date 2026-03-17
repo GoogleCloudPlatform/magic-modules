@@ -3,20 +3,15 @@ package dataplex_test
 import (
 	"context"
 	"fmt"
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-{{- if eq $.TargetVersionName "ga" }}
-	dataplex "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataplex"
-{{- else }}
-	dataplex "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataplex/beta"
-{{- end }}
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"strings"
 	"testing"
-
+	
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/services/dataplex"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 )
 
 func TestAccDataplexLake_BasicLake(t *testing.T) {
@@ -121,7 +116,7 @@ func testAccCheckDataplexLakeDestroyProducer(t *testing.T) func(s *terraform.Sta
 				UpdateTime:     dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
 			}
 
-			client := transport_tpg.NewDCLDataplexClient(config, config.UserAgent, billingProject, 0)
+			client := dataplex.NewDCLDataplexClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetLake(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_dataplex_lake still exists %v", obj)

@@ -3,20 +3,16 @@ package clouddeploy_test
 import (
 	"context"
 	"fmt"
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-{{- if eq $.TargetVersionName "ga" }}
-	clouddeploy "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/clouddeploy"
-{{- else }}
-	clouddeploy "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/clouddeploy/beta"
-{{- end }}
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/services/clouddeploy"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 )
 
 {{- if eq $.TargetVersionName "ga" }}
@@ -533,7 +529,7 @@ func testAccCheckClouddeployTargetDestroyProducer(t *testing.T) func(s *terrafor
 				UpdateTime:      dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
 			}
 
-			client := transport_tpg.NewDCLClouddeployClient(config, config.UserAgent, billingProject, 0)
+			client := clouddeploy.NewDCLClouddeployClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetTarget(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_clouddeploy_target still exists %v", obj)

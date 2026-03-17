@@ -3,20 +3,15 @@ package containerazure_test
 import (
 	"context"
 	"fmt"
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-{{- if eq $.TargetVersionName "ga" }}
-	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure"
-{{- else }}
-	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure/beta"
-{{- end }}
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"strings"
 	"testing"
-
+  
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 )
 
 func TestAccContainerAzureNodePool_BasicHandWritten(t *testing.T) {
@@ -588,7 +583,7 @@ func testAccCheckContainerAzureNodePoolDestroyProducer(t *testing.T) func(s *ter
 				UpdateTime:            dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
 			}
 
-			client := transport_tpg.NewDCLContainerAzureClient(config, config.UserAgent, billingProject, 0)
+			client := containerazure.NewDCLContainerAzureClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetNodePool(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_container_azure_node_pool still exists %v", obj)

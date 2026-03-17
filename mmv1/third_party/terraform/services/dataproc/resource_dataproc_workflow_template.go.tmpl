@@ -2216,7 +2216,7 @@ func resourceDataprocWorkflowTemplateCreate(d *schema.ResourceData, meta interfa
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLDataprocClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	client := NewDCLDataprocClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -2267,7 +2267,7 @@ func resourceDataprocWorkflowTemplateRead(d *schema.ResourceData, meta interface
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLDataprocClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	client := NewDCLDataprocClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -2361,7 +2361,7 @@ func resourceDataprocWorkflowTemplateDelete(d *schema.ResourceData, meta interfa
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLDataprocClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+	client := NewDCLDataprocClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)

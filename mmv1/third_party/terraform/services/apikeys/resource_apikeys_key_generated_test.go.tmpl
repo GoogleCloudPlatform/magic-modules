@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/services/apikeys"
 )
 
 func TestAccApikeysKey_AndroidKey(t *testing.T) {
@@ -432,7 +432,7 @@ func testAccCheckApikeysKeyDestroyProducer(t *testing.T) func(s *terraform.State
 				billingProject = config.BillingProject
 			}
 
-			obj := &Key{
+			obj := &apikeys.Key{
 				Name:                dcl.String(rs.Primary.Attributes["name"]),
 				DisplayName:         dcl.String(rs.Primary.Attributes["display_name"]),
 				Project:             dcl.StringOrNil(rs.Primary.Attributes["project"]),
@@ -441,7 +441,7 @@ func testAccCheckApikeysKeyDestroyProducer(t *testing.T) func(s *terraform.State
 				Uid:                 dcl.StringOrNil(rs.Primary.Attributes["uid"]),
 			}
 
-			client := transport_tpg.NewDCLApikeysClient(config, config.UserAgent, billingProject, 0)
+			client := apikeys.NewDCLApikeysClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetKey(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_apikeys_key still exists %v", obj)

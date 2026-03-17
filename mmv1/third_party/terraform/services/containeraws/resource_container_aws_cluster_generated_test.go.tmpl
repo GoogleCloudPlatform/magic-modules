@@ -3,20 +3,15 @@ package containeraws_test
 import (
 	"context"
 	"fmt"
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-{{- if eq $.TargetVersionName "ga" }}
-	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws"
-{{- else }}
-	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws/beta"
-{{- end }}
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 )
 
 func TestAccContainerAwsCluster_BasicHandWritten(t *testing.T) {
@@ -1015,7 +1010,7 @@ func testAccCheckContainerAwsClusterDestroyProducer(t *testing.T) func(s *terraf
 				UpdateTime:  dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
 			}
 
-			client := transport_tpg.NewDCLContainerAwsClient(config, config.UserAgent, billingProject, 0)
+			client := containeraws.NewDCLContainerAwsClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetCluster(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_container_aws_cluster still exists %v", obj)

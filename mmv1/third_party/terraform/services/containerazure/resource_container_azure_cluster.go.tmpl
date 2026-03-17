@@ -8,15 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-{{- if eq $.TargetVersionName "ga" }}
-	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure"
-{{- else }}
-	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure/beta"
-{{- end }}
-
-	"github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -571,7 +563,7 @@ func resourceContainerAzureClusterCreate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	obj := &containerazure.Cluster{
+	obj := &Cluster{
 		Authorization:               expandContainerAzureClusterAuthorization(d.Get("authorization")),
 		AzureRegion:                 dcl.String(d.Get("azure_region").(string)),
 		ControlPlane:                expandContainerAzureClusterControlPlane(d.Get("control_plane")),
@@ -595,7 +587,7 @@ func resourceContainerAzureClusterCreate(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id)
-	directive := tpgdclresource.CreateDirective
+	directive := dcl.CreateDirective
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -605,7 +597,7 @@ func resourceContainerAzureClusterCreate(d *schema.ResourceData, meta interface{
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	client := NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -634,7 +626,7 @@ func resourceContainerAzureClusterRead(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	obj := &containerazure.Cluster{
+	obj := &Cluster{
 		Authorization:               expandContainerAzureClusterAuthorization(d.Get("authorization")),
 		AzureRegion:                 dcl.String(d.Get("azure_region").(string)),
 		ControlPlane:                expandContainerAzureClusterControlPlane(d.Get("control_plane")),
@@ -662,7 +654,7 @@ func resourceContainerAzureClusterRead(d *schema.ResourceData, meta interface{})
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	client := NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -672,7 +664,7 @@ func resourceContainerAzureClusterRead(d *schema.ResourceData, meta interface{})
 	res, err := client.GetCluster(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("ContainerAzureCluster %q", d.Id())
-		return tpgdclresource.HandleNotFoundDCLError(err, d, resourceName)
+		return dcl.HandleNotFoundDCLError(err, d, resourceName)
 	}
 
 	if err = d.Set("authorization", flattenContainerAzureClusterAuthorization(res.Authorization)); err != nil {
@@ -756,7 +748,7 @@ func resourceContainerAzureClusterUpdate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	obj := &containerazure.Cluster{
+	obj := &Cluster{
 		Authorization:               expandContainerAzureClusterAuthorization(d.Get("authorization")),
 		AzureRegion:                 dcl.String(d.Get("azure_region").(string)),
 		ControlPlane:                expandContainerAzureClusterControlPlane(d.Get("control_plane")),
@@ -774,7 +766,7 @@ func resourceContainerAzureClusterUpdate(d *schema.ResourceData, meta interface{
 {{- end }}
 		Project:                     dcl.String(project),
 	}
-	directive := tpgdclresource.UpdateDirective
+	directive := dcl.UpdateDirective
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -785,7 +777,7 @@ func resourceContainerAzureClusterUpdate(d *schema.ResourceData, meta interface{
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
+	client := NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -814,7 +806,7 @@ func resourceContainerAzureClusterDelete(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	obj := &containerazure.Cluster{
+	obj := &Cluster{
 		Authorization:               expandContainerAzureClusterAuthorization(d.Get("authorization")),
 		AzureRegion:                 dcl.String(d.Get("azure_region").(string)),
 		ControlPlane:                expandContainerAzureClusterControlPlane(d.Get("control_plane")),
@@ -843,7 +835,7 @@ func resourceContainerAzureClusterDelete(d *schema.ResourceData, meta interface{
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+	client := NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -879,22 +871,22 @@ func resourceContainerAzureClusterImport(d *schema.ResourceData, meta interface{
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandContainerAzureClusterAuthorization(o interface{}) *containerazure.ClusterAuthorization {
+func expandContainerAzureClusterAuthorization(o interface{}) *ClusterAuthorization {
 	if o == nil {
-		return containerazure.EmptyClusterAuthorization
+		return EmptyClusterAuthorization
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyClusterAuthorization
+		return EmptyClusterAuthorization
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterAuthorization{
+	return &ClusterAuthorization{
 		AdminUsers:  expandContainerAzureClusterAuthorizationAdminUsersArray(obj["admin_users"]),
 		AdminGroups: expandContainerAzureClusterAuthorizationAdminGroupsArray(obj["admin_groups"]),
 	}
 }
 
-func flattenContainerAzureClusterAuthorization(obj *containerazure.ClusterAuthorization) interface{} {
+func flattenContainerAzureClusterAuthorization(obj *ClusterAuthorization) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -906,17 +898,17 @@ func flattenContainerAzureClusterAuthorization(obj *containerazure.ClusterAuthor
 	return []interface{}{transformed}
 
 }
-func expandContainerAzureClusterAuthorizationAdminUsersArray(o interface{}) []containerazure.ClusterAuthorizationAdminUsers {
+func expandContainerAzureClusterAuthorizationAdminUsersArray(o interface{}) []ClusterAuthorizationAdminUsers {
 	if o == nil {
-		return make([]containerazure.ClusterAuthorizationAdminUsers, 0)
+		return make([]ClusterAuthorizationAdminUsers, 0)
 	}
 
 	objs := o.([]interface{})
 	if len(objs) == 0 || objs[0] == nil {
-		return make([]containerazure.ClusterAuthorizationAdminUsers, 0)
+		return make([]ClusterAuthorizationAdminUsers, 0)
 	}
 
-	items := make([]containerazure.ClusterAuthorizationAdminUsers, 0, len(objs))
+	items := make([]ClusterAuthorizationAdminUsers, 0, len(objs))
 	for _, item := range objs {
 		i := expandContainerAzureClusterAuthorizationAdminUsers(item)
 		items = append(items, *i)
@@ -925,18 +917,18 @@ func expandContainerAzureClusterAuthorizationAdminUsersArray(o interface{}) []co
 	return items
 }
 
-func expandContainerAzureClusterAuthorizationAdminUsers(o interface{}) *containerazure.ClusterAuthorizationAdminUsers {
+func expandContainerAzureClusterAuthorizationAdminUsers(o interface{}) *ClusterAuthorizationAdminUsers {
 	if o == nil {
-		return containerazure.EmptyClusterAuthorizationAdminUsers
+		return EmptyClusterAuthorizationAdminUsers
 	}
 
 	obj := o.(map[string]interface{})
-	return &containerazure.ClusterAuthorizationAdminUsers{
+	return &ClusterAuthorizationAdminUsers{
 		Username: dcl.String(obj["username"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterAuthorizationAdminUsersArray(objs []containerazure.ClusterAuthorizationAdminUsers) []interface{} {
+func flattenContainerAzureClusterAuthorizationAdminUsersArray(objs []ClusterAuthorizationAdminUsers) []interface{} {
 	if objs == nil {
 		return nil
 	}
@@ -950,7 +942,7 @@ func flattenContainerAzureClusterAuthorizationAdminUsersArray(objs []containeraz
 	return items
 }
 
-func flattenContainerAzureClusterAuthorizationAdminUsers(obj *containerazure.ClusterAuthorizationAdminUsers) interface{} {
+func flattenContainerAzureClusterAuthorizationAdminUsers(obj *ClusterAuthorizationAdminUsers) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -961,17 +953,17 @@ func flattenContainerAzureClusterAuthorizationAdminUsers(obj *containerazure.Clu
 	return transformed
 
 }
-func expandContainerAzureClusterAuthorizationAdminGroupsArray(o interface{}) []containerazure.ClusterAuthorizationAdminGroups {
+func expandContainerAzureClusterAuthorizationAdminGroupsArray(o interface{}) []ClusterAuthorizationAdminGroups {
 	if o == nil {
-		return make([]containerazure.ClusterAuthorizationAdminGroups, 0)
+		return make([]ClusterAuthorizationAdminGroups, 0)
 	}
 
 	objs := o.([]interface{})
 	if len(objs) == 0 || objs[0] == nil {
-		return make([]containerazure.ClusterAuthorizationAdminGroups, 0)
+		return make([]ClusterAuthorizationAdminGroups, 0)
 	}
 
-	items := make([]containerazure.ClusterAuthorizationAdminGroups, 0, len(objs))
+	items := make([]ClusterAuthorizationAdminGroups, 0, len(objs))
 	for _, item := range objs {
 		i := expandContainerAzureClusterAuthorizationAdminGroups(item)
 		items = append(items, *i)
@@ -980,18 +972,18 @@ func expandContainerAzureClusterAuthorizationAdminGroupsArray(o interface{}) []c
 	return items
 }
 
-func expandContainerAzureClusterAuthorizationAdminGroups(o interface{}) *containerazure.ClusterAuthorizationAdminGroups {
+func expandContainerAzureClusterAuthorizationAdminGroups(o interface{}) *ClusterAuthorizationAdminGroups {
 	if o == nil {
-		return containerazure.EmptyClusterAuthorizationAdminGroups
+		return EmptyClusterAuthorizationAdminGroups
 	}
 
 	obj := o.(map[string]interface{})
-	return &containerazure.ClusterAuthorizationAdminGroups{
+	return &ClusterAuthorizationAdminGroups{
 		Group: dcl.String(obj["group"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterAuthorizationAdminGroupsArray(objs []containerazure.ClusterAuthorizationAdminGroups) []interface{} {
+func flattenContainerAzureClusterAuthorizationAdminGroupsArray(objs []ClusterAuthorizationAdminGroups) []interface{} {
 	if objs == nil {
 		return nil
 	}
@@ -1005,7 +997,7 @@ func flattenContainerAzureClusterAuthorizationAdminGroupsArray(objs []containera
 	return items
 }
 
-func flattenContainerAzureClusterAuthorizationAdminGroups(obj *containerazure.ClusterAuthorizationAdminGroups) interface{} {
+func flattenContainerAzureClusterAuthorizationAdminGroups(obj *ClusterAuthorizationAdminGroups) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1017,16 +1009,16 @@ func flattenContainerAzureClusterAuthorizationAdminGroups(obj *containerazure.Cl
 
 }
 
-func expandContainerAzureClusterControlPlane(o interface{}) *containerazure.ClusterControlPlane {
+func expandContainerAzureClusterControlPlane(o interface{}) *ClusterControlPlane {
 	if o == nil {
-		return containerazure.EmptyClusterControlPlane
+		return EmptyClusterControlPlane
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyClusterControlPlane
+		return EmptyClusterControlPlane
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterControlPlane{
+	return &ClusterControlPlane{
 		SshConfig:          expandContainerAzureClusterControlPlaneSshConfig(obj["ssh_config"]),
 		SubnetId:           dcl.String(obj["subnet_id"].(string)),
 		Version:            dcl.String(obj["version"].(string)),
@@ -1040,7 +1032,7 @@ func expandContainerAzureClusterControlPlane(o interface{}) *containerazure.Clus
 	}
 }
 
-func flattenContainerAzureClusterControlPlane(obj *containerazure.ClusterControlPlane) interface{} {
+func flattenContainerAzureClusterControlPlane(obj *ClusterControlPlane) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1061,21 +1053,21 @@ func flattenContainerAzureClusterControlPlane(obj *containerazure.ClusterControl
 
 }
 
-func expandContainerAzureClusterControlPlaneSshConfig(o interface{}) *containerazure.ClusterControlPlaneSshConfig {
+func expandContainerAzureClusterControlPlaneSshConfig(o interface{}) *ClusterControlPlaneSshConfig {
 	if o == nil {
-		return containerazure.EmptyClusterControlPlaneSshConfig
+		return EmptyClusterControlPlaneSshConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyClusterControlPlaneSshConfig
+		return EmptyClusterControlPlaneSshConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterControlPlaneSshConfig{
+	return &ClusterControlPlaneSshConfig{
 		AuthorizedKey: dcl.String(obj["authorized_key"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterControlPlaneSshConfig(obj *containerazure.ClusterControlPlaneSshConfig) interface{} {
+func flattenContainerAzureClusterControlPlaneSshConfig(obj *ClusterControlPlaneSshConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1087,21 +1079,21 @@ func flattenContainerAzureClusterControlPlaneSshConfig(obj *containerazure.Clust
 
 }
 
-func expandContainerAzureClusterControlPlaneDatabaseEncryption(o interface{}) *containerazure.ClusterControlPlaneDatabaseEncryption {
+func expandContainerAzureClusterControlPlaneDatabaseEncryption(o interface{}) *ClusterControlPlaneDatabaseEncryption {
 	if o == nil {
-		return containerazure.EmptyClusterControlPlaneDatabaseEncryption
+		return EmptyClusterControlPlaneDatabaseEncryption
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyClusterControlPlaneDatabaseEncryption
+		return EmptyClusterControlPlaneDatabaseEncryption
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterControlPlaneDatabaseEncryption{
+	return &ClusterControlPlaneDatabaseEncryption{
 		KeyId: dcl.String(obj["key_id"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterControlPlaneDatabaseEncryption(obj *containerazure.ClusterControlPlaneDatabaseEncryption) interface{} {
+func flattenContainerAzureClusterControlPlaneDatabaseEncryption(obj *ClusterControlPlaneDatabaseEncryption) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1113,7 +1105,7 @@ func flattenContainerAzureClusterControlPlaneDatabaseEncryption(obj *containeraz
 
 }
 
-func expandContainerAzureClusterControlPlaneMainVolume(o interface{}) *containerazure.ClusterControlPlaneMainVolume {
+func expandContainerAzureClusterControlPlaneMainVolume(o interface{}) *ClusterControlPlaneMainVolume {
 	if o == nil {
 		return nil
 	}
@@ -1122,12 +1114,12 @@ func expandContainerAzureClusterControlPlaneMainVolume(o interface{}) *container
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterControlPlaneMainVolume{
+	return &ClusterControlPlaneMainVolume{
 		SizeGib: dcl.Int64OrNil(int64(obj["size_gib"].(int))),
 	}
 }
 
-func flattenContainerAzureClusterControlPlaneMainVolume(obj *containerazure.ClusterControlPlaneMainVolume) interface{} {
+func flattenContainerAzureClusterControlPlaneMainVolume(obj *ClusterControlPlaneMainVolume) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1139,22 +1131,22 @@ func flattenContainerAzureClusterControlPlaneMainVolume(obj *containerazure.Clus
 
 }
 
-func expandContainerAzureClusterControlPlaneProxyConfig(o interface{}) *containerazure.ClusterControlPlaneProxyConfig {
+func expandContainerAzureClusterControlPlaneProxyConfig(o interface{}) *ClusterControlPlaneProxyConfig {
 	if o == nil {
-		return containerazure.EmptyClusterControlPlaneProxyConfig
+		return EmptyClusterControlPlaneProxyConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyClusterControlPlaneProxyConfig
+		return EmptyClusterControlPlaneProxyConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterControlPlaneProxyConfig{
+	return &ClusterControlPlaneProxyConfig{
 		ResourceGroupId: dcl.String(obj["resource_group_id"].(string)),
 		SecretId:        dcl.String(obj["secret_id"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterControlPlaneProxyConfig(obj *containerazure.ClusterControlPlaneProxyConfig) interface{} {
+func flattenContainerAzureClusterControlPlaneProxyConfig(obj *ClusterControlPlaneProxyConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1166,17 +1158,17 @@ func flattenContainerAzureClusterControlPlaneProxyConfig(obj *containerazure.Clu
 	return []interface{}{transformed}
 
 }
-func expandContainerAzureClusterControlPlaneReplicaPlacementsArray(o interface{}) []containerazure.ClusterControlPlaneReplicaPlacements {
+func expandContainerAzureClusterControlPlaneReplicaPlacementsArray(o interface{}) []ClusterControlPlaneReplicaPlacements {
 	if o == nil {
-		return make([]containerazure.ClusterControlPlaneReplicaPlacements, 0)
+		return make([]ClusterControlPlaneReplicaPlacements, 0)
 	}
 
 	objs := o.([]interface{})
 	if len(objs) == 0 || objs[0] == nil {
-		return make([]containerazure.ClusterControlPlaneReplicaPlacements, 0)
+		return make([]ClusterControlPlaneReplicaPlacements, 0)
 	}
 
-	items := make([]containerazure.ClusterControlPlaneReplicaPlacements, 0, len(objs))
+	items := make([]ClusterControlPlaneReplicaPlacements, 0, len(objs))
 	for _, item := range objs {
 		i := expandContainerAzureClusterControlPlaneReplicaPlacements(item)
 		items = append(items, *i)
@@ -1185,19 +1177,19 @@ func expandContainerAzureClusterControlPlaneReplicaPlacementsArray(o interface{}
 	return items
 }
 
-func expandContainerAzureClusterControlPlaneReplicaPlacements(o interface{}) *containerazure.ClusterControlPlaneReplicaPlacements {
+func expandContainerAzureClusterControlPlaneReplicaPlacements(o interface{}) *ClusterControlPlaneReplicaPlacements {
 	if o == nil {
-		return containerazure.EmptyClusterControlPlaneReplicaPlacements
+		return EmptyClusterControlPlaneReplicaPlacements
 	}
 
 	obj := o.(map[string]interface{})
-	return &containerazure.ClusterControlPlaneReplicaPlacements{
+	return &ClusterControlPlaneReplicaPlacements{
 		AzureAvailabilityZone: dcl.String(obj["azure_availability_zone"].(string)),
 		SubnetId:              dcl.String(obj["subnet_id"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterControlPlaneReplicaPlacementsArray(objs []containerazure.ClusterControlPlaneReplicaPlacements) []interface{} {
+func flattenContainerAzureClusterControlPlaneReplicaPlacementsArray(objs []ClusterControlPlaneReplicaPlacements) []interface{} {
 	if objs == nil {
 		return nil
 	}
@@ -1211,7 +1203,7 @@ func flattenContainerAzureClusterControlPlaneReplicaPlacementsArray(objs []conta
 	return items
 }
 
-func flattenContainerAzureClusterControlPlaneReplicaPlacements(obj *containerazure.ClusterControlPlaneReplicaPlacements) interface{} {
+func flattenContainerAzureClusterControlPlaneReplicaPlacements(obj *ClusterControlPlaneReplicaPlacements) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1224,7 +1216,7 @@ func flattenContainerAzureClusterControlPlaneReplicaPlacements(obj *containerazu
 
 }
 
-func expandContainerAzureClusterControlPlaneRootVolume(o interface{}) *containerazure.ClusterControlPlaneRootVolume {
+func expandContainerAzureClusterControlPlaneRootVolume(o interface{}) *ClusterControlPlaneRootVolume {
 	if o == nil {
 		return nil
 	}
@@ -1233,12 +1225,12 @@ func expandContainerAzureClusterControlPlaneRootVolume(o interface{}) *container
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterControlPlaneRootVolume{
+	return &ClusterControlPlaneRootVolume{
 		SizeGib: dcl.Int64OrNil(int64(obj["size_gib"].(int))),
 	}
 }
 
-func flattenContainerAzureClusterControlPlaneRootVolume(obj *containerazure.ClusterControlPlaneRootVolume) interface{} {
+func flattenContainerAzureClusterControlPlaneRootVolume(obj *ClusterControlPlaneRootVolume) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1250,21 +1242,21 @@ func flattenContainerAzureClusterControlPlaneRootVolume(obj *containerazure.Clus
 
 }
 
-func expandContainerAzureClusterFleet(o interface{}) *containerazure.ClusterFleet {
+func expandContainerAzureClusterFleet(o interface{}) *ClusterFleet {
 	if o == nil {
-		return containerazure.EmptyClusterFleet
+		return EmptyClusterFleet
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyClusterFleet
+		return EmptyClusterFleet
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterFleet{
+	return &ClusterFleet{
 		Project: dcl.StringOrNil(obj["project"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterFleet(obj *containerazure.ClusterFleet) interface{} {
+func flattenContainerAzureClusterFleet(obj *ClusterFleet) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1277,23 +1269,23 @@ func flattenContainerAzureClusterFleet(obj *containerazure.ClusterFleet) interfa
 
 }
 
-func expandContainerAzureClusterNetworking(o interface{}) *containerazure.ClusterNetworking {
+func expandContainerAzureClusterNetworking(o interface{}) *ClusterNetworking {
 	if o == nil {
-		return containerazure.EmptyClusterNetworking
+		return EmptyClusterNetworking
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyClusterNetworking
+		return EmptyClusterNetworking
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterNetworking{
-		PodAddressCidrBlocks:     tpgdclresource.ExpandStringArray(obj["pod_address_cidr_blocks"]),
-		ServiceAddressCidrBlocks: tpgdclresource.ExpandStringArray(obj["service_address_cidr_blocks"]),
+	return &ClusterNetworking{
+		PodAddressCidrBlocks:     dcl.ExpandStringArray(obj["pod_address_cidr_blocks"]),
+		ServiceAddressCidrBlocks: dcl.ExpandStringArray(obj["service_address_cidr_blocks"]),
 		VirtualNetworkId:         dcl.String(obj["virtual_network_id"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterNetworking(obj *containerazure.ClusterNetworking) interface{} {
+func flattenContainerAzureClusterNetworking(obj *ClusterNetworking) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1307,22 +1299,22 @@ func flattenContainerAzureClusterNetworking(obj *containerazure.ClusterNetworkin
 
 }
 
-func expandContainerAzureClusterAzureServicesAuthentication(o interface{}) *containerazure.ClusterAzureServicesAuthentication {
+func expandContainerAzureClusterAzureServicesAuthentication(o interface{}) *ClusterAzureServicesAuthentication {
 	if o == nil {
-		return containerazure.EmptyClusterAzureServicesAuthentication
+		return EmptyClusterAzureServicesAuthentication
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyClusterAzureServicesAuthentication
+		return EmptyClusterAzureServicesAuthentication
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterAzureServicesAuthentication{
+	return &ClusterAzureServicesAuthentication{
 		ApplicationId: dcl.String(obj["application_id"].(string)),
 		TenantId:      dcl.String(obj["tenant_id"].(string)),
 	}
 }
 
-func flattenContainerAzureClusterAzureServicesAuthentication(obj *containerazure.ClusterAzureServicesAuthentication) interface{} {
+func flattenContainerAzureClusterAzureServicesAuthentication(obj *ClusterAzureServicesAuthentication) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1336,7 +1328,7 @@ func flattenContainerAzureClusterAzureServicesAuthentication(obj *containerazure
 }
 
 {{- if ne $.TargetVersionName "ga" }}
-func expandContainerAzureClusterLoggingConfig(o interface{}) *containerazure.ClusterLoggingConfig {
+func expandContainerAzureClusterLoggingConfig(o interface{}) *ClusterLoggingConfig {
 	if o == nil {
 		return nil
 	}
@@ -1345,12 +1337,12 @@ func expandContainerAzureClusterLoggingConfig(o interface{}) *containerazure.Clu
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterLoggingConfig{
+	return &ClusterLoggingConfig{
 		ComponentConfig: expandContainerAzureClusterLoggingConfigComponentConfig(obj["component_config"]),
 	}
 }
 
-func flattenContainerAzureClusterLoggingConfig(obj *containerazure.ClusterLoggingConfig) interface{} {
+func flattenContainerAzureClusterLoggingConfig(obj *ClusterLoggingConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1362,7 +1354,7 @@ func flattenContainerAzureClusterLoggingConfig(obj *containerazure.ClusterLoggin
 
 }
 
-func expandContainerAzureClusterLoggingConfigComponentConfig(o interface{}) *containerazure.ClusterLoggingConfigComponentConfig {
+func expandContainerAzureClusterLoggingConfigComponentConfig(o interface{}) *ClusterLoggingConfigComponentConfig {
 	if o == nil {
 		return nil
 	}
@@ -1371,12 +1363,12 @@ func expandContainerAzureClusterLoggingConfigComponentConfig(o interface{}) *con
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.ClusterLoggingConfigComponentConfig{
+	return &ClusterLoggingConfigComponentConfig{
 		EnableComponents: expandContainerAzureClusterLoggingConfigComponentConfigEnableComponentsArray(obj["enable_components"]),
 	}
 }
 
-func flattenContainerAzureClusterLoggingConfigComponentConfig(obj *containerazure.ClusterLoggingConfigComponentConfig) interface{} {
+func flattenContainerAzureClusterLoggingConfigComponentConfig(obj *ClusterLoggingConfigComponentConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1389,7 +1381,7 @@ func flattenContainerAzureClusterLoggingConfigComponentConfig(obj *containerazur
 }
 
 {{- end }}
-func flattenContainerAzureClusterWorkloadIdentityConfig(obj *containerazure.ClusterWorkloadIdentityConfig) interface{} {
+func flattenContainerAzureClusterWorkloadIdentityConfig(obj *ClusterWorkloadIdentityConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1419,7 +1411,7 @@ func flattenContainerAzureClusterAnnotations(v map[string]string, d *schema.Reso
 }
 {{- if ne $.TargetVersionName "ga" }}
 
-func flattenContainerAzureClusterLoggingConfigComponentConfigEnableComponentsArray(obj []containerazure.ClusterLoggingConfigComponentConfigEnableComponentsEnum) interface{} {
+func flattenContainerAzureClusterLoggingConfigComponentConfigEnableComponentsArray(obj []ClusterLoggingConfigComponentConfigEnableComponentsEnum) interface{} {
 	if obj == nil {
 		return nil
 	}
@@ -1429,11 +1421,11 @@ func flattenContainerAzureClusterLoggingConfigComponentConfigEnableComponentsArr
 	}
 	return items
 }
-func expandContainerAzureClusterLoggingConfigComponentConfigEnableComponentsArray(o interface{}) []containerazure.ClusterLoggingConfigComponentConfigEnableComponentsEnum {
+func expandContainerAzureClusterLoggingConfigComponentConfigEnableComponentsArray(o interface{}) []ClusterLoggingConfigComponentConfigEnableComponentsEnum {
 	objs := o.([]interface{})
-	items := make([]containerazure.ClusterLoggingConfigComponentConfigEnableComponentsEnum, 0, len(objs))
+	items := make([]ClusterLoggingConfigComponentConfigEnableComponentsEnum, 0, len(objs))
 	for _, item := range objs {
-		i := containerazure.ClusterLoggingConfigComponentConfigEnableComponentsEnumRef(item.(string))
+		i := ClusterLoggingConfigComponentConfigEnableComponentsEnumRef(item.(string))
 		items = append(items, *i)
 	}
 	return items

@@ -8,15 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-{{- if eq $.TargetVersionName "ga" }}
-	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure"
-{{- else }}
-	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure/beta"
-{{- end }}
-
-	"github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -345,7 +337,7 @@ func resourceContainerAzureNodePoolCreate(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	obj := &containerazure.NodePool{
+	obj := &NodePool{
 		Autoscaling:           expandContainerAzureNodePoolAutoscaling(d.Get("autoscaling")),
 		Cluster:               dcl.String(d.Get("cluster").(string)),
 		Config:                expandContainerAzureNodePoolConfig(d.Get("config")),
@@ -365,7 +357,7 @@ func resourceContainerAzureNodePoolCreate(d *schema.ResourceData, meta interface
 		return fmt.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id)
-	directive := tpgdclresource.CreateDirective
+	directive := dcl.CreateDirective
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -375,7 +367,7 @@ func resourceContainerAzureNodePoolCreate(d *schema.ResourceData, meta interface
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	client := NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -404,7 +396,7 @@ func resourceContainerAzureNodePoolRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	obj := &containerazure.NodePool{
+	obj := &NodePool{
 		Autoscaling:           expandContainerAzureNodePoolAutoscaling(d.Get("autoscaling")),
 		Cluster:               dcl.String(d.Get("cluster").(string)),
 		Config:                expandContainerAzureNodePoolConfig(d.Get("config")),
@@ -428,7 +420,7 @@ func resourceContainerAzureNodePoolRead(d *schema.ResourceData, meta interface{}
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	client := NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -438,7 +430,7 @@ func resourceContainerAzureNodePoolRead(d *schema.ResourceData, meta interface{}
 	res, err := client.GetNodePool(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("ContainerAzureNodePool %q", d.Id())
-		return tpgdclresource.HandleNotFoundDCLError(err, d, resourceName)
+		return dcl.HandleNotFoundDCLError(err, d, resourceName)
 	}
 
 	if err = d.Set("autoscaling", flattenContainerAzureNodePoolAutoscaling(res.Autoscaling)); err != nil {
@@ -471,7 +463,7 @@ func resourceContainerAzureNodePoolRead(d *schema.ResourceData, meta interface{}
 	if err = d.Set("effective_annotations", res.Annotations); err != nil {
 		return fmt.Errorf("error setting effective_annotations in state: %s", err)
 	}
-	if err = d.Set("management", tpgresource.FlattenContainerAzureNodePoolManagement(res.Management, d, config)); err != nil {
+	if err = d.Set("management", flattenContainerAzureNodePoolManagement(res.Management)); err != nil {
 		return fmt.Errorf("error setting management in state: %s", err)
 	}
 	if err = d.Set("project", res.Project); err != nil {
@@ -508,7 +500,7 @@ func resourceContainerAzureNodePoolUpdate(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	obj := &containerazure.NodePool{
+	obj := &NodePool{
 		Autoscaling:           expandContainerAzureNodePoolAutoscaling(d.Get("autoscaling")),
 		Cluster:               dcl.String(d.Get("cluster").(string)),
 		Config:                expandContainerAzureNodePoolConfig(d.Get("config")),
@@ -522,7 +514,7 @@ func resourceContainerAzureNodePoolUpdate(d *schema.ResourceData, meta interface
 		Management:            expandContainerAzureNodePoolManagement(d.Get("management")),
 		Project:               dcl.String(project),
 	}
-	directive := tpgdclresource.UpdateDirective
+	directive := dcl.UpdateDirective
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -533,7 +525,7 @@ func resourceContainerAzureNodePoolUpdate(d *schema.ResourceData, meta interface
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
+	client := NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -562,7 +554,7 @@ func resourceContainerAzureNodePoolDelete(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	obj := &containerazure.NodePool{
+	obj := &NodePool{
 		Autoscaling:           expandContainerAzureNodePoolAutoscaling(d.Get("autoscaling")),
 		Cluster:               dcl.String(d.Get("cluster").(string)),
 		Config:                expandContainerAzureNodePoolConfig(d.Get("config")),
@@ -587,7 +579,7 @@ func resourceContainerAzureNodePoolDelete(d *schema.ResourceData, meta interface
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+	client := NewDCLContainerAzureClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -623,22 +615,22 @@ func resourceContainerAzureNodePoolImport(d *schema.ResourceData, meta interface
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandContainerAzureNodePoolAutoscaling(o interface{}) *containerazure.NodePoolAutoscaling {
+func expandContainerAzureNodePoolAutoscaling(o interface{}) *NodePoolAutoscaling {
 	if o == nil {
-		return containerazure.EmptyNodePoolAutoscaling
+		return EmptyNodePoolAutoscaling
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyNodePoolAutoscaling
+		return EmptyNodePoolAutoscaling
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.NodePoolAutoscaling{
+	return &NodePoolAutoscaling{
 		MaxNodeCount: dcl.Int64(int64(obj["max_node_count"].(int))),
 		MinNodeCount: dcl.Int64(int64(obj["min_node_count"].(int))),
 	}
 }
 
-func flattenContainerAzureNodePoolAutoscaling(obj *containerazure.NodePoolAutoscaling) interface{} {
+func flattenContainerAzureNodePoolAutoscaling(obj *NodePoolAutoscaling) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -651,16 +643,16 @@ func flattenContainerAzureNodePoolAutoscaling(obj *containerazure.NodePoolAutosc
 
 }
 
-func expandContainerAzureNodePoolConfig(o interface{}) *containerazure.NodePoolConfig {
+func expandContainerAzureNodePoolConfig(o interface{}) *NodePoolConfig {
 	if o == nil {
-		return containerazure.EmptyNodePoolConfig
+		return EmptyNodePoolConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyNodePoolConfig
+		return EmptyNodePoolConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.NodePoolConfig{
+	return &NodePoolConfig{
 		SshConfig:   expandContainerAzureNodePoolConfigSshConfig(obj["ssh_config"]),
 {{- if ne $.TargetVersionName "ga" }}
 		ImageType:   dcl.StringOrNil(obj["image_type"].(string)),
@@ -673,7 +665,7 @@ func expandContainerAzureNodePoolConfig(o interface{}) *containerazure.NodePoolC
 	}
 }
 
-func flattenContainerAzureNodePoolConfig(obj *containerazure.NodePoolConfig) interface{} {
+func flattenContainerAzureNodePoolConfig(obj *NodePoolConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -693,21 +685,21 @@ func flattenContainerAzureNodePoolConfig(obj *containerazure.NodePoolConfig) int
 
 }
 
-func expandContainerAzureNodePoolConfigSshConfig(o interface{}) *containerazure.NodePoolConfigSshConfig {
+func expandContainerAzureNodePoolConfigSshConfig(o interface{}) *NodePoolConfigSshConfig {
 	if o == nil {
-		return containerazure.EmptyNodePoolConfigSshConfig
+		return EmptyNodePoolConfigSshConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyNodePoolConfigSshConfig
+		return EmptyNodePoolConfigSshConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.NodePoolConfigSshConfig{
+	return &NodePoolConfigSshConfig{
 		AuthorizedKey: dcl.String(obj["authorized_key"].(string)),
 	}
 }
 
-func flattenContainerAzureNodePoolConfigSshConfig(obj *containerazure.NodePoolConfigSshConfig) interface{} {
+func flattenContainerAzureNodePoolConfigSshConfig(obj *NodePoolConfigSshConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -719,22 +711,22 @@ func flattenContainerAzureNodePoolConfigSshConfig(obj *containerazure.NodePoolCo
 
 }
 
-func expandContainerAzureNodePoolConfigProxyConfig(o interface{}) *containerazure.NodePoolConfigProxyConfig {
+func expandContainerAzureNodePoolConfigProxyConfig(o interface{}) *NodePoolConfigProxyConfig {
 	if o == nil {
-		return containerazure.EmptyNodePoolConfigProxyConfig
+		return EmptyNodePoolConfigProxyConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyNodePoolConfigProxyConfig
+		return EmptyNodePoolConfigProxyConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.NodePoolConfigProxyConfig{
+	return &NodePoolConfigProxyConfig{
 		ResourceGroupId: dcl.String(obj["resource_group_id"].(string)),
 		SecretId:        dcl.String(obj["secret_id"].(string)),
 	}
 }
 
-func flattenContainerAzureNodePoolConfigProxyConfig(obj *containerazure.NodePoolConfigProxyConfig) interface{} {
+func flattenContainerAzureNodePoolConfigProxyConfig(obj *NodePoolConfigProxyConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -747,7 +739,7 @@ func flattenContainerAzureNodePoolConfigProxyConfig(obj *containerazure.NodePool
 
 }
 
-func expandContainerAzureNodePoolConfigRootVolume(o interface{}) *containerazure.NodePoolConfigRootVolume {
+func expandContainerAzureNodePoolConfigRootVolume(o interface{}) *NodePoolConfigRootVolume {
 	if o == nil {
 		return nil
 	}
@@ -756,12 +748,12 @@ func expandContainerAzureNodePoolConfigRootVolume(o interface{}) *containerazure
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.NodePoolConfigRootVolume{
+	return &NodePoolConfigRootVolume{
 		SizeGib: dcl.Int64OrNil(int64(obj["size_gib"].(int))),
 	}
 }
 
-func flattenContainerAzureNodePoolConfigRootVolume(obj *containerazure.NodePoolConfigRootVolume) interface{} {
+func flattenContainerAzureNodePoolConfigRootVolume(obj *NodePoolConfigRootVolume) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -773,21 +765,21 @@ func flattenContainerAzureNodePoolConfigRootVolume(obj *containerazure.NodePoolC
 
 }
 
-func expandContainerAzureNodePoolMaxPodsConstraint(o interface{}) *containerazure.NodePoolMaxPodsConstraint {
+func expandContainerAzureNodePoolMaxPodsConstraint(o interface{}) *NodePoolMaxPodsConstraint {
 	if o == nil {
-		return containerazure.EmptyNodePoolMaxPodsConstraint
+		return EmptyNodePoolMaxPodsConstraint
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containerazure.EmptyNodePoolMaxPodsConstraint
+		return EmptyNodePoolMaxPodsConstraint
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.NodePoolMaxPodsConstraint{
+	return &NodePoolMaxPodsConstraint{
 		MaxPodsPerNode: dcl.Int64(int64(obj["max_pods_per_node"].(int))),
 	}
 }
 
-func flattenContainerAzureNodePoolMaxPodsConstraint(obj *containerazure.NodePoolMaxPodsConstraint) interface{} {
+func flattenContainerAzureNodePoolMaxPodsConstraint(obj *NodePoolMaxPodsConstraint) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -799,7 +791,7 @@ func flattenContainerAzureNodePoolMaxPodsConstraint(obj *containerazure.NodePool
 
 }
 
-func expandContainerAzureNodePoolManagement(o interface{}) *containerazure.NodePoolManagement {
+func expandContainerAzureNodePoolManagement(o interface{}) *NodePoolManagement {
 	if o == nil {
 		return nil
 	}
@@ -808,12 +800,12 @@ func expandContainerAzureNodePoolManagement(o interface{}) *containerazure.NodeP
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containerazure.NodePoolManagement{
+	return &NodePoolManagement{
 		AutoRepair: dcl.Bool(obj["auto_repair"].(bool)),
 	}
 }
 
-func flattenContainerAzureNodePoolManagement(obj *containerazure.NodePoolManagement) interface{} {
+func flattenContainerAzureNodePoolManagement(obj *NodePoolManagement) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}

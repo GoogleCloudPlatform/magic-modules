@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 	
-	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/services/assuredworkloads"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 )
 
 {{- if ne $.TargetVersionName "ga" }}
@@ -365,23 +365,23 @@ func testAccCheckAssuredWorkloadsWorkloadDestroyProducer(t *testing.T) func(s *t
 				billingProject = config.BillingProject
 			}
 
-			obj := &Workload{
-				ComplianceRegime:              WorkloadComplianceRegimeEnumRef(rs.Primary.Attributes["compliance_regime"]),
+			obj := &assuredworkloads.Workload{
+				ComplianceRegime:              assuredworkloads.WorkloadComplianceRegimeEnumRef(rs.Primary.Attributes["compliance_regime"]),
 				DisplayName:                   dcl.String(rs.Primary.Attributes["display_name"]),
 				Location:                      dcl.String(rs.Primary.Attributes["location"]),
 				Organization:                  dcl.String(rs.Primary.Attributes["organization"]),
 				BillingAccount:                dcl.String(rs.Primary.Attributes["billing_account"]),
 				EnableSovereignControls:       dcl.Bool(rs.Primary.Attributes["enable_sovereign_controls"] == "true"),
-				Partner:                       WorkloadPartnerEnumRef(rs.Primary.Attributes["partner"]),
+				Partner:                       assuredworkloads.WorkloadPartnerEnumRef(rs.Primary.Attributes["partner"]),
 				PartnerServicesBillingAccount: dcl.String(rs.Primary.Attributes["partner_services_billing_account"]),
 				ProvisionedResourcesParent:    dcl.String(rs.Primary.Attributes["provisioned_resources_parent"]),
 				ViolationNotificationsEnabled: dcl.Bool(rs.Primary.Attributes["violation_notifications_enabled"] == "true"),
 				CreateTime:                    dcl.StringOrNil(rs.Primary.Attributes["create_time"]),
-				KajEnrollmentState:            WorkloadKajEnrollmentStateEnumRef(rs.Primary.Attributes["kaj_enrollment_state"]),
+				KajEnrollmentState:            assuredworkloads.WorkloadKajEnrollmentStateEnumRef(rs.Primary.Attributes["kaj_enrollment_state"]),
 				Name:                          dcl.StringOrNil(rs.Primary.Attributes["name"]),
 			}
 
-			client := transport_tpg.NewDCLAssuredWorkloadsClient(config, config.UserAgent, billingProject, 0)
+			client := assuredworkloads.NewDCLAssuredWorkloadsClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetWorkload(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_assured_workloads_workload still exists %v", obj)

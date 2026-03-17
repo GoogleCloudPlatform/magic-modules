@@ -8,15 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-{{- if eq $.TargetVersionName "ga" }}
-	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws"
-{{- else }}
-	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws/beta"
-{{- end }}
-
-	"github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -670,7 +662,7 @@ func resourceContainerAwsClusterCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	obj := &containeraws.Cluster{
+	obj := &Cluster{
 		Authorization:       expandContainerAwsClusterAuthorization(d.Get("authorization")),
 		AwsRegion:           dcl.String(d.Get("aws_region").(string)),
 		ControlPlane:        expandContainerAwsClusterControlPlane(d.Get("control_plane")),
@@ -692,7 +684,7 @@ func resourceContainerAwsClusterCreate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id)
-	directive := tpgdclresource.CreateDirective
+	directive := dcl.CreateDirective
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -702,7 +694,7 @@ func resourceContainerAwsClusterCreate(d *schema.ResourceData, meta interface{})
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	client := NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -731,7 +723,7 @@ func resourceContainerAwsClusterRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	obj := &containeraws.Cluster{
+	obj := &Cluster{
 		Authorization:       expandContainerAwsClusterAuthorization(d.Get("authorization")),
 		AwsRegion:           dcl.String(d.Get("aws_region").(string)),
 		ControlPlane:        expandContainerAwsClusterControlPlane(d.Get("control_plane")),
@@ -757,7 +749,7 @@ func resourceContainerAwsClusterRead(d *schema.ResourceData, meta interface{}) e
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	client := NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -767,7 +759,7 @@ func resourceContainerAwsClusterRead(d *schema.ResourceData, meta interface{}) e
 	res, err := client.GetCluster(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("ContainerAwsCluster %q", d.Id())
-		return tpgdclresource.HandleNotFoundDCLError(err, d, resourceName)
+		return dcl.HandleNotFoundDCLError(err, d, resourceName)
 	}
 
 	if err = d.Set("authorization", flattenContainerAwsClusterAuthorization(res.Authorization)); err != nil {
@@ -845,7 +837,7 @@ func resourceContainerAwsClusterUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	obj := &containeraws.Cluster{
+	obj := &Cluster{
 		Authorization:       expandContainerAwsClusterAuthorization(d.Get("authorization")),
 		AwsRegion:           dcl.String(d.Get("aws_region").(string)),
 		ControlPlane:        expandContainerAwsClusterControlPlane(d.Get("control_plane")),
@@ -861,7 +853,7 @@ func resourceContainerAwsClusterUpdate(d *schema.ResourceData, meta interface{})
 {{- end }}
 		Project:             dcl.String(project),
 	}
-	directive := tpgdclresource.UpdateDirective
+	directive := dcl.UpdateDirective
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -872,7 +864,7 @@ func resourceContainerAwsClusterUpdate(d *schema.ResourceData, meta interface{})
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
+	client := NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -901,7 +893,7 @@ func resourceContainerAwsClusterDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	obj := &containeraws.Cluster{
+	obj := &Cluster{
 		Authorization:       expandContainerAwsClusterAuthorization(d.Get("authorization")),
 		AwsRegion:           dcl.String(d.Get("aws_region").(string)),
 		ControlPlane:        expandContainerAwsClusterControlPlane(d.Get("control_plane")),
@@ -928,7 +920,7 @@ func resourceContainerAwsClusterDelete(d *schema.ResourceData, meta interface{})
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+	client := NewDCLContainerAwsClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -964,22 +956,22 @@ func resourceContainerAwsClusterImport(d *schema.ResourceData, meta interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandContainerAwsClusterAuthorization(o interface{}) *containeraws.ClusterAuthorization {
+func expandContainerAwsClusterAuthorization(o interface{}) *ClusterAuthorization {
 	if o == nil {
-		return containeraws.EmptyClusterAuthorization
+		return EmptyClusterAuthorization
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterAuthorization
+		return EmptyClusterAuthorization
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterAuthorization{
+	return &ClusterAuthorization{
 		AdminUsers:  expandContainerAwsClusterAuthorizationAdminUsersArray(obj["admin_users"]),
 		AdminGroups: expandContainerAwsClusterAuthorizationAdminGroupsArray(obj["admin_groups"]),
 	}
 }
 
-func flattenContainerAwsClusterAuthorization(obj *containeraws.ClusterAuthorization) interface{} {
+func flattenContainerAwsClusterAuthorization(obj *ClusterAuthorization) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -991,17 +983,17 @@ func flattenContainerAwsClusterAuthorization(obj *containeraws.ClusterAuthorizat
 	return []interface{}{transformed}
 
 }
-func expandContainerAwsClusterAuthorizationAdminUsersArray(o interface{}) []containeraws.ClusterAuthorizationAdminUsers {
+func expandContainerAwsClusterAuthorizationAdminUsersArray(o interface{}) []ClusterAuthorizationAdminUsers {
 	if o == nil {
-		return make([]containeraws.ClusterAuthorizationAdminUsers, 0)
+		return make([]ClusterAuthorizationAdminUsers, 0)
 	}
 
 	objs := o.([]interface{})
 	if len(objs) == 0 || objs[0] == nil {
-		return make([]containeraws.ClusterAuthorizationAdminUsers, 0)
+		return make([]ClusterAuthorizationAdminUsers, 0)
 	}
 
-	items := make([]containeraws.ClusterAuthorizationAdminUsers, 0, len(objs))
+	items := make([]ClusterAuthorizationAdminUsers, 0, len(objs))
 	for _, item := range objs {
 		i := expandContainerAwsClusterAuthorizationAdminUsers(item)
 		items = append(items, *i)
@@ -1010,18 +1002,18 @@ func expandContainerAwsClusterAuthorizationAdminUsersArray(o interface{}) []cont
 	return items
 }
 
-func expandContainerAwsClusterAuthorizationAdminUsers(o interface{}) *containeraws.ClusterAuthorizationAdminUsers {
+func expandContainerAwsClusterAuthorizationAdminUsers(o interface{}) *ClusterAuthorizationAdminUsers {
 	if o == nil {
-		return containeraws.EmptyClusterAuthorizationAdminUsers
+		return EmptyClusterAuthorizationAdminUsers
 	}
 
 	obj := o.(map[string]interface{})
-	return &containeraws.ClusterAuthorizationAdminUsers{
+	return &ClusterAuthorizationAdminUsers{
 		Username: dcl.String(obj["username"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterAuthorizationAdminUsersArray(objs []containeraws.ClusterAuthorizationAdminUsers) []interface{} {
+func flattenContainerAwsClusterAuthorizationAdminUsersArray(objs []ClusterAuthorizationAdminUsers) []interface{} {
 	if objs == nil {
 		return nil
 	}
@@ -1035,7 +1027,7 @@ func flattenContainerAwsClusterAuthorizationAdminUsersArray(objs []containeraws.
 	return items
 }
 
-func flattenContainerAwsClusterAuthorizationAdminUsers(obj *containeraws.ClusterAuthorizationAdminUsers) interface{} {
+func flattenContainerAwsClusterAuthorizationAdminUsers(obj *ClusterAuthorizationAdminUsers) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1046,17 +1038,17 @@ func flattenContainerAwsClusterAuthorizationAdminUsers(obj *containeraws.Cluster
 	return transformed
 
 }
-func expandContainerAwsClusterAuthorizationAdminGroupsArray(o interface{}) []containeraws.ClusterAuthorizationAdminGroups {
+func expandContainerAwsClusterAuthorizationAdminGroupsArray(o interface{}) []ClusterAuthorizationAdminGroups {
 	if o == nil {
-		return make([]containeraws.ClusterAuthorizationAdminGroups, 0)
+		return make([]ClusterAuthorizationAdminGroups, 0)
 	}
 
 	objs := o.([]interface{})
 	if len(objs) == 0 || objs[0] == nil {
-		return make([]containeraws.ClusterAuthorizationAdminGroups, 0)
+		return make([]ClusterAuthorizationAdminGroups, 0)
 	}
 
-	items := make([]containeraws.ClusterAuthorizationAdminGroups, 0, len(objs))
+	items := make([]ClusterAuthorizationAdminGroups, 0, len(objs))
 	for _, item := range objs {
 		i := expandContainerAwsClusterAuthorizationAdminGroups(item)
 		items = append(items, *i)
@@ -1065,18 +1057,18 @@ func expandContainerAwsClusterAuthorizationAdminGroupsArray(o interface{}) []con
 	return items
 }
 
-func expandContainerAwsClusterAuthorizationAdminGroups(o interface{}) *containeraws.ClusterAuthorizationAdminGroups {
+func expandContainerAwsClusterAuthorizationAdminGroups(o interface{}) *ClusterAuthorizationAdminGroups {
 	if o == nil {
-		return containeraws.EmptyClusterAuthorizationAdminGroups
+		return EmptyClusterAuthorizationAdminGroups
 	}
 
 	obj := o.(map[string]interface{})
-	return &containeraws.ClusterAuthorizationAdminGroups{
+	return &ClusterAuthorizationAdminGroups{
 		Group: dcl.String(obj["group"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterAuthorizationAdminGroupsArray(objs []containeraws.ClusterAuthorizationAdminGroups) []interface{} {
+func flattenContainerAwsClusterAuthorizationAdminGroupsArray(objs []ClusterAuthorizationAdminGroups) []interface{} {
 	if objs == nil {
 		return nil
 	}
@@ -1090,7 +1082,7 @@ func flattenContainerAwsClusterAuthorizationAdminGroupsArray(objs []containeraws
 	return items
 }
 
-func flattenContainerAwsClusterAuthorizationAdminGroups(obj *containeraws.ClusterAuthorizationAdminGroups) interface{} {
+func flattenContainerAwsClusterAuthorizationAdminGroups(obj *ClusterAuthorizationAdminGroups) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1102,21 +1094,21 @@ func flattenContainerAwsClusterAuthorizationAdminGroups(obj *containeraws.Cluste
 
 }
 
-func expandContainerAwsClusterControlPlane(o interface{}) *containeraws.ClusterControlPlane {
+func expandContainerAwsClusterControlPlane(o interface{}) *ClusterControlPlane {
 	if o == nil {
-		return containeraws.EmptyClusterControlPlane
+		return EmptyClusterControlPlane
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterControlPlane
+		return EmptyClusterControlPlane
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlane{
+	return &ClusterControlPlane{
 		AwsServicesAuthentication: expandContainerAwsClusterControlPlaneAwsServicesAuthentication(obj["aws_services_authentication"]),
 		ConfigEncryption:          expandContainerAwsClusterControlPlaneConfigEncryption(obj["config_encryption"]),
 		DatabaseEncryption:        expandContainerAwsClusterControlPlaneDatabaseEncryption(obj["database_encryption"]),
 		IamInstanceProfile:        dcl.String(obj["iam_instance_profile"].(string)),
-		SubnetIds:                 tpgdclresource.ExpandStringArray(obj["subnet_ids"]),
+		SubnetIds:                 dcl.ExpandStringArray(obj["subnet_ids"]),
 		Version:                   dcl.String(obj["version"].(string)),
 {{- if ne $.TargetVersionName "ga" }}
 		InstancePlacement:         expandContainerAwsClusterControlPlaneInstancePlacement(obj["instance_placement"]),
@@ -1125,13 +1117,13 @@ func expandContainerAwsClusterControlPlane(o interface{}) *containeraws.ClusterC
 		MainVolume:                expandContainerAwsClusterControlPlaneMainVolume(obj["main_volume"]),
 		ProxyConfig:               expandContainerAwsClusterControlPlaneProxyConfig(obj["proxy_config"]),
 		RootVolume:                expandContainerAwsClusterControlPlaneRootVolume(obj["root_volume"]),
-		SecurityGroupIds:          tpgdclresource.ExpandStringArray(obj["security_group_ids"]),
+		SecurityGroupIds:          dcl.ExpandStringArray(obj["security_group_ids"]),
 		SshConfig:                 expandContainerAwsClusterControlPlaneSshConfig(obj["ssh_config"]),
 		Tags:                      tpgresource.CheckStringMap(obj["tags"]),
 	}
 }
 
-func flattenContainerAwsClusterControlPlane(obj *containeraws.ClusterControlPlane) interface{} {
+func flattenContainerAwsClusterControlPlane(obj *ClusterControlPlane) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1158,22 +1150,22 @@ func flattenContainerAwsClusterControlPlane(obj *containeraws.ClusterControlPlan
 
 }
 
-func expandContainerAwsClusterControlPlaneAwsServicesAuthentication(o interface{}) *containeraws.ClusterControlPlaneAwsServicesAuthentication {
+func expandContainerAwsClusterControlPlaneAwsServicesAuthentication(o interface{}) *ClusterControlPlaneAwsServicesAuthentication {
 	if o == nil {
-		return containeraws.EmptyClusterControlPlaneAwsServicesAuthentication
+		return EmptyClusterControlPlaneAwsServicesAuthentication
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterControlPlaneAwsServicesAuthentication
+		return EmptyClusterControlPlaneAwsServicesAuthentication
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlaneAwsServicesAuthentication{
+	return &ClusterControlPlaneAwsServicesAuthentication{
 		RoleArn:         dcl.String(obj["role_arn"].(string)),
 		RoleSessionName: dcl.StringOrNil(obj["role_session_name"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterControlPlaneAwsServicesAuthentication(obj *containeraws.ClusterControlPlaneAwsServicesAuthentication) interface{} {
+func flattenContainerAwsClusterControlPlaneAwsServicesAuthentication(obj *ClusterControlPlaneAwsServicesAuthentication) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1186,21 +1178,21 @@ func flattenContainerAwsClusterControlPlaneAwsServicesAuthentication(obj *contai
 
 }
 
-func expandContainerAwsClusterControlPlaneConfigEncryption(o interface{}) *containeraws.ClusterControlPlaneConfigEncryption {
+func expandContainerAwsClusterControlPlaneConfigEncryption(o interface{}) *ClusterControlPlaneConfigEncryption {
 	if o == nil {
-		return containeraws.EmptyClusterControlPlaneConfigEncryption
+		return EmptyClusterControlPlaneConfigEncryption
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterControlPlaneConfigEncryption
+		return EmptyClusterControlPlaneConfigEncryption
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlaneConfigEncryption{
+	return &ClusterControlPlaneConfigEncryption{
 		KmsKeyArn: dcl.String(obj["kms_key_arn"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterControlPlaneConfigEncryption(obj *containeraws.ClusterControlPlaneConfigEncryption) interface{} {
+func flattenContainerAwsClusterControlPlaneConfigEncryption(obj *ClusterControlPlaneConfigEncryption) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1212,21 +1204,21 @@ func flattenContainerAwsClusterControlPlaneConfigEncryption(obj *containeraws.Cl
 
 }
 
-func expandContainerAwsClusterControlPlaneDatabaseEncryption(o interface{}) *containeraws.ClusterControlPlaneDatabaseEncryption {
+func expandContainerAwsClusterControlPlaneDatabaseEncryption(o interface{}) *ClusterControlPlaneDatabaseEncryption {
 	if o == nil {
-		return containeraws.EmptyClusterControlPlaneDatabaseEncryption
+		return EmptyClusterControlPlaneDatabaseEncryption
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterControlPlaneDatabaseEncryption
+		return EmptyClusterControlPlaneDatabaseEncryption
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlaneDatabaseEncryption{
+	return &ClusterControlPlaneDatabaseEncryption{
 		KmsKeyArn: dcl.String(obj["kms_key_arn"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterControlPlaneDatabaseEncryption(obj *containeraws.ClusterControlPlaneDatabaseEncryption) interface{} {
+func flattenContainerAwsClusterControlPlaneDatabaseEncryption(obj *ClusterControlPlaneDatabaseEncryption) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1239,7 +1231,7 @@ func flattenContainerAwsClusterControlPlaneDatabaseEncryption(obj *containeraws.
 }
 
 {{- if ne $.TargetVersionName "ga" }}
-func expandContainerAwsClusterControlPlaneInstancePlacement(o interface{}) *containeraws.ClusterControlPlaneInstancePlacement {
+func expandContainerAwsClusterControlPlaneInstancePlacement(o interface{}) *ClusterControlPlaneInstancePlacement {
 	if o == nil {
 		return nil
 	}
@@ -1248,12 +1240,12 @@ func expandContainerAwsClusterControlPlaneInstancePlacement(o interface{}) *cont
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlaneInstancePlacement{
-		Tenancy: containeraws.ClusterControlPlaneInstancePlacementTenancyEnumRef(obj["tenancy"].(string)),
+	return &ClusterControlPlaneInstancePlacement{
+		Tenancy: ClusterControlPlaneInstancePlacementTenancyEnumRef(obj["tenancy"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterControlPlaneInstancePlacement(obj *containeraws.ClusterControlPlaneInstancePlacement) interface{} {
+func flattenContainerAwsClusterControlPlaneInstancePlacement(obj *ClusterControlPlaneInstancePlacement) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1266,7 +1258,7 @@ func flattenContainerAwsClusterControlPlaneInstancePlacement(obj *containeraws.C
 }
 
 {{- end }}
-func expandContainerAwsClusterControlPlaneMainVolume(o interface{}) *containeraws.ClusterControlPlaneMainVolume {
+func expandContainerAwsClusterControlPlaneMainVolume(o interface{}) *ClusterControlPlaneMainVolume {
 	if o == nil {
 		return nil
 	}
@@ -1275,16 +1267,16 @@ func expandContainerAwsClusterControlPlaneMainVolume(o interface{}) *containeraw
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlaneMainVolume{
+	return &ClusterControlPlaneMainVolume{
 		Iops:       dcl.Int64OrNil(int64(obj["iops"].(int))),
 		KmsKeyArn:  dcl.String(obj["kms_key_arn"].(string)),
 		SizeGib:    dcl.Int64OrNil(int64(obj["size_gib"].(int))),
 		Throughput: dcl.Int64OrNil(int64(obj["throughput"].(int))),
-		VolumeType: containeraws.ClusterControlPlaneMainVolumeVolumeTypeEnumRef(obj["volume_type"].(string)),
+		VolumeType: ClusterControlPlaneMainVolumeVolumeTypeEnumRef(obj["volume_type"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterControlPlaneMainVolume(obj *containeraws.ClusterControlPlaneMainVolume) interface{} {
+func flattenContainerAwsClusterControlPlaneMainVolume(obj *ClusterControlPlaneMainVolume) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1300,22 +1292,22 @@ func flattenContainerAwsClusterControlPlaneMainVolume(obj *containeraws.ClusterC
 
 }
 
-func expandContainerAwsClusterControlPlaneProxyConfig(o interface{}) *containeraws.ClusterControlPlaneProxyConfig {
+func expandContainerAwsClusterControlPlaneProxyConfig(o interface{}) *ClusterControlPlaneProxyConfig {
 	if o == nil {
-		return containeraws.EmptyClusterControlPlaneProxyConfig
+		return EmptyClusterControlPlaneProxyConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterControlPlaneProxyConfig
+		return EmptyClusterControlPlaneProxyConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlaneProxyConfig{
+	return &ClusterControlPlaneProxyConfig{
 		SecretArn:     dcl.String(obj["secret_arn"].(string)),
 		SecretVersion: dcl.String(obj["secret_version"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterControlPlaneProxyConfig(obj *containeraws.ClusterControlPlaneProxyConfig) interface{} {
+func flattenContainerAwsClusterControlPlaneProxyConfig(obj *ClusterControlPlaneProxyConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1328,7 +1320,7 @@ func flattenContainerAwsClusterControlPlaneProxyConfig(obj *containeraws.Cluster
 
 }
 
-func expandContainerAwsClusterControlPlaneRootVolume(o interface{}) *containeraws.ClusterControlPlaneRootVolume {
+func expandContainerAwsClusterControlPlaneRootVolume(o interface{}) *ClusterControlPlaneRootVolume {
 	if o == nil {
 		return nil
 	}
@@ -1337,16 +1329,16 @@ func expandContainerAwsClusterControlPlaneRootVolume(o interface{}) *containeraw
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlaneRootVolume{
+	return &ClusterControlPlaneRootVolume{
 		Iops:       dcl.Int64OrNil(int64(obj["iops"].(int))),
 		KmsKeyArn:  dcl.String(obj["kms_key_arn"].(string)),
 		SizeGib:    dcl.Int64OrNil(int64(obj["size_gib"].(int))),
 		Throughput: dcl.Int64OrNil(int64(obj["throughput"].(int))),
-		VolumeType: containeraws.ClusterControlPlaneRootVolumeVolumeTypeEnumRef(obj["volume_type"].(string)),
+		VolumeType: ClusterControlPlaneRootVolumeVolumeTypeEnumRef(obj["volume_type"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterControlPlaneRootVolume(obj *containeraws.ClusterControlPlaneRootVolume) interface{} {
+func flattenContainerAwsClusterControlPlaneRootVolume(obj *ClusterControlPlaneRootVolume) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1362,21 +1354,21 @@ func flattenContainerAwsClusterControlPlaneRootVolume(obj *containeraws.ClusterC
 
 }
 
-func expandContainerAwsClusterControlPlaneSshConfig(o interface{}) *containeraws.ClusterControlPlaneSshConfig {
+func expandContainerAwsClusterControlPlaneSshConfig(o interface{}) *ClusterControlPlaneSshConfig {
 	if o == nil {
-		return containeraws.EmptyClusterControlPlaneSshConfig
+		return EmptyClusterControlPlaneSshConfig
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterControlPlaneSshConfig
+		return EmptyClusterControlPlaneSshConfig
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterControlPlaneSshConfig{
+	return &ClusterControlPlaneSshConfig{
 		Ec2KeyPair: dcl.String(obj["ec2_key_pair"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterControlPlaneSshConfig(obj *containeraws.ClusterControlPlaneSshConfig) interface{} {
+func flattenContainerAwsClusterControlPlaneSshConfig(obj *ClusterControlPlaneSshConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1388,21 +1380,21 @@ func flattenContainerAwsClusterControlPlaneSshConfig(obj *containeraws.ClusterCo
 
 }
 
-func expandContainerAwsClusterFleet(o interface{}) *containeraws.ClusterFleet {
+func expandContainerAwsClusterFleet(o interface{}) *ClusterFleet {
 	if o == nil {
-		return containeraws.EmptyClusterFleet
+		return EmptyClusterFleet
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterFleet
+		return EmptyClusterFleet
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterFleet{
+	return &ClusterFleet{
 		Project: dcl.StringOrNil(obj["project"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterFleet(obj *containeraws.ClusterFleet) interface{} {
+func flattenContainerAwsClusterFleet(obj *ClusterFleet) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1415,24 +1407,24 @@ func flattenContainerAwsClusterFleet(obj *containeraws.ClusterFleet) interface{}
 
 }
 
-func expandContainerAwsClusterNetworking(o interface{}) *containeraws.ClusterNetworking {
+func expandContainerAwsClusterNetworking(o interface{}) *ClusterNetworking {
 	if o == nil {
-		return containeraws.EmptyClusterNetworking
+		return EmptyClusterNetworking
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return containeraws.EmptyClusterNetworking
+		return EmptyClusterNetworking
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterNetworking{
-		PodAddressCidrBlocks:       tpgdclresource.ExpandStringArray(obj["pod_address_cidr_blocks"]),
-		ServiceAddressCidrBlocks:   tpgdclresource.ExpandStringArray(obj["service_address_cidr_blocks"]),
+	return &ClusterNetworking{
+		PodAddressCidrBlocks:       dcl.ExpandStringArray(obj["pod_address_cidr_blocks"]),
+		ServiceAddressCidrBlocks:   dcl.ExpandStringArray(obj["service_address_cidr_blocks"]),
 		VPCId:                      dcl.String(obj["vpc_id"].(string)),
 		PerNodePoolSgRulesDisabled: dcl.Bool(obj["per_node_pool_sg_rules_disabled"].(bool)),
 	}
 }
 
-func flattenContainerAwsClusterNetworking(obj *containeraws.ClusterNetworking) interface{} {
+func flattenContainerAwsClusterNetworking(obj *ClusterNetworking) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1447,7 +1439,7 @@ func flattenContainerAwsClusterNetworking(obj *containeraws.ClusterNetworking) i
 
 }
 
-func expandContainerAwsClusterBinaryAuthorization(o interface{}) *containeraws.ClusterBinaryAuthorization {
+func expandContainerAwsClusterBinaryAuthorization(o interface{}) *ClusterBinaryAuthorization {
 	if o == nil {
 		return nil
 	}
@@ -1456,12 +1448,12 @@ func expandContainerAwsClusterBinaryAuthorization(o interface{}) *containeraws.C
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterBinaryAuthorization{
-		EvaluationMode: containeraws.ClusterBinaryAuthorizationEvaluationModeEnumRef(obj["evaluation_mode"].(string)),
+	return &ClusterBinaryAuthorization{
+		EvaluationMode: ClusterBinaryAuthorizationEvaluationModeEnumRef(obj["evaluation_mode"].(string)),
 	}
 }
 
-func flattenContainerAwsClusterBinaryAuthorization(obj *containeraws.ClusterBinaryAuthorization) interface{} {
+func flattenContainerAwsClusterBinaryAuthorization(obj *ClusterBinaryAuthorization) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1474,7 +1466,7 @@ func flattenContainerAwsClusterBinaryAuthorization(obj *containeraws.ClusterBina
 }
 
 {{- if ne $.TargetVersionName "ga" }}
-func expandContainerAwsClusterLoggingConfig(o interface{}) *containeraws.ClusterLoggingConfig {
+func expandContainerAwsClusterLoggingConfig(o interface{}) *ClusterLoggingConfig {
 	if o == nil {
 		return nil
 	}
@@ -1483,12 +1475,12 @@ func expandContainerAwsClusterLoggingConfig(o interface{}) *containeraws.Cluster
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterLoggingConfig{
+	return &ClusterLoggingConfig{
 		ComponentConfig: expandContainerAwsClusterLoggingConfigComponentConfig(obj["component_config"]),
 	}
 }
 
-func flattenContainerAwsClusterLoggingConfig(obj *containeraws.ClusterLoggingConfig) interface{} {
+func flattenContainerAwsClusterLoggingConfig(obj *ClusterLoggingConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1500,7 +1492,7 @@ func flattenContainerAwsClusterLoggingConfig(obj *containeraws.ClusterLoggingCon
 
 }
 
-func expandContainerAwsClusterLoggingConfigComponentConfig(o interface{}) *containeraws.ClusterLoggingConfigComponentConfig {
+func expandContainerAwsClusterLoggingConfigComponentConfig(o interface{}) *ClusterLoggingConfigComponentConfig {
 	if o == nil {
 		return nil
 	}
@@ -1509,12 +1501,12 @@ func expandContainerAwsClusterLoggingConfigComponentConfig(o interface{}) *conta
 		return nil
 	}
 	obj := objArr[0].(map[string]interface{})
-	return &containeraws.ClusterLoggingConfigComponentConfig{
+	return &ClusterLoggingConfigComponentConfig{
 		EnableComponents: expandContainerAwsClusterLoggingConfigComponentConfigEnableComponentsArray(obj["enable_components"]),
 	}
 }
 
-func flattenContainerAwsClusterLoggingConfigComponentConfig(obj *containeraws.ClusterLoggingConfigComponentConfig) interface{} {
+func flattenContainerAwsClusterLoggingConfigComponentConfig(obj *ClusterLoggingConfigComponentConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1527,7 +1519,7 @@ func flattenContainerAwsClusterLoggingConfigComponentConfig(obj *containeraws.Cl
 }
 
 {{- end }}
-func flattenContainerAwsClusterWorkloadIdentityConfig(obj *containeraws.ClusterWorkloadIdentityConfig) interface{} {
+func flattenContainerAwsClusterWorkloadIdentityConfig(obj *ClusterWorkloadIdentityConfig) interface{} {
 	if obj == nil || obj.Empty() {
 		return nil
 	}
@@ -1557,7 +1549,7 @@ func flattenContainerAwsClusterAnnotations(v map[string]string, d *schema.Resour
 }
 {{- if ne $.TargetVersionName "ga" }}
 
-func flattenContainerAwsClusterLoggingConfigComponentConfigEnableComponentsArray(obj []containeraws.ClusterLoggingConfigComponentConfigEnableComponentsEnum) interface{} {
+func flattenContainerAwsClusterLoggingConfigComponentConfigEnableComponentsArray(obj []ClusterLoggingConfigComponentConfigEnableComponentsEnum) interface{} {
 	if obj == nil {
 		return nil
 	}
@@ -1567,11 +1559,11 @@ func flattenContainerAwsClusterLoggingConfigComponentConfigEnableComponentsArray
 	}
 	return items
 }
-func expandContainerAwsClusterLoggingConfigComponentConfigEnableComponentsArray(o interface{}) []containeraws.ClusterLoggingConfigComponentConfigEnableComponentsEnum {
+func expandContainerAwsClusterLoggingConfigComponentConfigEnableComponentsArray(o interface{}) []ClusterLoggingConfigComponentConfigEnableComponentsEnum {
 	objs := o.([]interface{})
-	items := make([]containeraws.ClusterLoggingConfigComponentConfigEnableComponentsEnum, 0, len(objs))
+	items := make([]ClusterLoggingConfigComponentConfigEnableComponentsEnum, 0, len(objs))
 	for _, item := range objs {
-		i := containeraws.ClusterLoggingConfigComponentConfigEnableComponentsEnumRef(item.(string))
+		i := ClusterLoggingConfigComponentConfigEnableComponentsEnumRef(item.(string))
 		items = append(items, *i)
 	}
 	return items

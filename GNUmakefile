@@ -61,7 +61,7 @@ ifneq ($(SKIP_CLEAN),)
   endif
 endif
 
-terraform build provider: validate_environment clean-provider mmv1 tpgtools
+terraform build provider: validate_environment clean-provider mmv1
 	@echo "Provider generation process finished for $(VERSION) in $(OUTPUT_PATH)"
 
 
