@@ -99,8 +99,8 @@ properties:
       A reference to the BackendService resource. This field is optional when
       the loadBalancingScheme is set to INTERNAL_MANAGED.
     at_least_one_of:
-      - 'backendService'
-      - 'loadBalancingScheme'
+      - 'backend_service'
+      - 'load_balancing_scheme'
     api_name: service
     update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
     update_verb: 'POST'
@@ -121,8 +121,8 @@ properties:
       of load balancer cannot be used with another. For more information, refer
       to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
     at_least_one_of:
-      - 'backendService'
-      - 'loadBalancingScheme'
+      - 'backend_service'
+      - 'load_balancing_scheme'
     enum_values:
       - 'EXTERNAL'
       - 'EXTERNAL_MANAGED'
