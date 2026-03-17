@@ -1,0 +1,53 @@
+package apikeys
+
+import (
+	"context"
+	"log"
+	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
+)
+
+func init() {
+	sweeper.AddTestSweepersLegacy("ApikeysKey", testSweepApikeysKey)
+}
+
+func testSweepApikeysKey(region string) error {
+	log.Print("[INFO][SWEEPER_LOG] Starting sweeper for ApikeysKey")
+
+	config, err := sweeper.SharedConfigForRegion(region)
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
+		return err
+	}
+
+	err = config.LoadAndValidate(context.Background())
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] error loading: %s", err)
+		return err
+	}
+
+	t := &testing.T{}
+	billingId := envvar.GetTestBillingAccountFromEnv(t)
+
+	// Setup variables to be used for Delete arguments.
+	d := map[string]string{
+		"project":         config.Project,
+		"region":          region,
+		"location":        region,
+		"zone":            "-",
+		"billing_account": billingId,
+	}
+
+	client := NewDCLApikeysClient(config, config.UserAgent, "", 0)
+	err = client.DeleteAllKey(context.Background(), d["project"], isDeletableApikeysKey)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func isDeletableApikeysKey(r *Key) bool {
+	return sweeper.IsSweepableTestResource(*r.Name)
+}

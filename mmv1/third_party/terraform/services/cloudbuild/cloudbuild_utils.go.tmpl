@@ -1,0 +1,103 @@
+package cloudbuild
+
+import (
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+)
+
+// betaToGaPrivatePool is populating GA specific PrivatePoolV1Config values and setting WorkerConfig and NetworkConfig to nil.
+// r.PrivatePoolV1Config and c points to the same object.
+func betaToGaPrivatePool(r *WorkerPool, c *WorkerPoolPrivatePoolV1Config) *WorkerPoolPrivatePoolV1Config {
+	cfgWorkerConfig := &WorkerPoolPrivatePoolV1ConfigWorkerConfig{}
+	cfgNetworkConfig := &WorkerPoolPrivatePoolV1ConfigNetworkConfig{}
+	cfgPrivateServiceConnect := &WorkerPoolPrivatePoolV1ConfigPrivateServiceConnect{}
+	if r.WorkerConfig != nil {
+		cfgWorkerConfig.DiskSizeGb = r.WorkerConfig.DiskSizeGb
+		cfgWorkerConfig.MachineType = r.WorkerConfig.MachineType
+		cfgWorkerConfig.EnableNestedVirtualization = r.WorkerConfig.EnableNestedVirtualization
+		cfgNetworkConfig.EgressOption = noExternalIPEnum(r.WorkerConfig.NoExternalIP)
+	}
+	if r.NetworkConfig != nil {
+		cfgNetworkConfig.PeeredNetwork = r.NetworkConfig.PeeredNetwork
+		cfgNetworkConfig.PeeredNetworkIPRange = r.NetworkConfig.PeeredNetworkIPRange
+	}
+	if r.PrivateServiceConnect != nil {
+		cfgPrivateServiceConnect.NetworkAttachment = r.PrivateServiceConnect.NetworkAttachment
+		cfgPrivateServiceConnect.RouteAllTraffic = r.PrivateServiceConnect.RouteAllTraffic
+		if r.WorkerConfig != nil {
+			cfgPrivateServiceConnect.PublicIPAddressDisabled = r.WorkerConfig.NoExternalIP
+		}
+	}
+
+	cfg := &WorkerPoolPrivatePoolV1Config{}
+	cfg.WorkerConfig = cfgWorkerConfig
+	cfg.NetworkConfig = cfgNetworkConfig
+	if cfg.PrivateServiceConnect != nil {
+		cfg.NetworkConfig = nil
+		cfg.PrivateServiceConnect = cfgPrivateServiceConnect
+	}
+
+	r.WorkerConfig = nil
+	r.NetworkConfig = nil
+	r.PrivateServiceConnect = nil
+	return cfg
+}
+
+// gaToBetaPrivatePool is populating beta specific values (WorkerConfig and NetworkConfig) and setting PrivatePoolV1Config to nil.
+// r.PrivatePoolV1Config and c points to the same object.
+func gaToBetaPrivatePool(r *WorkerPool, c *WorkerPoolPrivatePoolV1Config) *WorkerPoolPrivatePoolV1Config {
+	if c == nil {
+		return nil
+	}
+
+	if c.WorkerConfig != nil && r.WorkerConfig == nil {
+		r.WorkerConfig = &WorkerPoolWorkerConfig{
+			DiskSizeGb:                 c.WorkerConfig.DiskSizeGb,
+			MachineType:                c.WorkerConfig.MachineType,
+			EnableNestedVirtualization: c.WorkerConfig.EnableNestedVirtualization,
+		}
+		if c.NetworkConfig != nil {
+			r.WorkerConfig.NoExternalIP = noExternalIPBoolean(c.NetworkConfig)
+		}
+		if c.PrivateServiceConnect != nil {
+			r.WorkerConfig.NoExternalIP = c.PrivateServiceConnect.PublicIPAddressDisabled
+		}
+	}
+	if c.NetworkConfig != nil && c.NetworkConfig.PeeredNetwork != nil && r.NetworkConfig == nil {
+		r.NetworkConfig = &WorkerPoolNetworkConfig{
+			PeeredNetwork:        c.NetworkConfig.PeeredNetwork,
+			PeeredNetworkIPRange: c.NetworkConfig.PeeredNetworkIPRange,
+		}
+	}
+	if c.PrivateServiceConnect != nil && r.PrivateServiceConnect != nil {
+		r.PrivateServiceConnect = &WorkerPoolPrivateServiceConnect{
+			NetworkAttachment: c.PrivateServiceConnect.NetworkAttachment,
+			RouteAllTraffic:   c.PrivateServiceConnect.RouteAllTraffic,
+		}
+	}
+
+	r.PrivatePoolV1Config = nil
+	return nil
+}
+
+func noExternalIPBoolean(networkConfig *WorkerPoolPrivatePoolV1ConfigNetworkConfig) *bool {
+	if networkConfig == nil || networkConfig.EgressOption == nil {
+		return nil
+	}
+	if string(*networkConfig.EgressOption) == "NO_PUBLIC_EGRESS" {
+		return dcl.Bool(true)
+	}
+	if string(*networkConfig.EgressOption) == "PUBLIC_EGRESS" {
+		return dcl.Bool(false)
+	}
+	return nil
+}
+
+func noExternalIPEnum(noExternalIP *bool) *WorkerPoolPrivatePoolV1ConfigNetworkConfigEgressOptionEnum {
+	if noExternalIP == nil {
+		return WorkerPoolPrivatePoolV1ConfigNetworkConfigEgressOptionEnumRef("EGRESS_OPTION_UNSPECIFIED")
+	}
+	if *noExternalIP {
+		return WorkerPoolPrivatePoolV1ConfigNetworkConfigEgressOptionEnumRef("NO_PUBLIC_EGRESS")
+	}
+	return WorkerPoolPrivatePoolV1ConfigNetworkConfigEgressOptionEnumRef("PUBLIC_EGRESS")
+}
