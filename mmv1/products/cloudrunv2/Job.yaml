@@ -739,7 +739,7 @@ properties:
                 description: |-
                   Direct VPC egress settings. Currently only single network interface is supported.
                 conflicts:
-                  - template.0.vpc_acces.0.connector
+                  - template.0.vpc_access.0.connector
                 item_type:
                   type: NestedObject
                   properties:
