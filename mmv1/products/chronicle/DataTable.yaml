@@ -23,6 +23,7 @@ import_format:
 
 update_verb: PATCH
 update_mask: true
+deletion_policy_exclude: true
 min_version: 'beta'
 references:
   guides:
