@@ -57,6 +57,7 @@ examples:
     ignore_read_extra:
       - 'desired_state'
       - 'auto_upgrade'
+      - 'expiration_time'
 virtual_fields:
   - name: 'desired_state'
     description: |
