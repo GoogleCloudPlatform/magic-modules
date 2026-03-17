@@ -61,13 +61,6 @@ examples:
       resource_project_name: 'my-project'
     external_providers: ["random", "time"]
 parameters:
-  - name: 'project'
-    type: String
-    description: |
-      The project for which to retrieve config.
-    url_param_only: true
-    required: true
-    immutable: true
 properties:
   - name: 'etag'
     type: String
