@@ -63,6 +63,7 @@ resource "google_service_usage_v2_organization_consumer_policy" "default" {
 
   enable_rules {
     services = [
+      "services/compute.googleapis.com",
       "services/storage.googleapis.com"
     ]
   }
@@ -79,8 +80,9 @@ resource "google_service_usage_v2_organization_consumer_policy" "default" {
 
   enable_rules {
     services = [
+      "services/compute.googleapis.com",
       "services/storage.googleapis.com",
-      "services/compute.googleapis.com"
+      "services/cloudresourcemanager.googleapis.com"
     ]
   }
 }
@@ -96,6 +98,7 @@ resource "google_service_usage_v2_organization_consumer_policy" "default" {
 
   enable_rules {
     services = [
+      "services/compute.googleapis.com",
       "services/storage.googleapis.com"
     ]
   }
