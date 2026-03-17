@@ -100,8 +100,8 @@ properties:
       A reference to the BackendService resource. This field is optional when
       the loadBalancingScheme is specified.
     at_least_one_of:
-      - 'backendService'
-      - 'loadBalancingScheme'
+      - 'backend_service'
+      - 'load_balancing_scheme'
     resource: RegionBackendService
     imports: selfLink
     custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
@@ -119,8 +119,8 @@ properties:
       of load balancer cannot be used with another. For more information, refer
       to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
     at_least_one_of:
-      - 'backendService'
-      - 'loadBalancingScheme'
+      - 'backend_service'
+      - 'load_balancing_scheme'
     enum_values:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL_MANAGED'
