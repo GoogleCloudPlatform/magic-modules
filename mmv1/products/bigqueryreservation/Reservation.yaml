@@ -254,3 +254,4 @@ properties:
       The reservation group that this reservation belongs to.
     resource: ReservationGroup
     imports: name
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
