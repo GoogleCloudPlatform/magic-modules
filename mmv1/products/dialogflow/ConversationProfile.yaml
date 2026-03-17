@@ -49,6 +49,12 @@ examples:
     vars:
       profile_name: 'dialogflow-profile'
       topic_name: 'recognition-result-notification'
+  - name: 'dialogflow_conversation_profile_beta_bidi'
+    primary_resource_id: 'bidi_profile'
+    version: beta
+    vars:
+      profile_name: 'dialogflow-profile-bidi'
+      random_suffix: 'true'
 parameters:
   - name: 'location'
     type: String
@@ -67,6 +73,11 @@ properties:
     description: |
       Required. Human readable name for this profile. Max length 1024 bytes.
     required: true
+  - type: Boolean
+    name: 'useBidiStreaming'
+    description: |
+      Optional. Whether to use the bidi streaming API in telephony integration for the conversation profile.
+    min_version: beta
   - type: NestedObject
     name: 'automatedAgentConfig'
     description: |
