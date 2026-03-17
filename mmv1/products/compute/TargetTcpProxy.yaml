@@ -52,6 +52,9 @@ examples:
     primary_resource_id: default
     vars:
       target_tcp_proxy_name: test-proxy
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+      tls_route_name: 'tls-route-check'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -95,6 +98,9 @@ properties:
     description: |
       A reference to the BackendService resource. This field is optional when
       the loadBalancingScheme is set to INTERNAL_MANAGED.
+    at_least_one_of:
+      - 'backendService'
+      - 'loadBalancingScheme'
     api_name: service
     update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
     update_verb: 'POST'
@@ -114,6 +120,9 @@ properties:
       Specifies the load balancer type. A target TCP proxy created for one type
       of load balancer cannot be used with another. For more information, refer
       to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
+    at_least_one_of:
+      - 'backendService'
+      - 'loadBalancingScheme'
     enum_values:
       - 'EXTERNAL'
       - 'EXTERNAL_MANAGED'
