@@ -453,3 +453,55 @@ properties:
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
+  - name: 'contextSpec'
+    type: NestedObject
+    description: |-
+      Optional. Configuration for how Agent Engine sub-resources should manage context.
+    properties:
+      - name: 'memoryBankConfig'
+        type: NestedObject
+        description: |-
+          Optional. Specification for a Memory Bank, which manages memories for the Agent Engine.
+        properties:
+          - name: 'generationConfig'
+            type: NestedObject
+            description: |-
+              Optional. Configuration for how to generate memories for the Memory Bank.
+            properties:
+              - name: 'model'
+                type: String
+                description: |-
+                  Required. The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                required: true
+          - name: 'similaritySearchConfig'
+            type: NestedObject
+            description: |-
+              Optional. Configuration for how to perform similarity search on memories.
+            properties:
+              - name: 'embeddingModel'
+                type: String
+                description: |-
+                  Required. The model used to generate embeddings to lookup similar memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                required: true
+          - name: 'ttlConfig'
+            type: NestedObject
+            description: |-
+              Optional. Configuration for automatic TTL ("time-to-live") of the memories in the Memory Bank.
+            properties:
+              - name: 'defaultTtl'
+                type: String
+                description: |-
+                  Optional. The default TTL duration of the memories in the Memory Bank.
+              - name: 'granularTtlConfig'
+                type: NestedObject
+                description: |-
+                  Optional. The granular TTL configuration of the memories in the Memory Bank.
+                properties:
+                  - name: 'memoryRevisionDefaultTtl'
+                    type: String
+                    description: |-
+                      Optional. The default TTL duration of the memory revisions in the Memory Bank.
+          - name: 'disableMemoryRevisions'
+            type: Boolean
+            description: |-
+              If true, no memory revisions will be created for any requests to the Memory Bank.
