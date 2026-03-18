@@ -21,7 +21,6 @@ base_url: projects/{{project}}/locations/{{location}}/reservationGroups
 create_url: projects/{{project}}/locations/{{location}}/reservationGroups?reservationGroupId={{name}}
 immutable: true
 id_format: projects/{{project}}/locations/{{location}}/reservationGroups/{{name}}
-exclude_sweeper: true
 examples:
   - name: bigquery_reservation_group_basic
     primary_resource_id: reservation_group
