@@ -9,7 +9,7 @@ This page documents the properties available in meta.yaml files. These files mak
 
 Meta.yaml files are auto-generated for MMv1 generated resources.
 
-DCL and Handwritten resources will have handwritten meta.yaml files in the appropriate service directory in [mmv1/third_party/terraform/services/](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services). The file name will be `resource_PRODUCT_RESOURCE_meta.yaml(.tmpl)`. For example, `resource_compute_instance_meta.yaml.tmpl` Handwritten meta.yaml files with a `.tmpl` extension can use version guards (`{{- if ne $.TargetVersionName "ga" }}...{{- else}}...{{- end}}`) to exclude beta fields from the `google` provider.
+Handwritten resources will have handwritten meta.yaml files in the appropriate service directory in [mmv1/third_party/terraform/services/](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services). The file name will be `resource_PRODUCT_RESOURCE_meta.yaml(.tmpl)`. For example, `resource_compute_instance_meta.yaml.tmpl` Handwritten meta.yaml files with a `.tmpl` extension can use version guards (`{{- if ne $.TargetVersionName "ga" }}...{{- else}}...{{- end}}`) to exclude beta fields from the `google` provider.
 
 All resources and fields must be present in meta.yaml files for the provider(s) they're available in.
 
@@ -21,7 +21,7 @@ The name of the Terraform resource. For example, "google_cloudfunctions2_functio
 
 ### `generation_type`
 
-The generation method used to create the Terraform resource. For example, "mmv1", "dcl", "handwritten".
+The generation method used to create the Terraform resource. For example, "mmv1" or "handwritten".
 
 ### `api_service_name`
 

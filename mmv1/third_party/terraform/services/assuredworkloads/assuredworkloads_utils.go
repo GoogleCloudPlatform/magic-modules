@@ -28,7 +28,7 @@ func (r *Workload) projectURL(userBasePath string, index int) (string, error) {
 			userBasePath = fmt.Sprintf("https://cloudresourcemanager%s/v1/", matches[1])
 		}
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}", "https://cloudresourcemanager.googleapis.com/v1/", userBasePath, params), nil
+	return dcl.URL("projects/{{project}}", "https://cloudresourcemanager.googleapis.com/v1/", userBasePath, params), nil
 }
 
 // Returns the URL of the folder resource with the given index in the workload.
@@ -46,7 +46,7 @@ func (r *Workload) folderURL(userBasePath string, index int) (string, error) {
 			userBasePath = fmt.Sprintf("https://cloudresourcemanager%s/v2/", matches[1])
 		}
 	}
-	return dcl.URL("folders/{{ "{{" }}folder{{ "}}" }}", "https://cloudresourcemanager.googleapis.com/v2/", userBasePath, params), nil
+	return dcl.URL("folders/{{folder}}", "https://cloudresourcemanager.googleapis.com/v2/", userBasePath, params), nil
 }
 
 // Returns the lifecycle state of the project or folder resource with the given url.

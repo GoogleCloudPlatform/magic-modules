@@ -71,7 +71,7 @@ func DCLKeySchema() *dcl.Schema {
 			Schemas: map[string]*dcl.Component{
 				"Key": &dcl.Component{
 					Title: "Key",
-					ID:    "projects/{{ "{{" }}project{{ "}}" }}/locations/global/keys/{{ "{{" }}name{{ "}}" }}",
+					ID:    "projects/{{project}}/locations/global/keys/{{name}}",
 					Locations: []string{
 						"global",
 					},

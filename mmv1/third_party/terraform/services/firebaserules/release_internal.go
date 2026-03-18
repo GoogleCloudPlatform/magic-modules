@@ -35,7 +35,7 @@ func (r *Release) getURL(userBasePath string) (string, error) {
 		"project": dcl.ValueOrEmptyString(nr.Project),
 		"name":    dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/releases/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/releases/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *Release) listURL(userBasePath string) (string, error) {
@@ -43,7 +43,7 @@ func (r *Release) listURL(userBasePath string) (string, error) {
 	params := map[string]interface{}{
 		"project": dcl.ValueOrEmptyString(nr.Project),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/releases", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/releases", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -52,7 +52,7 @@ func (r *Release) createURL(userBasePath string) (string, error) {
 	params := map[string]interface{}{
 		"project": dcl.ValueOrEmptyString(nr.Project),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/releases", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/releases", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -62,7 +62,7 @@ func (r *Release) deleteURL(userBasePath string) (string, error) {
 		"project": dcl.ValueOrEmptyString(nr.Project),
 		"name":    dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/releases/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/releases/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 // releaseApiOperation represents a mutable operation in the underlying REST

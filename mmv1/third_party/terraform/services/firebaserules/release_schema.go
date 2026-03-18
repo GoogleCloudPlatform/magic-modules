@@ -80,7 +80,7 @@ func DCLReleaseSchema() *dcl.Schema {
 			Schemas: map[string]*dcl.Component{
 				"Release": &dcl.Component{
 					Title:           "Release",
-					ID:              "projects/{{ "{{" }}project{{ "}}" }}/releases/{{ "{{" }}name{{ "}}" }}",
+					ID:              "projects/{{project}}/releases/{{name}}",
 					ParentContainer: "project",
 					HasCreate:       true,
 					SchemaProperty: dcl.Property{

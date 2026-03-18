@@ -60,7 +60,7 @@ func (r *Ruleset) getURL(userBasePath string) (string, error) {
 		"project": dcl.ValueOrEmptyString(nr.Project),
 		"name":    dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/rulesets/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/rulesets/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *Ruleset) listURL(userBasePath string) (string, error) {
@@ -68,7 +68,7 @@ func (r *Ruleset) listURL(userBasePath string) (string, error) {
 	params := map[string]interface{}{
 		"project": dcl.ValueOrEmptyString(nr.Project),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/rulesets", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/rulesets", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -77,7 +77,7 @@ func (r *Ruleset) createURL(userBasePath string) (string, error) {
 	params := map[string]interface{}{
 		"project": dcl.ValueOrEmptyString(nr.Project),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/rulesets", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/rulesets", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -87,7 +87,7 @@ func (r *Ruleset) deleteURL(userBasePath string) (string, error) {
 		"project": dcl.ValueOrEmptyString(nr.Project),
 		"name":    dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/rulesets/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/rulesets/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 // rulesetApiOperation represents a mutable operation in the underlying REST

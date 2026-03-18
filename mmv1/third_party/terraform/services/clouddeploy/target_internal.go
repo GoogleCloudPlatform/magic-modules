@@ -107,7 +107,7 @@ func (r *Target) getURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/targets/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/targets/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *Target) listURL(userBasePath string) (string, error) {
@@ -116,7 +116,7 @@ func (r *Target) listURL(userBasePath string) (string, error) {
 		"project":  dcl.ValueOrEmptyString(nr.Project),
 		"location": dcl.ValueOrEmptyString(nr.Location),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/targets", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/targets", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -127,7 +127,7 @@ func (r *Target) createURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/targets?targetId={{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/targets?targetId={{name}}", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -138,7 +138,7 @@ func (r *Target) deleteURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/targets/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/targets/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *Target) SetPolicyURL(userBasePath string) string {
@@ -2473,7 +2473,7 @@ func (r *Target) updateURL(userBasePath, updateName string) (string, error) {
 			"location": dcl.ValueOrEmptyString(nr.Location),
 			"name":     dcl.ValueOrEmptyString(nr.Name),
 		}
-		return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/targets/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, fields), nil
+		return dcl.URL("projects/{{project}}/locations/{{location}}/targets/{{name}}", nr.basePath(), userBasePath, fields), nil
 
 	}
 

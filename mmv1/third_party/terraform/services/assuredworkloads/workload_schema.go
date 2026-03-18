@@ -85,7 +85,7 @@ func DCLWorkloadSchema() *dcl.Schema {
 			Schemas: map[string]*dcl.Component{
 				"Workload": &dcl.Component{
 					Title:           "Workload",
-					ID:              "organizations/{{ "{{" }}organization{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/workloads/{{ "{{" }}name{{ "}}" }}",
+					ID:              "organizations/{{organization}}/locations/{{location}}/workloads/{{name}}",
 					UsesStateHint:   true,
 					ParentContainer: "organization",
 					LabelsField:     "labels",

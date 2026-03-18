@@ -103,7 +103,7 @@ func (r *Key) getURL(userBasePath string) (string, error) {
 		"project": dcl.ValueOrEmptyString(nr.Project),
 		"name":    dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/global/keys/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/global/keys/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *Key) listURL(userBasePath string) (string, error) {
@@ -111,7 +111,7 @@ func (r *Key) listURL(userBasePath string) (string, error) {
 	params := map[string]interface{}{
 		"project": dcl.ValueOrEmptyString(nr.Project),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/global/keys", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/global/keys", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -121,7 +121,7 @@ func (r *Key) createURL(userBasePath string) (string, error) {
 		"project": dcl.ValueOrEmptyString(nr.Project),
 		"name":    dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/global/keys?keyId={{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/global/keys?keyId={{name}}", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -131,7 +131,7 @@ func (r *Key) deleteURL(userBasePath string) (string, error) {
 		"project": dcl.ValueOrEmptyString(nr.Project),
 		"name":    dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/global/keys/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/global/keys/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 // keyApiOperation represents a mutable operation in the underlying REST
@@ -1739,7 +1739,7 @@ func (r *Key) updateURL(userBasePath, updateName string) (string, error) {
 			"project": dcl.ValueOrEmptyString(nr.Project),
 			"name":    dcl.ValueOrEmptyString(nr.Name),
 		}
-		return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/global/keys/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, fields), nil
+		return dcl.URL("projects/{{project}}/locations/global/keys/{{name}}", nr.basePath(), userBasePath, fields), nil
 
 	}
 

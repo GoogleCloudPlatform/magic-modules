@@ -80,7 +80,7 @@ func DCLRulesetSchema() *dcl.Schema {
 			Schemas: map[string]*dcl.Component{
 				"Ruleset": &dcl.Component{
 					Title:           "Ruleset",
-					ID:              "projects/{{ "{{" }}project{{ "}}" }}/rulesets/{{ "{{" }}name{{ "}}" }}",
+					ID:              "projects/{{project}}/rulesets/{{name}}",
 					ParentContainer: "project",
 					HasCreate:       true,
 					SchemaProperty: dcl.Property{

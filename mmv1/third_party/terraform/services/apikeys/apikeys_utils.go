@@ -17,7 +17,7 @@ func keyStringGetURL(userBasePath string, r *Key) (string, error) {
 		"project": dcl.ValueOrEmptyString(nr.Project),
 		"name":    dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/global/keys/{{ "{{" }}name{{ "}}" }}/keyString", "https://apikeys.googleapis.com/v2/", userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/global/keys/{{name}}/keyString", "https://apikeys.googleapis.com/v2/", userBasePath, params), nil
 }
 
 func (c *Client) getKeyStringRaw(ctx context.Context, r *Key) ([]byte, error) {

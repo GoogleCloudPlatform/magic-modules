@@ -35,7 +35,7 @@ func (r *AzureClient) basePath() string {
 	params := map[string]interface{}{
 		"location": dcl.ValueOrEmptyString(r.Location),
 	}
-	return dcl.Nprintf("https://{{ "{{" }}location{{ "}}" }}-gkemulticloud.googleapis.com/v1", params)
+	return dcl.Nprintf("https://{{location}}-gkemulticloud.googleapis.com/v1", params)
 }
 
 func (r *AzureClient) getURL(userBasePath string) (string, error) {
@@ -45,7 +45,7 @@ func (r *AzureClient) getURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/azureClients/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/azureClients/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *AzureClient) listURL(userBasePath string) (string, error) {
@@ -54,7 +54,7 @@ func (r *AzureClient) listURL(userBasePath string) (string, error) {
 		"project":  dcl.ValueOrEmptyString(nr.Project),
 		"location": dcl.ValueOrEmptyString(nr.Location),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/azureClients", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/azureClients", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -65,7 +65,7 @@ func (r *AzureClient) createURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/azureClients?azureClientId={{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/azureClients?azureClientId={{name}}", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -76,7 +76,7 @@ func (r *AzureClient) deleteURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/azureClients/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/azureClients/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 // clientApiOperation represents a mutable operation in the underlying REST

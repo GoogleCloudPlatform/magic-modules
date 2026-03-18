@@ -89,7 +89,7 @@ func DCLTargetSchema() *dcl.Schema {
 			Schemas: map[string]*dcl.Component{
 				"Target": &dcl.Component{
 					Title:           "Target",
-					ID:              "projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/targets/{{ "{{" }}name{{ "}}" }}",
+					ID:              "projects/{{project}}/locations/{{location}}/targets/{{name}}",
 					ParentContainer: "project",
 					HasCreate:       true,
 					SchemaProperty: dcl.Property{

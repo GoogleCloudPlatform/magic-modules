@@ -89,7 +89,7 @@ func DCLDeliveryPipelineSchema() *dcl.Schema {
 			Schemas: map[string]*dcl.Component{
 				"DeliveryPipeline": &dcl.Component{
 					Title:           "DeliveryPipeline",
-					ID:              "projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/deliveryPipelines/{{ "{{" }}name{{ "}}" }}",
+					ID:              "projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}",
 					ParentContainer: "project",
 					HasCreate:       true,
 					SchemaProperty: dcl.Property{

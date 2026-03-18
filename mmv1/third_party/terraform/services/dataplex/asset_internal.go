@@ -121,7 +121,7 @@ func (r *Asset) getURL(userBasePath string) (string, error) {
 		"lake":         dcl.ValueOrEmptyString(nr.Lake),
 		"name":         dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/lakes/{{ "{{" }}lake{{ "}}" }}/zones/{{ "{{" }}dataplexZone{{ "}}" }}/assets/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/lakes/{{lake}}/zones/{{dataplexZone}}/assets/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *Asset) listURL(userBasePath string) (string, error) {
@@ -132,7 +132,7 @@ func (r *Asset) listURL(userBasePath string) (string, error) {
 		"dataplexZone": dcl.ValueOrEmptyString(nr.DataplexZone),
 		"lake":         dcl.ValueOrEmptyString(nr.Lake),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/lakes/{{ "{{" }}lake{{ "}}" }}/zones/{{ "{{" }}dataplexZone{{ "}}" }}/assets", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/lakes/{{lake}}/zones/{{dataplexZone}}/assets", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -145,7 +145,7 @@ func (r *Asset) createURL(userBasePath string) (string, error) {
 		"lake":         dcl.ValueOrEmptyString(nr.Lake),
 		"name":         dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/lakes/{{ "{{" }}lake{{ "}}" }}/zones/{{ "{{" }}dataplexZone{{ "}}" }}/assets?assetId={{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/lakes/{{lake}}/zones/{{dataplexZone}}/assets?assetId={{name}}", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -158,7 +158,7 @@ func (r *Asset) deleteURL(userBasePath string) (string, error) {
 		"lake":         dcl.ValueOrEmptyString(nr.Lake),
 		"name":         dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/lakes/{{ "{{" }}lake{{ "}}" }}/zones/{{ "{{" }}dataplexZone{{ "}}" }}/assets/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/lakes/{{lake}}/zones/{{dataplexZone}}/assets/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *Asset) SetPolicyURL(userBasePath string) string {
@@ -2358,7 +2358,7 @@ func (r *Asset) updateURL(userBasePath, updateName string) (string, error) {
 			"lake":         dcl.ValueOrEmptyString(nr.Lake),
 			"name":         dcl.ValueOrEmptyString(nr.Name),
 		}
-		return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/lakes/{{ "{{" }}lake{{ "}}" }}/zones/{{ "{{" }}dataplexZone{{ "}}" }}/assets/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, fields), nil
+		return dcl.URL("projects/{{project}}/locations/{{location}}/lakes/{{lake}}/zones/{{dataplexZone}}/assets/{{name}}", nr.basePath(), userBasePath, fields), nil
 
 	}
 

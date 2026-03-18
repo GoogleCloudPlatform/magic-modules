@@ -264,7 +264,7 @@ func (r *DeliveryPipeline) getURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/deliveryPipelines/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *DeliveryPipeline) listURL(userBasePath string) (string, error) {
@@ -273,7 +273,7 @@ func (r *DeliveryPipeline) listURL(userBasePath string) (string, error) {
 		"project":  dcl.ValueOrEmptyString(nr.Project),
 		"location": dcl.ValueOrEmptyString(nr.Location),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/deliveryPipelines", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/deliveryPipelines", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -284,7 +284,7 @@ func (r *DeliveryPipeline) createURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/deliveryPipelines?deliveryPipelineId={{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/deliveryPipelines?deliveryPipelineId={{name}}", nr.basePath(), userBasePath, params), nil
 
 }
 
@@ -295,7 +295,7 @@ func (r *DeliveryPipeline) deleteURL(userBasePath string) (string, error) {
 		"location": dcl.ValueOrEmptyString(nr.Location),
 		"name":     dcl.ValueOrEmptyString(nr.Name),
 	}
-	return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/deliveryPipelines/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, params), nil
+	return dcl.URL("projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}", nr.basePath(), userBasePath, params), nil
 }
 
 func (r *DeliveryPipeline) SetPolicyURL(userBasePath string) string {
@@ -5118,7 +5118,7 @@ func (r *DeliveryPipeline) updateURL(userBasePath, updateName string) (string, e
 			"location": dcl.ValueOrEmptyString(nr.Location),
 			"name":     dcl.ValueOrEmptyString(nr.Name),
 		}
-		return dcl.URL("projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/deliveryPipelines/{{ "{{" }}name{{ "}}" }}", nr.basePath(), userBasePath, fields), nil
+		return dcl.URL("projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}", nr.basePath(), userBasePath, fields), nil
 
 	}
 

@@ -95,7 +95,7 @@ func DCLAzureClientSchema() *dcl.Schema {
 			Schemas: map[string]*dcl.Component{
 				"Client": &dcl.Component{
 					Title:           "AzureClient",
-					ID:              "projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/azureClients/{{ "{{" }}name{{ "}}" }}",
+					ID:              "projects/{{project}}/locations/{{location}}/azureClients/{{name}}",
 					ParentContainer: "project",
 					HasCreate:       true,
 					SchemaProperty: dcl.Property{
