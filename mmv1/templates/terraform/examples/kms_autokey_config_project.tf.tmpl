@@ -54,7 +54,7 @@ resource "time_sleep" "wait_srv_acc_permissions" {
 
 resource "google_kms_project_autokey_config" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
-  project     = google_project.resource_project.number
+  project     = "projects/${google_project.resource_project.number}"
   key_project_resolution_mode = "RESOURCE_PROJECT"
   depends_on  = [time_sleep.wait_srv_acc_permissions]
 }
