@@ -131,8 +131,7 @@ properties:
   - name: 'backupRules'
     type: Array
     description: |
-      The backup rules for this `BackupPlan`. There must be at least one `BackupRule` message.
-    required: true
+      The backup rules for this `BackupPlan`.
     item_type:
       type: NestedObject
       properties:
