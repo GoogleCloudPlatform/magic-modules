@@ -766,6 +766,7 @@ service/sqladmin-security:
   resources:
   - google_sql_ca_certs
   - google_sql_ssl_cert
+  - google_sql_provision_script
 service/storage:
   team: gcs-terraform-eng
   resources:
