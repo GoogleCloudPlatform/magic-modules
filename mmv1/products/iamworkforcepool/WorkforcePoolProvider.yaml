@@ -508,11 +508,6 @@ properties:
               details.
   - name: extendedAttributesOauth2Client
     type: NestedObject
-<<<<<<< auto-pr-1773180399209514679
-=======
-    deprecation_message: |-
-      `extended_attributes_oauth2_client` is restricted. We suggest use SCIM instead.
->>>>>>> main
     description: |
       The configuration for OAuth 2.0 client used to get the extended group
       memberships for user identities. Only the `AZURE_AD_GROUPS_ID` attribute
