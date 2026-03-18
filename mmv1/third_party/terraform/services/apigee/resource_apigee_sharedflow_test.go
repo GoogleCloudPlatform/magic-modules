@@ -247,6 +247,8 @@ func TestAccApigeeSharedFlow_space(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"space_id":        "test-space",
+		"display_name":    "Test Space",
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
@@ -337,8 +339,8 @@ resource "google_apigee_organization" "apigee_org" {
 
 resource "google_apigee_space" "space" {
   org_id       = google_apigee_organization.apigee_org.id
-  name         = "tf-test-space-%{random_suffix}"
-  display_name = "Test Space"
+  space_id     = "%{space_id}"
+  display_name = "%{display_name}"
 }
 
 resource "google_apigee_sharedflow" "test_apigee_sharedflow_space" {
