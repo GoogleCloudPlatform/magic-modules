@@ -148,6 +148,7 @@ properties:
         description: |-
           The timezone to use for the groc expression.
           If not specified, defaults to UTC.
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
   - name: updateTime
     type: String
     description: The most recent time at which this assessment rule was updated.
