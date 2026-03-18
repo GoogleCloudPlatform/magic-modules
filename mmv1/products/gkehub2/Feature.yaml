@@ -58,55 +58,48 @@ legacy_long_form_project: true
 examples:
   - name: 'gkehub_feature_multi_cluster_ingress'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("multiclusteringress")'
     exclude_test: true
   - name: 'gkehub_feature_multi_cluster_service_discovery'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("multiclusterservicediscovery")'
     exclude_test: true
   - name: 'gkehub_feature_anthos_service_mesh'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("servicemesh")'
     exclude_test: true
   - name: 'enable_fleet_observability_for_default_logs_with_COPY'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
     exclude_test: true
   - name: 'enable_fleet_observability_for_scope_logs_with_MOVE'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
     exclude_test: true
   - name: 'enable_fleet_observability_for_both_default_and_scope_logs'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
     exclude_test: true
   - name: 'enable_fleet_default_member_config_service_mesh'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("servicemesh")'
     exclude_test: true
   - name: 'enable_fleet_default_member_config_configmanagement'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("configmanagement")'
     exclude_test: true
   - name: 'enable_fleet_default_member_config_policycontroller'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
     exclude_test: true
   - name: 'enable_fleet_default_member_config_policycontroller_full'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
     exclude_test: true
   - name: 'enable_fleet_default_member_config_policycontroller_minimal'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
     exclude_test: true
   - name: 'gkehub_feature_clusterupgrade'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("clusterupgrade")'
     exclude_test: true
   - name: 'gkehub_feature_rbacrolebinding_actuation'
     primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("rbacrolebindingactuation")'
+    exclude_test: true
+  - name: 'gkehub_feature_workload_identity'
+    primary_resource_id: 'feature'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+    min_version: beta
     exclude_test: true
 parameters:
   - name: 'location'
@@ -255,6 +248,14 @@ properties:
             description: 'The list of allowed custom roles (ClusterRoles). If a custom role is not part of this list, it cannot be used in a fleet scope RBACRoleBinding. If a custom role in this list is in use, it cannot be removed from the list until the scope RBACRolebindings using it are deleted.'
             item_type:
               type: String
+      - name: 'workloadidentity'
+        type: NestedObject
+        description: Workload Identity feature spec.
+        properties:
+          - name: 'scopeTenancyPool'
+            type: String
+            description: 'Pool to be used for Workload Identity. This pool in trust-domain mode is used with Fleet Tenancy, so that sameness can be enforced. ex: projects/example/locations/global/workloadidentitypools/custompool'
+            required: true
   - name: 'fleetDefaultMemberConfig'
     type: NestedObject
     description: Optional. Fleet Default Membership Configuration.

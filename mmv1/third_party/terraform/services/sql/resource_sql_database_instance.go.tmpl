@@ -118,6 +118,7 @@ var (
 		"settings.0.insights_config.0.record_application_tags",
 		"settings.0.insights_config.0.record_client_address",
 		"settings.0.insights_config.0.query_plans_per_minute",
+		"settings.0.insights_config.0.enhanced_query_insights_enabled",
 	}
 
 	sqlServerAuditConfigurationKeys = []string{
@@ -798,13 +799,19 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										AtLeastOneOf: insightsConfigKeys,
 										Description:  `True if Query Insights feature is enabled.`,
 									},
+									"enhanced_query_insights_enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										AtLeastOneOf: insightsConfigKeys,
+										Description:  `True if Enhanced Query Insights feature is enabled.`,
+									},
 									"query_string_length": {
 										Type:         schema.TypeInt,
 										Optional:     true,
-										Default:      1024,
+										Computed:     true,
 										ValidateFunc: validation.IntBetween(1, 1048576),
 										AtLeastOneOf: insightsConfigKeys,
-										Description:  `Maximum query length stored in bytes. Between 256 and 4500. Default to 1024. For Enterprise Plus instances, from 1 to 1048576.`,
+										Description:  `Maximum query length stored in bytes. Between 256 and 4500. Default to 1024. For Enterprise Plus instances, from 1024 to 100000.`,
 									},
 									"record_application_tags": {
 										Type:         schema.TypeBool,
@@ -878,6 +885,13 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Computed:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NOT_REQUIRED", "REQUIRED"}, false),
 							Description:  `Enables the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections. If enabled, all the direct connections are rejected.`,
+						},
+						"data_api_access": {
+						    Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.StringInSlice([]string{"DISALLOW_DATA_API", "ALLOW_DATA_API"}, false),
+							Description:  `Allows using ExecuteSql API to connect to the instance. Disallowed when unspecified.`,
 						},
 						"deletion_protection_enabled": {
 							Type:        schema.TypeBool,
@@ -1008,7 +1022,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 			"database_version": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, MYSQL_8_4, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, POSTGRES_15, POSTGRES_16, POSTGRES_17, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
+				Description:      `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, MYSQL_8_4, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, POSTGRES_15, POSTGRES_16, POSTGRES_17, POSTGRES_18, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 				DiffSuppressFunc: databaseVersionDiffSuppress,
 			},
 			"encryption_key_name": {
@@ -1367,6 +1381,13 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Required:    true,
 							Description: `The name of the instance from which the point in time should be restored.`,
 						},
+						{{- if ne $.TargetVersionName "ga" }}
+						"source_project": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The project ID of the source project`,
+                        },
+						{{- end }}
 						"point_in_time": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -1547,7 +1568,14 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
+	cloneContext, cloneSourceInstance := expandCloneContext(d.Get("clone").([]interface{}))
+	
+	{{- if ne $.TargetVersionName "ga" }}
+	cloneSourceProject := expandCloneSourceProject(d.Get("clone").([]interface{}))
+	if cloneSourceProject == "" {
+		cloneSourceProject = project
+	}
+	{{- end }}
 	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
 
 	if valueI, ok := d.GetOk("settings.0.auto_upgrade_enabled"); ok && !(valueI.(bool)) {
@@ -1609,8 +1637,19 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		RetryFunc: func() (operr error) {
 			if cloneContext != nil {
 				cloneContext.DestinationInstanceName = name
+				{{- if ne $.TargetVersionName "ga" }}
+				// if cloneSourceProject isn't equal to the project, then it's a cross project clone request.
+				if (cloneSourceProject != project) {
+					cloneContext.DestinationProject = project
+					cloneContext.DestinationNetwork = network
+				}
+				{{- end }}
 				clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
-				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(project, cloneSource, &clodeReq).Do()
+				{{- if ne $.TargetVersionName "ga" }}
+				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(cloneSourceProject, cloneSourceInstance, &clodeReq).Do()
+				{{- else }}
+				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(project, cloneSourceInstance, &clodeReq).Do()
+				{{- end }}
 			} else if pointInTimeRestoreContext != nil {
 				parent := fmt.Sprintf("projects/%s", project)
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
@@ -1773,6 +1812,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		AvailabilityType:              _settings["availability_type"].(string),
 		ConnectorEnforcement:          _settings["connector_enforcement"].(string),
 		Collation:                     _settings["collation"].(string),
+		DataApiAccess:                 _settings["data_api_access"].(string),
 		DataDiskSizeGb:                int64(_settings["disk_size"].(int)),
 		DataDiskType:                  _settings["disk_type"].(string),
 {{- if ne $.TargetVersionName "ga" }}
@@ -1856,6 +1896,16 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 		SourceInstanceDeletionTime: _cloneConfiguration["source_instance_deletion_time"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func expandCloneSourceProject(configured []interface{}) (string) {
+	if len(configured) == 0 || configured[0] == nil {
+		return ""
+	}
+	_cloneConfiguration := configured[0].(map[string]interface{})
+	return _cloneConfiguration["source_project"].(string)
+}
+{{- end }}
 
 func expandMaintenanceWindow(configured []interface{}) *sqladmin.MaintenanceWindow {
 	if len(configured) == 0 || configured[0] == nil {
@@ -2128,6 +2178,11 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 		RecordApplicationTags: _insightsConfig["record_application_tags"].(bool),
 		RecordClientAddress:   _insightsConfig["record_client_address"].(bool),
 		QueryPlansPerMinute:   int64(_insightsConfig["query_plans_per_minute"].(int)),
+		EnhancedQueryInsightsEnabled: _insightsConfig["enhanced_query_insights_enabled"].(bool),
+		// Ensure boolean fields that may be set to false are always sent in API requests
+		// so Terraform can disable features (false) instead of leaving them as the
+		// server-side defaults when omitted.
+		ForceSendFields: []string{"EnhancedQueryInsightsEnabled"},
 	}
 }
 
@@ -2843,6 +2898,7 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"effective_availability_type":      settings.AvailabilityType,
 		"collation":                        settings.Collation,
 		"connector_enforcement":            settings.ConnectorEnforcement,
+		"data_api_access":                  settings.DataApiAccess,
 		"disk_type":                        settings.DataDiskType,
 		"disk_size":                        settings.DataDiskSizeGb,
 {{- if ne $.TargetVersionName "ga" }}
@@ -3305,6 +3361,7 @@ func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} 
 		"record_application_tags": insightsConfig.RecordApplicationTags,
 		"record_client_address":   insightsConfig.RecordClientAddress,
 		"query_plans_per_minute":  insightsConfig.QueryPlansPerMinute,
+		"enhanced_query_insights_enabled": insightsConfig.EnhancedQueryInsightsEnabled,
 	}
 
 	return []map[string]interface{}{data}

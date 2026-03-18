@@ -54,6 +54,14 @@ type Resource struct {
 	// organization variant, however most resources do not need it.
 	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
 
+	// ApiResourceField indicates what field on the API resource is managed by a resource.
+	// This is generally relevant for fine-grained resources. For example,
+	// google_compute_router_nat manages the `nat` field on the `Router` resource. Can be
+	// set to "." to indicate explicitly that the resource's fields aren't
+	// "nested", even if the resource uses NestedQuery. This is useful for resources that
+	// use "list" instead of "get" as the read endpoint.
+	ApiResourceField string `yaml:"api_resource_field,omitempty"`
+
 	// [Required] A description of the resource that's surfaced in provider
 	// documentation.
 	Description string
@@ -323,11 +331,6 @@ type Resource struct {
 	// The version name provided by the user through CI
 	TargetVersionName string `yaml:"-"`
 
-	// ApiResourceField indicates what field on the API resource is managed by a resource.
-	// This is generally relevant for fine-grained resources. For example,
-	// google_compute_router_nat manages the `nat` field on the `Router` resource.
-	ApiResourceField string `yaml:"api_resource_field,omitempty"`
-
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
 
@@ -490,6 +493,10 @@ func (r *Resource) SetDefault(product *Product) {
 	}
 	for _, vf := range r.VirtualFields {
 		vf.SetDefault(r)
+	}
+
+	if r.IamPolicy != nil && r.DeprecationMessage != "" && r.IamPolicy.DeprecationMessage == "" {
+		r.IamPolicy.DeprecationMessage = fmt.Sprintf("The parent resource has been deprecated: %v", r.DeprecationMessage)
 	}
 }
 
@@ -1826,17 +1833,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 }
 
 func (r Resource) IamImportQualifiersForTestSample() string {
-	var importFormat string
-	if len(r.IamPolicy.ImportFormat) > 0 {
-		importFormat = r.IamPolicy.ImportFormat[0]
-	} else {
-		importFormat = r.IamPolicy.SelfLink
-		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
-		}
-	}
-
-	params := r.ExtractIdentifiers(importFormat)
+	params := r.IamImportParams()
 	var importQualifiers []string
 	for i, param := range params {
 		if param == "project" {
@@ -2517,9 +2514,25 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		}
 	}
 
-	for _, e := range r.Examples {
-		for _, p := range e.IgnoreReadExtra {
-			props = append(props, strings.ReplaceAll(p, ".0.", "."))
+	if r.Samples != nil && r.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", r.Name)
+	}
+
+	if r.Examples != nil {
+		for _, e := range r.Examples {
+			for _, p := range e.IgnoreReadExtra {
+				props = append(props, strings.ReplaceAll(p, ".0.", "."))
+			}
+		}
+	}
+
+	if r.Samples != nil {
+		for _, s := range r.Samples {
+			for _, st := range s.Steps {
+				for _, p := range st.IgnoreReadExtra {
+					props = append(props, strings.ReplaceAll(p, ".0.", "."))
+				}
+			}
 		}
 	}
 

@@ -725,6 +725,7 @@ This block also contains several computed attributes, documented below.
 * `daily_maintenance_window` - (Optional) structure documented below.
 * `recurring_window` - (Optional) structure documented below
 * `maintenance_exclusion` - (Optional) structure documented below
+* `disruption_budget` - (Optional) structure documented below
 
 In beta, one or the other of `recurring_window` and `daily_maintenance_window` is required if a `maintenance_policy` block is supplied.
 
@@ -808,6 +809,24 @@ maintenance_policy {
       scope = "NO_MINOR_UPGRADES"
       end_time_behavior = "UNTIL_END_OF_SUPPORT"
     }
+  }
+}
+```
+
+* `disruption_budget` - cluster control plane minor and patch version disruption interval.
+
+<a name="nested_disruption_budget"></a>The `disruption_budget` block supports:
+* `minor_version_disruption_interval` - (Optional) The minimum duration between two minor version upgrades of the control plane.
+* `patch_version_disruption_interval` - (Optional) The minimum duration between two patch version upgrades of the control plane.
+* `last_minor_version_disruption_time` - (Output) The last minor version disruption time of the control plane.
+* `last_disruption_time` - (Output) The last disruption time of the control plane.
+
+Examples:
+```hcl
+maintenance_policy {
+  disruption_budget{
+    minor_version_disruption_interval = "2592000s"
+    patch_version_disruption_interval = "86400s"
   }
 }
 ```
@@ -1046,7 +1065,7 @@ gvnic {
     See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms)
     for more information. Defaults to false.
 
-* `sandbox_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it.
+* `sandbox_config` - (Optional) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it.
     Structure is [documented below](#nested_sandbox_config).
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
@@ -1428,7 +1447,12 @@ not.
 
 <a name="nested_sandbox_config"></a>The `sandbox_config` block supports:
 
-* `sandbox_type` (Required) Which sandbox to use for pods in the node pool.
+* `type` (Required) Which sandbox to use for pods in the node pool.
+    Accepted values are:
+
+    * `"GVISOR"`: Pods run within a gVisor sandbox.
+
+* `sandbox_type` (Beta, Deprecated) Which sandbox to use for pods in the node pool. `sandbox_config.sandbox_type` is deprecated and will be removed in a future major release. Use `sandbox_config.type` instead.
     Accepted values are:
 
     * `"gvisor"`: Pods run within a gVisor sandbox.

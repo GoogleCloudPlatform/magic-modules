@@ -153,7 +153,7 @@ properties:
   - name: 'brokerCapacityConfig'
     type: NestedObject
     description: "Capacity configuration at a per-broker level within the Kafka cluster. The config will be appled to each broker in the cluster."
-    ignore_read: true
+    is_missing_in_cai: true
     properties:
       - name: 'diskSizeGib'
         type: String
