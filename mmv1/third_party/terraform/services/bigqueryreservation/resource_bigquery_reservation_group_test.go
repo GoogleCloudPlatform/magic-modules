@@ -35,7 +35,7 @@ func TestAccBigqueryReservationGroup_basic(t *testing.T) {
 func testAccBigqueryReservationGroup_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_reservation_group" "reservation_group" {
-  name     = "projects/%{project}/locations/us-west2/reservationGroups/tf-test-res-group-%{random_suffix}"
+  name     = "tf-test-res-group-%{random_suffix}"
   location = "us-west2"
 }
 `, context)
