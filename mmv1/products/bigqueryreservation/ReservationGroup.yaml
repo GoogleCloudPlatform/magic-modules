@@ -43,3 +43,4 @@ properties:
     description: |
       The name of the reservation group. This field must only contain alphanumeric characters or dash.
     immutable: true
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
