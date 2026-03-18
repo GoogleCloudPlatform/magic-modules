@@ -847,7 +847,7 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	}
 
 	// File is not ignored and is appropriate file type to add header to
-	copyrightHeader := []string{"Copyright (c) HashiCorp, Inc.", "SPDX-License-Identifier: MPL-2.0"}
+	copyrightHeader := []string{"Copyright IBM Corp. 2014, 2026", "SPDX-License-Identifier: MPL-2.0"}
 	header := commentBlock(copyrightHeader, lang)
 
 	targetFile := filepath.Join(outputFolder, target)

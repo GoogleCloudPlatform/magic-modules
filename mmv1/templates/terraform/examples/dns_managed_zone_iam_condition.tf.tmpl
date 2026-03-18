@@ -1,0 +1,19 @@
+resource "google_dns_managed_zone" "default" {
+  name        = "{{index $.Vars "managed_zone_name"}}"
+  dns_name    = "{{index $.Vars "dns_name"}}"
+  description = "Example zone for IAM conditions"
+}
+
+resource "google_dns_managed_zone_iam_member" "condition_test" {
+  project      = google_dns_managed_zone.default.project
+  managed_zone = google_dns_managed_zone.default.name
+  role         = "roles/dns.admin"
+  member       = "user:admin@hashicorptest.com"
+
+  condition {
+    title       = "Exact Record Match"
+    description = "Allow modifying only api.example.com. A records"
+    # Mandatory pass-through clause for parent Managed Zone checks
+    expression = "(resource.type == 'dns.googleapis.com/ResourceRecordSet' && resource.name.endsWith('/rrsets/api.{{index $.Vars "dns_name"}}/A')) || (resource.type != 'dns.googleapis.com/ResourceRecordSet')"
+  }
+}
