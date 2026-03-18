@@ -242,7 +242,6 @@ resource "google_apigee_sharedflow" "test_apigee_sharedflow" {
 }
 
 func TestAccApigeeSharedFlow_space(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
