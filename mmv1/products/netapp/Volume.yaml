@@ -46,6 +46,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_force_delete.go.tmpl'
   pre_update: 'templates/terraform/pre_update/netapp_volume_update.go.tmpl'
@@ -339,6 +340,7 @@ properties:
     type: Array
     description: |
       List of actions that are restricted on this volume.
+    is_missing_in_cai: true
     item_type:
       type: Enum
       description: |

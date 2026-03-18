@@ -295,11 +295,15 @@ func shouldCreateTicket(testfailure *testFailure, existTestNames []string, today
 	if testfailure.FailureRateLabels[provider.GA] == testFailureNone && testfailure.FailureRateLabels[provider.Beta] == testFailureNone {
 		return false
 	}
+
+	// Skip if test ticket already exists
 	for _, t := range existTestNames {
 		if t == testfailure.TestName {
 			return false
 		}
 	}
+
+	// Skip if test ticket is closed today
 	for _, t := range todayClosedTestNames {
 		if t == testfailure.TestName {
 			return false
@@ -355,6 +359,11 @@ func convertTestNameToResource(testName string) string {
 func IsTerraformTeamOwned(testFailure *testFailure) bool {
 	return teamOwnedErrorTypes[testFailure.ErrorTypes[provider.GA]] ||
 		teamOwnedErrorTypes[testFailure.ErrorTypes[provider.Beta]]
+}
+
+func IsCrash(testFailure *testFailure) bool {
+	return testFailure.ErrorTypes[provider.GA] == "Crash" ||
+		testFailure.ErrorTypes[provider.Beta] == "Crash"
 }
 
 func failingTestNamesFromActiveIssues(ctx context.Context, gh *github.Client) ([]string, error) {
@@ -430,16 +439,20 @@ func computeTicketLabels(testFailure *testFailure) ([]string, error) {
 	}
 
 	var labels []string
+	if IsCrash(testFailure) {
+		labels = append(labels, "crash")
+	}
+
 	if IsTerraformTeamOwned(testFailure) {
 		// Apply terraform team label for team owned ticket
-		labels = []string{"service/terraform"}
+		labels = append(labels, "service/terraform")
 	} else {
 		// Apply service labels to forward test failure ticket automatically
 		regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 		if err != nil {
 			return nil, fmt.Errorf("error building regex labels: %w", err)
 		}
-		labels = labeler.ComputeLabels([]string{testFailure.AffectedResource}, regexpLabels)
+		labels = append(labels, labeler.ComputeLabels([]string{testFailure.AffectedResource}, regexpLabels)...)
 
 		// Apply terraform team label if no service labels applied
 		if len(labels) == 0 {

@@ -13,6 +13,7 @@
 
 ---
 name: 'Tag'
+api_resource_field: "."
 description: |
   Tags are used to attach custom metadata to Data Catalog resources. Tags conform to the specifications within their tag template.
 

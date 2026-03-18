@@ -1,12 +1,10 @@
 package observability_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"testing"
 )
@@ -21,7 +19,7 @@ func TestAccObservabilityTraceScope_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityTraceScope_basic(context),
@@ -53,7 +51,6 @@ func TestAccObservabilityTraceScope_update(t *testing.T) {
 func testAccObservabilityTraceScope_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_observability_trace_scope" "observability_trace_scope" {
-  provider         = google-beta
   trace_scope_id   = "tf-test-test-scope%{random_suffix}"
   location         = "global"
   resource_names   = [
@@ -63,7 +60,6 @@ resource "google_observability_trace_scope" "observability_trace_scope" {
 }
 
 data "google_project" "project" {
-  provider         = google-beta
 }
 `, context)
 }
@@ -72,7 +68,6 @@ func testAccObservabilityTraceScope_update(context map[string]interface{}) strin
 	return acctest.Nprintf(`
 resource "google_observability_trace_scope" "observability_trace_scope" {
   depends_on       = [google_project.project-2]
-  provider         = google-beta
   trace_scope_id   = "tf-test-test-scope%{random_suffix}"
   location         = "global"
   resource_names   = [
@@ -83,11 +78,9 @@ resource "google_observability_trace_scope" "observability_trace_scope" {
 }
 
 data "google_project" "project" {
-  provider         = google-beta
 }
 
 resource "google_project" "project-2" {
-  provider         = google-beta
   project_id       = "tf-test%{random_suffix}"
   name             = "tf-test%{random_suffix}"
   org_id           = "%{org_id}"
@@ -95,5 +88,3 @@ resource "google_project" "project-2" {
 }
 `, context)
 }
-
-{{ end }}
