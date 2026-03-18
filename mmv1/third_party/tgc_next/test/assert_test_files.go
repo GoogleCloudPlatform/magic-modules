@@ -347,11 +347,17 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *
 
 		if sVal, ok := val.(string); ok {
 			// TODO: convert to correct type when parsing HCL to fix the edge case where the field type is String and the only values are "false", "00", etc.
-			if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
-				continue
+			isRequired := false
+			if resourceSchema != nil {
+				isRequired = getSchemaRequired(resourceSchema, key)
 			}
-			if iVal, err := strconv.Atoi(sVal); err == nil && iVal == 0 {
-				continue
+			if !isRequired {
+				if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
+					continue
+				}
+				if iVal, err := strconv.Atoi(sVal); err == nil && iVal == 0 {
+					continue
+				}
 			}
 		}
 
