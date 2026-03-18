@@ -1,0 +1,22 @@
+func flatten{{$.GetPrefix}}TrafficFilter(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		// If the API drops the whole block, pull the user's configured block from state 
+		// to prevent the perpetual diff.
+		if val, ok := d.GetOk("traffic_filter"); ok {
+			return val
+		}
+		return nil
+	}
+
+	original := v.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	if val, ok := original["templateOnly"]; ok {
+		transformed["template_only"] = val
+	} else if val, ok := d.GetOk("traffic_filter.0.template_only"); ok {
+		// If the API returns the block but drops the false boolean, pull it from state
+		transformed["template_only"] = val
+	}
+
+	return []interface{}{transformed}
+}
