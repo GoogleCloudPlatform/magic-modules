@@ -1,7 +1,5 @@
 package vectorsearch_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -18,7 +16,7 @@ func TestAccVectorSearchCollection_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVectorSearchCollection_basic(context),
@@ -50,8 +48,6 @@ func TestAccVectorSearchCollection_update(t *testing.T) {
 func testAccVectorSearchCollection_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vector_search_collection" "example-collection" {
-  provider = google-beta
-
   location      = "us-central1"
   collection_id = "tf-test-example-collection-id%{random_suffix}"
 
@@ -95,8 +91,6 @@ EOF
 func testAccVectorSearchCollection_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vector_search_collection" "example-collection" {
-  provider = google-beta
-
   location      = "us-central1"
   collection_id = "tf-test-example-collection-id%{random_suffix}"
 
@@ -143,5 +137,3 @@ EOF
 }
 `, context)
 }
-
-{{- end }}

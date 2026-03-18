@@ -39,11 +39,11 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
 sweeper:
   url_substitutions:
     - region: "global"
     - region: "us-central1"
+include_in_tgc_next: true
 examples:
   - name: 'certificate_manager_trust_config'
     primary_resource_id: 'default'

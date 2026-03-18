@@ -13,7 +13,6 @@
 
 ---
 name: TraceScope
-min_version: 'beta'
 description: A trace scope is a collection of resources whose traces are queried together
 base_url: projects/{{project}}/locations/{{location}}/traceScopes
 update_mask: true
@@ -26,7 +25,6 @@ import_format:
 examples:
   - name: observability_trace_scope_basic
     primary_resource_id: observability_trace_scope
-    min_version: beta
     vars:
       trace_scope_id: test-scope
     test_env_vars:

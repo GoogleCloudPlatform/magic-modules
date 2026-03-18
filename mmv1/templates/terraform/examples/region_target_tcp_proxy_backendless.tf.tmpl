@@ -1,0 +1,6 @@
+resource "google_compute_region_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "region_target_tcp_proxy_name"}}"
+  region                = "europe-west4"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+}

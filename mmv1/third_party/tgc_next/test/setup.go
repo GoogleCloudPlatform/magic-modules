@@ -226,7 +226,7 @@ func prepareTestData(testName string, stepNumber int, retries int) (*StepTestDat
 	if stepMetadata, ok := testMetadata[stepNumber]; ok {
 		resourceMetadata := stepMetadata.ResourceMetadata
 
-		rawTfFile := fmt.Sprintf("%s_step%d.tf", testName, stepNumber)
+		rawTfFile := fmt.Sprintf("%s_step%d.tf", strings.ReplaceAll(testName, "/", "_"), stepNumber)
 		err = os.WriteFile(rawTfFile, []byte(stepMetadata.RawConfig), 0644)
 		if err != nil {
 			return nil, fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
@@ -245,7 +245,7 @@ func prepareTestData(testName string, stepNumber int, retries int) (*StepTestDat
 		}
 
 		if os.Getenv("WRITE_FILES") != "" {
-			writeJSONFile(fmt.Sprintf("%s_attrs", testName), rawResourceConfigs)
+			writeJSONFile(fmt.Sprintf("%s_attrs", strings.ReplaceAll(testName, "/", "_")), rawResourceConfigs)
 		}
 
 		rawConfigMap := convertToConfigMap(rawResourceConfigs)

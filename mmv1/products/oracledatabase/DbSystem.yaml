@@ -30,6 +30,7 @@ examples:
       project: 'my-project'
       db_system_id: 'my-instance'
       database_id: 'mydb'
+      db_unique_name: 'db'
       odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
       odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
       deletion_protection: 'true'
@@ -44,6 +45,7 @@ examples:
       # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
       db_system_id: 'fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))'
       database_id: 'fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))'
+      db_unique_name: 'fmt.Sprintf("db%s", acctest.RandString(t, 10))'
       odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: 'oracledatabase_db_system_full'
@@ -52,6 +54,7 @@ examples:
       project: 'my-project'
       db_system_id: 'my-instance'
       database_id: 'mydb'
+      db_unique_name: 'db'
       odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
       odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
       deletion_protection: 'true'
@@ -66,6 +69,7 @@ examples:
       # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
       db_system_id: 'fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))'
       database_id: 'fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))'
+      db_unique_name: 'fmt.Sprintf("db%s", acctest.RandString(t, 10))'
       odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
 virtual_fields:

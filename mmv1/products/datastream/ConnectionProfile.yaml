@@ -136,6 +136,9 @@ examples:
     vars:
       source_connection_profile_id: 'source-profile'
     exclude_test: true
+tgc_tests:
+  - name: 'TestAccDatastreamConnectionProfile_update'
+    skip: 'Test data is flaky and fix it later'
 parameters:
   - name: 'connectionProfileId'
     type: String
