@@ -1,0 +1,87 @@
+{{/*
+The following Go code is injected into the Terraform resource after a successful create operation.
+It's used to populate the "serviceAgents" field from the API response.
+*/}}
+
+  opName, ok := res["name"].(string)
+  if !ok {
+    return fmt.Errorf("could not find operation name in initial response: %#v", res)
+  }
+
+  log.Printf("[DEBUG] {{ .Name }}PostCreate: Re-polling operation %s to get final response", opName)
+
+  var finalOp map[string]interface{}
+  getOpURL := config.WorkloadIdentityBasePath + opName
+  timeout := d.Timeout(schema.TimeoutCreate)
+  startTime := time.Now()
+  deadline := startTime.Add(timeout)
+
+  for {
+    opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+      Config:    config,
+      Method:    "GET",
+      RawURL:    getOpURL,
+      UserAgent: userAgent,
+    })
+    if err != nil {
+      return fmt.Errorf("error re-polling operation %s: %w", opName, err)
+    }
+
+    done, ok := opRes["done"].(bool)
+    // Ensure 'done' field is present and is a boolean. If not, assuming false.
+    if ok && done {
+      finalOp = opRes
+      break
+    }
+
+    if time.Now().After(deadline) {
+      return fmt.Errorf("operation %s did not complete within the timeout of %s", opName, timeout.String())
+    }
+
+    time.Sleep(5 * time.Second)
+  }
+
+  if finalOp["error"] != nil {
+    return fmt.Errorf("operation %s failed: %#v", opName, finalOp["error"])
+  }
+
+  responseData, ok := finalOp["response"].(map[string]interface{})
+  if !ok {
+    return fmt.Errorf("LRO 'response' field not found or not a map in final operation: %#v", finalOp)
+  }
+
+  serviceAgentsData, ok := responseData["serviceAgents"].([]interface{})
+  if !ok {
+    return fmt.Errorf("required field 'serviceAgents' not found or is not an array in response data: %#v", responseData)
+  }
+
+  if len(serviceAgentsData) > 0 {
+    var agentsToSet []interface{}
+    for _, agent := range serviceAgentsData {
+        agentMap, ok := agent.(map[string]interface{})
+        if !ok {
+            log.Printf("[WARN] {{ .Name }}PostCreate: serviceAgent item is not a map: %#v", agent)
+            continue
+        }
+        newAgentMap := make(map[string]interface{})
+        for key, value := range agentMap {
+            // Terraform resource fields often use snake_case, while API responses might use camelCase.
+            // Manually convert "serviceProducer" to "service_producer" to match the schema.
+            snakeKey := key
+            if key == "serviceProducer" {
+                snakeKey = "service_producer"
+            }
+            newAgentMap[snakeKey] = value
+        }
+        agentsToSet = append(agentsToSet, newAgentMap)
+    }
+
+    if err := d.Set("service_agents", agentsToSet); err != nil {
+      return fmt.Errorf("error setting service_agents for {{ .Name }}: %w", err)
+    }
+    log.Printf("[DEBUG] {{ .Name }}PostCreate: Successfully set service_agents.")
+  } else {
+    log.Printf("[DEBUG] {{ .Name }}PostCreate: serviceAgents array was empty.")
+  }
+
+  return nil
