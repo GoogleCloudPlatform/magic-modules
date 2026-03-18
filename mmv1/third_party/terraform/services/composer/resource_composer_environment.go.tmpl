@@ -2091,7 +2091,7 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	/*
 		config.enable_private_environment in terraform maps to
 		composer.PrivateEnvironmentConfig.NetworkingType in API.
-		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
+		Check image version to avoid overriding NetworkingType in case of other versions.
 	*/
 	imageVersion := d.Get("config.0.software_config.0.image_version").(string)
 	if isComposer3(imageVersion) {
