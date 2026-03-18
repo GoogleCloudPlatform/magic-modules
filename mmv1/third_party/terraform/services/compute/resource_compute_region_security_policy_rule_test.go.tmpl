@@ -1166,7 +1166,7 @@ resource "google_compute_region_security_policy" "policy" {
 resource "google_compute_region_security_policy_rule" "policy_rule" {
   security_policy = google_compute_region_security_policy.policy.name
   region          = "us-central1"
-  action   = "throttle"
+  action          = "throttle"
   description = "Block requests if their reCAPTCHA Enterprise score is too low"
   priority = "1000"
   match {
@@ -1192,15 +1192,15 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 func testAccComputeRegionSecurityPolicyRule_ruleActionDeny(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_security_policy" "policy" {
-  name = "tf-test%{random_suffix}"
-	region = "us-central1"
-	type	= "CLOUD_ARMOR"
+  name  = "tf-test%{random_suffix}"
+  region = "us-central1"
+  type	= "CLOUD_ARMOR"
 }
 
 resource "google_compute_region_security_policy_rule" "policy_rule" {
   security_policy = google_compute_region_security_policy.policy.name
   region          = "us-central1"
-  action   = "deny(403)"
+  action          = "deny(403)"
   priority = "1000"
   match {
     expr {
@@ -1208,7 +1208,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
     }
   }
   description = "Block requests if their reCAPTCHA Enterprise score is too low"
-	preview = true
+  preview = true
 }
 `, context)
 }

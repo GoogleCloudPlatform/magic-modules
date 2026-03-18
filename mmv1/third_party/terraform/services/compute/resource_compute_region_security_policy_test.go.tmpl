@@ -1283,7 +1283,7 @@ resource "google_compute_region_security_policy" "policy" {
       }
     }
     description = "default rule"
-		preview 	= false
+    preview 	= false
   }
 }
 `, context)
@@ -1305,10 +1305,10 @@ resource "google_compute_region_security_policy" "policy" {
       }
     }
     description = "Block requests if their reCAPTCHA Enterprise score is too low"
-		preview = true
+    preview = true
   }
-	
-	rules {
+
+  rules {
     action   = "allow"
     priority = "2147483647"
     match {
@@ -1318,7 +1318,7 @@ resource "google_compute_region_security_policy" "policy" {
       }
     }
     description = "default rule"
-		preview 	= false
+    preview 	= false
   }
 }
 `, context)
