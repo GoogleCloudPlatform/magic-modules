@@ -5,12 +5,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccBigqueryReservationGroup_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -33,7 +35,7 @@ func TestAccBigqueryReservationGroup_basic(t *testing.T) {
 func testAccBigqueryReservationGroup_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_reservation_group" "reservation_group" {
-  name     = "tf-test-res-group-%{random_suffix}"
+  name     = "projects/%{project}/locations/us-west2/reservationGroups/tf-test-res-group-%{random_suffix}"
   location = "us-west2"
 }
 `, context)
