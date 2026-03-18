@@ -13,6 +13,7 @@
 
 ---
 name: 'SslCertificate'
+include_in_tgc_next: true
 kind: 'compute#sslCertificate'
 description: |
   An SslCertificate resource, used for HTTPS load balancing. This resource

@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionBackendService'
+include_in_tgc_next: true
 api_resource_type_kind: BackendService
 kind: 'compute#backendService'
 description: |

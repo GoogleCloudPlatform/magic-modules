@@ -13,6 +13,7 @@
 
 ---
 name: VpnTunnel
+include_in_tgc_next: true
 description: VPN tunnel resource.
 references:
   guides:
@@ -240,21 +241,25 @@ properties:
         properties:
           - name: encryption
             type: Array
+            is_missing_in_cai: true
             description: Encryption algorithms.
             item_type:
               type: String
           - name: integrity
             type: Array
+            is_missing_in_cai: true
             description: Integrity algorithms.
             item_type:
               type: String
           - name: prf
             type: Array
+            is_missing_in_cai: true
             description: Pseudo-random functions.
             item_type:
               type: String
           - name: dh
             type: Array
+            is_missing_in_cai: true
             description: Diffie-Hellman groups.
             item_type:
               type: String
@@ -264,16 +269,19 @@ properties:
         properties:
           - name: encryption
             type: Array
+            is_missing_in_cai: true
             description: Encryption algorithms.
             item_type:
               type: String
           - name: integrity
             type: Array
+            is_missing_in_cai: true
             description: Integrity algorithms.
             item_type:
               type: String
           - name: pfs
             type: Array
+            is_missing_in_cai: true
             description: Perfect forward secrecy groups.
             item_type:
               type: String

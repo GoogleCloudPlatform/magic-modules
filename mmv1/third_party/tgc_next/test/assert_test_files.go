@@ -491,6 +491,11 @@ func callDiffSuppress(s *schema.Schema, key string, val any) bool {
 
 // Returns true if the given key should be ignored according to the given set of ignored fields.
 func isIgnored(key string, ignoredFields map[string]any) bool {
+	// Global ignores for write-only fields
+	if strings.HasSuffix(key, "_wo") || strings.HasSuffix(key, "_wo_version") {
+		return true
+	}
+
 	// Check for exact match first.
 	if _, ignored := ignoredFields[key]; ignored {
 		return true
