@@ -106,8 +106,8 @@ type Step struct {
 	// Whether to skip import tests for this test step
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
-	// Whether to skip generating docs for this test step
-	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
+	// Whether to generate docs for this test step (override sample's exclude_basic_doc)
+	IncludeStepDoc bool `yaml:"include_step_doc,omitempty"`
 
 	DocumentationHCLText string `yaml:"-"`
 	TestHCLText          string `yaml:"-"`
@@ -327,6 +327,10 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 		testPrefixedVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
 	}
 
+	for key, value := range originalVars {
+		testVars[key] = value
+	}
+
 	// Apply overrides from YAML
 	for key, value := range s.OicsVarsOverrides {
 		testPrefixedVars[key] = value
@@ -346,4 +350,8 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	// Reset the step
 	s.PrefixedVars = originalPrefixedVars
 	s.Vars = originalVars
+}
+
+func (s *Step) ShouldGenerateDoc(index int, sample *Sample) bool {
+	return s.IncludeStepDoc || (index == 0 && !sample.ExcludeBasicDoc)
 }
