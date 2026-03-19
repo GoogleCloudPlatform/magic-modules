@@ -37,6 +37,13 @@ async:
   result:
     resource_inside_response: true
 examples:
+  - name: 'vertex_ai_reasoning_engine_deletion_policy'
+    primary_resource_id: 'reasoning_engine'
+    exclude_docs: true
+    vars:
+      name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_basic'
     primary_resource_id: 'reasoning_engine'
     exclude_docs: true
