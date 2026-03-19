@@ -43,6 +43,8 @@ async:
       delete_minutes: 30
   result:
     resource_inside_response: false
+schema_version: 1
+state_upgraders: true
 custom_code:
 examples:
   - name: 'network_services_tls_route_basic'
@@ -81,6 +83,7 @@ parameters:
     type: 'String'
     description: |
       Location (region) of the TLS Route.
+    immutable: true
     default_value: 'global'
     url_param_only: true
 properties:
@@ -107,7 +110,7 @@ properties:
     type: Array
     description: |
       Meshes defines a list of meshes this TlsRoute is attached to, as one of the routing rules to route the requests served by the mesh.
-      Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>
+      Each mesh reference should match the pattern: projects/*/locations/*/meshes/<mesh_name>
       The attached Mesh should be of a type SIDECAR
     send_empty_value: true
     item_type:
@@ -116,7 +119,7 @@ properties:
     type: Array
     description: |
       Gateways defines a list of gateways this TlsRoute is attached to, as one of the routing rules to route the requests served by the gateway.
-      Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
+      Each gateway reference should match the pattern: projects/*/locations/*/gateways/<gateway_name>
     send_empty_value: true
     item_type:
       type: String
