@@ -44,6 +44,9 @@ type Sample struct {
 	// Whether to skip generating tests for this resource
 	ExcludeTest bool `yaml:"exclude_test,omitempty"`
 
+	// Whether to EXCLUDE the first step from doc generation
+	ExcludeBasicDoc bool `yaml:"exclude_basic_doc,omitempty"`
+
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
