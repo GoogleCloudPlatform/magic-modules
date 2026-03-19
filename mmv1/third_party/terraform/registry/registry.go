@@ -2,6 +2,7 @@ package registry
 
 import (
 	"log"
+	"runtime/debug" // TODO: remove me
 	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -76,8 +77,11 @@ func (s Schema) Register() {
 	} else {
 		if _, ok := schemas.r[s.Name]; ok {
 			log.Printf("Duplicate registration attempt for resource %q", s.Name)
+			log.Printf("Previous registration:\n%s\n", schemas.rStacks[s.Name]) // TODO: remove me
+			log.Printf("Current registration:\n%s\n", schemas.rStacks[s.Name]) // TODO: remove me
 		}
 		schemas.r[s.Name] = s
+		schemas.rStacks[s.Name] = debug.Stack()// TODO: remove me
 	}
 }
 
@@ -85,11 +89,13 @@ type registeredSchemas struct {
 	sync.RWMutex
 	r map[string]Schema
 	d map[string]Schema
+	rStacks map[string][]byte // TODO: remove me
 }
 
 var schemas = &registeredSchemas{
 	r: make(map[string]Schema),
 	d: make(map[string]Schema),
+	rStacks: make(map[string][]byte), // TODO: remove me
 }
 
 // Resource returns the Terraform schema for the requested resource. The function panics
