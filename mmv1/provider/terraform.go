@@ -101,18 +101,21 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 
-	if !object.IsExcluded() {
+	if !object.Exclude {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
-			// log.Printf("Generating %s tests", object.Name)
-			t.GenerateResourceTests(object, *templateData, outputFolder)
-			t.GenerateResourceSweeper(object, *templateData, outputFolder)
+			if !object.IsExcluded() {
+				// log.Printf("Generating %s tests", object.Name)
+				t.GenerateResourceTests(object, *templateData, outputFolder)
+				t.GenerateResourceSweeper(object, *templateData, outputFolder)
+				// log.Printf("Generating %s metadata", object.Name)
+				t.GenerateResourceMetadata(object, *templateData, outputFolder)
+			}
+
 			t.GenerateSingularDataSource(object, *templateData, outputFolder)
 			t.GenerateSingularDataSourceTests(object, *templateData, outputFolder)
-			// log.Printf("Generating %s metadata", object.Name)
-			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
 	}
 

@@ -1,0 +1,144 @@
+---
+name: ReservationSubBlock
+description: Get information about a Google Compute Engine Reservation Sub-Block.
+datasource_experimental:
+  generate: true
+examples:
+  - name: 'reservation_sub_block_basic'
+    primary_resource_id: 'default'
+    vars:
+      reservation_name: 'gce-reservation'
+    exclude_test: true
+base_url: projects/{{project}}/zones/{{zone}}/reservations/{{reservation}}/reservationBlocks/{{reservation_block}}/reservationSubBlocks/{{name}}
+parameters:
+- name: reservation
+  type: String
+  description: The name of the parent reservation.
+  required: true
+  url_param_only: true
+- name: reservation_block
+  type: String
+  description: The name of the parent reservation block.
+  required: true
+  url_param_only: true
+- name: zone
+  type: String
+  description: The zone where the reservation sub-block resides.
+  default_from_api: true
+  url_param_only: true
+properties:
+- name: name
+  type: String
+  description: The name of the reservation sub-block.
+  required: true
+- name: kind
+  type: String
+  description: Type of the resource. Always compute#reservationSubBlock for reservation
+    sub-blocks.
+  output: true
+- name: resourceId
+  api_name: id
+  type: String
+  description: The unique identifier for the resource.
+  output: true
+- name: creationTimestamp
+  type: String
+  description: Creation timestamp in RFC3339 text format.
+  output: true
+- name: selfLink
+  type: String
+  description: Server-defined fully-qualified URL for this resource.
+  output: true
+- name: selfLinkWithId
+  type: String
+  description: Server-defined URL for this resource with the resource id.
+  output: true
+- name: subBlockCount
+  api_name: count
+  type: Integer
+  description: The number of hosts that are allocated in this reservation sub-block.
+  output: true
+- name: inUseCount
+  type: Integer
+  description: The number of instances that are currently in use on this reservation
+    sub-block.
+  output: true
+- name: status
+  type: String
+  description: Status of the reservation sub-block.
+  output: true
+- name: reservationSubBlockMaintenance
+  type: NestedObject
+  description: Maintenance information for this reservation sub-block.
+  output: true
+  properties:
+  - name: maintenanceOngoingCount
+    type: Integer
+    description: Number of hosts in the sub-block that have ongoing maintenance.
+    output: true
+  - name: maintenancePendingCount
+    type: Integer
+    description: Number of hosts in the sub-block that have pending maintenance.
+    output: true
+  - name: schedulingType
+    type: String
+    description: The type of maintenance for the reservation.
+    output: true
+  - name: subblockInfraMaintenanceOngoingCount
+    type: Integer
+    description: Number of subblock Infrastructure that has ongoing maintenance.
+    output: true
+  - name: subblockInfraMaintenancePendingCount
+    type: Integer
+    description: Number of subblock Infrastructure that has pending maintenance.
+    output: true
+  - name: instanceMaintenanceOngoingCount
+    type: Integer
+    description: Number of instances that have ongoing maintenance.
+    output: true
+  - name: instanceMaintenancePendingCount
+    type: Integer
+    description: Number of instances that have pending maintenance.
+    output: true
+- name: physicalTopology
+  type: NestedObject
+  description: The physical topology of the reservation sub-block.
+  output: true
+  properties:
+  - name: cluster
+    type: String
+    description: The cluster name of the reservation sub-block.
+    output: true
+  - name: block
+    type: String
+    description: The hash of the capacity block within the cluster.
+    output: true
+  - name: subBlock
+    type: String
+    description: The hash of the capacity sub-block within the capacity block.
+    output: true
+- name: healthInfo
+  type: NestedObject
+  description: Health information for the reservation sub-block.
+  output: true
+  properties:
+  - name: healthStatus
+    type: String
+    description: The health status of the reservation sub-block.
+    output: true
+  - name: healthyHostCount
+    type: Integer
+    description: The number of healthy hosts in the reservation sub-block.
+    output: true
+  - name: degradedHostCount
+    type: Integer
+    description: The number of degraded hosts in the reservation sub-block.
+    output: true
+  - name: healthyInfraCount
+    type: Integer
+    description: The number of healthy infrastructure in the reservation sub-block.
+    output: true
+  - name: degradedInfraCount
+    type: Integer
+    description: The number of degraded infrastructure in the reservation sub-block.
+    output: true

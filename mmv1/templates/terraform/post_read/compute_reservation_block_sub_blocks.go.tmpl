@@ -1,0 +1,36 @@
+	zone, err := tpgresource.GetZone(d, config)
+	if err != nil {
+		return err
+	}
+	name := d.Get("name").(string)
+	reservation := d.Get("reservation").(string)
+
+	listUrl := fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/zones/%s/reservations%%2F%s%%2FreservationBlocks%%2F%s/reservationSubBlocks?alt=json&maxResults=500", project, zone, reservation, name)
+
+	listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    listUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error listing ReservationSubBlocks: %s", err)
+	}
+
+	subBlockNames := []string{}
+	if listRes != nil {
+		if items, ok := listRes["items"].([]interface{}); ok {
+			for _, item := range items {
+				if subBlock, ok := item.(map[string]interface{}); ok {
+					if subBlockName, ok := subBlock["name"].(string); ok {
+						subBlockNames = append(subBlockNames, subBlockName)
+					}
+				}
+			}
+		}
+	}
+
+	if err := d.Set("sub_block_names", subBlockNames); err != nil {
+		return fmt.Errorf("Error setting sub_block_names: %s", err)
+	}

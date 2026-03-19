@@ -1,0 +1,18 @@
+resource "google_compute_reservation" "reservation" {
+  name = "{{index $.Vars "reservation_name"}}"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      min_cpu_platform = "Intel Cascade Lake"
+      machine_type     = "n2-standard-2"
+    }
+  }
+}
+
+data "google_compute_reservation_block" "{{$.PrimaryResourceId}}" {
+  name        = "reservation-block"
+  reservation = google_compute_reservation.reservation.name
+  zone        = "us-central1-a"
+}
