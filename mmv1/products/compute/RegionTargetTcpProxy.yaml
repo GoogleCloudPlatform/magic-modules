@@ -53,6 +53,14 @@ examples:
     primary_resource_id: default
     vars:
       region_target_tcp_proxy_name: test-proxy
+  - name: region_target_tcp_proxy_tls_route
+    min_version: beta
+    primary_resource_id: default
+    vars:
+      region_backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+      region_target_tcp_proxy_name: test-proxy
+      tls_route_name: 'tls-route-check'
 parameters:
   - name: region
     type: ResourceRef
