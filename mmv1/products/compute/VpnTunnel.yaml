@@ -13,7 +13,6 @@
 
 ---
 name: VpnTunnel
-include_in_tgc_next: true
 description: VPN tunnel resource.
 references:
   guides:
@@ -29,6 +28,7 @@ id_format: projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}
 async:
   operation:
     base_url: '{{op_id}}'
+include_in_tgc_next: true
 custom_code:
   encoder: templates/terraform/encoders/vpn_tunnel.go.tmpl
   constants: templates/terraform/constants/vpn_tunnel.tmpl

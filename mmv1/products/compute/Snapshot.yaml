@@ -13,7 +13,6 @@
 
 ---
 name: 'Snapshot'
-include_in_tgc_next: true
 kind: 'compute#snapshot'
 description: |
   Represents a Persistent Disk Snapshot resource.
@@ -55,6 +54,7 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/global/snapshots/{{name}}'
     - '{{name}}'
+include_in_tgc_next: true
 custom_code:
   decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
   pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'

@@ -13,7 +13,6 @@
 
 ---
 name: 'GlobalForwardingRule'
-include_in_tgc_next: true
 api_resource_type_kind: ForwardingRule
 api_variant_patterns:
   - 'projects/{project}/global/forwardingRules/{forwardingRule}'
@@ -43,6 +42,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'

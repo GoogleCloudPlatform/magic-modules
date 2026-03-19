@@ -13,7 +13,6 @@
 
 ---
 name: 'RegionBackendService'
-include_in_tgc_next: true
 api_resource_type_kind: BackendService
 kind: 'compute#backendService'
 description: |
@@ -46,6 +45,7 @@ iam_policy:
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
