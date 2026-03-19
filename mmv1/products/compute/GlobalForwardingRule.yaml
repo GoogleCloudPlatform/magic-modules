@@ -17,6 +17,7 @@ api_resource_type_kind: ForwardingRule
 api_variant_patterns:
   - 'projects/{project}/global/forwardingRules/{forwardingRule}'
 kind: 'compute#forwardingRule'
+cai_resource_kind: 'GlobalForwardingRule'
 description: |
   Represents a GlobalForwardingRule resource. Global forwarding rules are
   used to forward traffic to the correct load balancer for HTTP load
@@ -500,6 +501,7 @@ properties:
       networkTier of the Address.
     immutable: true
     default_from_api: true
+    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/global_forwarding_rule_network_tier.go.tmpl'
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'
