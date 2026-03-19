@@ -1338,7 +1338,7 @@ resource "google_project_service" "container" {
 
 resource "google_project_service" "gkehub" {
   project = google_project.project.project_id
-  service = "googleapis.com"
+  service = "gkehub.googleapis.com"
   depends_on = [google_project_service.container]
 }
 

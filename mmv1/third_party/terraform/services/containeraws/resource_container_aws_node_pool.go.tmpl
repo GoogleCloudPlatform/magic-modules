@@ -1295,15 +1295,18 @@ func expandContainerAwsNodePoolManagement(o interface{}) *NodePoolManagement {
 }
 
 func flattenContainerAwsNodePoolManagement(obj *NodePoolManagement) interface{} {
-	if obj == nil || obj.Empty() {
+	if obj == nil {
 		return nil
 	}
-	transformed := map[string]interface{}{
-		"auto_repair": obj.AutoRepair,
+	transformed := make(map[string]interface{})
+
+	if obj.AutoRepair == nil || obj.Empty() {
+		transformed["auto_repair"] = false
+	} else {
+		transformed["auto_repair"] = obj.AutoRepair
 	}
 
 	return []interface{}{transformed}
-
 }
 
 func expandContainerAwsNodePoolUpdateSettings(o interface{}) *NodePoolUpdateSettings {

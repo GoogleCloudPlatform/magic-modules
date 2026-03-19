@@ -806,15 +806,18 @@ func expandContainerAzureNodePoolManagement(o interface{}) *NodePoolManagement {
 }
 
 func flattenContainerAzureNodePoolManagement(obj *NodePoolManagement) interface{} {
-	if obj == nil || obj.Empty() {
+	if obj == nil {
 		return nil
 	}
-	transformed := map[string]interface{}{
-		"auto_repair": obj.AutoRepair,
+	transformed := make(map[string]interface{})
+
+	if obj.AutoRepair == nil || obj.Empty() {
+		transformed["auto_repair"] = false
+	} else {
+		transformed["auto_repair"] = obj.AutoRepair
 	}
 
 	return []interface{}{transformed}
-
 }
 
 func flattenContainerAzureNodePoolAnnotations(v map[string]string, d *schema.ResourceData) interface{} {
