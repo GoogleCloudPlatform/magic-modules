@@ -9,14 +9,9 @@ import (
 	"io"
 	"strings"
 
-{{- if ne $.TargetVersionName "ga" }}
-	"google.golang.org/api/googleapi"
-{{- end }}
 	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgdclresource/operations"
-{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/googleapi"
-{{- end }}
 )
 
 // getMembershipSpecs returns a map of membership specs taken from the get response of the feature membership's feature object.
