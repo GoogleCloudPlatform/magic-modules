@@ -1858,6 +1858,8 @@ func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_pointInTimeRestoreInMultiRegion(t *testing.T) {
+	// Skipped due to randomness
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
     backupVaultID := "bv-test-mr"
