@@ -71,6 +71,14 @@ examples:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
       http_health_check_name: 'backend-service-health-check'
+  - name: 'network_services_tls_route_region_target_tcp_proxy_basic'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      target_tcp_proxy_name: 'my-target-tcp-proxy'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'my-health-check'
 parameters:
   - name: 'name'
     type: String
@@ -120,6 +128,14 @@ properties:
     description: |
       Gateways defines a list of gateways this TlsRoute is attached to, as one of the routing rules to route the requests served by the gateway.
       Each gateway reference should match the pattern: projects/*/locations/*/gateways/<gateway_name>
+    send_empty_value: true
+    item_type:
+      type: String
+  - name: 'targetProxies'
+    type: Array
+    description: |
+      TargetProxies defines a list of target proxies this TlsRoute is attached to, as one of the routing rules to route the requests served by the load balancer.
+      Each target proxy reference should match the pattern: projects/*/locations/global/targetTcpProxies/<target_tcp_proxy_name>
     send_empty_value: true
     item_type:
       type: String
