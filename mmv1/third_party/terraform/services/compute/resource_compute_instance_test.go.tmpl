@@ -3723,6 +3723,28 @@ func TestAccComputeInstance_flexStart(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_reservationBound(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_reservationBound(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
 func TestAccComputeInstance_spotVM(t *testing.T) {
 	t.Parallel()
 
@@ -11339,6 +11361,58 @@ resource "google_compute_instance" "foobar" {
   }
 }
 `, instance)
+}
+
+func testAccComputeInstance_reservationBound(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2204-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+resource "google_compute_reservation" "foobar" {
+  name = "tf-test-reservation-%s"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type = "e2-medium"
+    }
+  }
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+      size  = 50
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    provisioning_model = "RESERVATION_BOUND"
+    automatic_restart = false
+    on_host_maintenance = "TERMINATE"
+  }
+
+  reservation_affinity {
+    type = "SPECIFIC_RESERVATION"
+    specific_reservation {
+      key    = "compute.googleapis.com/reservation-name"
+      values = [google_compute_reservation.foobar.name]
+    }
+  }
+}
+`, instance, instance)
 }
 
 func testAccComputeInstance_spotVM(instance string) string {
