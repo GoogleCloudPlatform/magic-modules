@@ -13450,3 +13450,138 @@ data "google_compute_default_service_account" "default" {
 }
 `, context)
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInstance_VSSWindowsDefault(diskName string) string {
+    return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  
+  family  = "windows-2025"
+  project = "windows-cloud"
+}
+
+resource "google_compute_disk" "sourcedisk" {
+  provider = google-beta
+  
+  name    = "%s-d1"
+  image   = data.google_compute_image.my_image.self_link
+  size    = 50
+  type    = "pd-ssd"
+  zone    = "us-central1-a"
+  project = "%s"
+}
+
+resource "google_compute_snapshot" "snapdisk" {
+  provider = google-beta
+  
+  name        = "%s"
+  source_disk = google_compute_disk.sourcedisk.name
+  zone        = "us-central1-a"
+  project     = "%s"
+}
+
+resource "google_compute_instance" "foobar2" {
+	name         = "%{instance_name2}"
+	machine_type = "e2-medium"
+	zone         = "us-central1-a"
+
+	boot_disk {
+		initialize_params {
+			snapshot = google_compute_snapshot.snapdisk.name
+		}
+	}
+
+	erase_windows_vss_signature = true
+
+	network_interface {
+		network = "default"
+	}
+}
+`, firstDiskName, projectName, snapshotName, projectName, diskName, ref_selector, projectName)
+}
+
+
+func testAccComputeInstance_VSSWindows(diskName string, eraseWindowsVssSignature bool) string {
+    return fmt.Sprintf(`
+resource "google_compute_disk" "foobar" {
+  provider = google-beta
+  name = "%s"
+  size = 10
+  type = "pd-ssd"
+  zone = "us-central1-a"
+  erase_windows_vss_signature  = %t
+}
+`, diskName, eraseWindowsVssSignature)
+}
+{{- end }}
+
+
+
+func testAccComputeDisk_VSSWindows(projectName, firstDiskName, snapshotName, diskName, ref_selector string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  
+  family  = "windows-2025"
+  project = "windows-cloud"
+}
+
+resource "google_compute_disk" "sourcedisk" {
+  provider = google-beta
+  
+  name    = "%s-d1"
+  image   = data.google_compute_image.my_image.self_link
+  size    = 50
+  type    = "pd-ssd"
+  zone    = "us-central1-a"
+  project = "%s"
+}
+
+resource "google_compute_snapshot" "snapdisk" {
+  provider = google-beta
+  
+  name        = "%s"
+  source_disk = google_compute_disk.sourcedisk.name
+  zone        = "us-central1-a"
+  project     = "%s"
+}
+
+resource "google_compute_disk" "seconddisk" {
+  provider = google-beta
+  
+  name     				      = "%s-d2"
+  snapshot 				      = google_compute_snapshot.snapdisk.%s
+  type     					  = "pd-ssd"
+  zone     					  = "us-central1-a"
+  project  					  = "%s"
+  erase_windows_vss_signature = true
+}
+`, firstDiskName, projectName, snapshotName, projectName, diskName, ref_selector, projectName)
+}
+
+
+
+resource "google_compute_snapshot" "foobar" {
+	name = "%{snapshot_name}"
+	source_disk = google_compute_instance.foobar.name
+	zone = google_compute_instance.foobar.zone
+}
+
+resource "google_compute_instance" "foobar2" {
+	name         = "%{instance_name2}"
+	machine_type = "e2-medium"
+	zone         = "us-central1-a"
+
+	boot_disk {
+		initialize_params {
+			snapshot = google_compute_snapshot.foobar.name
+		}
+	}
+
+	network_interface {
+		network = "default"
+	}
+}
+`, context)
+}
