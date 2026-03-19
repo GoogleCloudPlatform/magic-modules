@@ -24,6 +24,7 @@ When troubleshooting and resolving test failures, adhere to these constraints:
 - **DON'T** add `ignore_read_extra` to the example in `Resource.yaml`.
 - **DON'T** add new fields to `mmv1/api/resource/custom_code.go` unless explicitly guided by the user.
 - **DON'T** remove any existing `custom_code`, including any constants.
+- **DO** add a comment for each fix in the YAML file or other files to explain the root cause and the solution.
 
 ---
 
@@ -178,3 +179,23 @@ These tests check the accuracy of the conversions between Cloud Asset Inventory 
 - **Cause**: The `json` package is not imported.
 - **Solution**: Add `"encoding/json"` import path and add `_ = json.Unmarshal` to `mmv1/templates/tgc_next/services/resource.go.tmpl` to ensure the import is preserved.
 - **Example**: [PR #16178 reference](https://github.com/GoogleCloudPlatform/magic-modules/pull/16178)
+
+#### 12. Identifying Resources with Overlapping CAI Asset Types
+- **Symptom**: A single CAI asset type maps to multiple distinct Terraform resources (e.g., `compute.googleapis.com/SslCertificate` mapping to `google_compute_ssl_certificate`, `google_compute_managed_ssl_certificate`, `google_compute_region_ssl_certificate`), and the automated HCL converter assigns the wrong converter.
+- **Cause**: The TGC `cai2hcl` generator automatically attempts to identify resources by extracting distinct segments from their URL paths. If resources are differentiated by JSON data payload properties (e.g., `"type": "MANAGED"`) rather than distinct URL structures, the structural URL matching will fail to correctly route the asset.
+- **Solution**: Inject a manual type-checking override block directly into the `ConvertResource` function within `mmv1/templates/tgc_next/cai2hcl/convert_resource.go.tmpl` to explicitly handle the problematic asset type.
+- **Example**:
+  - **Failing Resource**: `google_compute_managed_ssl_certificate`
+  - **Error**: Assets are consistently mapped to the standard `google_compute_ssl_certificate` incorrectly.
+  - **Solution**: Add hardcoded logic to `mmv1/templates/tgc_next/cai2hcl/convert_resource.go.tmpl` ahead of the automatic `IdentityParams` loop:
+  ```go
+		{{- if eq $resourceType "compute.googleapis.com/SslCertificate" }}
+			if strings.Contains(asset.Name, "regions") {
+				converter = ConverterMap[asset.Type]["ComputeRegionSslCertificate"]
+			} else if typeVal, ok := asset.Resource.Data["type"]; ok && typeVal == "MANAGED" {
+				converter = ConverterMap[asset.Type]["ComputeManagedSslCertificate"]
+			} else {
+				converter = ConverterMap[asset.Type]["ComputeSslCertificate"]
+			}
+		{{- else }}
+  ```
