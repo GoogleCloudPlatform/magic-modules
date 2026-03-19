@@ -1,7 +1,6 @@
 config := acctest.GoogleProviderConfig(t)
 
-url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}KMSBasePath{{"}}"}}folders/{{"{{"}}folder{{"}}"}}/autokeyConfig")
-url = strings.Replace(url, "folders/folders/", "folders/", 1)
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}KMSBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/autokeyConfig")
 if err != nil {
   return err
 }
@@ -14,10 +13,6 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 })
 if err != nil {
   return nil
-}
-
-if v := res["keyProject"]; v != nil {
-	return fmt.Errorf("AutokeyConfig still exists at %s", url)
 }
 
 if v := res["keyProjectResolutionMode"]; v != nil {
