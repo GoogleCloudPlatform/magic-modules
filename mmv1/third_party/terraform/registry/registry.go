@@ -78,7 +78,7 @@ func (s Schema) Register() {
 		if _, ok := schemas.r[s.Name]; ok {
 			log.Printf("Duplicate registration attempt for resource %q", s.Name)
 			log.Printf("Previous registration:\n%s\n", schemas.rStacks[s.Name]) // TODO: remove me
-			log.Printf("Current registration:\n%s\n", schemas.rStacks[s.Name]) // TODO: remove me
+			log.Printf("Current registration:\n%s\n", debug.Stack()) // TODO: remove me
 		}
 		schemas.r[s.Name] = s
 		schemas.rStacks[s.Name] = debug.Stack()// TODO: remove me
