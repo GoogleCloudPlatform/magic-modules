@@ -1,0 +1,27 @@
+resource "google_compute_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "target_tcp_proxy_name"}}"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  backend_service       = google_compute_backend_service.default.id
+}
+
+resource "google_compute_backend_service" "default" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "backend_service_name"}}"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  protocol              = "TCP"
+  timeout_sec           = 10
+
+  health_checks = [google_compute_health_check.default.id]
+}
+
+resource "google_compute_health_check" "default" {
+  provider           = google-beta
+  name               = "{{index $.Vars "health_check_name"}}"
+  timeout_sec        = 1
+  check_interval_sec = 1
+
+  tcp_health_check {
+    port = "443"
+  }
+}
