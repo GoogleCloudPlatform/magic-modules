@@ -1,8 +1,5 @@
 package tpgdclresource
 
-import (
-)
-
 var (
 	// CreateDirective restricts Apply to creating resources for Create
 	CreateDirective = []ApplyOption{
