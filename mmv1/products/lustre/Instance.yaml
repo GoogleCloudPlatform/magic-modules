@@ -244,15 +244,19 @@ properties:
                 - name: 'hours'
                   type: Integer
                   description: 'Hours of day in 24 hour format. Should be from 0 to 23.'
+                  default_from_api: true
                 - name: 'minutes'
                   type: Integer
                   description: 'Minutes of hour of day. Must be from 0 to 59.'
+                  default_from_api: true
                 - name: 'seconds'
                   type: Integer
                   description: 'Seconds of minutes of the time. Must be from 0 to 59.'
+                  default_from_api: true
                 - name: 'nanos'
                   type: Integer
                   description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.'
+                  default_from_api: true
       - name: 'maintenanceExclusionWindow'
         type: Array
         description: 'The exclusion windows for the instance. Currently limited to 1 window.'
@@ -268,12 +272,15 @@ properties:
                 - name: 'year'
                   type: Integer
                   description: 'Year of the date. Must be from 1 to 9999, or 0 for recurring.'
+                  default_from_api: true
                 - name: 'month'
                   type: Integer
                   description: 'Month of a year. Must be from 1 to 12.'
+                  default_from_api: true
                 - name: 'day'
                   type: Integer
                   description: 'Day of a month. Must be from 1 to 31 and valid for the year and month.'
+                  default_from_api: true
             - name: 'endDate'
               type: NestedObject
               description: 'End date of the exclusion period in UTC.'
@@ -282,12 +289,15 @@ properties:
                 - name: 'year'
                   type: Integer
                   description: 'Year of the date. Must be from 1 to 9999, or 0 for recurring.'
+                  default_from_api: true
                 - name: 'month'
                   type: Integer
                   description: 'Month of a year. Must be from 1 to 12.'
+                  default_from_api: true
                 - name: 'day'
                   type: Integer
                   description: 'Day of a month. Must be from 1 to 31 and valid for the year and month.'
+                  default_from_api: true
             - name: 'time'
               type: NestedObject
               description: 'Time in UTC for the exclusion window.'
@@ -296,12 +306,16 @@ properties:
                 - name: 'hours'
                   type: Integer
                   description: 'Hours of day in 24 hour format. Should be from 0 to 23.'
+                  default_from_api: true
                 - name: 'minutes'
                   type: Integer
                   description: 'Minutes of hour of day. Must be from 0 to 59.'
+                  default_from_api: true
                 - name: 'seconds'
                   type: Integer
                   description: 'Seconds of minutes of the time. Must be from 0 to 59.'
+                  default_from_api: true
                 - name: 'nanos'
                   type: Integer
                   description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.'
+                  default_from_api: true

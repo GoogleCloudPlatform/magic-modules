@@ -59,9 +59,6 @@ resource "google_lustre_instance" "instance" {
       day_of_week = "SUNDAY"
       start_time {
         hours = 23
-        minutes = 0
-        seconds = 0
-        nanos = 0
       }
     }
     maintenance_exclusion_window {
@@ -76,9 +73,6 @@ resource "google_lustre_instance" "instance" {
         day   = 5
       }
       time {
-        hours = 0
-        minutes = 0
-        seconds = 0
         nanos = 1
       }
     }
