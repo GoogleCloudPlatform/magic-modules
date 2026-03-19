@@ -154,3 +154,13 @@ The underlying issue is that the Terraform schema defines the attribute (e.g. `d
 **Solution:**
 To fix validation errors caused by unconfigurable computed attributes being populated in HCL maps:
 1. **cai2hcl (Flattener):** Locate the flattener associated with the failing block (e.g. `flattenMaintenancePolicy`). Find where the nested properties are assigned from the API map into the `transformed` JSON equivalent. Surgically omit mapping the offending `Computed` attribute (e.g. `duration`). By mapping only the configurable fields (e.g., `start_time`), Terraform gracefully allows the implicitly computed value to pass without complaining about manually configured read-only attributes.
+
+#### Example: Resolving Shared Parameter Collisions in CAI Resource Identification
+
+**Failing Test:** Multiple generated resources mapping to the same API endpoints
+
+The TGC code generation loops through all known CAI endpoints to match a converted asset back to a single unique HCL block name. Previously, it searched for a single strictly unique `IdentityParam` string segment (e.g. `"global"` or `"projects"`). When multiple resources within a group (e.g. `compute.googleapis.com/FirewallPolicy`) shared these single unique segments (`_region_network_firewall_policy` has `"projects"`, and `_firewall_policy` has `"global"`), the deterministic identifier fallback misclassified the asset resource type.
+
+**Solution:**
+To fix CAI mapping collisions between similar resources:
+1. **terraform_tgc_next (Generator):** The generator natively supports an array-based `IdentityParams` slice. Instead of identifying a single unique segment, `removeSharedElements` strips common URL components across a product, leaving *all* remaining distinct parameters. The generator natively evaluates all segments concurrently (e.g. `contains(projects) && contains(global)`), resulting in perfect multi-parameter exact-path checking for highly nested collision-prone resources.
