@@ -26,6 +26,7 @@ references:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
   api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
 docs:
+cai_resource_kind: 'BackendService'
 base_url: 'projects/{{project}}/regions/{{region}}/backendServices'
 has_self_link: true
 timeouts:

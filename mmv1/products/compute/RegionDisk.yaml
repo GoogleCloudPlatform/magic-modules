@@ -36,6 +36,7 @@ references:
     'Adding or Resizing Regional Persistent Disks': 'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionDisks'
 docs:
+cai_resource_kind: 'Disk'
 base_url: 'projects/{{project}}/regions/{{region}}/disks'
 has_self_link: true
 immutable: true

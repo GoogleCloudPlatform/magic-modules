@@ -86,7 +86,7 @@ var (
 {{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
 {{- $apiVersion := $.CaiApiVersion $productBackendName $caiProductBaseUrl}}
 
-const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
+const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.CaiResourceName -}}"
 
 func ResourceConverter{{ $.ResourceName -}}() cai.ResourceConverter {
     return cai.ResourceConverter{
