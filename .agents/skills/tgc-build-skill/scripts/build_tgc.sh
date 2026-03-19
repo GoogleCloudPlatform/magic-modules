@@ -14,6 +14,7 @@ echo "Starting TGC Build Process..."
 
 echo "[Phase 1] Generating TGC Code from Magic Modules..."
 cd "$MAGIC_MODULES_PATH"
+make clean-tgc OUTPUT_PATH="$TGC_PATH"
 make tgc OUTPUT_PATH="$TGC_PATH"
 
 echo "[Phase 2] Compiling the TGC Binary downstream..."
