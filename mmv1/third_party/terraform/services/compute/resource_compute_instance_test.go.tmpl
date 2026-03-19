@@ -3745,6 +3745,28 @@ func TestAccComputeInstance_reservationBound(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_provisioningModelEmptyString(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_provisioningModelEmptyString(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
 func TestAccComputeInstance_spotVM(t *testing.T) {
 	t.Parallel()
 
@@ -11413,6 +11435,36 @@ resource "google_compute_instance" "foobar" {
   }
 }
 `, instance, instance)
+}
+
+func testAccComputeInstance_provisioningModelEmptyString(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family    = "debian-11"
+  project   = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    provisioning_model = ""
+    automatic_restart = false
+  }
+}
+`, instance)
 }
 
 func testAccComputeInstance_spotVM(instance string) string {
