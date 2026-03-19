@@ -345,6 +345,11 @@ The following arguments are supported:
 * `customer_managed_encryption_enforcement_config`: (Optional) If omitted, then new objects with CMEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_customer_managed_encryption_enforcement_config).
 
 * `customer_supplied_encryption_enforcement_config`: (Optional) If omitted, then new objects with CSEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_customer_supplied_encryption_enforcement_config).
+* `google_managed_encryption_enforcement_config` - (Optional) If omitted, then new objects with GMEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_google_managed_encryption_enforcement_config).
+
+* `customer_managed_encryption_enforcement_config` - (Optional) If omitted, then new objects with CMEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_customer_managed_encryption_enforcement_config).
+
+* `customer_supplied_encryption_enforcement_config` - (Optional) If omitted, then new objects with CSEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_customer_supplied_encryption_enforcement_config).
 
 <a name="nested_custom_placement_config"></a>The `custom_placement_config` block supports:
 
