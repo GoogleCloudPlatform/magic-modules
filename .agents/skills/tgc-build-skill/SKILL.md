@@ -20,9 +20,14 @@ Follow these two phases carefully to build TGC accurately.
 
 ### Phase 1: Generating Code from Magic Modules (`make tgc`)
 
-If you have modified YAML configurations or Go templates inside of `<magic-modules-path>/mmv1`, you must generate those changes into the downstream repository.
+If you have modified YAML configurations or Go templates inside of `<magic-modules-path>/mmv1`, you must generate those changes into the downstream repository. Always run `make clean-tgc` first to remove any lingering downstream ghost files.
 
-1. Build to the downstream repository by explicitly providing the `OUTPUT_PATH`.
+1. Clean the downstream target repository:
+   ```bash
+   make clean-tgc OUTPUT_PATH="$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion"
+   ```
+
+2. Build to the downstream repository by explicitly providing the `OUTPUT_PATH`.
 
    **Example**:
    ```bash
