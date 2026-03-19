@@ -325,7 +325,7 @@ The following arguments are supported:
 
 <a name="nested_encryption"></a>The `encryption` block supports:
 
-* `default_kms_key_name`: The `id` of a Cloud KMS key that will be used to encrypt objects inserted into this bucket, if no encryption method is specified.
+* `default_kms_key_name` -  (Optional) The `id` of a Cloud KMS key that will be used to encrypt objects inserted into this bucket, if no encryption method is specified.
   You must pay attention to whether the crypto key is available in the location that this bucket is created in.
   See [the docs](https://cloud.google.com/storage/docs/encryption/using-customer-managed-keys) for more details.
 
