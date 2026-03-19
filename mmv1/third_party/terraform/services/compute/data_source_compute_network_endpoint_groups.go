@@ -12,12 +12,6 @@ func DataSourceGoogleComputeNetworkEndpointGroups() *schema.Resource {
 	// Generate datasource schema from resource
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeNetworkEndpointGroup().Schema)
 
-	// Set 'Optional' schema elements
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "name")
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "zone")
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "self_link")
-
 	return &schema.Resource{
 		Read: dataSourceComputeNetworkEndpointGroupsRead,
 		Schema: map[string]*schema.Schema{
@@ -89,7 +83,6 @@ func dataSourceComputeNetworkEndpointGroupsRead(d *schema.ResourceData, meta int
 			"name":                  neg.Name,
 			"description":           neg.Description,
 			"network_endpoint_type": neg.NetworkEndpointType,
-			"zone":                  tpgresource.GetResourceNameFromSelfLink(neg.Zone),
 			"network":               network,
 			"subnetwork":            subnetwork,
 			"default_port":          neg.DefaultPort,
