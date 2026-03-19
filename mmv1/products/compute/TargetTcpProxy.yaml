@@ -104,7 +104,7 @@ properties:
     type: ResourceRef
     description: |
       A reference to the BackendService resource. This field is optional when
-      the loadBalancingScheme is set to INTERNAL_MANAGED.
+      the loadBalancingScheme (available in beta) is set to INTERNAL_MANAGED.
     at_least_one_of:
       - 'backend_service'
       - 'load_balancing_scheme'
