@@ -113,7 +113,7 @@ properties:
     type: ResourceRef
     description: |
       A reference to the BackendService resource. This field is optional when
-      the loadBalancingScheme is specified.
+      the loadBalancingScheme (available in beta) is specified.
     at_least_one_of:
       - 'backend_service'
       - 'load_balancing_scheme'
