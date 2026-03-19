@@ -3,7 +3,7 @@ module github.com/hashicorp/terraform-provider-google
 go 1.26.0
 
 require (
-	cloud.google.com/go/auth v0.18.1
+	cloud.google.com/go/auth v0.18.2
 	cloud.google.com/go/auth/oauth2adapt v0.2.8
 	cloud.google.com/go/bigquery v1.72.0
 	cloud.google.com/go/bigtable v1.41.0
@@ -33,10 +33,10 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
-	golang.org/x/net v0.49.0
+	golang.org/x/net v0.51.0
 	golang.org/x/oauth2 v0.35.0
-	google.golang.org/api v0.267.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260203192932-546029d2fa20
+	google.golang.org/api v0.270.0
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260226221140-a57be14db171
 	google.golang.org/grpc v1.79.2
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v2 v2.4.0
@@ -76,7 +76,7 @@ require (
 	github.com/google/go-cpy v0.0.0-20211218193943-a9c933c06932 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.11 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.14 // indirect
 	github.com/googleapis/gax-go/v2 v2.17.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-hclog v1.6.3 // indirect

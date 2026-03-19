@@ -33,9 +33,6 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'managed_zone'
-  iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  allowed_iam_role: 'roles/dns.admin'
-  update_mask: true
   import_format:
     - 'projects/{{project}}/managedZones/{{managed_zone}}'
     - '{{project}}/{{managed_zone}}'
@@ -126,13 +123,6 @@ examples:
       dns_name: 'services.example.com.'
     test_vars_overrides:
       'dns_name': '"services.example.com-" + acctest.RandString(t, 10) + "."'
-  - name: 'dns_managed_zone_iam_condition'
-    primary_resource_id: 'default'
-    vars:
-      dns_name: 'example.com.'
-      managed_zone_name: 'example-zone'
-    test_vars_overrides:
-      'dns_name': '"conditions.example.com-" + acctest.RandString(t, 10) + "."'
 virtual_fields:
   - name: 'force_destroy'
     description: 'Set this true to delete all records in the zone.'
