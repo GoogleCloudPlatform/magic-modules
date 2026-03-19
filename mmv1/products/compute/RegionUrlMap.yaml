@@ -13,7 +13,6 @@
 
 ---
 name: 'RegionUrlMap'
-include_in_tgc_next: true
 api_resource_type_kind: UrlMap
 kind: 'compute#urlMap'
 description: |
@@ -300,8 +299,6 @@ properties:
                     description: 'The value of the header to add.'
                   - name: 'replace'
                     type: Boolean
-
-                    is_missing_in_cai: true
                     description: |
                       If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
                       The default value is false.
@@ -327,8 +324,6 @@ properties:
                     description: 'The value of the header to add.'
                   - name: 'replace'
                     type: Boolean
-
-                    is_missing_in_cai: true
                     description: |
                       If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
                       The default value is false.
@@ -429,8 +424,6 @@ properties:
                           required: true
                         - name: 'replace'
                           type: Boolean
-
-                          is_missing_in_cai: true
                           description: |
                             If false, headerValue is appended to any values that already exist for the
                             header. If true, headerValue is set for the header, discarding any values that
@@ -462,8 +455,6 @@ properties:
                           required: true
                         - name: 'replace'
                           type: Boolean
-
-                          is_missing_in_cai: true
                           description: |
                             If false, headerValue is appended to any values that already exist for the
                             header. If true, headerValue is set for the header, discarding any values that
@@ -1000,8 +991,6 @@ properties:
                                     required: true
                                   - name: 'replace'
                                     type: Boolean
-
-                                    is_missing_in_cai: true
                                     description: |
                                       If false, headerValue is appended to any values that already exist for the
                                       header. If true, headerValue is set for the header, discarding any values that
@@ -1033,8 +1022,6 @@ properties:
                                     required: true
                                   - name: 'replace'
                                     type: Boolean
-
-                                    is_missing_in_cai: true
                                     description: |
                                       If false, headerValue is appended to any values that already exist for the
                                       header. If true, headerValue is set for the header, discarding any values that
@@ -1456,8 +1443,6 @@ properties:
                                     required: true
                                   - name: 'replace'
                                     type: Boolean
-
-                                    is_missing_in_cai: true
                                     description: |
                                       If false, headerValue is appended to any values that already exist for the
                                       header. If true, headerValue is set for the header, discarding any values that
@@ -1489,8 +1474,6 @@ properties:
                                     required: true
                                   - name: 'replace'
                                     type: Boolean
-
-                                    is_missing_in_cai: true
                                     description: |
                                       If false, headerValue is appended to any values that already exist for the
                                       header. If true, headerValue is set for the header, discarding any values that
@@ -1745,8 +1728,6 @@ properties:
                                 The value of the header to add.
                             - name: 'replace'
                               type: Boolean
-
-                              is_missing_in_cai: true
                               description: |
                                 If false, headerValue is appended to any values that already exist for the header.
                                 If true, headerValue is set for the header, discarding any values that were set for that header.
@@ -1775,8 +1756,6 @@ properties:
                                 The value of the header to add.
                             - name: 'replace'
                               type: Boolean
-
-                              is_missing_in_cai: true
                               description: |
                                 If false, headerValue is appended to any values that already exist for the header.
                                 If true, headerValue is set for the header, discarding any values that were set for that header.
@@ -2224,8 +2203,6 @@ properties:
                         description: 'The value of the header to add.'
                       - name: 'replace'
                         type: Boolean
-
-                        is_missing_in_cai: true
                         description: |
                           If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
                           The default value is false.
@@ -2251,8 +2228,6 @@ properties:
                         description: 'The value of the header to add.'
                       - name: 'replace'
                         type: Boolean
-
-                        is_missing_in_cai: true
                         description: |
                           If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
                           The default value is false.
@@ -2683,8 +2658,6 @@ properties:
               description: 'The value of the header to add.'
             - name: 'replace'
               type: Boolean
-
-              is_missing_in_cai: true
               description: |
                 If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
                 The default value is false.
@@ -2710,8 +2683,6 @@ properties:
               description: 'The value of the header to add.'
             - name: 'replace'
               type: Boolean
-
-              is_missing_in_cai: true
               description: |
                 If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
                 The default value is false.
