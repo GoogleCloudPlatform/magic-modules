@@ -121,29 +121,6 @@ properties:
             description: |
               Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
             required: true
-      - name: 'exprOptions'
-        type: NestedObject
-        description: |
-          The configuration options available when specifying a user defined CEVAL expression (i.e., 'expr').
-        properties:
-          - name: 'recaptchaOptions'
-            type: NestedObject
-            description: |
-              reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.
-            required: true
-            properties:
-              - name: 'actionTokenSiteKeys'
-                type: Array
-                description: |
-                  A list of site keys to be used during the validation of reCAPTCHA action-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
-                item_type:
-                  type: String
-              - name: 'sessionTokenSiteKeys'
-                type: Array
-                description: |
-                  A list of site keys to be used during the validation of reCAPTCHA session-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
-                item_type:
-                  type: String
       - name: 'config'
         type: NestedObject
         description: The configuration options for matching the rule.
