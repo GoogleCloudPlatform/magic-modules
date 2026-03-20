@@ -1,3 +1,15 @@
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.8.0"
+    }
+  }
+}
+
 resource "google_dataplex_glossary" "example-glossary" {
   glossary_id = "{{index $.Vars "glossary_id"}}"
   location    = "us-central1"

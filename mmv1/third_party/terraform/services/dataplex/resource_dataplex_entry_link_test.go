@@ -36,6 +36,17 @@ func TestAccDataplexEntryLink_update(t *testing.T) {
 
 func testAccDataplexEntryLink_dataplexEntryLinkUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.8.0"
+    }
+  }
+}
 resource "google_dataplex_entry_group" "entry-group-basic" {
   location = "us-central1"
   entry_group_id = "tf-test-entry-group%{random_suffix}"
