@@ -63,10 +63,6 @@ examples:
     primary_resource_id: 'policy'
     test_env_vars:
       org_id: 'ORG_ID'
-  - name: 'organization_security_policy_rule_with_rate_limit'
-    primary_resource_id: 'policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
   - name: 'organization_security_policy_rule_firewall'
     min_version: 'beta'
     primary_resource_id: 'policy'
@@ -185,7 +181,6 @@ properties:
       "deny": deny access to target.
       "goto_next": forward the request to the next hierarchical policy for evaluation.
       "redirect": redirect to a different target. Parameters for this action can be configured via redirectOptions. Only EXTERNAL_302 redirect type is supported for organization security policies.
-      "throttle": limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rateLimitOptions to be set for this.
     required: true
   - name: 'preconfiguredWafConfig'
     type: NestedObject
@@ -331,111 +326,6 @@ properties:
     type: Boolean
     description: |
       If set to true, the specified action is not enforced.
-  - name: 'rateLimitOptions'
-    type: NestedObject
-    description: |
-      Must be specified if the action is "throttle". Cannot be specified for any other actions.
-      Note: "rate_based_ban" action is not supported for organization security policy rules.
-    properties:
-      - name: 'rateLimitThreshold'
-        type: NestedObject
-        description: |
-          Threshold at which to begin ratelimiting.
-        properties:
-          - name: 'count'
-            type: Integer
-            description: |
-              Number of HTTP(S) requests for calculating the threshold.
-          - name: 'intervalSec'
-            type: Integer
-            description: |
-              Interval over which the threshold is computed.
-      - name: 'conformAction'
-        type: String
-        description: |
-          Action to take for requests that are under the configured rate limit threshold.
-          Valid option is "allow" only.
-      - name: 'exceedRedirectOptions'
-        type: NestedObject
-        description: |
-          Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect.
-        properties:
-          - name: 'type'
-            type: String
-            description: |
-              Type of the redirect action.
-          - name: 'target'
-            type: String
-            description: |
-              Target for the redirect action. This is required if the type is EXTERNAL_302 and cannot be specified for GOOGLE_RECAPTCHA.
-      - name: 'exceedAction'
-        type: String
-        description: |
-          Action to take for requests that are above the configured rate limit threshold, to either deny with a specified HTTP response code, or redirect to a different endpoint.
-          Valid options are deny(STATUS), where valid values for STATUS are 403, 404, 429, and 502.
-      - name: 'enforceOnKey'
-        type: Enum
-        description: |
-          Determines the key to enforce the rateLimitThreshold on. Possible values are:
-          * ALL: A single rate limit threshold is applied to all the requests matching this rule. This is the default value if "enforceOnKey" is not configured.
-          * IP: The source IP address of the request is the key. Each IP has this limit enforced separately.
-          * HTTP_HEADER: The value of the HTTP header whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the header value. If no such header is present in the request, the key type defaults to ALL.
-          * XFF_IP: The first IP address (i.e. the originating client IP address) specified in the list of IPs under X-Forwarded-For HTTP header. If no such header is present or the value is not a valid IP, the key defaults to the source IP address of the request i.e. key type IP.
-          * HTTP_COOKIE: The value of the HTTP cookie whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the cookie value. If no such cookie is present in the request, the key type defaults to ALL.
-          * HTTP_PATH: The URL path of the HTTP request. The key value is truncated to the first 128 bytes.
-          * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
-          * REGION_CODE: The country/region from which the request originates.
-        enum_values:
-          - 'ALL'
-          - 'IP'
-          - 'HTTP_HEADER'
-          - 'XFF_IP'
-          - 'HTTP_COOKIE'
-          - 'HTTP_PATH'
-          - 'SNI'
-          - 'REGION_CODE'
-      - name: 'enforceOnKeyName'
-        type: String
-        description: |
-          Rate limit key name applicable only for the following key types:
-          HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value.
-          HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
-      - name: 'enforceOnKeyConfigs'
-        type: Array
-        description: |
-          If specified, any combination of values of enforceOnKeyType/enforceOnKeyName is treated as the key on which ratelimit threshold/action is enforced.
-          You can specify up to 3 enforceOnKeyConfigs.
-          If enforceOnKeyConfigs is specified, enforceOnKey must not be specified.
-        item_type:
-          type: NestedObject
-          properties:
-            - name: 'enforceOnKeyType'
-              type: Enum
-              description: |
-                Determines the key to enforce the rateLimitThreshold on. Possible values are:
-                * ALL: A single rate limit threshold is applied to all the requests matching this rule. This is the default value if "enforceOnKeyConfigs" is not configured.
-                * IP: The source IP address of the request is the key. Each IP has this limit enforced separately.
-                * HTTP_HEADER: The value of the HTTP header whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the header value. If no such header is present in the request, the key type defaults to ALL.
-                * XFF_IP: The first IP address (i.e. the originating client IP address) specified in the list of IPs under X-Forwarded-For HTTP header. If no such header is present or the value is not a valid IP, the key defaults to the source IP address of the request i.e. key type IP.
-                * HTTP_COOKIE: The value of the HTTP cookie whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the cookie value. If no such cookie is present in the request, the key type defaults to ALL.
-                * HTTP_PATH: The URL path of the HTTP request. The key value is truncated to the first 128 bytes.
-                * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
-                * REGION_CODE: The country/region from which the request originates.
-              enum_values:
-                - 'ALL'
-                - 'IP'
-                - 'HTTP_HEADER'
-                - 'XFF_IP'
-                - 'HTTP_COOKIE'
-                - 'HTTP_PATH'
-                - 'SNI'
-                - 'REGION_CODE'
-            - name: 'enforceOnKeyName'
-              type: String
-              description: |
-                Rate limit key name applicable only for the following key types:
-                HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value.
-                HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
   - name: 'redirectOptions'
     type: NestedObject
     description: |
