@@ -107,27 +107,27 @@ examples:
     test_env_vars:
       org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_basic
-    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
     primary_resource_id: example
-    vars:
-      workforce_pool_id: example-pool
-      provider_id: example-prvdr
-    test_env_vars:
-      org_id: ORG_ID
     ignore_read_extra:
       - oidc.0.client_secret.0.value.0.plain_text
       - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+    vars:
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
+    test_env_vars:
+      org_id: ORG_ID
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05") # waiting for rollout
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_full
-    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
     primary_resource_id: example
-    vars:
-      workforce_pool_id: example-pool
-      provider_id: example-prvdr
-    test_env_vars:
-      org_id: ORG_ID
     ignore_read_extra:
       - oidc.0.client_secret.0.value.0.plain_text
       - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+    vars:
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
+    test_env_vars:
+      org_id: ORG_ID
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05") # waiting for rollout
   - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
     primary_resource_id: example
     ignore_read_extra:
@@ -143,6 +143,15 @@ examples:
     ignore_read_extra:
       - oidc.0.client_secret.0.value.0.plain_text
       - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+    vars:
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
+    test_env_vars:
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_oidc_detailed_audit_logging
+    primary_resource_id: example
+    ignore_read_extra:
+      - oidc.0.client_secret.0.value.0.plain_text
     vars:
       provider_id: example-prvdr
       workforce_pool_id: example-pool
@@ -499,8 +508,6 @@ properties:
               details.
   - name: extendedAttributesOauth2Client
     type: NestedObject
-    deprecation_message: |-
-      `extended_attributes_oauth2_client` is restricted. We suggest use SCIM instead.
     description: |
       The configuration for OAuth 2.0 client used to get the extended group
       memberships for user identities. Only the `AZURE_AD_GROUPS_ID` attribute
@@ -513,6 +520,7 @@ properties:
       retrieved when the user signs in and at regular intervals during the user's
       active session. Each user identity in the workforce identity pool must map
       to a unique Microsoft Entra ID user.
+    deprecation_message: '`extended_attributes_oauth2_client` is deprecated. Use SCIM instead.'
     properties:
       - name: issuerUri
         type: String
@@ -590,3 +598,6 @@ properties:
     enum_values:
       - SCIM_USAGE_UNSPECIFIED
       - ENABLED_FOR_GROUPS
+  - name: detailedAuditLogging
+    type: Boolean
+    description: If true, populates additional debug information in Cloud Audit Logs for this provider. Logged attribute mappings and values can be found in `sts.googleapis.com` data access logs. Default value is false.
