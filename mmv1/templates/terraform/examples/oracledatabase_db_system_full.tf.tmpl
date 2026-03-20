@@ -21,7 +21,7 @@ resource "google_oracle_database_db_system" "{{$.PrimaryResourceId}}"{
             db_version = "19.0.0.0"
             database {
                 db_name = "db"
-                db_unique_name = "dbunique"
+                db_unique_name = "{{index $.Vars "db_unique_name"}}"
                 admin_password = "ABcde_1#2345"
                 tde_wallet_password = "ABcde_1#2345"
                 database_id = "{{index $.Vars "database_id"}}"
