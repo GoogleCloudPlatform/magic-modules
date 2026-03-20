@@ -626,7 +626,7 @@ func compareCaiAssets(assets1, assets2 []caiasset.Asset, ignoredFieldSet map[str
 				asset.Resource,
 				roundtripAsset.Resource,
 				// secretmanager.googleapis.com/SecretVersion has secret as parent, not project
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "Parent", "DiscoveryDocumentURI"),
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "Parent", "DiscoveryName", "DiscoveryDocumentURI"),
 				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
 				cmp.FilterPath(func(p cmp.Path) bool {
 					return p.Last().String() == ".DiscoveryDocumentURI"
