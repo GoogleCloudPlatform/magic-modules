@@ -202,10 +202,10 @@ These tests check the accuracy of the conversions between Cloud Asset Inventory 
 
 #### 13. CAI Resource Kind Mismatch
 - **Symptom**: Error message stating a resource "is supported in either `tfplan2cai` or `cai2hcl` within tgc, but not in both."
-- **Cause**: The Terraform resource/Magic Modules name (e.g., `GlobalForwardingRule` or `RegionBackendService`) maps to an asset type whose kind suffix does not exactly match the MMv1 resource name, resulting in a misconfigured `AssetType` constant during `tfplan2cai` generation.
-- **Solution**: Explicitly define the actual suffix using the `cai_resource_kind` parameter in the resource's `.yaml` file.
-- **Example**: In `GlobalForwardingRule.yaml`, add:
+- **Cause**: This happens due to a namespace collision in the `cai2hcl` generator. TGC builds a two-way routing map to know which Terraform resource corresponds to which CAI Asset Type. If two resources (e.g., `BackendService` and `RegionBackendService`) both generate the exact same CAI asset type path (e.g. `compute.googleapis.com/BackendService`), they will overwrite each other's mapping inside `ConverterMap`. This leaves one of the resources registered in `tfplan2cai` but completely orphaned in `cai2hcl`.
+- **Solution**: Explicitly define a unique asset kind suffix using the `cai_resource_kind` parameter in the resource's `.yaml` file. This ensures `cai2hcl` registers a distinct dictionary key for mapping incoming CAI payloads back to the explicit Terraform resource variant.
+- **Example**: In `RegionBackendService.yaml` or `GlobalForwardingRule.yaml`, specify the exact CAI suffix name to avoid colliding with `BackendService.yaml` or `ForwardingRule.yaml`:
   ```yaml
   include_in_tgc_next: true
-  cai_resource_kind: 'GlobalForwardingRule'
+  cai_resource_kind: 'GlobalForwardingRule' # or 'RegionBackendService'
   ```
