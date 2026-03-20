@@ -14,6 +14,8 @@ Follow these steps sequentially. If you make a change to fix a test (Step 5), yo
 ### Step 1: Add or Modify the Resource
 Add or modify the resource definition (YAML config, templates, test data, etc.) within `magic-modules` (`mmv1/`). This is your baseline implementation.
 
+**Reference**: `.agents/skills/tgc-add-new-generated-resource-skill/SKILL.md`
+
 ### Step 2: Build TGC
 You must rebuild the downstream generated code and compile the TGC binary from your Magic Modules changes using the `tgc-build-skill`.
 
