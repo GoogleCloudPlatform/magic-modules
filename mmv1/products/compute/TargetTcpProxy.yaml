@@ -47,6 +47,21 @@ examples:
       target_tcp_proxy_name: 'test-proxy'
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+  - name: 'target_tcp_proxy_basic_beta'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      target_tcp_proxy_name: 'test-proxy'
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+  - name: target_tcp_proxy_backendless
+    min_version: beta
+    primary_resource_id: default
+    vars:
+      target_tcp_proxy_name: test-proxy
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+      tls_route_name: 'tls-route-check'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -88,9 +103,12 @@ properties:
   - name: 'backendService'
     type: ResourceRef
     description: |
-      A reference to the BackendService resource.
+      A reference to the BackendService resource. This field is optional when
+      the loadBalancingScheme (available in beta) is set to INTERNAL_MANAGED.
+    at_least_one_of:
+      - 'backend_service'
+      - 'load_balancing_scheme'
     api_name: service
-    required: true
     update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
     update_verb: 'POST'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
@@ -102,3 +120,17 @@ properties:
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
+  - name: loadBalancingScheme
+    min_version: beta
+    type: Enum
+    description: |
+      Specifies the load balancer type. A target TCP proxy created for one type
+      of load balancer cannot be used with another. For more information, refer
+      to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
+    at_least_one_of:
+      - 'backend_service'
+      - 'load_balancing_scheme'
+    enum_values:
+      - 'EXTERNAL'
+      - 'EXTERNAL_MANAGED'
+      - 'INTERNAL_MANAGED'
