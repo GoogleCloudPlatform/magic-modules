@@ -37,20 +37,33 @@ async:
   result:
     resource_inside_response: true
 examples:
+  - name: 'vertex_ai_reasoning_engine_deletion_policy'
+    primary_resource_id: 'reasoning_engine'
+    exclude_docs: true
+    vars:
+      name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_basic'
     primary_resource_id: 'reasoning_engine'
     exclude_docs: true
     vars:
       name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_source_based_deployment'
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_developer_connect_source'
     skip_docs: true  # skip docs until templatized (or decide to skip docs permanently then)
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_psc_interface'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -68,6 +81,8 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
         role: "roles/viewer"
     exclude_test: true
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_full'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -82,6 +97,17 @@ examples:
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
     external_providers: ["time"]
+    ignore_read_extra:
+      - 'deletion_policy'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      Optional. The deletion policy for the reasoning engine. Setting this to FORCE allows the reasoning engine to be deleted regardless of child undeleted resources.
+    type: Enum
+    enum_values:
+      - 'FORCE'
 parameters:
   - name: 'region'
     type: String
@@ -134,6 +160,7 @@ properties:
         required: true
   - name: 'spec'
     type: NestedObject
+    default_from_api: true
     description: |-
       Optional. Configurations of the ReasoningEngine.
     properties:
@@ -407,3 +434,22 @@ properties:
           project's Cloud Storage and "roles/aiplatform.user" for using Vertex
           extensions. If not specified, the Vertex AI Reasoning Engine service
           Agent in the project will be used.
+      - name: 'identityType'
+        type: Enum
+        min_version: 'beta'
+        description: |-
+          Optional. The identity type to use for the Reasoning Engine.
+          If not specified, the `service_account` field will be used if set,
+          otherwise the default Vertex AI Reasoning Engine Service Agent in the project will be used.
+          Possible values:
+          * `SERVICE_ACCOUNT`: Use a custom service account if the `service_account` field is set, otherwise use the default Vertex AI Reasoning Engine Service Agent in the project.
+          * `AGENT_IDENTITY`: Use Agent Identity. The `service_account` field must not be set.
+        enum_values:
+          - 'SERVICE_ACCOUNT'
+          - 'AGENT_IDENTITY'
+      - name: 'effectiveIdentity'
+        type: String
+        min_version: 'beta'
+        description: |-
+          The identity to use for the Reasoning Engine.
+        output: true

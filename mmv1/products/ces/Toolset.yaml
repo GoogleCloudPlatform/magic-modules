@@ -514,6 +514,14 @@ properties:
                     The name of the allowed custom CA certificates. This
                     can be used to disambiguate the custom CA certificates.
                   required: true
+      - name: customHeaders
+        type: KeyValuePairs
+        description: |-
+            The custom headers to send in the request to the MCP server. The values
+            must be in the format `$context.variables.<name_of_variable>` and can be
+            set in the session variables. See
+            https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/tool/open-api#openapi-injection
+            for more details.
   - name: updateTime
     type: String
     description: Timestamp when the toolset was last updated.

@@ -1,0 +1,37 @@
+---
+subcategory: "Compute Engine"
+description: |-
+  Retrieve Network Endpoint Groups in a zone.
+---
+
+# google_compute_network_endpoint_groups
+
+Use this data source to fetch a list of Network Endpoint Groups available in a
+project and zone.
+
+## Example Usage
+
+```hcl
+data "google_compute_network_endpoint_groups" "negs" {
+  zone   = "us-central1-a"
+  filter = "networkEdpointType=GCE_VM_IP_PORT"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `project` - (Optional) The ID of the project to list Network Endpoint Groups in. If it is not provided, the provider project is used.
+
+* `zone` (Optional) - The zone to list Network Endpoint Groups for. If `zone` is not specified, the provider-level zone must be set and is used
+instead.
+
+* `filter` - (Optional) A filter expression that filters Network Endpoint Groups listed in the response.
+
+## Attributes Reference
+
+In addition the arguments listed above, the following attributes are exported:
+
+* `network_endpoint_groups` - A list of all retrieved Network Endpoint Groups. For list of the attributes, see 
+the `google_compute_network_endpoint_group` data source.
