@@ -59,6 +59,13 @@ examples:
     test_env_vars:
       GOOGLE_BILLING_PROJECT: 'PROJECT'
       USER_PROJECT_OVERRIDE: 'true'
+  - name: 'biglake_iceberg_catalog_biglake'
+    primary_resource_id: 'my_iceberg_catalog'
+    vars:
+      name: 'my_iceberg_catalog'
+    test_env_vars:
+      GOOGLE_BILLING_PROJECT: 'PROJECT'
+      USER_PROJECT_OVERRIDE: 'true'
 parameters:
   - name: 'name'
     type: String
@@ -123,6 +130,7 @@ properties:
       Output only when the catalog type is CATALOG_TYPE_GCS_BUCKET.
       Required when the catalog type is CATALOG_TYPE_BIGLAKE.
     required: false
+    default_from_api: true
   - name: 'storage_regions'
     api_name: 'storage-regions'
     type: Array
@@ -178,4 +186,3 @@ properties:
       can be used to specify either a GCS bucket or a path within it.
     required: false
     immutable: false
-    output: false

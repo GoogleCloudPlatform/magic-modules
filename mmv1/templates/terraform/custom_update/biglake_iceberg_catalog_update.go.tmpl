@@ -25,21 +25,6 @@ if err != nil {
   obj["default-location"] = defaultLocationProp
 }
 
-// This custom logic determines whether the default-location is required or output only.
-catalogTypeProp, err := expandBiglakeIcebergIcebergCatalogCatalogType(d.Get("catalog_type"), d, config)
-if err != nil {
-  return err
-}
-if tpgresource.IsEmptyValue(reflect.ValueOf(defaultLocationProp)) {
-  if v, ok := catalogTypeProp.(string); ok && v == "CATALOG_TYPE_BIGLAKE" {
-    return fmt.Errorf("CATALOG_TYPE_BIGLAKE requires a non-empty default_location.")
-  }
-} else {
-  if v, ok := catalogTypeProp.(string); ok && v == "CATALOG_TYPE_GCS_BUCKET" && d.HasChange("default_location") {
-    return fmt.Errorf("CATALOG_TYPE_GCS_BUCKET outputs the default_location only. Do not change it.")
-  }
-}
-
 additionalLocationsProp, err := expandBiglakeIcebergIcebergCatalogAdditionalLocations(d.Get("additional_locations"), d, config)
 if err != nil {
   return err
