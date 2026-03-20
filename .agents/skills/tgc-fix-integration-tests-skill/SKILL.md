@@ -199,3 +199,13 @@ These tests check the accuracy of the conversions between Cloud Asset Inventory 
 			}
 		{{- else }}
   ```
+
+#### 13. CAI Resource Kind Mismatch
+- **Symptom**: Error message stating a resource "is supported in either `tfplan2cai` or `cai2hcl` within tgc, but not in both."
+- **Cause**: The Terraform resource/Magic Modules name (e.g., `GlobalForwardingRule` or `RegionBackendService`) maps to an asset type whose kind suffix does not exactly match the MMv1 resource name, resulting in a misconfigured `AssetType` constant during `tfplan2cai` generation.
+- **Solution**: Explicitly define the actual suffix using the `cai_resource_kind` parameter in the resource's `.yaml` file.
+- **Example**: In `GlobalForwardingRule.yaml`, add:
+  ```yaml
+  include_in_tgc_next: true
+  cai_resource_kind: 'GlobalForwardingRule'
+  ```

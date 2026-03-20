@@ -15,8 +15,8 @@ fi
 TEST_PATH=$1
 TEST_TARGET=$2
 
-# Assuming standard GOPATH
-TGC_DIR="$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion"
+# Assuming standard GOPATH unless explicitly provided in the environment
+TGC_DIR="${TGC_DIR:-$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion}"
 
 if [ ! -d "$TGC_DIR" ]; then
     echo "Error: TGC directory not found at $TGC_DIR"

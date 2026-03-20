@@ -7,7 +7,7 @@ MAGIC_MODULES_PATH="${MAGIC_MODULES_PATH:-$(pwd)}"
 if [ -n "$1" ]; then
   TGC_PATH="$1"
 else
-  TGC_PATH="${TGC_PATH:-$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion}"
+  TGC_PATH="${TGC_PATH:-$GOPATH/src/github.com/GoogleCloudPlatform/tgc-supported-resources}"
 fi
 
 echo "Starting TGC Build Process..."
