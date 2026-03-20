@@ -129,6 +129,7 @@ properties:
   - name: 'description'
     type: String
     description: The description of the ReasoningEngine.
+
   - name: 'createTime'
     type: String
     description: |-
@@ -454,6 +455,7 @@ properties:
           The identity to use for the Reasoning Engine.
         output: true
   - name: 'contextSpec'
+    min_version: 'beta'
     type: NestedObject
     description: |-
       Optional. Configuration for how Agent Engine sub-resources should manage context.
