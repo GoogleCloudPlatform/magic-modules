@@ -99,6 +99,12 @@ examples:
     external_providers: ["time"]
     ignore_read_extra:
       - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_context_spec'
+    primary_resource_id: 'reasoning_engine'
+    vars:
+      name: 're-ctx-spec'
+    ignore_read_extra:
+      - 'deletion_policy'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
 virtual_fields:
