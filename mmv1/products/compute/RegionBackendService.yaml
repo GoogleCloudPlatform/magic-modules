@@ -52,6 +52,7 @@ custom_code:
   encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
   decoder: 'templates/terraform/decoders/region_backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_region_backend_service.go.tmpl'
 custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1

@@ -2499,6 +2499,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"depends_on",
 		"count",
 		"for_each",
+		"dynamic",
 		"provider",
 		"lifecycle",
 		"timeouts",
