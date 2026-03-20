@@ -214,3 +214,12 @@ properties:
               - 'RUN_ONCE'
               - 'RUN_EVERY_START'
               - 'DOWNLOAD_AND_RUN_EVERY_START'
+      - name: 'colabImage'
+        type: NestedObject
+        description: 'Colab Image Configuration.'
+        default_from_api: true
+        properties:
+          - name: 'releaseName'
+            type: String
+            default_from_api: true
+            description: 'The release name of the NotebookRuntime Colab image, e.g. "py310". If not specified, detault to the latest release.'
