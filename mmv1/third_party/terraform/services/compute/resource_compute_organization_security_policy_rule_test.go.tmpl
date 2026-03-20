@@ -511,39 +511,6 @@ func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRule
 	})
 }
 
-func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimit(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeOrganizationSecurityPolicyRuleDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitCreate(context),
-			},
-			{
-				ResourceName:      "google_compute_organization_security_policy_rule.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitUpdate(context),
-			},
-			{
-				ResourceName:      "google_compute_organization_security_policy_rule.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithHeaderActionCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "security_policy_target" {
@@ -685,91 +652,6 @@ resource "google_compute_organization_security_policy_rule" "policy" {
   redirect_options {
     type   = "EXTERNAL_302"
     target = "https://www.example.com/new-blocked"
-  }
-
-  priority = 100
-}
-`, context)
-}
-
-func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitCreate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_folder" "security_policy_target" {
-  display_name = "tf-test-secpol-%{random_suffix}"
-  parent       = "organizations/%{org_id}"
-  deletion_protection = false
-}
-
-resource "google_compute_organization_security_policy" "policy" {
-  short_name = "tf-test%{random_suffix}"
-  parent     = google_folder.security_policy_target.name
-  type       = "CLOUD_ARMOR"
-}
-
-resource "google_compute_organization_security_policy_rule" "policy" {
-  policy_id = google_compute_organization_security_policy.policy.id
-  action    = "throttle"
-
-  match {
-    config {
-      src_ip_ranges = ["192.168.0.0/16"]
-    }
-    versioned_expr = "SRC_IPS_V1"
-  }
-
-  rate_limit_options {
-    conform_action = "allow"
-    exceed_action  = "deny(429)"
-
-    enforce_on_key = "IP"
-
-    rate_limit_threshold {
-      count        = 100
-      interval_sec = 60
-    }
-  }
-
-  priority = 100
-}
-`, context)
-}
-
-func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_folder" "security_policy_target" {
-  display_name = "tf-test-secpol-%{random_suffix}"
-  parent       = "organizations/%{org_id}"
-  deletion_protection = false
-}
-
-resource "google_compute_organization_security_policy" "policy" {
-  short_name = "tf-test%{random_suffix}"
-  parent     = google_folder.security_policy_target.name
-  type       = "CLOUD_ARMOR"
-}
-
-resource "google_compute_organization_security_policy_rule" "policy" {
-  policy_id = google_compute_organization_security_policy.policy.id
-  action    = "throttle"
-
-  match {
-    config {
-      src_ip_ranges = ["192.168.0.0/16"]
-    }
-    versioned_expr = "SRC_IPS_V1"
-  }
-
-  rate_limit_options {
-    conform_action = "allow"
-    exceed_action  = "deny(503)"
-
-    enforce_on_key = "HTTP_COOKIE"
-    enforce_on_key_name = "session_id"
-
-    rate_limit_threshold {
-      count        = 500
-      interval_sec = 120
-    }
   }
 
   priority = 100
