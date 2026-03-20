@@ -7,13 +7,14 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   spec {
     context_spec {
     memory_bank_config {
-      generation_config {
-        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+        generation_config {
+          model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+        }
+        similarity_search_config {
+          embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
+        }
+        disable_memory_revisions = false
       }
-      similarity_search_config {
-        embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
-      }
-      disable_memory_revisions = false
     }
   }
 }
