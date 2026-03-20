@@ -959,7 +959,7 @@ properties:
       - name: feedSourceType
         type: Enum
         immutable: true
-        values:
+        enum_values:
           - 'GOOGLE_CLOUD_STORAGE'
           - 'HTTP'
           - 'SFTP'
