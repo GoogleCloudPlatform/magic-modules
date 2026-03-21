@@ -3,6 +3,7 @@ package vertexai
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
