@@ -42,6 +42,8 @@ async:
       delete_minutes: 90
   result:
     resource_inside_response: false
+schema_version: 1
+state_upgraders: true
 custom_code:
 error_abort_predicates:
 
