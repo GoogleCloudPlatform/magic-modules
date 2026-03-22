@@ -74,7 +74,7 @@ type Tester struct {
 const accTestParallelism = 32
 const parallelJobs = 16
 
-const replayingTimeout = "360m"
+const replayingTimeout = "420m"
 
 var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (TestAcc\w+))`)
 
