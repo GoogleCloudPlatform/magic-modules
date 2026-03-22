@@ -25,12 +25,36 @@ self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repositor
 create_url: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/rules?ruleId={{rule_id}}'
 update_verb: 'PATCH'
 update_mask: true
+async:
+  # The API is not async, returns result directly in body instead of an operation that needs to be polled
+  actions: ['']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
 import_format:
   - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/rules/{{rule_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+examples:
+  - name: "artifact_registry_rule_basic"
+    primary_resource_id: 'my-rule'
+    vars:
+      repository_id: 'my-repository'
+      desc: 'example docker repository'
+      rule_id: 'my-repo-rule-id'
+      name: 'my-repo-rule-name'
+  - name: "artifact_registry_rule_full"
+    primary_resource_id: 'my-rule'
+    exclude_from_docs: true
+    vars:
+      repository_id: 'my-repository'
+      desc: 'example docker repository'
+      rule_id: 'my-repo-rule-full-id'
+      name: 'my-repo-rule-name'
 parameters:
   - name: 'repository_id'
     type: String
