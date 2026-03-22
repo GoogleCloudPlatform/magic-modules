@@ -1,0 +1,21 @@
+
+resource "google_artifact_registry_repository" "default" {
+  location      = "us-central1"
+  repository_id = "{{index $.Vars "repository_id"}}"
+  description   = "{{index $.Vars "desc"}}"
+  format        = "DOCKER"
+}
+
+resource "google_artifact_registry_rule" "{{$.PrimaryResourceId}}" {
+  repository_id = google_artifact_registry_repository.default.repository_id
+  location      = google_artifact_registry_repository.default.location
+  rule_id       = "{{index $.Vars "rule_id"}}"
+  action        = "DENY"
+  operation     = "DOWNLOAD"
+  package_id    = "foo"
+  condition {
+    expression  = "pkg.version.id < '2.0'"
+    title       = "Block legacy versions"
+    description = "Prevents downloading images with version IDs less than 2.0"
+  }
+}
