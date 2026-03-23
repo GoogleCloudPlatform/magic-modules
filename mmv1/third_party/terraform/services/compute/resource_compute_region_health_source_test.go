@@ -1,4 +1,5 @@
 package compute_test
+
 import (
 	"testing"
 
@@ -50,14 +51,12 @@ func TestAccComputeRegionHealthSource_update(t *testing.T) {
 func testAccComputeRegionHealthSource_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_health_aggregation_policy" "hap" {
-  provider    = google
   name        = "tf-test-hap-%{random_suffix}"
   description = "health aggregation policy for health source"
   region      = "%{region}"
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google
   name     = "tf-test-hc-%{random_suffix}"
   http_health_check {
     port = 80
@@ -65,7 +64,6 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
-  provider              = google
   name                  = "tf-test-bs-%{random_suffix}"
   region                = "%{region}"
   health_checks         = [google_compute_health_check.default.id]
@@ -73,7 +71,6 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_region_health_source" "example_test_health_source" {
-  provider                  = google
   name                      = "tf-test-health-source-%{random_suffix}"
   description               = "Example health source basic"
   region                    = "%{region}"
@@ -87,14 +84,12 @@ resource "google_compute_region_health_source" "example_test_health_source" {
 func testAccComputeRegionHealthSource_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_health_aggregation_policy" "hap" {
-  provider    = google
   name        = "tf-test-hap-%{random_suffix}"
   description = "health aggregation policy for health source"
   region      = "%{region}"
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google
   name     = "tf-test-hc-%{random_suffix}"
   http_health_check {
     port = 80
@@ -102,7 +97,6 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
-  provider              = google
   name                  = "tf-test-bs-%{random_suffix}"
   region                = "%{region}"
   health_checks         = [google_compute_health_check.default.id]
@@ -110,14 +104,12 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_region_health_aggregation_policy" "hap2" {
-  provider    = google
   name        = "tf-test-hap2-%{random_suffix}"
   description = "health aggregation policy for health source 2"
   region      = "%{region}"
 }
 
 resource "google_compute_region_backend_service" "default2" {
-  provider              = google
   name                  = "tf-test-bs2-%{random_suffix}"
   region                = "%{region}"
   health_checks         = [google_compute_health_check.default.id]
@@ -125,7 +117,6 @@ resource "google_compute_region_backend_service" "default2" {
 }
 
 resource "google_compute_region_health_source" "example_test_health_source" {
-  provider                  = google
   name                      = "tf-test-health-source-%{random_suffix}"
   description               = "Updated description"
   region                    = "%{region}"
