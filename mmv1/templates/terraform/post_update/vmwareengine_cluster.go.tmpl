@@ -1,0 +1,18 @@
+if d.HasChange("datastore_mount_config") {
+    o, n := d.GetChange("datastore_mount_config")
+    oldMounts := o.([]interface{})
+    newMounts := n.([]interface{})
+
+    mountsToAdd := CalculateDatastoreMountsDiff(oldMounts, newMounts)
+    mountsToRemove := CalculateDatastoreMountsDiff(newMounts, oldMounts) // For unmount
+
+    // mount operations
+    if err := mountDatastores(mountsToAdd, d, config); err != nil {
+        return err
+    }
+
+    // unmount operations
+    if err := unmountDatastores(mountsToRemove, d, config); err !=nil {
+        return err
+    }
+}

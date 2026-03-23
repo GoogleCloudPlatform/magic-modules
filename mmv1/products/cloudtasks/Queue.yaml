@@ -17,7 +17,6 @@ description: |
   A named resource to which messages are sent by publishers.
 docs:
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/queues'
 update_verb: 'PATCH'
@@ -40,7 +39,6 @@ custom_code:
 examples:
   - name: 'queue_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-tasks-queue-test%s", context["random_suffix"])'
     vars:
       name: 'cloud-tasks-queue-test'
   - name: 'cloud_tasks_queue_advanced'
@@ -186,7 +184,6 @@ properties:
           If zero, then the task age is unlimited.
         default_from_api: true
         diff_suppress_func: 'suppressOmittedMaxDuration'
-        custom_tgc_flatten: 'templates/tgc_next/custom_flatten/cloudtasks_queue_max_retry_duration.go.tmpl'
       - name: 'minBackoff'
         type: String
         description: |
@@ -307,6 +304,7 @@ properties:
               URI query.
 
               When specified, replaces the query part of the task URI. Setting the query value to an empty string clears the URI query segment.
+            diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
             properties:
               - name: 'queryParams'
                 type: String

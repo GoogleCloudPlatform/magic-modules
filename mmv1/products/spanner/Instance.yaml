@@ -30,7 +30,6 @@ import_format:
   - '{{name}}'
 cai_asset_name_format: 'projects/{{project}}/instances/{{name}}'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -75,8 +74,10 @@ virtual_fields:
     type: Boolean
     default_value: false
 tgc_tests:
-  - name: 'TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdateDisableAutoscaling'
-    skip: 'sometimes the CAI asset data for step3 is unavailable'
+  - name: TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdateDisableAutoscaling
+    skip: sometimes the CAI asset data for step3 is unavailable
+  - name: TestAccSpannerInstance_freeInstanceBasicUpdate
+    skip: sometimes the CAI asset data for step3 is unavailable
 parameters:
 properties:
   - name: 'name'

@@ -379,6 +379,7 @@ module "project-services" {
     "tpu.googleapis.com",
     "trafficdirector.googleapis.com",
     "transcoder.googleapis.com",
+    "vectorsearch.googleapis.com",
     "vmwareengine.googleapis.com",
     "vpcaccess.googleapis.com",
     "websecurityscanner.googleapis.com",

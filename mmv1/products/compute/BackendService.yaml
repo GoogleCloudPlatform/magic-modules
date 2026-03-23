@@ -43,13 +43,12 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/backend_service.go.tmpl'
@@ -61,7 +60,6 @@ schema_version: 1
 examples:
   - name: 'backend_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])'
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
@@ -652,7 +650,6 @@ properties:
               - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
             item_type:
               type: String
-            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
           - name: 'queryStringWhitelist'
             type: Array
             description: |
@@ -664,7 +661,6 @@ properties:
               delimiters.
             is_set: true
             send_empty_value: true
-            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
             at_least_one_of:
               - 'cdn_policy.0.cache_key_policy.0.include_host'
               - 'cdn_policy.0.cache_key_policy.0.include_protocol'
@@ -885,6 +881,7 @@ properties:
         type: String
         description: |
           OAuth2 Client ID for IAP
+        send_empty_value: true
       - name: 'oauth2ClientSecret'
         type: String
         description: |

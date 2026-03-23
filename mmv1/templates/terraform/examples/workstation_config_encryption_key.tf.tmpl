@@ -1,12 +1,10 @@
 resource "google_compute_network" "default" {
-  provider = google-beta
 
   name                    = "{{index $.Vars "workstation_cluster_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider = google-beta
 
   name          = "{{index $.Vars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
@@ -15,7 +13,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
 
   workstation_cluster_id = "{{index $.Vars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
@@ -32,28 +29,24 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_kms_key_ring" "default" {
-  provider = google-beta
 
   name     = "{{index $.Vars "workstation_cluster_name"}}"
   location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "default" {
-  provider = google-beta
 
   name            = "{{index $.Vars "workstation_cluster_name"}}"
   key_ring        = google_kms_key_ring.default.id
 }
 
 resource "google_service_account" "default" {
-  provider = google-beta
 
   account_id   = "{{index $.Vars "account_id"}}"
   display_name = "Service Account"
 }
 
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
-  provider               = google-beta
 
   workstation_config_id  = "{{index $.Vars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id

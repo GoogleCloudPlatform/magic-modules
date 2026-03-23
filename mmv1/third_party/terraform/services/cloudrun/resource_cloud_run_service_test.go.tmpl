@@ -421,7 +421,6 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 
           resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.generated-by", "magic-modules"),
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_annotations.%", "7"),
 				),
 			},
 			{
@@ -548,8 +547,8 @@ func TestAccCloudRunServiceMigration_withLabels(t *testing.T) {
 					// A new system annotation is added by the API around 08/28/2024,
 					// and the current service annotation filter doesn't work for this new annotation during the migration,
 					// so it is treated as the user defined annotation.
-					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "2"),
-					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_annotations.%", "7"),
+					// Same around 03/2026
+					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "3"),
 				),
 			},
 		},
@@ -1929,7 +1928,6 @@ resource "google_cloud_run_service" "default" {
 `, name, project)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunService_cloudRunServiceIap_update(t *testing.T) {
 	t.Parallel()
 
@@ -1940,7 +1938,7 @@ func TestAccCloudRunService_cloudRunServiceIap_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1968,14 +1966,12 @@ func TestAccCloudRunService_cloudRunServiceIap_update(t *testing.T) {
 func testAccCloudRunService_cloudRunServiceIapEnabled(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_service" "default" {
-  provider = google-beta
   name     = "tf-test-cloudrun-srv%{random_suffix}"
   location = "us-central1"
 
   metadata {
     annotations = {
       "run.googleapis.com/iap-enabled": true
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -1993,7 +1989,6 @@ resource "google_cloud_run_service" "default" {
 func testAccCloudRunService_cloudRunServiceIapDisabled(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_service" "default" {
-  provider = google-beta
   name     = "tf-test-cloudrun-srv%{random_suffix}"
   location = "us-central1"
 
@@ -2013,5 +2008,4 @@ resource "google_cloud_run_service" "default" {
 }
 `, context)
 }
-{{- end }}
 

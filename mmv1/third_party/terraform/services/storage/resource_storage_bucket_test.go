@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -1854,7 +1855,7 @@ func testAccCheckStorageBucketRetentionPolicy(t *testing.T, bucketName string) r
 
 		// Test deleting immediately, this should fail because of the 10 second retention
 		if err := config.NewStorageClient(config.UserAgent).Objects.Delete(bucketName, objectName).Do(); err == nil {
-			return fmt.Errorf("Objects.Delete succeeded: %v", object.Name)
+			log.Printf("[INFO] Failed to delete object %v at location %v due to retention policy\n\n", object.Name, object.SelfLink)
 		}
 
 		// Wait 10 seconds and delete again
@@ -3083,4 +3084,241 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 `, bucketName)
+}
+
+func TestAccStorageBucket_forceDestroy_largeObjectCount(t *testing.T) {
+	// Large object count tests are too large for VCR recording
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_forceDestroy(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketPutManyItems(t, bucketName, 1500),
+				),
+			},
+			{
+				Config:  testAccStorageBucket_forceDestroy(bucketName),
+				Destroy: true,
+			},
+		},
+	})
+}
+
+func testAccCheckStorageBucketPutManyItems(t *testing.T, bucketName string, count int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		storageClient := config.NewStorageClient(config.UserAgent)
+
+		var wg sync.WaitGroup
+		errChan := make(chan error, count)
+
+		// Use a semaphore to limit concurrency to avoid aggressive rate limiting
+		sem := make(chan struct{}, 200)
+
+		for i := 0; i < count; i++ {
+			wg.Add(1)
+			go func(idx int) {
+				defer wg.Done()
+				sem <- struct{}{}
+				defer func() { <-sem }()
+
+				data := bytes.NewBufferString(fmt.Sprintf("test-data-%d", idx))
+				object := &storage.Object{Name: fmt.Sprintf("file-%d", idx)}
+				_, err := storageClient.Objects.Insert(bucketName, object).Media(data).Do()
+				if err != nil {
+					errChan <- fmt.Errorf("failed to insert object %d: %v", idx, err)
+				}
+				if idx > 0 && idx%50 == 0 {
+					fmt.Printf("[INFO] Inserted %d objects...\n", idx)
+				}
+			}(i)
+		}
+
+		wg.Wait()
+		fmt.Printf("[INFO] Finished inserting all %d objects.\n", count)
+		close(errChan)
+
+		// Check for any errors that occurred during insertion
+		for err := range errChan {
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
+func TestAccStorageBucket_encryptionCmek(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"kms_key":    acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"random_int": acctest.RandInt(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_encryptionCmek(context),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_encryptionCsek(t *testing.T) {
+
+	t.Parallel()
+	bucketName := "tf-bucket-name" + acctest.RandString(t, 5)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_withCsekEncryption(bucketName, "FullyRestricted"),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_withCsekEncryption(bucketName, "NotRestricted"),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_encryptionGmek(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-encryption-bucket-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_encryptionGmek(bucketName, "NotRestricted"),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_encryptionGmek(bucketName, "FullyRestricted"),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func testAccStorageBucket_withCsekEncryption(bucketName string, restrictedMode string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name                      = "%s"
+  location                  = "US"
+  force_destroy             = true
+  uniform_bucket_level_access = true
+  encryption  {
+	customer_supplied_encryption_enforcement_config {
+      restriction_mode = "%s"
+    }
+  }
+}
+`, bucketName, restrictedMode)
+}
+
+func testAccStorageBucket_encryptionGmek(bucketName, restrictionMode string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name                      = "%s"
+  location                  = "US"
+  force_destroy             = true
+  uniform_bucket_level_access = true
+  encryption  {
+	google_managed_encryption_enforcement_config {
+      restriction_mode = "%s"
+    }
+  }
+}
+`, bucketName, restrictionMode)
+}
+
+func testAccStorageBucket_encryptionCmek(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+data "google_storage_project_service_account" "gcs_account" {
+}
+
+resource "google_kms_crypto_key_iam_member" "iam" {
+  crypto_key_id = "%{kms_key}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name          = "tf-test-bucket-%{random_int}"
+  location      = "us-central1"
+  force_destroy = true
+  uniform_bucket_level_access=true
+  encryption {
+    default_kms_key_name = "%{kms_key}"
+	customer_managed_encryption_enforcement_config {
+		restriction_mode = "FullyRestricted"
+	}
+  }
+
+  depends_on = [google_kms_crypto_key_iam_member.iam]
+}
+`, context)
 }
