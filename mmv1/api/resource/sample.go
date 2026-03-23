@@ -15,7 +15,6 @@ package resource
 
 import (
 	"fmt"
-	"log"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -39,8 +38,14 @@ type Sample struct {
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
 
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
+
 	// Whether to skip generating tests for this resource
 	ExcludeTest bool `yaml:"exclude_test,omitempty"`
+
+	// Whether to EXCLUDE the first step from doc generation
+	ExcludeBasicDoc bool `yaml:"exclude_basic_doc,omitempty"`
 
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
@@ -97,19 +102,6 @@ type Sample struct {
 	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
 }
 
-// Set default value for fields
-func (s *Sample) UnmarshalYAML(unmarshal func(any) error) error {
-	type sampleAlias Sample
-	aliasObj := (*sampleAlias)(s)
-
-	err := unmarshal(aliasObj)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *Sample) TestSampleSlug(productName, resourceName string) string {
 	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
 	return ret
@@ -128,18 +120,20 @@ func (s *Sample) ResourceType(terraformName string) string {
 	return terraformName
 }
 
-func (s *Sample) Validate(rName string) {
+func (s *Sample) Validate(rName string) (es []error) {
 	if s.Name == "" {
-		log.Fatalf("Missing `name` for one sample in resource %s", rName)
+		es = append(es, fmt.Errorf("missing `name` for one sample in resource %s", rName))
 	}
-	s.ValidateExternalProviders()
+	es = append(es, s.ValidateExternalProviders()...)
 
 	for _, step := range s.Steps {
-		step.Validate(rName, s.Name)
+		es = append(es, step.Validate(rName, s.Name)...)
 	}
+
+	return es
 }
 
-func (s *Sample) ValidateExternalProviders() {
+func (s *Sample) ValidateExternalProviders() (es []error) {
 	// Official providers supported by HashiCorp
 	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
 	HASHICORP_PROVIDERS := []string{"aws", "random", "null", "template", "azurerm", "kubernetes", "local",
@@ -155,6 +149,8 @@ func (s *Sample) ValidateExternalProviders() {
 	}
 
 	if len(unallowedProviders) > 0 {
-		log.Fatalf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		es = append(es, fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders))
 	}
+
+	return es
 }

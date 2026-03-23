@@ -123,6 +123,9 @@ service/cloudbuild:
 service/clouddeploy:
   resources:
   - google_clouddeploy_.*
+service/clouddomains:
+  resources:
+  - google_clouddomains_.*
 service/cloudfunctions:
   resources:
   - google_cloudfunctions_.*
@@ -130,6 +133,10 @@ service/cloudfunctions:
 service/cloudidentity-groups:
   resources:
   - google_cloud_identity_group.*
+service/cloudidentity-policy:
+  resources:
+  - google_cloud_identity_policy
+  - google_cloud_identity_policies
 service/cloudkms:
   resources:
   - google_kms_.*
@@ -161,7 +168,7 @@ service/cloudscheduler:
   - google_cloud_scheduler_.*
 service/cloudsecuritycompliance:
   resources:
-  - google_cloudsecuritycompliance_.*
+  - google_cloud_security_compliance_.*
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
@@ -278,12 +285,14 @@ service/compute-regional-pass-through-lb:
 service/compute-reservation:
   resources:
   - google_compute_reservation.*
+  - google_compute_future_reservation.*
 service/compute-router:
   resources:
   - google_compute_router
   - google_compute_router_interface
   - google_compute_router_peer
   - google_compute_router_route_policy
+  - google_compute_router_named_set
   - google_compute_router_status
 service/compute-security-policy:
   resources:
@@ -319,6 +328,10 @@ service/container:
 service/containeranalysis:
   resources:
   - google_container_analysis_.*
+service/data-transfer-essentials:
+  resources:
+  - google_network_connectivity_multicloud_data_transfer_config
+  - google_network_connectivity_destination
 service/datacatalog:
   resources:
   - google_data_catalog_.*
@@ -369,7 +382,9 @@ service/dialogflow-cx:
   - google_dialogflow_encryption_spec
   - google_dialogflow_entity_type
   - google_dialogflow_fulfillment
+  - google_dialogflow_generator
   - google_dialogflow_intent
+  - google_dialogflow_version
 service/discoveryengine:
   resources:
   - google_discovery_engine_.*
@@ -414,6 +429,10 @@ service/firebase:
   - google_firebase_storage.*
   - google_firebase_web.*
   - google_firebaserules_.*
+service/firebaseailogic:
+  team: firebase-terraform
+  resources:
+  - google_firebase_ai_logic.*
 service/firebaseapphosting:
   resources:
   - google_firebase_app_hosting.*
@@ -435,6 +454,9 @@ service/firestore-dataplane:
 service/gce-preview-feature:
   resources:
   - google_compute_preview_feature
+service/gce-rollout-plan:
+  resources:
+  - google_compute_rollout_plan
 service/gemini:
   resources:
   - google_gemini_.*
@@ -455,6 +477,9 @@ service/gkeonprem:
 service/healthcare:
   resources:
   - google_healthcare_.*
+service/hypercomputecluster:
+  resources:
+  - google_hypercomputecluster_cluster
 service/iam-core:
   resources:
   - google_organization_iam_custom_role
@@ -555,6 +580,9 @@ service/network-connectivity-center:
   resources:
   - google_network_connectivity_hub
   - google_network_connectivity_spoke
+  - google_network_connectivity_gateway_advertised_route
+  - google_network_security_sac_realm
+  - google_network_security_sac_attachment
 service/network-security:
   resources:
   - google_network_security_authorization_policy
@@ -599,8 +627,8 @@ service/networkservices-multicast:
   - google_network_services_multicast_.*
 service/networkservices-service-extensions:
   resources:
-  - google_network_services_lb_route_extension
-  - google_network_services_lb_traffic_extension
+  - google_network_services_lb_.*_extension
+  - google_network_services_wasm_plugin.*
 service/networkservices-traffic-director:
   resources:
   - google_network_services_endpoint_policy
@@ -665,7 +693,7 @@ service/pubsublite:
   - google_pubsub_lite_.*
 service/recaptchaenterprise:
   resources:
-  - google_recaptcha_enterprise_key
+  - google_recaptcha_enterprise_.*
 service/redis-cluster:
   resources:
   - google_redis_cluster.*
@@ -738,6 +766,7 @@ service/sqladmin-security:
   resources:
   - google_sql_ca_certs
   - google_sql_ssl_cert
+  - google_sql_provision_script
 service/storage:
   team: gcs-terraform-eng
   resources:
@@ -748,6 +777,9 @@ service/tpu:
 service/transcoder:
   resources:
   - google_transcoder_.*
+service/vectorsearch:
+  resources:
+  - google_vector_search_.*
 service/vmwareengine:
   resources:
   - google_vmwareengine_.*

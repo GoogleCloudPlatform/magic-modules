@@ -27,9 +27,9 @@ id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 timeouts:
-  insert_minutes: 40
-  update_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 120
+  update_minutes: 60
+  delete_minutes: 60
 sweeper:
   url_substitutions:
     - location: "us-central1-a"
@@ -49,8 +49,8 @@ async:
   operation:
     timeouts:
       insert_minutes: 120
-      update_minutes: 20
-      delete_minutes: 20
+      update_minutes: 60
+      delete_minutes: 60
     base_url: '{{op_id}}'
   actions:
     - create
@@ -61,6 +61,7 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: SW5zdGFuY2U=
+include_in_tgc_next: true
 parameters:
   - name: location
     type: String
@@ -116,14 +117,7 @@ properties:
     type: String
     description: |-
       The state of the instance.
-      Possible values:
-      STATE_UNSPECIFIED
-      ACTIVE
-      CREATING
-      DELETING
-      UPGRADING
-      REPAIRING
-      STOPPED
+      Please see https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances#state for values
     output: true
   - name: mountPoint
     type: String
@@ -155,3 +149,173 @@ properties:
     description: |-
         The placement policy name for the instance in the format of
         projects/{project}/locations/{location}/resourcePolicies/{resource_policy}
+  - name: kmsKey
+    type: String
+    description: |-
+      The KMS key id to use for encryption of the Lustre instance.
+    immutable: true
+  - name: stateReason
+    type: String
+    description: |-
+        The reason why the instance is in a certain state.
+    output: true
+  - name: accessRulesOptions
+    type: NestedObject
+    description: |-
+      Access control rules for the Lustre instance. Configures default root
+      squashing behavior and specific access rules based on IP addresses.
+    properties:
+      - name: defaultSquashMode
+        type: Enum
+        required: true
+        description: |-
+          Set to "ROOT_SQUASH" to enable root squashing by default.
+          Other values include "NO_SQUASH".
+        enum_values:
+          - 'ROOT_SQUASH'
+          - 'NO_SQUASH'
+      - name: defaultSquashUid
+        type: Integer
+        description: |-
+          The UID to map the root user to when root squashing is enabled
+          (e.g., 65534 for nobody).
+      - name: defaultSquashGid
+        type: Integer
+        description: |-
+          The GID to map the root user to when root squashing is enabled
+          (e.g., 65534 for nobody).
+      - name: accessRules
+        type: Array
+        description: |-
+          An array of access rule exceptions. Each rule defines IP address ranges
+          that should have different squash behavior than the default.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: name
+              type: String
+              description: |-
+                A unique identifier for the access rule.
+              required: true
+            - name: ipAddressRanges
+              type: Array
+              description: |-
+                An array of IP address strings or CIDR ranges that this rule applies to.
+              required: true
+              item_type:
+                type: String
+            - name: squashMode
+              type: Enum
+              description: |-
+                The squash mode for this specific rule. Currently, only "NO_SQUASH"
+                is supported for exceptions.
+              required: true
+              enum_values:
+                - 'NO_SQUASH'
+  - name: maintenancePolicy
+    type: NestedObject
+    description: 'The maintenance policy for the instance to determine when to allow or exclude the instance from maintenance updates.'
+    immutable: true
+    properties:
+      - name: 'weeklyMaintenanceWindows'
+        type: Array
+        description: 'The weekly maintenance windows for the instance. Currently limited to 1 window.'
+        max_size: 1
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'dayOfWeek'
+              type: Enum
+              description: 'Day of the week for the maintenance window.'
+              required: true
+              enum_values:
+                - 'SUNDAY'
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+            - name: 'startTime'
+              type: NestedObject
+              description: 'Start time of the maintenance window in UTC.'
+              required: true
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: 'Hours of day in 24 hour format. Should be from 0 to 23.'
+                  default_from_api: true
+                - name: 'minutes'
+                  type: Integer
+                  description: 'Minutes of hour of day. Must be from 0 to 59.'
+                  default_from_api: true
+                - name: 'seconds'
+                  type: Integer
+                  description: 'Seconds of minutes of the time. Must be from 0 to 59.'
+                  default_from_api: true
+                - name: 'nanos'
+                  type: Integer
+                  description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.'
+                  default_from_api: true
+      - name: 'maintenanceExclusionWindow'
+        type: Array
+        description: 'The exclusion windows for the instance. Currently limited to 1 window.'
+        max_size: 1
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'startDate'
+              type: NestedObject
+              description: 'Start date of the exclusion period in UTC.'
+              required: true
+              properties:
+                - name: 'year'
+                  type: Integer
+                  description: 'Year of the date. Must be from 1 to 9999, or 0 for recurring.'
+                  default_from_api: true
+                - name: 'month'
+                  type: Integer
+                  description: 'Month of a year. Must be from 1 to 12.'
+                  default_from_api: true
+                - name: 'day'
+                  type: Integer
+                  description: 'Day of a month. Must be from 1 to 31 and valid for the year and month.'
+                  default_from_api: true
+            - name: 'endDate'
+              type: NestedObject
+              description: 'End date of the exclusion period in UTC.'
+              required: true
+              properties:
+                - name: 'year'
+                  type: Integer
+                  description: 'Year of the date. Must be from 1 to 9999, or 0 for recurring.'
+                  default_from_api: true
+                - name: 'month'
+                  type: Integer
+                  description: 'Month of a year. Must be from 1 to 12.'
+                  default_from_api: true
+                - name: 'day'
+                  type: Integer
+                  description: 'Day of a month. Must be from 1 to 31 and valid for the year and month.'
+                  default_from_api: true
+            - name: 'time'
+              type: NestedObject
+              description: 'Time in UTC for the exclusion window.'
+              required: true
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: 'Hours of day in 24 hour format. Should be from 0 to 23.'
+                  default_from_api: true
+                - name: 'minutes'
+                  type: Integer
+                  description: 'Minutes of hour of day. Must be from 0 to 59.'
+                  default_from_api: true
+                - name: 'seconds'
+                  type: Integer
+                  description: 'Seconds of minutes of the time. Must be from 0 to 59.'
+                  default_from_api: true
+                - name: 'nanos'
+                  type: Integer
+                  description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.'
+                  default_from_api: true

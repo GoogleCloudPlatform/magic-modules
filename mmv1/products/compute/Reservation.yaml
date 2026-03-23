@@ -49,6 +49,7 @@ custom_code:
   constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
   pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
+  post_read: templates/terraform/post_read/compute_reservetion.go.tmpl
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
@@ -95,6 +96,14 @@ examples:
     exclude_docs: true
     min_version: 'beta'
     external_providers: ["time"]
+virtual_fields:
+  - name: 'block_names'
+    type: Array
+    description: |
+      List of all reservation block names in the parent reservation.
+    output: true
+    item_type:
+      type: String
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -170,10 +179,7 @@ properties:
         description: |
           A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: 'id'
-        key_description: |
-          The project id/number which is deleting or adding to the project list.
         value_type:
-          name: projectConfig
           type: NestedObject
           properties:
             - name: 'projectId'

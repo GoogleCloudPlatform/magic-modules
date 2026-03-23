@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package main
@@ -10,7 +10,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/hashicorp/go-changelog"
 	"golang.org/x/oauth2"
 )

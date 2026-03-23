@@ -88,6 +88,9 @@ resource "google_managed_kafka_cluster" "example" {
     vcpu_count = 4
     memory_bytes = 4512135122
   }
+  broker_capacity_config {
+    disk_size_gib = 1500
+  }
   gcp_config {
     access_config {
       network_configs {
@@ -134,6 +137,9 @@ resource "google_managed_kafka_cluster" "example" {
   capacity_config {
     vcpu_count = 4
     memory_bytes = 4512135122
+  }
+  broker_capacity_config {
+    disk_size_gib = 1500
   }
   gcp_config {
     access_config {

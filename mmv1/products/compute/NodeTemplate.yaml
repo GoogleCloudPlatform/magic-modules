@@ -38,6 +38,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
 examples:
   - name: 'node_template_basic'

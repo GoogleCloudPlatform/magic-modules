@@ -16,17 +16,17 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -106,7 +106,7 @@ type Examples struct {
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
 	// insert it into the docs verbatim.
-	Vars map[string]string
+	Vars map[string]string `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
 	// be inferred by Open in Cloud Shell.  For instance, org_id
@@ -164,6 +164,9 @@ type Examples struct {
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
 
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
+
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
@@ -197,30 +200,25 @@ func (e *Examples) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // MarshalYAML implements a custom marshaller for the Examples struct.
-// It omits the ConfigPath field if it's equal to its default generated value.
+// It uses a generic helper to omit fields that are set to their default values.
 func (e *Examples) MarshalYAML() (interface{}, error) {
-	// 1. Calculate the default value for ConfigPath based on the Name field.
-	//    This logic must mirror the one in UnmarshalYAML.
-	defaultPath := ""
-	if e.Name != "" {
-		defaultPath = DefaultConfigPath(e.Name)
-	}
-
-	// 2. Create a shallow copy to avoid modifying the original struct.
-	//    This prevents the marshaling operation from having side effects.
-	clone := *e
-
-	// 3. If the current ConfigPath matches the default, clear it.
-	//    The `omitempty` tag will then cause the YAML marshaler to skip it.
-	if clone.ConfigPath == defaultPath {
-		clone.ConfigPath = ""
-	}
-
-	// 4. Use a type alias to prevent infinite recursion.
-	//    The alias `exampleAlias` does not have this MarshalYAML method,
-	//    so calling the marshaler on it will use the default struct marshaler.
+	// Use a type alias to prevent infinite recursion.
 	type exampleAlias Examples
-	return (*exampleAlias)(&clone), nil
+
+	// Create a defaults object by unmarshalling an empty node, which populates defaults.
+	// Here, we can create one manually based on the unmarshal logic.
+	defaults := Examples{}
+	if e.Name != "" {
+		defaults.ConfigPath = DefaultConfigPath(e.Name)
+	}
+
+	// Use the generic helper to create a clone with default values zeroed out.
+	clone, err := utils.OmitDefaultsForMarshaling(*e, defaults)
+	if err != nil {
+		return nil, err
+	}
+
+	return (*exampleAlias)(clone.(*Examples)), nil
 }
 
 // DefaultConfigPath returns the default path for an example's Terraform config.
@@ -232,14 +230,14 @@ func DefaultConfigPath(name string) string {
 	return fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", name)
 }
 
-func (e *Examples) Validate(rName string) {
+func (e *Examples) Validate(rName string) error {
 	if e.Name == "" {
-		log.Fatalf("Missing `name` for one example in resource %s", rName)
+		return fmt.Errorf("missing `name` for one example in resource %s", rName)
 	}
-	e.ValidateExternalProviders()
+	return e.ValidateExternalProviders()
 }
 
-func (e *Examples) ValidateExternalProviders() {
+func (e *Examples) ValidateExternalProviders() error {
 	// Official providers supported by HashiCorp
 	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
 	HASHICORP_PROVIDERS := []string{"aws", "random", "null", "template", "azurerm", "kubernetes", "local",
@@ -255,12 +253,14 @@ func (e *Examples) ValidateExternalProviders() {
 	}
 
 	if len(unallowedProviders) > 0 {
-		log.Fatalf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		return fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
 	}
+
+	return nil
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) LoadHCLText(baseDir string) {
+func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
@@ -287,7 +287,10 @@ func (e *Examples) LoadHCLText(baseDir string) {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText = e.ExecuteTemplate(baseDir)
+	e.DocumentationHCLText, err = e.ExecuteTemplate(sysfs)
+	if err != nil {
+		return err
+	}
 	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -328,7 +331,10 @@ func (e *Examples) LoadHCLText(baseDir string) {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText = e.ExecuteTemplate(baseDir)
+	e.TestHCLText, err = e.ExecuteTemplate(sysfs)
+	if err != nil {
+		return err
+	}
 	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
 	// Remove region tags
 	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
@@ -338,12 +344,13 @@ func (e *Examples) LoadHCLText(baseDir string) {
 	// Reset the example
 	e.Vars = originalVars
 	e.TestEnvVars = originalTestEnvVars
+	return nil
 }
 
-func (e *Examples) ExecuteTemplate(baseDir string) string {
-	templateContent, err := os.ReadFile(filepath.Join(baseDir, e.ConfigPath))
+func (e *Examples) ExecuteTemplate(sysfs fs.FS) (string, error) {
+	templateContent, err := fs.ReadFile(sysfs, e.ConfigPath)
 	if err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	fileContentString := string(templateContent)
@@ -355,14 +362,14 @@ func (e *Examples) ExecuteTemplate(baseDir string) string {
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	rs := contents.String()
@@ -371,7 +378,7 @@ func (e *Examples) ExecuteTemplate(baseDir string) string {
 		rs = fmt.Sprintf("%s\n", rs)
 	}
 
-	return rs
+	return rs, nil
 }
 
 func (e *Examples) OiCSLink() string {
@@ -404,7 +411,8 @@ func (e *Examples) ResourceType(terraformName string) string {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) SetOiCSHCLText() {
+func (e *Examples) SetOiCSHCLText(sysfs fs.FS) {
+	var err error
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 
@@ -425,7 +433,10 @@ func (e *Examples) SetOiCSHCLText() {
 	e.Vars = testVars
 	// SetOiCSHCLText is generated from the provider, assume base directory is
 	// always relative for this case
-	e.OicsHCLText = e.ExecuteTemplate("")
+	e.OicsHCLText, err = e.ExecuteTemplate(sysfs)
+	if err != nil {
+		log.Fatal(err)
+	}
 	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
 
 	// Remove region tags

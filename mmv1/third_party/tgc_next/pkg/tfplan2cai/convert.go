@@ -3,6 +3,7 @@ package tfplan2cai
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"go.uber.org/zap"
 
@@ -20,11 +21,17 @@ type Options struct {
 	DefaultProject string
 	DefaultRegion  string
 	DefaultZone    string
+
 	// UserAgent for all requests (if online)
 	UserAgent string
+	// HTTPClient for all requests (if online)
+	HTTPClient *http.Client
 	// Map hierarchy resource (like projects/<number> or folders/<number>)
 	// to an ancestry path (like organizations/123/folders/456/projects/789)
 	AncestryCache map[string]string
+
+	// If true, the ancestry manager will be a no-op.
+	NoOpAncestryManager bool
 }
 
 // Convert converts terraform json plan to CAI Assets.
@@ -42,14 +49,19 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 	// Set up config and ancestry manager using the same user agent.
 	// Config and ancestry manager are shared among resources.
 
-	cfg, err := transport.NewConfig(ctx, o.DefaultProject, o.DefaultZone, o.DefaultRegion, o.Offline, o.UserAgent)
+	cfg, err := transport.NewConfig(ctx, o.DefaultProject, o.DefaultZone, o.DefaultRegion, o.Offline, o.UserAgent, o.HTTPClient)
 	if err != nil {
 		return nil, fmt.Errorf("building config: %w", err)
 	}
 
-	ancestryManager, err := ancestrymanager.New(cfg, o.Offline, o.AncestryCache, o.ErrorLogger)
-	if err != nil {
-		return nil, fmt.Errorf("building ancestry manager: %w", err)
+	var ancestryManager ancestrymanager.AncestryManager
+	if !o.NoOpAncestryManager {
+		ancestryManager, err = ancestrymanager.New(cfg, o.Offline, o.AncestryCache, o.ErrorLogger)
+		if err != nil {
+			return nil, fmt.Errorf("building ancestry manager: %w", err)
+		}
+	} else {
+		ancestryManager = &ancestrymanager.NoOpAncestryManager{}
 	}
 
 	var assets []caiasset.Asset

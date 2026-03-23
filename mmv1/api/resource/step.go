@@ -16,9 +16,9 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -87,10 +87,12 @@ type Step struct {
 	//         "network": nameOfVpc
 	//         ...
 	//       }
+	// NOTE: Keys in TestVarsOverrides will apply to a matching key in EITHER Vars or PrefixedVars.
 	TestVarsOverrides map[string]string `yaml:"test_vars_overrides,omitempty"`
 
 	// Hash to provider custom override values for generating oics config
 	// See test_vars_overrides for more details
+	// NOTE: Keys in OicsVarsOverrides will apply to a matching key in EITHER Vars or PrefixedVars for OiCS generation.
 	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides,omitempty"`
 
 	// The version name of the test step's version if it's different than the
@@ -104,8 +106,8 @@ type Step struct {
 	// Whether to skip import tests for this test step
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
-	// Whether to skip generating docs for this test step
-	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
+	// Whether to generate docs for this test step (override sample's exclude_basic_doc)
+	IncludeStepDoc bool `yaml:"include_step_doc,omitempty"`
 
 	DocumentationHCLText string `yaml:"-"`
 	TestHCLText          string `yaml:"-"`
@@ -113,29 +115,22 @@ type Step struct {
 	PrimaryResourceId    string `yaml:"-"`
 }
 
-func (s *Step) UnmarshalYAML(unmarshal func(any) error) error {
-	type stepAlias Step
-	aliasObj := (*stepAlias)(s)
-
-	err := unmarshal(aliasObj)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *Step) TestStepSlug(productName, resourceName string) string {
 	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
 	return ret
 }
 
-func (s *Step) Validate(rName, sName string) {
-	// TODO: Add check identifier when it's implemented
+func (s *Step) Validate(rName, sName string) (es []error) {
+	for k := range s.Vars {
+		if _, exists := s.PrefixedVars[k]; exists {
+			es = append(es, fmt.Errorf("variable key '%s' cannot exist in both 'vars' and 'prefixed_vars' for step '%s' in sample '%s' of resource '%s'", k, s.Name, sName, rName))
+		}
+	}
 	if s.Name == "" {
-		log.Fatalf("Missing `name` for one step in test sample %s in resource %s", sName, rName)
+		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
 	}
 
+	return es
 }
 
 func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
@@ -155,9 +150,9 @@ func validateRegexForContents(r *regexp.Regexp, contents string, configPath stri
 }
 
 // Executes step configuration templates for documentation and tests
-func (s *Step) SetHCLText() {
+func (s *Step) SetHCLText(sysfs fs.FS) {
 	originalPrefixedVars := s.PrefixedVars
-	// originalVars := s.Vars
+	originalVars := s.Vars
 	originalTestEnvVars := s.TestEnvVars
 	docTestEnvVars := make(map[string]string)
 	docs_defaults := map[string]string{
@@ -183,7 +178,7 @@ func (s *Step) SetHCLText() {
 		docTestEnvVars[key] = docs_defaults[s.TestEnvVars[key]]
 	}
 	s.TestEnvVars = docTestEnvVars
-	s.DocumentationHCLText = s.ExecuteTemplate()
+	s.DocumentationHCLText = s.ExecuteTemplate(sysfs)
 	s.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -215,6 +210,10 @@ func (s *Step) SetHCLText() {
 		testPrefixedVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
+	for key := range originalVars {
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	}
+
 	// Apply overrides from YAML
 	for key := range s.TestVarsOverrides {
 		testPrefixedVars[key] = fmt.Sprintf("%%{%s}", key)
@@ -227,7 +226,8 @@ func (s *Step) SetHCLText() {
 
 	s.PrefixedVars = testPrefixedVars
 	s.TestEnvVars = testTestEnvVars
-	s.TestHCLText = s.ExecuteTemplate()
+	s.Vars = testVars
+	s.TestHCLText = s.ExecuteTemplate(sysfs)
 	s.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.TestHCLText, "\n")
 	// Remove region tags
 	s.TestHCLText = re1.ReplaceAllString(s.TestHCLText, "")
@@ -236,11 +236,12 @@ func (s *Step) SetHCLText() {
 
 	// Reset the step
 	s.PrefixedVars = originalPrefixedVars
+	s.Vars = originalVars
 	s.TestEnvVars = originalTestEnvVars
 }
 
-func (s *Step) ExecuteTemplate() string {
-	templateContent, err := os.ReadFile(s.ConfigPath)
+func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
+	templateContent, err := fs.ReadFile(sysfs, s.ConfigPath)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -257,7 +258,7 @@ func (s *Step) ExecuteTemplate() string {
 
 	templateFileName := filepath.Base(s.ConfigPath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -312,25 +313,33 @@ func SubstituteTestPaths(config string) string {
 }
 
 // Executes step configuration templates for documentation and tests
-func (s *Step) SetOiCSHCLText() {
+func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	originalPrefixedVars := s.PrefixedVars
+	originalVars := s.Vars
 
 	// // Remove region tags
 	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
 	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
 
 	testPrefixedVars := make(map[string]string)
+	testVars := make(map[string]string)
 	for key, value := range originalPrefixedVars {
 		testPrefixedVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
+	}
+
+	for key, value := range originalVars {
+		testVars[key] = value
 	}
 
 	// Apply overrides from YAML
 	for key, value := range s.OicsVarsOverrides {
 		testPrefixedVars[key] = value
+		testVars[key] = value
 	}
 
 	s.PrefixedVars = testPrefixedVars
-	s.OicsHCLText = s.ExecuteTemplate()
+	s.Vars = testVars
+	s.OicsHCLText = s.ExecuteTemplate(sysfs)
 	s.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.OicsHCLText, "\n")
 
 	// Remove region tags
@@ -340,4 +349,9 @@ func (s *Step) SetOiCSHCLText() {
 
 	// Reset the step
 	s.PrefixedVars = originalPrefixedVars
+	s.Vars = originalVars
+}
+
+func (s *Step) ShouldGenerateDoc(index int, sample *Sample) bool {
+	return s.IncludeStepDoc || (index == 0 && !sample.ExcludeBasicDoc)
 }

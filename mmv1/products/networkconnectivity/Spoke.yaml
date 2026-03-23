@@ -131,6 +131,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
   - name: 'createTime'
     type: String
     description: Output only. The time the spoke was created.
@@ -141,7 +142,7 @@ properties:
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
+    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
   - name: 'description'
     type: String
     description: An optional description of the spoke.

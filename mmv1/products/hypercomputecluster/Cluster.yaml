@@ -1,0 +1,757 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Cluster
+description: A collection of virtual machines and connected resources forming a high-performance computing cluster capable of running large-scale, tightly coupled workloads. A cluster combines a set a compute resources that perform computations, storage resources that contain inputs and store outputs, an orchestrator that is responsible for assigning jobs to compute resources, and network resources that connect everything together.
+base_url: projects/{{project}}/locations/{{location}}/clusters
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
+create_url: projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+custom_code:
+  constants: templates/terraform/custom_code/hypercomputecluster_cluster_storage_resources_hash.go.tmpl
+autogen_status: Q2x1c3Rlcg==
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: clusterId
+    type: String
+    required: true
+    description: |-
+      ID of the cluster to create. Must conform to
+      [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
+      alphanumeric, and at most 63 characters).
+    immutable: true
+    url_param_only: true
+properties:
+  - name: computeResources
+    type: Map
+    description: |-
+      Compute resources available to the cluster. Keys specify the ID of the
+      compute resource by which it can be referenced elsewhere, and must conform
+      to [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
+      alphanumeric, and at most 63 characters).
+    set_hash_func: resourceHypercomputeclusterClusterResourceHash
+    value_type:
+      type: NestedObject
+      properties:
+        - name: config
+          type: NestedObject
+          required: true
+          description: Describes how a compute resource should be created at runtime.
+          properties:
+            - name: newFlexStartInstances
+              type: NestedObject
+              description: |-
+                When set in a ComputeResourceConfig, indicates that VM instances should
+                be created using [Flex
+                Start](https://cloud.google.com/compute/docs/instances/provisioning-models).
+              properties:
+                - name: machineType
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the Compute Engine [machine
+                    type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
+                    `n2-standard-2`.
+                - name: maxDuration
+                  type: String
+                  required: true
+                  description: |-
+                    Specifies the time limit for created instances. Instances will be
+                    terminated at the end of this duration.
+                - name: zone
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the zone in which VM instances should run, e.g., `us-central1-a`.
+                    Must be in the same region as the cluster, and must match the zone of any
+                    other resources specified in the cluster.
+            - name: newOnDemandInstances
+              type: NestedObject
+              description: |-
+                When set in a ComputeResourceConfig, indicates that on-demand (i.e.,
+                using the standard provisioning model) VM instances should be created.
+              properties:
+                - name: machineType
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the Compute Engine [machine
+                    type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
+                    `n2-standard-2`.
+                - name: zone
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the zone in which VM instances should run, e.g., `us-central1-a`.
+                    Must be in the same region as the cluster, and must match the zone of any
+                    other resources specified in the cluster.
+            - name: newReservedInstances
+              type: NestedObject
+              description: |-
+                When set in a ComputeResourceConfig, indicates that VM instances should
+                be created from a
+                [reservation](https://cloud.google.com/compute/docs/instances/reservations-overview).
+              properties:
+                - name: reservation
+                  type: String
+                  description: |-
+                    Name of the reservation from which VM instances should be created, in the
+                    format `projects/{project}/zones/{zone}/reservations/{reservation}`.
+            - name: newSpotInstances
+              type: NestedObject
+              description: |-
+                When set in a ComputeResourceConfig, indicates that [spot
+                VM](https://cloud.google.com/compute/docs/instances/spot) instances should be
+                created.
+              properties:
+                - name: machineType
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the Compute Engine [machine
+                    type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
+                    `n2-standard-2`.
+                - name: terminationAction
+                  type: String
+                  description: |-
+                    Specifies the termination action of the instance
+                    Possible values:
+                    STOP
+                    DELETE
+                - name: zone
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the zone in which VM instances should run, e.g., `us-central1-a`.
+                    Must be in the same region as the cluster, and must match the zone of any
+                    other resources specified in the cluster.
+    key_name: id
+  - name: createTime
+    type: String
+    description: Time that the cluster was originally created.
+    output: true
+  - name: description
+    type: String
+    description: User-provided description of the cluster.
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      [Labels](https://cloud.google.com/compute/docs/labeling-resources) applied
+      to the cluster. Labels can be used to organize clusters and to filter them
+      in queries.
+  - name: name
+    type: String
+    description: |-
+      Identifier. [Relative resource name](https://google.aip.dev/122) of the cluster, in the
+      format `projects/{project}/locations/{location}/clusters/{cluster}`.
+    output: true
+  - name: networkResources
+    type: Map
+    description: |-
+      Network resources available to the cluster. Must contain at most one value.
+      Keys specify the ID of the network resource by which it can be referenced
+      elsewhere, and must conform to
+      [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
+      alphanumeric, and at most 63 characters).
+    set_hash_func: resourceHypercomputeclusterClusterResourceHash
+    value_type:
+      type: NestedObject
+      properties:
+        - name: config
+          type: NestedObject
+          description: |-
+            Describes how a network resource should be initialized. Each network resource
+            can either be imported from an existing Google Cloud resource or initialized
+            when the cluster is created.
+          properties:
+            - name: existingNetwork
+              type: NestedObject
+              description: |-
+                When set in a NetworkResourceConfig, indicates that an existing network
+                should be imported.
+              properties:
+                - name: network
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the network to import, in the format
+                    `projects/{project}/global/networks/{network}`.
+                - name: subnetwork
+                  type: String
+                  required: true
+                  description: |-
+                    Particular subnetwork to use, in the format
+                    `projects/{project}/regions/{region}/subnetworks/{subnetwork}`.
+            - name: newNetwork
+              type: NestedObject
+              description: |-
+                When set in a NetworkResourceConfig, indicates that a new network should
+                be created.
+              properties:
+                - name: description
+                  type: String
+                  description: Description of the network. Maximum of 2048 characters.
+                - name: network
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the network to create, in the format
+                    `projects/{project}/global/networks/{network}`.
+        - name: network
+          type: NestedObject
+          description: |-
+            A reference to a [VPC network](https://cloud.google.com/vpc/docs/vpc) in
+            Google Compute Engine.
+          properties:
+            - name: network
+              type: String
+              description: |-
+                Name of the network, in the format
+                `projects/{project}/global/networks/{network}`.
+              output: true
+            - name: subnetwork
+              type: String
+              description: |-
+                Name of the particular subnetwork being used by the cluster, in the format
+                `projects/{project}/regions/{region}/subnetworks/{subnetwork}`.
+              output: true
+          output: true
+    key_name: id
+  - name: orchestrator
+    type: NestedObject
+    description: |-
+      The component responsible for scheduling and running workloads on the
+      cluster as well as providing the user interface for interacting with the
+      cluster at runtime.
+    properties:
+      - name: slurm
+        type: NestedObject
+        description: |-
+          When set in Orchestrator, indicates that the cluster should use
+          [Slurm](https://slurm.schedmd.com/) as the orchestrator.
+        properties:
+          - name: defaultPartition
+            type: String
+            description: |-
+              Default partition to use for submitted jobs that do not explicitly specify
+              a partition. Required if and only if there is more than one partition, in
+              which case it must match the id of one of the partitions.
+          - name: epilogBashScripts
+            type: Array
+            default_from_api: true
+            description: |-
+              Slurm [epilog scripts](https://slurm.schedmd.com/prolog_epilog.html), which
+              will be executed by compute nodes whenever a node finishes running a job.
+              Values must not be empty.
+            item_type:
+              type: String
+          - name: loginNodes
+            type: NestedObject
+            required: true
+            description: |-
+              Configuration for Slurm [login
+              nodes](https://slurm.schedmd.com/quickstart_admin.html#login) in the cluster.
+              Login nodes are Compute Engine VM instances that allow users to access the
+              cluster over SSH.
+            properties:
+              - name: bootDisk
+                type: NestedObject
+                description: |-
+                  A [Persistent disk](https://cloud.google.com/compute/docs/disks) used as the
+                  boot disk for a Compute Engine VM instance.
+                properties:
+                  - name: sizeGb
+                    type: String
+                    required: true
+                    description: Size of the disk in gigabytes. Must be at least 10GB.
+                    immutable: true
+                  - name: type
+                    type: String
+                    required: true
+                    description: |-
+                      [Persistent disk
+                      type](https://cloud.google.com/compute/docs/disks#disk-types), in the
+                      format `projects/{project}/zones/{zone}/diskTypes/{disk_type}`.
+                    immutable: true
+              - name: count
+                type: String
+                required: true
+                description: Number of login node instances to create.
+              - name: enableOsLogin
+                type: Boolean
+                description: |-
+                  Whether [OS Login](https://cloud.google.com/compute/docs/oslogin) should be
+                  enabled on login node instances.
+              - name: enablePublicIps
+                type: Boolean
+                description: |-
+                  Whether login node instances should be assigned [external IP
+                  addresses](https://cloud.google.com/compute/docs/ip-addresses#externaladdresses).
+              - name: instances
+                type: Array
+                description: |-
+                  Information about the login node instances that were created in Compute
+                  Engine.
+                output: true
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: instance
+                      type: String
+                      description: |-
+                        Name of the VM instance, in the format
+                        `projects/{project}/zones/{zone}/instances/{instance}`.
+                      output: true
+              - name: labels
+                type: KeyValuePairs
+                default_from_api: true
+                description: |-
+                  [Labels](https://cloud.google.com/compute/docs/labeling-resources) that
+                  should be applied to each login node instance.
+              - name: machineType
+                type: String
+                required: true
+                description: |-
+                  Name of the Compute Engine [machine
+                  type](https://cloud.google.com/compute/docs/machine-resource) to use for
+                  login nodes, e.g. `n2-standard-2`.
+              - name: startupScript
+                type: String
+                description: |-
+                  [Startup
+                  script](https://cloud.google.com/compute/docs/instances/startup-scripts/linux)
+                  to be run on each login node instance. Max 256KB.
+                  The script must complete within the system-defined default timeout of 5
+                  minutes. For tasks that require more time, consider running them in the
+                  background using methods such as `&` or `nohup`.
+              - name: storageConfigs
+                type: Array
+                description: |-
+                  How storage resources should be mounted on each login
+                  node.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: id
+                      type: String
+                      required: true
+                      description: |-
+                        ID of the storage resource to mount, which must match a key in the
+                        cluster's [storage_resources](Cluster.storage_resources).
+                    - name: localMount
+                      type: String
+                      required: true
+                      description: |-
+                        A directory inside the VM instance's file system where the storage resource
+                        should be mounted (e.g., `/mnt/share`).
+              - name: zone
+                type: String
+                required: true
+                description: |-
+                  Name of the zone in which login nodes should run, e.g., `us-central1-a`.
+                  Must be in the same region as the cluster, and must match the zone of any
+                  other resources specified in the cluster.
+                immutable: true
+          - name: nodeSets
+            type: Array
+            required: true
+            description: |-
+              Configuration of Slurm nodesets, which define groups of compute resources
+              that can be used by Slurm. At least one compute node is required.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: computeId
+                  type: String
+                  description: |-
+                    ID of the compute resource on which this nodeset will run. Must match a key
+                    in the cluster's [compute_resources](Cluster.compute_resources).
+                - name: computeInstance
+                  type: NestedObject
+                  description: |-
+                    When set in a SlurmNodeSet, indicates that the nodeset should be backed
+                    by Compute Engine VM instances.
+                  properties:
+                    - name: bootDisk
+                      type: NestedObject
+                      description: |-
+                        A [Persistent disk](https://cloud.google.com/compute/docs/disks) used as the
+                        boot disk for a Compute Engine VM instance.
+                      properties:
+                        - name: sizeGb
+                          type: String
+                          required: true
+                          description: Size of the disk in gigabytes. Must be at least 10GB.
+                          immutable: true
+                        - name: type
+                          type: String
+                          required: true
+                          description: |-
+                            [Persistent disk
+                            type](https://cloud.google.com/compute/docs/disks#disk-types), in the
+                            format `projects/{project}/zones/{zone}/diskTypes/{disk_type}`.
+                          immutable: true
+                    - name: labels
+                      type: KeyValuePairs
+                      default_from_api: true
+                      description: |-
+                        [Labels](https://cloud.google.com/compute/docs/labeling-resources) that
+                        should be applied to each VM instance in the nodeset.
+                    - name: startupScript
+                      type: String
+                      description: |-
+                        [Startup
+                        script](https://cloud.google.com/compute/docs/instances/startup-scripts/linux)
+                        to be run on each VM instance in the nodeset. Max 256KB.
+                - name: id
+                  type: String
+                  required: true
+                  description: |-
+                    Identifier for the nodeset, which allows it to be referenced by partitions.
+                    Must conform to
+                    [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
+                    alphanumeric, and at most 63 characters).
+                - name: maxDynamicNodeCount
+                  type: String
+                  description: |-
+                    Controls how many additional nodes a cluster can bring online to handle
+                    workloads. Set this value to enable dynamic node creation and limit the
+                    number of additional nodes the cluster can bring online. Leave empty if you
+                    do not want the cluster to create nodes dynamically, and instead rely only
+                    on static nodes.
+                - name: staticNodeCount
+                  type: String
+                  description: |-
+                    Number of nodes to be statically created for this nodeset. The cluster will
+                    attempt to ensure that at least this many nodes exist at all times.
+                - name: storageConfigs
+                  type: Array
+                  description: |-
+                    How storage resources should be mounted on each compute
+                    node.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: id
+                        type: String
+                        required: true
+                        description: |-
+                          ID of the storage resource to mount, which must match a key in the
+                          cluster's [storage_resources](Cluster.storage_resources).
+                      - name: localMount
+                        type: String
+                        required: true
+                        description: |-
+                          A directory inside the VM instance's file system where the storage resource
+                          should be mounted (e.g., `/mnt/share`).
+          - name: partitions
+            type: Array
+            required: true
+            description: |-
+              Configuration of Slurm partitions, which group one or more nodesets. Acts
+              as a queue against which jobs can be submitted. At least one partition is
+              required.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: id
+                  type: String
+                  required: true
+                  description: |-
+                    ID of the partition, which is how users will identify it. Must conform to
+                    [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
+                    alphanumeric, and at most 63 characters).
+                - name: nodeSetIds
+                  type: Array
+                  required: true
+                  description: |-
+                    IDs of the nodesets that make up this partition. Values must match
+                    SlurmNodeSet.id.
+                  item_type:
+                    type: String
+          - name: prologBashScripts
+            type: Array
+            default_from_api: true
+            description: |-
+              Slurm [prolog scripts](https://slurm.schedmd.com/prolog_epilog.html), which
+              will be executed by compute nodes before a node begins running a new job.
+              Values must not be empty.
+            item_type:
+              type: String
+  - name: reconciling
+    type: Boolean
+    description: |-
+      Indicates whether changes to the cluster are currently in flight. If this
+      is `true`, then the current state might not match the cluster's intended
+      state.
+    output: true
+  - name: storageResources
+    type: Map
+    description: |-
+      Storage resources available to the cluster. Keys specify the ID of the
+      storage resource by which it can be referenced elsewhere, and must conform
+      to [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
+      alphanumeric, and at most 63 characters).
+    set_hash_func: resourceHypercomputeclusterClusterResourceHash
+    value_type:
+      type: NestedObject
+      properties:
+        - name: bucket
+          type: NestedObject
+          description: |-
+            A reference to a [Google Cloud Storage](https://cloud.google.com/storage)
+            bucket.
+          properties:
+            - name: bucket
+              type: String
+              description: Name of the bucket.
+              output: true
+          output: true
+        - name: config
+          type: NestedObject
+          required: true
+          description: |-
+            Describes how a storage resource should be initialized. Each storage resource
+            can either be imported from an existing Google Cloud resource or initialized
+            when the cluster is created.
+          properties:
+            - name: existingBucket
+              type: NestedObject
+              description: |-
+                When set in a StorageResourceConfig, indicates that an existing
+                [Google Cloud Storage](https://cloud.google.com/storage) bucket should be
+                imported.
+              properties:
+                - name: bucket
+                  type: String
+                  required: true
+                  description: Name of the Cloud Storage bucket to import.
+            - name: existingFilestore
+              type: NestedObject
+              description: |-
+                When set in a StorageResourceConfig, indicates that an existing
+                [Filestore](https://cloud.google.com/filestore) instance should be imported.
+              properties:
+                - name: filestore
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the Filestore instance to import, in the format
+                    `projects/{project}/locations/{location}/instances/{instance}`
+            - name: existingLustre
+              type: NestedObject
+              description: |-
+                When set in a StorageResourceConfig, indicates that an existing
+                [Managed Lustre](https://cloud.google.com/products/managed-lustre) instance
+                should be imported.
+              properties:
+                - name: lustre
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the Managed Lustre instance to import, in the format
+                    `projects/{project}/locations/{location}/instances/{instance}`
+            - name: newBucket
+              type: NestedObject
+              description: |-
+                When set in a StorageResourceConfig, indicates that a new
+                [Google Cloud Storage](https://cloud.google.com/storage) bucket should be
+                created.
+              properties:
+                - name: autoclass
+                  type: NestedObject
+                  description: Message describing Google Cloud Storage autoclass configuration
+                  properties:
+                    - name: enabled
+                      type: Boolean
+                      required: true
+                      description: Enables Auto-class feature.
+                - name: bucket
+                  type: String
+                  required: true
+                  description: Name of the Cloud Storage bucket to create.
+                - name: hierarchicalNamespace
+                  type: NestedObject
+                  default_from_api: true
+                  description: Message describing Google Cloud Storage hierarchical namespace configuration
+                  diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+                  properties:
+                    - name: enabled
+                      type: Boolean
+                      default_from_api: true
+                      required: true
+                      description: Enables hierarchical namespace setup for the bucket.
+                      diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+                - name: storageClass
+                  type: String
+                  description: |-
+                    If set, uses the provided storage class as the bucket's default storage
+                    class.
+                    Possible values:
+                    STANDARD
+                    NEARLINE
+                    COLDLINE
+                    ARCHIVE
+                  enum_values:
+                    - 'STORAGE_CLASS_UNSPECIFIED'
+                    - 'STANDARD'
+                    - 'NEARLINE'
+                    - 'COLDLINE'
+                    - 'ARCHIVE'
+            - name: newFilestore
+              type: NestedObject
+              description: |-
+                When set in a StorageResourceConfig, indicates that a new
+                [Filestore](https://cloud.google.com/filestore) instance should be created.
+              properties:
+                - name: description
+                  type: String
+                  description: Description of the instance. Maximum of 2048 characters.
+                - name: fileShares
+                  type: Array
+                  required: true
+                  description: |-
+                    File system shares on the instance. Exactly one file share must be
+                    specified.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: capacityGb
+                        type: String
+                        required: true
+                        description: |-
+                          Size of the filestore in GB. Must be between 1024 and 102400, and must meet
+                          scalability requirements described at
+                          https://cloud.google.com/filestore/docs/service-tiers.
+                      - name: fileShare
+                        type: String
+                        required: true
+                        description: Filestore share location
+                - name: filestore
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the Filestore instance to create, in the format
+                    `projects/{project}/locations/{location}/instances/{instance}`
+                - name: protocol
+                  type: Enum
+                  description: |-
+                    Access protocol to use for all file shares in the instance. Defaults to NFS
+                    V3 if not set.
+                    Possible values:
+                    NFSV3
+                    NFSV41
+                  enum_values:
+                    - 'PROTOCOL_UNSPECIFIED'
+                    - 'NFSV3'
+                    - 'NFSV41'
+                - name: tier
+                  type: Enum
+                  required: true
+                  description: |-
+                    Service tier to use for the instance.
+                    Possible values:
+                    ZONAL
+                    REGIONAL
+                  enum_values:
+                    - 'TIER_UNSPECIFIED'
+                    - 'ZONAL'
+                    - 'REGIONAL'
+            - name: newLustre
+              type: NestedObject
+              description: |-
+                When set in a StorageResourceConfig, indicates that a new
+                [Managed Lustre](https://cloud.google.com/products/managed-lustre) instance
+                should be created.
+              properties:
+                - name: capacityGb
+                  type: String
+                  required: true
+                  description: |-
+                    Storage capacity of the instance in gibibytes (GiB). Allowed values are
+                    between 18000 and 7632000.
+                - name: description
+                  type: String
+                  description: Description of the Managed Lustre instance. Maximum of 2048 characters.
+                - name: filesystem
+                  type: String
+                  required: true
+                  description: |-
+                    Filesystem name for this instance. This name is used by client-side tools,
+                    including when mounting the instance. Must be 8 characters or less and can
+                    only contain letters and numbers.
+                - name: lustre
+                  type: String
+                  required: true
+                  description: |-
+                    Name of the Managed Lustre instance to create, in the format
+                    `projects/{project}/locations/{location}/instances/{instance}`
+        - name: filestore
+          type: NestedObject
+          description: A reference to a [Filestore](https://cloud.google.com/filestore) instance.
+          properties:
+            - name: filestore
+              type: String
+              description: |-
+                Name of the Filestore instance, in the format
+                `projects/{project}/locations/{location}/instances/{instance}`
+              output: true
+          output: true
+        - name: lustre
+          type: NestedObject
+          description: |-
+            A reference to a [Managed
+            Lustre](https://cloud.google.com/products/managed-lustre) instance.
+          properties:
+            - name: lustre
+              type: String
+              description: |-
+                Name of the Managed Lustre instance, in the format
+                `projects/{project}/locations/{location}/instances/{instance}`
+              output: true
+          output: true
+    key_name: id
+  - name: updateTime
+    type: String
+    description: Time that the cluster was most recently updated.
+    output: true
+examples:
+  - name: hypercomputecluster_cluster_basic
+    primary_resource_id: 'cluster'
+    vars:
+      cluster_id: 'my-cluster'
+    test_vars_overrides:
+      cluster_id: 'fmt.Sprintf("tf%s", acctest.RandString(t, 8))'

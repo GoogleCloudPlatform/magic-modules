@@ -12,15 +12,15 @@ import (
 )
 
 func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
-	for _, test := range []struct {
-		name          string
-		schemaDiff    diff.SchemaDiff
-		changedFields map[string]ResourceChanges
+	cases := []struct {
+		name       string
+		schemaDiff diff.SchemaDiff
+		want       map[string]ResourceChanges
 	}{
 		{
 			name: "covered-resource",
 			schemaDiff: diff.SchemaDiff{
-				"covered_resource": diff.ResourceDiff{
+				"google_compute_instance": diff.ResourceDiff{
 					Fields: map[string]diff.FieldDiff{
 						"field_one": {
 							New: &schema.Schema{},
@@ -45,25 +45,120 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 						},
 					},
 				},
-				"iam_resource": diff.ResourceDiff{
-					Fields: map[string]diff.FieldDiff{
-						"condition": {
-							New: &schema.Schema{},
-						},
-					},
-				},
 			},
-			changedFields: map[string]ResourceChanges{
-				"covered_resource": {
+			want: map[string]ResourceChanges{
+				"google_compute_instance": {
 					"field_one":                       &Field{Added: true},
 					"field_two.field_three":           &Field{Changed: true},
 					"field_four.field_five.field_six": &Field{Added: true},
 				},
 			},
 		},
-	} {
-		if changedFields := getChangedFieldsFromSchemaDiff(test.schemaDiff); !reflect.DeepEqual(changedFields, test.changedFields) {
-			t.Errorf("got unexpected changed fields: %v, expected %v", changedFields, test.changedFields)
+		{
+			name: "iam-resource",
+			schemaDiff: diff.SchemaDiff{
+				"google_resource_iam_member": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"condition": {
+							New: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"expression": {
+											Type: schema.TypeString,
+										},
+										"title": {
+											Type: schema.TypeString,
+										},
+										"description": {
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+						"condition.description": {
+							New: &schema.Schema{},
+						},
+						"condition.expression": {
+							New: &schema.Schema{},
+						},
+						"condition.title": {
+							New: &schema.Schema{},
+						},
+					},
+				},
+				"google_resource_iam_binding": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"condition": {
+							New: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"expression": {
+											Type: schema.TypeString,
+										},
+										"title": {
+											Type: schema.TypeString,
+										},
+										"description": {
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+						"condition.description": {
+							New: &schema.Schema{},
+						},
+						"condition.expression": {
+							New: &schema.Schema{},
+						},
+						"condition.title": {
+							New: &schema.Schema{},
+						},
+					},
+				},
+				"google_resource_iam_policy": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"condition": {
+							New: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"expression": {
+											Type: schema.TypeString,
+										},
+										"title": {
+											Type: schema.TypeString,
+										},
+										"description": {
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+						"condition.description": {
+							New: &schema.Schema{},
+						},
+						"condition.expression": {
+							New: &schema.Schema{},
+						},
+						"condition.title": {
+							New: &schema.Schema{},
+						},
+					},
+				},
+			},
+			want: map[string]ResourceChanges{},
+		},
+	}
+
+	for _, tc := range cases {
+		got := getChangedFieldsFromSchemaDiff(tc.schemaDiff)
+		if diff := cmp.Diff(got, tc.want); diff != "" {
+			t.Errorf("getChangedFieldsFromSchemaDiff(%s) returned unexpected diff. +got, -want:\n%s", tc.name, diff)
 		}
 	}
 

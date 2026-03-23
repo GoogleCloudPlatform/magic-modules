@@ -14,7 +14,7 @@
   limitations under the License. */ -}}
 {{- define "expandTgcPropertyMethod" }}
     {{ if $.CustomTgcExpand }}
-{{- $.CustomTemplate $.CustomTgcExpand false -}}
+{{- customTemplate $ $.CustomTgcExpand false -}}
     {{ else }}
 {{- template "expandPropertyMethod" $ -}}
     {{ end }}

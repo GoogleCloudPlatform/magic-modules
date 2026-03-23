@@ -33,22 +33,21 @@ billingProject = project
 if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
     billingProject = bp
 }
-// Read past the first page to get all endpoints.
-pt, _ := res["nextPageToken"].(string)
-allEndpoints, err := networkEndpointsPaginatedRead(d, config, userAgent, url, project, billingProject, pt)
+
+allEndpoints, err := networkEndpointsPaginatedRead(d, config, userAgent, url, project, billingProject, res)
 if err != nil {
-    // networkEndpointsPaginatedRead already adds error description
-    return nil, err
+	return nil, err
 }
-firstPage := res["items"].([]interface{})
-allEndpoints = append(firstPage, allEndpoints...)
 
 // listNetworkEndpoints returns data in a different structure, so we need to
 // convert to the Terraform schema.
 var transformed []interface{}
 for _, e := range allEndpoints {
-    t := e.(map[string]interface{})["networkEndpoint"]
-    transformed = append(transformed, t)
+	if item, ok := e.(map[string]interface{}); ok {
+		if t, ok := item["networkEndpoint"]; ok {
+			transformed = append(transformed, t)
+		}
+	}
 }
 
 return map[string]interface{}{"networkEndpoints": transformed}, nil
