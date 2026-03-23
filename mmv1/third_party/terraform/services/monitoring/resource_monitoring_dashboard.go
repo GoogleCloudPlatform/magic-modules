@@ -1,8 +1,8 @@
 package monitoring
 
 import (
+	"encoding/json"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -14,25 +14,41 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// This recursive function takes an old map and a new map and is intended to remove the computed keys
-// from the old json string (stored in state) so that it doesn't show a diff if it's not defined in the
-// new map's json string (defined in config)
+// removeComputedKeys removes keys from the old configuration that don't exist in the new configuration.
+// This prevents spurious diffs when the API adds computed fields that weren't in the original user config.
 func removeComputedKeys(old map[string]interface{}, new map[string]interface{}) map[string]interface{} {
-	for k, v := range old {
-		if _, ok := old[k]; ok && new[k] == nil {
+	if old == nil {
+		return old
+	}
+	if new == nil {
+		new = make(map[string]interface{})
+	}
+
+	for k, oldVal := range old {
+		newVal, exists := new[k]
+
+		if !exists {
 			delete(old, k)
 			continue
 		}
 
-		if reflect.ValueOf(v).Kind() == reflect.Map {
-			old[k] = removeComputedKeys(v.(map[string]interface{}), new[k].(map[string]interface{}))
+		if oldMap, okOld := oldVal.(map[string]interface{}); okOld {
+			if newMap, okNew := newVal.(map[string]interface{}); okNew {
+				old[k] = removeComputedKeys(oldMap, newMap)
+			}
 			continue
 		}
 
-		if reflect.ValueOf(v).Kind() == reflect.Slice {
-			for i, j := range v.([]interface{}) {
-				if reflect.ValueOf(j).Kind() == reflect.Map && len(new[k].([]interface{})) > i {
-					old[k].([]interface{})[i] = removeComputedKeys(j.(map[string]interface{}), new[k].([]interface{})[i].(map[string]interface{}))
+		if oldSlice, okOld := oldVal.([]interface{}); okOld {
+			if newSlice, okNew := newVal.([]interface{}); okNew {
+				for i := range oldSlice {
+					if i < len(newSlice) {
+						if oldElem, okOldElem := oldSlice[i].(map[string]interface{}); okOldElem {
+							if newElem, okNewElem := newSlice[i].(map[string]interface{}); okNewElem {
+								oldSlice[i] = removeComputedKeys(oldElem, newElem)
+							}
+						}
+					}
 				}
 			}
 			continue
@@ -40,6 +56,80 @@ func removeComputedKeys(old map[string]interface{}, new map[string]interface{}) 
 	}
 
 	return old
+}
+
+// apiDefaultFields are fields that the Monitoring API adds as defaults when not specified.
+// These fields are normalized away during diff suppression to prevent spurious diffs.
+// Only these specific fields are normalized; other fields are compared as-is.
+var apiDefaultFields = map[string]bool{
+	// Empty string fields from dashboardFilters and other locations
+	"labelKey":       true,
+	"stringValue":    true,
+	"legendTemplate": true,
+	"label":          true,
+	"unitOverride":   true,
+	// Boolean fields that API sets to false
+	"showLegend":         true,
+	"outputFullDuration": true,
+	// Position fields that API sets to 0
+	"xPos": true,
+	"yPos": true,
+}
+
+// normalizeDefaults recursively removes API default values from dashboard JSON.
+// Only fields in apiDefaultFields are normalized, preventing overly broad removal.
+// This allows comparison between user configs and API responses without spurious diffs.
+func normalizeDefaults(obj interface{}) interface{} {
+	switch v := obj.(type) {
+	case map[string]interface{}:
+		normalized := make(map[string]interface{})
+		for k, val := range v {
+			// Skip default values for known API fields
+			if apiDefaultFields[k] {
+				switch tv := val.(type) {
+				case string:
+					if tv == "" {
+						continue
+					}
+				case bool:
+					if !tv {
+						continue
+					}
+				case float64:
+					if tv == 0 {
+						continue
+					}
+				case []interface{}:
+					if len(tv) == 0 {
+						continue
+					}
+				}
+			}
+
+			// Recursively process nested structures
+			switch tv := val.(type) {
+			case map[string]interface{}:
+				normalized[k] = normalizeDefaults(tv)
+			case []interface{}:
+				normalizedArray := make([]interface{}, len(tv))
+				for i, elem := range tv {
+					normalizedArray[i] = normalizeDefaults(elem)
+				}
+				normalized[k] = normalizedArray
+			default:
+				normalized[k] = val
+			}
+		}
+		return normalized
+	case []interface{}:
+		normalizedArray := make([]interface{}, len(v))
+		for i, elem := range v {
+			normalizedArray[i] = normalizeDefaults(elem)
+		}
+		return normalizedArray
+	default:
+		return obj
+	}
 }
 
 func monitoringDashboardDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -53,7 +143,13 @@ func monitoringDashboardDiffSuppress(k, old, new string, d *schema.ResourceData)
 	}
 
 	oldMap = removeComputedKeys(oldMap, newMap)
-	return reflect.DeepEqual(oldMap, newMap)
+	oldNormalized := normalizeDefaults(oldMap)
+	newNormalized := normalizeDefaults(newMap)
+
+	// Compare as JSON strings after normalization to suppress spurious diffs
+	oldJSON, _ := json.Marshal(oldNormalized)
+	newJSON, _ := json.Marshal(newNormalized)
+	return string(oldJSON) == string(newJSON)
 }
 
 func ResourceMonitoringDashboard() *schema.Resource {
@@ -175,6 +271,12 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error setting Dashboard: %s", err)
 	}
 
+	// Remove system-managed fields that change on every update or are derived from the ID
+	if res != nil {
+		delete(res, "etag")
+		delete(res, "name")
+	}
+
 	str, err := structure.FlattenJsonToString(res)
 	if err != nil {
 		return fmt.Errorf("Error reading Dashboard: %s", err)
@@ -193,24 +295,36 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	o, n := d.GetChange("dashboard_json")
-	oObj, err := structure.ExpandJsonFromString(o.(string))
-	if err != nil {
-		return err
-	}
+	_, n := d.GetChange("dashboard_json")
 	nObj, err := structure.ExpandJsonFromString(n.(string))
 	if err != nil {
 		return err
 	}
 
-	nObj["etag"] = oObj["etag"]
-
+	// Fetch current dashboard to get the latest etag
+	url := config.MonitoringBasePath + "v1/" + d.Id()
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	currentDashboard, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "GET",
+		Project:              project,
+		RawURL:               url,
+		UserAgent:            userAgent,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsMonitoringConcurrentEditError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error fetching Dashboard for update: %s", err)
+	}
+
+	// Preserve etag from current API state for update request
+	if etag, ok := currentDashboard["etag"]; ok {
+		nObj["etag"] = etag
+	}
+
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:               config,
 		Method:               "PATCH",
