@@ -319,20 +319,20 @@ func getApigeeApiLastModifiedAt(d *schema.ResourceData) string {
 }
 
 func resourceApigeeApiDelete(d *schema.ResourceData, meta interface{}) error {
+    //UDP pre-delete start
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy API proxy without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing API proxy %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+    //UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
-    //UDP pre-delete start
-    if d.Get("deletion_policy").(string) == "PREVENT" {
-        return fmt.Errorf("cannot destroy google_apigee_api without setting deletion_policy=\"DELETE\" and running `terraform apply`")
-    }
-    if d.Get("deletion_policy").(string) == "ABANDON" {
-        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing google_apigee_api %q from Terraform state without deletion", d.Id())
-        return nil
-    }
-    //UDP pre-delete end
 
 	billingProject := ""
 

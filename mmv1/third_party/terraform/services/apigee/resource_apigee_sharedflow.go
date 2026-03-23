@@ -319,11 +319,6 @@ func getApigeeSharedFlowLastModifiedAt(d *schema.ResourceData) string {
 
 func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] resourceApigeeSharedFlowDelete")
-	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
     //UDP pre-delete start
     if d.Get("deletion_policy").(string) == "PREVENT" {
         return fmt.Errorf("cannot destroy SharedFlow without setting deletion_policy=\"DELETE\" and running `terraform apply`")
@@ -333,6 +328,11 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
         return nil
     }
     //UDP pre-delete end
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
 
 	billingProject := ""
 

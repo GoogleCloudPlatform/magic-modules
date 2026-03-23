@@ -223,11 +223,6 @@ func resourceApigeeSharedflowDeploymentUpdate(d *schema.ResourceData, meta inter
 }
 
 func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
     //UDP pre-delete start
     if d.Get("deletion_policy").(string) == "PREVENT" {
         return fmt.Errorf("cannot destroy SharedflowDeployment without setting deletion_policy=\"DELETE\" and running `terraform apply`")
@@ -237,6 +232,11 @@ func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta inter
         return nil
     }
     //UDP pre-delete end
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
 
 	billingProject := ""
 

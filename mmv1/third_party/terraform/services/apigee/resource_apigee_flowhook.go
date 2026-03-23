@@ -15,6 +15,7 @@ func ResourceApigeeFlowhook() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceApigeeFlowhookCreate,
 		Read:   resourceApigeeFlowhookRead,
+		Update: resourceApigeeFlowhookUpdate,
 		Delete: resourceApigeeFlowhookDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -64,7 +65,21 @@ func ResourceApigeeFlowhook() *schema.Resource {
 				Default:     true,
 				Description: `Flag that specifies whether execution should continue if the flow hook throws an exception. Set to true to continue execution. Set to false to stop execution if the flow hook throws an exception. Defaults to true.`,
 			},
-		},
+//UDP schema start
+            "deletion_policy": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+                Default: "DELETE",
+            },
+//UDP schema end
+        },
 		UseJSONNumber: true,
 	}
 }
@@ -177,11 +192,36 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("continue_on_error", flattenApigeeFlowhookContinueOnError(res["continueOnError"], d, config)); err != nil {
 		return fmt.Errorf("Error reading Flowhook: %s", err)
 	}
+    //UDP default read start
+    // Explicitly set virtual fields to default values if unset
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        if err := d.Set("deletion_policy", "DELETE"); err != nil {
+            return fmt.Errorf("Error setting deletion_policy: %s", err)
+        }
+    }
+    //UDP default read end
 
 	return nil
 }
 
+//UDP update start
+func resourceApigeeFlowhookUpdate(d *schema.ResourceData, meta interface{}) error {
+    // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+    return resourceApigeeFlowhookRead(d, meta)
+}
+//UDP update end
+
+
 func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) error {
+    //UDP pre-delete start
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy Flowhook without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing Flowhook %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+    //UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
