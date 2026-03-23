@@ -13,6 +13,7 @@ This page provides guidelines for reviewing a Magic Modules pull request (PR).
 
 The following types of PRs may require additional scrutiny and/or multiple reviewers.
 
+- DCL to MMv1 migrations
 - Adding multi-actor fields (fields whose values can be altered as a side effect of changes made to a different resource)
 
 ## Review
