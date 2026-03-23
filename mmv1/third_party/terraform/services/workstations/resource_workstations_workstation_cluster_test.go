@@ -1,8 +1,8 @@
 package workstations_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -17,7 +17,7 @@ func TestAccWorkstationsWorkstationCluster_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -51,7 +51,7 @@ func TestAccWorkstationsWorkstationCluster_Private_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -79,11 +79,9 @@ func TestAccWorkstationsWorkstationCluster_Private_update(t *testing.T) {
 func testAccWorkstationsWorkstationCluster_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		     = google-beta
   workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -95,13 +93,11 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -113,11 +109,9 @@ resource "google_compute_subnetwork" "default" {
 func testAccWorkstationsWorkstationCluster_private_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		     = google-beta
   workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -134,13 +128,11 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -148,4 +140,3 @@ resource "google_compute_subnetwork" "default" {
 }
 `, context)
 }
-{{- end }}
