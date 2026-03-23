@@ -259,6 +259,8 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 
 	args := []string{"test"}
 	args = append(args, opt.TestDirs...)
+	// explicitly set -p to 16 (package parallelism)
+	// otherwise, it will set to 32 by default based on CPU, and will cause OOM issue
 	args = append(args,
 		"-p",
 		"16",
