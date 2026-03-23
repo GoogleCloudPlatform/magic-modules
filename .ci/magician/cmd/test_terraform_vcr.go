@@ -471,18 +471,20 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 		for service := range services {
 			servicePath := "./" + filepath.Join(version.ProviderName(), "services", service)
 			testDirs = append(testDirs, servicePath)
-			fmt.Println("run VCR tests in ", service)
-			serviceResult, serviceReplayingErr := vt.Run(vcr.RunOptions{
-				Mode:     vcr.Replaying,
-				Version:  version,
-				TestDirs: []string{servicePath},
-			})
-			replayingErr = errors.Join(replayingErr, serviceReplayingErr)
-			result.PassedTests = append(result.PassedTests, serviceResult.PassedTests...)
-			result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
-			result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)
-			result.Panics = append(result.Panics, serviceResult.Panics...)
 		}
+
+		fmt.Printf("run VCR tests in %v\n", testDirs)
+		serviceResult, serviceReplayingErr := vt.Run(vcr.RunOptions{
+			Mode:     vcr.Replaying,
+			Version:  version,
+			TestDirs: testDirs,
+		})
+
+		replayingErr = errors.Join(replayingErr, serviceReplayingErr)
+		result.PassedTests = append(result.PassedTests, serviceResult.PassedTests...)
+		result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
+		result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)
+		result.Panics = append(result.Panics, serviceResult.Panics...)
 	} else {
 		fmt.Println("runReplaying: no impacted services")
 	}
