@@ -31,8 +31,6 @@ self_link: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{na
 immutable: false
 create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}&primary-location={{primary_location}}'
 custom_code:
-  custom_create:
-    templates/terraform/custom_create/biglake_iceberg_catalog_create.go.tmpl
   custom_update:
     templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
 iam_policy:
@@ -184,5 +182,3 @@ properties:
     description: Additional GCS locations (e.g., `gs://my-other-bucket/...`)
       that are permitted for use by resources within this catalog. This field
       can be used to specify either a GCS bucket or a path within it.
-    required: false
-    immutable: false

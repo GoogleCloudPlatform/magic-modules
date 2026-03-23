@@ -3,4 +3,5 @@ resource "google_biglake_iceberg_catalog" "{{$.PrimaryResourceId}}" {
     catalog_type = "CATALOG_TYPE_BIGLAKE"
     credential_mode = "CREDENTIAL_MODE_VENDED_CREDENTIALS"
     default_location = "gs://my-bucket"
+    additional_locations = ["gs://my-other-bucket"]
 }
