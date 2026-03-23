@@ -281,9 +281,9 @@ func ResourceApigeeKeystoresAliasesPkcs12Read(d *schema.ResourceData, meta inter
 }
 
 //UDP update start
-func resourceApigeeKeystoresAliasesPkcs12Update(d *schema.ResourceData, meta interface{}) error {
+func ResourceApigeeKeystoresAliasesPkcs12Update(d *schema.ResourceData, meta interface{}) error {
     // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
-    return resource__Read(d, meta)
+    return ResourceApigeeKeystoresAliasesPkcs12Read(d, meta)
 }
 //UDP update end
 

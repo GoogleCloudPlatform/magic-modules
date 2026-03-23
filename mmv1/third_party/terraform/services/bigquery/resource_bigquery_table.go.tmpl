@@ -1815,6 +1815,20 @@ func ResourceBigQueryTable() *schema.Resource {
 					},
 				},
 			},
+//UDP schema start
+            "deletion_policy": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+                Default: "DELETE",
+            },
+//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -2360,6 +2374,14 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error setting external_catalog_table_options: %s", err)
 		}
 	}
+    //UDP default read start
+    // Explicitly set virtual fields to default values if unset
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        if err := d.Set("deletion_policy", "DELETE"); err != nil {
+            return fmt.Errorf("Error setting deletion_policy: %s", err)
+        }
+    }
+    //UDP default read end
 
 	return nil
 }
@@ -2391,7 +2413,7 @@ func addAutoGenSchemaFields(d *schema.ResourceData, table *bigquery.Table) error
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	// If only client-side fields were modified, short-circuit the Update function to avoid sending an update API request.
-	clientSideFields := map[string]bool{"deletion_protection": true, "ignore_schema_changes": true, "ignore_auto_generated_schema": true, "table_metadata_view": true}
+	clientSideFields := map[string]bool{"deletion_protection": true, "ignore_schema_changes": true, "ignore_auto_generated_schema": true, "table_metadata_view": true, "deletion_policy": true}
 	clientSideOnly := true
 	for field := range ResourceBigQueryTable().Schema {
 		if d.HasChange(field) && !clientSideFields[field] {
@@ -2531,6 +2553,15 @@ func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent str
 }
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
+    //UDP pre-delete start
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy table without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing table %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+    //UDP pre-delete end
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("cannot destroy table %v without setting deletion_protection=false and running `terraform apply`", d.Id())
 	}
