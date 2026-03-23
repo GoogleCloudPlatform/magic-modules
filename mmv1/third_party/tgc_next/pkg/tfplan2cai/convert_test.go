@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
+
+	"os"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
@@ -133,4 +136,58 @@ func TestConvert_deleteIgnored(t *testing.T) {
 	}
 	_, _, err := convertWithChanges(t, []*tfjson.ResourceChange{&rc})
 	assert.Nil(t, err)
+}
+func TestConvert_ComputeNetwork(t *testing.T) {
+	logger, _ := newTestErrorLogger()
+	o := &Options{
+		ErrorLogger:         logger,
+		Offline:             true,
+		DefaultProject:      testProject,
+		DefaultZone:         "us-central1-a",
+		NoOpAncestryManager: true,
+	}
+
+	jsonPlan, err := os.ReadFile("resolvers/compute_network.tfplan.json")
+	if err != nil {
+		t.Fatalf("Error reading test file: %v", err)
+	}
+
+	assets, err := Convert(context.Background(), jsonPlan, o)
+	//assetsJSON, err := json.MarshalIndent(assets, "", "  ")
+	if err != nil {
+		t.Fatalf("Error marshaling assets: %v", err)
+	}
+	//fmt.Println(string(assetsJSON))
+	assert.Nil(t, err)
+	assert.NotEmpty(t, assets)
+	assert.NotEmpty(t, assets[2].Resource.Data["vmwareEngineNetwork"])
+	assert.NotEmpty(t, assets[2].Resource.Data["peerNetwork"])
+	assert.Equal(t, "projects/terraform-dev-haonan/locations/global/vmwareEngineNetworks/network-peering-test-ven", assets[2].Resource.Data["vmwareEngineNetwork"])
+	assert.Equal(t, "projects/terraform-dev-haonan/global/networks/network-peering-test-nw", assets[2].Resource.Data["peerNetwork"])
+}
+
+func TestConvert_ComputeDiskNestedId(t *testing.T) {
+	logger, _ := newTestErrorLogger()
+	o := &Options{
+		ErrorLogger:         logger,
+		Offline:             true,
+		DefaultProject:      testProject,
+		DefaultZone:         "us-central1-a",
+		NoOpAncestryManager: true,
+	}
+
+	jsonPlan, err := os.ReadFile("resolvers/compute_disk_nestedId.tfplan.json")
+	if err != nil {
+		t.Fatalf("Error reading test file: %v", err)
+	}
+
+	assets, err := Convert(context.Background(), jsonPlan, o)
+	assetsJSON, err := json.MarshalIndent(assets, "", "  ")
+	if err != nil {
+		t.Fatalf("Error marshaling assets: %v", err)
+	}
+	fmt.Println(string(assetsJSON))
+	assert.Nil(t, err)
+	assert.NotEmpty(t, assets)
+	assert.NotEmpty(t, assets[1].Resource.Data["asyncPrimaryDisk"])
 }

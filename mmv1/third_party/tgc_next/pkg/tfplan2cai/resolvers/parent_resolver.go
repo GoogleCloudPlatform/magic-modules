@@ -35,6 +35,10 @@ func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string][]string {
 		return parentToChildMap
 	}
 
+	if resourceConfig == nil || resourceConfig.RootModule == nil {
+		return parentToChildMap
+	}
+
 	for _, resource := range resourceConfig.RootModule.Resources {
 		for _, expression := range resource.Expressions {
 			if expression.ExpressionData.NestedBlocks != nil {
@@ -61,7 +65,48 @@ func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string][]string {
 	return parentToChildMap
 }
 
-func sortTraversalOrder(graph map[string][]string) (map[int][]string, error) {
+func (r *ParentResourceResolver) ResolveDependencies(jsonPlan []byte) map[string]map[string]string {
+	dependenciesMap := make(map[string]map[string]string)
+
+	resourceConfig, err := tfplan.ReadResourceConfigurations(jsonPlan)
+	if err != nil {
+		return dependenciesMap
+	}
+
+	if resourceConfig == nil || resourceConfig.RootModule == nil {
+		return dependenciesMap
+	}
+
+	for _, resource := range resourceConfig.RootModule.Resources {
+		for attrName, expression := range resource.Expressions {
+			if expression.ExpressionData.NestedBlocks != nil {
+				for i, innerMap := range expression.ExpressionData.NestedBlocks {
+					for propName, v := range innerMap {
+						reference := v.References
+						if reference != nil && len(reference) >= 2 && strings.HasSuffix(reference[0], ".id") {
+							if dependenciesMap[resource.Address] == nil {
+								dependenciesMap[resource.Address] = make(map[string]string)
+							}
+							path := fmt.Sprintf("%s.%d.%s", attrName, i, propName)
+							dependenciesMap[resource.Address][path] = reference[1]
+						}
+					}
+				}
+			}
+			reference := expression.ExpressionData.References
+			if reference != nil && len(reference) >= 2 && strings.HasSuffix(reference[0], ".id") {
+				if dependenciesMap[resource.Address] == nil {
+					dependenciesMap[resource.Address] = make(map[string]string)
+				}
+				dependenciesMap[resource.Address][attrName] = reference[1]
+			}
+		}
+	}
+
+	return dependenciesMap
+}
+
+func SortTraversalOrder(graph map[string][]string) (map[int][]string, error) {
 	inDegree := make(map[string]int)
 	allNodes := make(map[string]bool)
 
