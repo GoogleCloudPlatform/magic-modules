@@ -1,11 +1,10 @@
 package workstations_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -19,7 +18,7 @@ func TestAccWorkstationsWorkstationConfig_basic(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -38,13 +37,11 @@ func TestAccWorkstationsWorkstationConfig_basic(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -52,7 +49,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -64,7 +60,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		     = "us-central1"
@@ -86,7 +81,7 @@ func TestAccWorkstationsWorkstationConfig_displayName(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -115,13 +110,11 @@ func testAccWorkstationsWorkstationConfig_displayName(context map[string]interfa
 	context["display_name"] = context["display_name"].(string) + update
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -129,7 +122,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -141,7 +133,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		     = "us-central1"
@@ -163,7 +154,7 @@ func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -191,13 +182,11 @@ func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_persistentDirectories(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -205,7 +194,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -217,7 +205,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		     = "us-central1"
@@ -236,13 +223,11 @@ resource "google_workstations_workstation_config" "default" {
 func testAccWorkstationsWorkstationConfig_persistentDirectoriesUpdated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -250,7 +235,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -262,7 +246,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		     = "us-central1"
@@ -292,7 +275,7 @@ func TestAccWorkstationsWorkstationConfig_ephemeralDirectories(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -311,13 +294,11 @@ func TestAccWorkstationsWorkstationConfig_ephemeralDirectories(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_ephemeralDirectories(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -325,7 +306,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_disk" "test_source_disk" {
-  provider = google-beta
   name     = "tf-test-workstation-source-disk%{random_suffix}"
   size     = 10
   type     = "pd-ssd"
@@ -333,14 +313,12 @@ resource "google_compute_disk" "test_source_disk" {
 }
 
 resource "google_compute_snapshot" "test_source_snapshot" {
-  provider    = google-beta
   name        = "tf-test-workstation-source-snapshot%{random_suffix}"
   source_disk = google_compute_disk.test_source_disk.name
   zone        = "us-central1-a"
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -352,7 +330,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		     = "us-central1"
@@ -381,7 +358,7 @@ func TestAccWorkstationsWorkstationConfig_ephemeralDirectories_withSourceImage(t
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -400,13 +377,11 @@ func TestAccWorkstationsWorkstationConfig_ephemeralDirectories_withSourceImage(t
 func testAccWorkstationsWorkstationConfig_ephemeralDirectories_withSourceImage(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -414,7 +389,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_disk" "test_source_disk" {
-  provider = google-beta
   name     = "tf-test-workstation-source-disk%{random_suffix}"
   size     = 10
   type     = "pd-ssd"
@@ -422,14 +396,12 @@ resource "google_compute_disk" "test_source_disk" {
 }
 
 resource "google_compute_image" "test_source_image" {
-  provider    = google-beta
   name        = "tf-test-workstation-source-image%{random_suffix}"
   source_disk = google_compute_disk.test_source_disk.name
   storage_locations = ["us-central1"]
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -441,7 +413,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		     = "us-central1"
@@ -470,7 +441,7 @@ func TestAccWorkstationsWorkstationConfig_serviceAccount(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -489,13 +460,11 @@ func TestAccWorkstationsWorkstationConfig_serviceAccount(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_serviceAccount(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_compute_network" "default" {
-    provider                = google-beta
     name                    = "tf-test-workstation-cluster%{random_suffix}"
     auto_create_subnetworks = false
   }
   
   resource "google_compute_subnetwork" "default" {
-    provider      = google-beta
     name          = "tf-test-workstation-cluster%{random_suffix}"
     ip_cidr_range = "10.0.0.0/24"
     region        = "us-central1"
@@ -503,7 +472,7 @@ func testAccWorkstationsWorkstationConfig_serviceAccount(context map[string]inte
   }
   
   resource "google_workstations_workstation_cluster" "default" {
-    provider                   = google-beta
+
     workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
     network                    = google_compute_network.default.id
     subnetwork                 = google_compute_subnetwork.default.id
@@ -511,14 +480,12 @@ func testAccWorkstationsWorkstationConfig_serviceAccount(context map[string]inte
   }
   
   resource "google_service_account" "default" {
-    provider = google-beta
   
     account_id   = "tf-test-my-account%{random_suffix}"
     display_name = "Service Account"
   }
   
   resource "google_workstations_workstation_config" "default" {
-    provider               = google-beta
     workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
     workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
     location               = "us-central1"
@@ -544,7 +511,7 @@ func TestAccWorkstationsWorkstationConfig_boost(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -563,13 +530,11 @@ func TestAccWorkstationsWorkstationConfig_boost(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_boost(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_compute_network" "default" {
-    provider                = google-beta
     name                    = "tf-test-workstation-cluster%{random_suffix}"
     auto_create_subnetworks = false
   }
   
   resource "google_compute_subnetwork" "default" {
-    provider      = google-beta
     name          = "tf-test-workstation-cluster%{random_suffix}"
     ip_cidr_range = "10.0.0.0/24"
     region        = "us-central1"
@@ -577,7 +542,7 @@ func testAccWorkstationsWorkstationConfig_boost(context map[string]interface{}) 
   }
   
   resource "google_workstations_workstation_cluster" "default" {
-    provider                   = google-beta
+
     workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
     network                    = google_compute_network.default.id
     subnetwork                 = google_compute_subnetwork.default.id
@@ -585,7 +550,6 @@ func testAccWorkstationsWorkstationConfig_boost(context map[string]interface{}) 
   }
 
   resource "google_workstations_workstation_config" "default" {
-    provider               = google-beta
     workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
     workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
     location               = "us-central1"
@@ -621,7 +585,7 @@ func TestAccWorkstationsWorkstationConfig_disableTcpConnections(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -640,13 +604,11 @@ func TestAccWorkstationsWorkstationConfig_disableTcpConnections(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_disableTcpConnections(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_compute_network" "default" {
-    provider                = google-beta
     name                    = "tf-test-workstation-cluster%{random_suffix}"
     auto_create_subnetworks = false
   }
   
   resource "google_compute_subnetwork" "default" {
-    provider      = google-beta
     name          = "tf-test-workstation-cluster%{random_suffix}"
     ip_cidr_range = "10.0.0.0/24"
     region        = "us-central1"
@@ -654,7 +616,7 @@ func testAccWorkstationsWorkstationConfig_disableTcpConnections(context map[stri
   }
   
   resource "google_workstations_workstation_cluster" "default" {
-    provider                   = google-beta
+
     workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
     network                    = google_compute_network.default.id
     subnetwork                 = google_compute_subnetwork.default.id
@@ -662,14 +624,12 @@ func testAccWorkstationsWorkstationConfig_disableTcpConnections(context map[stri
   }
   
   resource "google_service_account" "default" {
-    provider = google-beta
   
     account_id   = "tf-test-my-account%{random_suffix}"
     display_name = "Service Account"
   }
   
   resource "google_workstations_workstation_config" "default" {
-    provider               = google-beta
     workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
     workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
     location               = "us-central1"
@@ -686,7 +646,6 @@ func testAccWorkstationsWorkstationConfig_disableTcpConnections(context map[stri
 `, context)
 }
 
-
 func TestAccWorkstationsWorkstationConfig_readinessChecks(t *testing.T) {
 	t.Parallel()
 
@@ -696,7 +655,7 @@ func TestAccWorkstationsWorkstationConfig_readinessChecks(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -715,13 +674,11 @@ func TestAccWorkstationsWorkstationConfig_readinessChecks(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_readinessChecks(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_compute_network" "default" {
-    provider                = google-beta
     name                    = "tf-test-workstation-cluster%{random_suffix}"
     auto_create_subnetworks = false
   }
   
   resource "google_compute_subnetwork" "default" {
-    provider      = google-beta
     name          = "tf-test-workstation-cluster%{random_suffix}"
     ip_cidr_range = "10.0.0.0/24"
     region        = "us-central1"
@@ -729,7 +686,7 @@ func testAccWorkstationsWorkstationConfig_readinessChecks(context map[string]int
   }
   
   resource "google_workstations_workstation_cluster" "default" {
-    provider                   = google-beta
+
     workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
     network                    = google_compute_network.default.id
     subnetwork                 = google_compute_subnetwork.default.id
@@ -737,14 +694,12 @@ func testAccWorkstationsWorkstationConfig_readinessChecks(context map[string]int
   }
   
   resource "google_service_account" "default" {
-    provider = google-beta
   
     account_id   = "tf-test-my-account%{random_suffix}"
     display_name = "Service Account"
   }
   
   resource "google_workstations_workstation_config" "default" {
-    provider               = google-beta
     workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
     workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
     location               = "us-central1"
@@ -778,7 +733,7 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -799,7 +754,7 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
 			},
-      {
+			{
 				Config: testAccWorkstationsWorkstationConfig_workstationConfigBasicExample(context),
 			},
 			{
@@ -815,25 +770,21 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_tags_tag_key" "tag_key1" {
-  provider = google-beta
   parent = "organizations/%{org_id}"
   short_name = "%{key_short_name}"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
-  provider   = google-beta
   parent     = google_tags_tag_key.tag_key1.id
   short_name = "%{value_short_name}"
 }
 
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -841,7 +792,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider   		      	 = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -853,7 +803,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		     = "us-central1"
@@ -889,7 +838,7 @@ func TestAccWorkstationsWorkstationConfig_updateHostDetails(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -926,13 +875,11 @@ func TestAccWorkstationsWorkstationConfig_updateHostDetails(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_updateHostDetailsDefault(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -940,7 +887,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider                   = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -948,14 +894,12 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_service_account" "default" {
-  provider = google-beta
 
   account_id   = "tf-test-my-account%{random_suffix}"
   display_name = "Service Account"
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -987,13 +931,11 @@ resource "google_workstations_workstation_config" "default" {
 func testAccWorkstationsWorkstationConfig_updateHostDetailsUpdated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1001,7 +943,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider                   = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -1011,14 +952,12 @@ resource "google_workstations_workstation_cluster" "default" {
 # No longer explicitly used in google_workstations_workstation_config resource block below, but the
 # service account needs to keep existing to allow the field to default from the API without error
 resource "google_service_account" "default" {
-  provider = google-beta
 
   account_id   = "tf-test-my-account%{random_suffix}"
   display_name = "Service Account"
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1055,13 +994,11 @@ resource "google_workstations_workstation_config" "default" {
 func testAccWorkstationsWorkstationConfig_updateHostDetailsUnsetInstanceConfigs(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1069,7 +1006,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider                   = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -1079,14 +1015,12 @@ resource "google_workstations_workstation_cluster" "default" {
 # No longer explicitly used in google_workstations_workstation_config resource block below, but the
 # service account needs to keep existing to allow the field to default from the API without error
 resource "google_service_account" "default" {
-  provider = google-beta
 
   account_id   = "tf-test-my-account%{random_suffix}"
   display_name = "Service Account"
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1117,7 +1051,7 @@ func TestAccWorkstationsWorkstationConfig_updateWorkingDir(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1145,13 +1079,11 @@ func TestAccWorkstationsWorkstationConfig_updateWorkingDir(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_withCustomWorkingDir(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1159,7 +1091,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider                   = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -1167,7 +1098,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1183,13 +1113,11 @@ resource "google_workstations_workstation_config" "default" {
 func testAccWorkstationsWorkstationConfig_unsetWorkingDir(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1197,7 +1125,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider                   = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -1205,7 +1132,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1226,7 +1152,7 @@ func TestAccWorkstationsWorkstationConfig_updatePersistentDirectorySourceSnapsho
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1254,13 +1180,11 @@ func TestAccWorkstationsWorkstationConfig_updatePersistentDirectorySourceSnapsho
 func testAccWorkstationsWorkstationConfig_withSourceDiskSnapshot(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1268,7 +1192,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_disk" "test_source_disk" {
-  provider = google-beta
   name     = "tf-test-workstation-source-disk%{random_suffix}"
   size     = 10
   type     = "pd-ssd"
@@ -1276,14 +1199,12 @@ resource "google_compute_disk" "test_source_disk" {
 }
 
 resource "google_compute_snapshot" "test_source_snapshot" {
-  provider    = google-beta
   name        = "tf-test-workstation-source-snapshot%{random_suffix}"
   source_disk = google_compute_disk.test_source_disk.name
   zone        = "us-central1-a"
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider                   = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -1291,7 +1212,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1311,13 +1231,11 @@ resource "google_workstations_workstation_config" "default" {
 func testAccWorkstationsWorkstationConfig_withUpdatedSourceDiskSnapshot(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1325,7 +1243,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_disk" "test_source_disk" {
-  provider = google-beta
   name     = "tf-test-workstation-source-disk%{random_suffix}"
   size     = 10
   type     = "pd-ssd"
@@ -1333,21 +1250,18 @@ resource "google_compute_disk" "test_source_disk" {
 }
 
 resource "google_compute_snapshot" "test_source_snapshot" {
-  provider    = google-beta
   name        = "tf-test-workstation-source-snapshot%{random_suffix}"
   source_disk = google_compute_disk.test_source_disk.name
   zone        = "us-central1-a"
 }
 
 resource "google_compute_snapshot" "test_source_snapshot2" {
-  provider    = google-beta
   name        = "tf-test-workstation-source-snapshot2%{random_suffix}"
   source_disk = google_compute_disk.test_source_disk.name
   zone        = "us-central1-a"
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider                   = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -1355,7 +1269,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1381,7 +1294,7 @@ func TestAccWorkstationsWorkstationConfig_vmTags(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1400,29 +1313,24 @@ func TestAccWorkstationsWorkstationConfig_vmTags(t *testing.T) {
 func testAccWorkstationsWorkstationConfig_vmTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_tags_tag_key" "tag_key1" {
-  provider = google-beta
   parent = data.google_project.project.id
   short_name = "tf_test_tag_key1%{random_suffix}"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
-  provider = google-beta
   parent = google_tags_tag_key.tag_key1.id
   short_name = "tf_test_tag_value1%{random_suffix}"
 }
 
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1430,7 +1338,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider                   = google-beta
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
@@ -1438,7 +1345,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1467,7 +1373,7 @@ func TestAccWorkstationsWorkstationConfig_workstationConfigAllowedPortsUpdate(t 
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1495,13 +1401,11 @@ func TestAccWorkstationsWorkstationConfig_workstationConfigAllowedPortsUpdate(t 
 func testAccWorkstationsWorkstationConfig_workstationConfigAllowedPorts(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1509,7 +1413,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -1525,7 +1428,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1550,13 +1452,11 @@ resource "google_workstations_workstation_config" "default" {
 func testAccWorkstationsWorkstationConfig_workstationConfigAllowedPortsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -1564,7 +1464,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -1580,7 +1479,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -1613,4 +1511,3 @@ resource "google_workstations_workstation_config" "default" {
 }
 `, context)
 }
-{{- end }}
