@@ -132,6 +132,20 @@ func ResourceApigeeApi() *schema.Resource {
 					return true
 				},
 			},
+//UDP schema start
+            "deletion_policy": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+                Default: "DELETE",
+            },
+//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -205,6 +219,20 @@ func resourceApigeeApiCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceApigeeApiUpdate(d *schema.ResourceData, meta interface{}) error {
+    //UDP update shortcircuit start
+    clientSideFields := map[string]bool{"deletion_policy": true}
+    clientSideOnly := true
+    for field := range ResourceApigeeApi().Schema {
+        if d.HasChange(field) && !clientSideFields[field] {
+            clientSideOnly = false
+            break
+        }
+    }
+    if clientSideOnly {
+        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+        return resourceApigeeApiRead(d, meta)
+    }
+    //UDP update shortcircuit end
 	//For how API proxy api is implemented, just treat an update as create, when the name is same, it will create a new revision
 	return resourceApigeeApiCreate(d, meta)
 }
@@ -261,6 +289,14 @@ func resourceApigeeApiRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("md5hash", "UNKNOWN")
 		d.Set("detect_md5hash", "UNKNOWN")
 	}
+    //UDP default read start
+    // Explicitly set virtual fields to default values if unset
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        if err := d.Set("deletion_policy", "DELETE"); err != nil {
+            return fmt.Errorf("Error setting deletion_policy: %s", err)
+        }
+    }
+    //UDP default read end
 	return nil
 }
 
@@ -288,6 +324,15 @@ func resourceApigeeApiDelete(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+    //UDP pre-delete start
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy google_apigee_api without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing google_apigee_api %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+    //UDP pre-delete end
 
 	billingProject := ""
 
