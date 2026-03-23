@@ -2,10 +2,12 @@ package backupdr
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"strings"
 )
 
 func DataSourceGoogleCloudBackupDRService() *schema.Resource {
@@ -101,4 +103,13 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 	name := id[strings.LastIndex(id, "/")+1:]
 	d.Set("name", name)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_backup_dr_management_server",
+		ProductName: "backupdr",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudBackupDRService(),
+	}.Register()
 }

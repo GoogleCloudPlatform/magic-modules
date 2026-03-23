@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -163,4 +164,13 @@ func dataSourceGoogleComputeInterconnectLocationRead(d *schema.ResourceData, met
 	}
 	d.SetId(id)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_interconnect_location",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInterconnectLocation(),
+	}.Register()
 }

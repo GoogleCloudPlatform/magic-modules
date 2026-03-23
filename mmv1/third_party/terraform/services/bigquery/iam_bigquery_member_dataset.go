@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -346,4 +347,13 @@ func (u *BigqueryDatasetIamMemberUpdater) GetMutexKey() string {
 
 func (u *BigqueryDatasetIamMemberUpdater) DescribeResource() string {
 	return fmt.Sprintf("Bigquery Dataset %s/%s", u.project, u.datasetId)
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_bigquery_dataset_iam_member",
+		ProductName: "bigquery",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(IamMemberBigqueryDatasetSchema, NewBigqueryDatasetIamMemberUpdater, BigqueryDatasetIdParseFunc),
+	}.Register()
 }

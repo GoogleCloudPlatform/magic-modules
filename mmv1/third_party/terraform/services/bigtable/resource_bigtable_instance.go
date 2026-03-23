@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/iterator"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -856,4 +857,13 @@ func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_bigtable_instance",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigtableInstance(),
+	}.Register()
 }
