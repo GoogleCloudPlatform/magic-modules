@@ -29,6 +29,12 @@ examples:
       app_display_name: my-app
       app_id: app-id
       deployment_display_name: my-deployment
+  - name: ces_deployment_with_noise_suppression
+    primary_resource_id: my-deployment
+    vars:
+      app_display_name: my-app
+      app_id: app-id
+      deployment_display_name: my-deployment
 parameters:
   - name: location
     type: String
@@ -118,6 +124,9 @@ properties:
           - name: webWidgetTitle
             type: String
             description: The title of the web widget.
+      - name: noiseSuppressionLevel
+        type: String
+        description: The noise suppression level of the channel profile. Available values are "low", "moderate", "high", "very_high".
   - name: createTime
     type: String
     description: Timestamp when this deployment was created.
