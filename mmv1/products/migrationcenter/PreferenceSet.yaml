@@ -41,6 +41,10 @@ examples:
     primary_resource_id: default
     vars:
       set_name: preference-set-test
+  - name: preference_set_compute_engine_preferences
+    primary_resource_id: default
+    vars:
+      set_name: preference-set-test
 parameters:
   - name: location
     type: String
@@ -115,6 +119,9 @@ properties:
           - name: licenseType
             type: String
             description: 'License type to consider when calculating costs for virtual machine insights and recommendations. If unspecified, costs are calculated based on the default licensing plan. Possible values: `LICENSE_TYPE_UNSPECIFIED`, `LICENSE_TYPE_DEFAULT`, `LICENSE_TYPE_BRING_YOUR_OWN_LICENSE`'
+          - name: persistentDiskType
+            type: String
+            description: Persistent disk type to use. If unspecified (default), all types are considered, based on available usage data.
       - name: vmwareEnginePreferences
         type: NestedObject
         description: The user preferences relating to Google Cloud VMware Engine target platform.
