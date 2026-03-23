@@ -34,7 +34,7 @@ The following arguments are supported:
   (Required)
   Path to the config zip bundle.
   
-* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to {{$.DeletionPolicyDefault}}.
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
     When a 'terraform destroy' or 'terraform apply' would delete the resource,
     the command will fail if this field is set to "PREVENT" in Terraform state.
     When set to "ABANDON", the command will remove the resource from Terraform
