@@ -52,6 +52,17 @@ examples:
       network_name: test-network
     test_vars_overrides:
       network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+  - name: memcache_instance_maintenance_version
+    primary_resource_id: instance
+    ignore_read_extra:
+      - deletion_protection
+    exclude_docs: true
+    vars:
+      address_name: address
+      instance_name: test-instance
+      network_name: test-network
+    test_vars_overrides:
+      network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
 virtual_fields:
   - name: deletion_protection
     type: Boolean
@@ -334,3 +345,6 @@ properties:
     ignore_read: true
     item_type:
       type: String
+  - name: maintenanceVersion
+    type: String
+    description: Last self service update maintenance version triggered by the customer. If it is empty, it means that the maintenance version is not set by the user.
