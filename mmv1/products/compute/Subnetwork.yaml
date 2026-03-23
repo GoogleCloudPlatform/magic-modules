@@ -119,7 +119,6 @@ examples:
       network_name: 'subnet-purpose-test-network'
   - name: 'subnetwork_resolve_subnet_mask'
     primary_resource_id: 'subnetwork-resolve-subnet-mask'
-    min_version: 'beta'
     vars:
       subnetwork_name: 'subnet-resolve-subnet-mask-test-subnetwork'
       network_name: 'subnet-resolve-subnet-mask-test-network'
@@ -571,5 +570,4 @@ properties:
     enum_values:
       - 'ARP_ALL_RANGES'
       - 'ARP_PRIMARY_RANGE'
-    min_version: beta
     immutable: true
