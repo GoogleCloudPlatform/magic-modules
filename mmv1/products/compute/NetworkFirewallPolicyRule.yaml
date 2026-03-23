@@ -80,6 +80,12 @@ examples:
       network: network
     test_env_vars:
       project_name: PROJECT_NAME
+  - name: network_firewall_policy_rule_policy_source
+    primary_resource_id: primary
+    vars:
+      fw_policy: fw-policy
+    test_env_vars:
+      project_name: PROJECT_NAME
 parameters:
   - name: firewallPolicy
     type: ResourceRef
@@ -372,3 +378,16 @@ properties:
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.
       If this is unspecified, the firewall policy rule will be enabled.
     send_empty_value: true
+  - name: policySource
+    type: String
+    description: |-
+      Indicates the source of this Firewall Policy. This field is optional on
+      creation and defaults to USER_DEFINED.
+
+      The USER_DEFINED value indicates a regular firewall policy.
+
+      The SYSTEM value indicates a system-level policy managed by an
+      internal service like GKE. This SYSTEM value is reserved for
+      internal services and cannot be set by users during policy creation.
+      Policies with a SYSTEM source cannot be modified or deleted by
+      users.
