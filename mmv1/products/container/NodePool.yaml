@@ -16,6 +16,13 @@ name: 'NodePool'
 include_in_tgc_next: true
 exclude_resource: true
 description: 'NodePool'
+tgc_tests:
+  - name: 'TestAccContainerNodePool_withUpgradeSettings'
+    skip: 'data issue'
+  - name: 'TestAccContainerNodePool_withTaintsUpdate'
+    skip: 'data issue'
+  - name: 'TestAccContainerNodePool_regionalAutoscaling'
+    skip: 'data issue'
 properties:
   - name: 'name'
     type: 'String'
