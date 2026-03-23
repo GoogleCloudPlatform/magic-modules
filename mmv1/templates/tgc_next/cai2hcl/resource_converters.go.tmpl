@@ -34,6 +34,7 @@ import (
 	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/{{ $object.ServiceName }}"
 		{{- end }}
 	{{- end }}
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/container"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -50,6 +51,9 @@ var ConverterMap = map[string]map[string]models.Cai2hclConverter{
 	},
 	"compute.googleapis.com/Instance": {
 		"Default": compute.NewComputeInstanceCai2hclConverter(provider),
+	},
+	"container.googleapis.com/NodePool": {
+		"Default": container.NewContainerNodePoolCai2hclConverter(provider),
 	},
 	// ####### END handwritten resources ###########
 

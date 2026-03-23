@@ -102,14 +102,15 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
-	if !object.IsExcluded() {
+	if !object.ExcludeResource {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
-		tgc.addTestsFromSamples(&object)
-		if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
-			log.Printf("Error adding examples from handwritten tests: %v", err)
-		}
-		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
+	tgc.addTestsFromSamples(&object)
+	if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+		log.Printf("Error adding examples from handwritten tests: %v", err)
+	}
+
+	tgc.GenerateResourceTests(object, *templateData, outputFolder)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -444,7 +445,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 	for _, productDefinition := range products {
 		service := strings.ToLower(productDefinition.Name)
 		for _, object := range productDefinition.Objects {
-			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(tgc.TargetVersionName)) {
+			if object.ExcludeResource || object.NotInVersion(productDefinition.VersionObjOrClosest(tgc.TargetVersionName)) {
 				continue
 			}
 
