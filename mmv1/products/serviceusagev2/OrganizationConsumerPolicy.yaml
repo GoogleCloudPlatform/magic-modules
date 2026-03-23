@@ -36,7 +36,7 @@ import_format:
   - 'organizations/{{organization}}/consumerPolicies/default'
 autogen_async: true
 async:
-  actions: ['create', 'update']
+  actions: ['create', 'update', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
