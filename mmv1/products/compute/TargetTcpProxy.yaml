@@ -53,7 +53,6 @@ examples:
   - name: target_tcp_proxy_tls_route
     min_version: beta
     primary_resource_id: default
-    min_version: beta
     vars:
       backend_service_name: backend-service
       health_check_name: health-check
