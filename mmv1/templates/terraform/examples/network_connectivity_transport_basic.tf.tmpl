@@ -1,4 +1,6 @@
-data "google_project" "project" {}
+data "google_project" "project" {
+  provider = google-beta
+}
 
 resource "google_compute_network" "primary-network" {
   provider                = google-beta

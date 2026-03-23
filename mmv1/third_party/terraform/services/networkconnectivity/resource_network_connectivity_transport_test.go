@@ -63,7 +63,9 @@ func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExampl
 
 func testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {}
+data "google_project" "project" {
+  provider = google-beta
+}
 
 resource "google_compute_network" "primary-network" {
   provider                = google-beta
