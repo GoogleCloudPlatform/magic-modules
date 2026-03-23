@@ -303,16 +303,6 @@ func resourceAttachedDiskImport(d *schema.ResourceData, meta interface{}) ([]*sc
 	return []*schema.ResourceData{d}, nil
 }
 
-func FindDiskByName(disks []*compute.AttachedDisk, id string) *compute.AttachedDisk {
-	for _, disk := range disks {
-		if tpgresource.CompareSelfLinkOrResourceName("", disk.Source, id, nil) {
-			return disk
-		}
-	}
-
-	return nil
-}
-
 func findDiskByName(disksRaw interface{}, id string) map[string]interface{} {
 	disks, ok := disksRaw.([]interface{})
 	if !ok {
