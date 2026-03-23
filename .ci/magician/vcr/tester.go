@@ -260,6 +260,8 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	args := []string{"test"}
 	args = append(args, opt.TestDirs...)
 	args = append(args,
+		"-p",
+		"16",
 		"-parallel",
 		strconv.Itoa(accTestParallelism),
 		"-v",
