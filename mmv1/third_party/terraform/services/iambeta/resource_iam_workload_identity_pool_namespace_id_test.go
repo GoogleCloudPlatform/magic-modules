@@ -1,4 +1,3 @@
-{{- if ne $.TargetVersionName "ga" -}}
 package iambeta_test
 
 import (
@@ -26,8 +25,8 @@ func TestValidateWorkloadIdentityPoolNamespaceId(t *testing.T) {
 		{TestName: "has an backslash", Value: "foo\bar", ExpectError: true},
 		{TestName: "too short", Value: "f", ExpectError: true},
 		{TestName: "too long", Value: strings.Repeat("f", 64), ExpectError: true},
-        {TestName: "starts with non-alphanumeric", Value: "-foobar", ExpectError: true},
-        {TestName: "ends with non-alphanumeric", Value: "foobar-", ExpectError: true},
+		{TestName: "starts with non-alphanumeric", Value: "-foobar", ExpectError: true},
+		{TestName: "ends with non-alphanumeric", Value: "foobar-", ExpectError: true},
 	}
 
 	es := verify.TestStringValidationCases(x, iambeta.ValidateWorkloadIdentityPoolNamespaceId)
@@ -35,4 +34,3 @@ func TestValidateWorkloadIdentityPoolNamespaceId(t *testing.T) {
 		t.Errorf("Failed to validate WorkloadIdentityPoolNamespace names: %v", es)
 	}
 }
-{{- end -}}
