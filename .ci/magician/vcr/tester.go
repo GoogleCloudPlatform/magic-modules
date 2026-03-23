@@ -71,7 +71,7 @@ type Tester struct {
 	uploadFunc                 func(head string, version provider.Version, fileName string) error
 }
 
-const accTestParallelism = 8
+const accTestParallelism = 16
 const parallelJobs = 16
 
 const replayingTimeout = "360m"
@@ -261,7 +261,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	args = append(args, opt.TestDirs...)
 	args = append(args,
 		"-p",
-		"4",
+		"12",
 		"-parallel",
 		strconv.Itoa(accTestParallelism),
 		"-v",
