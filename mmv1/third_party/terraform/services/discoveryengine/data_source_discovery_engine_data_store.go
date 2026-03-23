@@ -15,6 +15,8 @@ func DataSourceGoogleDiscoveryEngineDataStore() *schema.Resource {
 
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "location", "data_store_id", "display_name")
 	dsSchema["location"].Default = "global"
+	dsSchema["data_store_id"].ExactlyOneOf = []string{"data_store_id", "display_name"}
+	dsSchema["display_name"].ExactlyOneOf = []string{"data_store_id", "display_name"}
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleDiscoveryEngineDataStoreRead,
@@ -42,11 +44,7 @@ func dataSourceGoogleDiscoveryEngineDataStoreRead(d *schema.ResourceData, meta i
 	}
 
 	dataStoreId, hasId := d.GetOk("data_store_id")
-	displayName, hasName := d.GetOk("display_name")
-
-	if hasId == hasName {
-		return fmt.Errorf("Exactly one of 'data_store_id' or 'display_name' must be provided")
-	}
+	displayName, _ := d.GetOk("display_name")
 
 	var res map[string]interface{}
 
