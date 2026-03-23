@@ -629,6 +629,8 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
 {{- end}}
     }
+
+    log.Printf("[DEBUG] Finished reading {{ $.ResourceName }} %q: %#v", d.Id(), res)
 {{- if $.CustomCode.PostRead }}
     {{ customTemplate $ $.CustomCode.PostRead false -}}
 {{- end }}
