@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -38,7 +38,7 @@ func TestAccColabRuntimeTemplate_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-    "key_name":      acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"key_name":      acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -55,13 +55,13 @@ func TestAccColabRuntimeTemplate_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
 			},
-      {
+			{
 				Config: testAccColabRuntimeTemplate_update(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
-          PreApply: []plancheck.PlanCheck{
-            plancheck.ExpectResourceAction("google_colab_runtime_template.runtime-template", plancheck.ResourceActionUpdate),
-          },
-        },
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_runtime_template.runtime-template", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_runtime_template.runtime-template",
