@@ -11,11 +11,11 @@ import (
 func TestAccNetworkServicesEdgeCacheKeyset_update(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": randString,
-		"resource_name": "tf-test-my-keyset" + randString,
+		"resource_name": "tf-test-my-keyset" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -49,7 +49,7 @@ func testAccNetworkServicesEdgeCacheKeyset_update(context map[string]interface{}
 	return acctest.Nprintf(`
 
 resource "google_network_services_edge_cache_keyset" "default" {
-  name                 = "tf-test-my-keyset%{random_suffix}"
+  name                 = "%{resource_name}"
   description          = "T2"
   public_key {
     id = "my-public-key-2"

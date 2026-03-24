@@ -12,12 +12,11 @@ import (
 func TestAccDialogflowCXGenerator_dialogflowcxGeneratorUpdate(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"location":      "global",
-		"random_suffix": randString,
-		"agent_name":    "tf-test-dialogflowcx-agent-fucntion" + randString,
+		"agent_name":    "tf-test-dialogflowcx-agent-fucntion" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -59,7 +58,7 @@ func TestAccDialogflowCXGenerator_dialogflowcxGeneratorUpdate(t *testing.T) {
 func testAccDialogflowCXGenerator_dialogflowcxGeneratorUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dialogflow_cx_agent" "agent" {
-  display_name = "tf-test-dialogflowcx-agent-fucntion%{random_suffix}"
+  display_name = "%{agent_name}"
   location = "global"
   default_language_code = "en"
   supported_language_codes = ["fr","de","es"]

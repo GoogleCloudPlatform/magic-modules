@@ -12,26 +12,9 @@ import (
 func TestAccNetworkSecurityAuthzPolicy_networkServicesAuthzPolicyHttpRules(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"project":                      envvar.GetTestProjectFromEnv(),
-		"location":                     "us-west1",
-		"random_suffix":                randString,
-		"resource_name":                "my-authz-policy-" + randString,
-		"network_name":                 "lb-network-" + randString,
-		"subnet_name":                  "backend-subnet-" + randString,
-		"proxy_subnet_name":            "proxy-only-subnet-" + randString,
-		"address_name":                 "l7-ilb-ip-address-" + randString,
-		"health_check_name":            "l7-ilb-basic-check-" + randString,
-		"backend_url_name":             "l7-ilb-backend-service-" + randString,
-		"url_name":                     "l7-ilb-map-" + randString,
-		"target_proxy_name":            "l7-ilb-proxy-" + randString,
-		"forwarding_rule_name":         "l7-ilb-forwarding-rule-" + randString,
-		"callouts_instance_name":       "l7-ilb-callouts-ins-" + randString,
-		"callouts_instance_group_name": "l7-ilb-callouts-ins-group-" + randString,
-		"callouts_health_check_name":   "l7-ilb-callouts-healthcheck-" + randString,
-		"backend_authz_name":           "authz-service-" + randString,
-		"authz_extension_name":         "my-authz-ext-" + randString,
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -172,7 +155,7 @@ resource "google_network_security_authz_policy" "default" {
 
   action = "CUSTOM"
   custom_provider {
-	authz_extension {
+  authz_extension {
       resources = [ google_network_services_authz_extension.default.id ]
     }
   }
@@ -250,8 +233,8 @@ resource "google_network_security_authz_policy" "default" {
           headers {
             name = "PrefixHeader"
             value {
-			        ignore_case = false
-			        prefix      = "prefix"
+              ignore_case = false
+              prefix      = "prefix"
             }
           }
 
@@ -262,7 +245,7 @@ resource "google_network_security_authz_policy" "default" {
               ignore_case = true
               suffix      = "suffix"
             }
-		      }
+          }
 
           # Exact
           headers {
@@ -428,12 +411,11 @@ func TestAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(t *te
 	t.Skip("b/484137930")
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"location":      "us-west1",
-		"random_suffix": randString,
-		"policy_name":   "my-mcp-policy-" + randString,
+		"policy_name":   "tf-test-my-mcp-policy" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -477,7 +459,7 @@ func testAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(conte
 data "google_project" "project" {}
 
 resource "google_network_security_authz_policy" "default" {
-  name        = "tf-test-my-mcp-policy%{random_suffix}"
+  name        ="%{policy_name}"
   location    = "us-west1"
 
   target {

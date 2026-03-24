@@ -12,14 +12,13 @@ import (
 func TestAccLookerInstance_update(t *testing.T) {
 	t.Parallel()
 
-	suffix := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"region":        "us-central1",
-		"instance_name": "tf-test-looker-" + suffix,
-		"client_id":     "my-client-id",
-		"client_secret": "my-client-secret",
-		"random_suffix": suffix,
+		"client_id":     "tf-test-my-client-id" + randomSuffix,
+		"client_secret": "tf-test-my-client-secret" + randomSuffix,
+		"instance_name": "tf-test-my-instance" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

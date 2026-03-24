@@ -12,12 +12,11 @@ import (
 func TestAccWorkstationsWorkstationCluster_update(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":                  envvar.GetTestProjectFromEnv(),
-		"location":                 "us-central1",
-		"random_suffix":            randString,
-		"workstation_cluster_name": "tf-test-workstation-cluster" + randString,
+		"workstation_cluster_name": "tf-test-workstation-cluster" + randomSuffix,
+		"random_suffix":            randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -50,12 +49,11 @@ func TestAccWorkstationsWorkstationCluster_update(t *testing.T) {
 func TestAccWorkstationsWorkstationCluster_Private_update(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":                  envvar.GetTestProjectFromEnv(),
-		"location":                 "us-central1",
-		"random_suffix":            randString,
-		"workstation_cluster_name": "tf-test-workstation-cluster-private" + randString,
+		"workstation_cluster_name": "tf-test-workstation-cluster-private" + randomSuffix,
+		"random_suffix":            randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

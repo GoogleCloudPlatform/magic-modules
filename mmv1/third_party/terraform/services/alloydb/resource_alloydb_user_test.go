@@ -11,17 +11,16 @@ import (
 func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":               envvar.GetTestProjectFromEnv(),
-		"location":              "us-central1",
+		"alloydb_cluster_name":  "tf-test-alloydb-cluster" + randomSuffix,
+		"alloydb_cluster_pass":  "tf_test_cluster_secret" + randomSuffix,
+		"alloydb_instance_name": "tf-test-alloydb-instance" + randomSuffix,
+		"alloydb_user_name":     "user1" + randomSuffix,
+		"alloydb_user_pass":     "tf_test_user_secret" + randomSuffix,
 		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix":         randString,
-		"alloydb_cluster_name":  "tf-test-alloydb-cluster" + randString,
-		"alloydb_cluster_pass":  "tf_test_cluster_secret" + randString,
-		"alloydb_instance_name": "tf-test-alloydb-instance" + randString,
-		"alloydb_user_name":     "user1" + randString,
-		"alloydb_user_pass":     "tf_test_user_secret" + randString,
+		"random_suffix":         randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -65,7 +64,6 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
   initial_user {
     password = "%{alloydb_cluster_pass}"
   }
@@ -78,6 +76,7 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
+
 
 resource "google_alloydb_user" "user1" {
   cluster = google_alloydb_cluster.default.name
@@ -93,17 +92,16 @@ resource "google_alloydb_user" "user1" {
 func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":               envvar.GetTestProjectFromEnv(),
-		"location":              "us-central1",
+		"alloydb_cluster_name":  "tf-test-alloydb-cluster" + randomSuffix,
+		"alloydb_cluster_pass":  "tf_test_cluster_secret" + randomSuffix,
+		"alloydb_instance_name": "tf-test-alloydb-instance" + randomSuffix,
+		"alloydb_user_name":     "user1" + randomSuffix,
+		"alloydb_user_pass":     "tf_test_user_secret" + randomSuffix,
 		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix":         randString,
-		"alloydb_cluster_name":  "tf-test-alloydb-cluster" + randString,
-		"alloydb_cluster_pass":  "tf_test_cluster_secret" + randString,
-		"alloydb_instance_name": "tf-test-alloydb-instance" + randString,
-		"alloydb_user_name":     "user1" + randString,
-		"alloydb_user_pass":     "tf_test_user_secret" + randString,
+		"random_suffix":         randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -137,19 +135,18 @@ func testAccAlloydbUser_updatePass_BuiltIn(context map[string]interface{}) strin
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_id   = "%{alloydb_instance_name}"
   instance_type = "PRIMARY"
 }
 
 resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  cluster_id = "%{alloydb_cluster_name}"
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
   }
-
   initial_user {
-    password = "tf_test_cluster_secret%{random_suffix}"
+    password = "%{alloydb_cluster_pass}"
   }
 
   deletion_protection = false
@@ -160,6 +157,7 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
+
 
 resource "google_alloydb_user" "user1" {
   cluster = google_alloydb_cluster.default.name
@@ -175,16 +173,15 @@ resource "google_alloydb_user" "user1" {
 func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":               envvar.GetTestProjectFromEnv(),
-		"location":              "us-central1",
+		"alloydb_cluster_name":  "tf-test-alloydb-cluster" + randomSuffix,
+		"alloydb_cluster_pass":  "tf_test_cluster_secret" + randomSuffix,
+		"alloydb_instance_name": "tf-test-alloydb-instance" + randomSuffix,
+		"alloydb_user_name":     "user2@foo.com" + randomSuffix,
 		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix":         randString,
-		"alloydb_cluster_name":  "tf-test-alloydb-cluster" + randString,
-		"alloydb_instance_name": "tf-test-alloydb-instance" + randString,
-		"alloydb_cluster_pass":  "tf_test_cluster_secret" + randString,
-		"alloydb_user_name":     "user2-" + randString + "@foo.com",
+		"random_suffix":         randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -218,29 +215,34 @@ func testAccAlloydbUser_updateRoles_Iam(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_id   = "%{alloydb_instance_name}"
   instance_type = "PRIMARY"
 }
+
 resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  cluster_id = "%{alloydb_cluster_name}"
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
   }
   initial_user {
-    password = "tf_test_cluster_secret%{random_suffix}"
+    password = "%{alloydb_cluster_pass}"
   }
 
   deletion_protection = false
 }
+
 data "google_project" "project" {}
+
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
+
 resource "google_alloydb_user" "user2" {
   cluster = google_alloydb_cluster.default.name
   user_id = "%{alloydb_user_name}"
   user_type = "ALLOYDB_IAM_USER"
+
   database_roles = ["alloydbiamuser", "alloydbsuperuser"]
   depends_on = [google_alloydb_instance.default]
 }`, context)
@@ -249,17 +251,9 @@ resource "google_alloydb_user" "user2" {
 func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"project":               envvar.GetTestProjectFromEnv(),
-		"location":              "us-central1",
-		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix":         randString,
-		"alloydb_cluster_name":  "tf-test-alloydb-cluster" + randString,
-		"alloydb_cluster_pass":  "tf_test_cluster_secret" + randString,
-		"alloydb_instance_name": "tf-test-alloydb-instance" + randString,
-		"alloydb_user_name":     "user1" + randString,
-		"alloydb_user_pass":     "tf_test_user_secret" + randString,
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -288,17 +282,17 @@ func testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(context map[string]inte
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
-  instance_id   = "%{alloydb_instance_name}"
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
 }
 resource "google_alloydb_cluster" "default" {
-  cluster_id = "%{alloydb_cluster_name}"
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
   }
   initial_user {
-    password = "%{alloydb_cluster_pass}"
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   deletion_protection = false
 }
@@ -308,9 +302,9 @@ data "google_compute_network" "default" {
 }
 resource "google_alloydb_user" "user1" {
   cluster = google_alloydb_cluster.default.name
-  user_id = "%{alloydb_user_name}"
+  user_id = "user1%{random_suffix}"
   user_type = "ALLOYDB_BUILT_IN"
-  password_wo = "%{alloydb_user_pass}"
+  password_wo = "tf_test_user_secret%{random_suffix}"
   password_wo_version = 1
   database_roles = ["alloydbsuperuser"]
   depends_on = [google_alloydb_instance.default]
@@ -320,17 +314,9 @@ resource "google_alloydb_user" "user1" {
 func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo_update(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"project":               envvar.GetTestProjectFromEnv(),
-		"location":              "us-central1",
-		"network_name":          acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"random_suffix":         randString,
-		"alloydb_cluster_name":  "tf-test-alloydb-cluster" + randString,
-		"alloydb_cluster_pass":  "tf_test_cluster_secret" + randString,
-		"alloydb_instance_name": "tf-test-alloydb-instance" + randString,
-		"alloydb_user_name":     "user1" + randString,
-		"alloydb_user_pass":     "tf_test_user_secret" + randString,
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -360,17 +346,17 @@ func testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo_update(context map[stri
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
-  instance_id   = "%{alloydb_instance_name}"
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
 }
 resource "google_alloydb_cluster" "default" {
-  cluster_id = "%{alloydb_cluster_name}"
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
   }
   initial_user {
-    password = "%{alloydb_cluster_pass}"
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   deletion_protection = false
 }
@@ -380,9 +366,9 @@ data "google_compute_network" "default" {
 }
 resource "google_alloydb_user" "user1" {
   cluster = google_alloydb_cluster.default.name
-  user_id = "%{alloydb_user_name}"
+  user_id = "user1%{random_suffix}"
   user_type = "ALLOYDB_BUILT_IN"
-  password_wo = "tf_test_user_secret%{random_suffix}-update"
+  password_wo = "tf_test_user_updated_secret%{random_suffix}"
   password_wo_version = 2
   database_roles = ["alloydbsuperuser"]
   depends_on = [google_alloydb_instance.default]

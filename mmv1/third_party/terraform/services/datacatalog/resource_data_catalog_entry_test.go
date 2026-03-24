@@ -11,13 +11,12 @@ import (
 func TestAccDataCatalogEntry_update(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":        envvar.GetTestProjectFromEnv(),
-		"location":       "us-central1",
-		"random_suffix":  randString,
-		"entry_id":       "tf_test_my_entry" + randString,
-		"entry_group_id": "tf_test_my_group" + randString,
+		"entry_group_id": "tf_test_my_group" + randomSuffix,
+		"entry_id":       "tf_test_my_entry" + randomSuffix,
+		"random_suffix":  randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -13,15 +13,14 @@ import (
 func TestAccFirebaseAppCheckAppAttestConfig_firebaseAppCheckAppAttestConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
 		"project_id":    envvar.GetTestProjectFromEnv(),
-		"app_id":        "tf-test-app-" + randString,
+		"bundle_id":     "bundle.id.appattest" + randomSuffix,
 		"team_id":       "9987654321",
-		"random_suffix": randString,
 		"token_ttl":     "7200s",
-		"bundle_id":     "bundle.id.appattest" + randString,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

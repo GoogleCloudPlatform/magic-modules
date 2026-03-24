@@ -10,14 +10,13 @@ import (
 func TestAccBeyondcorpAppConnection_beyondcorpAppConnectionUpdateExample(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":             acctest.GetTestProject(t),
-		"region":              "us-central1",
-		"random_suffix":       randString,
-		"account_id":          "tf-test-my-account" + randString,
-		"app_connector_name":  "tf-test-my-app-connector" + randString,
-		"app_connection_name": "tf-test-my-app-connection" + randString,
+		"account_id":          "tf-test-my-account" + randomSuffix,
+		"app_connection_name": "tf-test-my-app-connection" + randomSuffix,
+		"app_connector_name":  "tf-test-my-app-connector" + randomSuffix,
+		"random_suffix":       randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -53,12 +52,12 @@ func TestAccBeyondcorpAppConnection_beyondcorpAppConnectionUpdateExample(t *test
 func testAccBeyondcorpAppConnection_beyondcorpAppConnectionUpdateExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
-  account_id   = "tf-test-my-account%{random_suffix}"
+  account_id   = "%{account_id}"
   display_name = "Test Service Account"
 }
 
 resource "google_beyondcorp_app_connector" "app_connector" {
-  name = "tf-test-my-app-connector%{random_suffix}"
+  name = "%{app_connector_name}"
   principal_info {
     service_account {
      email = google_service_account.service_account.email
@@ -67,7 +66,7 @@ resource "google_beyondcorp_app_connector" "app_connector" {
 }
 
 resource "google_beyondcorp_app_connection" "app_connection" {
-  name = "tf-test-my-app-connection%{random_suffix}"
+  name = "%{app_connection_name}"
   type = "TCP_PROXY"
   region = "us-central1"
   application_endpoint {

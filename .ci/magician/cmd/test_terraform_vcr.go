@@ -263,7 +263,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	if err := gh.PostComment(prNumber, comment); err != nil {
 		return fmt.Errorf("error posting comment: %w", err)
 	}
-
 	if len(replayingResult.FailedTests) > 0 {
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
 			Mode:             vcr.Recording,

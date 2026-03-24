@@ -13,20 +13,22 @@ import (
 func TestAccApphubApplication_applicationUpdateFull(t *testing.T) {
 	t.Parallel()
 
-	suffix := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":         envvar.GetTestProjectFromEnv(),
-		"location":        "us-east1",
-		"random_suffix":   suffix,
-		"application_id":  "tf-test-example-application" + suffix,
-		"display_name":    "Application Full" + suffix,
-		"desc":            "Application for testing" + suffix,
-		"business_name":   "Alice" + suffix,
-		"business_email":  "alice@google.com" + suffix,
-		"developer_name":  "Bob" + suffix,
-		"developer_email": "bob@google.com" + suffix,
-		"operator_name":   "Charlie" + suffix,
-		"operator_email":  "charlie@google.com" + suffix,
+		"application_id":      "tf-test-example-application" + randomSuffix,
+		"business_email":      "alice@google.com" + randomSuffix,
+		"business_name":       "Alice" + randomSuffix,
+		"desc":                "Application for testing" + randomSuffix,
+		"developer_email":     "bob@google.com" + randomSuffix,
+		"developer_name":      "Bob" + randomSuffix,
+		"developer_2_email":   "derek@google.com" + randomSuffix,
+		"developer_2_name":    "Derek" + randomSuffix,
+		"display_name":        "Application Full" + randomSuffix,
+		"display_name_update": "Application Full New" + randomSuffix,
+		"operator_email":      "charlie@google.com" + randomSuffix,
+		"operator_name":       "Charlie" + randomSuffix,
+		"random_suffix":       randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -89,7 +91,7 @@ func testAccApphubApplication_applicationUpdateDisplayName(context map[string]in
 resource "google_apphub_application" "example2" {
   location = "us-east1"
   application_id = "%{application_id}"
-  display_name = "%{display_name}-new"
+  display_name = "%{display_name_update}"
   scope {
     type = "REGIONAL"
   }
@@ -122,8 +124,8 @@ func testAccApphubApplication_applicationUpdateEnvironment(context map[string]in
 
 resource "google_apphub_application" "example2" {
   location = "us-east1"
-  application_id = "tf-test-example-application%{random_suffix}"
-  display_name = "Application Full New%{random_suffix}"
+  application_id = "%{application_id}"
+  display_name = "%{display_name_update}"
   scope {
     type = "REGIONAL"
   }
@@ -135,16 +137,16 @@ resource "google_apphub_application" "example2" {
       type = "MISSION_CRITICAL"
 		}
 		business_owners {
-		  display_name =  "Alice%{random_suffix}"
-		  email        =  "alice@google.com%{random_suffix}"
+		  display_name =  "%{business_name}"
+		  email        =  "%{business_email}"
 		}
 		developer_owners {
-		  display_name =  "Bob%{random_suffix}"
-		  email        =  "bob@google.com%{random_suffix}"
+		  display_name =  "%{developer_name}"
+		  email        =  "%{developer_email}"
 		}
 		operator_owners {
-		  display_name =  "Charlie%{random_suffix}"
-		  email        =  "charlie@google.com%{random_suffix}"
+		  display_name =  "%{operator_name}"
+		  email        =  "%{operator_email}"
 		}
   }
 }
@@ -156,8 +158,8 @@ func testAccApphubApplication_applicationUpdateCriticality(context map[string]in
 
 resource "google_apphub_application" "example2" {
   location = "us-east1"
-  application_id = "tf-test-example-application%{random_suffix}"
-  display_name = "Application Full New%{random_suffix}"
+  application_id = "%{application_id}"
+  display_name = "%{display_name_update}"
   scope {
     type = "REGIONAL"
   }
@@ -169,16 +171,16 @@ resource "google_apphub_application" "example2" {
       type = "MEDIUM"
 		}
 		business_owners {
-		  display_name =  "Alice%{random_suffix}"
-		  email        =  "alice@google.com%{random_suffix}"
+		  display_name =  "%{business_name}"
+		  email        =  "%{business_email}"
 		}
 		developer_owners {
-		  display_name =  "Bob%{random_suffix}"
-		  email        =  "bob@google.com%{random_suffix}"
+		  display_name =  "%{developer_name}"
+		  email        =  "%{developer_email}"
 		}
 		operator_owners {
-		  display_name =  "Charlie%{random_suffix}"
-		  email        =  "charlie@google.com%{random_suffix}"
+		  display_name =  "%{operator_name}"
+		  email        =  "%{operator_email}"
 		}
   }
 }
@@ -190,8 +192,8 @@ func testAccApphubApplication_applicationUpdateOwners(context map[string]interfa
 
 resource "google_apphub_application" "example2" {
   location = "us-east1"
-  application_id = "tf-test-example-application%{random_suffix}"
-  display_name = "Application Full New%{random_suffix}"
+  application_id = "%{application_id}"
+  display_name = "%{display_name_update}"
   scope {
     type = "REGIONAL"
   }
@@ -203,20 +205,20 @@ resource "google_apphub_application" "example2" {
       type = "MEDIUM"
 		}
 		business_owners {
-		  display_name =  "Alice%{random_suffix}"
-		  email        =  "alice@google.com%{random_suffix}"
+		  display_name =  "%{business_name}"
+		  email        =  "%{business_email}"
 		}
 		developer_owners {
-		  display_name =  "Bob%{random_suffix}"
-		  email        =  "bob@google.com%{random_suffix}"
+		  display_name =  "%{developer_name}"
+		  email        =  "%{developer_email}"
 		}
 		developer_owners {
-			display_name =  "Derek%{random_suffix}"
-			email        =  "derek@google.com%{random_suffix}"
+		  display_name =  "%{developer_2_name}"
+		  email        =  "%{developer_2_email}"
 		}
 		operator_owners {
-		  display_name =  "Charlie%{random_suffix}"
-		  email        =  "charlie@google.com%{random_suffix}"
+		  display_name =  "%{operator_name}"
+		  email        =  "%{operator_email}"
 		}
   }
 }

@@ -12,28 +12,27 @@ import (
 func TestAccApphubService_serviceUpdate(t *testing.T) {
 	t.Parallel()
 
-	suffix := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":                       envvar.GetTestProjectFromEnv(),
-		"location":                      "us-central1",
-		"org_id":                        envvar.GetTestOrgFromEnv(),
-		"billing_account":               envvar.GetTestBillingAccountFromEnv(),
-		"random_suffix":                 suffix,
-		"application_id":                "tf-test-example-application-1" + suffix,
-		"service_project_attachment_id": "tf-test-project-1" + suffix,
-		"display_name":                  "Example Service Full" + suffix,
-		"desc":                          "Register service for testing" + suffix,
-		"business_name":                 "Alice" + suffix,
-		"business_email":                "alice@google.com" + suffix,
-		"developer_name":                "Bob" + suffix,
-		"developer_email":               "bob@google.com" + suffix,
-		"operator_name":                 "Charlie" + suffix,
-		"operator_email":                "charlie@google.com" + suffix,
-		"ilb_network":                   "tf-test-l7-ilb-network" + suffix,
-		"ilb_subnet":                    "tf-test-l7-ilb-subnet" + suffix,
-		"forwarding_rule":               "tf-test-l7-ilb-forwarding-rule" + suffix,
-		"backend_service":               "tf-test-l7-ilb-backend-subnet" + suffix,
-		"health_check":                  "tf-test-l7-ilb-hc" + suffix,
+		"billing_account":               envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":                        envvar.GetTestOrgFromEnv(t),
+		"application_id":                "tf-test-example-application-1" + randomSuffix,
+		"backend_service":               "tf-test-l7-ilb-backend-subnet" + randomSuffix,
+		"business_email":                "alice@google.com" + randomSuffix,
+		"business_name":                 "Alice" + randomSuffix,
+		"desc":                          "Register service for testing" + randomSuffix,
+		"developer_email":               "bob@google.com" + randomSuffix,
+		"developer_name":                "Bob" + randomSuffix,
+		"display_name":                  "Example Service Full" + randomSuffix,
+		"forwarding_rule":               "tf-test-l7-ilb-forwarding-rule" + randomSuffix,
+		"health_check":                  "tf-test-l7-ilb-hc" + randomSuffix,
+		"ilb_network":                   "tf-test-l7-ilb-network" + randomSuffix,
+		"ilb_subnet":                    "tf-test-l7-ilb-subnet" + randomSuffix,
+		"operator_email":                "charlie@google.com" + randomSuffix,
+		"operator_name":                 "Charlie" + randomSuffix,
+		"service_project_attachment_id": "tf-test-project-1" + randomSuffix,
+		"random_suffix":                 randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -71,14 +70,14 @@ func testAccApphubService_apphubServiceUpdate(context map[string]interface{}) st
 	return acctest.Nprintf(`
 resource "google_apphub_application" "application" {
   location = "us-central1"
-  application_id = "tf-test-example-application-1%{random_suffix}"
+  application_id = "%{application_id}"
   scope {
     type = "REGIONAL"
   }
 }
 
 resource "google_project" "service_project" {
-  project_id ="tf-test-project-1%{random_suffix}"
+  project_id = "%{service_project_attachment_id}"
   name = "Service Project"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
@@ -128,7 +127,7 @@ resource "google_apphub_service" "example" {
 
 # VPC network
 resource "google_compute_network" "ilb_network" {
-  name                    = "tf-test-l7-ilb-network%{random_suffix}"
+  name                    = "%{ilb_network}"
   project                 = google_project.service_project.project_id
   auto_create_subnetworks = false
   depends_on = [time_sleep.wait_120s]
@@ -137,7 +136,7 @@ resource "google_compute_network" "ilb_network" {
 
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
-  name          = "tf-test-l7-ilb-subnet%{random_suffix}"
+  name          = "%{ilb_subnet}"
   project       = google_project.service_project.project_id
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"
@@ -146,7 +145,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 
 # forwarding rule
 resource "google_compute_forwarding_rule" "forwarding_rule" {
-  name                  ="tf-test-l7-ilb-forwarding-rule%{random_suffix}"
+  name                  = "%{forwarding_rule}"
   project               = google_project.service_project.project_id
   region                = "us-central1"
   ip_version            = "IPV4"
@@ -161,7 +160,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
 
 # backend service
 resource "google_compute_region_backend_service" "backend" {
-  name                  = "tf-test-l7-ilb-backend-subnet%{random_suffix}"
+  name                  = "%{backend_service}"
   project               = google_project.service_project.project_id
   region                = "us-central1"
   health_checks         = [google_compute_health_check.default.id]
@@ -169,7 +168,7 @@ resource "google_compute_region_backend_service" "backend" {
 
 # health check
 resource "google_compute_health_check" "default" {
-  name     = "tf-test-l7-ilb-hc%{random_suffix}"
+  name     = "%{health_check}"
   project  = google_project.service_project.project_id
   check_interval_sec = 1
   timeout_sec        = 1

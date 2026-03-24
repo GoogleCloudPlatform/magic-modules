@@ -569,13 +569,12 @@ resource "google_spanner_database" "basic" {
 func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"instance":      "tf-test-" + randString,
-		"instance_name": "tf-test-" + randString,
-		"random_suffix": randString,
-		"database_name": "tf-test-db-" + randString,
+		"database_name": "tf-test-my-database" + randomSuffix,
+		"instance_name": "tf-test-my-instance" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -607,7 +606,7 @@ func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
 func testAccSpannerDatabase_deletionProtection(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_spanner_instance" "main" {
-  name         = "tf-test-%{random_suffix}"
+  name         = "%{instance_name}"
   display_name = "main-instance"
   config       = "regional-europe-west1"
   num_nodes    = 1
@@ -615,7 +614,7 @@ resource "google_spanner_instance" "main" {
 
 resource "google_spanner_database" "database" {
   instance = google_spanner_instance.main.name
-  name     = "tf-test-my-database%{random_suffix}"
+  name     = "%{database_name}"
   ddl = [
     "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
     "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",

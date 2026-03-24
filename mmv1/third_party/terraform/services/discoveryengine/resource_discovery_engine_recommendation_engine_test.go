@@ -19,7 +19,7 @@ func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationeng
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample(context),
+				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample_basic(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_recommendation_engine.media",
@@ -28,7 +28,7 @@ func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationeng
 				ImportStateVerifyIgnore: []string{"common_config", "engine_id", "industry_vertical", "location"},
 			},
 			{
-				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample(context),
+				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample_update(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_recommendation_engine.media",
