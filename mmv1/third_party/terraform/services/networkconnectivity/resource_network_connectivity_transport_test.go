@@ -45,7 +45,7 @@ func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExampl
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckNetworkConnectivityTransportDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

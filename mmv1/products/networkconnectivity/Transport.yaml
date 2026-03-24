@@ -61,7 +61,7 @@ properties:
       Name of the resource, see google.aip.dev/122 for resource naming.
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'remoteProfile'
     type: String
     description: |
@@ -149,11 +149,9 @@ properties:
     description: |
       The user supplied account id for the CSP associated with the remote profile.
   - name: 'peeringNetwork'
-    type: ResourceRef
+    type: String
     description: |
       VPC Network URI that was created for the VPC Peering connection to the provided `network`. If VPC Peering is disconnected, this can be used to re-establish.
-    resource: 'Network'
-    imports: 'selfLink'
     output: true
   - name: 'hub'
     type: ResourceRef
