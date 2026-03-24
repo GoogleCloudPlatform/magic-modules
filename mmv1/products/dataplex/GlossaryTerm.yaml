@@ -25,7 +25,7 @@ timeouts:
   delete_minutes: 15
 autogen_async: true
 external_providers:
- - "time"
+  "time"
 import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}']
 examples:
   - name: 'dataplex_glossary_term_basic'
