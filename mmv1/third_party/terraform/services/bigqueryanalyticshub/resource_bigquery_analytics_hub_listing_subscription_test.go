@@ -93,8 +93,9 @@ func TestAccBigqueryAnalyticsHubListingSubscription_multiregion(t *testing.T) {
 func TestAccBigqueryAnalyticsHubListingSubscription_pubsub_linked_resources(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,9 +110,9 @@ func TestAccBigqueryAnalyticsHubListingSubscription_pubsub_linked_resources(t *t
 					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "resource_type", "PUBSUB_TOPIC"),
 					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "linked_resources.#", "1"),
 					resource.TestMatchResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "linked_resources.0.linked_pubsub_subscription",
-						regexp.MustCompile(`projects/\d+/subscriptions/tf_test_sub_`+context["random_suffix"].(string))),
+						regexp.MustCompile(fmt.Sprintf(`projects/\d+/subscriptions/tf_test_sub_%s`, randomSuffix))),
 					resource.TestMatchResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "linked_resources.0.listing",
-						regexp.MustCompile(`projects/\d+/locations/us/dataExchanges/tf_test_de_`+context["random_suffix"].(string)+`/listings/tf_test_listing_`+context["random_suffix"].(string))),
+						regexp.MustCompile(fmt.Sprintf(`projects/\d+/locations/us/dataExchanges/tf_test_de_%s/listings/tf_test_listing_%s`, randomSuffix, randomSuffix))),
 				),
 			},
 		},
