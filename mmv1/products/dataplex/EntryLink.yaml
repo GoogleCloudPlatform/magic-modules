@@ -42,6 +42,7 @@ examples:
       entry_link_name: 'my_entry_link_full'
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
+    external_providers: ["time"]
 parameters:
   - name: 'entryGroupId'
     type: String

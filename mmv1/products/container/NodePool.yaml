@@ -16,6 +16,13 @@ name: 'NodePool'
 include_in_tgc_next: true
 exclude_resource: true
 description: 'NodePool'
+tgc_tests:
+  - name: 'TestAccContainerNodePool_withUpgradeSettings'
+    skip: 'data issue'
+  - name: 'TestAccContainerNodePool_withTaintsUpdate'
+    skip: 'data issue'
+  - name: 'TestAccContainerNodePool_regionalAutoscaling'
+    skip: 'data issue'
 properties:
   - name: 'name'
     type: 'String'
@@ -60,6 +67,18 @@ properties:
                 - name: 'gpuDriverVersion'
                   type: 'String'
                   description: 'Mode for how the GPU driver is installed.'
+      - name: 'bootDisk'
+        type: 'NestedObject'
+        description: 'Configuration for the boot disk.'
+        properties:
+          - name: 'provisioned_iops'
+            api_name: 'provisionedIops'
+            type: 'Integer'
+            is_missing_in_cai: true
+          - name: 'provisioned_throughput'
+            api_name: 'provisionedThroughput'
+            type: 'Integer'
+            is_missing_in_cai: true
   - name: 'networkConfig'
     type: 'NestedObject'
     description: 'Networking configuration for this NodePool.'

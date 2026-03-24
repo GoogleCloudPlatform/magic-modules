@@ -22,8 +22,8 @@ docs:
 base_url: '{{cluster}}/users'
 self_link: '{{cluster}}/users/{{user_id}}'
 create_url: '{{cluster}}/users?userId={{user_id}}'
-update_url: '{{cluster}}/users?userId={{user_id}}'
-update_verb: 'POST'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/users/{{user_id}}'
 timeouts:
@@ -33,6 +33,7 @@ timeouts:
 autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_user.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/alloydb_user.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 examples:
