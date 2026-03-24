@@ -56,7 +56,7 @@ func ResourceIamAuditConfig(parentSpecificSchema map[string]*schema.Schema, newU
 		Delete: resourceIamAuditConfigDelete(newUpdaterFunc, settings.EnableBatching),
 		Schema: tpgresource.MergeSchemas(iamAuditConfigSchema, parentSpecificSchema),
 		Importer: &schema.ResourceImporter{
-			State: iamAuditConfigImport(resourceIdParser, settings.EnableResourceIdentity),
+			State: iamAuditConfigImport(resourceIdParser),
 		},
 		UseJSONNumber: true,
 	}
@@ -105,7 +105,7 @@ func resourceIamAuditConfigRead(newUpdaterFunc NewResourceIamUpdaterFunc) schema
 	}
 }
 
-func iamAuditConfigImport(resourceIdParser ResourceIdParserFunc, enableResourceIdentity bool) schema.StateFunc {
+func iamAuditConfigImport(resourceIdParser ResourceIdParserFunc) schema.StateFunc {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
@@ -123,7 +123,7 @@ func iamAuditConfigImport(resourceIdParser ResourceIdParserFunc, enableResourceI
 		if err := d.Set("service", service); err != nil {
 			return nil, fmt.Errorf("Error setting service: %s", err)
 		}
-		err := resourceIdParser(d, config, enableResourceIdentity)
+		err := resourceIdParser(d, config)
 		if err != nil {
 			return nil, err
 		}

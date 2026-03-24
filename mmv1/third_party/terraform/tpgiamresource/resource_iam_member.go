@@ -109,6 +109,7 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
 
+		// TODO: remove enableResourceIdentity when identity is the default
 		if enableResourceIdentity && d.Id() == "" {
 			identity, err := d.Identity()
 			if err != nil {
@@ -142,7 +143,7 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 			return nil, fmt.Errorf("Error setting member: %s", err)
 		}
 
-		err := resourceIdParser(d, config, enableResourceIdentity)
+		err := resourceIdParser(d, config)
 		if err != nil {
 			return nil, err
 		}

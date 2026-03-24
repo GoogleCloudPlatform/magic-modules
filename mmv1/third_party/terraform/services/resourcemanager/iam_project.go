@@ -34,21 +34,10 @@ func NewProjectIamUpdater(d tpgresource.TerraformResourceData, config *transport
 	}, nil
 }
 
-func ProjectIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config, enableResourceIdentity bool) error {
+func ProjectIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
 	if err := d.Set("project", d.Id()); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-
-	if enableResourceIdentity {
-		identity, err := d.Identity()
-		if err != nil {
-			return err
-		}
-		if err = identity.Set("project", d.Get("project").(string)); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
