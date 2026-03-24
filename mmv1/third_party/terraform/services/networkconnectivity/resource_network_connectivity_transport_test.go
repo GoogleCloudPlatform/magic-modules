@@ -98,7 +98,7 @@ resource "google_network_connectivity_transport" "primary"  {
 `, context)
 }
 
-func testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_basic(context map[string]interface{}) string {
+func testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
   provider = google-beta
