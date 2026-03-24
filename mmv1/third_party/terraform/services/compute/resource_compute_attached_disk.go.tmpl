@@ -26,6 +26,7 @@ func ResourceComputeAttachedDisk() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAttachedDiskCreate,
 		Read:   resourceAttachedDiskRead,
+		Update: resourceAttachedDiskUpdate,
 		Delete: resourceAttachedDiskDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -93,7 +94,19 @@ func ResourceComputeAttachedDisk() *schema.Resource {
                                 Description:  `The disk interface used for attaching this disk. One of SCSI or NVME. (This field is only used for specific cases, please don't specify this field without advice from Google.)`,
                                 ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
                         },
-
+//UDP schema start
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
+				When a 'terraform destroy' or 'terraform apply' would delete the instance,
+				the command will fail if this field is set to "PREVENT" in Terraform state.
+				When set to "ABANDON", the command will remove the resource from Terraform
+				management without updating or deleting the resource in the API.
+				When set to "DELETE", deleting the resource is allowed.`,
+				Default: "DELETE",
+			},
+//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -204,11 +217,35 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("disk", diskPath); err != nil {
 		return fmt.Errorf("Error setting disk: %s", err)
 	}
+    //UDP default read start
+	// Explicitly set virtual fields to default values if unset
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
+		if err := d.Set("deletion_policy", "DELETE"); err != nil {
+		    return fmt.Errorf("Error setting deletion_policy: %s", err)
+		} 
+	}
+    //UDP default read end
 
 	return nil
 }
 
+//UDP update start
+func resourceAttachedDiskUpdate(d *schema.ResourceData, meta interface{}) error {
+    // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+    return resourceAttachedDiskRead(d, meta)
+}
+//UDP update end
+
 func resourceAttachedDiskDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if d.Get("deletion_policy").(string) == "PREVENT" {
+		return fmt.Errorf("cannot destroy AttachedDisk without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+	}
+	if d.Get("deletion_policy").(string) == "ABANDON" {
+		log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing AttachedDisk %q from Terraform state without deletion", d.Id())
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

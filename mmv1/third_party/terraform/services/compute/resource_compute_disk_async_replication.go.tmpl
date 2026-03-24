@@ -22,6 +22,7 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDiskAsyncReplicationCreate,
 		Read:   resourceDiskAsyncReplicationRead,
+		Update: resourceDiskAsyncReplicationUpdate,
 		Delete: resourceDiskAsyncReplicationDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -64,6 +65,20 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 					},
 				},
 			},
+//UDP schema start
+            "deletion_policy": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+                Default: "DELETE",
+            },
+//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -226,10 +241,34 @@ func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error setting secondary_disk: %s", err)
 	}
 	d.SetId(resourceId)
+    //UDP default read start
+    // Explicitly set virtual fields to default values if unset
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        if err := d.Set("deletion_policy", "DELETE"); err != nil {
+            return fmt.Errorf("Error setting deletion_policy: %s", err)
+        } 
+    }
+    //UDP default read end
 	return nil
 }
 
+//UDP update start
+func resourceDiskAsyncReplicationUpdate(d *schema.ResourceData, meta interface{}) error {
+    // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+    return resourceDiskAsyncReplicationRead(d, meta)
+}
+//UDP update end
+
 func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}) error {
+    //UDP pre-delete start
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy resource without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing resource %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+    //UDP pre-delete end
 	clientCompute, err := asyncReplicationGetComputeClient(d, meta)
 	if err != nil {
 		return err
