@@ -79,7 +79,7 @@ properties:
       Required. The tooltip key of the tool.
     output: true
   - name: actionConfirmationRequirement
-    type: KeyValueLabels
+    type: KeyValuePairs
     description: |
       Optional. Action confirmation requirement for each action.
   - name: extensionSpec
