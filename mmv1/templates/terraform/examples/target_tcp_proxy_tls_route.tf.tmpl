@@ -1,0 +1,42 @@
+resource "google_compute_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "target_tcp_proxy_name"}}"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+}
+
+resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "backend_service_name"}}"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  protocol              = "TCP"
+  health_checks         = [google_compute_health_check.{{$.PrimaryResourceId}}.id]
+}
+
+resource "google_compute_health_check" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name     = "{{index $.Vars "health_check_name"}}"
+
+  https_health_check {
+    port = 443
+  }
+}
+
+resource "google_network_services_tls_route" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name     = "{{index $.Vars "tls_route_name"}}"
+
+  target_proxies = [
+    google_compute_target_tcp_proxy.{{$.PrimaryResourceId}}.id
+  ]
+
+  rules {
+    matches {
+      sni_host = ["example.com"]
+    }
+    action {
+      destinations {
+        service_name = google_compute_backend_service.{{$.PrimaryResourceId}}.id
+      }
+    }
+  }
+}
