@@ -103,22 +103,55 @@ var IamMemberBaseIdentitySchema = map[string]*schema.Schema{
 	},
 }
 
-func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, enableResourceIdentity bool) schema.StateFunc {
+func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, resourceIdentityParser ResourceIdentityParserFunc) schema.StateFunc {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
 
-		// TODO: remove enableResourceIdentity when identity is the default
-		if enableResourceIdentity && d.Id() == "" {
+		config := m.(*transport_tpg.Config)
+
+		if resourceIdentityParser != nil && d.Id() == "" {
 			identity, err := d.Identity()
 			if err != nil {
 				return nil, err
 			}
-			d.SetId(identity.Get("project").(string) + " " + identity.Get("role").(string) + " " + identity.Get("member").(string) + " " + identity.Get("condition_title").(string))
+			resourceID, err := resourceIdentityParser(identity, config)
+			if err != nil {
+				return nil, err
+			}
+			roleVal, ok := identity.GetOk("role")
+			if !ok {
+				return nil, fmt.Errorf("import identity is missing attribute %q", "role")
+			}
+			role, ok := roleVal.(string)
+			if !ok || role == "" {
+				return nil, fmt.Errorf("import identity attribute %q must be a non-empty string", "role")
+			}
+			memberVal, ok := identity.GetOk("member")
+			if !ok {
+				return nil, fmt.Errorf("import identity is missing attribute %q", "member")
+			}
+			member, ok := memberVal.(string)
+			if !ok || member == "" {
+				return nil, fmt.Errorf("import identity attribute %q must be a non-empty string", "member")
+			}
+			member = tpgresource.NormalizeIamPrincipalCasing(member)
+			conditionTitle := ""
+			if ctVal, ok := identity.GetOk("condition_title"); ok {
+				ct, ok := ctVal.(string)
+				if !ok {
+					return nil, fmt.Errorf("import identity attribute %q must be a string", "condition_title")
+				}
+				conditionTitle = ct
+			}
+			idParts := []string{resourceID, role, member}
+			if conditionTitle != "" {
+				idParts = append(idParts, conditionTitle)
+			}
+			d.SetId(strings.Join(idParts, " "))
 		}
 
-		config := m.(*transport_tpg.Config)
 		s := strings.Fields(d.Id())
 		var id, role, member string
 		if len(s) < 3 {
@@ -226,9 +259,9 @@ func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdate
 	createTimeOut := time.Duration(settings.CreateTimeOut) * time.Minute
 
 	resourceSchema := &schema.Resource{
-		Create: resourceIamMemberCreate(newUpdaterFunc, settings.EnableBatching, settings.EnableResourceIdentity),
-		Read:   resourceIamMemberRead(newUpdaterFunc, settings.EnableResourceIdentity),
-		Delete: resourceIamMemberDelete(newUpdaterFunc, settings.EnableBatching, settings.EnableResourceIdentity),
+		Create: resourceIamMemberCreate(newUpdaterFunc, settings.EnableBatching, settings.ResourceIdentityParser),
+		Read:   resourceIamMemberRead(newUpdaterFunc, settings.ResourceIdentityParser),
+		Delete: resourceIamMemberDelete(newUpdaterFunc, settings.EnableBatching, settings.ResourceIdentityParser),
 
 		// if non-empty, this will be used to send a deprecation message when the
 		// resource is used.
@@ -238,12 +271,12 @@ func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdate
 		SchemaVersion:  settings.SchemaVersion,
 		StateUpgraders: settings.StateUpgraders,
 		Importer: &schema.ResourceImporter{
-			State: iamMemberImport(newUpdaterFunc, resourceIdParser, settings.EnableResourceIdentity),
+			State: iamMemberImport(newUpdaterFunc, resourceIdParser, settings.ResourceIdentityParser),
 		},
 		UseJSONNumber: true,
 	}
 
-	if settings.EnableResourceIdentity {
+	if settings.ResourceIdentityParser != nil {
 		resourceSchema.Identity = &schema.ResourceIdentity{
 			Version: 1,
 			SchemaFunc: func() map[string]*schema.Schema {
@@ -271,7 +304,7 @@ func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding 
 	return b
 }
 
-func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, enableResourceIdentity bool) schema.CreateFunc {
+func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, resourceIdentityParser ResourceIdentityParserFunc) schema.CreateFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -301,7 +334,7 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 			d.SetId(d.Id() + "/" + k.String())
 		}
 
-		if enableResourceIdentity {
+		if resourceIdentityParser != nil {
 			identity, err := d.Identity()
 			if err != nil {
 				return err
@@ -314,11 +347,11 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 			}
 		}
 
-		return resourceIamMemberRead(newUpdaterFunc, enableResourceIdentity)(d, meta)
+		return resourceIamMemberRead(newUpdaterFunc, resourceIdentityParser)(d, meta)
 	}
 }
 
-func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, enableResourceIdentity bool) schema.ReadFunc {
+func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdentityParser ResourceIdentityParserFunc) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -377,7 +410,7 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, enableResou
 			return fmt.Errorf("Error setting condition: %s", err)
 		}
 
-		if enableResourceIdentity {
+		if resourceIdentityParser != nil {
 			identity, err := d.Identity()
 			if err != nil {
 				return err
@@ -393,7 +426,7 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, enableResou
 	}
 }
 
-func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, enableResourceIdentity bool) schema.DeleteFunc {
+func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, resourceIdentityParser ResourceIdentityParserFunc) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -417,6 +450,6 @@ func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
 		}
-		return resourceIamMemberRead(newUpdaterFunc, enableResourceIdentity)(d, meta)
+		return resourceIamMemberRead(newUpdaterFunc, resourceIdentityParser)(d, meta)
 	}
 }
