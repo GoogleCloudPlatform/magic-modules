@@ -404,7 +404,7 @@ func TestAccContainerCluster_withFilteredNotificationConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_disableFilteredNotificationConfig(clusterName, newTopic, networkName, subnetworkName),
+				Config: testAccContainerCluster_withEmptyFilteredNotificationConfig(clusterName, newTopic, networkName, subnetworkName),
 			},
 			{
 				ResourceName:      "google_container_cluster.filtered_notification_config",
@@ -413,7 +413,7 @@ func TestAccContainerCluster_withFilteredNotificationConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withEmptyFilteredNotificationConfig(clusterName, newTopic, networkName, subnetworkName),
+				Config: testAccContainerCluster_disableFilteredNotificationConfig(clusterName, newTopic, networkName, subnetworkName),
 			},
 			{
 				ResourceName:      "google_container_cluster.filtered_notification_config",
