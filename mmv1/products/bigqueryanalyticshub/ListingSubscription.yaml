@@ -146,6 +146,7 @@ properties:
     description: |
       The destination Pub/Sub subscription for this Analytics Hub subscription.
       Required when subscribing to a Pub/Sub topic listing.
+    ignore_read: true
     exactly_one_of:
       - 'destination_dataset'
       - 'destination_pubsub_subscription'
