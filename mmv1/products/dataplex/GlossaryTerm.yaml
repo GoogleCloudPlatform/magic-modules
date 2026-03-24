@@ -24,8 +24,6 @@ timeouts:
   update_minutes: 15
   delete_minutes: 15
 autogen_async: true
-external_providers:
-  "time"
 import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}']
 examples:
   - name: 'dataplex_glossary_term_basic'
@@ -36,6 +34,8 @@ examples:
     primary_resource_id: 'term_test_id_full'
     vars:
       term_name: 'term-full'
+    external_providers: 
+      - "time"
 parameters:
   - name: 'location'
     type: String
