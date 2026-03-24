@@ -121,20 +121,20 @@ If not provided, currently deletion protection will be set to UNPROTECTED as it 
 					},
 				},
 			},
-//UDP schema start
-            "deletion_policy": {
-                Type:     schema.TypeString,
-                Optional: true,
-                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
+			//UDP schema start
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
 When a 'terraform destroy' or 'terraform apply' would delete the instance,
 the command will fail if this field is set to "PREVENT" in Terraform state.
 When set to "ABANDON", the command will remove the resource from Terraform
 management without updating or deleting the resource in the API.
 When set to "DELETE", deleting the resource is allowed.
 `,
-                Default: "DELETE",
-            },
-//UDP schema end
+				Default: "DELETE",
+			},
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -265,33 +265,33 @@ func resourceBigtableAuthorizedViewRead(d *schema.ResourceData, meta interface{}
 	} else {
 		return fmt.Errorf("Error parsing server returned subset_view since it's empty")
 	}
-    //UDP default read start
-    // Explicitly set virtual fields to default values if unset
-    if _, ok := d.GetOkExists("deletion_policy"); !ok {
-        if err := d.Set("deletion_policy", "DELETE"); err != nil {
-            return fmt.Errorf("Error setting deletion_policy: %s", err)
-        }
-    }
-    //UDP default read end
+	//UDP default read start
+	// Explicitly set virtual fields to default values if unset
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
+		if err := d.Set("deletion_policy", "DELETE"); err != nil {
+			return fmt.Errorf("Error setting deletion_policy: %s", err)
+		}
+	}
+	//UDP default read end
 
 	return nil
 }
 
 func resourceBigtableAuthorizedViewUpdate(d *schema.ResourceData, meta interface{}) error {
-    //UDP update shortcircuit start
-    clientSideFields := map[string]bool{"deletion_policy": true}
-    clientSideOnly := true
-    for field := range ResourceBigtableAuthorizedView().Schema {
-        if d.HasChange(field) && !clientSideFields[field] {
-            clientSideOnly = false
-            break
-        }
-    }
-    if clientSideOnly {
-        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
-        return resourceBigtableAuthorizedViewRead(d, meta)
-    }
-    //UDP update shortcircuit end
+	//UDP update shortcircuit start
+	clientSideFields := map[string]bool{"deletion_policy": true}
+	clientSideOnly := true
+	for field := range ResourceBigtableAuthorizedView().Schema {
+		if d.HasChange(field) && !clientSideFields[field] {
+			clientSideOnly = false
+			break
+		}
+	}
+	if clientSideOnly {
+		log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+		return resourceBigtableAuthorizedViewRead(d, meta)
+	}
+	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -355,15 +355,15 @@ func resourceBigtableAuthorizedViewUpdate(d *schema.ResourceData, meta interface
 }
 
 func resourceBigtableAuthorizedViewDestroy(d *schema.ResourceData, meta interface{}) error {
-    //UDP pre-delete start
-    if d.Get("deletion_policy").(string) == "PREVENT" {
-        return fmt.Errorf("cannot destroy authorized view without setting deletion_policy=\"DELETE\" and running `terraform apply`")
-    }
-    if d.Get("deletion_policy").(string) == "ABANDON" {
-        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing authorized view %q from Terraform state without deletion", d.Id())
-        return nil
-    }
-    //UDP pre-delete end
+	//UDP pre-delete start
+	if d.Get("deletion_policy").(string) == "PREVENT" {
+		return fmt.Errorf("cannot destroy authorized view without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+	}
+	if d.Get("deletion_policy").(string) == "ABANDON" {
+		log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing authorized view %q from Terraform state without deletion", d.Id())
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
