@@ -3,6 +3,8 @@ package bigqueryanalyticshub_test
 import (
 	"fmt"
 	"os"
+    {{- end }}
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -88,6 +90,34 @@ func TestAccBigqueryAnalyticsHubListingSubscription_multiregion(t *testing.T) {
 	})
 }
 
+func TestAccBigqueryAnalyticsHubListingSubscription_pubsub_linked_resources(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryAnalyticsHubListingSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryAnalyticsHubListingSubscription_pubsub_linked_resources(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "state", "STATE_ACTIVE"),
+					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "resource_type", "PUBSUB_TOPIC"),
+					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "linked_resources.#", "1"),
+					resource.TestMatchResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "linked_resources.0.linked_pubsub_subscription",
+						regexp.MustCompile(`projects/\d+/subscriptions/tf_test_sub_`+context["random_suffix"].(string))),
+					resource.TestMatchResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "linked_resources.0.listing",
+						regexp.MustCompile(`projects/\d+/locations/us/dataExchanges/tf_test_de_`+context["random_suffix"].(string)+`/listings/tf_test_listing_`+context["random_suffix"].(string))),
+				),
+			},
+		},
+	})
+}
+
 func testAccBigqueryAnalyticsHubListingSubscription_stateId(state *terraform.State) (string, error) {
 	resourceName := "google_bigquery_analytics_hub_listing_subscription.subscription"
 	var rawState map[string]string
@@ -141,6 +171,44 @@ resource "google_bigquery_analytics_hub_listing_subscription" "subscription" {
 `, context)
 }
 
+func testAccBigqueryAnalyticsHubListingSubscription_pubsub_linked_resources(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
+  location         = "US"
+  data_exchange_id = "tf_test_de_%{random_suffix}"
+  display_name     = "tf_test_de_%{random_suffix}"
+}
+
+resource "google_pubsub_topic" "subscription" {
+  name = "tf_test_topic_%{random_suffix}"
+}
+
+resource "google_bigquery_analytics_hub_listing" "subscription" {
+  location         = "US"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id       = "tf_test_listing_%{random_suffix}"
+  display_name     = "tf_test_listing_%{random_suffix}"
+
+  pubsub_topic {
+    topic = google_pubsub_topic.subscription.id
+  }
+}
+
+resource "google_bigquery_analytics_hub_listing_subscription" "subscription" {
+  location         = "US"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id       = google_bigquery_analytics_hub_listing.subscription.listing_id
+
+  destination_pubsub_subscription {
+    pubsub_subscription {
+      name = "projects/${google_pubsub_topic.subscription.project}/subscriptions/tf_test_sub_%{random_suffix}"
+    }
+  }
+}
+`, context)
+}
+
+{{- if ne $.TargetVersionName "ga" }}
 func testAccBigqueryAnalyticsHubListingSubscription_multiregion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
