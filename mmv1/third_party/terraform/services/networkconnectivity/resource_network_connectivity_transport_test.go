@@ -36,7 +36,7 @@ var (
 	_ = googleapi.Error{}
 )
 
-func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_basic(t *testing.T) {
+func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -50,6 +50,15 @@ func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExampl
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_basic(context),
+			},
+			{
+				ResourceName:            "google_network_connectivity_transport.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "network", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_update(context),
 			},
 			{
 				ResourceName:            "google_network_connectivity_transport.primary",
@@ -78,6 +87,34 @@ resource "google_network_connectivity_transport" "primary"  {
   name              = "tf-test-basic-transport%{random_suffix}"
   region            = "us-east4"
   description       = "A sample transport"
+  remote_profile    = "https://networkconnectivity.googleapis.com/v1beta/${data.google_project.project.id}/locations/us-east4/remoteTransportProfiles/aws-us-east-1"
+  network           = google_compute_network.primary-network.name
+  bandwidth         = "BPS_1G"
+  remote_account_id = "123"
+  labels = {
+    label-one = "value-one"
+  }
+}
+`, context)
+}
+
+func testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_network" "primary-network" {
+  provider                = google-beta
+  name                    = "tf-test-my-vpc-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_connectivity_transport" "primary"  {
+  provider          = google-beta
+  name              = "tf-test-basic-transport%{random_suffix}"
+  region            = "us-east4"
+  description       = "New description"
   remote_profile    = "https://networkconnectivity.googleapis.com/v1beta/${data.google_project.project.id}/locations/us-east4/remoteTransportProfiles/aws-us-east-1"
   network           = google_compute_network.primary-network.name
   bandwidth         = "BPS_1G"
