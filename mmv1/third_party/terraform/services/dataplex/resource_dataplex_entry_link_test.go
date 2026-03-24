@@ -20,6 +20,9 @@ func TestAccDataplexEntryLink_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataplexEntryLink_dataplexEntryLinkUpdate(context),
@@ -36,17 +39,6 @@ func TestAccDataplexEntryLink_update(t *testing.T) {
 
 func testAccDataplexEntryLink_dataplexEntryLinkUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "0.8.0"
-    }
-  }
-}
 resource "google_dataplex_entry_group" "entry-group-basic" {
   location = "us-central1"
   entry_group_id = "tf-test-entry-group%{random_suffix}"
