@@ -363,7 +363,7 @@ func testAccSpannerInstancePartition_asymmetricAutoscaling(context map[string]in
 	return acctest.Nprintf(`
 resource "google_spanner_instance" "main" {
   name         = "tf-test-spanner-main-%{random_suffix}"
-  config       = "nam8"
+  config       = "nam6"
   display_name = "main-instance"
   num_nodes    = 1
   edition      = "ENTERPRISE_PLUS"
