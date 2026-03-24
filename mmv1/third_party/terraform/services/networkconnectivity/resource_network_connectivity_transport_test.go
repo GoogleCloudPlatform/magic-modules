@@ -36,7 +36,7 @@ var (
 	_ = googleapi.Error{}
 )
 
-func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample(t *testing.T) {
+func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_Full(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
