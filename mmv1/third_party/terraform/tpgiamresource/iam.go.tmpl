@@ -55,8 +55,6 @@ type (
 
 	// Parser for Terraform resource identifier (d.Id) for resource whose IAM policy is being changed
 	ResourceIdParserFunc func(d *schema.ResourceData, config *transport_tpg.Config) error
-
-	ResourceIdParserWithIdentityFunc func(d *schema.ResourceData, config *transport_tpg.Config, enableResourceIdentity bool) error
 )
 
 // Locking wrapper around read-only operation with retries.
