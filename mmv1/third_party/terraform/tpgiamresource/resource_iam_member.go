@@ -228,47 +228,12 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 	}
 }
 
-func ConvertToIdentitySchema(parentSchema map[string]*schema.Schema) map[string]*schema.Schema {
-	identitySchema := make(map[string]*schema.Schema)
-	for k, v := range parentSchema {
-		identitySchema[k] = &schema.Schema{
-			Type: v.Type,
-		}
-		// If the field has RequiredForImport or OptionalForImport set, preserve them
-		if v.RequiredForImport {
-			identitySchema[k].RequiredForImport = true
-		}
-		if v.OptionalForImport {
-			identitySchema[k].OptionalForImport = true
-		}
-		// If not explicitly set, infer from Required+ForceNew pattern
-		if !v.RequiredForImport && !v.OptionalForImport {
-			if v.Required && v.ForceNew {
-				identitySchema[k].RequiredForImport = true
-			} else if v.Optional && v.ForceNew {
-				identitySchema[k].OptionalForImport = true
-			}
-		}
-	}
-	return identitySchema
-}
-
-// setIamMemberParentIdentity copies IAM parent attributes from resource state into Terraform
-// resource identity. Keys are the same as ConvertToIdentitySchema(parentSpecificSchema); each
-// ResourceIdentityParser must read those attributes when producing the canonical resource id
-// (first segment of the legacy import id).
-func setIamMemberParentIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSpecificSchema map[string]*schema.Schema) {
-	for attr := range parentSpecificSchema {
-		identity.Set(attr, d.Get(attr))
-	}
-}
-
 // setIamMemberResourceIdentity sets parent attributes from state plus role/member/condition_title.
 // ResourceIdentityParser is only identity→canonical id (for import); it cannot derive parent
 // fields from updater.GetResourceId(). Those fields must come from the same state the updater
 // used, so they stay consistent with GetResourceId() and round-trip through ResourceIdentityParser.
 func setIamMemberResourceIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSpecificSchema map[string]*schema.Schema, role, member, conditionTitle string) {
-	setIamMemberParentIdentity(identity, d, parentSpecificSchema)
+	PopulateIamParentIdentity(identity, d, parentSpecificSchema)
 	identity.Set("role", role)
 	identity.Set("member", tpgresource.NormalizeIamPrincipalCasing(member))
 	if conditionTitle != "" {
