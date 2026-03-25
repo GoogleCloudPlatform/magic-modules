@@ -1,5 +1,5 @@
 package compute_test
-{{ if ne $.TargetVersionName `ga` -}}
+
 import (
 	"testing"
 
@@ -20,7 +20,7 @@ func TestAccComputeRegionCompositeHealthCheck_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionCompositeHealthCheckDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -34,8 +34,7 @@ func TestAccComputeRegionCompositeHealthCheck_update(t *testing.T) {
 			{
 				Config: testAccComputeRegionCompositeHealthCheck_update(context, "[google_compute_region_health_source.default.id, google_compute_region_health_source.default2.id]"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate),
-					},
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate)},
 				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_composite_health_check.example_test_composite_health_check", "description", "Updated description"),
@@ -49,15 +48,13 @@ func TestAccComputeRegionCompositeHealthCheck_update(t *testing.T) {
 			{
 				Config: testAccComputeRegionCompositeHealthCheck_update(context, "[google_compute_region_health_source.default.id]"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate),
-					},
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate)},
 				},
 			},
 			{
 				Config: testAccComputeRegionCompositeHealthCheck_basic(context, "[google_compute_region_health_source.default.id]"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate),
-					},
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate)},
 				},
 			},
 			{
@@ -73,7 +70,6 @@ func testAccComputeRegionCompositeHealthCheck_basic(context map[string]interface
 	context["health_sources"] = health_sources
 	return acctest.Nprintf(`
 resource "google_compute_region_composite_health_check" "example_test_composite_health_check" {
-  provider           = google-beta
   name               = "tf-test-composite-health-check-%{random_suffix}"
   description        = "Example composite health check basic"
   region             = "%{region}"
@@ -82,7 +78,6 @@ resource "google_compute_region_composite_health_check" "example_test_composite_
 }
 
 resource "google_compute_region_health_source" "default" {
-  provider                  = google-beta
   name                      = "tf-test-hs-%{random_suffix}"
   region                    = "%{region}"
   source_type               = "BACKEND_SERVICE"
@@ -91,14 +86,12 @@ resource "google_compute_region_health_source" "default" {
 }
 
 resource "google_compute_region_health_aggregation_policy" "hap" {
-  provider    = google-beta
   name        = "tf-test-hap-%{random_suffix}"
   description = "health aggregation policy for health source"
   region      = "%{region}"
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
   name     = "tf-test-hc-%{random_suffix}"
   http_health_check {
     port = 80
@@ -106,7 +99,6 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
-  provider              = google-beta
   name                  = "tf-test-bs-%{random_suffix}"
   region                = "%{region}"
   health_checks         = [google_compute_health_check.default.id]
@@ -114,7 +106,6 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_forwarding_rule" "default" {
-  provider              = google-beta
   name                  = "tf-test-fr-%{random_suffix}"
   region                = "%{region}"
   load_balancing_scheme = "INTERNAL"
@@ -126,13 +117,11 @@ resource "google_compute_forwarding_rule" "default" {
 }
 
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-net-%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-sub-%{random_suffix}"
   ip_cidr_range = "10.2.0.0/16"
   region        = "%{region}"
@@ -149,7 +138,6 @@ func testAccComputeRegionCompositeHealthCheck_update(context map[string]interfac
 	newContext["health_sources"] = health_sources
 	return acctest.Nprintf(`
 resource "google_compute_region_composite_health_check" "example_test_composite_health_check" {
-  provider           = google-beta
   name               = "tf-test-composite-health-check-%{random_suffix}"
   description        = "Updated description"
   region             = "%{region}"
@@ -158,7 +146,6 @@ resource "google_compute_region_composite_health_check" "example_test_composite_
 }
 
 resource "google_compute_region_health_source" "default" {
-  provider                  = google-beta
   name                      = "tf-test-hs-%{random_suffix}"
   region                    = "%{region}"
   source_type               = "BACKEND_SERVICE"
@@ -167,14 +154,12 @@ resource "google_compute_region_health_source" "default" {
 }
 
 resource "google_compute_region_health_aggregation_policy" "hap" {
-  provider    = google-beta
   name        = "tf-test-hap-%{random_suffix}"
   description = "health aggregation policy for health source"
   region      = "%{region}"
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
   name     = "tf-test-hc-%{random_suffix}"
   http_health_check {
     port = 80
@@ -182,7 +167,6 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
-  provider              = google-beta
   name                  = "tf-test-bs-%{random_suffix}"
   region                = "%{region}"
   health_checks         = [google_compute_health_check.default.id]
@@ -190,7 +174,6 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_forwarding_rule" "default" {
-  provider              = google-beta
   name                  = "tf-test-fr-%{random_suffix}"
   region                = "%{region}"
   load_balancing_scheme = "INTERNAL"
@@ -202,13 +185,11 @@ resource "google_compute_forwarding_rule" "default" {
 }
 
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "tf-test-net-%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "tf-test-sub-%{random_suffix}"
   ip_cidr_range = "10.2.0.0/16"
   region        = "%{region}"
@@ -216,7 +197,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_region_health_source" "default2" {
-  provider                  = google-beta
   name                      = "tf-test-hs2-%{random_suffix}"
   region                    = "%{region}"
   source_type               = "BACKEND_SERVICE"
@@ -225,14 +205,12 @@ resource "google_compute_region_health_source" "default2" {
 }
 
 resource "google_compute_region_health_aggregation_policy" "hap2" {
-  provider    = google-beta
   name        = "tf-test-hap2-%{random_suffix}"
   description = "health aggregation policy for health source 2"
   region      = "%{region}"
 }
 
 resource "google_compute_region_backend_service" "default2" {
-  provider              = google-beta
   name                  = "tf-test-bs2-%{random_suffix}"
   region                = "%{region}"
   health_checks         = [google_compute_health_check.default.id]
@@ -240,4 +218,3 @@ resource "google_compute_region_backend_service" "default2" {
 }
 `, newContext)
 }
-{{- end }}
