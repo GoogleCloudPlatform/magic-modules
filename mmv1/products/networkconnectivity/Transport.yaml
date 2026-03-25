@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 ---
 name: 'Transport'
 description: |
-  The NetworkConnectivity Transport resource
+  The Transport resource is a top-level resource used by customers to control Partner Cross-Cloud Interconnect (CCI) connections.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
@@ -79,24 +79,10 @@ properties:
       [Output only] Google-generated activation key. This is only output if the selected profile supports an OUTPUT key flow. Inputting this to the provider is only valid while the resource is in a PENDING_KEY state. Once the provider has accepted the key, the resource will move to the CONFIGURING state.
     output: true
   - name: 'bandwidth'
-    type: Enum
+    type: String
     description: |
       Bandwidth of the Transport. This must be one of the supported bandwidths for the remote profile.
     default_from_api: true
-    enum_values:
-      - 'BPS_50M'
-      - 'BPS_100M'
-      - 'BPS_200M'
-      - 'BPS_300M'
-      - 'BPS_400M'
-      - 'BPS_500M'
-      - 'BPS_1G'
-      - 'BPS_2G'
-      - 'BPS_5G'
-      - 'BPS_10G'
-      - 'BPS_20G'
-      - 'BPS_50G'
-      - 'BPS_100G'
   - name: 'labels'
     type: KeyValueLabels
     description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
