@@ -349,15 +349,23 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
 	return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }})
 }
 
-func {{ $.ResourceName }}IamParentParentResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, transportConfig *transport_tpg.Config) (string, error) {
-	return tpgiamresource.ParseIamResourceIdentity(d, identity, transportConfig, tpgiamresource.IamResourceIdentityConfig{
-		Params: []tpgiamresource.IamIdentityParam{
+// {{ $.ResourceName }}IamResourceIdentityParser returns the canonical resource id for IAM member
+// import via resource identity (same shape as {{ $.ResourceName }}IamUpdater.GetResourceId()).
+func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
 {{- range $param := $.IamResourceParams }}
-			{Key: "{{ camelize $param "lower" }}", IdentityKey: "{{ underscore $param }}"},
+	{{ $camel := camelize $param "lower" }}
+	{{ $snake := underscore $param }}
+	{{ $camel }}Val, ok := identity.GetOk("{{ $snake }}")
+	if !ok {
+		return "", fmt.Errorf("import identity is missing attribute %q", "{{ $snake }}")
+	}
+	{{ $camel }}, ok := {{ $camel }}Val.(string)
+	if !ok || {{ $camel }} == "" {
+		return "", fmt.Errorf("import identity attribute %q must be a non-empty string", "{{ $snake }}")
+	}
+	{{ $camel }} = tpgresource.GetResourceNameFromSelfLink({{ $camel }})
 {{- end }}
-		},
-		UriFormat: "{{ $.IamResourceUriFormat }}",
-	})
+	return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ range $i, $param := $.IamResourceParams }}{{ if $i }}, {{ end }}{{ camelize $param "lower" }}{{ end }}), nil
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) GetMutexKey() string {
