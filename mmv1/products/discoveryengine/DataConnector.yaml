@@ -58,6 +58,11 @@ examples:
     primary_resource_id: 'jira-with-actions'
     vars:
       collection_id: 'collection-id'
+  - name: 'discoveryengine_dataconnector_google_drive'
+    primary_resource_id: 'google-drive'
+    vars:
+      collection_id: 'collection-id'
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -107,8 +112,17 @@ properties:
   - name: 'dataSource'
     type: String
     description: |
-      The name of the data source.
-      Supported values: `salesforce`, `jira`, `confluence`, `bigquery`.
+      The name of the data source. Supported first-party connectors:
+      `gcs`, `bigquery`, `gcp_fhir`, `google_mail`, `google_drive`,
+      `google_calendar`, `google_chat`.
+      Supported third-party connectors (GA): `onedrive`, `outlook`,
+      `confluence`, `jira`, `servicenow`, `sharepoint`.
+      Supported third-party connectors (Preview): `asana`, `box`,
+      `confluence_server`, `dropbox`, `dynamics365`, `github`, `gitlab`,
+      `hubspot`, `jira_server`, `linear`, `notion`, `okta`, `pagerduty`,
+      `salesforce`, `slack`, `snowflake`, `teams`, `trello`, `workday`,
+      `zendesk`.
+      See the [full list of connectors](https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1alpha#dataconnectorservice).
     required: true
     immutable: true
   - name: 'dataSourceVersion'
@@ -156,8 +170,12 @@ properties:
           type: String
           description: |
             The name of the entity. Supported values by data source:
+            * Google Drive: `google_drive`
+            * Google Mail: `google_mail`
+            * Google Calendar: `google_calendar`
+            * Google Chat: `google_chat`
             * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
-            * Jira: project, issue, attachment, comment, worklog
+            * Jira: `project`, `issue`, `attachment`, `comment`, `worklog`
             * Confluence: `Content`, `Space`
         - name: 'keyPropertyMappings'
           type: KeyValuePairs

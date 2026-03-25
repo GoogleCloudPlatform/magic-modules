@@ -1,0 +1,14 @@
+resource "google_discovery_engine_data_connector" "google-drive" {
+  location                = "global"
+  collection_id           = "{{index $.Vars "collection_id"}}"
+  collection_display_name = "Google Drive"
+  data_source             = "google_drive"
+  refresh_interval        = "0s"
+  entities {
+    entity_name = "google_drive"
+    params      = jsonencode({
+      included_shared_drive_ids = ["SHARED_DRIVE_ID"]
+    })
+  }
+  connector_modes = ["FEDERATED"]
+}
