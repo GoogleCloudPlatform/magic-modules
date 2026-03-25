@@ -80,8 +80,8 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 
 func testAccEventarcPipeline_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_pubsub_topic" "topic" {
-  name = "%{topic_name}"
+resource "google_pubsub_topic" "topic_update" {
+  name = "%{topic_name}-2"
 }
 
 resource "google_eventarc_pipeline" "primary" {
@@ -145,8 +145,8 @@ EOF
 
 func testAccEventarcPipeline_unset(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_pubsub_topic" "topic" {
-  name = "%{topic_name}"
+resource "google_pubsub_topic" "topic_update" {
+  name = "%{topic_name}-2"
 }
 
 resource "google_eventarc_pipeline" "primary" {

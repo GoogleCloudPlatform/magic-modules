@@ -96,10 +96,10 @@ resource "google_discovery_engine_recommendation_engine" "media" {
   media_recommendation_engine_config {
     type                       = "recommended-for-you"
     optimization_objective     = "cvr"
-	optimization_objective_config {
-		target_field           = "watch-percentage"
-		target_field_value_float = 0.5
-	}
+  	optimization_objective_config {
+  		target_field           = "watch-percentage"
+  		target_field_value_float = 0.5
+  	}
     training_state             = "PAUSED"
     engine_features_config {
         recommended_for_you_config {

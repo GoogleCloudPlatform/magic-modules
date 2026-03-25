@@ -554,7 +554,7 @@ resource "google_compute_firewall" "fw_hc" {
 
 # allow communication within the subnet
 resource "google_compute_firewall" "fw_ilb_to_backends" {
-  name          = ""%{fw_allow_ilb_to_backends_name}"
+  name          = "%{fw_allow_ilb_to_backends_name}"
   provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
@@ -676,7 +676,7 @@ func testAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(context map[
 	return acctest.Nprintf(`
 // Forwarding rule for VPC private service connect
 resource "google_compute_forwarding_rule" "default" {
-  name                    = %{forwarding_rule_name}"
+  name                    = "%{forwarding_rule_name}"
   region                  = "us-central1"
   load_balancing_scheme   = ""
   target                  = google_compute_service_attachment.producer_service_attachment.id

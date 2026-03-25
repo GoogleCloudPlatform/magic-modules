@@ -132,7 +132,7 @@ resource "google_compute_network" "ilb_network" {
 
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
-  name          = %{ilb_subnet}"
+  name          = "%{ilb_subnet}"
   project       = google_project.service_project.project_id
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"

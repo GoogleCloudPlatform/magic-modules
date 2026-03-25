@@ -1,7 +1,6 @@
 package workstations_test
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"testing"
