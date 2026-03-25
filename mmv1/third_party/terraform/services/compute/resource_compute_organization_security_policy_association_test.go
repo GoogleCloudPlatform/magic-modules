@@ -13,8 +13,10 @@ func TestAccComputeOrganizationSecurityPolicyAssociation_excludeFields(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
+		"org_id":         envvar.GetTestOrgTargetFromEnv(t),
+		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"new_project_id": "tf-test-project-" + acctest.RandString(t, 10),
+		"random_suffix":  acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -46,8 +48,27 @@ func TestAccComputeOrganizationSecurityPolicyAssociation_excludeFields(t *testin
 
 func testAccComputeOrganizationSecurityPolicyAssociation_excludeFieldsCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project" "excluded_project" {
+  project_id      = "%{new_project_id}"
+  name            = "%{new_project_id}"
+  org_id          = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
 resource "google_folder" "security_policy_target" {
   display_name = "tf-test-secpol-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
+  deletion_protection = false
+}
+
+resource "google_folder" "security_policy_excluded_1" {
+  display_name = "tf-test-folder-1-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
+  deletion_protection = false
+}
+
+resource "google_folder" "security_policy_excluded_2" {
+  display_name = "tf-test-folder-2-%{random_suffix}"
   parent       = "organizations/%{org_id}"
   deletion_protection = false
 }
@@ -63,12 +84,12 @@ resource "google_compute_organization_security_policy_association" "policy" {
   attachment_id = google_compute_organization_security_policy.policy.parent
   policy_id     = google_compute_organization_security_policy.policy.id
   excluded_projects = [
-    "projects/12345678910",
-    "projects/01987654321"
+    "projects/%{project_number}",
+    "projects/${google_project.excluded_project.number}"
   ]
   excluded_folders = [
-    "projects/12345678910",
-    "projects/01987654321"
+    "projects/${google_folder.security_policy_target.folder_id}",
+    "projects/${google_folder.security_policy_excluded_1.folder_id}"
   ]
 }
 `, context)
@@ -76,8 +97,27 @@ resource "google_compute_organization_security_policy_association" "policy" {
 
 func testAccComputeOrganizationSecurityPolicyAssociation_excludeFieldsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project" "excluded_project" {
+  project_id      = "%{new_project_id}"
+  name            = "%{new_project_id}"
+  org_id          = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
 resource "google_folder" "security_policy_target" {
   display_name = "tf-test-secpol-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
+  deletion_protection = false
+}
+
+resource "google_folder" "security_policy_excluded_1" {
+  display_name = "tf-test-folder-1-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
+  deletion_protection = false
+}
+
+resource "google_folder" "security_policy_excluded_2" {
+  display_name = "tf-test-folder-2-%{random_suffix}"
   parent       = "organizations/%{org_id}"
   deletion_protection = false
 }
@@ -93,12 +133,12 @@ resource "google_compute_organization_security_policy_association" "policy" {
   attachment_id = google_compute_organization_security_policy.policy.parent
   policy_id     = google_compute_organization_security_policy.policy.id
   excluded_projects = [
-    "projects/01987654321"
+    "projects/${google_project.excluded_project.number}"
   ]
   excluded_folders = [
-    "projects/00000000000",
-    "projects/12345678910",
-    "projects/01987654321"
+    "projects/${google_folder.security_policy_target.folder_id}",
+    "projects/${google_folder.security_policy_excluded_1.folder_id}",
+    "projects/${google_folder.security_policy_excluded_2.folder_id}"
   ]
 }
 `, context)
