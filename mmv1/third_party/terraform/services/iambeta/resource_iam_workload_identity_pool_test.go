@@ -2,11 +2,10 @@ package iambeta_test
 
 import (
 	"fmt"
-	{{if ne $.TargetVersionName "ga" -}}
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-	{{- end }}
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -71,27 +70,26 @@ func TestAccIAMBetaWorkloadIdentityPool_minimal(t *testing.T) {
 	})
 }
 
-{{if ne $.TargetVersionName "ga" -}}
-func TestAccIAMBetaWorkloadIdentityPool_beta_update(t *testing.T) {
+func TestAccIAMBetaWorkloadIdentityPool_update(t *testing.T) {
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckIAMBetaWorkloadIdentityPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIAMBetaWorkloadIdentityPool_beta_full(randomSuffix),
+				Config: testAccIAMBetaWorkloadIdentityPool_full(randomSuffix),
 			},
 			{
-				ResourceName:            "google_iam_workload_identity_pool.my_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_iam_workload_identity_pool.my_pool",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
-				Config: testAccIAMBetaWorkloadIdentityPool_beta_update(randomSuffix),
+				Config: testAccIAMBetaWorkloadIdentityPool_update(randomSuffix),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_iam_workload_identity_pool.my_pool", plancheck.ResourceActionUpdate),
@@ -99,12 +97,12 @@ func TestAccIAMBetaWorkloadIdentityPool_beta_update(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:            "google_iam_workload_identity_pool.my_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_iam_workload_identity_pool.my_pool",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
-				Config: testAccIAMBetaWorkloadIdentityPool_beta_update_use_default_ca(randomSuffix),
+				Config: testAccIAMBetaWorkloadIdentityPool_update_use_default_ca(randomSuffix),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_iam_workload_identity_pool.my_pool", plancheck.ResourceActionUpdate),
@@ -112,12 +110,12 @@ func TestAccIAMBetaWorkloadIdentityPool_beta_update(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:            "google_iam_workload_identity_pool.my_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_iam_workload_identity_pool.my_pool",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
-				Config: testAccIAMBetaWorkloadIdentityPool_beta_minimum(randomSuffix),
+				Config: testAccIAMBetaWorkloadIdentityPool_minimal(randomSuffix),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_iam_workload_identity_pool.my_pool", plancheck.ResourceActionUpdate),
@@ -125,51 +123,17 @@ func TestAccIAMBetaWorkloadIdentityPool_beta_update(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:            "google_iam_workload_identity_pool.my_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_iam_workload_identity_pool.my_pool",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
-{{- end }}
 
 func testAccIAMBetaWorkloadIdentityPool_full(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
-  workload_identity_pool_id = "tf-test-my-pool-%s"
-  display_name              = "Name of pool"
-  description               = "Identity pool for automated test"
-  disabled                  = true
-}
-`, suffix)
-}
-
-func testAccIAMBetaWorkloadIdentityPool_minimal(suffix string) string {
-	return fmt.Sprintf(`
-resource "google_iam_workload_identity_pool" "my_pool" {
-  workload_identity_pool_id = "tf-test-my-pool-%s"
-}
-`, suffix)
-}
-
-func testAccIAMBetaWorkloadIdentityPool_update(suffix string) string {
-	return fmt.Sprintf(`
-resource "google_iam_workload_identity_pool" "my_pool" {
-  workload_identity_pool_id = "tf-test-my-pool-%s"
-  display_name              = "Updated name of pool"
-  description               = "Updated description"
-  disabled                  = false
-}
-`, suffix)
-}
-
-{{if ne $.TargetVersionName "ga" -}}
-func testAccIAMBetaWorkloadIdentityPool_beta_full(suffix string) string {
-	return fmt.Sprintf(`
-resource "google_iam_workload_identity_pool" "my_pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "tf-test-my-pool-%s"
   display_name              = "Name of the pool"
   description               = "Identity pool operates in TRUST_DOMAIN mode"
@@ -208,11 +172,9 @@ resource "google_iam_workload_identity_pool" "my_pool" {
 `, suffix)
 }
 
-func testAccIAMBetaWorkloadIdentityPool_beta_update(suffix string) string {
+func testAccIAMBetaWorkloadIdentityPool_update(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "tf-test-my-pool-%s"
   display_name              = "Updated name of the pool"
   description               = "Updated identity pool operates in TRUST_DOMAIN mode"
@@ -239,11 +201,9 @@ resource "google_iam_workload_identity_pool" "my_pool" {
 `, suffix)
 }
 
-func testAccIAMBetaWorkloadIdentityPool_beta_update_use_default_ca(suffix string) string {
+func testAccIAMBetaWorkloadIdentityPool_update_use_default_ca(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "tf-test-my-pool-%s"
   display_name              = "Updated name of the pool"
   description               = "Updated identity pool operates in TRUST_DOMAIN mode"
@@ -267,15 +227,11 @@ resource "google_iam_workload_identity_pool" "my_pool" {
 `, suffix)
 }
 
-
-func testAccIAMBetaWorkloadIdentityPool_beta_minimum(suffix string) string {
+func testAccIAMBetaWorkloadIdentityPool_minimal(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "tf-test-my-pool-%s"
   mode                      = "TRUST_DOMAIN"
 }
 `, suffix)
 }
-{{- end }}
