@@ -3,6 +3,7 @@ package vertexai
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -21,20 +22,17 @@ func (w *VertexAIOperationWaiter) QueryOp() (interface{}, error) {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
 
+	// Replace any occurences of the `{{region}}` tag with `region` directly.
+	// ReplaceVars can't be used because we don't have all of the necessary inputs.
 	region := tpgresource.GetRegionFromRegionalSelfLink(w.CommonOperationWaiter.Op.Name)
-
-	// Returns the proper get.
-{{- if eq $.TargetVersionName "ga" }}
-	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1/%s", region, w.CommonOperationWaiter.Op.Name)
-{{- else }}
-	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1beta1/%s", region, w.CommonOperationWaiter.Op.Name)
-{{- end }}
+	baseUrl := strings.ReplaceAll(w.Config.VertexAIBasePath, "{{region}}", region)
+	url := fmt.Sprintf("%s%s", baseUrl, w.CommonOperationWaiter.Op.Name)
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config: w.Config,
-		Method: "GET",
-		Project: w.Project,
-		RawURL: url,
+		Config:    w.Config,
+		Method:    "GET",
+		Project:   w.Project,
+		RawURL:    url,
 		UserAgent: w.UserAgent,
 	})
 }

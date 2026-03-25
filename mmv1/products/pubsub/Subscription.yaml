@@ -285,14 +285,14 @@ properties:
             type: Boolean
             description: |
               When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
-      - name: 'textConfig'
+      - name: textConfig
         type: NestedObject
         description: |
           If set, message data will be written to Cloud Storage in text format.
         allow_empty_object: true
         default_from_api: true
         properties:
-          - name: 'state'
+          - name: state
             type: String
             description: |
               Output only. Placeholder to allow the empty text_config block.

@@ -48,6 +48,7 @@ examples:
       entry_link_name: 'my_entry_link_full'
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
+    external_providers: ["time"]
   - name: 'dataplex_entry_link_with_aspect'
     primary_resource_id: 'full_entry_link_with_aspect'
     primary_resource_name: 'fmt.Sprintf("tf-test-entry-link-full-with-aspect%s", context["random_suffix"])'
