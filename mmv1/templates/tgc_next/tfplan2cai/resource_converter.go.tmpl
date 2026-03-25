@@ -99,7 +99,7 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
                 Resource: &caiasset.AssetResource{
                     Version: "{{ $apiVersion }}",
                     DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
-                    DiscoveryName: "{{ or $.ApiResourceTypeKind $.Name }}",
+                    DiscoveryName:        "{{ or $.ApiResourceTypeKind $.Name }}",
                     Data: obj,
                     Location:             location,
                 },

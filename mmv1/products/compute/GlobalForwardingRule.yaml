@@ -17,6 +17,7 @@ api_resource_type_kind: ForwardingRule
 api_variant_patterns:
   - 'projects/{project}/global/forwardingRules/{forwardingRule}'
 kind: 'compute#forwardingRule'
+cai_resource_kind: 'GlobalForwardingRule'
 description: |
   Represents a GlobalForwardingRule resource. Global forwarding rules are
   used to forward traffic to the correct load balancer for HTTP load
@@ -42,6 +43,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
@@ -499,6 +501,7 @@ properties:
       networkTier of the Address.
     immutable: true
     default_from_api: true
+    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/global_forwarding_rule_network_tier.go.tmpl'
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'

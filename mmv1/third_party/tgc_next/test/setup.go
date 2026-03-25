@@ -245,7 +245,7 @@ func prepareTestData(testName string, stepNumber int, retries int) (*StepTestDat
 		}
 
 		if os.Getenv("WRITE_FILES") != "" {
-			writeJSONFile(fmt.Sprintf("%s_attrs", strings.ReplaceAll(testName, "/", "_")), rawResourceConfigs)
+			writeJSONFile(fmt.Sprintf("%s_step%d_attrs", strings.ReplaceAll(testName, "/", "_"), stepNumber), rawResourceConfigs)
 		}
 
 		rawConfigMap := convertToConfigMap(rawResourceConfigs)
