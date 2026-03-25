@@ -3514,3 +3514,66 @@ resource "google_dataproc_metastore_service" "ms" {
 }
 `, clusterName, serviceId)
 }
+
+func TestAccDataprocCluster_withProvisionedIopsAndThroughput(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	subnetworkName := fmt.Sprintf("tf-test-subnetwork-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withProvisionedIopsAndThroughput(clusterName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_withProvisionedIopsAndThroughput(clusterName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "tf_test_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+        boot_disk_size_gb = 500
+        boot_disk_provisioned_iops = 10000
+        boot_disk_provisioned_throughput = 140
+      }
+    }
+
+    worker_config {
+      num_instances = 2
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+        boot_disk_size_gb = 500
+        boot_disk_provisioned_iops = 10000
+        boot_disk_provisioned_throughput = 140
+      }
+    }
+  }
+}
+`, clusterName, subnetworkName)
+}
