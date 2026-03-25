@@ -362,7 +362,7 @@ var generatedResources = map[string]*schema.Resource{
 	{{- end }}
 	{{- if $object.IamClassName }}
 		"{{ $object.TerraformName }}_iam_binding":              tpgiamresource.ResourceIamBinding({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
-		"{{ $object.TerraformName }}_iam_member":               tpgiamresource.ResourceIamMember({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
+		"{{ $object.TerraformName }}_iam_member":               tpgiamresource.ResourceIamMember({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc, tpgiamresource.IamWithResourceIdentity({{ $object.IamClassName }}IamResourceIdentityParser)),
 		"{{ $object.TerraformName }}_iam_policy":               tpgiamresource.ResourceIamPolicy({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
 	{{- end }}
 	{{- end }}
@@ -492,7 +492,7 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_dataproc_job_iam_member":               tpgiamresource.ResourceIamMember(dataproc.IamDataprocJobSchema, dataproc.NewDataprocJobUpdater, dataproc.DataprocJobIdParseFunc),
 	"google_dataproc_job_iam_policy":               tpgiamresource.ResourceIamPolicy(dataproc.IamDataprocJobSchema, dataproc.NewDataprocJobUpdater, dataproc.DataprocJobIdParseFunc),
 	"google_folder_iam_binding":                    tpgiamresource.ResourceIamBinding(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc),
-	"google_folder_iam_member":                     tpgiamresource.ResourceIamMember(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc),
+	"google_folder_iam_member":                     tpgiamresource.ResourceIamMember(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc, tpgiamresource.IamWithResourceIdentity(resourcemanager.FolderIamResourceIdentityParser)),
 	"google_folder_iam_policy":                     tpgiamresource.ResourceIamPolicy(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc),
 	"google_folder_iam_audit_config":               tpgiamresource.ResourceIamAuditConfig(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc),
 	"google_healthcare_dataset_iam_binding":        tpgiamresource.ResourceIamBinding(healthcare.IamHealthcareDatasetSchema, healthcare.NewHealthcareDatasetIamUpdater, healthcare.DatasetIdParseFunc, tpgiamresource.IamWithBatching),
