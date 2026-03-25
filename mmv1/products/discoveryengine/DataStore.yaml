@@ -86,6 +86,11 @@ examples:
     primary_resource_id: 'advanced_site_search_config'
     vars:
       data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_google_workspace'
+    primary_resource_id: 'google_workspace'
+    vars:
+      data_store_id: 'data-store-id'
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -177,6 +182,49 @@ properties:
       - 'NO_CONTENT'
       - 'CONTENT_REQUIRED'
       - 'PUBLIC_WEBSITE'
+      - 'GOOGLE_WORKSPACE'
+  - name: 'workspaceConfig'
+    type: NestedObject
+    description: |
+      Workspace specific configuration for the data store.
+      This must be set when `content_config` is set to `GOOGLE_WORKSPACE`.
+    required: false
+    immutable: true
+    properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          The Google Workspace data source.
+        required: false
+        immutable: true
+        enum_values:
+          - 'GOOGLE_DRIVE'
+          - 'GOOGLE_MAIL'
+          - 'GOOGLE_SITES'
+          - 'GOOGLE_CALENDAR'
+          - 'GOOGLE_CHAT'
+          - 'GOOGLE_GROUPS'
+          - 'GOOGLE_KEEP'
+      - name: 'dasherCustomerId'
+        type: String
+        description: |
+          Obfuscated Dasher customer ID.
+        required: false
+        output: true
+      - name: 'superAdminEmailAddress'
+        type: String
+        description: |
+          The super admin email address for the workspace that will be used
+          for access token generation. For now we only use it for Native
+          Google Drive connector data ingestion.
+        required: false
+      - name: 'superAdminServiceAccount'
+        type: String
+        description: |
+          The super admin service account for the workspace that will be used
+          for access token generation. For now we only use it for Native
+          Google Drive connector data ingestion.
+        required: false
   - name: 'advancedSiteSearchConfig'
     type: NestedObject
     description: |
