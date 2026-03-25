@@ -1719,7 +1719,6 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	t.Parallel()
 
@@ -1750,7 +1749,6 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func testAccSqlDatabaseInstanceImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
 	return func(s *terraform.State) (string, error) {
