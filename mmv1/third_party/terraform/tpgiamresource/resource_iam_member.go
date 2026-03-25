@@ -253,15 +253,38 @@ func ConvertToIdentitySchema(parentSchema map[string]*schema.Schema) map[string]
 	return identitySchema
 }
 
+// setIamMemberParentIdentity copies IAM parent attributes from resource state into Terraform
+// resource identity. Keys are the same as ConvertToIdentitySchema(parentSpecificSchema); each
+// ResourceIdentityParser must read those attributes when producing the canonical resource id
+// (first segment of the legacy import id).
+func setIamMemberParentIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSpecificSchema map[string]*schema.Schema) {
+	for attr := range parentSpecificSchema {
+		identity.Set(attr, d.Get(attr))
+	}
+}
+
+// setIamMemberResourceIdentity sets parent attributes from state plus role/member/condition_title.
+// ResourceIdentityParser is only identity→canonical id (for import); it cannot derive parent
+// fields from updater.GetResourceId(). Those fields must come from the same state the updater
+// used, so they stay consistent with GetResourceId() and round-trip through ResourceIdentityParser.
+func setIamMemberResourceIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSpecificSchema map[string]*schema.Schema, role, member, conditionTitle string) {
+	setIamMemberParentIdentity(identity, d, parentSpecificSchema)
+	identity.Set("role", role)
+	identity.Set("member", tpgresource.NormalizeIamPrincipalCasing(member))
+	if conditionTitle != "" {
+		identity.Set("condition_title", conditionTitle)
+	}
+}
+
 func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, options ...func(*IamSettings)) *schema.Resource {
 	settings := NewIamSettings(options...)
 
 	createTimeOut := time.Duration(settings.CreateTimeOut) * time.Minute
 
 	resourceSchema := &schema.Resource{
-		Create: resourceIamMemberCreate(newUpdaterFunc, settings.EnableBatching, settings.ResourceIdentityParser),
-		Read:   resourceIamMemberRead(newUpdaterFunc, settings.ResourceIdentityParser),
-		Delete: resourceIamMemberDelete(newUpdaterFunc, settings.EnableBatching, settings.ResourceIdentityParser),
+		Create: resourceIamMemberCreate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ResourceIdentityParser),
+		Read:   resourceIamMemberRead(newUpdaterFunc, parentSpecificSchema, settings.ResourceIdentityParser),
+		Delete: resourceIamMemberDelete(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ResourceIdentityParser),
 
 		// if non-empty, this will be used to send a deprecation message when the
 		// resource is used.
@@ -304,7 +327,7 @@ func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding 
 	return b
 }
 
-func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, resourceIdentityParser ResourceIdentityParserFunc) schema.CreateFunc {
+func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ResourceIdentityParserFunc) schema.CreateFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -339,19 +362,18 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 			if err != nil {
 				return err
 			}
-			identity.Set("project", d.Get("project").(string))
-			identity.Set("role", memberBind.Role)
-			identity.Set("member", tpgresource.NormalizeIamPrincipalCasing(memberBind.Members[0]))
+			conditionTitle := ""
 			if memberBind.Condition != nil {
-				identity.Set("condition_title", memberBind.Condition.Title)
+				conditionTitle = memberBind.Condition.Title
 			}
+			setIamMemberResourceIdentity(identity, d, parentSpecificSchema, memberBind.Role, memberBind.Members[0], conditionTitle)
 		}
 
-		return resourceIamMemberRead(newUpdaterFunc, resourceIdentityParser)(d, meta)
+		return resourceIamMemberRead(newUpdaterFunc, parentSpecificSchema, resourceIdentityParser)(d, meta)
 	}
 }
 
-func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdentityParser ResourceIdentityParserFunc) schema.ReadFunc {
+func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ResourceIdentityParserFunc) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -415,18 +437,17 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIde
 			if err != nil {
 				return err
 			}
-			identity.Set("project", d.Get("project").(string))
-			identity.Set("role", binding.Role)
-			identity.Set("member", tpgresource.NormalizeIamPrincipalCasing(eMember.Members[0]))
+			conditionTitle := ""
 			if binding.Condition != nil {
-				identity.Set("condition_title", binding.Condition.Title)
+				conditionTitle = binding.Condition.Title
 			}
+			setIamMemberResourceIdentity(identity, d, parentSpecificSchema, binding.Role, eMember.Members[0], conditionTitle)
 		}
 		return nil
 	}
 }
 
-func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, resourceIdentityParser ResourceIdentityParserFunc) schema.DeleteFunc {
+func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ResourceIdentityParserFunc) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -450,6 +471,6 @@ func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
 		}
-		return resourceIamMemberRead(newUpdaterFunc, resourceIdentityParser)(d, meta)
+		return resourceIamMemberRead(newUpdaterFunc, parentSpecificSchema, resourceIdentityParser)(d, meta)
 	}
 }
