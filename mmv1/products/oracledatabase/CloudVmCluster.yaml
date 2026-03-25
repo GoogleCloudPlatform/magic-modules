@@ -349,3 +349,25 @@ properties:
       Format:
       projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}
     default_from_api: true
+  - name: 'identityConnector'
+    type: NestedObject
+    output: true
+    description: |-
+      The identity connector details which will allow OCI to securely access
+      the resources in the customer project.
+    properties:
+      - name: 'serviceAgentEmail'
+        type: String
+        output: true
+        description: 'A google managed service account on which customers can grant roles to access resources in the customer project.'
+      - name: 'connectionState'
+        type: String
+        output: true
+        description: |-
+          The connection state of the identity connector.
+          Possible values:
+          CONNECTION_STATE_UNSPECIFIED
+          CONNECTED
+          PARTIALLY_CONNECTED
+          DISCONNECTED
+          UNKNOWN
