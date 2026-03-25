@@ -52,7 +52,6 @@ iam_policy:
     - '{{workload_identity_pool_id}}'
   allowed_iam_role: 'roles/iam.workloadIdentityPoolViewer'
   iam_conditions_request_type: 'REQUEST_BODY'
-  min_version: beta
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
@@ -66,17 +65,14 @@ examples:
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
   - name: 'iam_workload_identity_pool_full_trust_domain_mode'
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
   - name: 'iam_workload_identity_pool_full_trust_domain_mode_with_default_shared_ca'
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
 parameters:
 properties:
   - name: 'workloadIdentityPoolId'
@@ -154,7 +150,6 @@ properties:
 
           * `spiffe://<trust-domain>/ns/<kubernetes-namespace>/sa/<kubernetes-service-account>`
           * `spiffe://<trust-domain>/resources/<resource-scope>/<resource-name>`
-    min_version: beta
     enum_values:
       - 'FEDERATION_ONLY'
       - 'TRUST_DOMAIN'
@@ -165,7 +160,6 @@ properties:
       Represents configuration for generating mutual TLS (mTLS) certificates for the identities
       within this pool. Defines the Certificate Authority (CA) pool resources and configurations
       required for issuance and rotation of mTLS workload certificates.
-    min_version: beta
     properties:
       - name: 'caPools'
         type: KeyValuePairs
@@ -237,7 +231,6 @@ properties:
       domain will recognize and accept certificates issued by entities within the trusted domains.
       Note that a trust domain automatically trusts itself, eliminating the need for explicit
       configuration.
-    min_version: beta
     properties:
       - name: 'additionalTrustBundles'
         type: Map
