@@ -388,9 +388,6 @@ type TGCResource struct {
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
 	IncludeInTGCNext bool `yaml:"include_in_tgc_next,omitempty"`
 
-	// If true, only generate tests and skip generating resource.
-	TGCTestOnly bool `yaml:"tgc_test_only,omitempty"`
-
 	// The resource kind in CAI.
 	// If this is not set, then :name is used instead.
 	// For example: compute.googleapis.com/Address has Address for CaiResourceKind,
