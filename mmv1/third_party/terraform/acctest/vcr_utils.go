@@ -197,7 +197,11 @@ func closeRecorder(t *testing.T) {
 		// We did not cache the config if it does not use VCR
 		if !t.Failed() && IsVcrEnabled() {
 			// If a test succeeds, write new seed/yaml to files
-			err := config.Client.Transport.(*recorder.Recorder).Stop()
+			transport := config.Client.Transport
+			if dt, ok := transport.(*vcrDebugTransport); ok {
+				transport = dt.wrapped
+			}
+			err := transport.(*recorder.Recorder).Stop()
 			if err != nil {
 				t.Error(err)
 			}
@@ -259,7 +263,7 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 	// Defines how VCR will match requests to responses.
 	rec.SetMatcher(NewVcrMatcherFunc(ctx))
 
-	return pollInterval, rec, diags
+	return pollInterval, &vcrDebugTransport{wrapped: rec}, diags
 }
 
 // NewVcrMatcherFunc returns a function used for matching HTTP requests with data recorded in VCR cassettes
@@ -310,6 +314,37 @@ func NewVcrMatcherFunc(ctx context.Context) func(r *http.Request, i cassette.Req
 		}
 		return false
 	}
+}
+
+// vcrDebugTransport wraps an http.RoundTripper to log full request details
+// when VCR fails to find a matching interaction, aiding in debugging.
+type vcrDebugTransport struct {
+	wrapped http.RoundTripper
+}
+
+func (t *vcrDebugTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Buffer the body before the inner transport/matcher consumes it
+	var bodyBytes []byte
+	if req.Body != nil {
+		var err error
+		bodyBytes, err = ioutil.ReadAll(req.Body)
+		if err != nil {
+			return nil, fmt.Errorf("VCR debug transport: failed to read request body: %w", err)
+		}
+		req.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	}
+
+	resp, err := t.wrapped.RoundTrip(req)
+	if err != nil && strings.Contains(err.Error(), "interaction not found") {
+		log.Printf("[DEBUG] VCR: Requested interaction not found. Full request details:")
+		log.Printf("[DEBUG] VCR:   Method:  %s", req.Method)
+		log.Printf("[DEBUG] VCR:   URL:     %s", req.URL.String())
+		log.Printf("[DEBUG] VCR:   Headers: %v", req.Header)
+		if len(bodyBytes) > 0 {
+			log.Printf("[DEBUG] VCR:   Body:    %s", string(bodyBytes))
+		}
+	}
+	return resp, err
 }
 
 // stripStandardQueryParams removes standard Google API query parameters
