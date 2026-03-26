@@ -21,6 +21,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -109,10 +110,15 @@ type Step struct {
 	// Whether to generate docs for this test step (override sample's exclude_basic_doc)
 	IncludeStepDoc bool `yaml:"include_step_doc,omitempty"`
 
-	DocumentationHCLText string `yaml:"-"`
-	TestHCLText          string `yaml:"-"`
-	OicsHCLText          string `yaml:"-"`
-	PrimaryResourceId    string `yaml:"-"`
+	DocumentationHCLText string            `yaml:"-"`
+	TestHCLText          string            `yaml:"-"`
+	OicsHCLText          string            `yaml:"-"`
+	PrimaryResourceId    string            `yaml:"-"`
+	TestContextVars      map[string]string `yaml:"-"`
+}
+
+func (s *Step) ShouldGenerateDoc(index int, sample *Sample) bool {
+	return s.IncludeStepDoc || (index == 0 && !sample.ExcludeBasicDoc)
 }
 
 func (s *Step) TestStepSlug(productName, resourceName string) string {
@@ -190,6 +196,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	testPrefixedVars := make(map[string]string)
 	testVars := make(map[string]string)
 	testTestEnvVars := make(map[string]string)
+	testContextVars := make(map[string]string)
 	// Override prefixed_vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
@@ -207,17 +214,25 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		testPrefixedVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		// testPrefixedVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testPrefixedVars[key] = fmt.Sprintf("%%{%s}", key)
+		testContextVars[key] = fmt.Sprintf("\"%s\"+randomSuffix", newVal)
 	}
 
-	for key := range originalVars {
+	for key, value := range originalVars {
 		testVars[key] = fmt.Sprintf("%%{%s}", key)
+		if _, err := strconv.ParseBool(value); err == nil {
+			testContextVars[key] = value
+		} else if _, err := strconv.ParseInt(value, 10, 64); err == nil {
+			testContextVars[key] = value
+		} else {
+			testContextVars[key] = fmt.Sprintf("%#v", value)
+		}
 	}
 
 	// Apply overrides from YAML
-	for key := range s.TestVarsOverrides {
-		testPrefixedVars[key] = fmt.Sprintf("%%{%s}", key)
-		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	for key, value := range s.TestVarsOverrides {
+		testContextVars[key] = fmt.Sprintf("%s", value)
 	}
 
 	for key := range originalTestEnvVars {
@@ -227,6 +242,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	s.PrefixedVars = testPrefixedVars
 	s.TestEnvVars = testTestEnvVars
 	s.Vars = testVars
+	s.TestContextVars = testContextVars
 	s.TestHCLText = s.ExecuteTemplate(sysfs)
 	s.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.TestHCLText, "\n")
 	// Remove region tags
@@ -325,6 +341,9 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	testVars := make(map[string]string)
 	for key, value := range originalPrefixedVars {
 		testPrefixedVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
+	}
+	for key, value := range originalVars {
+		testVars[key] = value
 	}
 
 	for key, value := range originalVars {
