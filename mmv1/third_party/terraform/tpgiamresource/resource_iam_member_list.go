@@ -73,7 +73,7 @@ func (r *IamMemberListResource) ListResourceConfigSchema(_ context.Context, _ li
 			panic(fmt.Sprintf("tpgiamresource: list parent attribute %q must be TypeString for IAM list resources", name))
 		}
 		desc := sch.Description
-		if sch.Required && !sch.Optional {
+		if sch.Required {
 			attrs[name] = listschema.StringAttribute{
 				Required:    true,
 				Description: desc,
@@ -114,19 +114,6 @@ func copyParentFields(dst, src *schema.ResourceData, parentSchema map[string]*sc
 }
 
 func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
-	if r.Client == nil {
-		stream.Results = list.ListResultsStreamDiagnostics(diag.Diagnostics{
-			diag.NewErrorDiagnostic("Provider not configured", "ListResource received no provider metadata; configure the provider before listing."),
-		})
-		return
-	}
-	if req.ResourceIdentitySchema == nil {
-		stream.Results = list.ListResultsStreamDiagnostics(diag.Diagnostics{
-			diag.NewErrorDiagnostic("Missing identity schema", "IAM member list resources require a resource identity schema."),
-		})
-		return
-	}
-
 	baseRd := r.memberResource.TestResourceData()
 	diags := applyListParentConfig(ctx, req, r.parentSchema, baseRd)
 	if diags.HasError() {
