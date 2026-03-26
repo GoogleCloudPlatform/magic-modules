@@ -3716,6 +3716,7 @@ func TestAccComputeInstance_flexStart(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceTerminationAction(&instance, "DELETE"),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -3738,6 +3739,7 @@ func TestAccComputeInstance_reservationBound(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceTerminationAction(&instance, "DELETE"),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -11424,6 +11426,7 @@ resource "google_compute_instance" "foobar" {
     provisioning_model = "RESERVATION_BOUND"
     automatic_restart = false
     on_host_maintenance = "TERMINATE"
+    instance_termination_action = "DELETE"
   }
 
   reservation_affinity {
