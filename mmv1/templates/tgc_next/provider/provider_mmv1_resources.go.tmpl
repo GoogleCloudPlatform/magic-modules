@@ -6,12 +6,14 @@ import (
 	{{- range $object := $.ResourcesForVersion }}
 	  "github.com/hashicorp/terraform-provider-google/google/services/{{ $object.ServiceName }}"
 	{{- end }}
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/container"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
 )
 
 var handwrittenResources = map[string]*schema.Resource{
 	// ####### START handwritten resources ###########
 	"google_compute_instance":    compute.ResourceComputeInstance(),
+	"google_container_cluster":   container.ResourceContainerCluster(),
 	"google_container_node_pool": container.ResourceContainerNodePool(),
 	"google_project":             resourcemanager.ResourceGoogleProject(),
 	// ####### END handwritten resources ###########

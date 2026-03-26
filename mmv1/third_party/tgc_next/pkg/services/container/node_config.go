@@ -2374,6 +2374,7 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"storage_pools":                      c["storagePools"],
 		"min_cpu_platform":                   c["minCpuPlatform"],
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
+		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
 		"taint":                              flattenEffectiveTaints(c["taints"]),
 		"workload_metadata_config":           flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
 		"confidential_nodes":                 flattenConfidentialNodes(c["confidentialNodes"]),
@@ -2390,7 +2391,6 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"resource_manager_tags":              flattenResourceManagerTags(c["resourceManagerTags"]),
 		"enable_confidential_storage":        c["enableConfidentialStorage"],
 		"local_ssd_encryption_mode":          c["localSsdEncryptionMode"],
-		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
 	}
 
 	// Suppress Default Value
