@@ -1337,17 +1337,27 @@ func TestAccComputeInstanceTemplate_flexStart(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeInstanceTemplate_reservationBound(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
+	suffix := acctest.RandString(t, 10)
+	context := map[string]interface{}{
+		"suffix":           suffix,
+		"reservation_name": fmt.Sprintf("tf-test-res-%s", suffix),
+		"fr_name":          fmt.Sprintf("tf-test-fr-%s", suffix),
+		"start_time":       time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+		"end_time":         time.Now().Add(48 * time.Hour).Format(time.RFC3339),
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_reservationBound(acctest.RandString(t, 10)),
+				Config: testAccComputeInstanceTemplate_reservationBound(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -1364,6 +1374,7 @@ func TestAccComputeInstanceTemplate_reservationBound(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 func TestAccComputeInstanceTemplate_provisioningModelEmptyString(t *testing.T) {
 	t.Parallel()
@@ -5118,33 +5129,39 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-func testAccComputeInstanceTemplate_reservationBound(suffix string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-11"
-  project = "debian-cloud"
-}
-
-resource "google_compute_reservation" "foobar" {
-  name = "tf-test-reservation-%s"
-  zone = "us-central1-a"
-
-  specific_reservation {
-    count = 1
+{{- if ne $.TargetVersionName "ga" }}
+func testAccComputeInstanceTemplate_reservationBound(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_future_reservation" "foobar" {
+  provider = google-beta
+  name     = "%{fr_name}"
+  zone     = "us-central1-a"
+  planning_status = "SUBMITTED"
+  time_window {
+    start_time = "%{start_time}"
+    end_time   = "%{end_time}"
+  }
+  specific_sku_properties {
+    total_count = "1"
     instance_properties {
-      machine_type = "e2-medium"
+      machine_type = "n2-standard-2"
     }
   }
+  reservation_mode = "CALENDAR"
+  deployment_type = "DENSE"
+  specific_reservation_required = true
+  reservation_name = "%{reservation_name}"
 }
 
 resource "google_compute_instance_template" "foobar" {
-  name           = "tf-test-instance-template-%s"
-  machine_type   = "e2-medium"
+  provider     = google-beta
+  name           = "tf-test-instance-template-%{suffix}"
+  machine_type   = "n2-standard-2"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
   disk {
-    source_image = data.google_compute_image.my_image.self_link
+    source_image = "debian-cloud/debian-11"
     auto_delete  = true
     boot         = true
   }
@@ -5164,7 +5181,7 @@ resource "google_compute_instance_template" "foobar" {
     type = "SPECIFIC_RESERVATION"
     specific_reservation {
       key    = "compute.googleapis.com/reservation-name"
-      values = [google_compute_reservation.foobar.name]
+      values = [google_compute_future_reservation.foobar.reservation_name]
     }
   }
 
@@ -5176,8 +5193,9 @@ resource "google_compute_instance_template" "foobar" {
     scopes = ["userinfo-email", "compute-ro", "storage-ro"]
   }
 }
-`, suffix, suffix)
+`, context)
 }
+{{- end }}
 
 func testAccComputeInstanceTemplate_provisioningModelEmptyString(suffix string) string {
 	return fmt.Sprintf(`
