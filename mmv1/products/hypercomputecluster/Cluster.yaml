@@ -382,6 +382,7 @@ properties:
                   Name of the zone in which login nodes should run, e.g., `us-central1-a`.
                   Must be in the same region as the cluster, and must match the zone of any
                   other resources specified in the cluster.
+                immutable: true
           - name: nodeSets
             type: Array
             required: true
