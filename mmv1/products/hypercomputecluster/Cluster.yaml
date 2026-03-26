@@ -297,7 +297,6 @@ properties:
                     type: String
                     required: true
                     description: Size of the disk in gigabytes. Must be at least 10GB.
-                    immutable: true
                   - name: type
                     type: String
                     required: true
@@ -305,7 +304,6 @@ properties:
                       [Persistent disk
                       type](https://cloud.google.com/compute/docs/disks#disk-types), in the
                       format `projects/{project}/zones/{zone}/diskTypes/{disk_type}`.
-                    immutable: true
               - name: count
                 type: String
                 required: true
@@ -384,7 +382,6 @@ properties:
                   Name of the zone in which login nodes should run, e.g., `us-central1-a`.
                   Must be in the same region as the cluster, and must match the zone of any
                   other resources specified in the cluster.
-                immutable: true
           - name: nodeSets
             type: Array
             required: true
@@ -415,7 +412,6 @@ properties:
                           type: String
                           required: true
                           description: Size of the disk in gigabytes. Must be at least 10GB.
-                          immutable: true
                         - name: type
                           type: String
                           required: true
@@ -423,7 +419,6 @@ properties:
                             [Persistent disk
                             type](https://cloud.google.com/compute/docs/disks#disk-types), in the
                             format `projects/{project}/zones/{zone}/diskTypes/{disk_type}`.
-                          immutable: true
                     - name: labels
                       type: KeyValuePairs
                       default_from_api: true
