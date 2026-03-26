@@ -26,6 +26,7 @@ docs:
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/sessionTemplates'
 self_link: '{{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/sessionTemplates/{{name}}'
 update_verb: 'PATCH'
 autogen_async: true
 import_format:

@@ -33,6 +33,9 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  url_substitutions:
+    - location: "global"
 parameters:
   - name: location
     type: String

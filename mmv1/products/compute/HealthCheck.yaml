@@ -59,7 +59,9 @@ custom_diff:
   - 'healthCheckCustomizeDiff'
 sweeper:
   dependencies:
-    - "google_compute_subnetwork"
+    - google_compute_subnetwork
+    - google_compute_backend_service
+    - google_compute_region_backend_service
 tgc_tests:
   - name: 'TestAccComputeHealthCheck_grpcWithTls_create'
     skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'

@@ -29,6 +29,7 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
+sweeper: {}
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']

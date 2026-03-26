@@ -51,6 +51,8 @@ sweeper:
     resource_type: "google_vmwareengine_private_cloud"
     parent_field: "name"
     child_field: "parent"
+  dependencies:
+    - "google_vmwareengine_external_access_rule"
 error_retry_predicates:
   - 'transport_tpg.ExternalIpServiceNotActive'
 examples:

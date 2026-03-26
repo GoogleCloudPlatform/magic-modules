@@ -55,6 +55,9 @@ examples:
       app_connector_name: 'my-app-connector'
       account_id: 'my-account'
       display_name: 'some display name'
+sweeper:
+  dependencies:
+    - "google_beyondcorp_app_connection"
 parameters:
 properties:
   - name: 'name'

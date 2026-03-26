@@ -46,6 +46,9 @@ examples:
     region_override: 'global'
     vars:
       security_gateway_name: default-spa
+sweeper:
+  url_substitutions:
+    - location: "global"
 autogen_async: true
 async:
   operation:

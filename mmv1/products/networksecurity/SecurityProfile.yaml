@@ -44,7 +44,9 @@ include_in_tgc_next: true
 sweeper:
   url_substitutions:
     - parent: "organizations/${ORG_ID}"
-      region: "global"
+      location: "global"
+  dependencies:
+    - "google_network_security_security_profile_group"
 examples:
   - name: 'network_security_security_profile_basic'
     primary_resource_id: 'default'

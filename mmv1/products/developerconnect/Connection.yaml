@@ -27,6 +27,8 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
+sweeper:
+  query_string: "?force=true"
 examples:
   - name: 'developer_connect_connection_new'
     primary_resource_id: 'my-connection'

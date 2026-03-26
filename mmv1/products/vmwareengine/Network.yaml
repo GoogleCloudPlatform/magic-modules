@@ -45,6 +45,7 @@ collection_url_key: "vmwareEngineNetworks"
 sweeper:
   dependencies:
     - "google_vmwareengine_network_policy"
+    - "google_vmwareengine_private_cloud"
   url_substitutions:
     - region: 'global'
     - region: 'southamerica-west1'

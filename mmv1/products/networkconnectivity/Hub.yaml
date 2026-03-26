@@ -37,6 +37,9 @@ async:
     resource_inside_response: false
 custom_code:
 legacy_long_form_project: true
+sweeper:
+  dependencies:
+    - google_network_connectivity_spoke
 examples:
   - name: 'network_connectivity_hub_basic'
     primary_resource_id: 'primary'
