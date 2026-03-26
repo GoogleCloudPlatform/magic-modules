@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/cloudresourcemanager/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
@@ -73,7 +74,7 @@ func (r *IamMemberListResource) ListResourceConfigSchema(_ context.Context, _ li
 			panic(fmt.Sprintf("tpgiamresource: list parent attribute %q must be TypeString for IAM list resources", name))
 		}
 		desc := sch.Description
-		if sch.Required {
+		if sch.Required && !sch.Optional {
 			attrs[name] = listschema.StringAttribute{
 				Required:    true,
 				Description: desc,
@@ -88,7 +89,8 @@ func (r *IamMemberListResource) ListResourceConfigSchema(_ context.Context, _ li
 	resp.Schema = listschema.Schema{Attributes: attrs}
 }
 
-func applyListParentConfig(ctx context.Context, req list.ListRequest, parentSchema map[string]*schema.Schema, rd *schema.ResourceData) diag.Diagnostics {
+// ApplyListParentConfig copies list request config attributes into ResourceData for IAM parent fields.
+func ApplyListParentConfig(ctx context.Context, req list.ListRequest, parentSchema map[string]*schema.Schema, rd *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
 	for attrName := range parentSchema {
 		var v types.String
@@ -114,8 +116,21 @@ func copyParentFields(dst, src *schema.ResourceData, parentSchema map[string]*sc
 }
 
 func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
+	if r.Client == nil {
+		stream.Results = list.ListResultsStreamDiagnostics(diag.Diagnostics{
+			diag.NewErrorDiagnostic("Provider not configured", "ListResource received no provider metadata; configure the provider before listing."),
+		})
+		return
+	}
+	if req.ResourceIdentitySchema == nil {
+		stream.Results = list.ListResultsStreamDiagnostics(diag.Diagnostics{
+			diag.NewErrorDiagnostic("Missing identity schema", "IAM member list resources require a resource identity schema."),
+		})
+		return
+	}
+
 	baseRd := r.memberResource.TestResourceData()
-	diags := applyListParentConfig(ctx, req, r.parentSchema, baseRd)
+	diags := ApplyListParentConfig(ctx, req, r.parentSchema, baseRd)
 	if diags.HasError() {
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
@@ -137,16 +152,24 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 
 	stream.Results = func(yield func(list.ListResult) bool) {
 		var count int64
+		IamMemberListYieldPolicyResults(ctx, req, r.memberResource, r.parentSchema, baseRd, updater, p, &count)(yield)
+	}
+}
+
+// IamMemberListYieldPolicyResults returns an iterator over IAM member list rows for one parent policy.
+// If count is non-nil, it is incremented for each yielded row and req.Limit is applied against *count.
+func IamMemberListYieldPolicyResults(ctx context.Context, req list.ListRequest, memberResource *schema.Resource, parentSchema map[string]*schema.Schema, baseRd *schema.ResourceData, updater ResourceIamUpdater, p *cloudresourcemanager.Policy, count *int64) func(yield func(list.ListResult) bool) {
+	return func(yield func(list.ListResult) bool) {
 		for _, binding := range p.Bindings {
 			for _, mem := range binding.Members {
 				if strings.HasPrefix(mem, "deleted:") {
 					continue
 				}
-				if req.Limit > 0 && count >= req.Limit {
+				if req.Limit > 0 && count != nil && *count >= req.Limit {
 					return
 				}
-				rd := r.memberResource.TestResourceData()
-				copyParentFields(rd, baseRd, r.parentSchema)
+				rd := memberResource.TestResourceData()
+				copyParentFields(rd, baseRd, parentSchema)
 
 				normalized := tpgresource.NormalizeIamPrincipalCasing(mem)
 				if err := rd.Set("role", binding.Role); err != nil {
@@ -193,7 +216,7 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 				if binding.Condition != nil {
 					ctitle = binding.Condition.Title
 				}
-				setIamMemberResourceIdentity(identity, rd, r.parentSchema, binding.Role, mem, ctitle)
+				setIamMemberResourceIdentity(identity, rd, parentSchema, binding.Role, mem, ctitle)
 
 				res := req.NewListResult(ctx)
 				tfIdent, err := rd.TfTypeIdentityState()
@@ -231,7 +254,9 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 				}
 
 				res.DisplayName = fmt.Sprintf("%s %s %s", updater.DescribeResource(), binding.Role, normalized)
-				count++
+				if count != nil {
+					*count++
+				}
 				if !yield(res) {
 					return
 				}
