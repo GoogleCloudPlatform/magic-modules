@@ -803,8 +803,8 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 			"when deciding to add HashiCorp copyright headers.\n"+
 			"Watch out for unexpected changes to copied files", outputFolder)
 	}
-	// only add copyright headers when generating TPG and TPGB
-	if !(strings.HasSuffix(outputFolder, "terraform-provider-google") || strings.HasSuffix(outputFolder, "terraform-provider-google-beta")) {
+	// only add copyright headers when generating TPG, TPGB, and TPGN
+	if !(strings.HasSuffix(outputFolder, "terraform-provider-google") || strings.HasSuffix(outputFolder, "terraform-provider-google-beta") || strings.HasSuffix(outputFolder, "terraform-provider-google-nightly")) {
 		return
 	}
 
@@ -864,7 +864,7 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 }
 
 func expectedOutputFolder(outputFolder string) bool {
-	expectedFolders := []string{"terraform-provider-google", "terraform-provider-google-beta", "terraform-next", "terraform-google-conversion", "tfplan2cai"}
+	expectedFolders := []string{"terraform-provider-google", "terraform-provider-google-beta", "terraform-provider-google-nightly", "terraform-next", "terraform-provider-google-internal", "terraform-google-conversion", "tfplan2cai"}
 	folderName := filepath.Base(outputFolder) // Possible issue with Windows OS
 	isExpected := false
 	for _, folder := range expectedFolders {
@@ -1060,9 +1060,9 @@ func languageFromFilename(filename string) string {
 // as the DCL uses "alpha" for preview resources, while we use "private"
 func (t Terraform) DCLVersion() string {
 	switch t.TargetVersionName {
-	case "beta":
+	case "beta", "nightly":
 		return "/beta"
-	case "private":
+	case "private", "internal":
 		return "/alpha"
 	default:
 		return ""
