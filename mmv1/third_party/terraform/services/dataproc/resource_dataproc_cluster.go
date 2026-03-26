@@ -1971,17 +1971,17 @@ by Dataproc`,
 																		},
 
 																		"boot_disk_provisioned_iops": {
-																			Type:         schema.TypeInt,
-																			Optional:     true,
-																			Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
-																			ForceNew:     true,
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																			ForceNew:    true,
 																		},
 
 																		"boot_disk_provisioned_throughput": {
-																			Type:         schema.TypeInt,
-																			Optional:     true,
-																			Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
-																			ForceNew:     true,
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																			ForceNew:    true,
 																		},
 
 																		"local_ssd_interface": {
