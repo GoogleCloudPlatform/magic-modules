@@ -59,11 +59,15 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 
 	hclData["name"] = asset.Resource.Data["name"]
 	hclData["location"] = asset.Resource.Data["location"]
-	hclData["network"] = asset.Resource.Data["network"]
+	if v := asset.Resource.Data["network"]; v != nil && v != "default" {
+		hclData["network"] = v
+	}
 	hclData["subnetwork"] = asset.Resource.Data["subnetwork"]
 	hclData["initial_node_count"] = asset.Resource.Data["initialNodeCount"]
 	if legacyAbac, ok := asset.Resource.Data["legacyAbac"].(map[string]interface{}); ok {
-		hclData["enable_legacy_abac"] = legacyAbac["enabled"]
+		if v := legacyAbac["enabled"]; v != nil && v != false {
+			hclData["enable_legacy_abac"] = v
+		}
 	}
 	if autopilot, ok := asset.Resource.Data["autopilot"].(map[string]interface{}); ok {
 		if enabled, _ := autopilot["enabled"].(bool); enabled {
@@ -75,7 +79,9 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	}
 	enableAutopilot, _ := hclData["enable_autopilot"].(bool)
 	if shieldedNodes, ok := asset.Resource.Data["shieldedNodes"].(map[string]interface{}); ok && !enableAutopilot {
-		hclData["enable_shielded_nodes"] = shieldedNodes["enabled"]
+		if v := shieldedNodes["enabled"]; v != nil && v != true {
+			hclData["enable_shielded_nodes"] = v
+		}
 	}
 	hclData["confidential_nodes"] = flattenConfidentialNodes(asset.Resource.Data["confidentialNodes"])
 	if locations, ok := asset.Resource.Data["locations"].([]interface{}); ok {
@@ -94,8 +100,8 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 			hclData["node_locations"] = locations
 		}
 	}
-	hclData["min_master_version"] = asset.Resource.Data["initialClusterVersion"]
-	hclData["node_version"] = asset.Resource.Data["initialClusterVersion"]
+	hclData["min_master_version"] = asset.Resource.Data["currentNodeVersion"]
+	hclData["node_version"] = asset.Resource.Data["currentNodeVersion"]
 	hclData["logging_service"] = asset.Resource.Data["loggingService"]
 	hclData["monitoring_service"] = asset.Resource.Data["monitoringService"]
 	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil)
@@ -119,7 +125,9 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	privateClusterConfig := asset.Resource.Data["privateClusterConfig"]
 	controlPlaneEndpointsConfig := asset.Resource.Data["controlPlaneEndpointsConfig"]
 	networkConfig := asset.Resource.Data["networkConfig"]
-	hclData["enable_kubernetes_alpha"] = asset.Resource.Data["enableKubernetesAlpha"]
+	if v := asset.Resource.Data["enableKubernetesAlpha"]; v != nil && v != false {
+		hclData["enable_kubernetes_alpha"] = v
+	}
 	hclData["private_cluster_config"] = flattenPrivateClusterConfig(controlPlaneEndpointsConfig, privateClusterConfig, networkConfig)
 
 	hclData["vertical_pod_autoscaling"] = flattenVerticalPodAutoscaling(asset.Resource.Data["verticalPodAutoscaling"])
@@ -132,17 +140,25 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 		hclData["dns_config"] = flattenDnsConfig(nc["dnsConfig"])
 		hclData["network_performance_config"] = flattenNetworkPerformanceConfig(nc["networkPerformanceConfig"])
 		hclData["gateway_api_config"] = flattenGatewayApiConfig(nc["gatewayApiConfig"])
-		hclData["enable_cilium_clusterwide_network_policy"] = nc["enableCiliumClusterwideNetworkPolicy"]
+		if v := nc["enableCiliumClusterwideNetworkPolicy"]; v != nil && v != false {
+			hclData["enable_cilium_clusterwide_network_policy"] = v
+		}
 		if !enableAutopilot {
 			hclData["enable_intranode_visibility"] = nc["enableIntraNodeVisibility"]
 		}
 		hclData["private_ipv6_google_access"] = nc["privateIpv6GoogleAccess"]
 		hclData["datapath_provider"] = nc["datapathProvider"]
-		hclData["enable_multi_networking"] = nc["enableMultiNetworking"]
+		if v := nc["enableMultiNetworking"]; v != nil && v != false {
+			hclData["enable_multi_networking"] = v
+		}
 		hclData["enable_l4_ilb_subsetting"] = nc["enableL4ilbSubsetting"]
-		hclData["disable_l4_lb_firewall_reconciliation"] = nc["disableL4LbFirewallReconciliation"]
+		if v := nc["disableL4LbFirewallReconciliation"]; v != nil && v != false {
+			hclData["disable_l4_lb_firewall_reconciliation"] = v
+		}
 		hclData["in_transit_encryption_config"] = nc["inTransitEncryptionConfig"]
-		hclData["enable_fqdn_network_policy"] = nc["enableFqdnNetworkPolicy"]
+		if v := nc["enableFqdnNetworkPolicy"]; v != nil && v != false {
+			hclData["enable_fqdn_network_policy"] = v
+		}
 	}
 
 	hclData["workload_identity_config"] = flattenWorkloadIdentityConfig(asset.Resource.Data["workloadIdentityConfig"])
@@ -221,8 +237,13 @@ func flattenEnterpriseConfig(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
-	transformed := map[string]interface{}{
-		"desired_tier": ec["desiredTier"],
+	transformed := make(map[string]interface{})
+	if ec["desiredTier"] != nil {
+		transformed["desired_tier"] = ec["desiredTier"]
+	}
+
+	if len(transformed) == 0 {
+		return nil
 	}
 
 	return []map[string]interface{}{transformed}
@@ -327,13 +348,20 @@ func flattenBinaryAuthorization(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	c, ok := v.(map[string]interface{})
-	if !ok {
+	if !ok || len(c) == 0 {
 		return nil
 	}
 
-	transformed := map[string]interface{}{
-		"enabled":         c["enabled"],
-		"evaluation_mode": c["evaluationMode"],
+	transformed := make(map[string]interface{})
+	if c["enabled"] != nil {
+		transformed["enabled"] = c["enabled"]
+	}
+	if c["evaluationMode"] != nil {
+		transformed["evaluation_mode"] = c["evaluationMode"]
+	}
+
+	if len(transformed) == 0 {
+		return nil
 	}
 
 	return []map[string]interface{}{transformed}
@@ -341,12 +369,17 @@ func flattenBinaryAuthorization(v interface{}) []map[string]interface{} {
 
 func flattenNetworkPolicy(v interface{}) []map[string]interface{} {
 	c, ok := v.(map[string]interface{})
-	if !ok || len(c) == 0 {
+	if !ok {
 		return nil
 	}
 
+	enabled := false
+	if v, ok := c["enabled"]; ok && v != nil {
+		enabled = v.(bool)
+	}
+
 	transformed := map[string]interface{}{
-		"enabled":  c["enabled"],
+		"enabled":  enabled,
 		"provider": c["provider"],
 	}
 
@@ -363,39 +396,59 @@ func flattenClusterAddonsConfig(v interface{}, enableAutopilot bool) []map[strin
 	}
 	result := make(map[string]interface{})
 
-	if val, ok := c["horizontalPodAutoscaling"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["horizontalPodAutoscaling"].(map[string]interface{}); ok {
+		disabled := false
+		if v, ok := val["disabled"]; ok && v != nil {
+			disabled = v.(bool)
+		}
 		result["horizontal_pod_autoscaling"] = []map[string]interface{}{
 			{
-				"disabled": val["disabled"],
+				"disabled": disabled,
 			},
 		}
 	}
-	if val, ok := c["httpLoadBalancing"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["httpLoadBalancing"].(map[string]interface{}); ok {
+		disabled := false
+		if v, ok := val["disabled"]; ok && v != nil {
+			disabled = v.(bool)
+		}
 		result["http_load_balancing"] = []map[string]interface{}{
 			{
-				"disabled": val["disabled"],
+				"disabled": disabled,
 			},
 		}
 	}
-	if val, ok := c["networkPolicyConfig"].(map[string]interface{}); ok && !enableAutopilot && len(val) != 0 {
+	if val, ok := c["networkPolicyConfig"].(map[string]interface{}); ok && !enableAutopilot {
+		disabled := false
+		if v, ok := val["disabled"]; ok && v != nil {
+			disabled = v.(bool)
+		}
 		result["network_policy_config"] = []map[string]interface{}{
 			{
-				"disabled": val["disabled"],
+				"disabled": disabled,
 			},
 		}
 	}
 
-	if val, ok := c["gcpFilestoreCsiDriverConfig"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["gcpFilestoreCsiDriverConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
 		result["gcp_filestore_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}
 
-	if val, ok := c["cloudRunConfig"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["cloudRunConfig"].(map[string]interface{}); ok {
+		disabled := false
+		if v, ok := val["disabled"]; ok && v != nil {
+			disabled = v.(bool)
+		}
 		cloudRunConfig := map[string]interface{}{
-			"disabled": val["disabled"],
+			"disabled": disabled,
 		}
 		// Currently we only allow setting load_balancer_type to LOAD_BALANCER_TYPE_INTERNAL
 		if lbType, ok := val["loadBalancerType"].(string); ok && lbType == "LOAD_BALANCER_TYPE_INTERNAL" {
@@ -404,78 +457,145 @@ func flattenClusterAddonsConfig(v interface{}, enableAutopilot bool) []map[strin
 		result["cloudrun_config"] = []map[string]interface{}{cloudRunConfig}
 	}
 
-	if val, ok := c["dnsCacheConfig"].(map[string]interface{}); ok && !enableAutopilot && len(val) != 0 {
+	if val, ok := c["dnsCacheConfig"].(map[string]interface{}); ok && !enableAutopilot {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
 		result["dns_cache_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}
 
-	if val, ok := c["gcePersistentDiskCsiDriverConfig"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["gcePersistentDiskCsiDriverConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
 		result["gce_persistent_disk_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}
-	if val, ok := c["gkeBackupAgentConfig"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["gkeBackupAgentConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
 		result["gke_backup_agent_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}
-	if val, ok := c["configConnectorConfig"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["configConnectorConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
 		result["config_connector_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}
-	if val, ok := c["gcsFuseCsiDriverConfig"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["gcsFuseCsiDriverConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
 		result["gcs_fuse_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}
-	if val, ok := c["statefulHaConfig"].(map[string]interface{}); ok && !enableAutopilot && len(val) != 0 {
+	if val, ok := c["statefulHaConfig"].(map[string]interface{}); ok && !enableAutopilot {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
 		result["stateful_ha_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}
-	if val, ok := c["rayOperatorConfig"].(map[string]interface{}); ok && len(val) != 0 {
-		rayConfig := []map[string]interface{}{
+	if val, ok := c["sliceControllerConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["slice_controller_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
-		if logging, ok := val["rayClusterLoggingConfig"].(map[string]interface{}); ok && len(logging) != 0 {
+	}
+	if val, ok := c["rayOperatorConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		rayConfig := []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+		if logging, ok := val["rayClusterLoggingConfig"].(map[string]interface{}); ok {
+			enabled := false
+			if v, ok := logging["enabled"]; ok && v != nil {
+				enabled = v.(bool)
+			}
+
 			rayConfig[0]["ray_cluster_logging_config"] = []map[string]interface{}{{
-				"enabled": logging["enabled"],
+				"enabled": enabled,
 			}}
 		}
-		if monitoring, ok := val["rayClusterMonitoringConfig"].(map[string]interface{}); ok && len(monitoring) != 0 {
+		if monitoring, ok := val["rayClusterMonitoringConfig"].(map[string]interface{}); ok {
+			enabled := false
+			if v, ok := monitoring["enabled"]; ok && v != nil {
+				enabled = v.(bool)
+			}
+
 			rayConfig[0]["ray_cluster_monitoring_config"] = []map[string]interface{}{{
-				"enabled": monitoring["enabled"],
+				"enabled": enabled,
 			}}
 		}
 		result["ray_operator_config"] = rayConfig
 	}
-	if val, ok := c["parallelstoreCsiDriverConfig"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["parallelstoreCsiDriverConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
 		result["parallelstore_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled": val["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}
-	if val, ok := c["lustreCsiDriverConfig"].(map[string]interface{}); ok && len(val) != 0 {
+	if val, ok := c["lustreCsiDriverConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
 		result["lustre_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled":                   val["enabled"],
+				"enabled":                   enabled,
 				"enable_legacy_lustre_port": val["enableLegacyLustrePort"],
 			},
 		}
@@ -492,8 +612,14 @@ func flattenAuthenticatorGroupsConfig(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+
+	secGrp := ""
+	if val, ok := c["securityGroup"].(string); ok {
+		secGrp = val
+	}
+
 	transformed := map[string]interface{}{
-		"security_group": c["securityGroup"],
+		"security_group": secGrp,
 	}
 
 	return []map[string]interface{}{transformed}
@@ -563,13 +689,19 @@ func flattenPrivateClusterConfig(cpec, pcc, nc interface{}) []map[string]interfa
 				if v, ok := ipEndpointsConfig["enablePublicEndpoint"].(bool); ok {
 					r["enable_private_endpoint"] = !v
 				}
-				r["private_endpoint_subnetwork"] = ipEndpointsConfig["privateEndpointSubnetwork"]
-				if v, ok := ipEndpointsConfig["globalAccess"].(bool); ok {
-					r["master_global_access_config"] = []map[string]interface{}{
-						{
-							"enabled": v,
-						},
-					}
+				if v, ok := ipEndpointsConfig["privateEndpointSubnetwork"]; ok && v != nil {
+					r["private_endpoint_subnetwork"] = v
+				}
+
+				enabled := false
+				if v, ok := ipEndpointsConfig["globalAccess"]; ok && v != nil {
+					enabled = v.(bool)
+				}
+
+				r["master_global_access_config"] = []map[string]interface{}{
+					{
+						"enabled": enabled,
+					},
 				}
 			}
 		}
@@ -577,15 +709,22 @@ func flattenPrivateClusterConfig(cpec, pcc, nc interface{}) []map[string]interfa
 	// This is the only field that is canonically still in the PrivateClusterConfig message.
 	if pcc != nil {
 		if c, ok := pcc.(map[string]interface{}); ok {
-			r["master_ipv4_cidr_block"] = c["masterIpv4CidrBlock"]
+			if v, ok := c["masterIpv4CidrBlock"]; ok && v != nil {
+				r["master_ipv4_cidr_block"] = v
+			}
 		}
 	}
 	if nc != nil {
 		if c, ok := nc.(map[string]interface{}); ok {
-			r["enable_private_nodes"] = c["defaultEnablePrivateNodes"]
+			if v, ok := c["defaultEnablePrivateNodes"]; ok && v != nil {
+				r["enable_private_nodes"] = v
+			}
 		}
 	}
 
+	if len(r) == 0 {
+		return nil
+	}
 	return []map[string]interface{}{r}
 }
 
@@ -614,11 +753,13 @@ func flattenReleaseChannel(v interface{}) []map[string]interface{} {
 		}
 	}
 
-	if c, ok := v.(map[string]interface{}); ok && c["channel"] != "" {
-		transformed := map[string]interface{}{
-			"channel": c["channel"],
+	if c, ok := v.(map[string]interface{}); ok {
+		if ch, ok := c["channel"].(string); ok && ch != "" {
+			transformed := map[string]interface{}{
+				"channel": ch,
+			}
+			return []map[string]interface{}{transformed}
 		}
-		return []map[string]interface{}{transformed}
 	}
 
 	// Explicitly set the release channel to the UNSPECIFIED.
@@ -670,8 +811,13 @@ func flattenWorkloadIdentityConfig(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
+	workloadPool, ok := c["workloadPool"].(string)
+	if !ok || workloadPool == "" {
+		return nil
+	}
+
 	transformed := map[string]interface{}{
-		"workload_pool": c["workloadPool"],
+		"workload_pool": workloadPool,
 	}
 
 	return []map[string]interface{}{transformed}
@@ -797,12 +943,14 @@ func flattenIPAllocationPolicy(v interface{}, d *schema.ResourceData, config *tr
 	transformed := map[string]interface{}{
 		"cluster_secondary_range_name":  p["clusterSecondaryRangeName"],
 		"services_secondary_range_name": p["servicesSecondaryRangeName"],
-		"stack_type":                    stackType,
 		"pod_cidr_overprovision_config": flattenPodCidrOverprovisionConfig(p["podCidrOverprovisionConfig"]),
 		"additional_pod_ranges_config":  flattenAdditionalPodRangesConfig(p),
 		"additional_ip_ranges_config":   flattenAdditionalIpRangesConfigs(p["additionalIpRangesConfigs"]),
 		"auto_ipam_config":              flattenAutoIpamConfig(p["autoIpamConfig"]),
 		"network_tier_config":           flattenNetworkTierConfig(p["networkTierConfig"]),
+	}
+	if stackType != "" && stackType != "IPV4" {
+		transformed["stack_type"] = stackType
 	}
 	conflicts := false
 	for _, field := range ipAllocationRangeFields {
@@ -843,71 +991,96 @@ func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
-	window, ok := mp["window"].(map[string]interface{})
-	if !ok || window == nil {
+	transformed := map[string]interface{}{}
+
+	if window, ok := mp["window"].(map[string]interface{}); ok && window != nil {
+		exclusions := []map[string]interface{}{}
+		if maintenanceExclusions, ok := window["maintenanceExclusions"].(map[string]interface{}); ok && maintenanceExclusions != nil {
+			for wName, wVal := range maintenanceExclusions {
+				windowVal, ok := wVal.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				exclusion := map[string]interface{}{
+					"start_time":     windowVal["startTime"],
+					"exclusion_name": wName,
+				}
+
+				if opts, ok := windowVal["maintenanceExclusionOptions"].(map[string]interface{}); ok && opts != nil {
+					scope := "NO_UPGRADES"
+					if s, ok := opts["scope"].(string); ok && s != "" {
+						scope = s
+					}
+					if endTimeBehavior, ok := opts["endTimeBehavior"].(string); ok && endTimeBehavior != "" {
+						exclusion["exclusion_options"] = []map[string]interface{}{
+							{
+								"scope":             scope,
+								"end_time_behavior": endTimeBehavior,
+							},
+						}
+					} else {
+						exclusion["exclusion_options"] = []map[string]interface{}{
+							{
+								"scope": scope,
+							},
+						}
+						if endTime, _ := windowVal["endTime"].(string); endTime != "" {
+							exclusion["end_time"] = endTime
+						}
+					}
+				} else {
+					if endTime, _ := windowVal["endTime"].(string); endTime != "" {
+						exclusion["end_time"] = endTime
+					}
+				}
+				exclusions = append(exclusions, exclusion)
+			}
+		}
+
+		transformed["maintenance_exclusion"] = exclusions
+
+		if dailyMaintenanceWindow, ok := window["dailyMaintenanceWindow"].(map[string]interface{}); ok && dailyMaintenanceWindow != nil {
+			transformed["daily_maintenance_window"] = []map[string]interface{}{
+				{
+					"start_time": dailyMaintenanceWindow["startTime"],
+				},
+			}
+		}
+
+		if recurringWindow, ok := window["recurringWindow"].(map[string]interface{}); ok && recurringWindow != nil {
+			// recurringWindow has nested window
+			rwWindow, _ := recurringWindow["window"].(map[string]interface{})
+
+			windowMap := map[string]interface{}{}
+			if rwWindow != nil {
+				windowMap["start_time"] = rwWindow["startTime"]
+				windowMap["end_time"] = rwWindow["endTime"]
+			}
+			windowMap["recurrence"] = recurringWindow["recurrence"]
+
+			transformed["recurring_window"] = []map[string]interface{}{windowMap}
+		}
+	}
+
+	if disruptionBudget, ok := mp["disruptionBudget"].(map[string]interface{}); ok && disruptionBudget != nil {
+		dbMap := map[string]interface{}{}
+		if val, ok := disruptionBudget["minorVersionDisruptionInterval"]; ok && val != nil {
+			dbMap["minor_version_disruption_interval"] = val
+		}
+		if val, ok := disruptionBudget["patchVersionDisruptionInterval"]; ok && val != nil {
+			dbMap["patch_version_disruption_interval"] = val
+		}
+		transformed["disruption_budget"] = []map[string]interface{}{dbMap}
+	}
+
+	if len(transformed) == 0 {
 		return nil
 	}
 
-	exclusions := []map[string]interface{}{}
-	if maintenanceExclusions, ok := window["maintenanceExclusions"].(map[string]interface{}); ok && maintenanceExclusions != nil {
-		for wName, wVal := range maintenanceExclusions {
-			windowVal, ok := wVal.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			exclusion := map[string]interface{}{
-				"start_time":     windowVal["startTime"],
-				"exclusion_name": wName,
-			}
-
-			if opts, ok := windowVal["maintenanceExclusionOptions"].(map[string]interface{}); ok && opts != nil {
-				scope := "NO_UPGRADES"
-				if s, ok := opts["scope"].(string); ok && s != "" {
-					scope = s
-				}
-				exclusion["exclusion_options"] = []map[string]interface{}{
-					{
-						"scope":             scope,
-						"end_time_behavior": opts["endTimeBehavior"],
-					},
-				}
-				if endTime, _ := windowVal["endTime"].(string); endTime != "" {
-					exclusion["end_time"] = endTime
-				}
-			} else {
-				if endTime, _ := windowVal["endTime"].(string); endTime != "" {
-					exclusion["end_time"] = endTime
-				}
-			}
-			exclusions = append(exclusions, exclusion)
-		}
-	}
-
-	transformed := map[string]interface{}{
-		"maintenance_exclusion": exclusions,
-	}
-
-	if dailyMaintenanceWindow, ok := window["dailyMaintenanceWindow"].(map[string]interface{}); ok && dailyMaintenanceWindow != nil {
-		transformed["daily_maintenance_window"] = []map[string]interface{}{
-			{
-				"start_time": dailyMaintenanceWindow["startTime"],
-				"duration":   dailyMaintenanceWindow["duration"],
-			},
-		}
-	}
-
-	if recurringWindow, ok := window["recurringWindow"].(map[string]interface{}); ok && recurringWindow != nil {
-		// recurringWindow has nested window
-		rwWindow, _ := recurringWindow["window"].(map[string]interface{})
-
-		windowMap := map[string]interface{}{}
-		if rwWindow != nil {
-			windowMap["start_time"] = rwWindow["startTime"]
-			windowMap["end_time"] = rwWindow["endTime"]
-		}
-		windowMap["recurrence"] = recurringWindow["recurrence"]
-
-		transformed["recurring_window"] = []map[string]interface{}{windowMap}
+	_, hasDaily := transformed["daily_maintenance_window"]
+	_, hasRecurring := transformed["recurring_window"]
+	if !hasDaily && !hasRecurring {
+		return nil
 	}
 
 	return []map[string]interface{}{transformed}
@@ -987,7 +1160,9 @@ func flattenClusterAutoscaling(v interface{}, enableAutopilot bool) []map[string
 	}
 	transformed["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a["autoprovisioningNodePoolDefaults"])
 	transformed["auto_provisioning_locations"] = a["autoprovisioningLocations"]
-	transformed["autoscaling_profile"] = a["autoscalingProfile"]
+	if v := a["autoscalingProfile"]; v != nil && v != "BALANCED" {
+		transformed["autoscaling_profile"] = v
+	}
 	if dccc, ok := a["defaultComputeClassConfig"].(map[string]interface{}); ok {
 		transformed["default_compute_class_enabled"] = dccc["enabled"]
 	}
@@ -1006,15 +1181,33 @@ func flattenAutoProvisioningDefaults(v interface{}) []map[string]interface{} {
 
 	transformed := make(map[string]interface{})
 	transformed["oauth_scopes"] = a["oauthScopes"]
-	transformed["service_account"] = a["serviceAccount"]
-	transformed["disk_size"] = a["diskSizeGb"]
-	transformed["disk_type"] = a["diskType"]
-	transformed["image_type"] = a["imageType"]
-	transformed["min_cpu_platform"] = a["minCpuPlatform"]
-	transformed["boot_disk_kms_key"] = a["bootDiskKmsKey"]
-	transformed["shielded_instance_config"] = flattenShieldedInstanceConfig(a["shieldedInstanceConfig"])
-	transformed["management"] = flattenManagement(a["management"])
-	transformed["upgrade_settings"] = flattenUpgradeSettings(a["upgradeSettings"])
+	if v := a["serviceAccount"]; v != nil && v != "default" {
+		transformed["service_account"] = v
+	}
+	if v := a["diskSizeGb"]; v != nil && v != float64(100) {
+		transformed["disk_size"] = v
+	}
+	if v := a["diskType"]; v != nil && v != "pd-standard" {
+		transformed["disk_type"] = v
+	}
+	if v := a["imageType"]; v != nil && v != "COS_CONTAINERD" {
+		transformed["image_type"] = v
+	}
+	if v := a["minCpuPlatform"]; v != nil {
+		transformed["min_cpu_platform"] = v
+	}
+	if v := a["bootDiskKmsKey"]; v != nil {
+		transformed["boot_disk_kms_key"] = v
+	}
+	if v := flattenShieldedInstanceConfig(a["shieldedInstanceConfig"]); v != nil {
+		transformed["shielded_instance_config"] = v
+	}
+	if v := flattenManagement(a["management"]); v != nil {
+		transformed["management"] = v
+	}
+	if v := flattenUpgradeSettings(a["upgradeSettings"]); v != nil {
+		transformed["upgrade_settings"] = v
+	}
 
 	return []map[string]interface{}{transformed}
 }
@@ -1028,10 +1221,22 @@ func flattenUpgradeSettings(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["max_surge"] = a["maxSurge"]
-	transformed["max_unavailable"] = a["maxUnavailable"]
-	transformed["strategy"] = a["strategy"]
-	transformed["blue_green_settings"] = flattenBlueGreenSettings(a["blueGreenSettings"])
+	if val := a["maxSurge"]; val != nil {
+		transformed["max_surge"] = val
+	}
+	if val := a["maxUnavailable"]; val != nil {
+		transformed["max_unavailable"] = val
+	}
+	if val := a["strategy"]; val != nil {
+		transformed["strategy"] = val
+	}
+	if val := flattenBlueGreenSettings(a["blueGreenSettings"]); val != nil {
+		transformed["blue_green_settings"] = val
+	}
+
+	if len(transformed) == 0 {
+		return nil
+	}
 
 	return []map[string]interface{}{transformed}
 }
@@ -1046,8 +1251,16 @@ func flattenBlueGreenSettings(v interface{}) []map[string]interface{} {
 	}
 
 	transformed := make(map[string]interface{})
-	transformed["node_pool_soak_duration"] = a["nodePoolSoakDuration"]
-	transformed["standard_rollout_policy"] = flattenStandardRolloutPolicy(a["standardRolloutPolicy"])
+	if val := a["nodePoolSoakDuration"]; val != nil {
+		transformed["node_pool_soak_duration"] = val
+	}
+	if val := flattenStandardRolloutPolicy(a["standardRolloutPolicy"]); val != nil {
+		transformed["standard_rollout_policy"] = val
+	}
+
+	if len(transformed) == 0 {
+		return nil
+	}
 
 	return []map[string]interface{}{transformed}
 }
@@ -1064,7 +1277,9 @@ func flattenStandardRolloutPolicy(v interface{}) []map[string]interface{} {
 	transformed := make(map[string]interface{})
 	transformed["batch_percentage"] = a["batchPercentage"]
 	transformed["batch_node_count"] = a["batchNodeCount"]
-	transformed["batch_soak_duration"] = a["batchSoakDuration"]
+	if v := a["batchSoakDuration"]; v != nil && v != "0s" {
+		transformed["batch_soak_duration"] = v
+	}
 
 	return []map[string]interface{}{transformed}
 }
@@ -1078,8 +1293,15 @@ func flattenManagement(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["auto_upgrade"] = a["autoUpgrade"]
-	transformed["auto_repair"] = a["autoRepair"]
+	if v := a["autoUpgrade"]; v != nil {
+		transformed["auto_upgrade"] = v
+	}
+	if v := a["autoRepair"]; v != nil {
+		transformed["auto_repair"] = v
+	}
+	if len(transformed) == 0 {
+		return nil
+	}
 
 	return []map[string]interface{}{transformed}
 }
@@ -1088,14 +1310,14 @@ func flattenUpgradeOptions(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return nil
 	}
-	a, ok := v.(map[string]interface{})
-	if !ok {
+	if _, ok := v.(map[string]interface{}); !ok {
 		return nil
 	}
 
+	// upgrade_options block is Computed-only.
+	// Specifically, auto_upgrade_start_time and description are Computed.
+	// We omit them here to prevent 'Value for unconfigurable attribute' errors.
 	transformed := make(map[string]interface{})
-	transformed["auto_upgrade_start_time"] = a["autoUpgradeStartTime"]
-	transformed["description"] = a["description"]
 
 	return []map[string]interface{}{transformed}
 }
@@ -1142,8 +1364,13 @@ func flattenPodAutoscaling(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
+	hpaProfile, ok := c["hpaProfile"].(string)
+	if !ok || hpaProfile == "" || hpaProfile == "HPA_PROFILE_UNSPECIFIED" {
+		return nil
+	}
+
 	transformed := map[string]interface{}{
-		"hpa_profile": c["hpaProfile"],
+		"hpa_profile": hpaProfile,
 	}
 
 	return []map[string]interface{}{transformed}
@@ -1163,19 +1390,30 @@ func flattenSecretManagerConfig(v interface{}) []map[string]interface{} {
 	}
 
 	result := make(map[string]interface{})
-	result["enabled"] = c["enabled"]
+	if val, ok := c["enabled"]; ok && val != nil {
+		result["enabled"] = val
+	} else {
+		result["enabled"] = false
+	}
 
 	rotationList := []map[string]interface{}{}
 	if rotationConfig, ok := c["rotationConfig"].(map[string]interface{}); ok && rotationConfig != nil {
-		rotationConfigMap := map[string]interface{}{
-			"enabled": rotationConfig["enabled"],
+		rotationConfigMap := map[string]interface{}{}
+		if rVal, ok := rotationConfig["enabled"]; ok && rVal != nil {
+			rotationConfigMap["enabled"] = rVal
+		} else {
+			rotationConfigMap["enabled"] = false
 		}
+
 		if interval, ok := rotationConfig["rotationInterval"].(string); ok && interval != "" {
 			rotationConfigMap["rotation_interval"] = interval
 		}
 		rotationList = append(rotationList, rotationConfigMap)
 	}
-	result["rotation_config"] = rotationList
+
+	if len(rotationList) > 0 {
+		result["rotation_config"] = rotationList
+	}
 	return []map[string]interface{}{result}
 }
 
@@ -1195,9 +1433,12 @@ func flattenResourceUsageExportConfig(v interface{}) []map[string]interface{} {
 		}
 	}
 
-	transformed := map[string]interface{}{
-		"enable_network_egress_metering":       c["enableNetworkEgressMetering"],
-		"enable_resource_consumption_metering": enableResourceConsumptionMetering,
+	transformed := map[string]interface{}{}
+	if v := c["enableNetworkEgressMetering"]; v != nil && v != false {
+		transformed["enable_network_egress_metering"] = v
+	}
+	if enableResourceConsumptionMetering != true {
+		transformed["enable_resource_consumption_metering"] = enableResourceConsumptionMetering
 	}
 
 	if bqd, ok := c["bigqueryDestination"].(map[string]interface{}); ok && bqd != nil {
@@ -1214,11 +1455,17 @@ func flattenServiceExternalIpsConfig(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	c, ok := v.(map[string]interface{})
-	if !ok || len(c) == 0 {
+	if !ok {
 		return nil
 	}
+
+	enabled := false
+	if v, ok := c["enabled"]; ok && v != nil {
+		enabled = v.(bool)
+	}
+
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}
@@ -1247,8 +1494,14 @@ func flattenManagementConfig(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+
+	enabled := false
+	if val, ok := c["enabled"].(bool); ok {
+		enabled = val
+	}
+
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}
@@ -1280,9 +1533,11 @@ func flattenDnsConfig(v interface{}) []map[string]interface{} {
 	}
 	transformed := map[string]interface{}{
 		"additive_vpc_scope_dns_domain": c["additiveVpcScopeDnsDomain"],
-		"cluster_dns":                   c["clusterDns"],
 		"cluster_dns_scope":             c["clusterDnsScope"],
 		"cluster_dns_domain":            c["clusterDnsDomain"],
+	}
+	if v := c["clusterDns"]; v != nil && v != "PROVIDER_UNSPECIFIED" {
+		transformed["cluster_dns"] = v
 	}
 
 	return []map[string]interface{}{transformed}
@@ -1327,11 +1582,16 @@ func flattenFleet(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
-	transformed := map[string]interface{}{
-		"project":         c["project"],
-		"membership":      c["membership"],
-		"pre_registered":  c["preRegistered"],
-		"membership_type": c["membershipType"],
+	transformed := map[string]interface{}{}
+	if val, ok := c["project"]; ok && val != "" {
+		transformed["project"] = val
+	}
+	if val, ok := c["membershipType"]; ok && val != "" {
+		transformed["membership_type"] = val
+	}
+
+	if len(transformed) == 0 {
+		return nil
 	}
 
 	return []map[string]interface{}{transformed}

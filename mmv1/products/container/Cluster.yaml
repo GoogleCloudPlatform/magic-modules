@@ -14,30 +14,8 @@
 ---
 name: Cluster
 description: Container Cluster
-exclude: true
 include_in_tgc_next: true
-tgc_test_only: true
-tgc_tests:
-  - name: TestAccContainerCluster_cloudDns_nil_scope
-    skip: "Nil value incompatible with test"
-  - name: TestAccContainerCluster_withReleaseChannelEnabledDefaultVersion
-    skip: "Nil value incompatible with test"
-  - name: TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
-    skip: "maintenancePolicy endTime appears in cai asset when not in config, breaking the test"
-  - name: TestAccContainerCluster_stackType_withDualStack
-    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
-  - name: TestAccContainerCluster_stackType_withSingleStack
-    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
-  - name: TestAccContainerCluster_with_PodCIDROverprovisionDisabled
-    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
-  - name: TestAccContainerCluster_errorCleanDanglingCluster
-    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
-  - name: TestAccContainerCluster_withIPAllocationPolicy_specificSizes
-    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
-  - name: TestAccContainerCluster_withIPAllocationPolicy_specificIPRanges
-    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
-  - name: TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport
-    skip: "test orders array elements incorrectly for comparison"
+exclude_resource: true
 properties:
   - name: removeDefaultNodePool
     type: Boolean
@@ -47,9 +25,77 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: nodeCount
-          type: Integer
+        - name: 'nodeCount'
+          type: 'Integer'
+          description: 'The node count for the pool.'
+          # Node pools don't expose the current node count in CAI asset
+          # Field node_count will not be present in converted HCL
+          ignore_read: true
+        - name: 'NamePrefix'
+          type: 'String'
+          description: 'The prefix of the node pool name.'
+          # Field "name" and "name_prefix" conflicts. Convert name_prefix during cai2hcl
+          ignore_read: true
+        - name: 'nodeConfig'
+          type: 'NestedObject'
+          description: 'Configuration for the nodes in the pool.'
+          properties:
+            - name: 'guest_accelerator'
+              type: 'Array'
+              api_name: 'accelerators'
+              description: 'A list of hardware accelerators to be attached to each node.'
+              ignore_read: true
+              item_type:
+                type: 'NestedObject'
+                properties:
+                  - name: 'count'
+                    type: 'Integer'
+                    description: 'The number of the accelerator cards exposed to an instance.'
+                    ignore_read: true
+                  - name: 'type'
+                    type: 'String'
+                    description: 'The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.'
+                    ignore_read: true
+                  - name: 'gpuPartitionSize'
+                    type: 'String'
+                    description: 'Size of partitions to create on the GPU. Supported values are described in the NVIDIA mig user guide.'
+                    ignore_read: true
+                  - name: 'gpuDriverInstallationConfig'
+                    type: 'NestedObject'
+                    description: 'Configuration for GPU driver installation.'
+                    ignore_read: true
+                    properties:
+                      - name: 'gpuDriverVersion'
+                        type: 'String'
+                        description: 'Mode for how the GPU driver is installed.'
+  - name: 'ipAllocationPolicy'
+    type: 'NestedObject'
+    properties:
+      - name: 'clusterIpv4CidrBlock'
+        type: 'String'
+        # test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset
+        ignore_read: true
+      - name: 'servicesIpv4CidrBlock'
+        type: 'String'
+        # test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset
+        ignore_read: true
+  - name: 'networkPolicy'
+    type: Array
+    is_missing_in_cai: true
+    item_type:
+      type: 'NestedObject'
+      properties:
+        - name: 'enabled'
+          type: 'Boolean'
+          description: 'Whether network policy is enabled on the cluster.'
           is_missing_in_cai: true
-        - name: namePrefix
-          type: String
+          required: true
+        - name: 'provider'
+          type: 'String'
+          description: 'The selected network policy provider.'
           is_missing_in_cai: true
+tgc_tests:
+  - name: TestAccContainerCluster_withSandboxConfigType
+    skip: Need to fix the testing framework to handle the order of array items (map) node_config.taint
+  - name: TestAccContainerCluster_withLoggingConfig
+    skip: Need to fix the testing framework to handle logging_config.enable_components is empty array
