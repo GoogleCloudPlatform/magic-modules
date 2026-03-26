@@ -46,7 +46,7 @@ func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string][]string {
 					for _, v := range innerExexpression {
 						reference := v.References
 						if reference != nil {
-							if strings.HasSuffix(reference[0], ".id") {
+							if strings.HasSuffix(reference[0], ".id") || strings.HasSuffix(reference[0], ".self_link") {
 								parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Address)
 							}
 						}
@@ -55,7 +55,7 @@ func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string][]string {
 			}
 			reference := expression.ExpressionData.References
 			if reference != nil {
-				if strings.HasSuffix(reference[0], ".id") {
+				if strings.HasSuffix(reference[0], ".id") || strings.HasSuffix(reference[0], ".self_link") {
 					parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Address)
 				}
 			}
@@ -83,7 +83,7 @@ func (r *ParentResourceResolver) ResolveDependencies(jsonPlan []byte) map[string
 				for i, innerMap := range expression.ExpressionData.NestedBlocks {
 					for propName, v := range innerMap {
 						reference := v.References
-						if reference != nil && len(reference) >= 2 && strings.HasSuffix(reference[0], ".id") {
+						if reference != nil && len(reference) >= 2 && (strings.HasSuffix(reference[0], ".id") || strings.HasSuffix(reference[0], ".self_link")) {
 							if dependenciesMap[resource.Address] == nil {
 								dependenciesMap[resource.Address] = make(map[string]string)
 							}
@@ -94,7 +94,7 @@ func (r *ParentResourceResolver) ResolveDependencies(jsonPlan []byte) map[string
 				}
 			}
 			reference := expression.ExpressionData.References
-			if reference != nil && len(reference) >= 2 && strings.HasSuffix(reference[0], ".id") {
+			if reference != nil && len(reference) >= 2 && (strings.HasSuffix(reference[0], ".id") || strings.HasSuffix(reference[0], ".self_link")) {
 				if dependenciesMap[resource.Address] == nil {
 					dependenciesMap[resource.Address] = make(map[string]string)
 				}

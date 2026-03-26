@@ -190,4 +190,33 @@ func TestConvert_ComputeDiskNestedId(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, assets)
 	assert.NotEmpty(t, assets[1].Resource.Data["asyncPrimaryDisk"])
+  asyncPrimaryDisk, ok := assets[1].Resource.Data["asyncPrimaryDisk"].(map[string]interface{})
+	assert.True(t, ok, "asyncPrimaryDisk should be a map")
+	assert.Equal(t, "projects/terraform-dev-haonan/zones/us-central1-a/disks/async-test-disk", asyncPrimaryDisk["disk"])}
+
+func TestConvert_ComputeAddress(t *testing.T) {
+	logger, _ := newTestErrorLogger()
+	o := &Options{
+		ErrorLogger:         logger,
+		Offline:             true,
+		DefaultProject:      testProject,
+		DefaultZone:         "us-central1-a",
+		NoOpAncestryManager: true,
+	}
+
+	jsonPlan, err := os.ReadFile("resolvers/compute_address.tfplan.json")
+	if err != nil {
+		t.Fatalf("Error reading test file: %v", err)
+	}
+
+	assets, err := Convert(context.Background(), jsonPlan, o)
+	assetsJSON, err := json.MarshalIndent(assets, "", "  ")
+	if err != nil {
+		t.Fatalf("Error marshaling assets: %v", err)
+	}
+	fmt.Println(string(assetsJSON))
+	assert.Nil(t, err)
+	assert.NotEmpty(t, assets)
+	assert.Equal(t, "https://www.googleapis.com/compute/v1/projects/terraform-dev-haonan/regions/us-east1/subnetworks/subnetwork-test", assets[2].Resource.Data["subnetwork"])
+	assert.Equal(t, "https://www.googleapis.com/compute/v1/projects/terraform-dev-haonan/global/networks/tf-test-network-test", assets[1].Resource.Data["network"])
 }
