@@ -53,8 +53,6 @@ custom_code:
 sweeper:
   query_string: "?delay_hours=0&force=true"
   dependencies:
-    - "google_vmwareengine_cluster"
-    - "google_vmwareengine_subnet"
     - "google_vmwareengine_network_policy"
     - "google_vmwareengine_external_address"
   url_substitutions:

@@ -67,7 +67,6 @@ sweeper:
     - region: us-south1
   dependencies:
     - google_compute_forwarding_rule
-    - google_compute_instance
 async:
   operation:
     base_url: '{{op_id}}'
