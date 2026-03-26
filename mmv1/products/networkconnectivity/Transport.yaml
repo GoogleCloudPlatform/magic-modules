@@ -17,7 +17,7 @@ description: |
   The Transport resource is a top-level resource used by customers to control Partner Cross-Cloud Interconnect (CCI) connections.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
+    'Official Documentation': 'https://docs.cloud.google.com/sdk/gcloud/reference/beta/network-connectivity/transports'
   api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.transport'
 docs:
 base_url: 'projects/{{project}}/locations/{{region}}/transports'
