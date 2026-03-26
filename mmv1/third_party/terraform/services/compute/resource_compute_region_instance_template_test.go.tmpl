@@ -1221,6 +1221,7 @@ func TestAccComputeRegionInstanceTemplate_flexStart(t *testing.T) {
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateAutomaticRestart(&instanceTemplate, false),
 					testAccCheckComputeRegionInstanceTemplateProvisioningModel(&instanceTemplate, "FLEX_START"),
+					testAccCheckComputeRegionInstanceTemplateInstanceTerminationAction(&instanceTemplate, "DELETE"),
 				),
 			},
 			{
@@ -1248,6 +1249,7 @@ func TestAccComputeRegionInstanceTemplate_reservationBound(t *testing.T) {
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateAutomaticRestart(&instanceTemplate, false),
 					testAccCheckComputeRegionInstanceTemplateProvisioningModel(&instanceTemplate, "RESERVATION_BOUND"),
+					testAccCheckComputeRegionInstanceTemplateInstanceTerminationAction(&instanceTemplate, "DELETE"),
 				),
 			},
 			{
@@ -4583,6 +4585,7 @@ resource "google_compute_region_instance_template" "foobar" {
     automatic_restart = false
     provisioning_model = "FLEX_START"
     instance_termination_action = "DELETE"
+    on_host_maintenance = "TERMINATE"
     max_run_duration {
       nanos = 0
       seconds = 3600
@@ -4639,6 +4642,8 @@ resource "google_compute_region_instance_template" "foobar" {
   scheduling {
     automatic_restart = false
     provisioning_model = "RESERVATION_BOUND"
+    instance_termination_action = "DELETE"
+    on_host_maintenance = "TERMINATE"
   }
 
   reservation_affinity {
