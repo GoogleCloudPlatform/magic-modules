@@ -187,6 +187,7 @@ properties:
     description: |
       Preconfigured WAF configuration to be applied for the rule.
       If the rule does not evaluate preconfigured WAF rules, i.e., if evaluatePreconfiguredWaf() is not used, this field will have no effect.
+    send_empty_value: true
     properties:
       - name: 'exclusion'
         type: Array

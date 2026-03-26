@@ -6,7 +6,7 @@ resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}"
 
 resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResourceId}}" {
   policy_id = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.id
-  action    = "deny"
+  action    = "allow"
 
   match {
     expr {

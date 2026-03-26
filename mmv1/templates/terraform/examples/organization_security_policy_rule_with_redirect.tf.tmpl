@@ -10,7 +10,7 @@ resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResource
 
   match {
     config {
-      src_ip_ranges = ["10.0.0.0/8"]
+      src_ip_ranges = ["10.0.1.0/24"]
     }
     versioned_expr = "SRC_IPS_V1"
   }
