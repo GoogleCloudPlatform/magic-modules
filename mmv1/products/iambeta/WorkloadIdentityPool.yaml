@@ -150,6 +150,7 @@ properties:
 
           * `spiffe://<trust-domain>/ns/<kubernetes-namespace>/sa/<kubernetes-service-account>`
           * `spiffe://<trust-domain>/resources/<resource-scope>/<resource-name>`
+    default_from_api: true
     enum_values:
       - 'FEDERATION_ONLY'
       - 'TRUST_DOMAIN'
