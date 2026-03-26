@@ -20,9 +20,9 @@ import (
 
     "github.com/hashicorp/terraform-provider-google/google/fwvalidators"
     "github.com/hashicorp/terraform-provider-google/google/functions"
+    sdkprovider "github.com/hashicorp/terraform-provider-google/google/provider"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-    "github.com/hashicorp/terraform-provider-google/google/services/compute"
     "github.com/hashicorp/terraform-provider-google/google/services/apigee"
     "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
     "github.com/hashicorp/terraform-provider-google/version"
@@ -316,12 +316,9 @@ func (p *FrameworkProvider) Resources(_ context.Context) []func() resource.Resou
 }
 
 // ListResources defines list blocks for managed resource types implemented with SDKv2 schemas (e.g. IAM members).
+// MMv1-generated IAM list factories live in iam_member_list_resources.go; handwritten IAM types register here.
 func (p *FrameworkProvider) ListResources(_ context.Context) []func() list.ListResource {
-	return []func() list.ListResource{
-		compute.NewComputeDiskIamMemberListResource,
-		resourcemanager.NewFolderIamMemberListResource,
-		resourcemanager.NewProjectIamMemberListResource,
-	}
+	return sdkprovider.IamMemberListResources()
 }
 
 // Functions defines the provider functions implemented in the provider.

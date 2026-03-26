@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
@@ -36,6 +37,21 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 	transport_tpg "{{ $.ImportPath }}/transport"
 )
+
+// New{{ $.ResourceName }}IamMemberListResource returns the Terraform list resource for {{ $.TerraformName }}_iam_member.
+func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
+	return tpgiamresource.NewIamMemberListResource(
+		"{{ $.TerraformName }}_iam_member",
+		tpgiamresource.ResourceIamMember(
+			{{ $.ResourceName }}IamSchema,
+			{{ $.ResourceName }}IamUpdaterProducer,
+			{{ $.ResourceName }}IdParseFunc,
+			tpgiamresource.IamWithResourceIdentity({{ $.ResourceName }}IamResourceIdentityParser),
+		),
+		{{ $.ResourceName }}IamSchema,
+		{{ $.ResourceName }}IamUpdaterProducer,
+	)
+}
 
 var (
     _ = regexp.Match

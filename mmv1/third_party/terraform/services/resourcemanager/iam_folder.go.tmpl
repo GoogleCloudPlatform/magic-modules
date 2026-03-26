@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
@@ -16,6 +17,21 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 	cloudresourcemanagerv3 "google.golang.org/api/cloudresourcemanager/v3"
 )
+
+// NewFolderIamMemberListResource returns the list implementation for google_folder_iam_member.
+func NewFolderIamMemberListResource() list.ListResource {
+	return tpgiamresource.NewIamMemberListResource(
+		"google_folder_iam_member",
+		tpgiamresource.ResourceIamMember(
+			IamFolderSchema,
+			NewFolderIamUpdater,
+			FolderIdParseFunc,
+			tpgiamresource.IamWithResourceIdentity(FolderIamResourceIdentityParser),
+		),
+		IamFolderSchema,
+		NewFolderIamUpdater,
+	)
+}
 
 var IamFolderSchema = map[string]*schema.Schema{
 	"folder": {
