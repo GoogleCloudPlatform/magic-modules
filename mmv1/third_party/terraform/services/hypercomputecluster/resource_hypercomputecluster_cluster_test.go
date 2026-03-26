@@ -76,7 +76,6 @@ func TestAccHypercomputeclusterCluster_existing(t *testing.T) {
 	})
 }
 
-
 func TestAccHypercomputeclusterCluster_new(t *testing.T) {
 	t.Parallel()
 
@@ -656,10 +655,10 @@ func TestAccHypercomputeclusterCluster_inPlaceUpdates(t *testing.T) {
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_hypercomputecluster_cluster.cluster", "orchestrator.0.slurm.0.login_nodes.0.boot_disk.0.size_gb", "120"),     // Updated
-					resource.TestCheckResourceAttr("google_hypercomputecluster_cluster.cluster", "orchestrator.0.slurm.0.login_nodes.0.boot_disk.0.type", "pd-ssd"),          // Updated
+					resource.TestCheckResourceAttr("google_hypercomputecluster_cluster.cluster", "orchestrator.0.slurm.0.login_nodes.0.boot_disk.0.size_gb", "120"),                  // Updated
+					resource.TestCheckResourceAttr("google_hypercomputecluster_cluster.cluster", "orchestrator.0.slurm.0.login_nodes.0.boot_disk.0.type", "pd-ssd"),                  // Updated
 					resource.TestCheckResourceAttr("google_hypercomputecluster_cluster.cluster", "orchestrator.0.slurm.0.node_sets.0.compute_instance.0.boot_disk.0.size_gb", "150"), // Updated
-					resource.TestCheckResourceAttr("google_hypercomputecluster_cluster.cluster", "orchestrator.0.slurm.0.node_sets.0.compute_instance.0.boot_disk.0.type", "pd-ssd"),      // Updated
+					resource.TestCheckResourceAttr("google_hypercomputecluster_cluster.cluster", "orchestrator.0.slurm.0.node_sets.0.compute_instance.0.boot_disk.0.type", "pd-ssd"), // Updated
 				),
 			},
 		},
