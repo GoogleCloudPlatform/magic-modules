@@ -78,7 +78,7 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 
 	if orderMap != nil && len(orderMap) > 0 {
 		dependencyMap := ParentResolver.ResolveDependencies(jsonPlan)
-		
+
 		var levels []int
 		for level := range orderMap {
 			levels = append(levels, level)

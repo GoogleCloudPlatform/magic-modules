@@ -190,9 +190,10 @@ func TestConvert_ComputeDiskNestedId(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, assets)
 	assert.NotEmpty(t, assets[1].Resource.Data["asyncPrimaryDisk"])
-  asyncPrimaryDisk, ok := assets[1].Resource.Data["asyncPrimaryDisk"].(map[string]interface{})
+	asyncPrimaryDisk, ok := assets[1].Resource.Data["asyncPrimaryDisk"].(map[string]interface{})
 	assert.True(t, ok, "asyncPrimaryDisk should be a map")
-	assert.Equal(t, "projects/terraform-dev-haonan/zones/us-central1-a/disks/async-test-disk", asyncPrimaryDisk["disk"])}
+	assert.Equal(t, "projects/terraform-dev-haonan/zones/us-central1-a/disks/async-test-disk", asyncPrimaryDisk["disk"])
+}
 
 func TestConvert_ComputeAddress(t *testing.T) {
 	logger, _ := newTestErrorLogger()
