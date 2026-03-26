@@ -1,0 +1,31 @@
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}DataLineageBasePath{{"}}"}}{{"{{"}}parent{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/config")
+if err != nil {
+    return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+    billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "GET",
+    Project:   billingProject,
+    RawURL:    url,
+    UserAgent: config.UserAgent,
+})
+if err != nil {
+  return nil
+}
+
+if ingestion, ok := res["ingestion"]; ok {
+	if ingestionMap, ok := ingestion.(map[string]interface{}); !ok || len(ingestionMap) > 0 {
+		return fmt.Errorf("DataLineageConfig still exists at %s", url)
+	}
+}
+
+return nil
