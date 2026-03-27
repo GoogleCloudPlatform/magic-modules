@@ -15,9 +15,9 @@ import (
 const schemaDiffDesc = `Return a list of products where the regionalized endpoint default has changed.`
 
 type repDiffOptions struct {
-	rootOptions     *rootOptions
+	rootOptions    *rootOptions
 	repDefaultDiff func() (map[string]bool, map[string]bool)
-	stdout          io.Writer
+	stdout         io.Writer
 }
 
 func newRepDefaultChangeCmd(rootOptions *rootOptions) *cobra.Command {

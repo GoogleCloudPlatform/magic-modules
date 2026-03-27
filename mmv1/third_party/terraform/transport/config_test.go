@@ -524,9 +524,9 @@ func TestGetRegionFromRegionSelfLink(t *testing.T) {
 
 func TestResourceBasePathDefault(t *testing.T) {
 	config := &transport_tpg.Config{
-		Credentials:      transport_tpg.TestFakeCredentialsPath,
-		Project:          "my-gce-project",
-		Region:           "us-central1",
+		Credentials: transport_tpg.TestFakeCredentialsPath,
+		Project:     "my-gce-project",
+		Region:      "us-central1",
 	}
 	cases := map[string]struct {
 		BasePath       string
@@ -610,4 +610,3 @@ func TestResourceBasePathPreferGlobal(t *testing.T) {
 		})
 	}
 }
-

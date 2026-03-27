@@ -90,7 +90,7 @@ type diffCommentData struct {
 	MissingTests         map[string]*MissingTestInfo
 	MissingDocs          *MissingDocsSummary
 	MultipleResources    []string
-	RepDefaultChanges.   []string
+	RepDefaultChanges    []string
 	Errors               []Errors
 }
 
