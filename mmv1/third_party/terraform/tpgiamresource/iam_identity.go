@@ -14,20 +14,10 @@ func ConvertToIdentitySchema(parentSchema map[string]*schema.Schema) map[string]
 		identitySchema[k] = &schema.Schema{
 			Type: v.Type,
 		}
-		// If the field has RequiredForImport or OptionalForImport set, preserve them
-		if v.RequiredForImport {
+		if v.Required {
 			identitySchema[k].RequiredForImport = true
-		}
-		if v.OptionalForImport {
+		} else {
 			identitySchema[k].OptionalForImport = true
-		}
-		// If not explicitly set, infer from Required+ForceNew pattern
-		if !v.RequiredForImport && !v.OptionalForImport {
-			if v.Required && v.ForceNew {
-				identitySchema[k].RequiredForImport = true
-			} else if v.Optional && v.ForceNew {
-				identitySchema[k].OptionalForImport = true
-			}
 		}
 	}
 	return identitySchema
