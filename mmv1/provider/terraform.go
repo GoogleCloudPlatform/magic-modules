@@ -183,8 +183,10 @@ func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData T
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_meta.yaml", t.FullResourceName(object)))
+	target := fmt.Sprintf("resource_%s_generated_meta.yaml", t.FullResourceName(object))
+	targetFilePath := path.Join(targetFolder, target)
 	templateData.GenerateMetadataFile(targetFilePath, object)
+	t.addHashicorpCopyRightHeader(outputFolder, path.Join(t.FolderName(), "services", productName, target))
 }
 
 // GenerateResourceMetadataFile is used by the Bazel version of the MM compiler to generate the specified
@@ -631,7 +633,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".markdown" {
 			t.addCopyfileHeader(source, outputFolder, target)
 		}
-		if filepath.Ext(target) == ".go" {
+		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".yaml" {
 			t.addHashicorpCopyRightHeader(outputFolder, target)
 		}
 	}
@@ -813,8 +815,8 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	//       created in https://github.com/GoogleCloudPlatform/magic-modules/pull/7336
 	//       The test-fixtures folder is not included here as it's copied as a whole,
 	//       not file by file
-	ignoredFolders := []string{".release/", ".changelog/", "examples/", "scripts/", "META.d/"}
-	ignoredFiles := []string{"go.mod", ".goreleaser.yml", ".golangci.yml", "terraform-registry-manifest.json", "_meta.yaml"}
+	ignoredFolders := []string{".release/", ".changelog/", "examples/", "scripts/"}
+	ignoredFiles := []string{"go.mod", ".goreleaser.yml", ".golangci.yml", "terraform-registry-manifest.json"}
 	shouldAddHeader := true
 	for _, folder := range ignoredFolders {
 		// folder will be path leading to file
