@@ -49,16 +49,16 @@ func SuppressLayer7DdosDefenseMissing(k, old, new string, d *schema.ResourceData
 				continue
 			}
 
-			// If any other sibling field is actively set in the old state, 
+			// If any other sibling field is actively set in the old state,
 			// do NOT suppress the parent block so it can be modified/destroyed normally.
 			switch v := value.(type) {
 			case []interface{}: // Covers Terraform sub-blocks / lists
 				if len(v) > 0 {
-					return false 
+					return false
 				}
 			case string:
 				if v != "" {
-					return false 
+					return false
 				}
 			case bool:
 				if v {
