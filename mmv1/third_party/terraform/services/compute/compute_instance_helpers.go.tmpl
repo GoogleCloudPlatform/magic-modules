@@ -565,7 +565,11 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"ipv6_address":        iface.Ipv6Address,
 			"queue_count":         iface.QueueCount,
 			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
-			"igmp_query":          iface.IgmpQuery,
+		}
+		// Some resources still use network_interface schemas without igmp_query.
+		// Only set the field when it's configured in this resource shape.
+		if iface.IgmpQuery != "" && d.Get("network_interface.0.igmp_query") != nil {
+			flattened[i]["igmp_query"] = iface.IgmpQuery
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -661,6 +665,12 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		subnetwork := data["subnetwork"].(string)
 		if networkAttachmentObj, ok := data["network_attachment"]; ok {
 			networkAttachment = networkAttachmentObj.(string)
+		}
+		igmpQuery := ""
+		if igmpQueryObj, ok := data["igmp_query"]; ok && igmpQueryObj != nil {
+			if s, ok := igmpQueryObj.(string); ok {
+				igmpQuery = s
+			}
 		}
 		// Checks if networkAttachment is not specified in resource, network or subnetwork have to be specified.
 		if networkAttachment == "" && network == "" && subnetwork == "" {

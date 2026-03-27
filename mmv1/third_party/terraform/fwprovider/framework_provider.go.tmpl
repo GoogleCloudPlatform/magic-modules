@@ -295,10 +295,25 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
 	//    See also, new approaches to handle this: https://github.com/GoogleCloudPlatform/magic-modules/pull/11925
 
 
+<<<<<<< HEAD
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources, data sources,
 	// ephemeral resources, and list resources implemented using the plugin-framework. Their Configure functions receive this data via ConfigureRequest.ProviderData
 	// (list resources use ConfigureResponse.ListResourceData — see terraform-plugin-framework list.ConfigureRequest).
 	meta := p.Primary.Meta().(*transport_tpg.Config)
+=======
+	// This is how we make provider configuration info (configured clients, default project, etc) available to resources and data sources
+	// implemented using the plugin-framework. The resources' Configure functions receive this data in the ConfigureRequest argument.
+	primaryMeta := p.Primary.Meta()
+	if primaryMeta == nil {
+		resp.Diagnostics.AddError("Provider not configured", "SDK provider metadata is nil. Ensure the provider block is configured before using framework resources.")
+		return
+	}
+	meta, ok := primaryMeta.(*transport_tpg.Config)
+	if !ok {
+		resp.Diagnostics.AddError("Provider configuration error", "SDK provider metadata had unexpected type and could not be propagated to framework resources.")
+		return
+	}
+>>>>>>> 4a8305bc7 (resolve issues with using list_compute_iam_member (muxinng + helpers))
 	resp.DataSourceData = meta
 	resp.ResourceData = meta
 	resp.EphemeralResourceData = meta

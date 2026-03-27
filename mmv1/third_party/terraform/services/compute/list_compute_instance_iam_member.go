@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -15,10 +16,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // errIamListStop signals normal stop (limit reached or consumer closed the stream).
@@ -46,6 +49,7 @@ func NewComputeInstanceIamMemberListResource() list.ListResource {
 			ComputeInstanceIamSchema,
 			ComputeInstanceIamUpdaterProducer,
 			ComputeInstanceIdParseFunc,
+			tpgiamresource.IamWithResourceIdentity(ComputeInstanceIamResourceIdentityParser),
 		),
 	}
 }
@@ -112,7 +116,7 @@ func (r *ComputeInstanceIamMemberListResource) List(ctx context.Context, req lis
 
 	stream.Results = func(push func(list.ListResult) bool) {
 		var count int64
-		err := ListInstances(r.Client, project, zone, filter, func(instRd *schema.ResourceData) error {
+		err := ListInstanceIdentifiers(r.Client, project, zone, filter, func(instRd *schema.ResourceData) error {
 			name := instRd.Get("name").(string)
 			z, _ := instRd.Get("zone").(string)
 			p, _ := instRd.Get("project").(string)
@@ -130,6 +134,67 @@ func (r *ComputeInstanceIamMemberListResource) List(ctx context.Context, req lis
 			push(res)
 		}
 	}
+}
+
+// ListInstanceIdentifiers lists compute instances and only extracts fields needed by IAM list
+// enumeration (project, zone, name). This avoids full compute-instance flattening.
+func ListInstanceIdentifiers(config *transport_tpg.Config, project, zone, filter string, callback func(rd *schema.ResourceData) error) error {
+	resourceData := ResourceComputeInstance().Data(&terraform.InstanceState{})
+	if err := resourceData.Set("project", project); err != nil {
+		return err
+	}
+	if err := resourceData.Set("zone", zone); err != nil {
+		return err
+	}
+	url, err := tpgresource.ReplaceVars(resourceData, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instances")
+	if err != nil {
+		return err
+	}
+
+	billingProject := ""
+	if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+		billingProject = parts[1]
+	}
+	if bp, err := tpgresource.GetBillingProject(resourceData, config); err == nil {
+		billingProject = bp
+	}
+	userAgent, err := tpgresource.GenerateUserAgentString(resourceData, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	opts := transport_tpg.ListCallOptions{
+		Config:         config,
+		TempData:       resourceData,
+		Url:            url,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+		Filter:         filter,
+		Flattener: func(item map[string]interface{}, d *schema.ResourceData, _ *transport_tpg.Config) error {
+			name, _ := item["name"].(string)
+			if name == "" {
+				return fmt.Errorf("instance list item missing name")
+			}
+			if err := d.Set("name", name); err != nil {
+				return err
+			}
+			if v, ok := item["zone"].(string); ok && v != "" {
+				if err := d.Set("zone", tpgresource.GetResourceNameFromSelfLink(v)); err != nil {
+					return err
+				}
+			}
+			if v, ok := item["selfLink"].(string); ok && v != "" {
+				if m := regexp.MustCompile(`projects/([^/]+)/`).FindStringSubmatch(v); m != nil {
+					if err := d.Set("project", m[1]); err != nil {
+						return err
+					}
+				}
+			}
+			return nil
+		},
+		Callback: callback,
+	}
+	return transport_tpg.ListCall(opts)
 }
 
 func stringAttr(v types.String, def string) string {
@@ -195,13 +260,21 @@ func yieldIamMemberRows(ctx context.Context, req list.ListRequest, memberResourc
 
 			res := req.NewListResult(ctx)
 			if memberResource.ProtoIdentitySchema(ctx) != nil {
-				_, err := rd.Identity()
+				identity, err := rd.Identity()
 				if err != nil {
 					res.Diagnostics.AddError("identity", err.Error())
 					if !push(res) {
 						return errIamListStop
 					}
 					continue
+				}
+				identity.Set("project", rd.Get("project"))
+				identity.Set("zone", rd.Get("zone"))
+				identity.Set("instance_name", rd.Get("instance_name"))
+				identity.Set("role", binding.Role)
+				identity.Set("member", normalized)
+				if binding.Condition != nil && binding.Condition.Title != "" {
+					identity.Set("condition_title", binding.Condition.Title)
 				}
 				tfIdent, err := rd.TfTypeIdentityState()
 				if err != nil {
