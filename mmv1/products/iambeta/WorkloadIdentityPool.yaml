@@ -55,6 +55,7 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/iam_workload_identity_pool.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool.go.tmpl'
 examples:
   - name: 'iam_workload_identity_pool_basic'
