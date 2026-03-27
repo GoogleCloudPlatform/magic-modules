@@ -933,12 +933,6 @@ func DefaultProviderZone(_ context.Context, diff *schema.ResourceDiff, meta inte
 }
 
 func DefaultProviderDeletionPolicy(resourceDefault string) schema.CustomizeDiffFunc {
-	// return func(d *schema.ResourceDiff, meta interface{}) error {
-	// 	if cond(d.Get(default), meta) {
-	// 		return f(d, meta)
-	// 	}
-	// 	return nil
-	// }
 	return func(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 		if dpolicy := diff.Get("deletion_policy"); dpolicy != nil {
@@ -951,20 +945,6 @@ func DefaultProviderDeletionPolicy(resourceDefault string) schema.CustomizeDiffF
 		return nil
 	}
 }
-
-// func DefaultProviderDeletionPolicy(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-// 	config := meta.(*transport_tpg.Config)
-
-// 	if dpolicy := diff.Get("deletion_policy"); dpolicy != nil {
-// 		dpolicy, err := GetDeletionPolicyFromDiff(diff, config)
-// 		err = diff.SetNew("deletion_policy", dpolicy)
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	return nil
-// }
 
 // id.UniqueId() returns a timestamp + incremental hash
 // This function truncates the timestamp to provide a prefix + 9 using
