@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	oldConfig "google/provider/new/google/transport"
-	newConfig "google/provider/old/google/transport"
+	oldConfig "google/provider/new/google/transport/config"
+	newConfig "google/provider/old/google/transport/config"
 
 	"encoding/json"
 	"fmt"
