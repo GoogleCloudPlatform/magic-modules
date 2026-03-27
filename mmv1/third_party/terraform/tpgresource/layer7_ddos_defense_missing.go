@@ -16,7 +16,9 @@ func SuppressLayer7DdosDefenseMissing(k, old, new string, d *schema.ResourceData
 	}
 
 	// We focus strictly on the status of layer_7_ddos_defense_config.
-	// If it was already enabled in the state (API), we SHOULD NOT suppress it.
+	// If it was already enabled in the state (API), we SHOULD NOT suppress it,
+	// ensuring that when the user intentionally unsets (disables) the feature,
+	// the change is accurately reflected in the plan.
 	enableVal, _ := d.GetChange("adaptive_protection_config.0.layer_7_ddos_defense_config.0.enable")
 	if enable, ok := enableVal.(bool); ok && enable {
 		return false
@@ -28,11 +30,48 @@ func SuppressLayer7DdosDefenseMissing(k, old, new string, d *schema.ResourceData
 	}
 
 	// If evaluating the parent block (adaptive_protection_config.#), suppress it only if
-	// no other features (like auto_deploy_config) are intentionally configured.
+	// no other sibling features are intentionally configured.
 	if k == "adaptive_protection_config.#" {
-		if _, ok := d.GetOk("adaptive_protection_config.0.auto_deploy_config"); !ok {
-			return true
+		oldState, _ := d.GetChange("adaptive_protection_config")
+		oldBlocks, ok := oldState.([]interface{})
+		if !ok || len(oldBlocks) == 0 || oldBlocks[0] == nil {
+			return false
 		}
+
+		oldMap, ok := oldBlocks[0].(map[string]interface{})
+		if !ok {
+			return false
+		}
+
+		for key, value := range oldMap {
+			// Skip the target block itself, as we already validated its status above
+			if key == "layer_7_ddos_defense_config" {
+				continue
+			}
+
+			// If any other sibling field is actively set in the old state, 
+			// do NOT suppress the parent block so it can be modified/destroyed normally.
+			switch v := value.(type) {
+			case []interface{}: // Covers Terraform sub-blocks / lists
+				if len(v) > 0 {
+					return false 
+				}
+			case string:
+				if v != "" {
+					return false 
+				}
+			case bool:
+				if v {
+					return false
+				}
+			case int, float64:
+				if v != 0 && v != 0.0 {
+					return false
+				}
+			}
+		}
+		// If we reach here it is safe to suppress the parent block permadiff.
+		return true
 	}
 
 	return false
