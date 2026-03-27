@@ -536,13 +536,13 @@ func TestResourceBasePathDefault(t *testing.T) {
 		Location       string
 		ExpectedOutput string
 	}{
-		"Default to rep path": {
+		"Default to global path": {
 			BasePath:       "https://clouddeploy.googleapis.com/v1/",
 			RepPath:        "https://www.clouddeploy.{{location}}.rep.googleapis.com/v1/",
 			BasePathKey:    "Clouddeploy",
 			Config:         config,
 			Location:       "us-central1",
-			ExpectedOutput: "https://www.clouddeploy.us-central1.rep.googleapis.com/v1/",
+			ExpectedOutput: "https://clouddeploy.googleapis.com/v1/",
 		},
 		"Overridden path takes priority": {
 			BasePath:       "https://override.{{location}}.googleapis.com/v1/",
