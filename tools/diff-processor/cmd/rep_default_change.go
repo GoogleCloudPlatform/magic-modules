@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	oldConfig "google/provider/new/google/transport/config"
-	newConfig "google/provider/old/google/transport/config"
+	oldConfig "google/provider/new/google/transport"
+	newConfig "google/provider/old/google/transport"
 
 	"encoding/json"
 	"fmt"
@@ -24,7 +24,7 @@ func newRepDefaultChangeCmd(rootOptions *rootOptions) *cobra.Command {
 	o := &repDiffOptions{
 		rootOptions: rootOptions,
 		repDefaultDiff: func() (map[string]bool, map[string]bool) {
-			return oldConfig.DefaultRepStatus(), newConfig.DefaultRepStatus()
+			return oldConfig.DefaultRepStatus, newConfig.DefaultRepStatus
 		},
 		stdout: os.Stdout,
 	}
