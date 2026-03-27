@@ -84,6 +84,22 @@ func TestNewVcrMatcherFunc_canDetectMatches(t *testing.T) {
 				query:  "alt=json&prettyPrint=false",
 			},
 		},
+		"matches POST requests when new request has no prettyPrint but cassette has prettyPrint=false": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "compute.googleapis.com",
+				path:   "compute/v1/projects/my-project/zones/us-central1-a/instances/my-instance/setSecurityPolicy",
+				query:  "alt=json",
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "compute.googleapis.com",
+				path:   "compute/v1/projects/my-project/zones/us-central1-a/instances/my-instance/setSecurityPolicy",
+				query:  "alt=json&prettyPrint=false",
+			},
+		},
 		"matches POST requests with matching but re-ordered bodies, but only if Content-Type contains 'application/json'": {
 			httpRequest: requestDescription{
 				scheme: "https",

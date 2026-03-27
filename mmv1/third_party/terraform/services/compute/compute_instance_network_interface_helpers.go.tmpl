@@ -6,9 +6,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-{{- end }}
 
 {{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
@@ -20,14 +18,20 @@ import (
 func computeInstanceDeleteAccessConfigs(d *schema.ResourceData, config *transport_tpg.Config, instNetworkInterface *compute.NetworkInterface, project, zone, userAgent, instanceName string) error {
 	// Delete any accessConfig that currently exists in instNetworkInterface
 	for _, ac := range instNetworkInterface.AccessConfigs {
-		op, err := config.NewComputeClient(userAgent).Instances.DeleteAccessConfig(
-			project, zone, instanceName, ac.Name, instNetworkInterface.Name).Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/deleteAccessConfig?accessConfig=%s&networkInterface=%s", config.ComputeBasePath, project, zone, instanceName, ac.Name, instNetworkInterface.Name)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Error deleting old access_config: %s", err)
 		}
-		opErr := ComputeOperationWaitTime(config, op, project, "old access_config to delete", userAgent, d.Timeout(schema.TimeoutUpdate))
-		if opErr != nil {
-			return opErr
+		err = ComputeOperationWaitTime(config, res, project, "old access_config to delete", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -36,13 +40,25 @@ func computeInstanceDeleteAccessConfigs(d *schema.ResourceData, config *transpor
 func computeInstanceAddAccessConfigs(d *schema.ResourceData, config *transport_tpg.Config, instNetworkInterface *compute.NetworkInterface, accessConfigs []*compute.AccessConfig, project, zone, userAgent, instanceName string) error {
 	// Create new ones
 	for _, ac := range accessConfigs {
-		op, err := config.NewComputeClient(userAgent).Instances.AddAccessConfig(project, zone, instanceName, instNetworkInterface.Name, ac).Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/addAccessConfig?networkInterface=%s", config.ComputeBasePath, project, zone, instanceName, instNetworkInterface.Name)
+		acBody, err := tpgresource.ConvertToMap(ac)
+		if err != nil {
+			return fmt.Errorf("Error converting access config: %s", err)
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      acBody,
+		})
 		if err != nil {
 			return fmt.Errorf("Error adding new access_config: %s", err)
 		}
-		opErr := ComputeOperationWaitTime(config, op, project, "new access_config to add", userAgent, d.Timeout(schema.TimeoutUpdate))
-		if opErr != nil {
-			return opErr
+		err = ComputeOperationWaitTime(config, res, project, "new access_config to add", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -70,13 +86,25 @@ func computeInstanceCreateUpdateWhileStoppedCall(d *schema.ResourceData, config 
 			}
 		}
 
-		op, err := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instanceName, instNetworkInterface.Name, networkInterfacePatchObj).Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateNetworkInterface?networkInterface=%s", config.ComputeBasePath, project, zone, instanceName, instNetworkInterface.Name)
+		niBody, err := tpgresource.ConvertToMap(networkInterfacePatchObj)
+		if err != nil {
+			return fmt.Errorf("Error converting network interface: %s", err)
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "PATCH",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      niBody,
+		})
 		if err != nil {
 			return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
 		}
-		opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
-		if opErr != nil {
-			return opErr
+		err = ComputeOperationWaitTime(config, res, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
 		}
 
 		if accessConfigsHaveChanged {
@@ -92,17 +120,24 @@ func computeInstanceCreateUpdateWhileStoppedCall(d *schema.ResourceData, config 
 {{ if ne $.TargetVersionName `ga` -}}
 func computeInstanceAddSecurityPolicy(d *schema.ResourceData, config *transport_tpg.Config, securityPolicyWithNics map[string][]string, project, zone, userAgent, instanceName string) error {
 	for sp, nics := range securityPolicyWithNics {
-		req := &compute.InstancesSetSecurityPolicyRequest{
-			NetworkInterfaces: nics,
-			SecurityPolicy:    sp,
-		}
-		op, err := config.NewComputeClient(userAgent).Instances.SetSecurityPolicy(project, zone, instanceName, req).Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setSecurityPolicy", config.ComputeBasePath, project, zone, instanceName)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body: map[string]interface{}{
+				"networkInterfaces": nics,
+				"securityPolicy":    sp,
+			},
+		})
 		if err != nil {
 			return fmt.Errorf("Error adding security policy: %s", err)
 		}
-		opErr := ComputeOperationWaitTime(config, op, project, "security_policy to add", userAgent, d.Timeout(schema.TimeoutUpdate))
-		if opErr != nil {
-			return opErr
+		err = ComputeOperationWaitTime(config, res, project, "security_policy to add", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
 		}
 	}
 
