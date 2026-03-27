@@ -475,23 +475,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		errors["Other"] = append(errors["Other"], "Failed to update breaking-change status check with state: "+breakingState)
 	}
 
-	// Update REP default changes status on PR
-	repDefaultState := "success"
-	if len(data.RepDefaultChanges) > 0 {
-		repDefaultState = "failure"
-		// If fetching the PR failed, Labels will be empty
-		for _, label := range pullRequest.Labels {
-			if label.Name == allowRepDefaultChangesLabel {
-				repDefaultState = "success"
-				break
-			}
-		}
-	}
-	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-rep-default-change-test", breakingState, targetURL, commitSha); err != nil {
-		fmt.Printf("Error posting terraform-provider-rep-default-change-test build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
-		errors["Other"] = append(errors["Other"], "Failed to update rep-default-change status check with state: "+repDefaultState)
-	}
-
 	// Flag missing service labels for added resources
 	missingServiceLabels := []string{}
 	if len(regexpLabels) > 0 {
@@ -542,6 +525,23 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		})
 	}
 	data.Errors = errorsList
+
+	// Update REP default changes status on PR
+	repDefaultState := "success"
+	if len(data.RepDefaultChanges) > 0 {
+		repDefaultState = "failure"
+		// If fetching the PR failed, Labels will be empty
+		for _, label := range pullRequest.Labels {
+			if label.Name == allowRepDefaultChangesLabel {
+				repDefaultState = "success"
+				break
+			}
+		}
+	}
+	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-rep-default-change-test", breakingState, targetURL, commitSha); err != nil {
+		fmt.Printf("Error posting terraform-provider-rep-default-change-test build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
+		errors["Other"] = append(errors["Other"], "Failed to update rep-default-change status check with state: "+repDefaultState)
+	}
 
 	// Post diff comment
 	message, err := formatDiffComment(data)
