@@ -579,7 +579,7 @@ func ConvertToIdentitySchema(parentSchema map[string]*schema.Schema) map[string]
 }
 
 // Copies IAM parent attributes from resource state into identity
-func populateIamParentIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSchema map[string]*schema.Schema) {
+func PopulateIamParentIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSchema map[string]*schema.Schema) {
 	for attr := range parentSchema {
 		identity.Set(attr, d.Get(attr))
 	}
