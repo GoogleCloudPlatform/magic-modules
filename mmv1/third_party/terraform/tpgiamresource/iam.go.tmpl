@@ -218,6 +218,16 @@ func (k conditionKey) String() string {
 	return fmt.Sprintf("%s/%s/%s",  k.Title, k.Description, k.Expression)
 }
 
+// IamMemberListItemID returns the Terraform state id for one IAM member row (matches resource_iam_member id shape).
+func IamMemberListItemID(updater ResourceIamUpdater, role, member string, condition *cloudresourcemanager.Expr) string {
+	normalized := tpgresource.NormalizeIamPrincipalCasing(member)
+	id := updater.GetResourceId() + "/" + role + "/" + normalized
+	if k := conditionKeyFromCondition(condition); !k.Empty() {
+		id = id + "/" + k.String()
+	}
+	return id
+}
+
 type iamBindingKey struct {
 	Role      string
 	Condition conditionKey
