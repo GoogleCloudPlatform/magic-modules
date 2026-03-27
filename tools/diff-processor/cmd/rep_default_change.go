@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	newProvider "google/provider/new/google/transport"
-	oldProvider "google/provider/old/google/transport"
+	oldConfig "google/provider/new/google/transport"
+	newConfig "google/provider/old/google/transport"
 
 	"encoding/json"
 	"fmt"
@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const schemaDiffDesc = `Return a list of products where the regionalized endpoint default has changed.`
+const repDiffDesc = `Return a list of products where the regionalized endpoint default has changed.`
 
 type repDiffOptions struct {
 	rootOptions    *rootOptions
@@ -30,8 +30,8 @@ func newRepDefaultChangeCmd(rootOptions *rootOptions) *cobra.Command {
 	}
 	cmd := &cobra.Command{
 		Use:   "rep-diff",
-		Short: schemaDiffDesc,
-		Long:  schemaDiffDesc,
+		Short: repDiffDesc,
+		Long:  repDiffDesc,
 		Args:  cobra.NoArgs,
 		RunE: func(c *cobra.Command, args []string) error {
 			return o.run()
@@ -41,7 +41,7 @@ func newRepDefaultChangeCmd(rootOptions *rootOptions) *cobra.Command {
 }
 func (o *repDiffOptions) run() error {
 	old, new := o.repDefaultDiff()
-	results = []string
+	var results []string
 	for key, enabled := range new {
 		oldEnabled, ok := old[key]
 		if ok && oldEnabled != enabled {
