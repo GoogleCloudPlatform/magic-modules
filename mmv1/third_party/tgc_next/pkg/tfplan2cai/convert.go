@@ -48,7 +48,19 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 
 	// TODO: add remaining advanced resolvers for resources
 	ParentResolver := resolvers.NewParentResourceResolver(o.ErrorLogger)
-	ParentChildMap := ParentResolver.Resolve(jsonPlan)
+	dependencyMap := ParentResolver.Resolve(jsonPlan)
+
+	ParentChildMap := make(map[string][]string)
+	for child, attrs := range dependencyMap {
+		seenParents := make(map[string]bool)
+		for _, parent := range attrs {
+			if !seenParents[parent] {
+				ParentChildMap[parent] = append(ParentChildMap[parent], child)
+				seenParents[parent] = true
+			}
+		}
+	}
+
 	orderMap, err := resolvers.SortTraversalOrder(ParentChildMap)
 	if err != nil {
 		return nil, fmt.Errorf("sorting traversal order: %w", err)
@@ -77,7 +89,6 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 	convertedAddresses := make(map[string]bool)
 
 	if orderMap != nil && len(orderMap) > 0 {
-		dependencyMap := ParentResolver.ResolveDependencies(jsonPlan)
 
 		var levels []int
 		for level := range orderMap {

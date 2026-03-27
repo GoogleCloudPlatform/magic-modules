@@ -26,46 +26,7 @@ func NewParentResourceResolver(errorLogger *zap.Logger) *ParentResourceResolver 
 	}
 }
 
-func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string][]string {
-	parentToChildMap := make(map[string][]string)
-
-	// Read elements from the resouce config
-	resourceConfig, err := tfplan.ReadResourceConfigurations(jsonPlan)
-	if err != nil {
-		return parentToChildMap
-	}
-
-	if resourceConfig == nil || resourceConfig.RootModule == nil {
-		return parentToChildMap
-	}
-
-	for _, resource := range resourceConfig.RootModule.Resources {
-		for _, expression := range resource.Expressions {
-			if expression.ExpressionData.NestedBlocks != nil {
-				for _, innerExexpression := range expression.ExpressionData.NestedBlocks {
-					for _, v := range innerExexpression {
-						reference := v.References
-						if reference != nil {
-							if strings.HasSuffix(reference[0], ".id") || strings.HasSuffix(reference[0], ".self_link") {
-								parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Address)
-							}
-						}
-					}
-				}
-			}
-			reference := expression.ExpressionData.References
-			if reference != nil {
-				if strings.HasSuffix(reference[0], ".id") || strings.HasSuffix(reference[0], ".self_link") {
-					parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Address)
-				}
-			}
-		}
-	}
-
-	return parentToChildMap
-}
-
-func (r *ParentResourceResolver) ResolveDependencies(jsonPlan []byte) map[string]map[string]string {
+func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string]map[string]string {
 	dependenciesMap := make(map[string]map[string]string)
 
 	resourceConfig, err := tfplan.ReadResourceConfigurations(jsonPlan)
