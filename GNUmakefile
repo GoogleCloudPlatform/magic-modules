@@ -4,41 +4,16 @@
 default: build
 
 # mm setup
-ifeq ($(ENGINE),tpgtools)
-  # we specify the product to one that doesn't
-  # exist so exclusively build base tpgtools implementation
-  mmv1_compile=-p does-not-exist
-else ifneq ($(PRODUCT),)
+ifneq ($(PRODUCT),)
   mmv1_compile=--product $(PRODUCT)
-endif
-
-# tpgtools setup
-ifeq ($(ENGINE),mmv1)
-  # we specify the product to one that doesn't
-  # exist so exclusively build base mmv1 implementation
-	tpgtools_compile = --service does-not-exist
-else ifneq ($(PRODUCT),)
-  tpgtools_compile = --service $(PRODUCT)
-else
-  tpgtools_compile =
 endif
 
 ifneq ($(RESOURCE),)
   mmv1_compile += --resource $(RESOURCE)
-  tpgtools_compile += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
   mmv1_compile += --overrides $(OVERRIDES)
-  tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
-  serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
-else
-  tpgtools_compile += --path "api" --overrides "overrides"
-  serialize_compile = --path "api" --overrides "overrides"
-endif
-
-ifneq ($(VERBOSE),)
-  tpgtools_compile += --logtostderr=1 --stderrthreshold=2
 endif
 
 UNAME := $(shell uname)
@@ -50,10 +25,6 @@ else
 SED_I := -i '' -E
 endif
 
-ifeq ($(FORCE_DCL),)
-  FORCE_DCL=latest
-endif
-
 SHOULD_SKIP_CLEAN := false # Default: do not skip
 ifneq ($(SKIP_CLEAN),)
   ifneq ($(SKIP_CLEAN),false)
@@ -61,7 +32,7 @@ ifneq ($(SKIP_CLEAN),)
   endif
 endif
 
-terraform build provider: validate_environment clean-provider mmv1 tpgtools
+terraform build provider: validate_environment clean-provider mmv1
 	@echo "Provider generation process finished for $(VERSION) in $(OUTPUT_PATH)"
 
 
@@ -74,12 +45,6 @@ mmv1:
 		else \
 			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
 		fi
-
-tpgtools: serialize
-	@echo "Executing tpgtools build for $(OUTPUT_PATH)";
-	@cd tpgtools;\
-		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile); \
-		rm serialization.go
 
 clean-provider: check_safe_build
 	@if [ -n "$(PRODUCT)" ]; then \
@@ -136,24 +101,6 @@ test:
 	cd mmv1; \
 		go test ./...
 
-serialize:
-	cd tpgtools;\
-		cp -f serialization.go.base serialization.go &&\
-		go run . $(serialize_compile) --mode "serialization" > temp.serial &&\
-		mv -f temp.serial serialization.go
-
-upgrade-dcl:
-	make serialize
-	cd tpgtools && \
-		go mod edit -dropreplace=github.com/GoogleCloudPlatform/declarative-resource-client-library &&\
-		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@$(FORCE_DCL) &&\
-		go mod tidy;\
-		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
-		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
-	cd ../mmv1/third_party/terraform && \
-		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod; echo "$$SUM_LINE" >> go.sum
-
-
 validate_environment: check_parameters check_safe_build
 
 check_parameters:
@@ -175,4 +122,4 @@ check_safe_build:
 doctor:
 	./scripts/doctor
 
-.PHONY: mmv1 tpgtools test clean-provider validate_environment serialize doctor
+.PHONY: mmv1 test clean-provider validate_environment doctor
