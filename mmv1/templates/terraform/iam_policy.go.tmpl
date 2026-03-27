@@ -320,19 +320,43 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
 
 // {{ $.ResourceName }}IamResourceIdentityParser returns the canonical resource id for IAM member
 // import via resource identity (same shape as {{ $.ResourceName }}IamUpdater.GetResourceId()).
-func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
-{{- range $param := $.IamResourceParams }}
+// project / zone / region / location match IAM schema: optional on import identity and defaulted from
+// the provider when omitted, consistent with {{ $.ResourceName }}IamUpdaterProducer.
+func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData, config *transport_tpg.Config) (string, error) {
+	importD := tpgresource.IamImportTerraformData(identity)
+{{- range $i, $param := $.IamResourceParams }}
 	{{ $camel := camelize $param "lower" }}
 	{{ $snake := underscore $param }}
+{{- if or (eq $param "project") (eq $param "zone") (eq $param "region") (eq $param "location") }}
+	var {{ $camel }} string
+	if rv, ok := identity.GetOk("{{ $snake }}"); ok {
+		if s, strOk := rv.(string); strOk {
+			{{ $camel }} = s
+		}
+	}
+	if {{ $camel }} == "" {
+		res, err := tpgresource.Get{{ title $param }}(importD, config)
+		if err != nil {
+			return "", err
+		}
+		{{ $camel }} = res
+	}
+	if {{ $camel }} == "" {
+		return "", fmt.Errorf("could not determine %q for IAM import identity; set it on the resource or configure the provider", "{{ $snake }}")
+	}
+{{- else }}
 	{{ $camel }}Val, ok := identity.GetOk("{{ $snake }}")
 	if !ok {
 		return "", fmt.Errorf("import identity is missing attribute %q", "{{ $snake }}")
 	}
-	{{ $camel }}, ok := {{ $camel }}Val.(string)
-	if !ok || {{ $camel }} == "" {
+	{{ $camel }}, strOk := {{ $camel }}Val.(string)
+	if !strOk || {{ $camel }} == "" {
 		return "", fmt.Errorf("import identity attribute %q must be a non-empty string", "{{ $snake }}")
 	}
+{{- end }}
+{{- if eq $i (sub (len $.IamResourceParams) 1) }}
 	{{ $camel }} = tpgresource.GetResourceNameFromSelfLink({{ $camel }})
+{{- end }}
 {{- end }}
 	return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ range $i, $param := $.IamResourceParams }}{{ if $i }}, {{ end }}{{ camelize $param "lower" }}{{ end }}), nil
 }
