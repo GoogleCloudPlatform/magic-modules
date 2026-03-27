@@ -13,14 +13,27 @@
 
 ---
 name: ServiceAgent
-description: A Service Agent resource within the Workload Identity API.
+description: A Service Agent within the Workload Identity API.
 base_url: '{{parent}}'
 create_url: '{{parent}}:generateServiceAgents'
 create_verb: POST
 
 custom_code:
+  # The 'post_create' hook is used here because this resource behaves like a
+  # singleton.
+  # The 'generateServiceAgents' API call creates a Service Agent.
+  # Since 'exclude_read' is true, the read functionality is integrated into
+  # this 'post_create' step.
+  # The Go template will parse the response from the creation call to
+  # capture the generated service agent details and store them in the
+  # Terraform state, effectively performing the "read" as part of the create
+  # lifecycle.
   post_create: 'templates/terraform/post_create/workload_identity_service_agent.go.tmpl'
 
+# 'exclude_read: true' means no separate Read API call is defined for this
+# resource.
+# The state of the ServiceAgent is derived from the output of the creation
+# call handled within the 'custom_code.post_create'.
 exclude_read: true
 exclude_delete: true
 exclude_import: true
@@ -36,6 +49,16 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+
+examples:
+  - name: "workload_identity_service_agent_basic"
+    primary_resource_id: "primary"
+    exclude_import_test: true
+    exclude_test: true
+  - name: "workload_identity_service_agent_test"
+    primary_resource_id: "primary"
+    exclude_import_test: true
+    exclude_docs: true
 
 parameters:
   - name: parent
@@ -66,11 +89,9 @@ properties:
         - name: serviceProducer
           type: String
           output: true
-
-min_version: beta
-
-examples:
-  - name: "workload_identity_service_agent_basic"
-    primary_resource_id: "primary"
-    exclude_import_test: true
-    min_version: beta
+        - name: state
+          type: Enum
+          output: true
+          enum_values:
+            - 'ACTIVE'
+            - 'FAILED'

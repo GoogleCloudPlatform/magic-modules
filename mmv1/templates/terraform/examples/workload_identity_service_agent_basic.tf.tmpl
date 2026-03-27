@@ -1,8 +1,6 @@
-resource "google_workload_identity_service_agent" "{{$.PrimaryResourceId}}" {
-  parent   = "projects/${data.google_project.project.number}/locations/global/serviceProducers/bigquery.googleapis.com"
-  provider = google-beta
+data "google_project" "project" {
 }
 
-data "google_project" "project" {
-  provider = google-beta
+resource "google_workload_identity_service_agent" "{{$.PrimaryResourceId}}" {
+  parent   = "projects/${data.google_project.project.number}/locations/global/serviceProducers/healthcare.google.apis.com"
 }

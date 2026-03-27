@@ -8,46 +8,32 @@ It's used to populate the "serviceAgents" field from the API response.
     return fmt.Errorf("could not find operation name in initial response: %#v", res)
   }
 
-  log.Printf("[DEBUG] {{ .Name }}PostCreate: Re-polling operation %s to get final response", opName)
+  log.Printf("[DEBUG] {{ .Name }}PostCreate: Attempting to get operation %s", opName)
 
-  var finalOp map[string]interface{}
   getOpURL := config.WorkloadIdentityBasePath + opName
-  timeout := d.Timeout(schema.TimeoutCreate)
-  startTime := time.Now()
-  deadline := startTime.Add(timeout)
-
-  for {
-    opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-      Config:    config,
-      Method:    "GET",
-      RawURL:    getOpURL,
-      UserAgent: userAgent,
-    })
-    if err != nil {
-      return fmt.Errorf("error re-polling operation %s: %w", opName, err)
-    }
-
-    done, ok := opRes["done"].(bool)
-    // Ensure 'done' field is present and is a boolean. If not, assuming false.
-    if ok && done {
-      finalOp = opRes
-      break
-    }
-
-    if time.Now().After(deadline) {
-      return fmt.Errorf("operation %s did not complete within the timeout of %s", opName, timeout.String())
-    }
-
-    time.Sleep(5 * time.Second)
+  opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "GET",
+    RawURL:    getOpURL,
+    UserAgent: userAgent,
+  })
+  if err != nil {
+    return fmt.Errorf("error getting operation %s: %w", opName, err)
   }
 
-  if finalOp["error"] != nil {
-    return fmt.Errorf("operation %s failed: %#v", opName, finalOp["error"])
+  if opRes["error"] != nil {
+    return fmt.Errorf("operation %s failed: %#v", opName, opRes["error"])
   }
 
-  responseData, ok := finalOp["response"].(map[string]interface{})
+  done, ok := opRes["done"].(bool)
+  // Ensure 'done' field is present and is a boolean. If not, treat as not done.
+  if !ok || !done {
+    return fmt.Errorf("operation %s did not complete: %#v", opName, opRes)
+  }
+
+  responseData, ok := opRes["response"].(map[string]interface{})
   if !ok {
-    return fmt.Errorf("LRO 'response' field not found or not a map in final operation: %#v", finalOp)
+    return fmt.Errorf("LRO 'response' field not found or not a map in final operation: %#v", opRes)
   }
 
   serviceAgentsData, ok := responseData["serviceAgents"].([]interface{})
@@ -55,33 +41,19 @@ It's used to populate the "serviceAgents" field from the API response.
     return fmt.Errorf("required field 'serviceAgents' not found or is not an array in response data: %#v", responseData)
   }
 
-  if len(serviceAgentsData) > 0 {
-    var agentsToSet []interface{}
-    for _, agent := range serviceAgentsData {
-        agentMap, ok := agent.(map[string]interface{})
-        if !ok {
-            log.Printf("[WARN] {{ .Name }}PostCreate: serviceAgent item is not a map: %#v", agent)
-            continue
-        }
-        newAgentMap := make(map[string]interface{})
-        for key, value := range agentMap {
-            // Terraform resource fields often use snake_case, while API responses might use camelCase.
-            // Manually convert "serviceProducer" to "service_producer" to match the schema.
-            snakeKey := key
-            if key == "serviceProducer" {
-                snakeKey = "service_producer"
-            }
-            newAgentMap[snakeKey] = value
-        }
-        agentsToSet = append(agentsToSet, newAgentMap)
-    }
-
-    if err := d.Set("service_agents", agentsToSet); err != nil {
-      return fmt.Errorf("error setting service_agents for {{ .Name }}: %w", err)
-    }
-    log.Printf("[DEBUG] {{ .Name }}PostCreate: Successfully set service_agents.")
-  } else {
-    log.Printf("[DEBUG] {{ .Name }}PostCreate: serviceAgents array was empty.")
+  if len(serviceAgentsData) == 0 {
+    return fmt.Errorf("required field 'serviceAgents' was empty in response data for operation %s", opName)
   }
+
+  log.Printf("[DEBUG] {{ .Name }}PostCreate: Retrieved %d service agent(s).", len(serviceAgentsData))
+  for i, agent := range serviceAgentsData {
+    log.Printf("[DEBUG] {{ .Name }}PostCreate: Service Agent [%d]: %#v", i, agent)
+  }
+
+  if err := d.Set("service_agents", flattenWorkloadIdentityServiceAgentServiceAgents(serviceAgentsData, d, config)); err != nil {
+    return fmt.Errorf("error setting service_agents for {{ .Name }}: %w", err)
+  }
+
+  log.Printf("[DEBUG] {{ .Name }}PostCreate: Successfully set service_agents.")
 
   return nil
