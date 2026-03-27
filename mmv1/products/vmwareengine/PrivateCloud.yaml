@@ -51,6 +51,8 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/vmwareengine_private_cloud.go.tmpl'
   post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
 sweeper:
+  dependencies:
+    - "google_vmwareengine_external_address"
   query_string: "?delay_hours=0&force=true"
   url_substitutions:
     - region: "us-central1-a"
