@@ -1,6 +1,6 @@
 resource "google_model_armor_template" "template-basic" {
-  location    = "{{.Vars.location}}"
-  template_id = "{{.Vars.templateId}}"
+  location    = "{{index $.Vars "location"}}"
+  template_id = "{{index $.Vars "templateId"}}"
 
   filter_config {
 

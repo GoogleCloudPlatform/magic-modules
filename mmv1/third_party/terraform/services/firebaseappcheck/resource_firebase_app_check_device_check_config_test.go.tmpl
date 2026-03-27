@@ -13,21 +13,26 @@ import (
 func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigUpdate(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
 		"project_id":       envvar.GetTestProjectFromEnv(),
-		"team_id":          "9987654321",
+		"bundle_id":        "bundle.id.devicecheck" + randomSuffix,
+		"key_id":           "Key ID" + randomSuffix,
 		"private_key_path": "test-fixtures/private-key.p8",
+		"team_id":          "9987654321",
 		"token_ttl":        "3900s",
-		"random_suffix":    acctest.RandString(t, 10),
+		"random_suffix":    randomSuffix,
 	}
 
 	contextUpdated := map[string]interface{}{
 		"project_id":       envvar.GetTestProjectFromEnv(),
-		"team_id":          "9987654321",
+		"bundle_id":        "bundle.id.devicecheck" + randomSuffix,
+		"key_id":           "Key ID" + randomSuffix,
 		"private_key_path": "test-fixtures/private-key-2.p8",
+		"team_id":          "9987654321",
 		"token_ttl":        "7200s",
-		// Bundle ID needs to be the same between updates but different between tests
-		"random_suffix": context["random_suffix"],
+		"random_suffix":    randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
