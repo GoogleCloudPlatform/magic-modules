@@ -394,6 +394,9 @@ endpoints are available prior to using this setting.
 * `prefer_global_endpoints` - (Optional) Whether resources should prefer using
 global endpoints when sending requests.
 
+To find out what regional endpoints are available, check the
+[official documentation](https://docs.cloud.google.com/vpc/docs/regional-service-endpoints).
+
 ---
 
 * `batching` - (Optional) Controls batching for specific GCP request types

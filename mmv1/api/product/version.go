@@ -31,7 +31,6 @@ type Version struct {
 	BaseUrl          string `yaml:"base_url"`
 	Name             string
 	RepUrl           string `yaml:"rep_url,omitempty"`
-	UseGlobalUrl     bool   `yaml:"use_global_url,omitempty"`
 }
 
 func (v *Version) Validate(pName string) {
@@ -48,9 +47,8 @@ func (v *Version) CompareTo(other *Version) int {
 }
 
 
-// Regional endpoints should be used by default unless the service has not
-// fully rolled out support. Keep the UseGlobalUrl flag to allow users to
-// configure using a partially rolled out REP without an endpoint override
+// Whether this version supports regionalized endpoints (REP). The default
+// of regional vs global is controlled at the product level
 func (v *Version) RepEnabled() bool {
-	return v.RepUrl != "" && !v.UseGlobalUrl
+	return v.RepUrl != ""
 }
