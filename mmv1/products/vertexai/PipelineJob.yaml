@@ -93,11 +93,13 @@ properties:
         type: String
   - name: pipelineSpec
     type: String
+    send_empty_value: true
     description: A compiled definition of a pipeline, represented as a JSON object.
     validation:
       function: 'validation.StringIsJSON'
   - name: pscInterfaceConfig
     type: String
+    send_empty_value: true
     description: JSON-encoded PSC interface configuration.
     validation:
       function: 'validation.StringIsJSON'
@@ -118,6 +120,7 @@ properties:
       - PIPELINE_STATE_PAUSED
   - name: 'labels'
     min_version: 'beta'
+    send_empty_value: true
     type: KeyValueLabels
     description: The spec of the pipeline. Stored as free-form JSON/object.
   - name: 'serviceAccount'
@@ -127,6 +130,7 @@ properties:
   - name: 'network'
     min_version: 'beta'
     type: String
+    send_empty_value: true
     description: The full name of the Compute Engine network to which the Pipeline Job's workload should be peered.
   - name: 'templateUri'
     min_version: 'beta'
@@ -134,6 +138,7 @@ properties:
     description: A template uri from where the PipelineJob.pipeline_spec, if empty, will be downloaded. Currently, only uri from Vertex Template Registry & Gallery is supported. Reference to https://cloud.google.com/vertex-ai/docs/pipelines/create-pipeline-template.
   - name: 'reservedIpRanges'
     min_version: 'beta'
+    send_empty_value: true
     type: Array
     description: A list of names for reserved IP ranges under the VPC network.
     item_type:
@@ -145,10 +150,12 @@ properties:
     output: true
   - name: 'preflightValidations'
     min_version: 'beta'
+    send_empty_value: true
     type: Boolean
     description: Whether to do component level validations before job creation.
   - name: 'satisfiesPzs'
     min_version: 'beta'
+    send_empty_value: true
     type: Boolean
     description: Reserved for future use.
     output: true
@@ -159,5 +166,6 @@ properties:
     send_empty_value: true
   - name: 'originalPipelineJobId'
     min_version: 'beta'
+    send_empty_value: true
     type: String
     description: The original pipeline job id if this job is a rerun of a previous job.
