@@ -2091,16 +2091,25 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	return resourceComputeInstanceRead(d, meta)
 }
 
-func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+func flattenComputeInstance(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+	var instance compute.Instance
+	var err error
+	if res != nil {
+		// Convert map[string]interface{} to compute.Instance struct
+		err = tpgresource.Convert(res, &instance)
+		if err != nil {
+			return err
+		}
+	} else {
+		instancePtr, err := getInstance(config, d)
+		if err != nil || instancePtr == nil {
+			return err
+		}
+		instance = *instancePtr
+	}
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
-		return err
-	}
-
-	instance, err := getInstance(config, d)
-	if err != nil || instance == nil {
 		return err
 	}
 
@@ -2422,6 +2431,16 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
         return err
     }
     
+	return nil
+}
+
+func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+
+	if err := flattenComputeInstance(nil, d, config); err != nil {
+		return err
+	}
+
 	return nil
 }
 
