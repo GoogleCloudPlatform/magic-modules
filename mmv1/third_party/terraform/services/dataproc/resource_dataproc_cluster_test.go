@@ -3675,4 +3675,3 @@ resource "google_dataproc_cluster" "tf_test_cluster" {
 }
 `, clusterName)
 }
-
