@@ -73,6 +73,9 @@ examples:
       deletion_protection: 'false'
       database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
       endpoint_name: 'fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))'
+    # Skip in VCR until the test issue is resolved
+    # TODO(shuyama): Add GH issue link
+    skip_vcr: true
   - name: 'oracledatabase_autonomous_database_odbnetwork'
     primary_resource_id: 'myADB'
     vars:

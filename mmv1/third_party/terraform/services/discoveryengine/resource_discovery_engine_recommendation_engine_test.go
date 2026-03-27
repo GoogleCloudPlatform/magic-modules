@@ -10,6 +10,10 @@ import (
 func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample_update(t *testing.T) {
 	t.Parallel()
 
+	// Skip in VCR until the test issue is resolved
+	// TODO(shuyama): Add GH issue link
+	acctest.SkipIfVcr(t)
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
