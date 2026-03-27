@@ -561,3 +561,26 @@ func MissingBindings(a, b []*cloudresourcemanager.Binding) []*cloudresourcemanag
 	}
 	return results
 }
+
+// Converts an IAM parent resource schema to identity schema
+func ConvertToIdentitySchema(parentSchema map[string]*schema.Schema) map[string]*schema.Schema {
+	identitySchema := make(map[string]*schema.Schema)
+	for k, v := range parentSchema {
+		identitySchema[k] = &schema.Schema{
+			Type: v.Type,
+		}
+		if v.Required {
+			identitySchema[k].RequiredForImport = true
+		} else {
+			identitySchema[k].OptionalForImport = true
+		}
+	}
+	return identitySchema
+}
+
+// Copies IAM parent attributes from resource state into identity
+func PopulateIamParentIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSchema map[string]*schema.Schema) {
+	for attr := range parentSchema {
+		identity.Set(attr, d.Get(attr))
+	}
+}
