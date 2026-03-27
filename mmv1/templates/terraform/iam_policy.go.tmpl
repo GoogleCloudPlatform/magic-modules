@@ -322,8 +322,12 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
 // import via resource identity (same shape as {{ $.ResourceName }}IamUpdater.GetResourceId()).
 // project / zone / region / location match IAM schema: optional on import identity and defaulted from
 // the provider when omitted, consistent with {{ $.ResourceName }}IamUpdaterProducer.
+// Any other identity attributes are normally all required; if at least two are set, each must be
+// present (multi-attribute import). If only one is set, it must be "{{ underscore $.IamParentResourceName }}"
+// carrying a full or partial resource id, parsed with the same import regexes as string import.
 func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData, config *transport_tpg.Config) (string, error) {
 	importD := tpgresource.IamImportTerraformData(identity)
+	parentKey := "{{ underscore $.IamParentResourceName }}"
 {{- range $i, $param := $.IamResourceParams }}
 	{{ $camel := camelize $param "lower" }}
 	{{ $snake := underscore $param }}
@@ -344,7 +348,63 @@ func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData
 	if {{ $camel }} == "" {
 		return "", fmt.Errorf("could not determine %q for IAM import identity; set it on the resource or configure the provider", "{{ $snake }}")
 	}
-{{- else }}
+{{- end }}
+{{- end }}
+	nonLocCount := 0
+{{- range $param := $.IamResourceParams }}
+{{- if not (or (eq $param "project") (eq $param "zone") (eq $param "region") (eq $param "location")) }}
+	if v, ok := identity.GetOk("{{ underscore $param }}"); ok {
+		if s, strOk := v.(string); strOk && s != "" {
+			nonLocCount++
+		}
+	}
+{{- end }}
+{{- end }}
+	if nonLocCount == 0 {
+		return "", fmt.Errorf("import identity must set attribute %q to the full resource id, or set multiple resource attributes", parentKey)
+	}
+	if nonLocCount == 1 {
+		var compositeId string
+{{- range $param := $.IamResourceParams }}
+{{- if not (or (eq $param "project") (eq $param "zone") (eq $param "region") (eq $param "location")) }}
+		if v, ok := identity.GetOk("{{ underscore $param }}"); ok {
+			if s, strOk := v.(string); strOk && s != "" {
+				if "{{ underscore $param }}" != parentKey {
+					return "", fmt.Errorf("import identity sets only one resource attribute %q; either set attribute %q to the full resource id or set multiple attributes", "{{ underscore $param }}", parentKey)
+				}
+				compositeId = s
+			}
+		}
+{{- end }}
+{{- end }}
+		if compositeId == "" {
+			return "", fmt.Errorf("import identity must set non-empty attribute %q", parentKey)
+		}
+		values := make(map[string]string)
+{{- range $param := $.IamResourceParams }}
+{{- if or (eq $param "project") (eq $param "zone") (eq $param "region") (eq $param "location") }}
+		values["{{ $param }}"] = {{ camelize $param "lower" }}
+{{- end }}
+{{- end }}
+		m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdRegexesFromIam }}"}, importD, config, compositeId)
+		if err != nil {
+			return "", err
+		}
+		for k, v := range m {
+			values[k] = v
+		}
+{{- range $param := $.IamResourceParams }}
+		if values["{{ $param }}"] == "" {
+			return "", fmt.Errorf("could not derive %q from %q; set attributes explicitly or use a longer resource id in %q", "{{ underscore $param }}", compositeId, parentKey)
+		}
+{{- end }}
+		return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ range $i, $param := $.IamResourceParams }}{{ if $i }}, {{ end }}values["{{ $param }}"]{{ end }}), nil
+	}
+	_ = importD
+{{- range $i, $param := $.IamResourceParams }}
+	{{ $camel := camelize $param "lower" }}
+	{{ $snake := underscore $param }}
+{{- if not (or (eq $param "project") (eq $param "zone") (eq $param "region") (eq $param "location")) }}
 	{{ $camel }}Val, ok := identity.GetOk("{{ $snake }}")
 	if !ok {
 		return "", fmt.Errorf("import identity is missing attribute %q", "{{ $snake }}")
@@ -353,9 +413,9 @@ func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData
 	if !strOk || {{ $camel }} == "" {
 		return "", fmt.Errorf("import identity attribute %q must be a non-empty string", "{{ $snake }}")
 	}
-{{- end }}
 {{- if eq $i (sub (len $.IamResourceParams) 1) }}
 	{{ $camel }} = tpgresource.GetResourceNameFromSelfLink({{ $camel }})
+{{- end }}
 {{- end }}
 {{- end }}
 	return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ range $i, $param := $.IamResourceParams }}{{ if $i }}, {{ end }}{{ camelize $param "lower" }}{{ end }}), nil
