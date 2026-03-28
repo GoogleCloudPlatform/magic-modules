@@ -16,26 +16,24 @@
 // 'config' is provided by the boilerplate.
 // We use ':=' to declare 'userAgent', 'err', and 'project' for the first time in this scope.
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-if err != nil {
-	return err
-}
+if err != nil { return err }
 
 billingProject := ""
 project, err := tpgresource.GetProject(d, config)
-if err != nil {
-	return fmt.Errorf("Error fetching project for Disk: %s", err)
-}
+if err != nil { return fmt.Errorf("Error fetching project for Disk: %s", err) }
 billingProject = project
-if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
-	billingProject = bp
-}
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil { billingProject = bp }
 
 d.Partial(true)
 
-if d.HasChange("label_fingerprint") || d.HasChange("labels") {
+// 1. Labels (POST) - Use shared helper to avoid 'undefined' errors
+if d.HasChange("label_fingerprint") || d.HasChange("effective_labels") {
 	obj := make(map[string]interface{})
 	if v, ok := d.GetOk("label_fingerprint"); ok { obj["labelFingerprint"] = v }
-	obj["labels"] = tpgresource.ExpandLabels(d)
+	
+	// Correct helper for google-beta provider
+	obj["labels"] = tpgresource.ExpandEffectiveLabels(d)
+
 	obj, err = resourceComputeDiskUpdateEncoder(d, meta, obj)
 	if err != nil { return err }
 	url, _ := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/zones/{{ "{{" }}zone{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/setLabels")
@@ -47,6 +45,7 @@ if d.HasChange("label_fingerprint") || d.HasChange("labels") {
 	if err != nil { return err }
 }
 
+// 2. Size (POST)
 if d.HasChange("size") {
 	obj := make(map[string]interface{})
 	obj["sizeGb"] = d.Get("size")
@@ -61,6 +60,7 @@ if d.HasChange("size") {
 	if err != nil { return err }
 }
 
+// 3. Performance (PATCH - Atomic Group 1)
 if d.HasChange("provisioned_iops") || d.HasChange("provisioned_throughput") {
 	obj := make(map[string]interface{})
 	var paths []string
@@ -85,6 +85,7 @@ if d.HasChange("provisioned_iops") || d.HasChange("provisioned_throughput") {
 	if err != nil { return err }
 }
 
+// 4. Access Mode (PATCH - Group 2)
 if d.HasChange("access_mode") {
 	obj := make(map[string]interface{})
 	obj["accessMode"] = d.Get("access_mode")

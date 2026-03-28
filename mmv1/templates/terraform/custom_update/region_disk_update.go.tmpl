@@ -13,6 +13,8 @@
 # limitations under the License.
 */}}
 
+// 'config' is provided by the boilerplate. 
+// Use ':=' to declare 'userAgent', 'err', and 'project' for the first time in this scope.
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
 	return err
@@ -31,14 +33,15 @@ if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 d.Partial(true)
 
 // 1. Handle Labels (POST to /setLabels)
-if d.HasChange("label_fingerprint") || d.HasChange("labels") {
+if d.HasChange("label_fingerprint") || d.HasChange("effective_labels") {
 	obj := make(map[string]interface{})
 	if v, ok := d.GetOk("label_fingerprint"); ok {
 		obj["labelFingerprint"] = v
 	}
 	
-	// Use shared ExpandLabels to avoid generator pruning issues
-	obj["labels"] = tpgresource.ExpandLabels(d)
+	// FIX: Use shared ExpandEffectiveLabels for beta/regional compatibility
+	// and to avoid generator pruning issues.
+	obj["labels"] = tpgresource.ExpandEffectiveLabels(d)
 
 	obj, err = resourceComputeRegionDiskUpdateEncoder(d, meta, obj)
 	if err != nil {
@@ -72,7 +75,7 @@ if d.HasChange("label_fingerprint") || d.HasChange("labels") {
 // 2. Handle Size (POST to /resize)
 if d.HasChange("size") {
 	obj := make(map[string]interface{})
-	// Use d.Get directly for simple fields to ensure stability against code pruning
+	// Use d.Get directly for simple integer fields to ensure stability.
 	obj["sizeGb"] = d.Get("size")
 
 	obj, err = resourceComputeRegionDiskUpdateEncoder(d, meta, obj)
@@ -104,8 +107,9 @@ if d.HasChange("size") {
 	}
 }
 
-// 3. Handle Hyperdisk Performance (Combined PATCH for b/487264955)
-// These fields MUST be updated together to satisfy ratio validation requirements.
+// 3. Handle Hyperdisk Performance (Atomic Combined PATCH for Group 1)
+// provisioned_iops and provisioned_throughput MUST be updated together 
+// to avoid API ratio validation errors.
 if d.HasChange("provisioned_iops") || d.HasChange("provisioned_throughput") {
 	obj := make(map[string]interface{})
 	var paths []string
@@ -129,6 +133,7 @@ if d.HasChange("provisioned_iops") || d.HasChange("provisioned_throughput") {
 	if err != nil {
 		return err
 	}
+	// Atomic Path Construction
 	url := fmt.Sprintf("%s?paths=%s", baseUrl, strings.Join(paths, "&paths="))
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -150,7 +155,7 @@ if d.HasChange("provisioned_iops") || d.HasChange("provisioned_throughput") {
 	}
 }
 
-// 4. Handle Access Mode (Separate PATCH to comply with API Update Group rules)
+// 4. Handle Access Mode (Separate PATCH for Group 2)
 // The API forbids combining 'accessMode' with performance fields in a single request.
 if d.HasChange("access_mode") {
 	obj := make(map[string]interface{})
