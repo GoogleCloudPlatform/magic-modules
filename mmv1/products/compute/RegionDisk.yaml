@@ -395,9 +395,8 @@ properties:
     required: false
     immutable: false
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=accessMode'
     update_verb: 'PATCH'
-    update_id: 'hyperdisk_performance'
   - name: 'provisionedIops'
     type: Integer
     description: |
@@ -407,7 +406,6 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     update_verb: 'PATCH'
-    update_id: 'hyperdisk_performance'
   - name: 'provisionedThroughput'
     type: Integer
     description: |
@@ -416,7 +414,6 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     update_verb: 'PATCH'
-    update_id: 'hyperdisk_performance'
   - name: 'eraseWindowsVssSignature'
     type: Boolean
     description: |

@@ -476,7 +476,6 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     update_verb: 'PATCH'
-    update_id: 'hyperdisk_performance'
   - name: 'provisionedThroughput'
     type: Integer
     description: |
@@ -486,7 +485,6 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     update_verb: 'PATCH'
-    update_id: 'hyperdisk_performance'
   - name: 'asyncPrimaryDisk'
     type: NestedObject
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
@@ -569,9 +567,8 @@ properties:
     required: false
     immutable: false
     default_from_api: true
-    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'
     update_verb: 'PATCH'
-    update_id: 'hyperdisk_performance'
   - name: 'eraseWindowsVssSignature'
     type: Boolean
     description: |
