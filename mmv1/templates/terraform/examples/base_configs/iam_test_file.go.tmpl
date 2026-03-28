@@ -12,6 +12,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+{{- if not $.IamPolicy.ExcludeImportTest }}
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+{{- end }}
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
@@ -107,6 +110,45 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 	})
 }
 
+{{- if not $.IamPolicy.ExcludeImportTest }}
+// TestAcc{{ $.ResourceName }}IamMemberIdentityImportGenerated imports {{ $.IamTerraformName }}_member using
+// Terraform resource identity (import block). Requires Terraform 1.12+.
+func TestAcc{{ $.ResourceName }}IamMemberIdentityImportGenerated(t *testing.T) {
+	t.Parallel()
+{{ template "IamTestSetup" $ }}
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+{{- if eq $.MinVersionObj.Name "beta" }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+{{-  else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+{{-  end }}
+{{- if $example.ExternalProviders }}
+		ExternalProviders: map[string]resource.ExternalProvider{
+		{{- range $provider := $example.ExternalProviders }}
+			"{{$provider}}": {},
+		{{- end }}
+		},
+{{-  end }}
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc{{ $.ResourceName }}IamMember_basicGenerated(context),
+			},
+			{
+				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
+				ImportState:       true,
+				ImportStateKind:   resource.ImportBlockWithResourceIdentity,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+{{- end }}
 func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 {{ if $.IamPolicy.AdminIamRole }}
