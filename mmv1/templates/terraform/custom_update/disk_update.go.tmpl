@@ -13,162 +13,89 @@
 # limitations under the License.
 */}}
 
-// 'config' is already declared by the base resource.go.tmpl
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-if err != nil {
-	return err
-}
+if err != nil { return err }
 
 billingProject := ""
-// Use ':=' to declare 'project' and 'err' for the first time in this template snippet
 project, err := tpgresource.GetProject(d, config)
-if err != nil {
-	return fmt.Errorf("Error fetching project for Disk: %s", err)
-}
+if err != nil { return fmt.Errorf("Error fetching project for Disk: %s", err) }
 billingProject = project
-if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
-	billingProject = bp
-}
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil { billingProject = bp }
 
 d.Partial(true)
 
-// 1. Handle Labels (POST to /setLabels)
-if d.HasChange("label_fingerprint") || d.HasChange("effective_labels") {
+// 1. Labels Update
+if d.HasChange("label_fingerprint") || d.HasChange("labels") {
 	obj := make(map[string]interface{})
-
-	labelFingerprintProp, err := expandComputeDiskLabelFingerprint(d.Get("label_fingerprint"), d, config)
-	if err == nil && !tpgresource.IsEmptyValue(reflect.ValueOf(labelFingerprintProp)) {
-		obj["labelFingerprint"] = labelFingerprintProp
-	}
-	labelsProp, err := expandComputeDiskEffectiveLabels(d.Get("effective_labels"), d, config)
-	if err == nil && !tpgresource.IsEmptyValue(reflect.ValueOf(labelsProp)) {
-		obj["labels"] = labelsProp
-	}
+	if v, ok := d.GetOk("label_fingerprint"); ok { obj["labelFingerprint"] = v }
+	
+	// Use shared ExpandLabels instead of resource-specific expander
+	obj["labels"] = tpgresource.ExpandLabels(d)
 
 	obj, err = resourceComputeDiskUpdateEncoder(d, meta, obj)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/zones/{{ "{{" }}zone{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/setLabels")
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "POST",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-		Body:      obj,
-		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Config: config, Method: "POST", Project: billingProject, RawURL: url, UserAgent: userAgent, Body: obj, Timeout: d.Timeout(schema.TimeoutUpdate),
 	})
-	if err != nil {
-		return fmt.Errorf("Error updating Disk %q labels: %s", d.Id(), err)
-	}
-
+	if err != nil { return fmt.Errorf("Error updating Disk %q labels: %s", d.Id(), err) }
 	err = ComputeOperationWaitTime(config, res, project, "Updating Disk Labels", userAgent, d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 }
 
-// 2. Handle Size (POST to /resize)
+// 2. Size Update
 if d.HasChange("size") {
 	obj := make(map[string]interface{})
-	sizeGbProp, err := expandComputeDiskSize(d.Get("size"), d, config)
-	if err == nil && !tpgresource.IsEmptyValue(reflect.ValueOf(sizeGbProp)) {
-		obj["sizeGb"] = sizeGbProp
-	}
-
+	obj["sizeGb"] = d.Get("size")
 	obj, err = resourceComputeDiskUpdateEncoder(d, meta, obj)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/zones/{{ "{{" }}zone{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/resize")
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "POST",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-		Body:      obj,
-		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Config: config, Method: "POST", Project: billingProject, RawURL: url, UserAgent: userAgent, Body: obj, Timeout: d.Timeout(schema.TimeoutUpdate),
 	})
-	if err != nil {
-		return fmt.Errorf("Error resizing Disk %q: %s", d.Id(), err)
-	}
-
+	if err != nil { return fmt.Errorf("Error resizing Disk %q: %s", d.Id(), err) }
 	err = ComputeOperationWaitTime(config, res, project, "Resizing Disk", userAgent, d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 }
 
-// 3. Handle Hyperdisk Performance (Combined PATCH logic for b/487264955)
+// 3. Atomic Performance Update
 if d.HasChange("provisioned_iops") || d.HasChange("provisioned_throughput") || d.HasChange("access_mode") {
 	obj := make(map[string]interface{})
 	var paths []string
 
 	if d.HasChange("provisioned_iops") {
-		v, err := expandComputeDiskProvisionedIops(d.Get("provisioned_iops"), d, config)
-		if err == nil {
-			obj["provisionedIops"] = v
-			paths = append(paths, "provisionedIops")
-		}
+		obj["provisionedIops"] = d.Get("provisioned_iops")
+		paths = append(paths, "provisionedIops")
 	}
 	if d.HasChange("provisioned_throughput") {
-		v, err := expandComputeDiskProvisionedThroughput(d.Get("provisioned_throughput"), d, config)
-		if err == nil {
-			obj["provisionedThroughput"] = v
-			paths = append(paths, "provisionedThroughput")
-		}
+		obj["provisionedThroughput"] = d.Get("provisioned_throughput")
+		paths = append(paths, "provisionedThroughput")
 	}
 	if d.HasChange("access_mode") {
-		v, err := expandComputeDiskAccessMode(d.Get("access_mode"), d, config)
-		if err == nil {
-			obj["accessMode"] = v
-			paths = append(paths, "accessMode")
-		}
+		obj["accessMode"] = d.Get("access_mode")
+		paths = append(paths, "accessMode")
 	}
 
 	obj["name"] = d.Get("name")
 	obj, err = resourceComputeDiskUpdateEncoder(d, meta, obj)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 
 	baseUrl, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/zones/{{ "{{" }}zone{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}")
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	url := fmt.Sprintf("%s?paths=%s", baseUrl, strings.Join(paths, "&paths="))
 
-	headers := make(http.Header)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "PATCH",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-		Body:      obj,
-		Timeout:   d.Timeout(schema.TimeoutUpdate),
-		Headers:   headers,
+		Config: config, Method: "PATCH", Project: billingProject, RawURL: url, UserAgent: userAgent, Body: obj, Timeout: d.Timeout(schema.TimeoutUpdate),
 	})
-	if err != nil {
-		return fmt.Errorf("Error updating Disk %q performance: %s", d.Id(), err)
-	}
-
+	if err != nil { return fmt.Errorf("Error updating Disk %q performance: %s", d.Id(), err) }
 	err = ComputeOperationWaitTime(config, res, project, "Updating Disk Performance", userAgent, d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 }
 
 d.Partial(false)

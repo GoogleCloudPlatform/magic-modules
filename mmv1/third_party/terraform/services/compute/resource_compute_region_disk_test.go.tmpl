@@ -195,11 +195,12 @@ func TestAccComputeRegionDisk_hyperdiskPerformanceAtomicUpdate(t *testing.T) {
 }
 
 func testAccComputeRegionDisk_hyperdiskPerformance(context map[string]interface{}, stage string) string {
-	iops := context["iops_init"]
-	tp := context["tp_init"]
 	if stage == "update" {
-		iops = context["iops_update"]
-		tp = context["tp_update"]
+		context["iops"] = context["iops_update"]
+		context["tp"] = context["tp_update"]
+	} else {
+		context["iops"] = context["iops_init"]
+		context["tp"] = context["tp_init"]
 	}
 
 	return acctest.Nprintf(`
@@ -209,8 +210,8 @@ resource "google_compute_region_disk" "foobar" {
   region                 = "us-central1"
   replica_zones          = ["us-central1-a", "us-central1-f"]
   size                   = 100
-  provisioned_iops       = `+fmt.Sprintf("%v", iops)+`
-  provisioned_throughput = `+fmt.Sprintf("%v", tp)+`
+  provisioned_iops       = %{iops}
+  provisioned_throughput = %{tp}
 }
 `, context)
 }
