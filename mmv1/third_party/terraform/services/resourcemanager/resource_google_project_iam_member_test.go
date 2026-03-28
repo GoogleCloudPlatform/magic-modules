@@ -2,12 +2,14 @@ package resourcemanager_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func projectIamMemberImportStep(resourceName, pid, role, member string) resource.TestStep {
@@ -16,6 +18,21 @@ func projectIamMemberImportStep(resourceName, pid, role, member string) resource
 		ImportStateId:     fmt.Sprintf("%s %s %s", pid, role, member),
 		ImportState:       true,
 		ImportStateVerify: true,
+	}
+}
+
+func projectIamMemberIdentityImportStep(resourceName string) resource.TestStep {
+	return resource.TestStep{
+		ResourceName:      resourceName,
+		ImportState:       true,
+		ImportStateKind:   resource.ImportBlockWithResourceIdentity,
+		ImportStateVerify: true,
+	}
+}
+
+func projectIamMemberTerraformVersionChecks() []tfversion.TerraformVersionCheck {
+	return []tfversion.TerraformVersionCheck{
+		tfversion.SkipBelow(tfversion.Version1_12_0),
 	}
 }
 
@@ -29,6 +46,7 @@ func TestAccProjectIamMember_basic(t *testing.T) {
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
 	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks:   projectIamMemberTerraformVersionChecks(),
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -44,6 +62,7 @@ func TestAccProjectIamMember_basic(t *testing.T) {
 				Config: testAccProjectAssociateMemberBasic(pid, org, role, member),
 			},
 			projectIamMemberImportStep(resourceName, pid, role, member),
+			projectIamMemberIdentityImportStep(resourceName),
 		},
 	})
 }
@@ -65,6 +84,7 @@ func TestAccProjectIamMember_multiple(t *testing.T) {
 	member2 := "user:gterraformtest1@gmail.com"
 
 	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks:   projectIamMemberTerraformVersionChecks(),
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -80,13 +100,16 @@ func TestAccProjectIamMember_multiple(t *testing.T) {
 				Config: testAccProjectAssociateMemberBasic(pid, org, role, member),
 			},
 			projectIamMemberImportStep(resourceName, pid, role, member),
+			projectIamMemberIdentityImportStep(resourceName),
 
 			// Apply another IAM binding
 			{
 				Config: testAccProjectAssociateMemberMultiple(pid, org, role, member, role, member2),
 			},
 			projectIamMemberImportStep(resourceName, pid, role, member),
+			projectIamMemberIdentityImportStep(resourceName),
 			projectIamMemberImportStep(resourceName2, pid, role, member2),
+			projectIamMemberIdentityImportStep(resourceName2),
 		},
 	})
 }
@@ -107,6 +130,7 @@ func TestAccProjectIamMember_remove(t *testing.T) {
 	member2 := "user:gterraformtest1@gmail.com"
 
 	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks:   projectIamMemberTerraformVersionChecks(),
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -123,7 +147,9 @@ func TestAccProjectIamMember_remove(t *testing.T) {
 				Config: testAccProjectAssociateMemberMultiple(pid, org, role, member, role, member2),
 			},
 			projectIamMemberImportStep(resourceName, pid, role, member),
+			projectIamMemberIdentityImportStep(resourceName),
 			projectIamMemberImportStep(resourceName, pid, role, member2),
+			projectIamMemberIdentityImportStep(resourceName),
 
 			// Remove the bindings
 			{
@@ -146,6 +172,7 @@ func TestAccProjectIamMember_withCondition(t *testing.T) {
 	member := "user:admin@hashicorptest.com"
 	conditionTitle := "expires_after_2019_12_31"
 	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks:   projectIamMemberTerraformVersionChecks(),
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -166,6 +193,7 @@ func TestAccProjectIamMember_withCondition(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			projectIamMemberIdentityImportStep(resourceName),
 		},
 	})
 }
