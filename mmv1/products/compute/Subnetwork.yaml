@@ -296,7 +296,7 @@ properties:
       **Note**: This field uses [attr-as-block mode](https://developer.hashicorp.com/terraform/language/attr-as-blocks) to avoid
       breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
       set `send_secondary_ip_range_if_empty = true`
-    update_verb: PATCH
+    update_verb: NOOP
     update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     update_id: secondaryIpRanges
     fingerprint_name: fingerprint
