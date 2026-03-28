@@ -18,6 +18,7 @@ resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
     RawURL:    url,
     UserAgent: config.UserAgent,
 })
-if err == nil && resp["deleteTime"].(string) == "" {
+deleteTime, ok := resp["deleteTime"].(string)
+if err == nil && (!ok || deleteTime == "") {
     return fmt.Errorf("FirebaseHostingCustomDomain still exists at %s", url)
 }
