@@ -1860,7 +1860,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
 		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
 		{{- if ne $.TargetVersionName `ga` }}
-		EraseWindowsVssSignature:   d.Get("erase_windows_vss_signature").(bool)
+		EraseWindowsVssSignature:   d.Get("erase_windows_vss_signature").(bool),
 		{{- end }}
 	}, nil
 }
