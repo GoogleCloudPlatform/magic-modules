@@ -52,12 +52,16 @@ examples:
   - name: 'biglake_iceberg_table_basic'
     primary_resource_id: 'my_iceberg_table'
     vars:
-      random_suffix: 'random-suffix'
+      bucket_name: 'my-bucket'
+      namespace_id: 'my_namespace'
+      table_name: 'my_table'
   - name: 'biglake_iceberg_table_update'
     primary_resource_id: 'my_iceberg_table'
     skip_test: true
     vars:
-      random_suffix: 'random-suffix'
+      bucket_name: 'my-bucket'
+      namespace_id: 'my_namespace'
+      table_name: 'my_table'
 
 parameters:
   - name: 'catalog'

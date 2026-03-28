@@ -111,7 +111,6 @@ examples:
       subnetwork_name: subnet-purpose-test-subnetwork
   - name: subnetwork_resolve_subnet_mask
     primary_resource_id: subnetwork-resolve-subnet-mask
-    min_version: beta
     vars:
       network_name: subnet-resolve-subnet-mask-test-network
       subnetwork_name: subnet-resolve-subnet-mask-test-subnetwork
@@ -558,7 +557,6 @@ properties:
     description: |
       'Configures subnet mask resolution for this subnetwork.'
     immutable: true
-    min_version: beta
     enum_values:
       - ARP_ALL_RANGES
       - ARP_PRIMARY_RANGE

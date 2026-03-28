@@ -71,11 +71,10 @@ examples:
     primary_resource_id: 'database'
     vars:
       database_name: 'my-database'
+      instance_name: 'my-instance'
     ignore_read_extra:
       - 'deletion_protection'
       - 'default_time_zone'
-      # Randomness due to spanner instance
-    skip_vcr: true
 virtual_fields:
   - name: 'deletion_protection'
     description: |

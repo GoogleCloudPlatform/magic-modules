@@ -491,6 +491,11 @@ func callDiffSuppress(s *schema.Schema, key string, val any) bool {
 
 // Returns true if the given key should be ignored according to the given set of ignored fields.
 func isIgnored(key string, ignoredFields map[string]any) bool {
+	// Global ignores for write-only fields
+	if strings.HasSuffix(key, "_wo") || strings.HasSuffix(key, "_wo_version") {
+		return true
+	}
+
 	// Check for exact match first.
 	if _, ignored := ignoredFields[key]; ignored {
 		return true
@@ -621,7 +626,7 @@ func compareCaiAssets(assets1, assets2 []caiasset.Asset, ignoredFieldSet map[str
 				asset.Resource,
 				roundtripAsset.Resource,
 				// secretmanager.googleapis.com/SecretVersion has secret as parent, not project
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "Parent", "DiscoveryDocumentURI"),
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "Parent", "DiscoveryName", "DiscoveryDocumentURI"),
 				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
 				cmp.FilterPath(func(p cmp.Path) bool {
 					return p.Last().String() == ".DiscoveryDocumentURI"

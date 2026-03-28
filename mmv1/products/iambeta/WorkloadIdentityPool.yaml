@@ -52,7 +52,6 @@ iam_policy:
     - '{{workload_identity_pool_id}}'
   allowed_iam_role: 'roles/iam.workloadIdentityPoolViewer'
   iam_conditions_request_type: 'REQUEST_BODY'
-  min_version: beta
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
@@ -66,14 +65,14 @@ examples:
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
-    external_providers:
-      - 'random'
   - name: 'iam_workload_identity_pool_full_trust_domain_mode'
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
+  - name: 'iam_workload_identity_pool_full_trust_domain_mode_with_default_shared_ca'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
 parameters:
 properties:
   - name: 'workloadIdentityPoolId'
@@ -144,20 +143,30 @@ properties:
       format: `ns/<namespace>/sa/<workload_identifier>`.
       `google_iam_workload_identity_pool_provider`s cannot be created within `TRUST_DOMAIN`
       mode pools.
-    min_version: beta
+      * `SYSTEM_TRUST_DOMAIN`: Pools are managed by Google Cloud services. Neither
+      `google_iam_workload_identity_pool_namespace`s nor `google_iam_workload_identity_pool_provider`s
+      can be created within `SYSTEM_TRUST_DOMAIN` mode pools. All identities within a
+      `SYSTEM_TRUST_DOMAIN` mode pool are in one of the following formats:
+
+          * `spiffe://<trust-domain>/ns/<kubernetes-namespace>/sa/<kubernetes-service-account>`
+          * `spiffe://<trust-domain>/resources/<resource-scope>/<resource-name>`
+    default_from_api: true
     enum_values:
       - 'FEDERATION_ONLY'
       - 'TRUST_DOMAIN'
+      - 'SYSTEM_TRUST_DOMAIN'
   - name: 'inlineCertificateIssuanceConfig'
     type: NestedObject
     description: |
       Represents configuration for generating mutual TLS (mTLS) certificates for the identities
       within this pool. Defines the Certificate Authority (CA) pool resources and configurations
       required for issuance and rotation of mTLS workload certificates.
-    min_version: beta
     properties:
       - name: 'caPools'
         type: KeyValuePairs
+        exactly_one_of:
+          - 'inlineCertificateIssuanceConfig.0.ca_pools'
+          - 'inlineCertificateIssuanceConfig.0.use_default_shared_ca'
         description: |
           A required mapping of a cloud region to the CA pool resource located in that region used
           for certificate issuance, adhering to these constraints:
@@ -168,7 +177,20 @@ properties:
           `projects/{project}/locations/{location}/caPools/{ca_pool}`
           * **Region Matching:** Workloads are ONLY issued certificates from CA pools within the
           same region. Also the CA pool region (in value) must match the workload's region (key).
-        required: true
+      - name: 'useDefaultSharedCa'
+        type: Boolean
+        exactly_one_of:
+          - 'inlineCertificateIssuanceConfig.0.ca_pools'
+          - 'inlineCertificateIssuanceConfig.0.use_default_shared_ca'
+        description: |
+          If set to true, the trust domain will utilize the GCP-provisioned default CA. A default
+          CA in the same region as the workload will be selected to issue the certificate. Enabling
+          this will clear any existing `ca_pools` configuration to provision the certificates.
+
+
+          ~> **Note** This field is mutually exclusive with `ca_pools`. If this flag is enabled,
+          certificates will be automatically provisioned from the default shared CAs. This flag should
+          not be set if you want to use your own CA pools to provision the certificates.
       - name: 'lifetime'
         type: String
         description: |
@@ -210,7 +232,6 @@ properties:
       domain will recognize and accept certificates issued by entities within the trusted domains.
       Note that a trust domain automatically trusts itself, eliminating the need for explicit
       configuration.
-    min_version: beta
     properties:
       - name: 'additionalTrustBundles'
         type: Map

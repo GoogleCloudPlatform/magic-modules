@@ -8,7 +8,6 @@ import (
 	{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
-	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
@@ -125,6 +124,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_networks":                          compute.DataSourceGoogleComputeNetworks(),
     "google_compute_network_attachment":                compute.DataSourceGoogleComputeNetworkAttachment(),
 	"google_compute_network_endpoint_group":            compute.DataSourceGoogleComputeNetworkEndpointGroup(),
+	"google_compute_network_endpoint_groups":           compute.DataSourceGoogleComputeNetworkEndpointGroups(),
 	"google_compute_network_peering":                   compute.DataSourceComputeNetworkPeering(),
 	"google_compute_node_types":                        compute.DataSourceGoogleComputeNodeTypes(),
 	"google_compute_regions":                           compute.DataSourceGoogleComputeRegions(),
@@ -327,6 +327,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_region_backend_service":            compute.DataSourceGoogleComputeRegionBackendService(),
 	"google_network_management_connectivity_test_run":  networkmanagement.DataSourceGoogleNetworkManagementTestRun(),
 	"google_network_management_connectivity_tests":  	networkmanagement.DataSourceGoogleNetworkManagementConnectivityTests(),
+	"google_network_security_address_groups": 			networksecurity.DataSourceNetworkSecurityAddressGroups(),
 	// ####### END handwritten datasources ###########
 }
 

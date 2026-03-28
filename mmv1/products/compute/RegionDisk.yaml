@@ -36,6 +36,7 @@ references:
     'Adding or Resizing Regional Persistent Disks': 'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionDisks'
 docs:
+cai_resource_kind: 'RegionDisk'
 base_url: 'projects/{{project}}/regions/{{region}}/disks'
 has_self_link: true
 immutable: true
@@ -57,6 +58,7 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     - '{{name}}'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_disk.go.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
