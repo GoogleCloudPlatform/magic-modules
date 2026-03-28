@@ -159,6 +159,62 @@ func TestAccComputeRegionDisk_basicUpdate(t *testing.T) {
 	})
 }
 
+func TestAccComputeRegionDisk_hyperdiskPerformanceAtomicUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"iops_init":     25000,
+		"tp_init":       1200,
+		"iops_update":   3000,
+		"tp_update":     140,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionDisk_hyperdiskPerformance(context, "init"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_disk.foobar", "provisioned_iops", "25000"),
+					resource.TestCheckResourceAttr("google_compute_region_disk.foobar", "provisioned_throughput", "1200"),
+				),
+			},
+			{
+				// Step 2: Decrease both simultaneously (The Atomic Fix)
+				Config: testAccComputeRegionDisk_hyperdiskPerformance(context, "update"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_disk.foobar", "provisioned_iops", "3000"),
+					resource.TestCheckResourceAttr("google_compute_region_disk.foobar", "provisioned_throughput", "140"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeRegionDisk_hyperdiskPerformance(context map[string]interface{}, stage string) string {
+	iops := context["iops_init"]
+	tp := context["tp_init"]
+	if stage == "update" {
+		iops = context["iops_update"]
+		tp = context["tp_update"]
+	}
+
+	return acctest.Nprintf(`
+resource "google_compute_region_disk" "foobar" {
+  name                   = "tf-test-re-hd-atomic-%{random_suffix}"
+  type                   = "hyperdisk-balanced-high-availability" // Correct regional type
+  region                 = "us-central1"
+  replica_zones          = ["us-central1-a", "us-central1-f"]
+  size                   = 100
+  provisioned_iops       = `+fmt.Sprintf("%v", iops)+`
+  provisioned_throughput = `+fmt.Sprintf("%v", tp)+`
+}
+`, context)
+}
+
 func TestAccComputeRegionDisk_encryption(t *testing.T) {
 	t.Parallel()
 
