@@ -1,0 +1,10 @@
+    tagValueInput := d.Get("tag_value").(string)
+
+	// Conditionally set the API field based on the input format
+	if strings.HasPrefix(tagValueInput, "tagValues/") {
+		obj["tagValue"] = tagValueInput
+		delete(obj, "tagValueNamespacedName") // Ensure the other key is not present
+	} else {
+		obj["tagValueNamespacedName"] = tagValueInput
+		delete(obj, "tagValue") // Ensure the other key is not present
+	}

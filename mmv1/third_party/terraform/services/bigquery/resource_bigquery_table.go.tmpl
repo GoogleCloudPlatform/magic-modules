@@ -251,6 +251,12 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 		}
 		return bigQueryTableTypeEq(valA.(string), valB.(string))
 	case "collation":
+		// If the configuration (valB) is nil or missing, it implies "inherit from dataset".
+		// We suppress the diff by returning true, accepting whatever actual value (valA)
+		// the server returned (e.g., "und:ci").
+		if valB == nil {
+			return true
+		}
 		equivalentSet := []interface{}{nil, ""}
 		eq := valueIsInArray(valA, equivalentSet) && valueIsInArray(valB, equivalentSet)
 		return eq
@@ -828,6 +834,12 @@ func ResourceBigQueryTable() *schema.Resource {
 										Optional:    true,
 										Default:     0,
 										Description: `The number of rows at the top of a CSV file that BigQuery will skip when reading the data.`,
+									},
+									"source_column_match": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"POSITION", "NAME"}, false),
+										Description:  `Specifies how source columns are matched to the table schema. Valid values are POSITION (columns matched by position, assuming same ordering) or NAME (columns matched by name, reads header row and reorders columns to align with schema field names).`,
 									},
 								},
 							},
@@ -2753,6 +2765,10 @@ func expandCsvOptions(configured interface{}) *bigquery.CsvOptions {
 		opts.SkipLeadingRows = int64(v.(int))
 	}
 
+	if v, ok := raw["source_column_match"]; ok {
+		opts.SourceColumnMatch = v.(string)
+	}
+
 	if v, ok := raw["quote"]; ok {
 		quote := v.(string)
 		opts.Quote = &quote
@@ -2784,6 +2800,10 @@ func flattenCsvOptions(opts *bigquery.CsvOptions) []map[string]interface{} {
 
 	if opts.SkipLeadingRows != 0 {
 		result["skip_leading_rows"] = opts.SkipLeadingRows
+	}
+
+	if opts.SourceColumnMatch != "" {
+		result["source_column_match"] = opts.SourceColumnMatch
 	}
 
 	if opts.Quote != nil {
@@ -3155,7 +3175,8 @@ func setSchemaForceSendFields(fields []*bigquery.TableFieldSchema, rawFields []i
 
 		for _, key := range schemaForceSendFieldKeys {
 			// If the key is present in the raw JSON (even if empty), force send it.
-			if _, ok := rawField[key]; ok {
+			// Only force send if the value is not nil.
+			if val, ok := rawField[key]; ok && val != nil {
 				// Convert JSON key to Struct Field Name (e.g., "collation" -> "Collation")
 				fieldName := strings.Title(key)
 				field.ForceSendFields = append(field.ForceSendFields, fieldName)

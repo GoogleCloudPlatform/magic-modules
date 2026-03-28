@@ -28,7 +28,6 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 40
   update_minutes: 20
@@ -62,7 +61,6 @@ custom_diff:
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -70,7 +68,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_basic_container'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -78,7 +75,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -88,7 +84,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -100,7 +95,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -119,7 +113,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_confidential_compute'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -127,7 +120,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_euc'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -436,7 +428,6 @@ properties:
                 external IP address.
               immutable: true
               default_from_api: true
-              custom_tgc_flatten: 'templates/tgc_next/custom_flatten/workbench_instance_access_configs.go.tmpl'
               item_type:
                 type: NestedObject
                 properties:
@@ -509,6 +500,7 @@ properties:
               - 'RESERVATION_ANY'
               - 'RESERVATION_SPECIFIC'
           - name: 'key'
+            type: String
             immutable: true
             description: |
               Corresponds to the label key of a reservation resource. To target a

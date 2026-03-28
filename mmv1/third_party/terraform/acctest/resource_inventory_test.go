@@ -165,7 +165,7 @@ func ignoreField(r, f string) bool {
 func underscore(source string) string {
 	tmp := regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`).ReplaceAllString(source, "${1}_${2}")
 	tmp = regexp.MustCompile(`([a-z\d])([A-Z])`).ReplaceAllString(tmp, "${1}_${2}")
-	tmp = strings.Replace(tmp, "-", "_", 1)
+	tmp = strings.ReplaceAll(tmp, "-", "_")
 	// skip this because we want to operate on nested api fields
 	// tmp = strings.Replace(tmp, ".", "_", 1)
 	tmp = strings.ToLower(tmp)
@@ -190,15 +190,20 @@ func TestValidateResourceMetadata(t *testing.T) {
 		}
 	}
 	for _, resourceName := range slices.Sorted(maps.Keys(metaResources)) {
+		m := metaResources[resourceName]
 		if _, ok := resources[resourceName]; !ok {
-			t.Errorf("Resource %q has meta.yaml file but isn't present in the provider", resourceName)
+			t.Errorf("%s: Resource %q has meta.yaml file but isn't present in the provider", m.FileName, resourceName)
 		}
 	}
 
 	// Check for fields that are in the provider but not in metadata (or vice versa)
 	for _, resourceName := range sortedResourceNames {
 		r := resources[resourceName]
-		m := metaResources[resourceName]
+		m, ok := metaResources[resourceName]
+		// Resources with missing meta.yaml have already been flagged.
+		if !ok {
+			continue
+		}
 		mFields := map[string]bool{}
 		for _, f := range m.Fields {
 			terraformField := f.Field
@@ -212,7 +217,7 @@ func TestValidateResourceMetadata(t *testing.T) {
 				continue
 			}
 			if _, ok := mFields[f]; !ok {
-				t.Errorf("Field in provider resource; missing in meta.yaml: %s.%s", r.Name, f)
+				t.Errorf("%s: Field in provider resource; missing in meta.yaml: %s.%s", m.FileName, r.Name, f)
 			}
 		}
 		for f, _ := range mFields {
@@ -220,26 +225,82 @@ func TestValidateResourceMetadata(t *testing.T) {
 				continue
 			}
 			if _, ok := r.Fields[f]; !ok {
-				t.Errorf("Field in meta.yaml; missing in provider resource: %s.%s", r.Name, f)
+				t.Errorf("%s: Field in meta.yaml; missing in provider resource: %s.%s", m.FileName, r.Name, f)
 			}
 		}
+	}
+
+	// Most of the fields in this list probably represent bugs in resource logic
+	// and should be fixed over time.
+	allowedApiNameUnderscores := map[string]bool{
+		"google_bigquery_job.user_email":                                                                                               true,
+		"google_billing_project_info.billing_account":                                                                                  true,
+		"google_cloud_run_v2_service.template.containers.build_info.source_location":                                                   true,
+		"google_compute_router_peer.custom_learned_route_priority":                                                                     true,
+		"google_dataproc_batch.runtime_config.effective_properties":                                                                    true,
+		"google_dataproc_session_template.runtime_config.effective_properties":                                                         true,
+		"google_datastream_connection_profile.salesforce_profile.oauth2_client_credentials.client_id":                                  true,
+		"google_developer_connect_insights_config.errors.details.detail_message":                                                       true,
+		"google_integrations_auth_config.client_certificate.encrypted_private_key":                                                     true,
+		"google_integrations_auth_config.client_certificate.passphrase":                                                                true,
+		"google_integrations_auth_config.client_certificate.ssl_certificate":                                                           true,
+		"google_os_config_v2_policy_orchestrator.orchestration_state.current_iteration_state.error.details.type_url":                   true,
+		"google_os_config_v2_policy_orchestrator.orchestration_state.previous_iteration_state.error.details.type_url":                  true,
+		"google_os_config_v2_policy_orchestrator_for_folder.orchestration_state.current_iteration_state.error.details.type_url":        true,
+		"google_os_config_v2_policy_orchestrator_for_folder.orchestration_state.previous_iteration_state.error.details.type_url":       true,
+		"google_os_config_v2_policy_orchestrator_for_organization.orchestration_state.current_iteration_state.error.details.type_url":  true,
+		"google_os_config_v2_policy_orchestrator_for_organization.orchestration_state.previous_iteration_state.error.details.type_url": true,
+		"google_monitoring_notification_channel.sensitive_labels.auth_token":                                                           true,
+		"google_monitoring_notification_channel.sensitive_labels.auth_token_wo":                                                        true,
+		"google_monitoring_notification_channel.sensitive_labels.service_key":                                                          true,
+		"google_monitoring_notification_channel.sensitive_labels.service_key_wo":                                                       true,
 	}
 
 	// Validate yaml files
-	for resourceName, m := range metaResources {
-		if m.Resource == "" {
-			t.Errorf("`resource` is missing from %s", m.Path)
+	for resourceName, r := range metaResources {
+		if r.Resource == "" {
+			t.Errorf("%s: `resource` is missing from", r.FileName)
 		}
-		if m.ServicePackage == "" {
-			t.Errorf("can't detect service package for %s", m.Path)
+		if r.ServicePackage == "" {
+			t.Errorf("%s: can't detect service package", r.FileName)
 		}
 
-		if m.ApiServiceName == "" {
-			// Allowlist google_container_registry because it doesn't clearly correspond to a service
-			if resourceName != "google_container_registry" {
-				t.Errorf("`api_service_name` is missing from %s", m.Path)
+		// Resources that don't clearly correspond to an API resource or don't have a CAIS mapping.
+		providerOnlyResources := []string{"google_container_registry", "google_sql_provision_script"}
+		if !slices.Contains(providerOnlyResources, resourceName) {
+			if r.ApiServiceName == "" {
+				t.Errorf("%s: `api_service_name` is required and not set", r.FileName)
+			}
+
+			// Allowlist google_biglake_iceberg resources as a pre-existing case.
+			// This product doesn't have a version in the base_url because resources & IAM have different base_urls. (Resources include an `iceberg` prefix that isn't present for IAM URLs.)
+			ignoredResources := []string{"google_biglake_iceberg_catalog", "google_biglake_iceberg_namespace", "google_biglake_iceberg_table"}
+			if r.ApiVersion == "" && !slices.Contains(ignoredResources, resourceName) {
+				t.Errorf("%s: `api_version` is required and not set", r.FileName)
+			}
+			if r.ApiResourceTypeKind == "" {
+				t.Errorf("%s: `api_resource_type_kind` is required and not set", r.FileName)
 			}
 		}
 
+		for _, f := range r.Fields {
+			tfField := f.Field
+			if tfField == "" {
+				tfField = underscore(f.ApiField)
+			}
+			if f.ProviderOnly && f.ApiField != "" {
+				t.Errorf("%s: %s: `api_field` can't be set for provider-only fields", r.FileName, tfField)
+			}
+			if f.Field != "" && f.Field == underscore(f.ApiField) {
+				t.Errorf("%s: %s: `field` must be omitted because it can be inferred from `api_field`", r.FileName, tfField)
+			}
+			if strings.Contains(f.ApiField, "_") {
+				k := fmt.Sprintf("%s.%s", r.Resource, tfField)
+				if !allowedApiNameUnderscores[k] {
+					t.Errorf("%s: %s: `api_field` can't contain `_` characters", r.FileName, tfField)
+				}
+			}
+		}
 	}
+	t.Logf("Docs: https://googlecloudplatform.github.io/magic-modules/reference/metadata/")
 }

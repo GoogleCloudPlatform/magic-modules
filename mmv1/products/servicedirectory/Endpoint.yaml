@@ -24,7 +24,6 @@ base_url: '{{name}}'
 self_link: '{{name}}'
 create_url: '{{service}}/endpoints?endpointId={{endpoint_id}}'
 update_verb: 'PATCH'
-update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}'
 timeouts:
@@ -35,7 +34,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_endpoint.go.tmpl'
   encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
   decoder: 'templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl'
-
+  pre_update: 'templates/terraform/pre_update/service_directory_endpoint.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'service_directory_endpoint_basic'
@@ -92,8 +91,6 @@ properties:
       function: 'validation.IntBetween(0, 65535)'
   - name: 'metadata'
     type: KeyValuePairs
-    update_mask_fields:
-      - 'annotations'
     description: |
       Metadata for the endpoint. This data can be consumed
       by service clients. The entire metadata dictionary may contain

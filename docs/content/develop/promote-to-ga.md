@@ -65,7 +65,7 @@ For handwritten resources, modify the documentation as appropriate for your chan
 3. Add `Beta` as an annotation on any fields or subfields that remained beta-only. For example:
 
    ```markdown
-   * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
+   * `FIELD_NAME` - (Optional, [Beta](../guides/provider_versions.html.markdown)) FIELD_DESCRIPTION
    ```
 
    Replace `FIELD_NAME` and `FIELD_DESCRIPTION` with the field's name and description.

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataSourceAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
+func testAccDataSourceAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	policyTitle := "my title"
@@ -42,7 +42,7 @@ data "google_access_context_manager_access_policy" "policy" {
 `, map[string]interface{}{"org": org, "policyTitle": policyTitle})
 }
 
-func TestAccDataSourceAccessContextManagerServicePerimeter_scopedPolicyTest(t *testing.T) {
+func testAccDataSourceAccessContextManagerServicePerimeter_scopedPolicyTest(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	project := envvar.GetTestProjectNumberFromEnv()

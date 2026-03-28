@@ -1,0 +1,303 @@
+package observability_test
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccObservabilityProjectSettings_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"kms_key_name":  acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name,
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObservabilityProjectSettings_basic(context),
+			},
+			{
+				ResourceName:            "google_observability_project_settings.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "project"},
+			},
+			{
+				Config: testAccObservabilityProjectSettings_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_observability_project_settings.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_observability_project_settings.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "project"},
+			},
+		},
+	})
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityProjectSettings_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+	provider        = "google-beta"
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "observability_api" {
+	provider           = "google-beta"
+  project            = google_project.project.project_id
+  service            = "observability.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Actively force the creation of the Service Agent identity
+resource "google_project_service_identity" "observability_sa" {
+	provider = "google-beta"
+  project  = google_project.project.project_id
+  service  = "observability.googleapis.com"
+
+  depends_on = [google_project_service.observability_api]
+}
+
+# Short buffer for the new identity to propagate to global IAM indexes
+resource "time_sleep" "wait_for_sa_propagation" {
+  create_duration = "30s"
+  depends_on      = [google_project_service_identity.observability_sa]
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+	provider      = "google-beta"
+  crypto_key_id = "%{kms_key_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+
+  depends_on = [time_sleep.wait_for_sa_propagation]
+}
+
+resource "google_observability_project_settings" "primary" {
+	provider     = "google-beta"
+  location     = "us"
+  project      = google_project.project.project_id
+  kms_key_name = "%{kms_key_name}"
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key
+  ]
+}
+`, context)
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityProjectSettings_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+	provider        = "google-beta"
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "observability_api" {
+	provider           = "google-beta"
+  project            = google_project.project.project_id
+  service            = "observability.googleapis.com"
+  disable_on_destroy = false
+}
+
+# This resource actively forces the Service Agent to be created in IAM
+resource "google_project_service_identity" "observability_sa" {
+	provider = "google-beta"
+  project  = google_project.project.project_id
+  service  = "observability.googleapis.com"
+
+  depends_on = [google_project_service.observability_api]
+}
+
+# A shorter delay is still needed for global IAM propagation (news to travel to KMS)
+resource "time_sleep" "wait_for_sa_propagation" {
+  create_duration = "30s"
+  depends_on      = [google_project_service_identity.observability_sa]
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+	provider      = "google-beta"
+  crypto_key_id = "%{kms_key_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+
+  depends_on = [time_sleep.wait_for_sa_propagation]
+}
+
+resource "google_observability_project_settings" "primary" {
+	provider     = "google-beta"
+  location     = "us"
+  project      = google_project.project.project_id
+  kms_key_name = "" # Unset KMS key
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key
+  ]
+}
+`, context)
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func TestAccObservabilityProjectSettings_globalUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObservabilityProjectSettings_global(context, "eu"),
+			},
+			{
+				ResourceName:            "google_observability_project_settings.primary_global",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "project"},
+			},
+			{
+				Config: testAccObservabilityProjectSettings_globalUpdate(context, "us-central1"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_observability_project_settings.primary_global", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_observability_project_settings.primary_global",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "project"},
+			},
+		},
+	})
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityProjectSettings_global(context map[string]interface{}, defaultLocation string) string {
+	return acctest.Nprintf(fmt.Sprintf(`
+resource "google_project" "project" {
+	provider        = "google-beta"
+	project_id      = "tf-test%%{random_suffix}"
+	name            = "tf-test%%{random_suffix}"
+	org_id          = "%%{org_id}"
+	deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "observability_api" {
+	provider           = "google-beta"
+	project            = google_project.project.project_id
+	service            = "observability.googleapis.com"
+	disable_on_destroy = false
+}
+
+# Data source read to wait for project/API propagation
+resource "time_sleep" "wait_for_propagation" {
+	create_duration = "90s"
+	depends_on      = [google_project_service.observability_api]
+}
+
+data "google_observability_project_settings" "wait_for_propagation" {
+	provider   = "google-beta"
+	location   = "global"
+	project    = google_project.project.project_id
+	depends_on = [time_sleep.wait_for_propagation]
+}
+
+resource "google_observability_project_settings" "primary_global" {
+	provider                 = "google-beta"
+	location                 = "global"
+	project                  = google_project.project.project_id
+	default_storage_location = "%s"
+	depends_on = [data.google_observability_project_settings.wait_for_propagation]
+}
+`, defaultLocation), context)
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityProjectSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
+	return acctest.Nprintf(fmt.Sprintf(`
+resource "google_project" "project" {
+	provider        = "google-beta"
+	project_id      = "tf-test%%{random_suffix}"
+	name            = "tf-test%%{random_suffix}"
+	org_id          = "%%{org_id}"
+	deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "observability_api" {
+	provider           = "google-beta"
+	project            = google_project.project.project_id
+	service            = "observability.googleapis.com"
+	disable_on_destroy = false
+}
+
+# Data source read to wait for project/API propagation
+resource "time_sleep" "wait_for_propagation" {
+	create_duration = "90s"
+	depends_on      = [google_project_service.observability_api]
+}
+
+data "google_observability_project_settings" "wait_for_propagation" {
+	provider   = "google-beta"
+	location   = "global"
+	project    = google_project.project.project_id
+	depends_on = [time_sleep.wait_for_propagation]
+}
+
+resource "google_observability_project_settings" "primary_global" {
+	provider                 = "google-beta"
+	location                 = "global"
+	project                  = google_project.project.project_id
+	default_storage_location = "%s"
+	depends_on = [data.google_observability_project_settings.wait_for_propagation]
+}
+`, defaultLocation), context)
+}
+{{- else }}
+{{- end }}

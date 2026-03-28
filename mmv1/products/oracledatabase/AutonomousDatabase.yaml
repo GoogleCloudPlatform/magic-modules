@@ -73,6 +73,9 @@ examples:
       deletion_protection: 'false'
       database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
       endpoint_name: 'fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))'
+    # Skip in VCR until the test issue is resolved
+    # TODO(shuyama): Add GH issue link
+    skip_vcr: true
   - name: 'oracledatabase_autonomous_database_odbnetwork'
     primary_resource_id: 'myADB'
     vars:
@@ -103,6 +106,23 @@ examples:
       deletion_protection: 'false'
       project: '"oci-terraform-testing-prod"'
       database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_autonomous_database_disaster_recovery'
+    primary_resource_id: 'myADB'
+    vars:
+      project: 'my-project'
+      autonomous_database_id: 'my-instance'
+      location: 'my-location'
+      database_name: 'mydatabase'
+      enable_backup_replication: 'false'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      project: '"oci-terraform-testing-prod"'
+      location: '"us-west3"'
+      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
+      enable_backup_replication: 'true'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
@@ -135,10 +155,10 @@ properties:
     output: true
   - name: 'database'
     type: String
+    default_from_api: true
     description: "The name of the Autonomous Database. The database name must
     be unique in\nthe project. The name must begin with a letter and can\ncontain
     a maximum of 30 alphanumeric characters. "
-    required: true
   - name: 'displayName'
     type: String
     description: "The display name for the Autonomous Database. The name does
@@ -155,7 +175,7 @@ properties:
     ignore_read: true
   - name: 'properties'
     type: NestedObject
-    required: true
+    default_from_api: true
     description: 'The properties of an Autonomous Database. '
     properties:
       - name: 'ocid'
@@ -688,3 +708,26 @@ properties:
     type: String
     description: 'The date and time that the Autonomous Database was created. '
     output: true
+  - name: peerAutonomousDatabases
+    type: Array
+    description: "The peer Autonomous Database names of the given Autonomous Database."
+    output: true
+    item_type:
+      type: String
+  - name: disasterRecoverySupportedLocations
+    type: Array
+    description: "List of supported GCP region to clone the Autonomous Database for disaster recovery."
+    output: true
+    item_type:
+      type: String
+  - name: sourceConfig
+    type: NestedObject
+    ignore_read: true
+    description: 'The source Autonomous Database configuration for the standby Autonomous Database.'
+    properties:
+      - name: 'autonomousDatabase'
+        type: String
+        description: "The name of the primary Autonomous Database that is used to create a Peer Autonomous Database from a source."
+      - name: 'automaticBackupsReplicationEnabled'
+        type: Boolean
+        description: "This field specifies if the replication of automatic backups is enabled when creating a Data Guard."

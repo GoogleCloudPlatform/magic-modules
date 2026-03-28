@@ -13,6 +13,7 @@
 
 ---
 name: 'ReportConfig'
+include_in_tgc_next: true
 description: |
   Represents an inventory report configuration.
 references:

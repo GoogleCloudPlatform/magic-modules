@@ -3,6 +3,7 @@ package filestore_test
 import (
 	"context"
 	"fmt"
+	"net/netip"
 	"reflect"
 	"regexp"
 	"testing"
@@ -482,8 +483,8 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 					),
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
-						"effective_replication.0.role",
-						"STANDBY",
+						"effective_replication.0.replicas.0.state",
+						"READY",
 					),
 				),
 			},
@@ -491,7 +492,39 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "desired_replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
+			},
+			{
+				Config: testAccFilestoreInstance_replication_pause(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_filestore_instance.replica_instance",
+						"effective_replication.0.replicas.0.state",
+						"PAUSED",
+					),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.replica_instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "desired_replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
+			},
+			{
+				Config: testAccFilestoreInstance_replication_resume(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_filestore_instance.replica_instance",
+						"effective_replication.0.replicas.0.state",
+						"READY",
+					),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.replica_instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "desired_replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
 			},
 		},
 	})
@@ -521,6 +554,96 @@ resource "google_filestore_instance" "replica_instance" {
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."
+
+  file_shares {	
+    capacity_gb 	= 1024
+    name            = "share"
+  }
+
+  networks {
+    network         = "default"
+    modes           = ["MODE_IPV4"]
+  }
+
+  initial_replication {
+    replicas {
+      peer_instance = google_filestore_instance.source_instance.id
+    }
+  }
+}
+`, context)
+}
+
+func testAccFilestoreInstance_replication_pause(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_filestore_instance" "source_instance" {
+  name             = "tf-test-source-instance-%{random_suffix}"
+  location         = "%{location_1}"
+  tier             = "%{tier}"
+  description      = "An source instance created during testing."
+
+  file_shares {
+    capacity_gb    = 1024
+    name           = "share"
+  }
+
+  networks {
+    network        = "default"
+    modes          = ["MODE_IPV4"]
+  }
+}
+
+resource "google_filestore_instance" "replica_instance" {
+  name          	= "tf-test-replica-instance-%{random_suffix}"
+  location      	= "%{location_2}"
+  tier          	= "%{tier}"
+  description   	= "An replica instance created during testing."
+  desired_replica_state    = "PAUSED"
+
+  file_shares {	
+    capacity_gb 	= 1024
+    name            = "share"
+  }
+
+  networks {
+    network         = "default"
+    modes           = ["MODE_IPV4"]
+  }
+
+  initial_replication {
+    replicas {
+      peer_instance = google_filestore_instance.source_instance.id
+    }
+  }
+}
+`, context)
+}
+
+func testAccFilestoreInstance_replication_resume(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_filestore_instance" "source_instance" {
+  name             = "tf-test-source-instance-%{random_suffix}"
+  location         = "%{location_1}"
+  tier             = "%{tier}"
+  description      = "An source instance created during testing."
+
+  file_shares {
+    capacity_gb    = 1024
+    name           = "share"
+  }
+
+  networks {
+    network        = "default"
+    modes          = ["MODE_IPV4"]
+  }
+}
+
+resource "google_filestore_instance" "replica_instance" {
+  name          	= "tf-test-replica-instance-%{random_suffix}"
+  location      	= "%{location_2}"
+  tier          	= "%{tier}"
+  description   	= "An replica instance created during testing."
+  desired_replica_state    = "READY"
 
   file_shares {	
     capacity_gb 	= 1024
@@ -805,4 +928,102 @@ resource "google_filestore_instance" "instance" {
   }
 }
 `, name, location, tier, network)
+}
+
+func TestAccFilestoreInstance_psc_ipv6(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"name":     fmt.Sprintf("tf-test-%d", acctest.RandInt(t)),
+		"location": "us-central1",
+		"tier":     "REGIONAL",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_psc_ipv6(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.modes.0", "MODE_IPV6"),
+					resource.TestCheckResourceAttrWith("google_filestore_instance.instance", "networks.0.ip_addresses.0", func(value string) error {
+						if value == "" {
+							return fmt.Errorf("should not be empty")
+						}
+
+						ip, err := netip.ParseAddr(value)
+						if err != nil || !ip.Is6() {
+							return fmt.Errorf("should contain a valid IPv6 address")
+						}
+
+						return nil
+					}),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_psc_ipv6(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_client_config" "current" {}
+
+resource "google_compute_network" "psc_network" {
+  name                     = "%{name}"
+  auto_create_subnetworks  = false
+  enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "psc_subnet" {
+  name             = "%{name}"
+  ip_cidr_range    = "10.2.0.0/16"
+  region           = "%{location}"
+  stack_type       = "IPV4_IPV6"
+  ipv6_access_type = "INTERNAL"
+  network          = google_compute_network.psc_network.id
+}
+
+resource "google_network_connectivity_service_connection_policy" "default" {
+  name          = "%{name}"
+  location      = "%{location}"
+  service_class = "google-cloud-filestore"
+  network       = google_compute_network.psc_network.id
+  psc_config {
+    subnetworks = [google_compute_subnetwork.psc_subnet.id]
+  }
+}
+
+resource "google_filestore_instance" "instance" {
+  depends_on = [
+    google_network_connectivity_service_connection_policy.default
+  ]
+  name        = "%{name}"
+  location    = "%{location}"
+  tier        = "%{tier}"
+  description = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network      = google_compute_network.psc_network.name
+    modes        = ["MODE_IPV6"]
+    connect_mode = "PRIVATE_SERVICE_CONNECT"
+    psc_config {
+      endpoint_project = data.google_client_config.current.project
+    }
+  }
+}
+`, context)
 }

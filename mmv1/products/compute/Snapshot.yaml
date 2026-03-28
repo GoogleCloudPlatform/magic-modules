@@ -46,8 +46,6 @@ timeouts:
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
-  operation:
-    full_url: 'selfLink'
   result:
     resource_inside_response: false
 collection_url_key: 'items'
@@ -56,7 +54,9 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/global/snapshots/{{name}}'
     - '{{name}}'
+include_in_tgc_next: true
 custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/compute_snapshot.go.tmpl'
   decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
   pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
 sweeper:
@@ -65,27 +65,23 @@ sweeper:
 examples:
   - name: 'snapshot_basic'
     primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
   - name: 'snapshot_basic_2'
     primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
   - name: 'snapshot_basic_source_instant_snapshot'
     primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
       instant_snapshot_name: 'my-instant-snapshot'
   - name: 'snapshot_chainname'
     primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-snapshot-chainname%s", context["random_suffix"])'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'

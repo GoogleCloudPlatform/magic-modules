@@ -32,7 +32,7 @@ type Sweeper struct {
 	// IdentifierField specifies which field in the resource object should be used
 	// to identify resources for deletion. If not specified, defaults to "name"
 	// if present in the resource, otherwise falls back to "id".
-	IdentifierField string `yaml:"identifier_field"`
+	IdentifierField string `yaml:"identifier_field,omitempty"`
 
 	// Regions (deprecated - use url_substitutions) defines which regions to run
 	// the sweeper in. If empty, defaults to just us-central1. Note that
@@ -109,32 +109,32 @@ type EnsureValue struct {
 type ParentResource struct {
 	// ResourceType is the type name of the parent resource (e.g., "google_container_cluster")
 	// used to find the corresponding parent sweeper logic.
-	ResourceType string `yaml:"resource_type"`
+	ResourceType string `yaml:"resource_type,omitempty"`
 
 	// ParentField specifies which field to extract from the parent resource object.
 	// This value is then used either directly as the parent identifier or as input
 	// for the Template. Example: "name" or "id".
 	// Required unless Template is provided.
-	ParentField string `yaml:"parent_field"`
+	ParentField string `yaml:"parent_field,omitempty"`
 
 	// ParentFieldRegex is a regex pattern with at least one capture group used to
 	// extract a specific portion of the ParentField value. The first capture group's
 	// match will be used as the final value for substitution in the Template's
 	// {{value}} placeholder or as the parent identifier if Template is not used.
-	ParentFieldRegex string `yaml:"parent_field_regex"`
+	ParentFieldRegex string `yaml:"parent_field_regex,omitempty"`
 
 	// ParentFieldExtractName, when true, indicates the ParentField contains a self_link
 	// URL (e.g., "projects/p/zones/z/instances/i"). It extracts just the final
 	// resource name component ("i") from the URL path. This extracted name is then used
 	// for substitution in the Template's {{value}} placeholder or as the parent
 	// identifier if Template is not used.
-	ParentFieldExtractName bool `yaml:"parent_field_extract_name"`
+	ParentFieldExtractName bool `yaml:"parent_field_extract_name,omitempty"`
 
 	// ChildField is the field name within the *child* resource's API list/get URL
 	// (defined in base_url/self_link) that needs to be populated with the identifier
 	// derived from the parent resource (via ParentField/Template).
 	// Example: "cluster", "instance".
-	ChildField string `yaml:"child_field"`
+	ChildField string `yaml:"child_field,omitempty"`
 
 	// Template provides a format string to construct the parent reference identifier
 	// needed in the child resource's URL. Variables in {{curly_braces}} are replaced

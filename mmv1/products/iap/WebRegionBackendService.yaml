@@ -40,7 +40,6 @@ exclude_tgc: true
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-region-backend-service%s", context["random_suffix"])'
     vars:
       region_backend_service_name: 'region-backend-service'
       health_check_name: 'health-check'

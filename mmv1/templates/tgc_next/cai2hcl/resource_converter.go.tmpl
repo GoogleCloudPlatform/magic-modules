@@ -131,7 +131,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 {{ end}}
 
-{{ if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) -}}
+{{ if and $.CustomCode.Decoder (not $.CustomCode.TGCIgnoreTerraformDecoder) -}}
 	res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
 	if err != nil {
 		return nil, err
@@ -178,7 +178,7 @@ func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interf
 }
 {{- end }}
 
-{{- if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) }}
+{{- if and $.CustomCode.Decoder (not $.CustomCode.TGCIgnoreTerraformDecoder) }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
 	{{ customTemplate $ $.CustomCode.Decoder false -}}
 }

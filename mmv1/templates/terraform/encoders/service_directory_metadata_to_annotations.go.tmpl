@@ -1,7 +1,9 @@
+{{ if eq $.TargetVersionName "ga" }}
 if obj["metadata"] == nil {
 	return obj, nil
 }
 
 obj["annotations"] = obj["metadata"].(map[string]string)
 delete(obj, "metadata")
+{{ end }}
 return obj, nil

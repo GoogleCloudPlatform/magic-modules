@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/redis"
@@ -1365,6 +1366,11 @@ func TestAccRedisCluster_redisClusterMaintenanceVersion(t *testing.T) {
 			},
 			{
 				Config: testAccRedisCluster_redisClusterMaintenanceVersionUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_redis_cluster.cluster-ms", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_redis_cluster.cluster-ms",
@@ -1407,7 +1413,7 @@ resource "google_redis_cluster" "cluster-ms" {
   node_type 				 = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode 	 = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
   authorization_mode 		 = "AUTH_MODE_DISABLED"
-  # maintenance_version 		 = "REDISCLUSTER_20251008.00_p00"
+  maintenance_version 		 = "REDISCLUSTER_20251008_00_00"
   redis_configs = { 
     maxmemory-policy		 = "volatile-ttl"
   }
@@ -1422,9 +1428,15 @@ resource "google_redis_cluster" "cluster-ms" {
 func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
+		"cluster_name":                "tf-test-ha-cluster" + randomSuffix,
 		"deletion_protection_enabled": false,
-		"random_suffix":               acctest.RandString(t, 10),
+		"network_name":                "tf-test-my-network" + randomSuffix,
+		"policy_name":                 "tf-test-my-policy" + randomSuffix,
+		"subnet_name":                 "tf-test-my-subnet" + randomSuffix,
+		"random_suffix":               randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1443,6 +1455,11 @@ func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccRedisCluster_redisClusterHaWithLabelsUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_redis_cluster.cluster-ha-with-labels", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_redis_cluster.cluster-ha-with-labels",
@@ -1457,11 +1474,11 @@ func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 func testAccRedisCluster_redisClusterHaWithLabelsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_redis_cluster" "cluster-ha-with-labels" {
-  name           = "tf-test-ha-cluster%{random_suffix}"
+  name           = "%{cluster_name}"
   shard_count    = 3
   labels = {
     my_key = "my_val"
-    other_key = "other_val" 
+    other_key = "other_val_update" 
   }
   psc_configs {
     network = google_compute_network.consumer_net.id
@@ -1474,7 +1491,7 @@ resource "google_redis_cluster" "cluster-ha-with-labels" {
   redis_configs = {
     maxmemory-policy	= "volatile-ttl"
   }
-  deletion_protection_enabled = false
+  deletion_protection_enabled = %{deletion_protection_enabled}
 
   zone_distribution_config {
     mode = "MULTI_ZONE"
@@ -1496,7 +1513,7 @@ resource "google_redis_cluster" "cluster-ha-with-labels" {
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
-  name = "tf-test-my-policy%{random_suffix}"
+  name = "%{policy_name}"
   location = "us-central1"
   service_class = "gcp-memorystore-redis"
   description   = "my basic service connection policy"
@@ -1507,15 +1524,148 @@ resource "google_network_connectivity_service_connection_policy" "default" {
 }
 
 resource "google_compute_subnetwork" "consumer_subnet" {
-  name          = "tf-test-my-subnet%{random_suffix}"
+  name          = "%{subnet_name}"
   ip_cidr_range = "10.0.0.248/29"
   region        = "us-central1"
   network       = google_compute_network.consumer_net.id
 }
 
 resource "google_compute_network" "consumer_net" {
-  name                    = "tf-test-my-network%{random_suffix}"
+  name                    = "%{network_name}"
   auto_create_subnetworks = false
+}
+`, context)
+}
+
+func TestAccRedisCluster_customerManagedCas(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create cluster with Customer Managed CAS
+				Config: testAccRedisCluster_customerManagedCasConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_redis_cluster.cluster_cas", "server_ca_mode", "SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA"),
+					resource.TestCheckResourceAttrSet("google_redis_cluster.cluster_cas", "server_ca_pool"),
+				),
+			},
+			{
+				ResourceName:      "google_redis_cluster.cluster_cas",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// These fields are often not returned in a way that matches exactly on import for complex clusters
+				ImportStateVerifyIgnore: []string{"psc_configs", "region", "name"},
+			},
+		},
+	})
+}
+
+func testAccRedisCluster_customerManagedCasConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+# 1. Create the CA Pool
+resource "google_privateca_ca_pool" "default" {
+  name     = "tf-test-ca-pool-%{random_suffix}"
+  location = "us-central1"
+  tier     = "ENTERPRISE"
+}
+
+# 2. Create the Certificate Authority
+resource "google_privateca_certificate_authority" "default" {
+  pool                     = google_privateca_ca_pool.default.name
+  certificate_authority_id = "tf-test-ca-%{random_suffix}"
+  location                 = "us-central1"
+  config {
+    subject_config {
+      subject {
+        organization = "Google"
+        common_name  = "tf-test-redis-ca"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign  = true
+        }
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+  ignore_active_certificates_on_deletion = true
+  deletion_protection = false
+  skip_grace_period   = true
+}
+
+# 3. IAM Binding for the Redis Service Agent
+resource "google_privateca_ca_pool_iam_member" "redis_p4sa_requester" {
+  ca_pool = google_privateca_ca_pool.default.id
+  role    = "roles/privateca.certificateRequester"
+  member  = "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com"
+}
+
+# 4. Networking Policy
+resource "google_network_connectivity_service_connection_policy" "default" {
+  name          = "tf-test-policy-%{random_suffix}"
+  location      = "us-central1"
+  service_class = "gcp-memorystore-redis"
+  network       = google_compute_network.consumer_net.id
+  psc_config {
+    subnetworks = [google_compute_subnetwork.consumer_subnet.id]
+  }
+}
+
+resource "google_compute_subnetwork" "consumer_subnet" {
+  name          = "tf-test-subnet-%{random_suffix}"
+  ip_cidr_range = "10.0.0.248/29"
+  region        = "us-central1"
+  network       = google_compute_network.consumer_net.id
+}
+
+resource "google_compute_network" "consumer_net" {
+  name                    = "tf-test-network-%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+# 5. The Redis Cluster using the new fields
+resource "google_redis_cluster" "cluster_cas" {
+  name                        = "tf-test-cas-%{random_suffix}"
+  shard_count                 = 3
+  region                      = "us-central1"
+  deletion_protection_enabled = false
+
+  psc_configs {
+    network = google_compute_network.consumer_net.id
+  }
+
+  transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
+  
+  # NEW FIELDS TESTED HERE
+  server_ca_mode = "SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA"
+  server_ca_pool = google_privateca_ca_pool.default.id
+
+  depends_on = [
+    google_network_connectivity_service_connection_policy.default,
+    google_privateca_certificate_authority.default,
+    google_privateca_ca_pool_iam_member.redis_p4sa_requester
+  ]
 }
 `, context)
 }

@@ -31,6 +31,8 @@ timeouts:
 examples:
   - name: 'discoveryengine_licenseconfig_basic'
     primary_resource_id: 'basic'
+    # License Config creation has been deprecated at the project level for Gemini Enterprise
+    exclude_test: true
     vars:
       license_config_id: 'license-config-id'
 parameters:

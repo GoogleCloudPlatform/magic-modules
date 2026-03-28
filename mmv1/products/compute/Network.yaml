@@ -36,13 +36,12 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 sweeper:
   dependencies:
     # - "google_network_security_intercept_endpoint_group" (beta only)
     # - "google_network_security_intercept_deployment_group" (beta only)
     - "google_network_security_firewall_endpoint_association"
+include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_network.go.tmpl'
@@ -127,6 +126,7 @@ properties:
     validation:
       function: 'verify.ValidateGCEName'
   - name: 'networkId'
+    type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
@@ -207,16 +207,15 @@ properties:
           - 'DEFAULT'
           - 'ADD_COST_TO_MED'
         is_missing_in_cai: true
-      - name: 'delete_bgp_always_compare_med'
+      - name: 'deleteBgpAlwaysCompareMed'
         type: Boolean
         default_value: false
         update_verb: 'PATCH'
         update_url: 'projects/{{project}}/global/networks/{{name}}'
-        custom_flatten: 'templates/terraform/custom_flatten/compute_network_delete_bgp_always_compare_med.go.tmpl'
+        client_side: true
         description: |
           If set to `true`, the `bgp_always_compare_med` field will be cleared.
           If set to `false` (the default), `bgp_always_compare_med` will be set to the value specified in the configuration.
-        ignore_read: true
   - name: 'mtu'
     type: Integer
     description: |

@@ -29,6 +29,9 @@ id_format:
   projects/{{project}}/locations/{{location}}/multicastDomainGroups/{{multicast_domain_group_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomainGroups/{{multicast_domain_group_id}}
+sweeper:
+  url_substitutions:
+    - location: "global"
 examples:
   - name: network_services_multicast_domain_group_basic
     primary_resource_id: mdg_test

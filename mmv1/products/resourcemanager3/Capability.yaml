@@ -19,8 +19,8 @@ description:
   that span multiple projects within that folder and its descendant projects.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/manage-applications'
-  api: 'https://cloud.google.com/resource-manager/reference/rest'
+    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/manage-applications'
+  api: 'https://docs.cloud.google.com/resource-manager/reference/rest'
 
 import_format:
   - '{{parent}}/capabilities/{{capability_name}}'

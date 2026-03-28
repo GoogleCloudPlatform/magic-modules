@@ -1,0 +1,24 @@
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}FirebaseAILogicBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/templates/{{"{{"}}template_id{{"}}"}}")
+if err != nil {
+	return err
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err != nil {
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+		return nil
+	}
+	return fmt.Errorf("error reading PromptTemplate to verify lock destruction: %v", err)
+}
+
+locked, ok := res["locked"].(bool)
+if ok && locked {
+	return fmt.Errorf("FirebaseAILogicPromptTemplate %s is still locked after destroy", rs.Primary.Attributes["template_id"])
+}

@@ -1,0 +1,121 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RolloutSequence'
+description: |
+  RolloutSequence defines the desired order of upgrades.
+min_version: beta
+references:
+  guides:
+    'Rollout Sequencing Overview': 'https://cloud.google.com/kubernetes-engine/docs/concepts/rollout-sequencing-custom-stages/about-rollout-sequencing'
+  api: https://docs.cloud.google.com/kubernetes-engine/fleet-management/docs/reference/rest/v1beta/projects.locations.rolloutSequences
+id_format: 'projects/{{project}}/locations/global/rolloutSequences/{{rollout_sequence_id}}'
+base_url: 'projects/{{project}}/locations/global/rolloutSequences'
+self_link: 'projects/{{project}}/locations/global/rolloutSequences/{{rollout_sequence_id}}'
+create_url: 'projects/{{project}}/locations/global/rolloutSequences?rollout_sequence_id={{rollout_sequence_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/rolloutSequences/{{rollout_sequence_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    result:
+      resource_inside_response: false
+parameters:
+  - name: 'rollout_sequence_id'
+    type: String
+    description: |
+      The user-provided identifier of the RolloutSequence.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The full resource name of the RolloutSequence.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Human readable display name of the Rollout Sequence.
+  - name: 'uid'
+    type: String
+    description: |
+      Google-generated UUID for this resource.
+    output: true
+  - name: 'etag'
+    type: String
+    description: |
+      etag of the Rollout Sequence.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp at which the Rollout Sequence was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp at which the Rollout Sequence was last updated.
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      The timestamp at the Rollout Sequence was deleted.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels for this Rollout Sequence.
+  - name: 'stages'
+    type: Array
+    description: |
+      Ordered list of stages that constitute this Rollout Sequence.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'fleetProjects'
+          type: Array
+          description: |
+            List of Fleet projects to select the clusters from.
+            Expected format: projects/{project}
+          required: true
+          item_type:
+            type: String
+        - name: 'clusterSelector'
+          type: NestedObject
+          description: |
+            Filter to select a subset of clusters from the specified Fleet projects.
+            If not specified, all clusters in the fleet projects are selected.
+          properties:
+            - name: 'labelSelector'
+              type: String
+              description: |
+                The label selector must be a valid CEL (Common Expression Language) expression which
+                evaluates resource.labels.
+              required: true
+        - name: 'soakDuration'
+          type: String
+          description: |
+            Soak time after upgrading all the clusters in the stage, specified in seconds.

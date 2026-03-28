@@ -1,5 +1,5 @@
 /*
- * Copyright (c) HashiCorp, Inc.
+ * Copyright IBM Corp. 2014, 2026
  * SPDX-License-Identifier: MPL-2.0
  */
 
@@ -421,6 +421,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Firebase",
         "path" to "./google-beta/services/firebase"
     ),
+    "firebaseailogic" to mapOf(
+        "name" to "firebaseailogic",
+        "displayName" to "Firebase AI Logic",
+        "path" to "./google-beta/services/firebaseailogic"
+    ),
     "firebaseappcheck" to mapOf(
         "name" to "firebaseappcheck",
         "displayName" to "Firebaseappcheck",
@@ -495,6 +500,11 @@ var ServicesListBeta = mapOf(
         "name" to "healthcare",
         "displayName" to "Healthcare",
         "path" to "./google-beta/services/healthcare"
+    ),
+    "hypercomputecluster" to mapOf(
+        "name" to "hypercomputecluster",
+        "displayName" to "ClusterDirector",
+        "path" to "./google/services/hypercomputecluster"
     ),
     "iam2" to mapOf(
         "name" to "iam2",
@@ -856,6 +866,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Transcoder",
         "path" to "./google-beta/services/transcoder"
     ),
+    "vectorsearch" to mapOf(
+        "name" to "vectorsearch",
+        "displayName" to "VectorSearch",
+        "path" to "./google-beta/services/vectorsearch",
+      ),
     "vertexai" to mapOf(
         "name" to "vertexai",
         "displayName" to "Vertexai",

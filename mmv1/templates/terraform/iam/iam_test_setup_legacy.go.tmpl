@@ -9,8 +9,10 @@
 {{- end}}
 	})
 {{- end }}
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randomSuffix,
 		"role":          "{{ $.IamPolicy.AllowedIamRole }}",
 {{- if $.IamPolicy.AdminIamRole }}
 		"admin_role":    "{{ $.IamPolicy.AdminIamRole }}",
@@ -19,8 +21,8 @@
 		"project_id" :   fmt.Sprintf("{{ $.IamPolicy.TestProjectName }}%s", acctest.RandString(t, 10)),
 {{- end }}
 {{- template "EnvVarContext" dict "TestEnvVars" $.FirstTestExample.TestEnvVars "HasNewLine" true}}
-{{- if $.FirstTestExample.TestVarsOverrides }}
-{{-    range $varName, $override := $.FirstTestExample.TestVarsOverrides }}
+{{- if $.FirstTestExample.TestContextVars }}
+{{-    range $varName, $override := $.FirstTestExample.TestContextVars }}
 		"{{ $varName }}": {{ $override }},
 {{-   end }}
 {{- end }}

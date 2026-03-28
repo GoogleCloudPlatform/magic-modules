@@ -1,0 +1,10 @@
+resource "google_logging_saved_query" "{{.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "logging_saved_query_name"}}"
+  display_name = "My Saved Query"
+  parent       = "projects/{{index $.TestEnvVars "project"}}"
+  location     = "global"
+  logging_query {
+    filter = "resource.type=gce_instance"
+  }
+  visibility = "SHARED"
+}

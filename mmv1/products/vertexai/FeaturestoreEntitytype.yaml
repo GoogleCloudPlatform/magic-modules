@@ -60,7 +60,6 @@ exclude_sweeper: true
 examples:
   - name: 'vertex_ai_featurestore_entitytype'
     primary_resource_id: 'entity'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/featurestores/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("terraform%s", context["random_suffix"])), fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform'
       project: 'vertex-ai'

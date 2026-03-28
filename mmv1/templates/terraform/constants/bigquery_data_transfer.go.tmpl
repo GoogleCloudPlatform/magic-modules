@@ -10,7 +10,7 @@ func sensitiveParamCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 		}
 	}
 
-	{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+	{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 	for _, sp := range sensitiveWoParams {
 		mapLabel := diff.Get("params." + sp[:len(sp)-3]).(string)
 		authLabel, _ := diff.GetRawConfigAt(cty.GetAttrPath("sensitive_params").IndexInt(0).GetAttr(sp))

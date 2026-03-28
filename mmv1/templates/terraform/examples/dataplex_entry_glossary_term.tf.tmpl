@@ -10,6 +10,12 @@ resource "google_dataplex_glossary_term" "example-glossary-term" {
   term_id = "{{index $.Vars "glossary_term_id"}}"
 }
 
+# Introduce a 45-second wait after the glossary resource creation
+resource "time_sleep" "wait-for-sync" {
+  create_duration = "45s"
+  depends_on = [google_dataplex_glossary_term.example-glossary-term]
+}
+
 resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
   entry_group_id = "@dataplex"
   project = "{{index $.TestEnvVars "project_number"}}"
@@ -26,4 +32,5 @@ resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
          EOF
      }
    }
+  depends_on = [time_sleep.wait-for-sync]
 }

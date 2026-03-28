@@ -27,6 +27,9 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/multicastProducerAssociations/{{multicast_producer_association_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastProducerAssociations/{{multicast_producer_association_id}}
+sweeper:
+  url_substitutions:
+    - location: "us-central1-b"
 examples:
   - name: network_services_multicast_producer_association_basic
     primary_resource_id: mpa_test

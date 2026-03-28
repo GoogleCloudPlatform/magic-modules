@@ -571,6 +571,55 @@ func TestAccBigQueryExternalDataTable_json(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryExternalDataTable_sourceColumnMatch(t *testing.T) {
+	t.Parallel()
+	bucketName := acctest.TestBucketName(t)
+	resourceName := "google_bigquery_table.test"
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableSourceColumnMatchName(datasetID, tableID, bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "external_data_configuration.0.csv_options.0.source_column_match", "NAME"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+			},
+			{
+				Config: testAccBigQueryTableSourceColumnMatchPosition(datasetID, tableID, bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "external_data_configuration.0.csv_options.0.source_column_match", "POSITION"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+			},
+			{
+				Config: testAccBigQueryTableSourceColumnMatchRemoved(datasetID, tableID, bucketName),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+			},
+		},
+	})
+}
+
 func TestAccBigQueryTable_RangePartitioning(t *testing.T) {
 	t.Parallel()
 	resourceName := "google_bigquery_table.test"
@@ -1831,6 +1880,32 @@ func TestAccBigQueryTable_SchemaWithEmptyCollation(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccBigQueryTableWithNoCollation(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%{dataset_id}"
+  location   = "US"
+
+  default_table_expiration_ms = null
+  default_collation           = "und:ci"
+}
+
+resource "google_bigquery_table" "test" {
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  table_id   = "%{table_id}"
+  deletion_protection = false
+
+  schema = jsonencode([
+    {
+      name      = "source"
+      type      = "STRING"
+      // collation is explicitly omitted (nil) to test inheritance
+    }
+  ])
+}
+`, context)
 }
 
 func TestAccBigQueryTable_invalidSchemas(t *testing.T) {
@@ -5029,6 +5104,59 @@ resource "google_bigquery_table" "test" {
 `, context)
 }
 
+func TestAccBigQueryTable_SchemaWithNoCollation(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"dataset_id": fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10)),
+		"table_id":   fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableWithNoCollation(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Verify that the "source" column inherited "und:ci" from the dataset
+					testAccCheckBigQueryTableCollation(t, context["dataset_id"].(string), context["table_id"].(string), "source", "und:ci"),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+			},
+		},
+	})
+}
+
+func testAccCheckBigQueryTableCollation(t *testing.T, datasetID, tableID, colName, expectedCollation string) resource.TestCheckFunc {
+	t.Helper()
+
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		res, err := config.NewBigQueryClient(config.UserAgent).Tables.Get(config.Project, datasetID, tableID).Do()
+		if err != nil {
+			return err
+		}
+
+		for _, field := range res.Schema.Fields {
+			if field.Name == colName {
+				if field.Collation != expectedCollation {
+					return fmt.Errorf("Expected collation for column '%s' to be '%s', but got '%s'", colName, expectedCollation, field.Collation)
+				}
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Column '%s' not found in table schema", colName)
+	}
+}
+
 func testAccBigQueryTableWithSchemaAndRowAccessPolicy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_dataset" "test" {
@@ -5497,6 +5625,145 @@ EOF
   }
 }
 `, context)
+}
+
+func testAccBigQueryTableSourceColumnMatchName(datasetID, tableID, bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "test.csv"
+  content = <<EOF
+country,product,price
+US,phone,100
+JP,tablet,300
+UK,laptop,200
+EOF
+
+  bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+    autodetect    = true
+    source_format = "CSV"
+    csv_options {
+      quote               = ""
+      skip_leading_rows   = 1
+      source_column_match = "NAME"
+    }
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
+    ]
+  }
+}
+`, datasetID, bucketName, tableID)
+}
+
+func testAccBigQueryTableSourceColumnMatchPosition(datasetID, tableID, bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "test.csv"
+  content = <<EOF
+country,product,price
+US,phone,100
+JP,tablet,300
+UK,laptop,200
+EOF
+
+  bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+    autodetect    = false
+    source_format = "CSV"
+    csv_options {
+      quote               = ""
+      skip_leading_rows   = 1
+      source_column_match = "POSITION"
+    }
+    schema = jsonencode([
+      { name = "country", type = "STRING" },
+      { name = "product", type = "STRING" },
+      { name = "price", type = "INT64" }
+    ])
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
+    ]
+  }
+}
+`, datasetID, bucketName, tableID)
+}
+
+func testAccBigQueryTableSourceColumnMatchRemoved(datasetID, tableID, bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "test.csv"
+  content = <<EOF
+country,product,price
+US,phone,100
+JP,tablet,300
+UK,laptop,200
+EOF
+
+  bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+    autodetect    = true
+    source_format = "CSV"
+    csv_options {
+      quote               = ""
+      skip_leading_rows   = 1
+    }
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
+    ]
+  }
+}
+`, datasetID, bucketName, tableID)
 }
 
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b

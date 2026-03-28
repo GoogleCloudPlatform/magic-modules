@@ -45,7 +45,7 @@ func TestFindResources(t *testing.T) {
 		t.Fatalf("Could not validate data %s", err)
 	}
 	res := findResources(doc)
-	if len(res) != 2 {
+	if len(res) != 3 {
 		t.Fatalf("Expected 2 resources, found: %d", len(res))
 	}
 	if !res["Food"].create.async {
@@ -53,5 +53,8 @@ func TestFindResources(t *testing.T) {
 	}
 	if res["Pet"].create.async {
 		t.Error("Pet resource is not supposed to be detected as async")
+	}
+	if res["Breeds"].update == nil {
+		t.Error("Singleton update should be found")
 	}
 }

@@ -1,4 +1,4 @@
-resource "google_compute_region_target_tcp_proxy" "default" {
+resource "google_compute_region_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
   name            = "{{index $.Vars "region_target_tcp_proxy_name"}}"
   region          = "europe-west4"
   backend_service = google_compute_region_backend_service.default.id
