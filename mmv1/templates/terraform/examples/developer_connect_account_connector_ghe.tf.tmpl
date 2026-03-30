@@ -1,0 +1,30 @@
+data "google_secret_manager_secret_version_access" "ghe_ac_client_id" {
+  secret  = "ghe-ac-client-id"
+}
+
+data "google_secret_manager_secret_version_access" "ghe_ac_client_secret" {
+  secret  = "ghe-ac-client-secret"
+}
+
+resource "google_developer_connect_account_connector" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  account_connector_id = "{{index $.Vars "account_connector_name"}}"
+
+  custom_oauth_config {
+    auth_uri = "https://ghe.proctor-staging-test.com/login/oauth/authorize"
+    client_id = data.google_secret_manager_secret_version_access.ghe_ac_client_id.secret_data
+    client_secret = data.google_secret_manager_secret_version_access.ghe_ac_client_secret.secret_data
+    token_uri = "https://ghe.proctor-staging-test.com/login/oauth/access_token"
+    host_uri = "https://ghe.proctor-staging-test.com"
+    scm_provider = "GITHUB_ENTERPRISE"
+    scopes = ["repo"]
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # Terraform should ignore changes to the client_secret field because
+      # the API does not return it (INPUT_ONLY).
+      custom_oauth_config[0].client_secret,
+    ]
+  }
+}
