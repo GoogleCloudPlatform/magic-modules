@@ -1,9 +1,11 @@
 data "google_secret_manager_secret_version_access" "gle_ac_client_id" {
   secret  = "gle-ac-client-id"
+  project = "devconnect-terraform-creds"
 }
 
 data "google_secret_manager_secret_version_access" "gle_ac_client_secret" {
   secret  = "gle-ac-client-secret"
+  project = "devconnect-terraform-creds"
 }
 
 resource "google_developer_connect_account_connector" "{{$.PrimaryResourceId}}" {

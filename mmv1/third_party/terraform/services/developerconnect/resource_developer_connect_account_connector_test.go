@@ -76,6 +76,10 @@ resource "google_developer_connect_account_connector" "my-account-connector" {
     system_provider_id = "GITHUB"
     scopes = ["repo", "public_repo"]
   }
+
+  proxy_config {
+    enabled = true
+  }
 }
 `, context)
 }
@@ -149,6 +153,10 @@ resource "google_developer_connect_account_connector" "my-account-connector" {
     system_provider_id = "GITLAB"
     scopes = ["api", "read_api"]
   }
+  
+  proxy_config {
+    enabled = true
+  }
 }
 `, context)
 }
@@ -194,10 +202,12 @@ func testAccDeveloperConnectAccountConnector_GHE(context map[string]interface{})
 	return acctest.Nprintf(`
 data "google_secret_manager_secret_version_access" "ghe_ac_client_id" {
   secret  = "ghe-ac-client-id"
+  project = "devconnect-terraform-creds"
 }
 
 data "google_secret_manager_secret_version_access" "ghe_ac_client_secret" {
   secret  = "ghe-ac-client-secret"
+  project = "devconnect-terraform-creds"
 }
 
 resource "google_developer_connect_account_connector" "my-account-connector" {
@@ -227,10 +237,12 @@ func testAccDeveloperConnectAccountConnector_GHEUpdate(context map[string]interf
 	return acctest.Nprintf(`
 data "google_secret_manager_secret_version_access" "ghe_ac_client_id" {
   secret  = "ghe-ac-client-id"
+  project = "devconnect-terraform-creds"
 }
 
 data "google_secret_manager_secret_version_access" "ghe_ac_client_secret" {
   secret  = "ghe-ac-client-secret"
+  project = "devconnect-terraform-creds"
 }
 
 resource "google_developer_connect_account_connector" "my-account-connector" {
@@ -253,6 +265,7 @@ resource "google_developer_connect_account_connector" "my-account-connector" {
       host_uri = "https://ghe.proctor-staging-test.com"
       scm_provider = "GITHUB_ENTERPRISE"
       scopes = ["repo", "user"]
+      pkce_disabled = true
   }
 
   lifecycle {
@@ -305,10 +318,12 @@ func testAccDeveloperConnectAccountConnector_GLE(context map[string]interface{})
 	return acctest.Nprintf(`
 data "google_secret_manager_secret_version_access" "gle_ac_client_id" {
   secret  = "gle-ac-client-id"
+  project = "devconnect-terraform-creds"
 }
 
 data "google_secret_manager_secret_version_access" "gle_ac_client_secret" {
   secret  = "gle-ac-client-secret"
+  project = "devconnect-terraform-creds"
 }
 
 resource "google_developer_connect_account_connector" "my-account-connector" {
@@ -338,10 +353,12 @@ func testAccDeveloperConnectAccountConnector_GLEUpdate(context map[string]interf
 	return acctest.Nprintf(`
 data "google_secret_manager_secret_version_access" "gle_ac_client_id" {
   secret  = "gle-ac-client-id"
+  project = "devconnect-terraform-creds"
 }
 
 data "google_secret_manager_secret_version_access" "gle_ac_client_secret" {
   secret  = "gle-ac-client-secret"
+  project = "devconnect-terraform-creds"
 }
 
 resource "google_developer_connect_account_connector" "my-account-connector" {
@@ -403,10 +420,12 @@ func testAccDeveloperConnectAccountConnector_GhePrivAccountConnector(context map
 	return acctest.Nprintf(`
 data "google_secret_manager_secret_version_access" "ghe_ac_priv_client_id" {
   secret  = "ghe-ac-priv-client-id"
+  project = "devconnect-terraform-creds"
 }
 
 data "google_secret_manager_secret_version_access" "ghe_ac_priv_client_secret" {
   secret  = "ghe-ac-priv-client-secret"
+  project = "devconnect-terraform-creds"
 }
 
 resource "google_developer_connect_account_connector" "my-account-connector" {
@@ -464,10 +483,12 @@ func testAccDeveloperConnectAccountConnector_GlePrivAccountConnector(context map
 	return acctest.Nprintf(`
 data "google_secret_manager_secret_version_access" "gle_ac_priv_client_id" {
   secret  = "gle-ac-priv-client-id"
+  project = "devconnect-terraform-creds"
 }
 
 data "google_secret_manager_secret_version_access" "gle_ac_priv_client_secret" {
   secret  = "gle-ac-priv-client-secret"
+  project = "devconnect-terraform-creds"
 }
 
 resource "google_developer_connect_account_connector" "my-account-connector" {
@@ -525,10 +546,12 @@ func testAccDeveloperConnectAccountConnector_BbdcPrivAccountConnector(context ma
 	return acctest.Nprintf(`
 data "google_secret_manager_secret_version_access" "bbdc_ac_priv_client_id" {
   secret  = "bbdc-ac-priv-client-id"
+  project = "devconnect-terraform-creds"
 }
 
 data "google_secret_manager_secret_version_access" "bbdc_ac_priv_client_secret" {
   secret  = "bbdc-ac-priv-client-secret"
+  project = "devconnect-terraform-creds"
 }
 
 resource "google_developer_connect_account_connector" "my-account-connector" {
