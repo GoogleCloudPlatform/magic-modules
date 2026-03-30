@@ -155,8 +155,8 @@ func GetZoneFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (stri
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
 func GetDeletionPolicyFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config, resourceDefault string) (string, error) {
-	//if cty.Null value, then the value has not been manually configured
-	if d.GetRawConfig().GetAttr("deletion_policy") == cty.NullVal(cty.String) {
+	//if IsNull() value, then the value has not been manually configured
+	if d.GetRawConfig().GetAttr("deletion_policy").IsNull() {
 		if config.DeletionPolicy != "" {
 			log.Printf("[DEBUG] `deletion_policy` detected as not set within resource configuration. Falling back to configured provider default, %s", config.DeletionPolicy)
 			return config.DeletionPolicy, nil
