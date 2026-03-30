@@ -1,0 +1,9 @@
+resource "google_dataplex_metadata_feed" "{{$.PrimaryResourceId}}" {
+  metadata_feed_id = "{{index $.Vars "metadata_feed_id"}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
+  location = "us-central1"
+  description = "Example metadata feed"
+  scope {
+    projects = ["projects/{{index $.TestEnvVars "project_name"}}"]
+  }
+}
