@@ -357,7 +357,7 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
 // Any other identity attributes are normally all required; if at least two are set, each must be
 // present (multi-attribute import). If only one is set, it must be "{{ underscore $.IamParentResourceName }}"
 // carrying a full or partial resource id, parsed with the same import regexes as string import.
-func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData, config *transport_tpg.Config) (string, error) {
+func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData, transportConfig *transport_tpg.Config) (string, error) {
 	importD := tpgresource.IamImportTerraformData(identity)
 	parentKey := "{{ underscore $.IamParentResourceName }}"
 {{- range $i, $param := $.IamResourceParams }}
@@ -371,7 +371,7 @@ func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData
 		}
 	}
 	if {{ $camel }} == "" {
-		res, err := tpgresource.Get{{ title $param }}(importD, config)
+		res, err := tpgresource.Get{{ title $param }}(importD, transportConfig)
 		if err != nil {
 			return "", err
 		}
@@ -418,7 +418,7 @@ func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData
 		values["{{ $param }}"] = {{ camelize $param "lower" }}
 {{- end }}
 {{- end }}
-		m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdRegexesFromIam }}"}, importD, config, compositeId)
+		m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdRegexesFromIam }}"}, importD, transportConfig, compositeId)
 		if err != nil {
 			return "", err
 		}
