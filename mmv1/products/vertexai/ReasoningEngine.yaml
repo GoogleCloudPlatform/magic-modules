@@ -101,8 +101,16 @@ examples:
       - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_context_spec'
     primary_resource_id: 'reasoning_engine'
+    min_version: beta
     vars:
       name: 're-ctx-spec'
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_granular_ttl'
+    primary_resource_id: 'reasoning_engine'
+    min_version: beta
+    vars:
+      name: 're-gran-ttl'
     ignore_read_extra:
       - 'deletion_policy'
 custom_code:
@@ -469,46 +477,61 @@ properties:
       - name: 'memoryBankConfig'
         type: NestedObject
         description: |-
-          Optional. Specification for a Memory Bank, which manages memories for the Agent Engine.
+          Specification for a Memory Bank, which manages memories for the Agent Engine.
         properties:
           - name: 'generationConfig'
             type: NestedObject
             description: |-
-              Optional. Configuration for how to generate memories for the Memory Bank.
+              Configuration for how to generate memories for the Memory Bank.
             properties:
               - name: 'model'
                 type: String
                 description: |-
-                  Required. The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                  The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
                 required: true
           - name: 'similaritySearchConfig'
             type: NestedObject
             description: |-
-              Optional. Configuration for how to perform similarity search on memories.
+              Configuration for how to perform similarity search on memories.
             properties:
               - name: 'embeddingModel'
                 type: String
                 description: |-
-                  Required. The model used to generate embeddings to lookup similar memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                  The model used to generate embeddings to lookup similar memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
                 required: true
           - name: 'ttlConfig'
             type: NestedObject
             description: |-
-              Optional. Configuration for automatic TTL ("time-to-live") of the memories in the Memory Bank.
+              Configuration for automatic TTL ("time-to-live") of the memories in the Memory Bank.
             properties:
               - name: 'defaultTtl'
                 type: String
+                exactly_one_of:
+                  - defaultTtl
+                  - granularTtlConfig
                 description: |-
-                  Optional. The default TTL duration of the memories in the Memory Bank.
+                  The default TTL duration of the memories in the Memory Bank.
               - name: 'granularTtlConfig'
                 type: NestedObject
                 description: |-
-                  Optional. The granular TTL configuration of the memories in the Memory Bank.
+                  The granular TTL configuration of the memories in the Memory Bank.
                 properties:
-                  - name: 'memoryRevisionDefaultTtl'
+                  - name: 'createTtl'
                     type: String
                     description: |-
-                      Optional. The default TTL duration of the memory revisions in the Memory Bank.
+                      The TTL duration for memories uploaded via CreateMemory.
+                  - name: 'generateCreatedTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories newly generated via GenerateMemories.
+                  - name: 'generateUpdatedTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories updated via GenerateMemories.
+              - name: 'memoryRevisionDefaultTtl'
+                type: String
+                description: |-
+                  The default TTL duration of the memory revisions in the Memory Bank.
           - name: 'disableMemoryRevisions'
             type: Boolean
             description: |-

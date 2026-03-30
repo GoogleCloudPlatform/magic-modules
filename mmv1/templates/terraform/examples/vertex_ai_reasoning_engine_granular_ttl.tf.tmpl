@@ -1,6 +1,6 @@
 resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "name"}}"
-  description  = "Reasoning engine with context spec"
+  description  = "Reasoning engine with granular ttl"
   region       = "us-central1"
   provider     = google-beta
 
@@ -14,7 +14,12 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
       }
       disable_memory_revisions = false
       ttl_config {
-        default_ttl = "86400s"
+        memory_revision_default_ttl = "86400s"
+        granular_ttl_config {
+          create_ttl = "86400s"
+          generate_created_ttl = "86400s"
+          generate_updated_ttl = "86400s"
+        }
       }
     }
   }
