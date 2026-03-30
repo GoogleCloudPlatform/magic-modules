@@ -44,7 +44,6 @@ custom_diff:
   - 'tpgresource.DefaultProviderProject'
 # excluding identity due to name value inconsistency
 exclude_identity_generation: true
-include_in_tgc_next: true
 examples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'

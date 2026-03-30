@@ -49,8 +49,6 @@ sweeper:
   url_substitutions:
     - zone: "southamerica-west1-a"
 include_in_tgc_next: true
-custom_code:
-  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.tmpl'
 examples:
   - name: 'target_instance_basic'
     primary_resource_id: 'default'
