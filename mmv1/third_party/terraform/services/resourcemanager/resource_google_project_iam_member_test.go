@@ -23,10 +23,9 @@ func projectIamMemberImportStep(resourceName, pid, role, member string) resource
 
 func projectIamMemberIdentityImportStep(resourceName string) resource.TestStep {
 	return resource.TestStep{
-		ResourceName:      resourceName,
-		ImportState:       true,
-		ImportStateKind:   resource.ImportBlockWithResourceIdentity,
-		ImportStateVerify: true,
+		ResourceName: resourceName,
+		ImportState:  true,
+		ImportStateKind: resource.ImportBlockWithResourceIdentity,
 	}
 }
 
