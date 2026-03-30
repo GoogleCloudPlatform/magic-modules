@@ -99,6 +99,7 @@ examples:
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
       project_id: 'PROJECT_NAME'
+    external_providers: ["time"]
 
 
 parameters:

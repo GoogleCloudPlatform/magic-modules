@@ -689,7 +689,7 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `Sandbox configuration for this node.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
-							"sandbox_type": {
+							"type": {
 								Type:         schema.TypeString,
 								Required:     true,
 								Description:  `Type of the sandbox to use for the node (e.g. 'gvisor')`,
@@ -2390,6 +2390,7 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"resource_manager_tags":              flattenResourceManagerTags(c["resourceManagerTags"]),
 		"enable_confidential_storage":        c["enableConfidentialStorage"],
 		"local_ssd_encryption_mode":          c["localSsdEncryptionMode"],
+		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
 	}
 
 	// Suppress Default Value
@@ -2645,6 +2646,25 @@ func flattenGcfsConfig(v interface{}) []map[string]interface{} {
 	}
 	transformed := map[string]interface{}{
 		"enabled": enabled,
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenSandboxConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{}
+	if val, ok := c["type"]; ok && val != nil {
+		transformed["type"] = val
+	} else if val, ok := c["sandboxType"]; ok && val != nil {
+		transformed["type"] = val
 	}
 
 	return []map[string]interface{}{transformed}

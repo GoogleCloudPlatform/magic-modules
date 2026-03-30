@@ -31,7 +31,7 @@ func TestProcessInput(t *testing.T) {
 }
 
 func TestFindTmpls(t *testing.T) {
-	yamlFiles := []string{"testdata/resource1.yaml", "testdata/resource2.yaml"}
+	yamlFiles := []string{"testdata/product.yaml", "testdata/resource1.yaml", "testdata/resource2.yaml"}
 	got, err := findTmpls(yamlFiles)
 	if err != nil {
 		t.Fatal(err)
@@ -51,6 +51,7 @@ func TestFindTmpls(t *testing.T) {
 		"templates/terraform/custom_expand/bigquery_dataset_ref.go.tmpl":                       true,
 		"templates/terraform/custom_flatten/bigquery_dataset_ref.go.tmpl":                      true,
 		"templates/terraform/iam/example_config_body/app_engine_service.tf.tmpl":               true,
+		"templates/terraform/state_migrations/big_query_job.go.tmpl":                           true,
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("findTmpls() got unexpected diff(-want, got) = %s", diff)

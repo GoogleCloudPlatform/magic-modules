@@ -269,7 +269,6 @@ type Config struct {
 	{{- end }}
 
 	CloudBillingBasePath string
-	ContainerBasePath string
 	DataflowBasePath string
 	IamCredentialsBasePath string
 	ResourceManagerV3BasePath string
@@ -295,7 +294,6 @@ type Config struct {
 const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
 {{- end }}
 const CloudBillingBasePathKey = "CloudBilling"
-const ContainerBasePathKey = "Container"
 const DataflowBasePathKey = "Dataflow"
 const IAMBasePathKey = "IAM"
 const IamCredentialsBasePathKey = "IamCredentials"
@@ -311,11 +309,6 @@ var DefaultBasePaths = map[string]string{
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
 	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
-{{- if eq $.TargetVersionName "ga" }}
-	ContainerBasePathKey : "https://container.googleapis.com/v1/",
-{{- else }}
-	ContainerBasePathKey : "https://container.googleapis.com/v1beta1/",
-{{- end }}
 	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
 	IAMBasePathKey : "https://iam.googleapis.com/v1/",
 	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
@@ -1526,7 +1519,7 @@ func AreADCCredentialsX509() bool {
 
 // Remove the `/{{"{{"}}version{{"}}"}}/` from a base path if present.
 func RemoveBasePathVersion(url string) string {
-	re := regexp.MustCompile(`(?P<base>http[s]://.*)(?P<version>/[^/]+?/$)`)
+	re := regexp.MustCompile(`(?P<base>https?://.*)(?P<version>/[^/]+?/$)`)
 	return re.ReplaceAllString(url, "$1/")
 }
 

@@ -52,7 +52,7 @@ examples:
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
   - name: 'network_services_tls_route_regional_basic'
     primary_resource_id: 'default'
     vars:
@@ -64,13 +64,21 @@ examples:
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
   - name: 'network_services_tls_route_gateway_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
+  - name: 'network_services_tls_route_target_tcp_proxy_basic'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      target_tcp_proxy_name: 'my-target-tcp-proxy'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'my-health-check'
   - name: 'network_services_tls_route_region_target_tcp_proxy_basic'
     min_version: beta
     primary_resource_id: 'default'
