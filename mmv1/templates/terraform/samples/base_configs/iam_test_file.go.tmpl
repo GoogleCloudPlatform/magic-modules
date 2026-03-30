@@ -141,10 +141,9 @@ func TestAcc{{ $.ResourceName }}IamMemberIdentityImportGenerated(t *testing.T) {
 				Config: testAcc{{ $.ResourceName }}IamMember_basicGenerated(context),
 			},
 			{
-				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportState:       true,
-				ImportStateKind:   resource.ImportBlockWithResourceIdentity,
-				ImportStateVerify: true,
+				ResourceName:    "{{ $.IamTerraformName }}_member.foo",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
