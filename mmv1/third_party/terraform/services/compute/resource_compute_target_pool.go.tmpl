@@ -440,16 +440,24 @@ func resourceComputeTargetPoolUpdate(d *schema.ResourceData, meta interface{}) e
 		}
 
 		spr := emptySecurityPolicyReference()
-		spr.SecurityPolicy = pol.RelativeLink()
+		spr["securityPolicy"] = pol.RelativeLink()
 
-		op, err := config.NewComputeClient(userAgent).TargetPools.SetSecurityPolicy(project, region, d.Get("name").(string), spr).Do()
+		targetPoolSecPolicyUrl := fmt.Sprintf("%sprojects/%s/regions/%s/targetPools/%s/setSecurityPolicy", config.ComputeBasePath, project, region, d.Get("name").(string))
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    targetPoolSecPolicyUrl,
+			UserAgent: userAgent,
+			Body:      spr,
+		})
 		if err != nil {
 			return fmt.Errorf("Error updating TargetPool security policy:: %s", err)
 		}
 
-		waitErr := ComputeOperationWaitTime(config, op, project, "Updating TargetPool Security Policy", userAgent, d.Timeout(schema.TimeoutCreate))
-		if waitErr != nil {
-			return waitErr
+		err = ComputeOperationWaitTime(config, res, project, "Updating TargetPool Security Policy", userAgent, d.Timeout(schema.TimeoutCreate))
+		if err != nil {
+			return err
 		}
 	}
 	{{- end }}
