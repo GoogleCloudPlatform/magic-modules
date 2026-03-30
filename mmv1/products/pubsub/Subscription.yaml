@@ -140,6 +140,7 @@ examples:
       tag_value: 'tag_value'
   - name: 'pubsub_subscription_ai_inference'
     primary_resource_id: 'example'
+    external_providers: ["time"]
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
