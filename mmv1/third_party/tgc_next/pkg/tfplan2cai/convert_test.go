@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"os"
@@ -153,11 +152,9 @@ func TestConvert_ComputeNetwork(t *testing.T) {
 	}
 
 	assets, err := Convert(context.Background(), jsonPlan, o)
-	//assetsJSON, err := json.MarshalIndent(assets, "", "  ")
 	if err != nil {
 		t.Fatalf("Error marshaling assets: %v", err)
 	}
-	//fmt.Println(string(assetsJSON))
 	assert.Nil(t, err)
 	assert.NotEmpty(t, assets)
 	assert.NotEmpty(t, assets[2].Resource.Data["vmwareEngineNetwork"])
@@ -182,11 +179,9 @@ func TestConvert_ComputeDiskNestedId(t *testing.T) {
 	}
 
 	assets, err := Convert(context.Background(), jsonPlan, o)
-	assetsJSON, err := json.MarshalIndent(assets, "", "  ")
 	if err != nil {
 		t.Fatalf("Error marshaling assets: %v", err)
 	}
-	fmt.Println(string(assetsJSON))
 	assert.Nil(t, err)
 	assert.NotEmpty(t, assets)
 	assert.NotEmpty(t, assets[1].Resource.Data["asyncPrimaryDisk"])
@@ -211,11 +206,9 @@ func TestConvert_ComputeAddress(t *testing.T) {
 	}
 
 	assets, err := Convert(context.Background(), jsonPlan, o)
-	assetsJSON, err := json.MarshalIndent(assets, "", "  ")
 	if err != nil {
 		t.Fatalf("Error marshaling assets: %v", err)
 	}
-	fmt.Println(string(assetsJSON))
 	assert.Nil(t, err)
 	assert.NotEmpty(t, assets)
 	assert.Equal(t, "https://www.googleapis.com/compute/v1/projects/terraform-dev-haonan/regions/us-east1/subnetworks/subnetwork-test", assets[2].Resource.Data["subnetwork"])

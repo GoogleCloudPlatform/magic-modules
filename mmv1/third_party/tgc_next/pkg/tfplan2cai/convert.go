@@ -109,12 +109,10 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 				for _, rd := range resourceDataList {
 					if deps != nil {
 						for attrName, parentAddr := range deps {
-							parentAssets := convertedAssetsByAddress[parentAddr]
-							if len(parentAssets) > 0 {
-								parentName := parentAssets[0].Name
-								parts := strings.SplitN(parentName, "/", 4)
-								if len(parts) == 4 {
-									rd.Set(attrName, parts[3])
+							parentRds := resourceDataMap[parentAddr]
+							if len(parentRds) > 0 {
+								if parentId := parentRds[0].Id(); parentId != "" {
+									rd.Set(attrName, parentId)
 								}
 							}
 						}
@@ -125,20 +123,36 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 				if err != nil {
 					return nil, fmt.Errorf("tfplan2cai converting: %w", err)
 				}
+				if len(convertedAssets) > 0 {
+					parts := strings.SplitN(convertedAssets[0].Name, "/", 4)
+					if len(parts) == 4 {
+						for _, rd := range resourceDataList {
+							rd.SetId(parts[3])
+						}
+					}
+				}
 				convertedAssetsByAddress[address] = convertedAssets
 				assets = append(assets, convertedAssets...)
 			}
 		}
-	}
-
-	for address, resourceDataList := range resourceDataMap {
-		if !convertedAddresses[address] {
-			convertedAssets, err := converters.ConvertResource(resourceDataList, cfg, ancestryManager, o.ErrorLogger)
-			if err != nil {
-				return nil, fmt.Errorf("tfplan2cai converting: %w", err)
+	} else {
+		for address, resourceDataList := range resourceDataMap {
+			if !convertedAddresses[address] {
+				convertedAssets, err := converters.ConvertResource(resourceDataList, cfg, ancestryManager, o.ErrorLogger)
+				if err != nil {
+					return nil, fmt.Errorf("tfplan2cai converting: %w", err)
+				}
+				if len(convertedAssets) > 0 {
+					parts := strings.SplitN(convertedAssets[0].Name, "/", 4)
+					if len(parts) == 4 {
+						for _, rd := range resourceDataList {
+							rd.SetId(parts[3])
+						}
+					}
+				}
+				convertedAssetsByAddress[address] = convertedAssets
+				assets = append(assets, convertedAssets...)
 			}
-			convertedAssetsByAddress[address] = convertedAssets
-			assets = append(assets, convertedAssets...)
 		}
 	}
 
