@@ -1,0 +1,151 @@
+---
+name: 'MetadataFeed'
+description: |
+  A Metadata Feed represents a metadata feed in Dataplex.
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/metadataFeeds/{{metadata_feed_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/metadataFeeds/{{metadata_feed_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/metadataFeeds?metadataFeedId={{metadata_feed_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/metadataFeeds/{{metadata_feed_id}}'
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+  delete_minutes: 5
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 5
+      update_minutes: 5
+      delete_minutes: 5
+  result:
+    resource_inside_response: false
+iam_policy:
+  exclude_import_test: true
+  method_name_separator: ':'
+  parent_resource_attribute: 'metadata_feed_id'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/metadataFeeds/{{metadata_feed_id}}'
+    - '{{metadata_feed_id}}'
+custom_code:
+examples:
+  - name: 'dataplex_metadata_feed_full'
+    primary_resource_id: 'default'
+    vars:
+      metadata_feed_id: 'default'
+      topic_name: 'topic'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+  - name: 'dataplex_metadata_feed_full_update'
+    primary_resource_id: 'default'
+    vars:
+      metadata_feed_id: 'default'
+      topic_name: 'topic'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    exclude_test: true
+  - name: 'dataplex_metadata_feed_basic'
+    primary_resource_id: 'test_metadata_feed'
+    vars:
+      metadata_feed_id: 'metadata-feed-basic'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location where metadata feed will be created in.
+    url_param_only: true
+    immutable: true
+  - name: 'metadataFeedId'
+    type: String
+    description: |
+      The metadata feed id of the metadata feed.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The relative resource name of the MetadataFeed, of the form: projects/{project_number}/locations/{location_id}/metadataFeeds/{metadata_feed_id}
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      System generated globally unique ID for the MetadataFeed. This ID will be different if the MetadataFeed is deleted and re-created with the same name.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time when the MetadataFeed was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time when the MetadataFeed was last updated.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      User-defined labels for the MetadataFeed.
+  - name: 'scope'
+    type: NestedObject
+    description: |
+      Scope defines the scope of the metadata feed.
+    required: true
+    properties:
+      - name: 'organizationLevel'
+        type: Boolean
+        description: |
+          Whether the metadata feed is at the organization-level.
+      - name: 'projects'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          The projects whose entries you want to listen to. Must be in the same organization as the feed. Must be in the format: projects/{project_id_or_number}.
+      - name: 'entryGroups'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          The entry groups whose entries you want to listen to. Must be in the format: projects/{project_id_or_number}/locations/{location_id}/entryGroups/{entry_group_id}.
+  - name: 'filters'
+    type: NestedObject
+    description: |
+      Filters defines the type of changes that you want to listen to.
+    properties:
+      - name: 'entryTypes'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          The entry types that you want to listen to.
+      - name: 'aspectTypes'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          The aspect types that you want to listen to.
+      - name: 'changeTypes'
+        type: Array
+        item_type:
+          type: Enum
+          enum_values:
+            - 'CHANGE_TYPE_UNSPECIFIED'
+            - 'CREATE'
+            - 'UPDATE'
+            - 'DELETE'
+        description: |
+          The type of change that you want to listen to.
+  - name: 'pubsubTopic'
+    type: String
+    description: |
+      The pubsub topic that you want the metadata feed messages to publish to.
