@@ -52,11 +52,7 @@ The following arguments are supported:
 * `config_bundle` -
   (Required)
   Path to the config zip bundle.
-
-* `space` -
-  (Optional)
-  The id of the space.
-
+  
 - - -
 
 ## Attributes Reference

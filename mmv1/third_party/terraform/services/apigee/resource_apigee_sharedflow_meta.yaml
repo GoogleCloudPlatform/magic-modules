@@ -14,4 +14,3 @@ fields:
   - api_field: 'name'
   - field: 'org_id'
   - api_field: 'revision'
-  - field: 'space'

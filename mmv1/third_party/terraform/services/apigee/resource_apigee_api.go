@@ -57,12 +57,6 @@ func ResourceApigeeApi() *schema.Resource {
 				ForceNew:    true,
 				Description: `Name of the API proxy. This field only accepts the following characters: A-Za-z0-9._-.`,
 			},
-			"space": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: `Name of the space.`,
-			},
 			"org_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -150,7 +144,6 @@ func resourceApigeeApiCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] resourceApigeeApiCreate, name=			 	%s", d.Get("name").(string))
 	log.Printf("[DEBUG] resourceApigeeApiCreate, org_id=, 			%s", d.Get("org_id").(string))
-	log.Printf("[DEBUG] resourceApigeeApiCreate, space=, 			%s", d.Get("space").(string))
 	log.Printf("[DEBUG] resourceApigeeApiCreate, config_bundle=, 	%s", d.Get("config_bundle").(string))
 
 	config := meta.(*transport_tpg.Config)
@@ -172,12 +165,7 @@ func resourceApigeeApiCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error, \"config_bundle\" must be specified")
 	}
 
-	var url string
-	if d.Get("space").(string) != "" {
-		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/spaces/{{space}}/apis?name={{name}}&action=import")
-	} else {
-		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/apis?name={{name}}&action=import")
-	}
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/apis?name={{name}}&action=import")
 	if err != nil {
 		return err
 	}
@@ -197,12 +185,7 @@ func resourceApigeeApiCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Store the ID now
-	var id string
-	if d.Get("space").(string) != "" {
-		id, err = tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/spaces/{{space}}/apis/{{name}}")
-	} else {
-		id, err = tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/apis/{{name}}")
-	}
+	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/apis/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -233,12 +216,7 @@ func resourceApigeeApiRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	var url string
-	if d.Get("space").(string) != "" {
-		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/spaces/{{space}}/apis/{{name}}")
-	} else {
-		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/apis/{{name}}")
-	}
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/apis/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -313,12 +291,7 @@ func resourceApigeeApiDelete(d *schema.ResourceData, meta interface{}) error {
 
 	billingProject := ""
 
-	var url string
-	if d.Get("space").(string) != "" {
-		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/spaces/{{space}}/apis/{{name}}")
-	} else {
-		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/apis/{{name}}")
-	}
+	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/apis/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -351,7 +324,6 @@ func resourceApigeeApiDelete(d *schema.ResourceData, meta interface{}) error {
 func resourceApigeeApiImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
-		"^organizations/(?P<org_id>[^/]+)/spaces/(?P<space>[^/]+)/apis/(?P<name>[^/]+)$",
 		"^organizations/(?P<org_id>[^/]+)/apis/(?P<name>[^/]+)$",
 		"^(?P<org_id>[^/]+)/(?P<name>[^/]+)$",
 	}, d, config); err != nil {
@@ -359,13 +331,7 @@ func resourceApigeeApiImport(d *schema.ResourceData, meta interface{}) ([]*schem
 	}
 
 	// Replace import id for the resource id
-	var id string
-	var err error
-	if d.Get("space").(string) != "" {
-		id, err = tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/spaces/{{space}}/apis/{{name}}")
-	} else {
-		id, err = tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/apis/{{name}}")
-	}
+	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/apis/{{name}}")
 
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
