@@ -42,7 +42,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'GET'
   import_format:
-    - 'projects/{{project}}/locations/global/hubs/{{hub}}'
+    - 'projects/{{project}}/locations/global/hubs/{{name}}'
   allowed_iam_role: 'roles/networkconnectivity.hubViewer'
 examples:
   - name: 'network_connectivity_hub_basic'
