@@ -113,7 +113,6 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"rep-diff"}, map[string]string(nil)},
 		},
 	} {
 		if actualCalls, ok := mr.Calls(method); !ok {
@@ -134,7 +133,6 @@ func TestExecGenerateComment(t *testing.T) {
 			{"123456", "terraform-provider-multiple-resources", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 			{"123456", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 			{"123456", "terraform-provider-missing-service-labels", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
-			{"123456", "terraform-provider-rep-default-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 		},
 		"PostComment": {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\n\nYour PR generated some diffs in downstreams - here they are.\n\n`google` provider: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/1a2a3a4a..1a2a3a4b) ( 2 files changed, 40 insertions(+))\n`google-beta` provider: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/1a2a3a4a..1a2a3a4b) ( 2 files changed, 40 insertions(+))\n`terraform-google-conversion`: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/1a2a3a4a..1a2a3a4b) ( 1 file changed, 10 insertions(+))\n\n\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n\n\n"}},
 		"AddLabels":   {{"123456", []string{"service/alloydb"}}},

@@ -90,7 +90,6 @@ type diffCommentData struct {
 	MissingTests         map[string]*MissingTestInfo
 	MissingDocs          *MissingDocsSummary
 	MultipleResources    []string
-	RepDefaultChanges    []string
 	Errors               []Errors
 }
 
@@ -101,7 +100,6 @@ type simpleSchemaDiff struct {
 const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
 const allowMultipleResourcesLabel = "override-multiple-resources"
-const allowRepDefaultChangesLabel = "override-rep-default-change"
 
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
@@ -370,17 +368,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		for _, resource := range append(simpleDiff.ModifiedResources, simpleDiff.RemovedResources...) {
 			uniqueAffectedResources[resource] = struct{}{}
 		}
-
-		if repo.Name == "terraform-provider-google-beta" {
-			// Run REP default diff (beta and GA share defaults)
-			serviceDiffs, err := computeRepDefaultDiffs(diffProcessorPath, rnr)
-			if err != nil {
-				fmt.Println("Error running missing test detector: ", err)
-				errors[repo.Title] = append(errors[repo.Title], "The REP diff detector failed to run.")
-			}
-
-			data.RepDefaultChanges = serviceDiffs
-		}
 	}
 	breakingChangesSlice := maps.Values(uniqueBreakingChanges)
 	sort.Slice(breakingChangesSlice, func(i, j int) bool {
@@ -526,23 +513,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 	data.Errors = errorsList
 
-	// Update REP default changes status on PR
-	repDefaultState := "success"
-	if len(data.RepDefaultChanges) > 0 {
-		repDefaultState = "failure"
-		// If fetching the PR failed, Labels will be empty
-		for _, label := range pullRequest.Labels {
-			if label.Name == allowRepDefaultChangesLabel {
-				repDefaultState = "success"
-				break
-			}
-		}
-	}
-	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-rep-default-change-test", breakingState, targetURL, commitSha); err != nil {
-		fmt.Printf("Error posting terraform-provider-rep-default-change-test build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
-		errors["Other"] = append(errors["Other"], "Failed to update rep-default-change status check with state: "+repDefaultState)
-	}
-
 	// Post diff comment
 	message, err := formatDiffComment(data)
 	if err != nil {
@@ -656,27 +626,6 @@ func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) 
 		return nil, err
 	}
 	return missingDocs, rnr.PopDir()
-}
-
-// Run the diff processor to detect changes in REP defaults
-func computeRepDefaultDiffs(diffProcessorPath string, rnr ExecRunner) ([]string, error) {
-	if err := rnr.PushDir(diffProcessorPath); err != nil {
-		return nil, err
-	}
-	output, err := rnr.Run("bin/diff-processor", []string{"rep-diff"}, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if output == "" {
-		return nil, nil
-	}
-
-	var changes []string
-	if err = json.Unmarshal([]byte(output), &changes); err != nil {
-		return nil, err
-	}
-	return changes, rnr.PopDir()
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {

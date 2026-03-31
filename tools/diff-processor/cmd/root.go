@@ -25,7 +25,6 @@ func newRootCmd() (*cobra.Command, *rootOptions, error) {
 	cmd.AddCommand(newDetectMissingTestsCmd(o))
 	cmd.AddCommand(newSchemaDiffCmd(o))
 	cmd.AddCommand(newDetectMissingDocsCmd(o))
-	cmd.AddCommand(newRepDefaultChangeCmd(o))
 	return cmd, o, nil
 }
 
