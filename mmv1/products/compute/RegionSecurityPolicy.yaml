@@ -248,7 +248,6 @@ properties:
       properties:
         - name: 'description'
           type: String
-          custom_tgc_flatten: 'templates/tgc_next/custom_flatten/region_security_policy_rules_description.go.tmpl'
           description: |
             An optional description of this resource. Provide this property when you create the resource.
         - name: 'priority'
