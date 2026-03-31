@@ -17,4 +17,15 @@
 			}
 		}
 	}
+	if po, ok := res["publishingOptions"]; ok && po != nil {
+		if poMap, ok := po.(map[string]interface{}); ok {
+			if _, ok := poMap["publishCaCert"]; !ok {
+				poMap["publishCaCert"] = false
+			}
+			if _, ok := poMap["publishCrl"]; !ok {
+				poMap["publishCrl"] = false
+			}
+		}
+	}
+
 	return res, hclData, nil
