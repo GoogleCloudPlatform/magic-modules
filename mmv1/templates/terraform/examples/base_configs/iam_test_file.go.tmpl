@@ -117,6 +117,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+<<<<<<< HEAD
 			{
 				ResourceName:    "{{ $.IamTerraformName }}_member.foo",
 				ImportState:     true,
@@ -155,16 +156,17 @@ func TestAcc{{ $.ResourceName }}IamMemberIdentityImportGenerated(t *testing.T) {
 			{
 				Config: testAcc{{ $.ResourceName }}IamMember_basicGenerated(context),
 			},
+=======
+>>>>>>> e126969d1 (add resourceIdentityImport step in first TestAcc instead of adding a new TestAcc)
 			{
 				ResourceName:    "{{ $.IamTerraformName }}_member.foo",
 				ImportState:     true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
+{{-  end }}
 		},
 	})
 }
-
-{{- end }}
 func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 {{ if $.IamPolicy.AdminIamRole }}
