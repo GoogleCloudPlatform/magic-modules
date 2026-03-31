@@ -53,6 +53,7 @@ func ResourceBigtableTable() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			abpDiffFunc,
 		),
@@ -171,6 +172,7 @@ func ResourceBigtableTable() *schema.Resource {
 			"deletion_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
 When a 'terraform destroy' or 'terraform apply' would delete the instance,
 the command will fail if this field is set to "PREVENT" in Terraform state.
@@ -178,7 +180,6 @@ When set to "ABANDON", the command will remove the resource from Terraform
 management without updating or deleting the resource in the API.
 When set to "DELETE", deleting the resource is allowed.
 `,
-				Default: "DELETE",
 			},
 			//UDP schema end
 		},
@@ -453,14 +454,21 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		// String value is default to empty string, so need to set it to nil to specify that the row key schema is not set.
 		d.Set("row_key_schema", nil)
 	}
-	//UDP default read start
-	// Explicitly set virtual fields to default values if unset
-	if _, ok := d.GetOkExists("deletion_policy"); !ok {
-		if err := d.Set("deletion_policy", "DELETE"); err != nil {
-			return fmt.Errorf("Error setting deletion_policy: %s", err)
-		}
-	}
-	//UDP default read end
+	        //UDP default read start
+    // Explicitly set virtual fields to default values if unset
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        //prioritize config's value if present
+        if config.DeletionPolicy != ""{
+            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }else{
+            if err := d.Set("deletion_policy", "DELETE"); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }
+    }
+    //UDP default read end
 
 	return nil
 }

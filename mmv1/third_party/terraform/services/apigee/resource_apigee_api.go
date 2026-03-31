@@ -33,6 +33,7 @@ func ResourceApigeeApi() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			/*
 				If any of the config_bundle, detect_md5hash or md5hash is changed,
 				then an update is expected, so we tell Terraform core to expect update on meta_data,
@@ -136,6 +137,7 @@ func ResourceApigeeApi() *schema.Resource {
 			"deletion_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
 When a 'terraform destroy' or 'terraform apply' would delete the instance,
 the command will fail if this field is set to "PREVENT" in Terraform state.
@@ -143,7 +145,6 @@ When set to "ABANDON", the command will remove the resource from Terraform
 management without updating or deleting the resource in the API.
 When set to "DELETE", deleting the resource is allowed.
 `,
-				Default: "DELETE",
 			},
 			//UDP schema end
 		},
@@ -292,8 +293,15 @@ func resourceApigeeApiRead(d *schema.ResourceData, meta interface{}) error {
 	//UDP default read start
 	// Explicitly set virtual fields to default values if unset
 	if _, ok := d.GetOkExists("deletion_policy"); !ok {
-		if err := d.Set("deletion_policy", "DELETE"); err != nil {
-			return fmt.Errorf("Error setting deletion_policy: %s", err)
+		//prioritize config's value if present
+		if config.DeletionPolicy != "" {
+			if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		} else {
+			if err := d.Set("deletion_policy", "DELETE"); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
 		}
 	}
 	//UDP default read end
