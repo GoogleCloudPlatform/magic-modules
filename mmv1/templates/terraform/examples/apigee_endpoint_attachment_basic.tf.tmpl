@@ -52,7 +52,7 @@ resource "google_compute_address" "psc_ilb_consumer_address" {
   name   = "psc-ilb-consumer-address"
   region = "{{index $.TestEnvVars "location"}}"
 
-  subnetwork   = "default"
+  subnetwork   = google_compute_subnetwork.psc_ilb_producer_subnetwork.id
   address_type = "INTERNAL"
 
   project    = google_project.project.project_id
