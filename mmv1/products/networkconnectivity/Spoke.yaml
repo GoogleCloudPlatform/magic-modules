@@ -79,7 +79,7 @@ examples:
       hub_name: 'basic-hub1'
       vpn_tunnel_1_spoke_name: 'vpn-tunnel-1-spoke'
       vpn_tunnel_2_spoke_name: 'vpn-tunnel-2-spoke'
- # Skip due to multiple fine-grained resources
+  # Skip due to multiple fine-grained resources
     skip_vcr: true
   - name: 'network_connectivity_spoke_interconnect_attachment_basic'
     primary_resource_id: 'primary'
