@@ -44,7 +44,7 @@ func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string]map[string]
 				for i, innerMap := range expression.ExpressionData.NestedBlocks {
 					for propName, v := range innerMap {
 						reference := v.References
-						if reference != nil && len(reference) >= 2 && (strings.HasSuffix(reference[0], ".id") || strings.HasSuffix(reference[0], ".self_link")) {
+						if reference != nil && len(reference) >= 2 && (strings.HasSuffix(reference[0], ".id")) {
 							if dependenciesMap[resource.Address] == nil {
 								dependenciesMap[resource.Address] = make(map[string]string)
 							}
@@ -55,7 +55,7 @@ func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string]map[string]
 				}
 			}
 			reference := expression.ExpressionData.References
-			if reference != nil && len(reference) >= 2 && (strings.HasSuffix(reference[0], ".id") || strings.HasSuffix(reference[0], ".self_link")) {
+			if reference != nil && len(reference) >= 2 && (strings.HasSuffix(reference[0], ".id")) {
 				if dependenciesMap[resource.Address] == nil {
 					dependenciesMap[resource.Address] = make(map[string]string)
 				}

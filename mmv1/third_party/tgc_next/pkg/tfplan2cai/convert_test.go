@@ -211,6 +211,5 @@ func TestConvert_ComputeAddress(t *testing.T) {
 	}
 	assert.Nil(t, err)
 	assert.NotEmpty(t, assets)
-	assert.Equal(t, "https://www.googleapis.com/compute/v1/projects/terraform-dev-haonan/regions/us-east1/subnetworks/subnetwork-test", assets[2].Resource.Data["subnetwork"])
-	assert.Equal(t, "https://www.googleapis.com/compute/v1/projects/terraform-dev-haonan/global/networks/tf-test-network-test", assets[1].Resource.Data["network"])
+	assert.Equal(t, "https://www.googleapis.com/compute/v1/projects/terraform-dev-haonan/regions/us-east1/subnetworks/subnetwork-test", assets[1].Resource.Data["subnetwork"])
 }

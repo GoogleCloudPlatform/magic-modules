@@ -135,24 +135,24 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 				assets = append(assets, convertedAssets...)
 			}
 		}
-	} else {
-		for address, resourceDataList := range resourceDataMap {
-			if !convertedAddresses[address] {
-				convertedAssets, err := converters.ConvertResource(resourceDataList, cfg, ancestryManager, o.ErrorLogger)
-				if err != nil {
-					return nil, fmt.Errorf("tfplan2cai converting: %w", err)
-				}
-				if len(convertedAssets) > 0 {
-					parts := strings.SplitN(convertedAssets[0].Name, "/", 4)
-					if len(parts) == 4 {
-						for _, rd := range resourceDataList {
-							rd.SetId(parts[3])
-						}
+	}
+
+	for address, resourceDataList := range resourceDataMap {
+		if !convertedAddresses[address] {
+			convertedAssets, err := converters.ConvertResource(resourceDataList, cfg, ancestryManager, o.ErrorLogger)
+			if err != nil {
+				return nil, fmt.Errorf("tfplan2cai converting: %w", err)
+			}
+			if len(convertedAssets) > 0 {
+				parts := strings.SplitN(convertedAssets[0].Name, "/", 4)
+				if len(parts) == 4 {
+					for _, rd := range resourceDataList {
+						rd.SetId(parts[3])
 					}
 				}
-				convertedAssetsByAddress[address] = convertedAssets
-				assets = append(assets, convertedAssets...)
 			}
+			convertedAssetsByAddress[address] = convertedAssets
+			assets = append(assets, convertedAssets...)
 		}
 	}
 
