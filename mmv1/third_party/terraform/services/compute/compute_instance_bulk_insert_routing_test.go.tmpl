@@ -1,0 +1,661 @@
+package compute_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
+{{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
+{{- else }}
+	compute "google.golang.org/api/compute/v0.beta"
+{{- end }}
+)
+
+func TestAccComputeInstance_bulkInsertBasic(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "bulk")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertBasic(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasInstanceId(&instance, "google_compute_instance.foobar"),
+					testAccCheckComputeInstanceTag(&instance, "foo"),
+					testAccCheckComputeInstanceLabel(&instance, "my_key", "my_value"),
+					testAccCheckComputeInstanceMetadata(&instance, "foo", "bar"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "current_status", "RUNNING"),
+					resource.TestCheckResourceAttrSet("google_compute_instance.foobar", "creation_timestamp"),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{
+				"labels.%", "labels.my_key", "labels.my_other_key",
+				"terraform_labels", "terraform_labels.%",
+				"metadata.foo",
+			}),
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertDefaultsToBulkInsert(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "bulk")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertBasic(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "current_status", "RUNNING"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertFallbackDeletionProtection(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "insert")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertDeletionProtection(instanceName, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "deletion_protection", "true"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_bulkInsertDeletionProtection(instanceName, false),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertWithScheduling(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "bulk")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertSpot(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.provisioning_model", "SPOT"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.preemptible", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertWithAttachedDisk(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-disk-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "bulk")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertAttachedDiskReadOnly(instanceName, diskName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceDisk(&instance, instanceName, true, true),
+					testAccCheckComputeInstanceDisk(&instance, diskName, false, false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertWithServiceAccount(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	saAccountID := fmt.Sprintf("tf-bi-sa-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "bulk")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertServiceAccount(instanceName, saAccountID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttrPair(
+						"google_compute_instance.foobar", "service_account.0.email",
+						"google_service_account.bulk_insert_test", "email"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertUpdate(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "bulk")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertBasic(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceLabel(&instance, "my_key", "my_value"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_bulkInsertUpdatedLabels(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceLabel(&instance, "my_key", "updated_value"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertFallbackEnableDisplay(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "insert")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertEnableDisplay(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "enable_display", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertFallbackBootDiskCSEK(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "insert")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertBootDiskCSEK(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttrSet("google_compute_instance.foobar", "instance_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertFallbackBootDiskSnapshot(t *testing.T) {
+	var instance compute.Instance
+	snapshotName := fmt.Sprintf("tf-test-snap-%s", acctest.RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "insert")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertBootDiskSnapshot(instanceName, snapshotName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttrSet("google_compute_instance.foobar", "instance_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_bulkInsertFallbackInstanceEncryptionKey(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	saAccountID := fmt.Sprintf("tf-bikms-%s", acctest.RandString(t, 10))
+
+	// Per-test KMS resources avoid BootstrapKMSKey's shared crypto key, which may be
+	// absent or destroyed in some test projects.
+	context := map[string]interface{}{
+		"instance_name": instanceName,
+		"sa_account_id": saAccountID,
+		"key_ring":      fmt.Sprintf("tf-bulk-kr-%s", acctest.RandString(t, 10)),
+		"crypto_key":    fmt.Sprintf("tf-bulk-ck-%s", acctest.RandString(t, 10)),
+	}
+
+	t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", "insert")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bulkInsertInstanceEncryptionKey(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttrSet("google_compute_instance.foobar", "instance_encryption_key.0.kms_key_self_link"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeInstance_bulkInsertBasic(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+  tags         = ["foo", "bar"]
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  labels = {
+    my_key       = "my_value"
+    my_other_key = "my_other_value"
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_bulkInsertUpdatedLabels(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+  tags         = ["foo", "bar"]
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  labels = {
+    my_key       = "updated_value"
+    my_other_key = "my_other_value"
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_bulkInsertDeletionProtection(instance string, deletionProtection bool) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name                = "%s"
+  machine_type        = "e2-medium"
+  zone                = "us-central1-a"
+  deletion_protection = %t
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, instance, deletionProtection)
+}
+
+func testAccComputeInstance_bulkInsertSpot(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    preemptible                 = true
+    automatic_restart           = false
+    provisioning_model          = "SPOT"
+    instance_termination_action = "STOP"
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_bulkInsertAttachedDiskReadOnly(instance, disk string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "seed" {
+  name  = "%[1]s-seed"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+  image = data.google_compute_image.my_image.self_link
+}
+
+resource "google_compute_snapshot" "snap" {
+  name        = "%[1]s-snap"
+  source_disk = google_compute_disk.seed.name
+  zone        = "us-central1-a"
+}
+
+resource "google_compute_region_disk" "foobar" {
+  name          = "%[1]s"
+  snapshot      = google_compute_snapshot.snap.self_link
+  type          = "pd-ssd"
+  replica_zones = ["us-central1-a", "us-central1-f"]
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%[2]s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  attached_disk {
+    source = google_compute_region_disk.foobar.self_link
+    mode   = "READ_ONLY"
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, disk, instance)
+}
+
+func testAccComputeInstance_bulkInsertServiceAccount(instance, saAccountID string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_service_account" "bulk_insert_test" {
+  account_id   = "%s"
+  display_name = "Terraform bulkInsert routing test"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    email  = google_service_account.bulk_insert_test.email
+    scopes = [
+      "userinfo-email",
+      "compute-ro",
+      "storage-ro",
+    ]
+  }
+}
+`, saAccountID, instance)
+}
+
+func testAccComputeInstance_bulkInsertEnableDisplay(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-1"
+  zone         = "us-central1-a"
+
+  enable_display = true
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_bulkInsertBootDiskSnapshot(instance, snapshot string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "seed" {
+  name  = "%[2]s-seed"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+  image = data.google_compute_image.my_image.self_link
+}
+
+resource "google_compute_snapshot" "boot" {
+  name        = "%[2]s"
+  source_disk = google_compute_disk.seed.name
+  zone        = "us-central1-a"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%[1]s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      snapshot = google_compute_snapshot.boot.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, instance, snapshot)
+}
+
+func testAccComputeInstance_bulkInsertBootDiskCSEK(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    disk_encryption_key_raw = "xKfPzQ6x9YxNQ6Qv0s2C8rM0oWQG2f2WzNf8aQ4kJpM="
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_bulkInsertInstanceEncryptionKey(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_kms_key_ring" "bulk_insert_kms" {
+	name     = "%{key_ring}"
+	location = "global"
+}
+
+resource "google_kms_crypto_key" "bulk_insert_kms" {
+	name     = "%{crypto_key}"
+	key_ring = google_kms_key_ring.bulk_insert_kms.id
+}
+
+resource "google_service_account" "kms_actor" {
+	account_id   = "%{sa_account_id}"
+	display_name = "Terraform bulkInsert routing CMEK test"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_actor" {
+	crypto_key_id = google_kms_crypto_key.bulk_insert_kms.id
+	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+	member        = "serviceAccount:${google_service_account.kms_actor.email}"
+}
+
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "us-central1-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+		network = "default"
+	}
+
+	instance_encryption_key {
+		kms_key_self_link       = google_kms_crypto_key.bulk_insert_kms.id
+		kms_key_service_account = google_service_account.kms_actor.email
+	}
+
+	depends_on = [google_kms_crypto_key_iam_member.kms_actor]
+}
+`, context)
+}
