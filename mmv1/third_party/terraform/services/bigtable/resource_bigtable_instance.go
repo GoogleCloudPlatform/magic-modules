@@ -53,7 +53,7 @@ func ResourceBigtableInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			resourceBigtableInstanceClusterReorderTypeList,
 			resourceBigtableInstanceUniqueClusterID,
@@ -394,21 +394,21 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("Error setting force_destroy: %s", err)
 		}
 	}
-	        //UDP default read start
-    // Explicitly set virtual fields to default values if unset
-    if _, ok := d.GetOkExists("deletion_policy"); !ok {
-        //prioritize config's value if present
-        if config.DeletionPolicy != ""{
-            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }else{
-            if err := d.Set("deletion_policy", "DELETE"); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }
-    }
-    //UDP default read end
+	//UDP default read start
+	// Explicitly set virtual fields to default values if unset
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
+		//prioritize config's value if present
+		if config.DeletionPolicy != "" {
+			if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		} else {
+			if err := d.Set("deletion_policy", "DELETE"); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		}
+	}
+	//UDP default read end
 
 	return nil
 }

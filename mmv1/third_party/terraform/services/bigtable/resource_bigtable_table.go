@@ -53,7 +53,7 @@ func ResourceBigtableTable() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			abpDiffFunc,
 		),
@@ -454,21 +454,21 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		// String value is default to empty string, so need to set it to nil to specify that the row key schema is not set.
 		d.Set("row_key_schema", nil)
 	}
-	        //UDP default read start
-    // Explicitly set virtual fields to default values if unset
-    if _, ok := d.GetOkExists("deletion_policy"); !ok {
-        //prioritize config's value if present
-        if config.DeletionPolicy != ""{
-            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }else{
-            if err := d.Set("deletion_policy", "DELETE"); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }
-    }
-    //UDP default read end
+	//UDP default read start
+	// Explicitly set virtual fields to default values if unset
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
+		//prioritize config's value if present
+		if config.DeletionPolicy != "" {
+			if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		} else {
+			if err := d.Set("deletion_policy", "DELETE"); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		}
+	}
+	//UDP default read end
 
 	return nil
 }
