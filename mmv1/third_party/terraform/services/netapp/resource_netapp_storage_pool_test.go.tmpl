@@ -851,7 +851,7 @@ func testAccNetappStoragePool_ScaleTypeEnterprise(context map[string]interface{}
 resource "google_netapp_storage_pool" "test_pool" {
 	provider = google-beta
     name = "tf-test-pool%{random_suffix}"
-    location = "us-central1-a"
+    location = "us-east4-a"
     service_level = "FLEX"
     type = "UNIFIED"
     capacity_gib = "12288"
@@ -876,7 +876,7 @@ func testAccNetappStoragePool_ScaleTypeEnterprise_update(context map[string]inte
 resource "google_netapp_storage_pool" "test_pool" {
 	provider = google-beta
     name = "tf-test-pool%{random_suffix}"
-    location = "us-central1-a"
+    location = "us-east4-a"
     service_level = "FLEX"
     type = "UNIFIED"
     capacity_gib = "13312"
