@@ -22,7 +22,7 @@ type IamResourceIdentityConfig struct {
 	UriFormat string // fmt.Sprintf format producing the canonical resource id
 }
 
-var locationDefaultFuncs = map[string]func(*schema.ResourceData, *transport_tpg.Config) (string, error){
+var locationDefaultFuncs = map[string]func(tpgresource.TerraformResourceData, *transport_tpg.Config) (string, error){
 	"project":  tpgresource.GetProject,
 	"zone":     tpgresource.GetZone,
 	"region":   tpgresource.GetRegion,
