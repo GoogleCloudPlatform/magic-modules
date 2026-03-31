@@ -75,9 +75,9 @@ properties:
       Optional. High level description of the tool and its usage.
   - name: toolKey
     type: String
+    required: true
     description: |
       Required. The tooltip key of the tool.
-    output: true
   - name: actionConfirmationRequirement
     type: KeyValuePairs
     description: |

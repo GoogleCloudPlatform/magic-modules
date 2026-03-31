@@ -2,6 +2,7 @@ resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
   location = "global"
   display_name = "{{index $.Vars "tool_name"}}"
   description = "A basic open_api_spec tool"
+  tool_key = "{{index $.Vars "tool_name"}}"
   open_api_spec {
     text_schema = "openapi: 3.0.0\ninfo:\n  title: Example API\n  version: 1.0.0\npaths:\n  /example:\n    get:\n      summary: Example GET\n      responses:\n        '200':\n          description: OK"
   }

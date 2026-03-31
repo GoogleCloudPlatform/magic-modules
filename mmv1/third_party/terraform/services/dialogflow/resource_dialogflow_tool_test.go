@@ -55,6 +55,7 @@ resource "google_dialogflow_tool" "basic_tool" {
   location = "global"
   display_name = "%{tool_name}"
   description = "A basic open_api_spec tool"
+  tool_key = "%{tool_name}"
   open_api_spec {
     text_schema = "openapi: 3.0.0\ninfo:\n  title: Example API\n  version: 1.0.0\npaths:\n  /example:\n    get:\n      summary: Example GET\n      responses:\n        '200':\n          description: OK"
   }
@@ -68,6 +69,7 @@ resource "google_dialogflow_tool" "basic_tool" {
   location = "global"
   display_name = "%{tool_name}-updated"
   description = "A basic open_api_spec tool updated"
+	tool_key = "%{tool_name}-updated"
   open_api_spec {
     text_schema = "openapi: 3.0.0\ninfo:\n  title: Example API Updated\n  version: 1.0.0\npaths:\n  /example:\n    get:\n      summary: Example GET Updated\n      responses:\n        '200':\n          description: OK"
   }

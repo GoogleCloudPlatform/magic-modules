@@ -38,6 +38,10 @@ examples:
     primary_resource_id: 'summarization_basic_generator'
     vars:
       profile_name: 'dialogflow-profile'
+  - name: 'dialogflow_generator_agent_coaching'
+    primary_resource_id: 'agent_coaching_generator'
+    vars:
+      profile_name: 'dialogflow-profile'
 
 parameters:
   - name: 'location'
@@ -65,7 +69,9 @@ properties:
       Optional. Human readable description of the generator.
   - name: summarizationContext
     type: NestedObject
-    required: true
+    exactly_one_of:
+      - summarization_context
+      - agent_coaching_context
     description: |
       Input of prebuilt Summarization feature.
     properties:
@@ -215,6 +221,9 @@ properties:
           Optional. The target language of the generated summary. The language code for conversation will be used if this field is empty. Supported 2.0 and later versions.
   - name: agentCoachingContext
     type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - agent_coaching_context
     description: |
       Optional. Agent coaching context for the generator.
     properties:
