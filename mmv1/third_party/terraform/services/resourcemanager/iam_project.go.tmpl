@@ -46,7 +46,7 @@ func ProjectIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
 
 // ProjectIamResourceIdentityParser returns the project id for google_project_iam_member import
 // via resource identity (same shape as ProjectIamUpdater.GetResourceId()).
-func ProjectIamResourceIdentityParser(identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
+func ProjectIamResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
 	v, ok := identity.GetOk("project")
 	if !ok {
 		return "", fmt.Errorf("import identity is missing attribute %q", "project")

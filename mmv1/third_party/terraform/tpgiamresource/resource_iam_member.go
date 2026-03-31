@@ -110,13 +110,12 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 		}
 
 		config := m.(*transport_tpg.Config)
-
 		if resourceIdentityParser != nil && d.Id() == "" {
 			identity, err := d.Identity()
 			if err != nil {
 				return nil, err
 			}
-			resourceID, err := resourceIdentityParser(identity, config)
+			resourceID, err := resourceIdentityParser(d, identity, config)
 			if err != nil {
 				return nil, err
 			}
