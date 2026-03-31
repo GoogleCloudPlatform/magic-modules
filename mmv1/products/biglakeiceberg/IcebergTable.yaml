@@ -46,7 +46,7 @@ iam_policy:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
     - '{{name}}'
   allowed_iam_role: 'roles/biglake.editor'
-  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl'
 
 examples:
   - name: 'biglake_iceberg_table_basic'
