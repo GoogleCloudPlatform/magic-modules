@@ -388,10 +388,10 @@ resource "google_bigquery_dataset" "bq_dataset" {
   location   = "us-central1"
 }
 
-resource "google_bigquery_table" "table1" {
+resource "google_bigquery_table" "tf_test_table1" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
-  table_id   = "table1_%{random_suffix}"
+  table_id   = "tf_test_table1_%{random_suffix}"
   project    = "%{project_number}"
   schema     = <<EOF
 [
@@ -405,10 +405,10 @@ resource "google_bigquery_table" "table1" {
 EOF
 }
 
-resource "google_bigquery_table" "table2" {
+resource "google_bigquery_table" "tf_test_table2" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
-  table_id   = "table2_%{random_suffix}"
+  table_id   = "tf_test_table2_%{random_suffix}"
   project    = "%{project_number}"
   schema     = <<EOF
 [
@@ -429,11 +429,11 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
   entry_link_id = "tf-test-full-entry-link%{random_suffix}"
   entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/schema-join"
   entry_references {
-    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table1.table_id}"
+    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table1.table_id}"
     type = ""
   }
   entry_references {
-    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table2.table_id}"
+    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table2.table_id}"
     type = ""
   }
   aspects {
@@ -458,10 +458,10 @@ resource "google_bigquery_dataset" "bq_dataset" {
   location   = "us-central1"
 }
 
-resource "google_bigquery_table" "table1" {
+resource "google_bigquery_table" "tf_test_table1" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
-  table_id   = "table1_%{random_suffix}"
+  table_id   = "tf_test_table1_%{random_suffix}"
   project    = "%{project_number}"
   schema     = <<EOF
 [
@@ -475,10 +475,10 @@ resource "google_bigquery_table" "table1" {
 EOF
 }
 
-resource "google_bigquery_table" "table2" {
+resource "google_bigquery_table" "tf_test_table2" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
-  table_id   = "table2_%{random_suffix}"
+  table_id   = "tf_test_table2_%{random_suffix}"
   project    = "%{project_number}"
   schema     = <<EOF
 [
@@ -499,11 +499,11 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
   entry_link_id = "tf-test-full-entry-link%{random_suffix}"
   entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/schema-join"
   entry_references {
-    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table1.table_id}"
+    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table1.table_id}"
     type = ""
   }
   entry_references {
-    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table2.table_id}"
+    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table2.table_id}"
     type = ""
   }
   aspects {

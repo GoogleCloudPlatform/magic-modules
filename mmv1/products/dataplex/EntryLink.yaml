@@ -120,12 +120,14 @@ properties:
           description: |
             The relative resource name of the referenced Entry, of the form:
             projects/{project_id_or_number}/locations/{location_id}/entryGroups/{entry_group_id}/entries/{entry_id}
+          immutable: true
           required: true
         - name: 'path'
           type: String
           description: |
             The path in the Entry that is referenced in the Entry Link.
             Empty path denotes that the Entry itself is referenced in the Entry Link.
+          immutable: true
         - name: 'type'
           type: Enum
           description: |
@@ -133,6 +135,7 @@ properties:
           enum_values:
             - 'SOURCE'
             - 'TARGET'
+          immutable: true
   - name: 'aspects'
     type: Array
     custom_flatten: 'templates/terraform/custom_flatten/dataplex_entry_link_aspects.go.tmpl'
@@ -143,6 +146,7 @@ properties:
       properties:
         - name: 'aspectKey'
           type: String
+          immutable: true
           required: true
           description: |
               The map keys of the Aspects which the service should modify.
