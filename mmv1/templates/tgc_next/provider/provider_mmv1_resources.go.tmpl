@@ -13,6 +13,7 @@ import (
 var handwrittenResources = map[string]*schema.Resource{
 	// ####### START handwritten resources ###########
 	"google_compute_instance":    compute.ResourceComputeInstance(),
+	"google_container_cluster":   container.ResourceContainerCluster(),
 	"google_container_node_pool": container.ResourceContainerNodePool(),
 	"google_project":             resourcemanager.ResourceGoogleProject(),
 	// ####### END handwritten resources ###########

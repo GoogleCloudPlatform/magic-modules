@@ -38,6 +38,15 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 {{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
 	{{- if gt (len $resources) 1 }}
 		case "{{ $resourceType }}":
+		{{- if eq $resourceType "compute.googleapis.com/SslCertificate" }}
+			if strings.Contains(asset.Name, "regions") {
+				converter = ConverterMap[asset.Type]["ComputeRegionSslCertificate"]
+			} else if typeVal, ok := asset.Resource.Data["type"]; ok && typeVal == "MANAGED" {
+				converter = ConverterMap[asset.Type]["ComputeManagedSslCertificate"]
+			} else {
+				converter = ConverterMap[asset.Type]["ComputeSslCertificate"]
+			}
+		{{- else }}
 		{{- range $i, $object := $resources }}
 			{{- if eq $i 0 }}
 			if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
@@ -48,6 +57,7 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 			{{- if eq $i (sub (len $resources) 1)}}
 			}
 			{{- end }}
+		{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}

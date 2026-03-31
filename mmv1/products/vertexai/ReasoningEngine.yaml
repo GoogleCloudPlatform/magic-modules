@@ -99,6 +99,20 @@ examples:
     external_providers: ["time"]
     ignore_read_extra:
       - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_context_spec'
+    primary_resource_id: 'reasoning_engine'
+    min_version: beta
+    vars:
+      name: 're-ctx-spec'
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_granular_ttl'
+    primary_resource_id: 'reasoning_engine'
+    min_version: beta
+    vars:
+      name: 're-gran-ttl'
+    ignore_read_extra:
+      - 'deletion_policy'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
 virtual_fields:
@@ -129,6 +143,7 @@ properties:
   - name: 'description'
     type: String
     description: The description of the ReasoningEngine.
+
   - name: 'createTime'
     type: String
     description: |-
@@ -453,3 +468,71 @@ properties:
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
+  - name: 'contextSpec'
+    min_version: 'beta'
+    type: NestedObject
+    description: |-
+      Optional. Configuration for how Agent Engine sub-resources should manage context.
+    properties:
+      - name: 'memoryBankConfig'
+        type: NestedObject
+        description: |-
+          Specification for a Memory Bank, which manages memories for the Agent Engine.
+        properties:
+          - name: 'generationConfig'
+            type: NestedObject
+            description: |-
+              Configuration for how to generate memories for the Memory Bank.
+            properties:
+              - name: 'model'
+                type: String
+                description: |-
+                  The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                required: true
+          - name: 'similaritySearchConfig'
+            type: NestedObject
+            description: |-
+              Configuration for how to perform similarity search on memories.
+            properties:
+              - name: 'embeddingModel'
+                type: String
+                description: |-
+                  The model used to generate embeddings to lookup similar memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                required: true
+          - name: 'ttlConfig'
+            type: NestedObject
+            description: |-
+              Configuration for automatic TTL ("time-to-live") of the memories in the Memory Bank.
+            properties:
+              - name: 'defaultTtl'
+                type: String
+                exactly_one_of:
+                  - defaultTtl
+                  - granularTtlConfig
+                description: |-
+                  The default TTL duration of the memories in the Memory Bank.
+              - name: 'granularTtlConfig'
+                type: NestedObject
+                description: |-
+                  The granular TTL configuration of the memories in the Memory Bank.
+                properties:
+                  - name: 'createTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories uploaded via CreateMemory.
+                  - name: 'generateCreatedTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories newly generated via GenerateMemories.
+                  - name: 'generateUpdatedTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories updated via GenerateMemories.
+              - name: 'memoryRevisionDefaultTtl'
+                type: String
+                description: |-
+                  The default TTL duration of the memory revisions in the Memory Bank.
+          - name: 'disableMemoryRevisions'
+            type: Boolean
+            description: |-
+              If true, no memory revisions will be created for any requests to the Memory Bank.
