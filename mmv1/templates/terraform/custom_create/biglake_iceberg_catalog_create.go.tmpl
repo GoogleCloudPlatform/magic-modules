@@ -1,0 +1,91 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+  return err
+}
+
+obj := make(map[string]interface{})
+credentialModeProp, err := expandBiglakeIcebergIcebergCatalogCredentialMode(d.Get("credential_mode"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("credential_mode"); !tpgresource.IsEmptyValue(reflect.ValueOf(credentialModeProp)) && (ok || !reflect.DeepEqual(v, credentialModeProp)) {
+  obj["credential-mode"] = credentialModeProp
+}
+catalogTypeProp, err := expandBiglakeIcebergIcebergCatalogCatalogType(d.Get("catalog_type"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("catalog_type"); !tpgresource.IsEmptyValue(reflect.ValueOf(catalogTypeProp)) && (ok || !reflect.DeepEqual(v, catalogTypeProp)) {
+  obj["catalog-type"] = catalogTypeProp
+}
+defaultLocationProp, err := expandBiglakeIcebergIcebergCatalogDefaultLocation(d.Get("default_location"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("default_location"); !tpgresource.IsEmptyValue(reflect.ValueOf(defaultLocationProp)) && (ok || !reflect.DeepEqual(v, defaultLocationProp)) {
+  obj["default-location"] = defaultLocationProp
+}
+
+// This custom logic determines whether the default-location is required or output only.
+if tpgresource.IsEmptyValue(reflect.ValueOf(defaultLocationProp)) {
+  if v, ok := catalogTypeProp.(string); ok && v == "CATALOG_TYPE_BIGLAKE" {
+    return fmt.Errorf("CATALOG_TYPE_BIGLAKE requires a non-empty default_location.")
+  }
+} else {
+  if v, ok := catalogTypeProp.(string); ok && v == "CATALOG_TYPE_GCS_BUCKET" {
+    return fmt.Errorf("CATALOG_TYPE_GCS_BUCKET outputs the default_location only. Do not set it.")
+  }
+}
+
+additionalLocationsProp, err := expandBiglakeIcebergIcebergCatalogAdditionalLocations(d.Get("additional_locations"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("additional_locations"); !tpgresource.IsEmptyValue(reflect.ValueOf(additionalLocationsProp)) && (ok || !reflect.DeepEqual(v, additionalLocationsProp)) {
+  obj["additional-locations"] = additionalLocationsProp
+}
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BiglakeIcebergBasePath{{"}}"}}iceberg/v1/restcatalog/extensions/projects/{{"{{"}}project{{"}}"}}/catalogs?iceberg-catalog-id={{"{{"}}name{{"}}"}}")
+if err != nil {
+  return err
+}
+
+log.Printf("[DEBUG] Creating new IcebergCatalog: %#v", obj)
+billingProject := ""
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+  return fmt.Errorf("Error fetching project for IcebergCatalog: %s", err)
+}
+billingProject = project
+
+if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+  billingProject = parts[1]
+}
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+  billingProject = bp
+}
+
+headers := make(http.Header)
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+  Config:    config,
+  Method:    "POST",
+  Project:   billingProject,
+  RawURL:    url,
+  UserAgent: userAgent,
+  Body:      obj,
+  Timeout:   d.Timeout(schema.TimeoutCreate),
+  Headers:   headers,
+})
+if err != nil {
+  return fmt.Errorf("Error creating IcebergCatalog: %s", err)
+}
+
+// Store the ID now
+id, err := tpgresource.ReplaceVars(d, config, "iceberg/v1/restcatalog/extensions/projects/{{"{{"}}project{{"}}"}}/catalogs/{{"{{"}}name{{"}}"}}")
+if err != nil {
+  return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+log.Printf("[DEBUG] Finished creating IcebergCatalog %q: %#v", d.Id(), res)
+
+return resourceBiglakeIcebergIcebergCatalogRead(d, meta)
