@@ -257,3 +257,53 @@ func TestParseHCLBytes(t *testing.T) {
 		})
 	}
 }
+
+func TestFlatten(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name string
+		data any
+		exp  map[string]any
+	}{
+		{
+			name: "nested map",
+			data: map[string]any{
+				"network": "default",
+				"routing_config": map[string]any{
+					"mode": "REGIONAL",
+				},
+			},
+			exp: map[string]any{
+				"network":             "default",
+				"routing_config.mode": "REGIONAL",
+			},
+		},
+		{
+			name: "slice of maps (sorting)",
+			data: map[string]any{
+				"access_config": []any{
+					map[string]any{"nat_ip": "1.1.1.1", "name": "access-config-2"},
+					map[string]any{"nat_ip": "2.2.2.2", "name": "access-config-1"},
+				},
+			},
+			exp: map[string]any{
+				"access_config.0.name":   "access-config-1",
+				"access_config.0.nat_ip": "2.2.2.2",
+				"access_config.1.name":   "access-config-2",
+				"access_config.1.nat_ip": "1.1.1.1",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := make(map[string]any)
+			flatten(tc.data, "", got)
+			if diff := cmp.Diff(tc.exp, got); diff != "" {
+				t.Errorf("unexpected diff (-want +got): %s", diff)
+			}
+		})
+	}
+}
