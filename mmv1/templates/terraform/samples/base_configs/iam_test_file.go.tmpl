@@ -82,6 +82,11 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 {{ template "IamTestSetupSample" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
+{{- if not $.IamPolicy.ExcludeImportTest }}
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+{{-  end }}
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 {{- if eq $.MinVersionObj.Name "beta" }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
@@ -107,49 +112,15 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-{{-  end }}
-		},
-	})
-}
-
-{{- if not $.IamPolicy.ExcludeImportTest }}
-// TestAcc{{ $.ResourceName }}IamMemberIdentityImportGenerated imports {{ $.IamTerraformName }}_member using
-// Terraform resource identity (import block). Requires Terraform 1.12+.
-func TestAcc{{ $.ResourceName }}IamMemberIdentityImportGenerated(t *testing.T) {
-	t.Parallel()
-{{ template "IamTestSetupSample" $ }}
-
-	acctest.VcrTest(t, resource.TestCase{
-		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version1_12_0),
-		},
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-{{- if eq $.MinVersionObj.Name "beta" }}
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-{{-  else }}
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-{{-  end }}
-{{- if $sample.ExternalProviders }}
-		ExternalProviders: map[string]resource.ExternalProvider{
-		{{- range $provider := $sample.ExternalProviders }}
-			"{{$provider}}": {},
-		{{- end }}
-		},
-{{-  end }}
-		Steps: []resource.TestStep{
-			{
-				Config: testAcc{{ $.ResourceName }}IamMember_basicGenerated(context),
-			},
 			{
 				ResourceName:    "{{ $.IamTerraformName }}_member.foo",
 				ImportState:     true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
+{{-  end }}
 		},
 	})
 }
-
-{{- end }}
 func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 {{ if $.IamPolicy.AdminIamRole }}
