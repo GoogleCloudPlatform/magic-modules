@@ -502,7 +502,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
-{{- if $.ProductMetadata.Version.RepEnabled }}
+
+{{ if $.ProductMetadata.Version.RepEnabled }}
         urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
         if err != nil {
             return err
