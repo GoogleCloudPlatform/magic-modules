@@ -60,7 +60,7 @@ type (
 	// google_*_iam_member import id) from Terraform import identity when d.Id() is empty.
 	// Parent attributes on identity match the IAM parent schema keys (project, folder, zone,
 	// name, …); resource_iam_member copies them from state on create/read alongside member/role.
-	ResourceIdentityParserFunc func(identity *schema.IdentityData, config *transport_tpg.Config) (resourceID string, err error)
+	ResourceIdentityParserFunc func(d *schema.ResourceData, identity *schema.IdentityData, config *transport_tpg.Config) (resourceID string, err error)
 )
 
 // Locking wrapper around read-only operation with retries.

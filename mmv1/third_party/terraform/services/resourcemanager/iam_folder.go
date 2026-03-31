@@ -47,7 +47,7 @@ func FolderIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
 
 // FolderIamResourceIdentityParser returns the canonical folder id for google_folder_iam_member
 // import via resource identity (same shape as FolderIamUpdater.GetResourceId()).
-func FolderIamResourceIdentityParser(identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
+func FolderIamResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
 	v, ok := identity.GetOk("folder")
 	if !ok {
 		return "", fmt.Errorf("import identity is missing attribute %q", "folder")

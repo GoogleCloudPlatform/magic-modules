@@ -357,8 +357,7 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
 // Any other identity attributes are normally all required; if at least two are set, each must be
 // present (multi-attribute import). If only one is set, it must be "{{ underscore $.IamParentResourceName }}"
 // carrying a full or partial resource id, parsed with the same import regexes as string import.
-func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData, transportConfig *transport_tpg.Config) (string, error) {
-	importD := tpgresource.IamImportTerraformData(identity)
+func {{ $.ResourceName }}IamResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, transportConfig *transport_tpg.Config) (string, error) {
 	parentKey := "{{ underscore $.IamParentResourceName }}"
 {{- range $i, $param := $.IamResourceParams }}
 	{{ $camel := camelize $param "lower" }}
@@ -371,7 +370,7 @@ func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData
 		}
 	}
 	if {{ $camel }} == "" {
-		res, err := tpgresource.Get{{ title $param }}(importD, transportConfig)
+		res, err := tpgresource.Get{{ title $param }}(d, transportConfig)
 		if err != nil {
 			return "", err
 		}
@@ -418,7 +417,7 @@ func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData
 		values["{{ $param }}"] = {{ camelize $param "lower" }}
 {{- end }}
 {{- end }}
-		m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdRegexesFromIam }}"}, importD, transportConfig, compositeId)
+		m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdRegexesFromIam }}"}, d, transportConfig, compositeId)
 		if err != nil {
 			return "", err
 		}
@@ -432,7 +431,6 @@ func {{ $.ResourceName }}IamResourceIdentityParser(identity *schema.IdentityData
 {{- end }}
 		return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ range $i, $param := $.IamResourceParams }}{{ if $i }}, {{ end }}values["{{ $param }}"]{{ end }}), nil
 	}
-	_ = importD
 {{- range $i, $param := $.IamResourceParams }}
 	{{ $camel := camelize $param "lower" }}
 	{{ $snake := underscore $param }}
