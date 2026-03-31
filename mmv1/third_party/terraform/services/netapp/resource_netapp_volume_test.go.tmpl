@@ -1516,7 +1516,7 @@ func testAccNetappVolume_LargeCapacityConfig_basic(context map[string]interface{
         service_level = "FLEX"
         capacity_gib = "12288"
         type = "UNIFIED"
-        scale_tier = "SCALE_TIER_ENTERPRISE"
+        scale_type = "SCALE_TYPE_SCALEOUT"
         network = data.google_compute_network.default.id
     }
 
@@ -1550,7 +1550,7 @@ func testAccNetappVolume_LargeCapacityConfig_updated(context map[string]interfac
         service_level = "FLEX"
         capacity_gib = "12288"
         type = "UNIFIED"
-        scale_tier = "SCALE_TIER_ENTERPRISE"
+        scale_type = "SCALE_TYPE_SCALEOUT"
         network = data.google_compute_network.default.id
     }
 

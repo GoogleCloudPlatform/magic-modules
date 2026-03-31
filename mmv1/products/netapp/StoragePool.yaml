@@ -246,15 +246,15 @@ properties:
       - 'UNIFIED'
     immutable: true
     default_from_api: true
-  - name: 'scaleTier'
+  - name: 'scaleType'
     type: Enum
     description: |
-      The effective scale tier of the storage pool. If `scale_tier` is not
-      specified during creation, this defaults to `SCALE_TIER_STANDARD`.
+      The effective scale type of the storage pool. If `scale_type` is not
+      specified during creation, this defaults to `SCALE_TYPE_STANDARD`.
     enum_values:
-      - 'SCALE_TIER_UNSPECIFIED'
-      - 'SCALE_TIER_STANDARD'
-      - 'SCALE_TIER_ENTERPRISE'
+      - 'SCALE_TYPE_UNSPECIFIED'
+      - 'SCALE_TYPE_DEFAULT'
+      - 'SCALE_TYPE_SCALEOUT'
     immutable: true
     min_version: beta
     default_from_api: true
