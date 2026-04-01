@@ -6,7 +6,9 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{ if ne $.TargetVersionName `ga` -}}
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+{{- end }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
