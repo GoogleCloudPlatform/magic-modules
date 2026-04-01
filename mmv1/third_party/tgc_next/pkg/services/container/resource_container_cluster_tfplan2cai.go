@@ -109,7 +109,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		BinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
 			Enabled:                   d.Get("enable_autopilot").(bool),
-			WorkloadPolicyConfig:     workloadPolicyConfig,
+			WorkloadPolicyConfig:      workloadPolicyConfig,
 			PrivilegedAdmissionConfig: expandPrivilegedAdmissionConfig(d.Get("autopilot_privileged_admission")),
 			ForceSendFields:           []string{"Enabled"},
 		},
