@@ -554,7 +554,7 @@ func TestAccNetappBackup_NetappCrossRegionBackup(t *testing.T) {
         ImportState:             true,
         ImportStateVerify:       true,
         ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      }
+      },
     },
   })
 }
