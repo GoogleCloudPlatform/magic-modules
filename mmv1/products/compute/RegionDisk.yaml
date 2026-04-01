@@ -147,6 +147,7 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'sha256'
         type: String
         description: |
