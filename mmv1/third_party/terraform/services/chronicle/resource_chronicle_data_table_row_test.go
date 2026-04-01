@@ -1,7 +1,5 @@
 package chronicle_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
 
@@ -16,17 +14,17 @@ func TestAccChronicleDataTableRow_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"instance_id":   envvar.GetTestChronicleInstanceIdFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
-		"ttl_initial":  "24h",
-		"ttl_updated":  "48h",
+		"instance_id":    envvar.GetTestChronicleInstanceIdFromEnv(t),
+		"random_suffix":  acctest.RandString(t, 10),
+		"ttl_initial":    "24h",
+		"ttl_updated":    "48h",
 		"values_initial": `["testuser1", "192.168.1.1/32"]`,
 		"values_updated": `["testuser2", "192.168.1.2/32"]`,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:          func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Step 1: Create initial row
 			{
@@ -113,7 +111,6 @@ func TestAccChronicleDataTableRow_update(t *testing.T) {
 func testAccChronicleDataTableRow_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_table" "example_dt" {
-  provider       = google-beta
   location       = "us"
   instance = "%{instance_id}"
   data_table_id  = "tf_test_terraform_test%{random_suffix}"
@@ -132,7 +129,6 @@ resource "google_chronicle_data_table" "example_dt" {
 }
 
 resource "google_chronicle_data_table_row" "example_row" {
-  provider       = google-beta
   # Explicitly provide the URL parameters.
   location       = "us"
   instance       = "%{instance_id}"
@@ -152,7 +148,6 @@ output "data_table_row_name" {
 func testAccChronicleDataTableRow_ttlUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_table" "example_dt" {
-  provider        = google-beta
   location        = "us"
   instance        = "%{instance_id}"
   data_table_id   = "tf_test_terraform_test%{random_suffix}"
@@ -171,7 +166,6 @@ resource "google_chronicle_data_table" "example_dt" {
 }
 
 resource "google_chronicle_data_table_row" "example_row" {
-  provider         = google-beta
   location         = "us"
   instance         = "%{instance_id}"
   data_table_id    = google_chronicle_data_table.example_dt.data_table_id
@@ -186,7 +180,6 @@ resource "google_chronicle_data_table_row" "example_row" {
 func testAccChronicleDataTableRow_valuesReplace(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_table" "example_dt" {
-  provider        = google-beta
   location        = "us"
   instance        = "%{instance_id}"
   data_table_id   = "tf_test_terraform_test%{random_suffix}"
@@ -205,7 +198,6 @@ resource "google_chronicle_data_table" "example_dt" {
 }
 
 resource "google_chronicle_data_table_row" "example_row" {
-  provider         = google-beta
   location         = "us"
   instance         = "%{instance_id}"
   data_table_id    = google_chronicle_data_table.example_dt.data_table_id
@@ -220,7 +212,6 @@ resource "google_chronicle_data_table_row" "example_row" {
 func testAccChronicleDataTableRow_bothReplace(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_table" "example_dt" {
-  provider        = google-beta
   location        = "us"
   instance        = "%{instance_id}"
   data_table_id   = "tf_test_terraform_test%{random_suffix}"
@@ -239,7 +230,6 @@ resource "google_chronicle_data_table" "example_dt" {
 }
 
 resource "google_chronicle_data_table_row" "example_row" {
-  provider         = google-beta
   location         = "us"
   instance         = "%{instance_id}"
   data_table_id    = google_chronicle_data_table.example_dt.data_table_id
@@ -249,5 +239,3 @@ resource "google_chronicle_data_table_row" "example_row" {
 }
 `, context)
 }
-
-{{- end }}
