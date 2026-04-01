@@ -524,43 +524,43 @@ resource "google_netapp_backup" "test_backup" {
 `, context)
 }
 func TestAccNetappBackup_NetappCrossRegionBackup(t *testing.T) {
-  context := map[string]interface{}{
-    "network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccNetappBackup_CrossRegionBackup(context),
-      },
-      {
-        ResourceName:            "google_netapp_backup.test_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      },
-      {
-        Config: testAccNetappBackup_CrossRegionBackupUpdate(context),
-      },
-      {
-        ResourceName:            "google_netapp_backup.test_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappBackup_CrossRegionBackup(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+			{
+				Config: testAccNetappBackup_CrossRegionBackupUpdate(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+		},
+	})
 }
 
 func testAccNetappBackup_CrossRegionBackup(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -629,7 +629,7 @@ resource "google_netapp_backup" "test_backup" {
 }
 
 func testAccNetappBackup_CrossRegionBackupUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
