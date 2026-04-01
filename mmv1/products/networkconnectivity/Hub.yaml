@@ -38,11 +38,12 @@ async:
 custom_code:
 legacy_long_form_project: true
 iam_policy:
-  parent_resource_attribute: 'hub'
+  parent_resource_attribute: 'name'
   method_name_separator: ':'
   fetch_iam_policy_verb: 'GET'
   import_format:
-    - 'projects/{{project}}/locations/global/hubs/{{hub}}'
+    - 'projects/{{project}}/locations/global/hubs/{{name}}'
+    - '{{name}}'
   allowed_iam_role: 'roles/networkconnectivity.hubViewer'
 examples:
   - name: 'network_connectivity_hub_basic'
