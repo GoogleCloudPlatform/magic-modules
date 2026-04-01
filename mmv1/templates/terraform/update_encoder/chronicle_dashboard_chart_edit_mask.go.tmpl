@@ -1,0 +1,28 @@
+fieldMasks := map[string]string{
+        "dashboard_query.0.query":                         "dashboard_query.query",
+        "dashboard_query.0.input":                         "dashboard_query.input",
+        "dashboard_chart.0.display_name":                  "dashboard_chart.display_name",
+        "dashboard_chart.0.description":                   "dashboard_chart.description",
+        "dashboard_chart.0.chart_datasource.0.data_sources": "dashboard_chart.chart_datasource.data_sources",
+        "dashboard_chart.0.visualization":                 "dashboard_chart.visualization",
+        "dashboard_chart.0.drill_down_config":             "dashboard_chart.drill_down_config",
+    }
+
+var changedMasks []string
+for tfPath, apiPath := range fieldMasks {
+	if d.HasChange(tfPath) {
+		changedMasks = append(changedMasks, apiPath)
+	}
+}
+
+if len(changedMasks) > 0 {
+    // Sort the slice to ensure a deterministic VCR recording
+    sort.Strings(changedMasks)
+	obj["editMask"] = strings.Join(changedMasks, ",")
+}
+
+// chartLayout is handled via its parent resource "NativeDashboard" and it is not 
+// part of the EditChart request body in this API version.
+delete(obj, "chartLayout")
+
+return obj, nil
