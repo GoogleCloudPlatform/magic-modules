@@ -7,6 +7,14 @@ resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
   # Level 1: Top-level default_route_action
   default_route_action {
     cache_policy {
+      cache_key_policy {
+        include_host              = true
+        include_protocol          = true
+        include_query_string      = true
+        included_cookie_names     = ["cookie1", "cookie2"]
+        included_header_names     = ["header1", "header2"]
+        included_query_parameters = ["param1", "param2"]
+      }
       cache_mode = "FORCE_CACHE_ALL"
       default_ttl {
         seconds = "3600"
