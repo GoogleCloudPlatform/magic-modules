@@ -14,7 +14,7 @@ import (
 	"google.golang.org/api/container/v1"
 )
 
-func ContainerClusterTfplan2CaiConverter() cai.Tfplan2caiConverter {
+func ContainerClusterTfplan2caiConverter() cai.Tfplan2caiConverter {
 	return cai.Tfplan2caiConverter{
 		Convert: GetContainerCluster,
 	}
@@ -85,6 +85,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 
 	cluster := &container.Cluster{
 		Name:                        clusterName,
+		Location:                    location,
 		InitialNodeCount:            int64(d.Get("initial_node_count").(int)),
 		MaintenancePolicy:           expandMaintenancePolicy(d, config),
 		ControlPlaneEndpointsConfig: expandControlPlaneEndpointsConfig(d),
@@ -299,7 +300,10 @@ func expandEnterpriseConfig(configured interface{}) *container.EnterpriseConfig 
 	}
 
 	ec := &container.EnterpriseConfig{}
-	enterpriseConfig := l[0].(map[string]interface{})
+	enterpriseConfig, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	if v, ok := enterpriseConfig["cluster_tier"]; ok {
 		ec.ClusterTier = v.(string)
 	}
@@ -316,7 +320,10 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		return nil
 	}
 
-	config := l[0].(map[string]interface{})
+	config, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	ac := &container.AddonsConfig{}
 
 	if v, ok := config["http_load_balancing"]; ok && len(v.([]interface{})) > 0 {
@@ -407,6 +414,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
+	if v, ok := config["slice_controller_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.SliceControllerConfig = &container.SliceControllerConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
 	if v, ok := config["ray_operator_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.RayOperatorConfig = &container.RayOperatorConfig{
@@ -490,9 +505,14 @@ func expandAdditionalIpRangesConfigs(configured interface{}, d tpgresource.Terra
 		if err != nil {
 			return nil, err
 		}
+		status := ""
+		if v, ok := config["status"]; ok {
+			status = v.(string)
+		}
 		additionalIpRangesConfig = append(additionalIpRangesConfig, &container.AdditionalIPRangesConfig{
 			Subnetwork:        subnetwork.RelativeLink(),
 			PodIpv4RangeNames: expandPodIpv4RangeNames(config["pod_ipv4_range_names"]),
+			Status:            status,
 		})
 	}
 
@@ -547,7 +567,10 @@ func expandNetworkTierConfig(configured interface{}) *container.NetworkTierConfi
 		return nil
 	}
 
-	config := l[0].(map[string]interface{})
+	config, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	return &container.NetworkTierConfig{
 		NetworkTier: config["network_tier"].(string),
 	}
@@ -559,8 +582,13 @@ func expandAutoIpamConfig(configured interface{}) *container.AutoIpamConfig {
 		return nil
 	}
 
+	config, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	return &container.AutoIpamConfig{
-		Enabled: l[0].(map[string]interface{})["enabled"].(bool),
+		Enabled:         config["enabled"].(bool),
+		ForceSendFields: []string{"Enabled"},
 	}
 }
 
@@ -600,14 +628,12 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 	configured := d.Get("maintenance_policy")
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return &container.MaintenancePolicy{
-			ResourceVersion: resourceVersion,
-			Window: &container.MaintenanceWindow{
-				MaintenanceExclusions: exclusions,
-			},
-		}
+		return nil
 	}
-	maintenancePolicy := l[0].(map[string]interface{})
+	maintenancePolicy, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 
 	if maintenanceExclusions, ok := maintenancePolicy["maintenance_exclusion"]; ok {
 		for k := range exclusions {
@@ -628,6 +654,7 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 				}
 				if len(meo["end_time_behavior"].(string)) > 0 {
 					mex.MaintenanceExclusionOptions.EndTimeBehavior = meo["end_time_behavior"].(string)
+					mex.MaintenanceExclusionOptions.ForceSendFields = append(mex.MaintenanceExclusionOptions.ForceSendFields, "EndTimeBehavior")
 					mex.EndTime = ""
 				}
 				exclusions[exclusion["exclusion_name"].(string)] = mex
@@ -914,10 +941,7 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 func expandBinaryAuthorization(configured interface{}) *container.BinaryAuthorization {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return &container.BinaryAuthorization{
-			Enabled:         false,
-			ForceSendFields: []string{"Enabled"},
-		}
+		return &container.BinaryAuthorization{}
 	}
 	config := l[0].(map[string]interface{})
 	return &container.BinaryAuthorization{
@@ -1156,8 +1180,12 @@ func expandReleaseChannel(configured interface{}) *container.ReleaseChannel {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
+	channel := config["channel"].(string)
+	if channel == "UNSPECIFIED" {
+		return &container.ReleaseChannel{}
+	}
 	return &container.ReleaseChannel{
-		Channel: config["channel"].(string),
+		Channel: channel,
 	}
 }
 
@@ -1214,7 +1242,7 @@ func expandIdentityServiceConfig(configured interface{}) *container.IdentityServ
 
 func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
 	if configured == nil {
-		return nil
+		return &container.PodAutoscaling{HpaProfile: "HPA_PROFILE_UNSPECIFIED"}
 	}
 
 	podAutoscaling := &container.PodAutoscaling{}
@@ -1222,13 +1250,15 @@ func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
 	configs := configured.([]interface{})
 
 	if len(configs) == 0 || configs[0] == nil {
-		return nil
+		return &container.PodAutoscaling{HpaProfile: "HPA_PROFILE_UNSPECIFIED"}
 	}
 
 	config := configs[0].(map[string]interface{})
 
-	if v, ok := config["hpa_profile"]; ok {
+	if v, ok := config["hpa_profile"]; ok && v.(string) != "" {
 		podAutoscaling.HpaProfile = v.(string)
+	} else {
+		podAutoscaling.HpaProfile = "HPA_PROFILE_UNSPECIFIED"
 	}
 
 	return podAutoscaling
@@ -1253,10 +1283,12 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 					sc.RotationConfig = &container.RotationConfig{
 						Enabled:          autoRotationConfig["enabled"].(bool),
 						RotationInterval: rotationInterval,
+						ForceSendFields:  []string{"Enabled"},
 					}
 				} else {
 					sc.RotationConfig = &container.RotationConfig{
-						Enabled: autoRotationConfig["enabled"].(bool),
+						Enabled:         autoRotationConfig["enabled"].(bool),
+						ForceSendFields: []string{"Enabled"},
 					}
 				}
 			}
@@ -1278,12 +1310,17 @@ func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint 
 func expandCostManagementConfig(configured interface{}) *container.CostManagementConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
-		return nil
+		return &container.CostManagementConfig{}
 	}
 
 	config := l[0].(map[string]interface{})
+	enabled := config["enabled"].(bool)
+	if !enabled {
+		return &container.CostManagementConfig{}
+	}
+
 	return &container.CostManagementConfig{
-		Enabled:         config["enabled"].(bool),
+		Enabled:         enabled,
 		ForceSendFields: []string{"Enabled"},
 	}
 }
@@ -1517,19 +1554,6 @@ func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults 
 		nodePoolDefaults.NodeConfigDefaults = expandNodeConfigDefaults(v)
 	}
 	return nodePoolDefaults
-}
-
-func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interface{} {
-	if c == nil {
-		return nil
-	}
-
-	result := make(map[string]interface{})
-	if c.NodeConfigDefaults != nil {
-		result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
-	}
-
-	return []map[string]interface{}{result}
 }
 
 func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoConfig {

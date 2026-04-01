@@ -341,16 +341,22 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *
 			continue
 		}
 
-		if rVal := reflect.ValueOf(val); !rVal.IsValid() || rVal.IsZero() {
+		rVal := reflect.ValueOf(val)
+		if !rVal.IsValid() {
+			continue
+		}
+
+		isRequired := false
+		if resourceSchema != nil {
+			isRequired = getSchemaRequired(resourceSchema, key)
+		}
+
+		if !isRequired && rVal.IsZero() {
 			continue
 		}
 
 		if sVal, ok := val.(string); ok {
 			// TODO: convert to correct type when parsing HCL to fix the edge case where the field type is String and the only values are "false", "00", etc.
-			isRequired := false
-			if resourceSchema != nil {
-				isRequired = getSchemaRequired(resourceSchema, key)
-			}
 			if !isRequired {
 				if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
 					continue
@@ -362,7 +368,9 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *
 		}
 
 		if vMap, ok := val.(map[string]any); ok && len(vMap) == 0 {
-			continue
+			if !isRequired {
+				continue
+			}
 		}
 
 		if _, ok := map2[key]; !ok {
