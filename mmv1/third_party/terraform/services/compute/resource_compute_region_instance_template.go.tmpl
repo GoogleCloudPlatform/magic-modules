@@ -34,6 +34,7 @@ func ResourceComputeRegionInstanceTemplate() *schema.Resource {
 		},
 		SchemaVersion: 1,
 		CustomizeDiff: customdiff.All(
+            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			resourceComputeInstanceTemplateSourceImageCustomizeDiff,
@@ -1273,6 +1274,20 @@ be from 0 to 999,999,999 inclusive.`,
 				ValidateFunc: validation.StringInSlice([]string{"NONE", "STOP", ""}, false),
 				Description:  `Action to be taken when a customer's encryption key is revoked. Supports "STOP" and "NONE", with "NONE" being the default.`,
 			},
+			//UDP schema start
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+			},
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1415,7 +1430,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 }
 
 func resourceComputeRegionInstanceTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
-	// Only the field "labels" and "terraform_labels" is mutable
+	// Only the field "deletion_policy", "labels" and "terraform_labels" is mutable
 	return resourceComputeRegionInstanceTemplateRead(d, meta)
 }
 
@@ -1664,11 +1679,34 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		}
 	}
 
+    //UDP default read start
+    // Explicitly set virtual fields to default values if unset
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        //prioritize config's value if present
+        if config.DeletionPolicy != ""{
+            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }else{
+            if err := d.Set("deletion_policy", "DELETE"); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }
+    }
+    //UDP default read end
 	return nil
 }
 
 func resourceComputeRegionInstanceTemplateDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+    //UDP pre-delete start
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy Region Instance Template without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing Region Instance Template %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+    //UDP pre-delete end	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

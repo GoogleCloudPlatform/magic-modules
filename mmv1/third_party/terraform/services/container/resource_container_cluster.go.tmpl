@@ -229,6 +229,7 @@ func ResourceContainerCluster() *schema.Resource {
 		Delete: resourceContainerClusterDelete,
 
 		CustomizeDiff: customdiff.All(
+            		tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			resourceNodeConfigEmptyGuestAccelerator,
 			customdiff.ForceNewIfChange("enable_l4_ilb_subsetting", isBeenEnabled),
 			customdiff.ForceNewIfChange("enable_fqdn_network_policy", isBeenEnabled),
@@ -2795,6 +2796,21 @@ func ResourceContainerCluster() *schema.Resource {
           },
         },
 			},
+			//UDP schema start
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+			},
+			//UDP schema end
+
 		},
 	}
 }
@@ -3748,10 +3764,39 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
     return err
   }
 
+    //UDP default read start
+    // Explicitly set virtual fields to default values if unset
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        //prioritize config's value if present
+        if config.DeletionPolicy != ""{
+            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }else{
+            if err := d.Set("deletion_policy", "DELETE"); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }
+    }
+    //UDP default read end
 	return nil
 }
 
 func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) error {
+    //UDP update shortcircuit start
+    clientSideFields := map[string]bool{"deletion_policy": true}
+    clientSideOnly := true
+    for field := range ResourceContainerCluster().Schema {
+        if d.HasChange(field) && !clientSideFields[field] {
+            clientSideOnly = false
+            break
+        }
+    }
+    if clientSideOnly {
+        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+        return resourceContainerClusterRead(d, meta)
+    }
+    //UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -5488,7 +5533,15 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	if d.Get("deletion_protection").(bool) {
+    //UDP pre-delete start
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy GKE cluster without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing GKE cluster %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+    //UDP pre-delete end	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with cluster deletion.")
 	}
 	config := meta.(*transport_tpg.Config)
