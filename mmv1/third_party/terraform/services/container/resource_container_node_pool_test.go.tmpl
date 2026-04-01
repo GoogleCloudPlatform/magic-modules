@@ -4815,7 +4815,7 @@ data "google_container_engine_versions" "central1a" {
 resource "google_compute_node_template" "soletenant-tmpl" {
   name      = "tf-test-soletenant-tmpl"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "n4a-node-96-624"
   cpu_overcommit_type = "ENABLED"
 }
 
