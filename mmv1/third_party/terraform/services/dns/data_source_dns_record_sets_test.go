@@ -29,6 +29,28 @@ func TestAccDataSourceDnsRecordSets_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceDnsRecordSets_nameAndType(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceDnsRecordSets_nameAndType(name),
+				Check: resource.ComposeTestCheckFunc(
+
+					resource.TestCheckResourceAttr("data.google_dns_record_sets.filtered", "rrsets.#", "1"),
+					resource.TestCheckResourceAttr("data.google_dns_record_sets.filtered", "rrsets.0.type", "TXT"),
+					resource.TestCheckResourceAttr("data.google_dns_record_sets.filtered", "rrsets.0.rrdatas.0", "\"hello-world\""),
+				),
+			},
+		},
+	})
+}
+
 func testAccDataSourceDnsRecordSets_basic(randString string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "zone" {
@@ -53,4 +75,47 @@ data "google_dns_record_sets" "example" {
   depends_on = [google_dns_record_set.rs]
 }
 `, randString, randString, randString)
+}
+
+func testAccDataSourceDnsRecordSets_nameAndType(randString string) string {
+	return fmt.Sprintf(`
+resource "google_dns_managed_zone" "zone" {
+  name     = "tf-test-zone-%s"
+  dns_name = "%s.hashicorptest.com."
+}
+
+// Criamos um registro A
+resource "google_dns_record_set" "rs_a" {
+  managed_zone = google_dns_managed_zone.zone.name
+  name         = "a-%s.${google_dns_managed_zone.zone.dns_name}"
+  type         = "A"
+  ttl          = 300
+  rrdatas      = [
+    "10.0.0.1",
+  ]
+}
+
+// Criamos um registro TXT (Este é o alvo do nosso Data Source)
+resource "google_dns_record_set" "rs_txt" {
+  managed_zone = google_dns_managed_zone.zone.name
+  name         = "txt-%s.${google_dns_managed_zone.zone.dns_name}"
+  type         = "TXT"
+  ttl          = 300
+  rrdatas      = [
+    "\"hello-world\"",
+  ]
+}
+
+// Data Source pedindo estritamente o tipo TXT E o nome do registro TXT
+data "google_dns_record_sets" "filtered" {
+  managed_zone = google_dns_managed_zone.zone.name
+  name         = google_dns_record_set.rs_txt.name
+  type         = "TXT"
+
+  depends_on = [
+    google_dns_record_set.rs_a,
+    google_dns_record_set.rs_txt
+  ]
+}
+`, randString, randString, randString, randString)
 }

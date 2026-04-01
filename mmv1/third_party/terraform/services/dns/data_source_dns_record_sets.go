@@ -83,13 +83,13 @@ func dataSourceDnsRecordSetsRead(d *schema.ResourceData, meta interface{}) error
 
 	req := config.NewDnsClient(userAgent).ResourceRecordSets.List(project, zone)
 
-	name, nameOk := d.GetOk("name")
-	recordType, typeOk := d.GetOk("type")
+	name := d.Get("name").(string)
+	recordType := d.Get("type").(string)
 
-	if nameOk {
-		req.Name(name.(string))
-		if typeOk {
-			req.Type(recordType.(string))
+	if name != "" {
+		req.Name(name)
+		if recordType != "" {
+			req.Type(recordType)
 		}
 	}
 
@@ -97,8 +97,8 @@ func dataSourceDnsRecordSetsRead(d *schema.ResourceData, meta interface{}) error
 
 	err = req.Pages(context.Background(), func(page *dns.ResourceRecordSetsListResponse) error {
 		for _, r := range page.Rrsets {
-			if typeOk && !nameOk {
-				if r.Type != recordType.(string) {
+			if recordType != "" && name == "" {
+				if r.Type != recordType {
 					continue
 				}
 			}
