@@ -22,7 +22,7 @@ type IamResourceIdentityConfig struct {
 	UriFormat string // fmt.Sprintf format producing the canonical resource id
 }
 
-var locationDefaultFuncs = map[string]func(tpgresource.TerraformResourceData, *transport_tpg.Config) (string, error){
+var DefaultConfigValueFuncs = map[string]func(tpgresource.TerraformResourceData, *transport_tpg.Config) (string, error){
 	"project":  tpgresource.GetProject,
 	"zone":     tpgresource.GetZone,
 	"region":   tpgresource.GetRegion,
@@ -39,38 +39,30 @@ func ParseIamResourceIdentity(
 ) (string, error) {
 	resolved := make(map[string]string, len(rc.Params))
 	for i, p := range rc.Params {
-		if fn, isLoc := locationDefaultFuncs[p.Key]; isLoc {
-			var val string
-			if rv, ok := identity.GetOk(p.IdentityKey); ok {
-				if s, ok := rv.(string); ok {
-					val = s
-				}
+		var val string
+		if rv, ok := identity.GetOk(p.IdentityKey); ok {
+			if s, ok := rv.(string); ok {
+				val = s
 			}
-			if val == "" {
-				res, err := fn(d, config)
-				if err != nil {
-					return "", err
-				}
-				val = res
+		}
+		if GetDefaultConfigValue := DefaultConfigValueFuncs[p.Key]; GetDefaultConfigValue != nil && val == "" {
+			defaultVal, err := GetDefaultConfigValue(d, config)
+			if err != nil {
+				return "", err
 			}
-			if val == "" {
+			if defaultVal == "" {
 				return "", fmt.Errorf("could not determine %q for IAM import identity; set it on the resource or configure the provider", p.IdentityKey)
 			}
-			resolved[p.Key] = val
-		} else {
-			val, ok := identity.GetOk(p.IdentityKey)
-			if !ok {
-				return "", fmt.Errorf("import identity is missing attribute %q", p.IdentityKey)
-			}
-			s, strOk := val.(string)
-			if !strOk || s == "" {
-				return "", fmt.Errorf("import identity attribute %q must be a non-empty string", p.IdentityKey)
-			}
-			if i == len(rc.Params)-1 {
-				s = tpgresource.GetResourceNameFromSelfLink(s)
-			}
-			resolved[p.Key] = s
+			resolved[p.Key] = defaultVal
+			continue
 		}
+		if val == "" {
+			return "", fmt.Errorf("import identity is missing attribute %q", p.IdentityKey)
+		}
+		if i == len(rc.Params)-1 {
+			val = tpgresource.GetResourceNameFromSelfLink(val)
+		}
+		resolved[p.Key] = val
 	}
 
 	args := make([]any, len(rc.Params))
