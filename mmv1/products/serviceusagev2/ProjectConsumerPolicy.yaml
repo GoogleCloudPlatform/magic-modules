@@ -44,7 +44,7 @@ async:
     resource_inside_response: true
 exclude_sweeper: true
 custom_code:
-  custom_update: 'templates/terraform/custom_update/project_consumer_policy.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/project_consumer_policy.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/project_consumer_policy.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/project_consumer_policy.go.tmpl'
 examples:
