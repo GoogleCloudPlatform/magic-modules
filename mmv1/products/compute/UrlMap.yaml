@@ -998,7 +998,7 @@ properties:
                       backend has Identity-Aware Proxy enabled.
                     properties:
                       - name: 'cacheMode'
-                        type: Enum              
+                        type: Enum
                         description: |
                           Specifies the cache setting for all responses from this route. If not
                           specified, Cloud CDN uses CACHE_ALL_STATIC mode.
@@ -1007,7 +1007,7 @@ properties:
                           - 'FORCE_CACHE_ALL'
                           - 'CACHE_ALL_STATIC'
                       - name: 'defaultTtl'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           Specifies the default TTL for cached content for responses that do not have
                           an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
@@ -1035,7 +1035,7 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'maxTtl'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           Specifies the maximum allowed TTL for cached content. Cache directives that
                           attempt to set a max-age or s-maxage higher than this, or an Expires header
@@ -1063,7 +1063,7 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'clientTtl'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           Specifies a separate client (e.g. browser client) maximum TTL for cached
                           content. This is used to clamp the max-age (or Expires) value sent to the
@@ -1092,14 +1092,14 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'requestCoalescing'
-                        type: Boolean              
+                        type: Boolean
                         send_empty_value: true
                         description: |
                           If true then Cloud CDN will combine multiple concurrent cache fill
                           requests into a small number of requests to the origin. If not specified,
                           Cloud CDN applies request coalescing by default.
                       - name: 'negativeCaching'
-                        type: Boolean              
+                        type: Boolean
                         send_empty_value: true
                         description: |
                           Negative caching allows per-status code TTLs to be set, in order to apply
@@ -1118,7 +1118,7 @@ properties:
                           These defaults can be overridden in negativeCachingPolicy. If not
                           specified, Cloud CDN applies negative caching by default.
                       - name: 'negativeCachingPolicy'
-                        type: Array              
+                        type: Array
                         send_empty_value: true
                         description: |
                           Sets a cache TTL for the specified HTTP status code. negativeCaching
@@ -1163,7 +1163,7 @@ properties:
                                   validation:
                                     function: 'validation.IntBetween(0, 0)'
                       - name: 'cacheBypassRequestHeaderNames'
-                        type: Array              
+                        type: Array
                         description: |
                           Bypass the cache when the specified request headers are matched by name,
                           e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
@@ -1172,7 +1172,7 @@ properties:
                         item_type:
                           type: String
                       - name: 'serveWhileStale'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           Serve existing content from the cache (if available) when revalidating
                           content with the origin, or when an error is encountered when refreshing
@@ -1199,7 +1199,7 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'cacheKeyPolicy'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           The cache key configuration. If not specified, the default behavior depends
                           on the backend type: for Backend Services, the complete request URI is
@@ -2083,7 +2083,7 @@ properties:
                       backend has Identity-Aware Proxy enabled.
                     properties:
                       - name: 'cacheMode'
-                        type: Enum              
+                        type: Enum
                         description: |
                           Specifies the cache setting for all responses from this route. If not
                           specified, Cloud CDN uses CACHE_ALL_STATIC mode.
@@ -2092,7 +2092,7 @@ properties:
                           - 'FORCE_CACHE_ALL'
                           - 'CACHE_ALL_STATIC'
                       - name: 'defaultTtl'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           Specifies the default TTL for cached content for responses that do not have
                           an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
@@ -2120,7 +2120,7 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'maxTtl'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           Specifies the maximum allowed TTL for cached content. Cache directives that
                           attempt to set a max-age or s-maxage higher than this, or an Expires header
@@ -2148,7 +2148,7 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'clientTtl'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           Specifies a separate client (e.g. browser client) maximum TTL for cached
                           content. This is used to clamp the max-age (or Expires) value sent to the
@@ -2177,14 +2177,14 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'requestCoalescing'
-                        type: Boolean              
+                        type: Boolean
                         send_empty_value: true
                         description: |
                           If true then Cloud CDN will combine multiple concurrent cache fill
                           requests into a small number of requests to the origin. If not specified,
                           Cloud CDN applies request coalescing by default.
                       - name: 'negativeCaching'
-                        type: Boolean              
+                        type: Boolean
                         send_empty_value: true
                         description: |
                           Negative caching allows per-status code TTLs to be set, in order to apply
@@ -2203,7 +2203,7 @@ properties:
                           These defaults can be overridden in negativeCachingPolicy. If not
                           specified, Cloud CDN applies negative caching by default.
                       - name: 'negativeCachingPolicy'
-                        type: Array              
+                        type: Array
                         send_empty_value: true
                         description: |
                           Sets a cache TTL for the specified HTTP status code. negativeCaching
@@ -2248,7 +2248,7 @@ properties:
                                   validation:
                                     function: 'validation.IntBetween(0, 0)'
                       - name: 'cacheBypassRequestHeaderNames'
-                        type: Array              
+                        type: Array
                         description: |
                           Bypass the cache when the specified request headers are matched by name,
                           e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
@@ -2257,7 +2257,7 @@ properties:
                         item_type:
                           type: String
                       - name: 'serveWhileStale'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           Serve existing content from the cache (if available) when revalidating
                           content with the origin, or when an error is encountered when refreshing
@@ -2284,7 +2284,7 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'cacheKeyPolicy'
-                        type: NestedObject              
+                        type: NestedObject
                         description: |
                           The cache key configuration. If not specified, the default behavior depends
                           on the backend type: for Backend Services, the complete request URI is
@@ -2994,7 +2994,7 @@ properties:
                 backend has Identity-Aware Proxy enabled.
               properties:
                 - name: 'cacheMode'
-                  type: Enum              
+                  type: Enum
                   description: |
                     Specifies the cache setting for all responses from this route. If not
                     specified, Cloud CDN uses CACHE_ALL_STATIC mode.
@@ -3003,7 +3003,7 @@ properties:
                     - 'FORCE_CACHE_ALL'
                     - 'CACHE_ALL_STATIC'
                 - name: 'defaultTtl'
-                  type: NestedObject              
+                  type: NestedObject
                   description: |
                     Specifies the default TTL for cached content for responses that do not have
                     an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
@@ -3031,7 +3031,7 @@ properties:
                       validation:
                         function: 'validation.IntBetween(0, 0)'
                 - name: 'maxTtl'
-                  type: NestedObject              
+                  type: NestedObject
                   description: |
                     Specifies the maximum allowed TTL for cached content. Cache directives that
                     attempt to set a max-age or s-maxage higher than this, or an Expires header
@@ -3059,7 +3059,7 @@ properties:
                       validation:
                         function: 'validation.IntBetween(0, 0)'
                 - name: 'clientTtl'
-                  type: NestedObject              
+                  type: NestedObject
                   description: |
                     Specifies a separate client (e.g. browser client) maximum TTL for cached
                     content. This is used to clamp the max-age (or Expires) value sent to the
@@ -3088,14 +3088,14 @@ properties:
                       validation:
                         function: 'validation.IntBetween(0, 0)'
                 - name: 'requestCoalescing'
-                  type: Boolean              
+                  type: Boolean
                   send_empty_value: true
                   description: |
                     If true then Cloud CDN will combine multiple concurrent cache fill
                     requests into a small number of requests to the origin. If not specified,
                     Cloud CDN applies request coalescing by default.
                 - name: 'negativeCaching'
-                  type: Boolean              
+                  type: Boolean
                   send_empty_value: true
                   description: |
                     Negative caching allows per-status code TTLs to be set, in order to apply
@@ -3114,7 +3114,7 @@ properties:
                     These defaults can be overridden in negativeCachingPolicy. If not
                     specified, Cloud CDN applies negative caching by default.
                 - name: 'negativeCachingPolicy'
-                  type: Array              
+                  type: Array
                   send_empty_value: true
                   description: |
                     Sets a cache TTL for the specified HTTP status code. negativeCaching
@@ -3159,7 +3159,7 @@ properties:
                             validation:
                               function: 'validation.IntBetween(0, 0)'
                 - name: 'cacheBypassRequestHeaderNames'
-                  type: Array              
+                  type: Array
                   description: |
                     Bypass the cache when the specified request headers are matched by name,
                     e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
@@ -3168,7 +3168,7 @@ properties:
                   item_type:
                     type: String
                 - name: 'serveWhileStale'
-                  type: NestedObject              
+                  type: NestedObject
                   description: |
                     Serve existing content from the cache (if available) when revalidating
                     content with the origin, or when an error is encountered when refreshing
@@ -3195,7 +3195,7 @@ properties:
                       validation:
                         function: 'validation.IntBetween(0, 0)'
                 - name: 'cacheKeyPolicy'
-                  type: NestedObject              
+                  type: NestedObject
                   description: |
                     The cache key configuration. If not specified, the default behavior depends
                     on the backend type: for Backend Services, the complete request URI is
@@ -4050,7 +4050,7 @@ properties:
           backend has Identity-Aware Proxy enabled.
         properties:
           - name: 'cacheMode'
-            type: Enum              
+            type: Enum
             description: |
               Specifies the cache setting for all responses from this route. If not
               specified, Cloud CDN uses CACHE_ALL_STATIC mode.
@@ -4070,7 +4070,7 @@ properties:
               - 'default_route_action.0.cache_policy.0.cache_key_policy'
               - 'default_route_action.0.cache_policy.0.serve_while_stale'
           - name: 'defaultTtl'
-            type: NestedObject              
+            type: NestedObject
             description: |
               Specifies the default TTL for cached content for responses that do not have
               an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
@@ -4109,7 +4109,7 @@ properties:
                 validation:
                   function: 'validation.IntBetween(0, 0)'
           - name: 'maxTtl'
-            type: NestedObject              
+            type: NestedObject
             description: |
               Specifies the maximum allowed TTL for cached content. Cache directives that
               attempt to set a max-age or s-maxage higher than this, or an Expires header
@@ -4148,7 +4148,7 @@ properties:
                 validation:
                   function: 'validation.IntBetween(0, 0)'
           - name: 'clientTtl'
-            type: NestedObject              
+            type: NestedObject
             description: |
               Specifies a separate client (e.g. browser client) maximum TTL for cached
               content. This is used to clamp the max-age (or Expires) value sent to the
@@ -4188,7 +4188,7 @@ properties:
                 validation:
                   function: 'validation.IntBetween(0, 0)'
           - name: 'requestCoalescing'
-            type: Boolean              
+            type: Boolean
             send_empty_value: true
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
@@ -4206,7 +4206,7 @@ properties:
               requests into a small number of requests to the origin. If not specified,
               Cloud CDN applies request coalescing by default.
           - name: 'negativeCaching'
-            type: Boolean              
+            type: Boolean
             send_empty_value: true
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
@@ -4236,7 +4236,7 @@ properties:
               These defaults can be overridden in negativeCachingPolicy. If not
               specified, Cloud CDN applies negative caching by default.
           - name: 'negativeCachingPolicy'
-            type: Array              
+            type: Array
             send_empty_value: true
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
@@ -4292,7 +4292,7 @@ properties:
                       validation:
                         function: 'validation.IntBetween(0, 0)'
           - name: 'cacheBypassRequestHeaderNames'
-            type: Array              
+            type: Array
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
               - 'default_route_action.0.cache_policy.0.default_ttl'
@@ -4312,7 +4312,7 @@ properties:
             item_type:
               type: String
           - name: 'serveWhileStale'
-            type: NestedObject              
+            type: NestedObject
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
               - 'default_route_action.0.cache_policy.0.default_ttl'
@@ -4350,7 +4350,7 @@ properties:
                 validation:
                   function: 'validation.IntBetween(0, 0)'
           - name: 'cacheKeyPolicy'
-            type: NestedObject              
+            type: NestedObject
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
               - 'default_route_action.0.cache_policy.0.default_ttl'
