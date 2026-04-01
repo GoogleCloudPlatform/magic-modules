@@ -73,151 +73,81 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 }
 ```
 
-## Add a create test
+## Add an acceptance test
 
-A create test is an **acceptance test** that creates the target resource and immediately destroys it.
+An **acceptance test** verifies that a resource can be created, updated, and destroyed successfully.
 
-> **Note:** All resources should have a "basic" create test, which uses the smallest possible number of fields. Additional create tests can be used to ensure all fields on the resource are used in at least one test.
+> **Note:** All resources should have a "basic" test covering the minimal required fields. Additional tests should be added to cover all fields, with updatable fields being covered by an update step. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code
 
-{{% tabs "create" %}}
+{{% tabs "create-update" %}}
 {{< tab "MMv1" >}}
-1. Add an entry to your `RESOURCE_NAME.yaml` file's `examples`. The fields listed here are the most commonly-used. For a comprehensive reference, see [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}}).
+1. Add an entry to your `RESOURCE_NAME.yaml` file's `samples` list. Each sample can contain multiple steps. The first step will generate a `create` test, and any subsequent steps will generate `update` tests. For a comprehensive reference, see [MMv1 resource reference: `samples` ↗]({{<ref "/reference/resource#samples" >}}).
    ```yaml
-   examples:
-     # name must correspond to a configuration file that you'll create in the next step.
-     # The name should include the product name, resource name, and a basic description
-     # of the test. This will be used to generate the test name and the documentation
-     # header.
-     - name: "PRODUCT_RESOURCE_basic"
+   samples:
+     # name is used to generate the test name.
+     - name: "PRODUCT_RESOURCE_update"
        # primary_resource_id will be used for the Terraform resource id in the configuration file.
-       primary_resource_id: "example"
-       # vars contains key/value pairs of variables to inject into the configuration file.
-       # These can be referenced in the configuration file as a key inside `{{$.Vars}}`.
-       # All resource IDs (even for resources not under test) should be declared
-       # with variables that contain a `-` or `_`; this will ensure that, in tests,
-       # the resources are created with a `tf-test` prefix to allow automatic cleanup
-       # of dangling resources and a random suffix to avoid name collisions.
-       vars:
-         network_name: "example-network"
-       # test_vars_overrides contains key/value pairs of literal overrides for
-       # variables used in tests. This can be used to call functions to
-       # generate or determine a variable's value – for example, bootstrapping
-       # a shared network for your product to avoid test failures due to limits
-       # on the default network.
-       test_vars_overrides:
-         network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
-       # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
+       primary_resource_id: "default"
+       # min_version can be set at the top level if it applies to all steps.
        min_version: beta
+       steps:
+         # The first step defines the initial create configuration.
+         - name: "create" # A descriptive name for the step
+           config_path: "create_config.tf.tmpl"
+           # prefixed_vars contains key/value pairs to inject into the configuration file.
+           # These can be referenced as a key inside `{{$.PrefixedVars}}`.
+           prefixed_vars:
+             resource_name: "example-resource"
+             network_name: "example-network"tabs
+           # test_vars_overrides contains literal overrides for variables in tests.
+           test_vars_overrides:
+             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
+         # Subsequent steps define update configurations.
+         - name: "update"
+           config_path: "update_config.tf.tmpl" # Can be the same or a different file
+           prefixed_vars:
+             resource_name: "example-resource"
+             network_name: "example-network"
+           # test_vars_overrides contains literal overrides for variables in tests.
+           test_vars_overrides:
+             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
+           vars:
+             display_name: "Updated Name" # The new value for the updatable field
    ```
 
-2. Create a `.tf.tmpl` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should match the name of the example created in the previous step. For example, `PRODUCT_RESOURCE_basic.tf.tmpl`.
-3. In that file, write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
+2. Create one or more `.tf.tmpl` files in `mmv1/templates/terraform/samples/services/SERVICE_NAME/`. The file names should match the `config_path` values from the previous step.
+3. In those files, write the Terraform configuration for your test steps. This should include all required dependencies.
+`create_config.tf.tmpl`:
    ```tf
-   resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
-     name          = "{{index $.Vars "subnetwork_name"}}"
-     ip_cidr_range = "10.1.0.0/16"
-     region        = "us-central1"
+   resource "google_product_resource" "{{.PrimaryResourceId}}" {
+     name          = "{{index .PrefixedVars "resource_name"}}"
      network       = google_compute_network.network.name
    }
 
    resource "google_compute_network" "network" {
-     name                    = "{{index $.Vars "network_name"}}"
+     name                    = "{{index .PrefixedVars "network_name"}}"
      auto_create_subnetworks = false
    }
    ```
-4. If the resource or the example is beta-only:
-   - Add `provider = google-beta` to every resource in the file.
-{{< /tab >}}
-{{< tab "Handwritten" >}}
-This section assumes you've used the [Add a resource]({{< ref "/develop/add-resource" >}}) guide to create your handwritten resource, and you have a working MMv1 config.
+`update_config.tf.tmpl`: (This file added the `display_name` variable).
+   ```tf
+   resource "google_product_resource" "{{.PrimaryResourceId}}" {
+     name          = "{{index .PrefixedVars "resource_name"}}"
+     display_name  = "{{index .Vars "display_name"}}"
+     network       = google_compute_network.network.name
+   }
 
-> **Note:** If not, you can create one now, or skip this guide and construct the test by hand. Writing tests by hand can sometimes be a better option if there is a similar test you can copy from.
-
-1. Add the test in MMv1. Repeat for all the create tests you will need.
-2. [Generate the beta provider]({{< ref "/develop/generate-providers" >}}).
-3. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services/) as a new file call `*_test.go`.
-4. Modify the tests as needed.
-   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
-   - Remove the comments at the top of the file.
-   - Remove the `Example` suffix from all function names.
-   - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.tmpl`
-     - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
-     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
-     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
-{{< /tab >}}
-{{% /tabs %}}
-
-## Add an update test
-
-An update test is an **acceptance test** that creates the target resource and then makes updates to fields that are updatable. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code.
-
-> **Note:** All updatable fields must be covered by at least one update test. In most cases, only a single update test is needed to test all fields at once.
-
-{{% tabs "update" %}}
-{{< tab "MMv1" >}}
-1. [Generate the beta provider]({{< ref "/develop/generate-providers" >}}).
-2. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) as a new file call `*_test.go`.
-3. Using an editor of your choice, delete the `*DestroyProducer` function, and all but one test. The remaining test should be the "full" test, or if there is no "full" test, the "basic" test. This will be the starting point for your new update test.
-4. Modify the `TestAcc*` *test function* to support updates.
-   - Change the suffix of the test function to `_update`.
-   - Copy the 2 `TestStep` blocks and paste them immediately after, so that there are 4 total test steps.
-   - Change the suffix of the first `Config` value to `_full` (or `_basic`).
-   - Change the suffix of the second `Config` value to `_update`.
-   - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
-   - The resulting test function would look similar to this:
-   ```go
-   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
-
-   func TestAccPubsubTopic_update(t *testing.T) {
-      ...
-      acctest.VcrTest(t, resource.TestCase{
-         ...
-         Steps: []resource.TestStep{
-            {
-               Config: testAccPubsubTopic_full(...),
-            },
-            {
-               ...
-            },
-            {
-               Config: testAccPubsubTopic_update(...),
-               ConfigPlanChecks: resource.ConfigPlanChecks{
-                  PreApply: []plancheck.PlanCheck{
-                     plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
-                  },
-               },
-            },
-            {
-               ...
-            },
-         },
-      })
+   resource "google_compute_network" "network" {
+     name                    = "{{index .PrefixedVars "network_name"}}"
+     auto_create_subnetworks = false
    }
    ```
-5. Modify the `testAcc*` Terraform *template function* to support updates.
-   - Copy the template function and paste it immediately after so that there are 2 template functions.
-   - Change the suffix of the first template function to `_full` (or `_basic`).
-   - Change the suffix of the second template function to `_update`.
-   - The resulting template functions would look similar to this:
-   ```go
-   func testAccPubsubTopic_full(...) string {
-       ...
-   }
-
-   func testAccPubsubTopic_update(...) string {
-       ...
-   }
-   ```
-6. Modify the test as needed.
-   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
-   - Modify the template function ending in `_update` so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
-   - Remove the comments at the top of the file.
-   - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.tmpl`
-     - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
-     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
-     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
+4. For beta-only resources or features:
+   - If the resource or the whole test is beta-only
+      - Add `provider = google-beta` to every resource in the file.
+      - Add `min_version: beta` at the top sample level
+   - If only a single test step is beta-only
+      - Add `min_version: beta` at the individual step level
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.tmpl` file in the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) which contains your create tests.
