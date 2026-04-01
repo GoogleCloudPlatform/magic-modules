@@ -1022,13 +1022,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -1050,13 +1048,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -1079,13 +1075,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -1133,7 +1127,6 @@ properties:
                           properties:
                             - name: 'code'
                               type: Integer
-                              min_version: beta
                               description: |
                                 The HTTP status code to define a TTL against. Only HTTP status codes
                                 300, 301, 302, 307, 308, 404, 405, 410, 421, 451 and 501 can be
@@ -1141,7 +1134,6 @@ properties:
                                 once.
                             - name: 'ttl'
                               type: NestedObject
-                              min_version: beta
                               description: |
                                 The TTL (in seconds) for which to cache responses with the
                                 corresponding status code. The maximum allowed value is 1800s (30
@@ -1150,13 +1142,11 @@ properties:
                               properties:
                                 - name: 'seconds'
                                   type: String
-                                  min_version: beta
                                   required: true
                                   description: |
                                     Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                                 - name: 'nanos'
                                   type: Integer
-                                  min_version: beta
                                   ignore_read: true
                                   description: |
                                     Span of time that's a fraction of a second at nanosecond resolution.
@@ -1186,13 +1176,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -1208,7 +1196,6 @@ properties:
                         properties:
                           - name: 'includeProtocol'
                             type: Boolean
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               If true, http and https requests will be cached separately. Note: This
@@ -1219,7 +1206,6 @@ properties:
                               configuration error.
                           - name: 'includeHost'
                             type: Boolean
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               If true, requests to different hosts will be cached separately. Note:
@@ -1230,7 +1216,6 @@ properties:
                               configuration error.
                           - name: 'includeQueryString'
                             type: Boolean
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               If true, include query string parameters in the cache key according to
@@ -1244,8 +1229,6 @@ properties:
                               the cache key.
                           - name: 'includedQueryParameters'
                             type: Array
-                            min_version: beta
-                            is_set: true
                             send_empty_value: true
                             description: |
                               Names of query string parameters to include in cache keys. All other
@@ -1256,8 +1239,6 @@ properties:
                               type: String
                           - name: 'excludedQueryParameters'
                             type: Array
-                            min_version: beta
-                            is_set: true
                             send_empty_value: true
                             description: |
                               Names of query string parameters to exclude in cache keys. All other
@@ -1273,7 +1254,6 @@ properties:
                               type: String
                           - name: 'includedHeaderNames'
                             type: Array
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               Allows HTTP request headers (by name) to be used in the cache key.
@@ -1281,7 +1261,6 @@ properties:
                               type: String
                           - name: 'includedCookieNames'
                             type: Array
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               Allows HTTP cookies (by name) to be used in the cache key. The
@@ -2107,13 +2086,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -2135,13 +2112,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -2164,13 +2139,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -2218,7 +2191,6 @@ properties:
                           properties:
                             - name: 'code'
                               type: Integer
-                              min_version: beta
                               description: |
                                 The HTTP status code to define a TTL against. Only HTTP status codes
                                 300, 301, 302, 307, 308, 404, 405, 410, 421, 451 and 501 can be
@@ -2226,7 +2198,6 @@ properties:
                                 once.
                             - name: 'ttl'
                               type: NestedObject
-                              min_version: beta
                               description: |
                                 The TTL (in seconds) for which to cache responses with the
                                 corresponding status code. The maximum allowed value is 1800s (30
@@ -2235,13 +2206,11 @@ properties:
                               properties:
                                 - name: 'seconds'
                                   type: String
-                                  min_version: beta
                                   required: true
                                   description: |
                                     Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                                 - name: 'nanos'
                                   type: Integer
-                                  min_version: beta
                                   ignore_read: true
                                   description: |
                                     Span of time that's a fraction of a second at nanosecond resolution.
@@ -2271,13 +2240,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -2293,7 +2260,6 @@ properties:
                         properties:
                           - name: 'includeProtocol'
                             type: Boolean
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               If true, http and https requests will be cached separately. Note: This
@@ -2304,7 +2270,6 @@ properties:
                               configuration error.
                           - name: 'includeHost'
                             type: Boolean
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               If true, requests to different hosts will be cached separately. Note:
@@ -2315,7 +2280,6 @@ properties:
                               configuration error.
                           - name: 'includeQueryString'
                             type: Boolean
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               If true, include query string parameters in the cache key according to
@@ -2329,8 +2293,6 @@ properties:
                               the cache key.
                           - name: 'includedQueryParameters'
                             type: Array
-                            min_version: beta
-                            is_set: true
                             send_empty_value: true
                             description: |
                               Names of query string parameters to include in cache keys. All other
@@ -2341,8 +2303,6 @@ properties:
                               type: String
                           - name: 'excludedQueryParameters'
                             type: Array
-                            min_version: beta
-                            is_set: true
                             send_empty_value: true
                             description: |
                               Names of query string parameters to exclude in cache keys. All other
@@ -2358,7 +2318,6 @@ properties:
                               type: String
                           - name: 'includedHeaderNames'
                             type: Array
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               Allows HTTP request headers (by name) to be used in the cache key.
@@ -2366,7 +2325,6 @@ properties:
                               type: String
                           - name: 'includedCookieNames'
                             type: Array
-                            min_version: beta
                             send_empty_value: true
                             description: |
                               Allows HTTP cookies (by name) to be used in the cache key. The
@@ -3018,13 +2976,11 @@ properties:
                   properties:
                     - name: 'seconds'
                       type: String
-                      min_version: beta
                       required: true
                       description: |
                         Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                     - name: 'nanos'
                       type: Integer
-                      min_version: beta
                       ignore_read: true
                       description: |
                         Span of time that's a fraction of a second at nanosecond resolution.
@@ -3046,13 +3002,11 @@ properties:
                   properties:
                     - name: 'seconds'
                       type: String
-                      min_version: beta
                       required: true
                       description: |
                         Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                     - name: 'nanos'
                       type: Integer
-                      min_version: beta
                       ignore_read: true
                       description: |
                         Span of time that's a fraction of a second at nanosecond resolution.
@@ -3075,13 +3029,11 @@ properties:
                   properties:
                     - name: 'seconds'
                       type: String
-                      min_version: beta
                       required: true
                       description: |
                         Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                     - name: 'nanos'
                       type: Integer
-                      min_version: beta
                       ignore_read: true
                       description: |
                         Span of time that's a fraction of a second at nanosecond resolution.
@@ -3129,7 +3081,6 @@ properties:
                     properties:
                       - name: 'code'
                         type: Integer
-                        min_version: beta
                         description: |
                           The HTTP status code to define a TTL against. Only HTTP status codes
                           300, 301, 302, 307, 308, 404, 405, 410, 421, 451 and 501 can be
@@ -3137,7 +3088,6 @@ properties:
                           once.
                       - name: 'ttl'
                         type: NestedObject
-                        min_version: beta
                         description: |
                           The TTL (in seconds) for which to cache responses with the
                           corresponding status code. The maximum allowed value is 1800s (30
@@ -3146,13 +3096,11 @@ properties:
                         properties:
                           - name: 'seconds'
                             type: String
-                            min_version: beta
                             required: true
                             description: |
                               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                           - name: 'nanos'
                             type: Integer
-                            min_version: beta
                             ignore_read: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution.
@@ -3182,13 +3130,11 @@ properties:
                   properties:
                     - name: 'seconds'
                       type: String
-                      min_version: beta
                       required: true
                       description: |
                         Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                     - name: 'nanos'
                       type: Integer
-                      min_version: beta
                       ignore_read: true
                       description: |
                         Span of time that's a fraction of a second at nanosecond resolution.
@@ -3204,7 +3150,6 @@ properties:
                   properties:
                     - name: 'includeProtocol'
                       type: Boolean
-                      min_version: beta
                       send_empty_value: true
                       description: |
                         If true, http and https requests will be cached separately. Note: This
@@ -3215,7 +3160,6 @@ properties:
                         configuration error.
                     - name: 'includeHost'
                       type: Boolean
-                      min_version: beta
                       send_empty_value: true
                       description: |
                         If true, requests to different hosts will be cached separately. Note:
@@ -3226,7 +3170,6 @@ properties:
                         configuration error.
                     - name: 'includeQueryString'
                       type: Boolean
-                      min_version: beta
                       send_empty_value: true
                       description: |
                         If true, include query string parameters in the cache key according to
@@ -3240,8 +3183,6 @@ properties:
                         the cache key.
                     - name: 'includedQueryParameters'
                       type: Array
-                      min_version: beta
-                      is_set: true
                       send_empty_value: true
                       description: |
                         Names of query string parameters to include in cache keys. All other
@@ -3252,8 +3193,6 @@ properties:
                         type: String
                     - name: 'excludedQueryParameters'
                       type: Array
-                      min_version: beta
-                      is_set: true
                       send_empty_value: true
                       description: |
                         Names of query string parameters to exclude in cache keys. All other
@@ -3269,7 +3208,6 @@ properties:
                         type: String
                     - name: 'includedHeaderNames'
                       type: Array
-                      min_version: beta
                       send_empty_value: true
                       description: |
                         Allows HTTP request headers (by name) to be used in the cache key.
@@ -3277,7 +3215,6 @@ properties:
                         type: String
                     - name: 'includedCookieNames'
                       type: Array
-                      min_version: beta
                       send_empty_value: true
                       description: |
                         Allows HTTP cookies (by name) to be used in the cache key. The
@@ -4096,13 +4033,11 @@ properties:
             properties:
               - name: 'seconds'
                 type: String
-                min_version: beta
                 required: true
                 description: |
                   Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
               - name: 'nanos'
                 type: Integer
-                min_version: beta
                 ignore_read: true
                 description: |
                   Span of time that's a fraction of a second at nanosecond resolution.
@@ -4135,13 +4070,11 @@ properties:
             properties:
               - name: 'seconds'
                 type: String
-                min_version: beta
                 required: true
                 description: |
                   Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
               - name: 'nanos'
                 type: Integer
-                min_version: beta
                 ignore_read: true
                 description: |
                   Span of time that's a fraction of a second at nanosecond resolution.
@@ -4175,13 +4108,11 @@ properties:
             properties:
               - name: 'seconds'
                 type: String
-                min_version: beta
                 required: true
                 description: |
                   Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
               - name: 'nanos'
                 type: Integer
-                min_version: beta
                 ignore_read: true
                 description: |
                   Span of time that's a fraction of a second at nanosecond resolution.
@@ -4262,7 +4193,6 @@ properties:
               properties:
                 - name: 'code'
                   type: Integer
-                  min_version: beta
                   description: |
                     The HTTP status code to define a TTL against. Only HTTP status codes
                     300, 301, 302, 307, 308, 404, 405, 410, 421, 451 and 501 can be
@@ -4270,7 +4200,6 @@ properties:
                     once.
                 - name: 'ttl'
                   type: NestedObject
-                  min_version: beta
                   description: |
                     The TTL (in seconds) for which to cache responses with the
                     corresponding status code. The maximum allowed value is 1800s (30
@@ -4279,13 +4208,11 @@ properties:
                   properties:
                     - name: 'seconds'
                       type: String
-                      min_version: beta
                       required: true
                       description: |
                         Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                     - name: 'nanos'
                       type: Integer
-                      min_version: beta
                       ignore_read: true
                       description: |
                         Span of time that's a fraction of a second at nanosecond resolution.
@@ -4337,13 +4264,11 @@ properties:
             properties:
               - name: 'seconds'
                 type: String
-                min_version: beta
                 required: true
                 description: |
                   Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
               - name: 'nanos'
                 type: Integer
-                min_version: beta
                 ignore_read: true
                 description: |
                   Span of time that's a fraction of a second at nanosecond resolution.
@@ -4370,7 +4295,6 @@ properties:
             properties:
               - name: 'includeProtocol'
                 type: Boolean
-                min_version: beta
                 send_empty_value: true
                 description: |
                   If true, http and https requests will be cached separately. Note: This
@@ -4389,7 +4313,6 @@ properties:
                   - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
               - name: 'includeHost'
                 type: Boolean
-                min_version: beta
                 send_empty_value: true
                 description: |
                   If true, requests to different hosts will be cached separately. Note:
@@ -4408,7 +4331,6 @@ properties:
                   - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
               - name: 'includeQueryString'
                 type: Boolean
-                min_version: beta
                 send_empty_value: true
                 description: |
                   If true, include query string parameters in the cache key according to
@@ -4430,8 +4352,6 @@ properties:
                   - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
               - name: 'includedQueryParameters'
                 type: Array
-                min_version: beta
-                is_set: true
                 send_empty_value: true
                 description: |
                   Names of query string parameters to include in cache keys. All other
@@ -4452,8 +4372,6 @@ properties:
                   type: String
               - name: 'excludedQueryParameters'
                 type: Array
-                min_version: beta
-                is_set: true
                 send_empty_value: true
                 description: |
                   Names of query string parameters to exclude in cache keys. All other
@@ -4479,7 +4397,6 @@ properties:
                   type: String
               - name: 'includedHeaderNames'
                 type: Array
-                min_version: beta
                 send_empty_value: true
                 description: |
                   Allows HTTP request headers (by name) to be used in the cache key.
@@ -4495,7 +4412,6 @@ properties:
                   type: String
               - name: 'includedCookieNames'
                 type: Array
-                min_version: beta
                 send_empty_value: true
                 description: |
                   Allows HTTP cookies (by name) to be used in the cache key. The
