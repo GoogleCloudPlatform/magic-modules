@@ -76,6 +76,9 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 		if workloadPolicyConfig, ok := autopilot["workloadPolicyConfig"].(map[string]interface{}); ok {
 			hclData["allow_net_admin"] = workloadPolicyConfig["allowNetAdmin"]
 		}
+		if privilegedAdmissionConfig, ok := autopilot["privilegedAdmissionConfig"].(map[string]interface{}); ok {
+			hclData["autopilot_privileged_admission"] = privilegedAdmissionConfig["allowlistPaths"]
+		}
 	}
 	enableAutopilot, _ := hclData["enable_autopilot"].(bool)
 	if shieldedNodes, ok := asset.Resource.Data["shieldedNodes"].(map[string]interface{}); ok && !enableAutopilot {

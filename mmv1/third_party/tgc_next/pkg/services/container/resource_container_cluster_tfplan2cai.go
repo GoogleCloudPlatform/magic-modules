@@ -108,9 +108,10 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		Autoscaling:         expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
-			Enabled:              d.Get("enable_autopilot").(bool),
-			WorkloadPolicyConfig: workloadPolicyConfig,
-			ForceSendFields:      []string{"Enabled"},
+			Enabled:                   d.Get("enable_autopilot").(bool),
+			WorkloadPolicyConfig:      workloadPolicyConfig,
+			PrivilegedAdmissionConfig: expandPrivilegedAdmissionConfig(d.Get("autopilot_privileged_admission")),
+			ForceSendFields:           []string{"Enabled"},
 		},
 		ReleaseChannel:       expandReleaseChannel(d.Get("release_channel")),
 		GkeAutoUpgradeConfig: expandGkeAutoUpgradeConfig(d.Get("gke_auto_upgrade_config")),
@@ -1605,5 +1606,24 @@ func expandRBACBindingConfig(configured interface{}) *container.RBACBindingConfi
 		EnableInsecureBindingSystemUnauthenticated: config["enable_insecure_binding_system_unauthenticated"].(bool),
 		EnableInsecureBindingSystemAuthenticated:   config["enable_insecure_binding_system_authenticated"].(bool),
 		ForceSendFields:                            []string{"EnableInsecureBindingSystemUnauthenticated", "EnableInsecureBindingSystemAuthenticated"},
+	}
+}
+
+func expandPrivilegedAdmissionConfig(v interface{}) *container.PrivilegedAdmissionConfig {
+	if v == nil {
+		return nil
+	}
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+	var paths []string
+	for _, p := range l {
+		if p != nil {
+			paths = append(paths, p.(string))
+		}
+	}
+	return &container.PrivilegedAdmissionConfig{
+		AllowlistPaths: paths,
 	}
 }
