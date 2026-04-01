@@ -131,7 +131,7 @@ examples:
   - name: 'dataproc_metastore_service_scheduled_backup'
     primary_resource_id: 'backup'
     vars:
-      metastore_service_name: 'backup'
+      metastore_service_name: 'backup-1'
   - name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
     primary_resource_id: 'test_resource'
     vars:

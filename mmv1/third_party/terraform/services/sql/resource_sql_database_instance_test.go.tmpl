@@ -1719,7 +1719,6 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	t.Parallel()
 
@@ -1732,7 +1731,7 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -1750,7 +1749,6 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func testAccSqlDatabaseInstanceImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
 	return func(s *terraform.State) (string, error) {
@@ -4066,6 +4064,7 @@ func TestAccSqlDatabaseInstance_useInternalCaByDefault(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_INTERNAL_CA"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_certificate_rotation_mode", "SERVER_CERTIFICATE_ROTATION_MODE_UNSPECIFIED"),
 				),
 			},
 			{
@@ -4095,6 +4094,7 @@ func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_certificate_rotation_mode", "SERVER_CERTIFICATE_ROTATION_MODE_UNSPECIFIED"),
 					resource.TestCheckResourceAttr(resourceName, "dns_names.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "dns_names.0.connection_type", "PUBLIC"),
 					resource.TestCheckResourceAttr(resourceName, "dns_names.0.dns_scope", "INSTANCE"),
@@ -4109,6 +4109,37 @@ func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
 		},
 	})
 }
+
+func TestAccSqlDatabaseInstance_setServerCertRotationMode(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	resourceName := "google_sql_database_instance.instance"
+	rotationMode := "AUTOMATIC_ROTATION_DURING_MAINTENANCE"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_setServerCertRotationMode(databaseName, rotationMode),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_certificate_rotation_mode", rotationMode),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 
 func TestAccSqlDatabaseInstance_useCustomSubjectAlternateName(t *testing.T) {
 	t.Parallel()
@@ -4827,6 +4858,7 @@ resource "google_sql_database_instance" "instance" {
 		ipv4_enabled    = "true"
 		server_ca_mode  = "CUSTOMER_MANAGED_CAS_CA"
 		server_ca_pool  = google_privateca_ca_pool.customer_ca_pool.id
+		server_certificate_rotation_mode = "AUTOMATIC_ROTATION_DURING_MAINTENANCE"
 		custom_subject_alternative_names = ["%{customSan}"]
 	}
   }
@@ -4915,9 +4947,10 @@ resource "google_sql_database_instance" "instance" {
   settings {
 	tier = "db-f1-micro"
 	ip_configuration {
-		ipv4_enabled    = "true"
-		server_ca_mode  = "CUSTOMER_MANAGED_CAS_CA"
-		server_ca_pool  = google_privateca_ca_pool.customer_ca_pool.id
+		ipv4_enabled                     = "true"
+		server_ca_mode                   = "CUSTOMER_MANAGED_CAS_CA"
+		server_ca_pool                   = google_privateca_ca_pool.customer_ca_pool.id
+		server_certificate_rotation_mode = "AUTOMATIC_ROTATION_DURING_MAINTENANCE"
 	}
   }
 
@@ -4942,6 +4975,25 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `, databaseName, serverCaMode)
+}
+
+func testGoogleSqlDatabaseInstance_setServerCertRotationMode(databaseName, rotationMode string) string {
+        return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_15"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled    = "true"
+      server_ca_mode  = "GOOGLE_MANAGED_CAS_CA"
+      server_certificate_rotation_mode = "%s"
+    }
+  }
+}
+`, databaseName, rotationMode)
 }
 
 func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, sslMode string) string {
@@ -8337,7 +8389,6 @@ data "google_sql_backup_run" "backup" {
 func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
-  provider = google-beta
   name                = "tf-test-cpc-%{random_suffix}"
   project_id          = "tf-test-cpc-%{random_suffix}"
   org_id              = "%{orgId}"
@@ -8351,14 +8402,12 @@ resource "time_sleep" "wait_60_seconds" {
 }
 
 resource "google_project_service" "compute" {
-  provider = google-beta
   project = google_project.project.project_id
   service = "compute.googleapis.com"
   depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project_service" "servicenetworking" {
-  provider = google-beta
   project = google_project.project.project_id
   service = "servicenetworking.googleapis.com"
   depends_on = [google_project_service.compute]
@@ -8370,14 +8419,12 @@ resource "time_sleep" "wait_300_seconds" {
 }
 
 resource "google_compute_network" "sql_network" {
-  provider = google-beta
   name       = "sql-network"
   project    = google_project.project.project_id
   depends_on = [time_sleep.wait_300_seconds]
 }
 
 resource "google_compute_global_address" "sql_range" {
-  provider = google-beta
   name          = "sql-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
@@ -8387,7 +8434,6 @@ resource "google_compute_global_address" "sql_range" {
 }
 
 resource "google_service_networking_connection" "sql_vpc_connection" {
-  provider = google-beta
   network                 = google_compute_network.sql_network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.sql_range.name]
@@ -8396,7 +8442,6 @@ resource "google_service_networking_connection" "sql_vpc_connection" {
 }
 
 resource "google_sql_database_instance" "instance" {
-	provider = google-beta
 	name             = "tf-test-cpc-%{random_suffix}"
 	database_version = "POSTGRES_11"
 	region           = "us-central1"
@@ -8429,7 +8474,6 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_database_instance" "source_instance" {
-	provider = google-beta
 	name = "tf-test-source-%{random_suffix}"
 	database_version = "POSTGRES_11"
 	region           = "us-central1"

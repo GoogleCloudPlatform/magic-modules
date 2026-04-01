@@ -46,18 +46,22 @@ iam_policy:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
     - '{{name}}'
   allowed_iam_role: 'roles/biglake.editor'
-  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl'
 
 examples:
   - name: 'biglake_iceberg_table_basic'
     primary_resource_id: 'my_iceberg_table'
     vars:
-      random_suffix: 'random-suffix'
+      bucket_name: 'my-bucket'
+      namespace_id: 'my_namespace'
+      table_name: 'my_table'
   - name: 'biglake_iceberg_table_update'
     primary_resource_id: 'my_iceberg_table'
     skip_test: true
     vars:
-      random_suffix: 'random-suffix'
+      bucket_name: 'my-bucket'
+      namespace_id: 'my_namespace'
+      table_name: 'my_table'
 
 parameters:
   - name: 'catalog'

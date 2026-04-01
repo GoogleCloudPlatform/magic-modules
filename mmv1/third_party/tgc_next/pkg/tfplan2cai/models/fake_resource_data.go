@@ -43,11 +43,13 @@ type getResult struct {
 type FakeResourceData struct {
 	reader schema.FieldReader
 	schema map[string]*schema.Schema
+	id     string
+	state  map[string]string
 }
 
 // Id returns the ID of the resource from state.
 func (d *FakeResourceData) Id() string {
-	return ""
+	return d.id
 }
 
 func (d *FakeResourceData) getRaw(key string) getResult {
@@ -115,9 +117,12 @@ func (d *FakeResourceData) GetOkExists(key string) (interface{}, bool) {
 
 // These methods are required by some mappers but we don't actually have (or need)
 // implementations for them.
-func (d *FakeResourceData) HasChange(string) bool             { return false }
-func (d *FakeResourceData) Set(string, interface{}) error     { return nil }
-func (d *FakeResourceData) SetId(string)                      {}
+func (d *FakeResourceData) HasChange(string) bool { return false }
+func (d *FakeResourceData) Set(key string, value interface{}) error {
+	d.state[key] = fmt.Sprintf("%v", value)
+	return nil
+}
+func (d *FakeResourceData) SetId(id string)                   { d.id = id }
 func (d *FakeResourceData) GetProviderMeta(interface{}) error { return nil }
 func (d *FakeResourceData) Timeout(key string) time.Duration  { return time.Duration(1) }
 
