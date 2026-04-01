@@ -310,6 +310,29 @@ resource "google_sql_database_instance" "instance" {
 }
 ```
 
+### Cloud SQL Instance created using point_in_time_restore using multiregion datasource
+~> **NOTE:** Replace `backupdr_datasource` with the full datasource path, `time_stamp` should be in the format of `YYYY-MM-DDTHH:MM:SSZ` and `region` with the target instance region.
+
+```hcl
+resource "google_sql_database_instance" "instance" {
+  name             = "main-instance"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier    = "db-f1-micro"
+    backup_configuration {
+      enabled = true
+      binary_log_enabled = true
+    }
+  }
+  point_in_time_restore_context {
+   datasource      = "backupdr_datasource"
+   target_instance = "target_instance_name"
+   point_in_time   = "time_stamp"
+   region          = "region"
+ }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -539,9 +562,11 @@ This setting can be updated, but it cannot be removed after it is set.
 
 * `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. Supported values are `ALLOW_UNENCRYPTED_AND_ENCRYPTED`, `ENCRYPTED_ONLY`, and `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` (not supported for SQL Server). See [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances#ipconfiguration) for details.
 
-* `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported values are `GOOGLE_MANAGED_INTERNAL_CA` and `GOOGLE_MANAGED_CAS_CA`.
+* `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported values are `GOOGLE_MANAGED_INTERNAL_CA`, `GOOGLE_MANAGED_CAS_CA`, and `CUSTOMER_MANAGED_CAS_CA`.
 
 * `server_ca_pool` - (Optional) The resource name of the server CA pool for an instance with `CUSTOMER_MANAGED_CAS_CA` as the `server_ca_mode`.
+
+* `server_certificate_rotation_mode` - (Optional) Controls the automatic server certificate rotation feature. Supported values are `NO_AUTOMATIC_ROTATION`and `AUTOMATIC_ROTATION_DURING_MAINTENANCE`. `AUTOMATIC_ROTATION_DURING_MAINTENANCE` can only be set if `server_ca_mode` is either `GOOGLE_MANAGED_CAS_CA` or `CUSTOMER_MANAGED_CAS_CA`. See [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances#ipconfiguration) for details.
 
 * `custom_subject_alternative_names` - (Optional) The custom subject alternative names for an instance with `CUSTOMER_MANAGED_CAS_CA` as the `server_ca_mode`.
 
@@ -700,6 +725,8 @@ The optional `point_in_time_restore_context` block supports:
 
 * `target_instance` - The name of the target instance.
 
+* `region` - The region of the target instance where the datasource will be restored. For example: "us-central1".
+
 * `private_network` - (Optional) The resource link for the VPC network from which the Cloud SQL instance is accessible for private IP. For example, "/projects/myProject/global/networks/default".
 
 * `preferred_zone` - (Optional) Point-in-time recovery of an instance to the specified zone. If no zone is specified, then clone to the same primary zone as the source instance.
@@ -715,6 +742,7 @@ The optional `point_in_time_restore_context` block supports:
 The optional `clone` block supports:
 
 * `source_instance_name` - (Required) Name of the source instance which will be cloned.
+* `source_project` - (Optional) Id of source project where source instances exits, required for cross project clone scenario.
 
 * `point_in_time` -  (Optional) The timestamp of the point in time that should be restored.
 

@@ -183,8 +183,10 @@ func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData T
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_meta.yaml", t.FullResourceName(object)))
+	target := fmt.Sprintf("resource_%s_generated_meta.yaml", t.FullResourceName(object))
+	targetFilePath := path.Join(targetFolder, target)
 	templateData.GenerateMetadataFile(targetFilePath, object)
+	t.addHashicorpCopyRightHeader(outputFolder, path.Join(t.FolderName(), "services", productName, target))
 }
 
 // GenerateResourceMetadataFile is used by the Bazel version of the MM compiler to generate the specified
@@ -631,7 +633,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".markdown" {
 			t.addCopyfileHeader(source, outputFolder, target)
 		}
-		if filepath.Ext(target) == ".go" {
+		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".yaml" {
 			t.addHashicorpCopyRightHeader(outputFolder, target)
 		}
 	}
@@ -803,8 +805,8 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 			"when deciding to add HashiCorp copyright headers.\n"+
 			"Watch out for unexpected changes to copied files", outputFolder)
 	}
-	// only add copyright headers when generating TPG and TPGB
-	if !(strings.HasSuffix(outputFolder, "terraform-provider-google") || strings.HasSuffix(outputFolder, "terraform-provider-google-beta")) {
+	// only add copyright headers when generating TPG, TPGB, and TPGN
+	if !(strings.HasSuffix(outputFolder, "terraform-provider-google") || strings.HasSuffix(outputFolder, "terraform-provider-google-beta") || strings.HasSuffix(outputFolder, "terraform-provider-google-nightly")) {
 		return
 	}
 
@@ -813,8 +815,8 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	//       created in https://github.com/GoogleCloudPlatform/magic-modules/pull/7336
 	//       The test-fixtures folder is not included here as it's copied as a whole,
 	//       not file by file
-	ignoredFolders := []string{".release/", ".changelog/", "examples/", "scripts/", "META.d/"}
-	ignoredFiles := []string{"go.mod", ".goreleaser.yml", ".golangci.yml", "terraform-registry-manifest.json", "_meta.yaml"}
+	ignoredFolders := []string{".release/", ".changelog/", "examples/", "scripts/"}
+	ignoredFiles := []string{"go.mod", ".goreleaser.yml", ".golangci.yml", "terraform-registry-manifest.json"}
 	shouldAddHeader := true
 	for _, folder := range ignoredFolders {
 		// folder will be path leading to file
@@ -847,7 +849,7 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	}
 
 	// File is not ignored and is appropriate file type to add header to
-	copyrightHeader := []string{"Copyright (c) HashiCorp, Inc.", "SPDX-License-Identifier: MPL-2.0"}
+	copyrightHeader := []string{"Copyright IBM Corp. 2014, 2026", "SPDX-License-Identifier: MPL-2.0"}
 	header := commentBlock(copyrightHeader, lang)
 
 	targetFile := filepath.Join(outputFolder, target)
@@ -864,7 +866,7 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 }
 
 func expectedOutputFolder(outputFolder string) bool {
-	expectedFolders := []string{"terraform-provider-google", "terraform-provider-google-beta", "terraform-next", "terraform-google-conversion", "tfplan2cai"}
+	expectedFolders := []string{"terraform-provider-google", "terraform-provider-google-beta", "terraform-provider-google-nightly", "terraform-next", "terraform-provider-google-internal", "terraform-google-conversion", "tfplan2cai"}
 	folderName := filepath.Base(outputFolder) // Possible issue with Windows OS
 	isExpected := false
 	for _, folder := range expectedFolders {
@@ -1060,9 +1062,9 @@ func languageFromFilename(filename string) string {
 // as the DCL uses "alpha" for preview resources, while we use "private"
 func (t Terraform) DCLVersion() string {
 	switch t.TargetVersionName {
-	case "beta":
+	case "beta", "nightly":
 		return "/beta"
-	case "private":
+	case "private", "internal":
 		return "/alpha"
 	default:
 		return ""

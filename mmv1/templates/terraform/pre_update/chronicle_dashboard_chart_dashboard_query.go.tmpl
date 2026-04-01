@@ -1,0 +1,45 @@
+// 1. Extraction of the query name
+rawQuery := d.Get("dashboard_query").([]interface{})
+if len(rawQuery) == 0 || rawQuery[0] == nil {
+    return fmt.Errorf("dashboard_query is empty; cannot fetch etag for update")
+}
+
+queryData, ok := rawQuery[0].(map[string]interface{})
+if !ok {
+    return fmt.Errorf("dashboard_query is not a valid map")
+}
+
+queryName, _ := queryData["name"].(string)
+if queryName == "" {
+    return fmt.Errorf("dashboard_query.name is missing; required to fetch etag")
+}
+
+// 2. URL Formatting
+baseUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{ChronicleBasePath}}"}}")
+if err != nil {
+    return err
+}
+queryUrl := fmt.Sprintf("%s/%s", strings.TrimRight(baseUrl, "/"), strings.TrimLeft(queryName, "/"))
+
+// 3. API Request
+queryRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "GET",
+    RawURL:    queryUrl,
+    Timeout:   d.Timeout(schema.TimeoutRead),
+})
+if err != nil {
+    return fmt.Errorf("error retrieving etag for Chronicle Query %q: %w", queryName, err)
+}
+
+// 4. ETag Injection
+if etag, ok := queryRes["etag"].(string); ok && etag != "" {
+    log.Printf("[DEBUG] Injecting etag %q into update payload", etag)
+    
+    // Check if we need to nest the etag or put it at the root
+    if dq, nested := obj["dashboardQuery"].(map[string]interface{}); nested {
+        dq["etag"] = etag
+    } else {
+        obj["etag"] = etag
+    }
+}

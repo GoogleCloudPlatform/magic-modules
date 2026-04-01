@@ -1,0 +1,22 @@
+// Root Cause: The `pemCertificate` field inside `trustAnchors` is sensitive and omitted from CAI assets.
+// When it is omitted, `trustAnchors` becomes an empty list/map, causing cai2hcl to generate an empty `additional_trust_bundles {}` block without `trust_anchors`,
+// which fails Terraform validation: `At least 1 "trust_anchors" blocks are required.`
+// Solution: We inject `"pemCertificate" = "unknown"` exactly like the Provider decoder to satisfy validation rules during `cai2hcl` conversion.
+if inlineTrustConfig, ok := res["inlineTrustConfig"].(map[string]interface{}); ok {
+	if additionalTrustBundlesMap, ok := inlineTrustConfig["additionalTrustBundles"].(map[string]interface{}); ok {
+        for _, bundleIf := range additionalTrustBundlesMap {
+            if bundle, ok := bundleIf.(map[string]interface{}); ok {
+                if trustAnchors, ok := bundle["trustAnchors"].([]interface{}); ok {
+                    // trust_anchors is missing pemCertificate in CAI assets, but required in Terraform
+                    for _, trustAnchorRaw := range trustAnchors {
+                        if trustAnchor, ok := trustAnchorRaw.(map[string]interface{}); ok {
+                            trustAnchor["pemCertificate"] = "unknown"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+return res, hclData, nil

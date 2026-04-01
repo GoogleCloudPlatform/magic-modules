@@ -411,6 +411,8 @@ properties:
             type: String
             description: |-
               VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
+            conflicts:
+              - template.0.vpc_access.0.network_interfaces
           - name: 'egress'
             type: Enum
             description: |-
@@ -423,6 +425,8 @@ properties:
             type: Array
             description: |-
               Direct VPC egress settings. Currently only single network interface is supported.
+            conflicts:
+              - template.0.vpc_access.0.connector
             item_type:
               type: NestedObject
               properties:

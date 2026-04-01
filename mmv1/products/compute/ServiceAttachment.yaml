@@ -35,6 +35,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/compute_service_attachment.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
@@ -295,6 +296,7 @@ properties:
           description: |
             A project that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
+          is_missing_in_cai: true
         - name: 'networkUrl'
           type: String
           # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
@@ -308,13 +310,14 @@ properties:
             The endpoint that is allowed to connect to this service attachment.
             Only one of project_id_or_num, network_url and endpoint_url may be set.
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          min_version: beta
+          is_missing_in_cai: true
         - name: 'connectionLimit'
           type: Integer
           description: |
             The number of consumer forwarding rules the consumer project can
             create.
           required: true
+          is_missing_in_cai: true
   - name: 'reconcileConnections'
     type: Boolean
     description: |

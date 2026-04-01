@@ -54,6 +54,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/netapp_volume_replication.go.tmpl'
   post_create: 'templates/terraform/post_create/netapp_volume_replication_post_create.go.tmpl'
@@ -264,9 +265,6 @@ properties:
         type: NestedObject
         description: |-
           Tiering policy for the volume.
-        update_mask_fields:
-          - 'tiering_policy.cooling_threshold_days'
-          - 'tiering_policy.tier_action'
         properties:
           - name: 'coolingThresholdDays'
             type: Integer

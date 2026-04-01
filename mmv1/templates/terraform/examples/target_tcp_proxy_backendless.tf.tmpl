@@ -1,0 +1,5 @@
+resource "google_compute_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "target_tcp_proxy_name"}}"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+}

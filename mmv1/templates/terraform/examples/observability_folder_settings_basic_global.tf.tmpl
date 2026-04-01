@@ -1,0 +1,27 @@
+resource "google_folder" "test_folder" {
+  provider            = "google-beta"
+  display_name        = "tf-test-%{random_suffix}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+# Wait for the folder to be created and recognized by the Observability API
+resource "time_sleep" "wait_for_folder" {
+  create_duration = "90s"
+  depends_on      = [google_folder.test_folder]
+}
+
+data "google_observability_folder_settings" "settings_data" {
+  provider   = "google-beta"
+  folder     = google_folder.test_folder.folder_id
+  location   = "global"
+  depends_on = [time_sleep.wait_for_folder]
+}
+
+resource "google_observability_folder_settings" "primary_global" {
+  provider                 = "google-beta"
+  location                 = "global"
+  folder                   = google_folder.test_folder.folder_id
+  default_storage_location = "us"
+  depends_on               = [data.google_observability_folder_settings.settings_data]
+}

@@ -689,7 +689,7 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `Sandbox configuration for this node.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
-							"sandbox_type": {
+							"type": {
 								Type:         schema.TypeString,
 								Required:     true,
 								Description:  `Type of the sandbox to use for the node (e.g. 'gvisor')`,
@@ -2370,12 +2370,11 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"labels":                             c["labels"],
 		"resource_labels":                    c["resourceLabels"],
 		"tags":                               c["tags"],
-		"preemptible":                        c["preemptible"],
 		"secondary_boot_disks":               flattenSecondaryBootDisks(c["secondaryBootDisks"]),
 		"storage_pools":                      c["storagePools"],
-		"spot":                               c["spot"],
 		"min_cpu_platform":                   c["minCpuPlatform"],
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
+		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
 		"taint":                              flattenEffectiveTaints(c["taints"]),
 		"workload_metadata_config":           flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
 		"confidential_nodes":                 flattenConfidentialNodes(c["confidentialNodes"]),
@@ -2392,6 +2391,16 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"resource_manager_tags":              flattenResourceManagerTags(c["resourceManagerTags"]),
 		"enable_confidential_storage":        c["enableConfidentialStorage"],
 		"local_ssd_encryption_mode":          c["localSsdEncryptionMode"],
+	}
+
+	// Suppress Default Value
+	if v, ok := c["preemptible"].(bool); ok && v {
+		transformed["preemptible"] = v
+	}
+
+	// Suppress Default Value
+	if v, ok := c["spot"].(bool); ok && v {
+		transformed["spot"] = v
 	}
 
 	if v, ok := c["oauthScopes"].([]interface{}); ok && len(v) > 0 {
@@ -2506,9 +2515,18 @@ func flattenShieldedInstanceConfig(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
-	transformed := map[string]interface{}{
-		"enable_secure_boot":          c["enableSecureBoot"],
-		"enable_integrity_monitoring": c["enableIntegrityMonitoring"],
+	transformed := map[string]interface{}{}
+	// Suppress Default Value
+	if v, ok := c["enableSecureBoot"].(bool); ok && v {
+		transformed["enable_secure_boot"] = v
+	}
+	// Suppress Default Value
+	if v, ok := c["enableIntegrityMonitoring"].(bool); ok && !v {
+		transformed["enable_integrity_monitoring"] = v
+	}
+
+	if len(transformed) == 0 {
+		return nil
 	}
 
 	return []map[string]interface{}{transformed}
@@ -2539,8 +2557,15 @@ func flattenEphemeralStorageLocalSsdConfig(v interface{}) []map[string]interface
 		return nil
 	}
 
+	// Default localSsdCount to 0 if missing. The field is required in the schema,
+	// but the API may not return it if the value is 0.
+	localSsdCount := c["localSsdCount"]
+	if localSsdCount == nil {
+		localSsdCount = 0
+	}
+
 	transformed := map[string]interface{}{
-		"local_ssd_count":  c["localSsdCount"],
+		"local_ssd_count":  localSsdCount,
 		"data_cache_count": c["dataCacheCount"],
 	}
 
@@ -2626,6 +2651,25 @@ func flattenGcfsConfig(v interface{}) []map[string]interface{} {
 	return []map[string]interface{}{transformed}
 }
 
+func flattenSandboxConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{}
+	if val, ok := c["type"]; ok && val != nil {
+		transformed["type"] = val
+	} else if val, ok := c["sandboxType"]; ok && val != nil {
+		transformed["type"] = val
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
 func flattenGvnic(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return nil
@@ -2635,8 +2679,13 @@ func flattenGvnic(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
+	enabled, ok := c["enabled"].(bool)
+	if !ok {
+		enabled = false
+	}
+
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}
@@ -2868,6 +2917,23 @@ func flattenNodePoolAutoConfigNodeKubeletConfig(v interface{}) []map[string]inte
 	return []map[string]interface{}{transformed}
 }
 
+func flattenNodePoolAutoConfigLinuxNodeConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"cgroup_mode":                c["cgroupMode"],
+		"node_kernel_module_loading": flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
 func flattenEvictionSignals(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return nil
@@ -2966,11 +3032,17 @@ func flattenWindowsNodeConfig(v interface{}) []map[string]interface{} {
 	if len(c) == 0 {
 		return nil
 	}
-	transformed := map[string]interface{}{
-		"osversion": c["osVersion"],
+
+	// Suppress Default Value "OS_VERSION_UNSPECIFIED"
+	if osVersion, ok := c["osVersion"].(string); ok && osVersion != "OS_VERSION_UNSPECIFIED" {
+		return []map[string]interface{}{
+			{
+				"osversion": c["osVersion"],
+			},
+		}
 	}
 
-	return []map[string]interface{}{transformed}
+	return nil
 }
 
 func flattenHugepagesConfig(v interface{}) []map[string]interface{} {
@@ -3277,8 +3349,15 @@ func flattenFastSocket(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	// Default enabled to false if missing. The field is required in the schema,
+	// but the API may not return it if the value is false.
+	enabled, ok := c["enabled"].(bool)
+	if !ok {
+		enabled = false
+	}
+
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}

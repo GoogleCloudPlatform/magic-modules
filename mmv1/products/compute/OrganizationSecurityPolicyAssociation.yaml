@@ -47,7 +47,7 @@ examples:
     vars:
       short_name: "my-short-name"
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: 'ORG_TARGET'
 parameters:
   - name: 'policyId'
     type: String
@@ -72,3 +72,15 @@ properties:
     description: |
       The display name of the security policy of the association.
     output: true
+  - name: 'excludedProjects'
+    type: Array
+    description: |
+      A list of projects to exclude from the security policy.
+    item_type:
+      type: String
+  - name: 'excludedFolders'
+    type: Array
+    description: |
+      A list of folders to exclude from the security policy.
+    item_type:
+      type: String

@@ -104,6 +104,12 @@ examples:
       bucket_name: example-bucket
       subscription_name: example-subscription
       topic_name: example-topic
+  - name: pubsub_subscription_push_cloudstorage_text
+    primary_resource_id: example
+    vars:
+      bucket_name: example-bucket
+      subscription_name: example-subscription
+      topic_name: example-topic
   - name: pubsub_subscription_push_cloudstorage_avro
     primary_resource_id: example
     vars:
@@ -279,7 +285,18 @@ properties:
             type: Boolean
             description: |
               When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
-            send_empty_value: true
+      - name: textConfig
+        type: NestedObject
+        description: |
+          If set, message data will be written to Cloud Storage in text format.
+        allow_empty_object: true
+        default_from_api: true
+        properties:
+          - name: state
+            type: String
+            description: |
+              Output only. Placeholder to allow the empty text_config block.
+            output: true
       - name: serviceAccountEmail
         type: String
         description: |
@@ -353,7 +370,6 @@ properties:
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
         diff_suppress_func: IgnoreMissingKeyInMap("x-goog-version")
-        custom_tgc_expand: templates/tgc_next/custom_expand/pubsub_subscription_attributes.go.tmpl
       - name: noWrapper
         type: NestedObject
         description: |

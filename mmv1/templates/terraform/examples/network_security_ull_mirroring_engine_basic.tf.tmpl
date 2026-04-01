@@ -1,0 +1,8 @@
+resource "google_network_security_ull_mirroring_engine" "{{$.PrimaryResourceId}}" {
+  provider                = google-beta
+  ull_mirroring_engine_id = "{{index $.Vars "ull_mirroring_engine_id"}}"
+  location                = "us-south1-d"
+  labels = {
+    foo = "bar"
+  }
+}

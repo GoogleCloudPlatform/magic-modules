@@ -45,6 +45,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'tag_key'
+  iam_conditions_request_type: 'REQUEST_BODY'
 custom_code:
 exclude_tgc: true
 examples:

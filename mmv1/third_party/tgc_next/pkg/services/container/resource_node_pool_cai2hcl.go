@@ -126,7 +126,8 @@ func flattenNodePoolUpgradeSettings(v interface{}) []map[string]interface{} {
 	upgradeSettings["max_unavailable"] = us["maxUnavailable"]
 
 	// "SHORT_LIVED" strategy is not supported by the Terraform provider yet.
-	if strategy, ok := us["strategy"].(string); ok && strategy != "SHORT_LIVED" {
+	// Suppress Default Value "SURGE"
+	if strategy, ok := us["strategy"].(string); ok && strategy != "SHORT_LIVED" && strategy != "SURGE" {
 		upgradeSettings["strategy"] = strategy
 	}
 
@@ -227,11 +228,18 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 	}
 
 	if v, ok := np["management"].(map[string]interface{}); ok {
-		nodePool["management"] = []map[string]interface{}{
-			{
-				"auto_repair":  v["autoRepair"],
-				"auto_upgrade": v["autoUpgrade"],
-			},
+		mgmt := map[string]interface{}{}
+
+		// Suppress Default Value
+		if val, ok := v["autoRepair"].(bool); ok && !val {
+			mgmt["auto_repair"] = val
+		}
+		// Suppress Default Value
+		if val, ok := v["autoUpgrade"].(bool); ok && !val {
+			mgmt["auto_upgrade"] = val
+		}
+		if len(mgmt) > 0 {
+			nodePool["management"] = []map[string]interface{}{mgmt}
 		}
 	}
 
@@ -253,11 +261,16 @@ func flattenNodeNetworkConfig(c interface{}, d *schema.ResourceData, prefix stri
 			// "create_pod_range": d.Get(prefix + "network_config.0.create_pod_range"), // API doesn't return this value so we set the old one. Field is ForceNew + Required
 			"pod_ipv4_cidr_block":             config["podIpv4CidrBlock"],
 			"pod_range":                       config["podRange"],
-			"enable_private_nodes":            config["enablePrivateNodes"],
 			"pod_cidr_overprovision_config":   flattenPodCidrOverprovisionConfig(config["podCidrOverprovisionConfig"]),
 			"network_performance_config":      flattenNodeNetworkPerformanceConfig(config["networkPerformanceConfig"]),
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(config["additionalNodeNetworkConfigs"]),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(config["additionalPodNetworkConfigs"]),
+		}
+
+		// enable_private_nodes = false and the field not in HCL behaves the same, as this field is in ForceSendFields and the false value is included in the API request when it is not specified in config.
+		// Only convert the field enable_private_nodes when its value is true in CAI asset.
+		if v, ok := config["enablePrivateNodes"].(bool); ok && v {
+			transformed["enable_private_nodes"] = v
 		}
 		return []map[string]interface{}{transformed}
 	}

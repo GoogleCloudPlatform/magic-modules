@@ -28,6 +28,7 @@ id_format: projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}
 async:
   operation:
     base_url: '{{op_id}}'
+include_in_tgc_next: true
 custom_code:
   encoder: templates/terraform/encoders/vpn_tunnel.go.tmpl
   constants: templates/terraform/constants/vpn_tunnel.tmpl
@@ -220,7 +221,6 @@ properties:
     description: |
       Additional params passed with the request, but not persisted as part of resource payload
     immutable: true
-    min_version: beta
     ignore_read: true
     properties:
       - name: resourceManagerTags
@@ -241,21 +241,25 @@ properties:
         properties:
           - name: encryption
             type: Array
+            is_missing_in_cai: true
             description: Encryption algorithms.
             item_type:
               type: String
           - name: integrity
             type: Array
+            is_missing_in_cai: true
             description: Integrity algorithms.
             item_type:
               type: String
           - name: prf
             type: Array
+            is_missing_in_cai: true
             description: Pseudo-random functions.
             item_type:
               type: String
           - name: dh
             type: Array
+            is_missing_in_cai: true
             description: Diffie-Hellman groups.
             item_type:
               type: String
@@ -265,16 +269,19 @@ properties:
         properties:
           - name: encryption
             type: Array
+            is_missing_in_cai: true
             description: Encryption algorithms.
             item_type:
               type: String
           - name: integrity
             type: Array
+            is_missing_in_cai: true
             description: Integrity algorithms.
             item_type:
               type: String
           - name: pfs
             type: Array
+            is_missing_in_cai: true
             description: Perfect forward secrecy groups.
             item_type:
               type: String

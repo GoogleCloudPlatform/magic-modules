@@ -115,3 +115,13 @@ properties:
           The percentage of requests to be sampled, expressed as a fraction
           in the range (0,1]. Note that the actual sampling rate may be lower than
           the specified value if the system is overloaded. Default is 1.0.
+  - name: trafficFilter
+    type: NestedObject
+    description: Configuration for traffic filtering.
+    custom_flatten: 'templates/terraform/custom_flatten/firebaseailogic_config_traffic_filter.go.tmpl'
+    properties:
+      - name: templateOnly
+        type: Boolean
+        description: |-
+          Only allows users to use AI Logic via prompt templates for this project.
+          If true, only calls using server templates are permitted.

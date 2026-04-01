@@ -8,7 +8,6 @@ import (
 	{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
-	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
@@ -125,6 +124,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_networks":                          compute.DataSourceGoogleComputeNetworks(),
     "google_compute_network_attachment":                compute.DataSourceGoogleComputeNetworkAttachment(),
 	"google_compute_network_endpoint_group":            compute.DataSourceGoogleComputeNetworkEndpointGroup(),
+	"google_compute_network_endpoint_groups":           compute.DataSourceGoogleComputeNetworkEndpointGroups(),
 	"google_compute_network_peering":                   compute.DataSourceComputeNetworkPeering(),
 	"google_compute_node_types":                        compute.DataSourceGoogleComputeNodeTypes(),
 	"google_compute_regions":                           compute.DataSourceGoogleComputeRegions(),
@@ -165,6 +165,8 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_dataplex_data_quality_rules":				dataplex.DataSourceDataplexDataQualityRules(),
 	"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 	"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
+	"google_discovery_engine_data_store":                discoveryengine.DataSourceGoogleDiscoveryEngineDataStore(),
+	"google_discovery_engine_data_stores":               discoveryengine.DataSourceGoogleDiscoveryEngineDataStores(),
 	"google_dns_keys":                                  dns.DataSourceDNSKeys(),
 	"google_dns_managed_zone":                          dns.DataSourceDnsManagedZone(),
 	"google_dns_managed_zones":                         dns.DataSourceDnsManagedZones(),
@@ -216,6 +218,8 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_monitoring_uptime_check_ips":               monitoring.DataSourceGoogleMonitoringUptimeCheckIps(),
 	"google_netblock_ip_ranges":                        resourcemanager.DataSourceGoogleNetblockIpRanges(),
 	{{- if ne $.TargetVersionName "ga" }}
+	"google_observability_folder_settings":             observability.DataSourceObservabilityFolderSettings(),
+	"google_observability_project_settings":            observability.DataSourceObservabilityProjectSettings(),
 	"google_observability_organization_settings":       observability.DataSourceObservabilityOrganizationSettings(),
 	{{- end }}
 	"google_oracle_database_autonomous_database":       oracledatabase.DataSourceOracleDatabaseAutonomousDatabase(),
@@ -325,6 +329,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_region_backend_service":            compute.DataSourceGoogleComputeRegionBackendService(),
 	"google_network_management_connectivity_test_run":  networkmanagement.DataSourceGoogleNetworkManagementTestRun(),
 	"google_network_management_connectivity_tests":  	networkmanagement.DataSourceGoogleNetworkManagementConnectivityTests(),
+	"google_network_security_address_groups": 			networksecurity.DataSourceNetworkSecurityAddressGroups(),
 	// ####### END handwritten datasources ###########
 }
 
@@ -455,6 +460,7 @@ var handwrittenResources = map[string]*schema.Resource{
 	{{- end }}
 	"google_service_networking_connection":         servicenetworking.ResourceServiceNetworkingConnection(),
 	"google_sql_database_instance":                 sql.ResourceSqlDatabaseInstance(),
+	"google_sql_provision_script":                  sql.ResourceSqlProvisionScript(),
 	"google_sql_ssl_cert":                          sql.ResourceSqlSslCert(),
 	"google_sql_user":                              sql.ResourceSqlUser(),
 	"google_organization_iam_custom_role":          resourcemanager.ResourceGoogleOrganizationIamCustomRole(),
