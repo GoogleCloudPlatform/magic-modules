@@ -2166,15 +2166,37 @@ resource "google_compute_url_map" "urlmap" {
   # Level 1: Top-level default_route_action
   default_route_action {
     cache_policy {
-      cache_mode = "FORCE_CACHE_ALL"
-      default_ttl {
-        seconds = "3600"
+      cache_bypass_request_header_names = ["X-Internal-Bypass"]
+      cache_mode = "CACHE_ALL_STATIC"
+      cache_key_policy {
+        include_query_string = true
+        excluded_query_parameters = ["custom_parameter"]
       }
       client_ttl {
         seconds = "1800"
+        nanos = 0
+      }
+      default_ttl {
+        seconds = "3600"
+        nanos = 0
+      }
+      max_ttl {
+        seconds = "7200"
+        nanos = 0
+      }
+      negative_caching = true
+      negative_caching_policy {
+        code = 404
+        ttl {
+          seconds = "100"
+          nanos = 0
+        }
       }
       request_coalescing = true
-      cache_bypass_request_header_names = ["X-Internal-Bypass"]
+      serve_while_stale {
+        seconds = "3600"
+        nanos = 0
+      }
     }
   }
 
@@ -2195,9 +2217,27 @@ resource "google_compute_url_map" "urlmap" {
     # Level 2: PathMatcher-level default_route_action
     default_route_action {
       cache_policy {
+        cache_bypass_request_header_names = ["X-Internal-Bypass"]
         cache_mode = "CACHE_ALL_STATIC"
+        cache_key_policy {
+          include_host              = true
+          include_protocol          = true
+          include_query_string      = true
+          included_cookie_names     = ["custom_cookie"]
+          included_header_names     = ["custom_header"]
+          included_query_parameters = ["custom_parameter"]
+        }
+        client_ttl {
+          nanos   = 0
+          seconds = "100"
+        }
         default_ttl {
+          nanos   = 0
           seconds = "7200"
+        }
+        max_ttl {
+          nanos   = 0
+          seconds = "10000"
         }
         negative_caching = true
         negative_caching_policy {
@@ -2205,6 +2245,11 @@ resource "google_compute_url_map" "urlmap" {
           ttl {
             seconds = "300"
           }
+        }
+        request_coalescing = false
+        serve_while_stale {
+          nanos = 0
+          seconds = "3600"
         }
       }
     }
@@ -2219,12 +2264,31 @@ resource "google_compute_url_map" "urlmap" {
           default_ttl {
             seconds = "86400"
           }
+          cache_bypass_request_header_names = ["X-Custom-Header"]
           cache_key_policy {
             include_host         = true
             include_protocol     = true
             include_query_string = true
             excluded_query_parameters = ["custom_parameter"]
             included_header_names     = ["X-Custom-Header"]
+            included_cookie_names = ["X-Cookie-Name"]
+          }
+          max_ttl {
+            nanos   = 0
+            seconds = "500000"
+          }
+          negative_caching = true
+          negative_caching_policy {
+            code = 501
+            ttl {
+              nanos   = 0
+              seconds = "100"
+            }
+          }
+          request_coalescing = true
+          serve_while_stale {
+            nanos   = 0
+            seconds = "3600"
           }
         }
       }
@@ -2264,16 +2328,38 @@ resource "google_compute_url_map" "urlmap" {
           cache_mode = "CACHE_ALL_STATIC"
           default_ttl {
             seconds = "60"
+            nanos = 0
           }
           client_ttl {
             seconds = "90"
+            nanos = 0
           }
           max_ttl {
             seconds = "120"
+            nanos = 0
           }
           serve_while_stale {
             seconds = "3600"
+            nanos = 0
           }
+          cache_bypass_request_header_names = ["X-Header"]
+          cache_key_policy {
+            include_host              = true
+            include_protocol          = false
+            include_query_string      = true
+            included_cookie_names     = ["X-Cookie"]
+            included_header_names     = ["X-Header"]
+            included_query_parameters = ["X-Query"]
+          }
+          negative_caching = true
+          negative_caching_policy {
+            code = 404
+            ttl {
+              nanos   = 0
+              seconds = "100"
+            }
+          }
+          request_coalescing = false
         }
       }
     }
@@ -2314,6 +2400,10 @@ resource "google_compute_url_map" "urlmap" {
       cache_mode = "USE_ORIGIN_HEADERS"
       request_coalescing = false
       cache_bypass_request_header_names = ["X-Internal-Bypass-Updated"]
+      cache_key_policy {
+        include_query_string = true
+        excluded_query_parameters = ["updated_parameter"]
+      }
     }
   }
 
@@ -2351,9 +2441,11 @@ resource "google_compute_url_map" "urlmap" {
           cache_mode = "CACHE_ALL_STATIC"
           default_ttl {
             seconds = "43200"
+            nanos   = 0
           }
           client_ttl {
             seconds = "1800"
+            nanos   = 0
           }
           cache_key_policy {
             include_host         = false
@@ -2373,6 +2465,10 @@ resource "google_compute_url_map" "urlmap" {
     default_route_action {
       cache_policy {
         cache_mode = "CACHE_ALL_STATIC"
+        cache_key_policy {
+          include_query_string = true
+          excluded_query_parameters = ["updated_parameter"]
+        }
         default_ttl {
           seconds = "60"
         }
@@ -2397,6 +2493,10 @@ resource "google_compute_url_map" "urlmap" {
       route_action {
         cache_policy {
           cache_mode = "FORCE_CACHE_ALL"
+          cache_key_policy {
+            include_query_string = true
+            excluded_query_parameters = ["updated_parameter"]
+          }
           default_ttl {
             seconds = "120"
           }
