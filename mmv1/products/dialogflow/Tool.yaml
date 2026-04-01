@@ -20,8 +20,7 @@ references:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
   api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.locations.tools'
 base_url: 'projects/{{project}}/locations/{{location}}/tools'
-has_self_link: true
-id_format: 'projects/{{project}}/locations/{{location}}/tools/{{name}}'
+self_link: '{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/tools/{{name}}'
   - '{{name}}'
