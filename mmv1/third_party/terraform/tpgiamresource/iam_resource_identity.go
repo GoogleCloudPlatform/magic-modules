@@ -38,9 +38,7 @@ func ParseIamResourceIdentity(
 	rc IamResourceIdentityConfig,
 ) (string, error) {
 	resolved := make(map[string]string, len(rc.Params))
-	var nonLocParams []IamIdentityParam
-	nonLocCount := 0
-	for _, p := range rc.Params {
+	for i, p := range rc.Params {
 		if fn, isLoc := locationDefaultFuncs[p.Key]; isLoc {
 			var val string
 			if rv, ok := identity.GetOk(p.IdentityKey); ok {
@@ -60,54 +58,25 @@ func ParseIamResourceIdentity(
 			}
 			resolved[p.Key] = val
 		} else {
-			nonLocParams = append(nonLocParams, p)
-			if v, ok := identity.GetOk(p.IdentityKey); ok {
-				if s, ok := v.(string); ok && s != "" {
-					nonLocCount++
-				}
+			val, ok := identity.GetOk(p.IdentityKey)
+			if !ok {
+				return "", fmt.Errorf("import identity is missing attribute %q", p.IdentityKey)
 			}
+			s, strOk := val.(string)
+			if !strOk || s == "" {
+				return "", fmt.Errorf("import identity attribute %q must be a non-empty string", p.IdentityKey)
+			}
+			if i == len(rc.Params)-1 {
+				s = tpgresource.GetResourceNameFromSelfLink(s)
+			}
+			resolved[p.Key] = s
 		}
 	}
 
-	if nonLocCount == 0 {
-		return formatIamResourceUri(rc, resolved)
-	}
-
-	return parseIdentityAttributes(identity, rc, resolved)
-}
-
-// parseMultiAttrIdentity handles the case where 2+ non-location params are set:
-// each non-location param is extracted individually from the identity. The last
-// param in the list gets GetResourceNameFromSelfLink applied.
-func parseIdentityAttributes(
-	identity *schema.IdentityData,
-	rc IamResourceIdentityConfig,
-	resolved map[string]string,
-) (string, error) {
-	for i, p := range rc.Params {
-		if _, isLoc := locationDefaultFuncs[p.Key]; isLoc {
-			continue
-		}
-		val, ok := identity.GetOk(p.IdentityKey)
-		if !ok {
-			return "", fmt.Errorf("import identity is missing attribute %q", p.IdentityKey)
-		}
-		s, strOk := val.(string)
-		if !strOk || s == "" {
-			return "", fmt.Errorf("import identity attribute %q must be a non-empty string", p.IdentityKey)
-		}
-		if i == len(rc.Params)-1 {
-			s = tpgresource.GetResourceNameFromSelfLink(s)
-		}
-		resolved[p.Key] = s
-	}
-	return formatIamResourceUri(rc, resolved)
-}
-
-func formatIamResourceUri(rc IamResourceIdentityConfig, values map[string]string) (string, error) {
 	args := make([]any, len(rc.Params))
 	for i, p := range rc.Params {
-		args[i] = values[p.Key]
+		args[i] = resolved[p.Key]
 	}
+
 	return fmt.Sprintf(rc.UriFormat, args...), nil
 }
