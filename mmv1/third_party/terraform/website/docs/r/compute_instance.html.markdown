@@ -254,7 +254,7 @@ is desired, you will need to modify your state file manually using
 
 * `instance_encryption_key` - (optional) Configuration for data encryption on the instance with encryption keys. Structure is [documented below](#nested_instance_encryption_key`).
 
-* `erase_windows_vss_snapshot` - (optional) [Beta](../guides/provider_versions.html.markdown) Specifies whether the disks restored from source snapshots or source machine image should erase Windows specific VSS signature.
+* `erase_windows_vss_signature` - (optional) [Beta](../guides/provider_versions.html.markdown) Specifies whether the disks restored from source snapshots or source machine image should erase Windows specific VSS signature.
 
 ---
 
