@@ -36,7 +36,7 @@ import_format:
   - 'organizations/{{organization}}/consumerPolicies/default'
 autogen_async: true
 async:
-  actions: ['create', 'update']
+  actions: ['create', 'update', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -56,7 +56,7 @@ examples:
     skip_test: true
     vars: {}
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: 'ORG_TARGET'
     ignore_read_extra:
       - 'enable_rules.0.services'
 virtual_fields:
