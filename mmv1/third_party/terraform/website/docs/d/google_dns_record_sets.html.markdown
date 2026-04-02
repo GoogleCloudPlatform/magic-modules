@@ -13,7 +13,7 @@ To get more information about Cloud DNS Record Sets, see:
 * [API documentation](https://cloud.google.com/dns/docs/reference/v1/resourceRecordSets/list)
 * [How-to Guides](https://cloud.google.com/dns/docs/records)
 
-~> **Note:** Filtering by `name` and `type` is performed client-side.
+~> **Note:** Filtering by `type` when `name` is not set is performed client-side.
 
 ## Example Usage
 
