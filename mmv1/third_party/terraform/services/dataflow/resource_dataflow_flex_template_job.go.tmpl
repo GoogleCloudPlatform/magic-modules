@@ -258,6 +258,9 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 				Default:     false,
 				Description: `If true, treat DRAINING and CANCELLING as terminal job states and do not wait for further changes before removing from terraform state and moving on. WARNING: this will lead to job name conflicts if you do not ensure that the job names are different, e.g. by embedding a release ID or by using a random_id.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -522,6 +525,11 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		d.SetId("")
 		return nil
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	//UDP default read end
 
 	return nil
 }
@@ -570,6 +578,11 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 	if resourceDataflowJobIsVirtualUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
 		return nil
 	}
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceDataflowFlexTemplateJob) {
+	    return ResourceDataflowFlexTemplateJob().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 
 	if jobHasUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
 		config := meta.(*transport_tpg.Config)
@@ -636,6 +649,13 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

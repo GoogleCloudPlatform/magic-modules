@@ -199,6 +199,7 @@ func ResourceContainerNodePool() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			resourceNodeConfigEmptyGuestAccelerator,
 			{{ if ne $.TargetVersionName `ga` }}
