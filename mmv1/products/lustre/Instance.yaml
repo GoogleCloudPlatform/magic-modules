@@ -212,3 +212,110 @@ properties:
               required: true
               enum_values:
                 - 'NO_SQUASH'
+  - name: maintenancePolicy
+    type: NestedObject
+    description: 'The maintenance policy for the instance to determine when to allow or exclude the instance from maintenance updates.'
+    immutable: true
+    properties:
+      - name: 'weeklyMaintenanceWindows'
+        type: Array
+        description: 'The weekly maintenance windows for the instance. Currently limited to 1 window.'
+        max_size: 1
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'dayOfWeek'
+              type: Enum
+              description: 'Day of the week for the maintenance window.'
+              required: true
+              enum_values:
+                - 'SUNDAY'
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+            - name: 'startTime'
+              type: NestedObject
+              description: 'Start time of the maintenance window in UTC.'
+              required: true
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: 'Hours of day in 24 hour format. Should be from 0 to 23.'
+                  default_from_api: true
+                - name: 'minutes'
+                  type: Integer
+                  description: 'Minutes of hour of day. Must be from 0 to 59.'
+                  default_from_api: true
+                - name: 'seconds'
+                  type: Integer
+                  description: 'Seconds of minutes of the time. Must be from 0 to 59.'
+                  default_from_api: true
+                - name: 'nanos'
+                  type: Integer
+                  description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.'
+                  default_from_api: true
+      - name: 'maintenanceExclusionWindow'
+        type: Array
+        description: 'The exclusion windows for the instance. Currently limited to 1 window.'
+        max_size: 1
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'startDate'
+              type: NestedObject
+              description: 'Start date of the exclusion period in UTC.'
+              required: true
+              properties:
+                - name: 'year'
+                  type: Integer
+                  description: 'Year of the date. Must be from 1 to 9999, or 0 for recurring.'
+                  default_from_api: true
+                - name: 'month'
+                  type: Integer
+                  description: 'Month of a year. Must be from 1 to 12.'
+                  default_from_api: true
+                - name: 'day'
+                  type: Integer
+                  description: 'Day of a month. Must be from 1 to 31 and valid for the year and month.'
+                  default_from_api: true
+            - name: 'endDate'
+              type: NestedObject
+              description: 'End date of the exclusion period in UTC.'
+              required: true
+              properties:
+                - name: 'year'
+                  type: Integer
+                  description: 'Year of the date. Must be from 1 to 9999, or 0 for recurring.'
+                  default_from_api: true
+                - name: 'month'
+                  type: Integer
+                  description: 'Month of a year. Must be from 1 to 12.'
+                  default_from_api: true
+                - name: 'day'
+                  type: Integer
+                  description: 'Day of a month. Must be from 1 to 31 and valid for the year and month.'
+                  default_from_api: true
+            - name: 'time'
+              type: NestedObject
+              description: 'Time in UTC for the exclusion window.'
+              required: true
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: 'Hours of day in 24 hour format. Should be from 0 to 23.'
+                  default_from_api: true
+                - name: 'minutes'
+                  type: Integer
+                  description: 'Minutes of hour of day. Must be from 0 to 59.'
+                  default_from_api: true
+                - name: 'seconds'
+                  type: Integer
+                  description: 'Seconds of minutes of the time. Must be from 0 to 59.'
+                  default_from_api: true
+                - name: 'nanos'
+                  type: Integer
+                  description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.'
+                  default_from_api: true

@@ -54,7 +54,7 @@ examples:
     version: beta
     vars:
       profile_name: 'dialogflow-profile-bidi'
-      random_suffix: 'true'
+      app_id: 'app-id'
 parameters:
   - name: 'location'
     type: String
