@@ -203,6 +203,7 @@ properties:
       - name: maintenanceExclusionWindow
         type: Array
         description: The exclusion windows for the instance. Currently limited to 1 window.
+        max_size: 1
         item_type:
           type: NestedObject
           properties:
@@ -326,6 +327,7 @@ properties:
         description: |-
           The weekly maintenance windows for the instance. Currently limited to 1
           window.
+        max_size: 1
         item_type:
           type: NestedObject
           properties:
@@ -402,6 +404,7 @@ properties:
 
       If the instance is using the Dynamic tier, this field must not be set or
       must be set to zero.
+    immutable: true
   - name: placementPolicy
     type: String
     description: |-
