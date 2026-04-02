@@ -58,16 +58,6 @@ examples:
       org_id: 'ORG_ID'
     ignore_read_extra:
       - 'enable_rules.0.services'
-virtual_fields:
-  - name: 'deletion_policy'
-    description: |
-      The deletion policy for the consumer policy. Setting the policy to "FORCE" will
-      pass the force parameter to the API, which allows updates and deletions that may
-      result in the deletion of resources from affected services or loss of API access
-      for clients.
-      Possible values: DELETE, FORCE
-    type: String
-    default_value: "DELETE"
 parameters:
   - name: 'folder'
     type: String
