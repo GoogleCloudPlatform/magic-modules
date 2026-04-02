@@ -535,7 +535,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Description: `The version identifier of the Cloud Function. Each deployment attempt results in a new version of a function being created.`,
 			},
 			//UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,

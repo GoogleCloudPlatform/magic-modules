@@ -134,7 +134,7 @@ func ResourceApigeeApi() *schema.Resource {
 				},
 			},
 			//UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,

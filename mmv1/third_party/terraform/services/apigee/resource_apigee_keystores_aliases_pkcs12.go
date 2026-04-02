@@ -162,7 +162,7 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 				Description: `Optional.Type of Alias`,
 			},
 			//UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,

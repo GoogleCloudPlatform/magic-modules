@@ -71,7 +71,7 @@ func ResourceApigeeFlowhook() *schema.Resource {
 				Description: `Flag that specifies whether execution should continue if the flow hook throws an exception. Set to true to continue execution. Set to false to stop execution if the flow hook throws an exception. Defaults to true.`,
 			},
 			//UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,

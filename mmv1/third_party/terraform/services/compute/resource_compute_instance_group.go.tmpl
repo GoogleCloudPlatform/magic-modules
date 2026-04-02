@@ -128,7 +128,7 @@ func ResourceComputeInstanceGroup() *schema.Resource {
 				Description: `The number of instances in the group.`,
 			},
 //UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,
@@ -317,37 +317,18 @@ func resourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) 
 	if err := d.Set("self_link", instanceGroup.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-            //UDP default read start
-    // Explicitly set virtual fields to default values if unset
-    if _, ok := d.GetOkExists("deletion_policy"); !ok {
-        //prioritize config's value if present
-        if config.DeletionPolicy != ""{
-            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }else{
-            if err := d.Set("deletion_policy", "DELETE"); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }
+                //UDP default read start
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
     }
     //UDP default read end
 
 	return nil
 }
 func resourceComputeInstanceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-    //UDP update shortcircuit start
-    clientSideFields := map[string]bool{"deletion_policy": true}
-    clientSideOnly := true
-    for field := range ResourceComputeInstanceGroup().Schema {
-        if d.HasChange(field) && !clientSideFields[field] {
-            clientSideOnly = false
-            break
-        }
-    }
-    if clientSideOnly {
-        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
-        return resourceComputeInstanceGroupRead(d, meta)
+        //UDP update shortcircuit start
+    if tpgresource.DeletionPolicyPreUpdate(d, ResourceComputeInstanceGroup) {
+        return ResourceComputeInstanceGroup().Read(d, meta)
     }
     //UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
@@ -455,12 +436,10 @@ func resourceComputeInstanceGroupUpdate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceComputeInstanceGroupDelete(d *schema.ResourceData, meta interface{}) error {
-    //UDP pre-delete start
-    if d.Get("deletion_policy").(string) == "PREVENT" {
-        return fmt.Errorf("cannot destroy InstanceGroup without setting deletion_policy=\"DELETE\" and running `terraform apply`")
-    }
-    if d.Get("deletion_policy").(string) == "ABANDON" {
-        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing InstanceGroup %q from Terraform state without deletion", d.Id())
+        //UDP pre-delete start
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
         return nil
     }
     //UDP pre-delete end

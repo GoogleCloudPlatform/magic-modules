@@ -96,7 +96,7 @@ func ResourceComputeAttachedDisk() *schema.Resource {
                                 ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
                         },
 //UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,
@@ -208,19 +208,9 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("disk", diskPath); err != nil {
 		return fmt.Errorf("Error setting disk: %s", err)
 	}
-            //UDP default read start
-    // Explicitly set virtual fields to default values if unset
-    if _, ok := d.GetOkExists("deletion_policy"); !ok {
-        //prioritize config's value if present
-        if config.DeletionPolicy != ""{
-            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }else{
-            if err := d.Set("deletion_policy", "DELETE"); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }
+                //UDP default read start
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
     }
     //UDP default read end
 
@@ -235,15 +225,13 @@ func resourceAttachedDiskUpdate(d *schema.ResourceData, meta interface{}) error 
 //UDP update end
 
 func resourceAttachedDiskDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
-	if d.Get("deletion_policy").(string) == "PREVENT" {
-		return fmt.Errorf("cannot destroy AttachedDisk without setting deletion_policy=\"DELETE\" and running `terraform apply`")
-	}
-	if d.Get("deletion_policy").(string) == "ABANDON" {
-		log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing AttachedDisk %q from Terraform state without deletion", d.Id())
-		return nil
-	}
-	//UDP pre-delete end
+	    //UDP pre-delete start
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
+        return nil
+    }
+    //UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

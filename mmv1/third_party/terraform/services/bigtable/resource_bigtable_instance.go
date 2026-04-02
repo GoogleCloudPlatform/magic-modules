@@ -225,7 +225,7 @@ func ResourceBigtableInstance() *schema.Resource {
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 			//UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,

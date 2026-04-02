@@ -123,7 +123,7 @@ If not provided, currently deletion protection will be set to UNPROTECTED as it 
 				},
 			},
 			//UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,

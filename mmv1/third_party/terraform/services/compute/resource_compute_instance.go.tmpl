@@ -1672,7 +1672,7 @@ be from 0 to 999,999,999 inclusive.`,
 				},
 			},
 //UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		CustomizeDiff: customdiff.All(
@@ -2327,37 +2327,18 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
 
-            //UDP default read start
-    // Explicitly set virtual fields to default values if unset
-    if _, ok := d.GetOkExists("deletion_policy"); !ok {
-        //prioritize config's value if present
-        if config.DeletionPolicy != ""{
-            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }else{
-            if err := d.Set("deletion_policy", "DELETE"); err != nil {
-                return fmt.Errorf("Error setting deletion_policy: %s", err)
-            }
-        }
+                //UDP default read start
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
     }
     //UDP default read end
 	return nil
 }
 
 func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-    //UDP update shortcircuit start
-    clientSideFields := map[string]bool{"deletion_policy": true}
-    clientSideOnly := true
-    for field := range ResourceComputeInstance().Schema {
-        if d.HasChange(field) && !clientSideFields[field] {
-            clientSideOnly = false
-            break
-        }
-    }
-    if clientSideOnly {
-        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
-        return resourceComputeInstanceRead(d, meta)
+        //UDP update shortcircuit start
+    if tpgresource.DeletionPolicyPreUpdate(d, ResourceComputeInstance) {
+        return ResourceComputeInstance().Read(d, meta)
     }
     //UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
@@ -3550,12 +3531,10 @@ func isGracefulMetadataStartupSwitch(d *schema.ResourceDiff) bool {
 }
 
 func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-    //UDP pre-delete start
-    if d.Get("deletion_policy").(string) == "PREVENT" {
-        return fmt.Errorf("cannot destroy Instance without setting deletion_policy=\"DELETE\" and running `terraform apply`")
-    }
-    if d.Get("deletion_policy").(string) == "ABANDON" {
-        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing Instance %q from Terraform state without deletion", d.Id())
+        //UDP pre-delete start
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
         return nil
     }
     //UDP pre-delete end

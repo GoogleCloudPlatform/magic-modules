@@ -63,7 +63,7 @@ func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 				Description: `Id of the Sharedflow to be deployed.`,
 			},
 			//UDP schema start
-            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
 		},
 		UseJSONNumber: true,
