@@ -840,7 +840,7 @@ resource "google_cloudfunctions2_function" "traffic-split-function" {
   description = "initial deployment"
 
   build_config {
-    runtime = "nodejs16"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -880,7 +880,7 @@ resource "google_cloudfunctions2_function" "traffic-split-function" {
   description = "updated deployment"
 
   build_config {
-    runtime = "nodejs16"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
