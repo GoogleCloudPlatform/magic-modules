@@ -33,6 +33,7 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			resourceServiceAccountCustomDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 		Schema: map[string]*schema.Schema{
 			"email": {
@@ -92,6 +93,9 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 				Computed:    false,
 				Description: `If set to true, skip service account creation if a service account with the same email already exists.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -239,10 +243,22 @@ func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error 
 	if err := d.Set("member", "serviceAccount:"+sa.Email); err != nil {
 		return fmt.Errorf("Error setting member: %s", err)
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	//UDP default read end
 	return nil
 }
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -262,6 +278,11 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleServiceAccount) {
+	    return ResourceGoogleServiceAccount().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
