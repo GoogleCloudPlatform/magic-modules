@@ -626,6 +626,49 @@ func TestAccComputeInstanceFromTemplate_DiskForceAttach(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeInstanceFromTemplate_VSSWindows(t *testing.T) {
+  t.Parallel()
+
+  var instance compute.Instance
+
+  context_1 := map[string]interface{}{
+    "bootdisk_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "template_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "instance_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "vss_flag":       true,
+  }
+  context_2 := map[string]interface{}{
+    "bootdisk_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "template_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "instance_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "vss_flag":       false,
+  }
+
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+    CheckDestroy:             testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeInstanceFromTemplate_VSSWindows(context_1),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckComputeInstanceExists(
+            t, "google_compute_instance_from_template.foobar", &instance),
+        ),
+      },
+      {
+        Config: testAccComputeInstanceFromTemplate_VSSWindows(context_2),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckComputeInstanceExists(
+            t, "google_compute_instance_from_template.foobar", &instance),
+          ),
+      },
+    },
+  })
+}
+{{- end }}
+
 func testAccComputeInstanceFromTemplate_basic(instance, template string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2628,3 +2671,49 @@ resource "google_compute_instance_from_template" "foobar" {
 }
 `, context)
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInstanceFromTemplate_VSSWindows(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+
+  family  = "windows-2025"
+  project = "windows-cloud"
+}
+
+resource "google_compute_disk" "foobarboot" {
+  provider = google-beta
+
+  name  = "%{bootdisk_name}"
+  image = data.google_compute_image.my_image.self_link
+  size  = 50
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  provider = google-beta
+
+  name          = "%{template_name}"
+  machine_type  = "e2-standard-2"
+
+  disk {
+    source      = google_compute_disk.foobarboot.name
+    boot        = true
+  }
+}
+
+resource "google_compute_instance_from_template" "foobar" {
+  provider = google-beta
+
+  name         = "%{instance_name}"
+  zone         = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar.self_link
+
+  erase_windows_vss_signature = %{vss_flag}
+}
+`, context)
+}
+{{- end }}
