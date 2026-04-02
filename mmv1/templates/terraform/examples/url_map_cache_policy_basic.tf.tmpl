@@ -1,0 +1,45 @@
+resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name     = "{{index $.Vars "url_map_name"}}"
+  
+  default_service = google_compute_backend_service.default.id
+
+  default_route_action {
+    cache_policy {
+      cache_mode = "CACHE_ALL_STATIC"
+      default_ttl {
+        seconds = "3600"
+      }
+      client_ttl {
+        seconds = "1800"
+      }
+      negative_caching = true
+      negative_caching_policy {
+        code = 404
+        ttl {
+          seconds = "300"
+        }
+      }
+      request_coalescing = true
+      cache_bypass_request_header_names = ["X-Internal-Bypass"]
+    }
+  }
+}
+
+resource "google_compute_backend_service" "default" {
+  provider = google-beta
+  name     = "{{index $.Vars "backend_service_name"}}"
+  
+  protocol              = "HTTP"
+  # Mandatory scheme for cache_policy
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  health_checks         = [google_compute_health_check.default.id]
+}
+
+resource "google_compute_health_check" "default" {
+  provider = google-beta
+  name     = "{{index $.Vars "health_check_name"}}"
+  http_health_check {
+    port = 80
+  }
+}

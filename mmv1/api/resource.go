@@ -2502,6 +2502,8 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"provider",
 		"lifecycle",
 		"timeouts",
+		"dynamic",
+		"deletion_protection",
 	}
 	for _, tp := range r.VirtualFields {
 		props = append(props, strings.Join(tp.Lineage(), "."))

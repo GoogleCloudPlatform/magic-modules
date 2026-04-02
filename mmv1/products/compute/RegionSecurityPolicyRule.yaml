@@ -310,6 +310,7 @@ properties:
     description: |
       Must be specified if the action is "rate_based_ban" or "throttle". Cannot be specified for any other actions.
     update_mask_fields:
+      - 'rateLimitOptions'
       - 'rateLimitOptions.rateLimitThreshold'
       - 'rateLimitOptions.conformAction'
       - 'rateLimitOptions.exceedAction'

@@ -1,0 +1,190 @@
+# A Native Dashboard is required to create a Dashboard Chart.
+resource "google_chronicle_native_dashboard" "my_dashboard" {
+  provider     = google-beta
+  location     = "us" # Example region, adjust as necessary
+  instance     = "{{index $.TestEnvVars "chronicle_id"}}"
+  display_name = "{{index $.Vars "dashboard_name"}}"
+  description  = "{{index $.Vars "dashboard_description"}}"
+  access       = "DASHBOARD_PRIVATE"
+  type         = "CUSTOM"
+
+  # REFINED: The 'definition' wrapper is removed because flatten_object is true.
+  # 'filters' and 'charts' are now top-level blocks.
+  filters {
+    id                                    = "GlobalTimeFilter"
+    display_name                          = "Global Time Filter"
+    data_source                           = "GLOBAL"
+    is_standard_time_range_filter         = true
+    is_standard_time_range_filter_enabled = true
+    filter_operator_and_field_values {
+      filter_operator = "PAST"
+      field_values    = ["1", "DAY"]
+    }
+  }
+
+  # Note: 'charts' block is intentionally omitted here as it is managed 
+  # by the 'google_chronicle_dashboard_chart' resource lifecycle.
+}
+
+resource "google_chronicle_dashboard_chart" "my_chart" {
+  provider         = google-beta
+  location         = google_chronicle_native_dashboard.my_dashboard.location
+  instance         = google_chronicle_native_dashboard.my_dashboard.instance
+  native_dashboard = google_chronicle_native_dashboard.my_dashboard.name
+
+  # Chart layout (satisfies the ValidateChartLayout Go logic)
+  chart_layout {
+    start_x = 0
+    span_x  = 50
+    start_y = 12
+    span_y  = 18
+  }
+
+  dashboard_chart {
+    display_name = "Data Source Health Overview"
+    description  = "Health of data sources over time"
+    tile_type    = "TILE_TYPE_VISUALIZATION"
+
+    chart_datasource {
+      data_sources = ["IOC_MATCHES"]
+    }
+
+    visualization {
+      series {
+        series_type = "LINE"
+        encode {
+          x = "timestamp"
+          y = "total_count"
+        }
+        data_label {
+          show = true
+        }
+      }
+
+      x_axes {
+        axis_type    = "CATEGORY"
+        display_name = "Date"
+      }
+
+      y_axes {
+        axis_type    = "CATEGORY"
+        display_name = "Sources"
+      }
+
+      legends {
+        top           = 12
+        legend_orient = "HORIZONTAL"
+        show         = true
+        id           = "test_map_legend_01"
+        bottom       =  10
+        left         =  10
+        right        =  5
+        legend_align = "LEFT"
+        padding      = [10]
+        z            = 2
+        z_level      = 1
+      }
+
+      series_column = ["health_status"]
+      grouping_type = "Grouped"
+    }
+
+    drill_down_config {
+      left_drill_downs {
+        id           = "D89B834D-977A-4E0C-83B0-12AB1D05E76B"
+        display_name = "Link to the google"
+        custom_settings {
+          new_tab = true
+          external_link {
+            description = "This is an external link"
+            link        = "www.google.com"
+          }
+        }
+      }
+    }
+  }
+
+  dashboard_query {
+    query = <<-EOT
+      $IOC_Type = ioc.ioc_type
+      
+      match:
+        $IOC_Type
+      
+      outcome:
+        $IOC_Count = count(ioc.ioc_value) 
+      
+      order:
+        $IOC_Count desc
+    EOT
+
+    input {
+      relative_time {
+        time_unit      = "DAY"
+        start_time_val = "1"
+      }
+    }
+  }
+}
+
+resource "google_chronicle_dashboard_chart" "button_tile" {
+  provider         = google-beta
+  location         = google_chronicle_native_dashboard.my_dashboard.location
+  instance         = google_chronicle_native_dashboard.my_dashboard.instance
+  native_dashboard = google_chronicle_native_dashboard.my_dashboard.name
+
+  chart_layout {
+    start_x = 0
+    span_x  = 12
+    start_y = 66
+    span_y  = 4
+  }
+
+  dashboard_chart {
+    display_name = "Navigation Button"
+    tile_type    = "TILE_TYPE_BUTTON"
+
+    visualization {
+      button {
+        description = "This is a button tile"
+        label       = "View Custom Detection Rules"
+        hyperlink   = "/rulesDashboard"
+        new_tab     = true
+        properties {
+          color        = "#1a73e8"
+          button_style = "BUTTON_STYLE_TRANSPARENT"
+        }
+      }
+    }
+  }
+}
+
+resource "google_chronicle_dashboard_chart" "markdown_tile" {
+  provider         = google-beta
+  location         = google_chronicle_native_dashboard.my_dashboard.location
+  instance         = google_chronicle_native_dashboard.my_dashboard.instance
+  native_dashboard = google_chronicle_native_dashboard.my_dashboard.name
+
+  # Note: Ensure start_y does not overlap with your previous charts
+  chart_layout {
+    start_x = 0
+    span_x  = 24
+    start_y = 48
+    span_y  = 4
+  }
+
+  dashboard_chart {
+    display_name = "markdown"
+    tile_type    = "TILE_TYPE_MARKDOWN"
+
+    visualization {
+      markdown {
+        content = "### Dashboard Header\nThis is a markdown block used for descriptions or section headers."
+        
+        properties {
+          background_color = "#09326C"
+        }
+      }
+    }
+  }
+}
