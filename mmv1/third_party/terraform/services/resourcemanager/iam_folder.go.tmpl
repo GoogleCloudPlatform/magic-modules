@@ -28,8 +28,8 @@ func NewFolderIamMemberListResource() list.ListResource {
 			FolderIdParseFunc,
 			tpgiamresource.IamWithResourceIdentity(FolderIamResourceIdentityParser),
 		),
-		IamFolderSchema,
 		NewFolderIamUpdater,
+		tpgiamresource.IamMemberListCallConfig{},
 	)
 }
 

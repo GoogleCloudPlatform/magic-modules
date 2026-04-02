@@ -48,8 +48,8 @@ func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
 			{{ $.ResourceName }}IdParseFunc,
 			tpgiamresource.IamWithResourceIdentity({{ $.ResourceName }}IamResourceIdentityParser),
 		),
-		{{ $.ResourceName }}IamSchema,
 		{{ $.ResourceName }}IamUpdaterProducer,
+		tpgiamresource.IamMemberListCallConfig{},
 	)
 }
 
