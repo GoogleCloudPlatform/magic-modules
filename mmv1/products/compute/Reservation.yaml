@@ -397,6 +397,13 @@ properties:
     description: |
       Reserved for future use.
     output: true
+  - name: 'resourcePolicies'
+    type: KeyValuePairs
+    description: |
+      Resource policies to attach to this reservation. Each map entry uses a
+      user-defined key; the value is the full or partial URL of the resource policy
+      (for example, a group placement policy). Used to associate placement policy
+      with the reservation.
   - name: 'resourceStatus'
     type: NestedObject
     description: |
