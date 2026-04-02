@@ -291,7 +291,7 @@ func expandEndpointServiceConfigSource(d *schema.ResourceData, meta interface{})
 func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) error {
 	//UDP update shortcircuit start
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceEndpointsService) {
-	    return ResourceEndpointsService().Read(d, meta)
+		return ResourceEndpointsService().Read(d, meta)
 	}
 	//UDP update shortcircuit end
 	// This update is not quite standard for a terraform resource.  Instead of
@@ -365,10 +365,10 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
@@ -415,8 +415,8 @@ func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting endpoints: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 

@@ -130,8 +130,8 @@ func resourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta int
 		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 
@@ -141,7 +141,7 @@ func resourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta int
 func resourceGoogleFolderOrganizationPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	//UDP update shortcircuit start
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleFolderOrganizationPolicy) {
-	    return ResourceGoogleFolderOrganizationPolicy().Read(d, meta)
+		return ResourceGoogleFolderOrganizationPolicy().Read(d, meta)
 	}
 	//UDP update shortcircuit end
 	if isOrganizationPolicyUnset(d) {
@@ -157,10 +157,10 @@ func resourceGoogleFolderOrganizationPolicyUpdate(d *schema.ResourceData, meta i
 
 func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
