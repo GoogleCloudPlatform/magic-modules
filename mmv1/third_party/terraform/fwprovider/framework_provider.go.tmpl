@@ -302,6 +302,7 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
 =======
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources and data sources
 	// implemented using the plugin-framework. The resources' Configure functions receive this data in the ConfigureRequest argument.
+<<<<<<< HEAD
 	primaryMeta := p.Primary.Meta()
 	if primaryMeta == nil {
 		resp.Diagnostics.AddError("Provider not configured", "SDK provider metadata is nil. Ensure the provider block is configured before using framework resources.")
@@ -313,6 +314,9 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
 		return
 	}
 >>>>>>> 4a8305bc7 (resolve issues with using list_compute_iam_member (muxinng + helpers))
+=======
+	meta := p.Primary.Meta().(*transport_tpg.Config)
+>>>>>>> 464559223 (remove extra nil checks)
 	resp.DataSourceData = meta
 	resp.ResourceData = meta
 	resp.EphemeralResourceData = meta
