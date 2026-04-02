@@ -1865,7 +1865,7 @@ func expandGpuDirectConfig(v interface{}) *container.GpuDirectConfig {
 
 	cfg := ls[0].(map[string]interface{})
 
-	if v, ok := cfg["gpu_direct_strategy"]; ok {
+	if v, ok := cfg["gpudirect_strategy"]; ok {
 		return &container.GpuDirectConfig{
 			GpuDirectStrategy: v.(string),
 		}
@@ -2820,7 +2820,7 @@ func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]int
 	return rmt
 }
 
-// GpuDirectConfig only has one field, flatten directly to string.
+// GpuDirectConfig currently only has one field, flatten directly to string.
 func flattenGpuDirectConfig(c *container.GpuDirectConfig) string {
 	if c == nil {
 		return nil

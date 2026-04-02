@@ -4638,6 +4638,8 @@ resource "google_container_node_pool" "np_with_gpu" {
     machine_type = "a2-highgpu-1g" // can't be e2 because of accelerator
     disk_size_gb = 32
 
+	gpudirect_strategy = "rdma"
+
     oauth_scopes = [
       "https://www.googleapis.com/auth/devstorage.read_only",
       "https://www.googleapis.com/auth/logging.write",
