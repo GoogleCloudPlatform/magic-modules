@@ -169,19 +169,8 @@ func ResourceBigtableTable() *schema.Resource {
 					the delimiter must be base64 encoded. For example, if you want to set a delimiter to a single byte character "#", it should be set to "Iw==", which is the base64 encoding of the byte sequence "#".`,
 			},
 			//UDP schema start
-			"deletion_policy": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
-When a 'terraform destroy' or 'terraform apply' would delete the instance,
-the command will fail if this field is set to "PREVENT" in Terraform state.
-When set to "ABANDON", the command will remove the resource from Terraform
-management without updating or deleting the resource in the API.
-When set to "DELETE", deleting the resource is allowed.
-`,
-			},
-			//UDP schema end
+            "deletion_policy": DeletionPolicySchemaEntry("DELETE"),
+//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -454,21 +443,11 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		// String value is default to empty string, so need to set it to nil to specify that the row key schema is not set.
 		d.Set("row_key_schema", nil)
 	}
-	//UDP default read start
-	// Explicitly set virtual fields to default values if unset
-	if _, ok := d.GetOkExists("deletion_policy"); !ok {
-		//prioritize config's value if present
-		if config.DeletionPolicy != "" {
-			if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
-				return fmt.Errorf("Error setting deletion_policy: %s", err)
-			}
-		} else {
-			if err := d.Set("deletion_policy", "DELETE"); err != nil {
-				return fmt.Errorf("Error setting deletion_policy: %s", err)
-			}
-		}
-	}
-	//UDP default read end
+	    //UDP default read start
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
+    }
+    //UDP default read end
 
 	return nil
 }
@@ -516,20 +495,11 @@ func familyMapDiffValueTypes(a, b map[string]bigtable.Family) map[string]bigtabl
 }
 
 func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error {
-	//UDP update shortcircuit start
-	clientSideFields := map[string]bool{"deletion_policy": true}
-	clientSideOnly := true
-	for field := range ResourceBigtableTable().Schema {
-		if d.HasChange(field) && !clientSideFields[field] {
-			clientSideOnly = false
-			break
-		}
-	}
-	if clientSideOnly {
-		log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
-		return resourceBigtableTableRead(d, meta)
-	}
-	//UDP update shortcircuit end
+	    //UDP update shortcircuit start
+    if tpgresource.DeletionPolicyPreUpdate(d, ResourceBigtableTable) {
+        return ResourceBigtableTable().Read(d, meta)
+    }
+    //UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -675,15 +645,13 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
-	if d.Get("deletion_policy").(string) == "PREVENT" {
-		return fmt.Errorf("cannot destroy table without setting deletion_policy=\"DELETE\" and running `terraform apply`")
-	}
-	if d.Get("deletion_policy").(string) == "ABANDON" {
-		log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing table %q from Terraform state without deletion", d.Id())
-		return nil
-	}
-	//UDP pre-delete end
+	    //UDP pre-delete start
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
+        return nil
+    }
+    //UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
