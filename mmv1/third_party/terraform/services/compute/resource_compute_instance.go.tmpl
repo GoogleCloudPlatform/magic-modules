@@ -2333,9 +2333,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
 
-    // If not forced to false, upgrading to a new provider version and subsequently changing a vm property
-    // will trigger replacement when erase_windows_vss_signature = null in state is changed to false as part of a refresh
     {{- if ne $.TargetVersionName `ga` }}
+	// If not forced to false, upgrading to a new provider version and subsequently changing a vm property
+    // will trigger replacement when erase_windows_vss_signature = null in state is changed to false as part of a refresh
     if _, ok := d.GetOkExists("erase_windows_vss_signature"); !ok {
         if err := d.Set("erase_windows_vss_signature", false); err != nil {
             return fmt.Errorf("Error setting erase_windows_vss_signature: %s", err)
@@ -3596,9 +3596,9 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 
+    {{- if ne $.TargetVersionName `ga` }}
 	// erase_windows_vss_signature is not a property of a vm so force to false on import.
     // If not set, value is null in state and will cause replacement if a vm property is subsequently updated (eg. machine_type).
-    {{- if ne $.TargetVersionName `ga` }}
     if err := d.Set("erase_windows_vss_signature", false); err != nil {
         return nil, fmt.Errorf("Error setting erase_windows_vss_signature: %s", err)
     }
