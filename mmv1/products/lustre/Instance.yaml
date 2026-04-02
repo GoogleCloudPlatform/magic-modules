@@ -438,6 +438,7 @@ properties:
   - name: upcomingMaintenanceSchedule
     type: NestedObject
     description: Represents a scheduled maintenance event.
+    output: true
     properties:
       - name: endTime
         type: String
