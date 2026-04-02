@@ -63,7 +63,7 @@ func DataSourceGoogleFolder() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"deletion_policy" {
+			"deletion_policy": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
