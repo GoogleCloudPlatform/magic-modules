@@ -135,8 +135,8 @@ func ResourceApigeeSharedFlow() *schema.Resource {
 				},
 			},
 			//UDP schema start
-            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
-//UDP schema end
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -208,11 +208,11 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceApigeeSharedFlowUpdate(d *schema.ResourceData, meta interface{}) error {
-	    //UDP update shortcircuit start
-    if tpgresource.DeletionPolicyPreUpdate(d, ResourceApigeeSharedFlow) {
-        return ResourceApigeeSharedFlow().Read(d, meta)
-    }
-    //UDP update shortcircuit end
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceApigeeSharedFlow) {
+		return ResourceApigeeSharedFlow().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 	//For how sharedflow api is implemented, just treat an update as create, when the name is same, it will create a new revision
 	return resourceApigeeSharedFlowCreate(d, meta)
 }
@@ -269,11 +269,11 @@ func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) erro
 		d.Set("md5hash", "UNKNOWN")
 		d.Set("detect_md5hash", "UNKNOWN")
 	}
-	    //UDP default read start
-    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-        return err
-    }
-    //UDP default read end
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+	//UDP default read end
 	return nil
 }
 
@@ -297,13 +297,13 @@ func getApigeeSharedFlowLastModifiedAt(d *schema.ResourceData) string {
 
 func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] resourceApigeeSharedFlowDelete")
-	    //UDP pre-delete start
-    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-        return err
-    }else if ok{
-        return nil
-    }
-    //UDP pre-delete end
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

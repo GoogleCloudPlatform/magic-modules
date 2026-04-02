@@ -178,21 +178,20 @@ func GetDeletionPolicyFromDiff(d *schema.ResourceDiff, config *transport_tpg.Con
 
 func DeletionPolicySchemaEntry(resourceDefault string) *schema.Schema {
 	return &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Description: fmt.Sprintf(`Whether Terraform will be prevented from destroying the instance. Defaults to "%s".
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+		Description: fmt.Sprintf(`Whether Terraform will be prevented from destroying the instance. Defaults to "%s".
 When a 'terraform destroy' or 'terraform apply' would delete the instance,
 the command will fail if this field is set to "PREVENT" in Terraform state.
 When set to "ABANDON", the command will remove the resource from Terraform
 management without updating or deleting the resource in the API.
 When set to "DELETE", deleting the resource is allowed.
 `, resourceDefault),
-			}
+	}
 }
 
-
-func DeletionPolicyReadDefault(d *schema.ResourceData, config *transport_tpg.Config, resourceDefault string) (error) {
+func DeletionPolicyReadDefault(d *schema.ResourceData, config *transport_tpg.Config, resourceDefault string) error {
 	if _, ok := d.GetOkExists("deletion_policy"); !ok {
 		//prioritize config's value if present
 		if config.DeletionPolicy != "" {
@@ -208,30 +207,30 @@ func DeletionPolicyReadDefault(d *schema.ResourceData, config *transport_tpg.Con
 	return nil
 }
 
-func DeletionPolicyPreUpdate(d *schema.ResourceData, resourceSchema func() *schema.Resource) (bool) {
-    clientSideFields := map[string]bool{"deletion_policy": true}
-    clientSideOnly := true
-    for field := range resourceSchema().Schema{
-        if d.HasChange(field) && !clientSideFields[field] {
-            return false
-        }
-    }
-    if clientSideOnly {
-        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
-        return true
-    }
-    return false
+func DeletionPolicyPreUpdate(d *schema.ResourceData, resourceSchema func() *schema.Resource) bool {
+	clientSideFields := map[string]bool{"deletion_policy": true}
+	clientSideOnly := true
+	for field := range resourceSchema().Schema {
+		if d.HasChange(field) && !clientSideFields[field] {
+			return false
+		}
+	}
+	if clientSideOnly {
+		log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+		return true
+	}
+	return false
 }
 
 func DeletionPolicyPreDelete(d *schema.ResourceData) (bool, error) {
-    if d.Get("deletion_policy").(string) == "PREVENT" {
-        return true, fmt.Errorf("cannot destroy %q without setting deletion_policy=\"DELETE\" and running `terraform apply`", d.Id())
-    }
-    if d.Get("deletion_policy").(string) == "ABANDON" {
-        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing %q from Terraform state without deletion", d.Id())
-        return true, nil
-    }
-    return false, nil
+	if d.Get("deletion_policy").(string) == "PREVENT" {
+		return true, fmt.Errorf("cannot destroy %q without setting deletion_policy=\"DELETE\" and running `terraform apply`", d.Id())
+	}
+	if d.Get("deletion_policy").(string) == "ABANDON" {
+		log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing %q from Terraform state without deletion", d.Id())
+		return true, nil
+	}
+	return false, nil
 }
 
 func GetRouterLockName(region string, router string) string {

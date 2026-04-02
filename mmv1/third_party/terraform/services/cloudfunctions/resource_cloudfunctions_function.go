@@ -535,8 +535,8 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Description: `The version identifier of the Cloud Function. Each deployment attempt results in a new version of a function being created.`,
 			},
 			//UDP schema start
-            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
-//UDP schema end
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -870,22 +870,22 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	} else {
 		d.Set("automatic_update_policy", nil)
 	}
-	    //UDP default read start
-    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-        return err
-    }
-    //UDP default read end
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+	//UDP default read end
 
 	return nil
 }
 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
-	    //UDP update shortcircuit start
-    if tpgresource.DeletionPolicyPreUpdate(d, ResourceCloudFunctionsFunction) {
-        return ResourceCloudFunctionsFunction().Read(d, meta)
-    }
-    //UDP update shortcircuit end
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceCloudFunctionsFunction) {
+		return ResourceCloudFunctionsFunction().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1078,13 +1078,13 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
-	    //UDP pre-delete start
-    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-        return err
-    }else if ok{
-        return nil
-    }
-    //UDP pre-delete end
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
