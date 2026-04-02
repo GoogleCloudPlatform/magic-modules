@@ -160,6 +160,7 @@ properties:
   - name: dynamicTierOptions
     type: NestedObject
     description: Dynamic tier options for a Managed Lustre instance.
+    immutable: true
     properties:
       - name: mode
         type: String
@@ -169,6 +170,7 @@ properties:
           Possible values:
           DISABLED
           DEFAULT_CACHE
+        immutable: true
   - name: filesystem
     type: String
     required: true
@@ -182,7 +184,6 @@ properties:
     description: |-
       Indicates whether you want to enable support for GKE clients. By default,
       GKE clients are not supported.
-      Deprecated. No longer required for GKE instance creation.
   - name: kmsKey
     type: String
     description: |-
