@@ -23,6 +23,10 @@ func ResourceGoogleFolder() *schema.Resource {
 			State: resourceGoogleFolderImportState,
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(4 * time.Minute),
 			Update: schema.DefaultTimeout(4 * time.Minute),
@@ -89,6 +93,9 @@ func ResourceGoogleFolder() *schema.Resource {
 				Computed:    true,
 				Description: `The Management Project associated with the folder's configured capabilities.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -196,6 +203,11 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("management_project", folder.ManagementProject); err != nil {
 		return fmt.Errorf("Error setting management_project: %s", err)
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	//UDP default read end
 
 	return nil
 }
@@ -207,7 +219,7 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	clientSideFields := map[string]bool{"deletion_protection": true}
+	clientSideFields := map[string]bool{"deletion_protection": true, "deletion_policy": true}
 	clientSideOnly := true
 	for field := range ResourceGoogleFolder().Schema {
 		if d.HasChange(field) && !clientSideFields[field] {
@@ -270,6 +282,13 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
