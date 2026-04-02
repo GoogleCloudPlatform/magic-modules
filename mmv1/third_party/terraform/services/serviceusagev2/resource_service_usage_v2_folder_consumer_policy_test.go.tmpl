@@ -88,7 +88,7 @@ resource "google_folder" "test" {
 resource "google_service_usage_v2_folder_consumer_policy" "default" {
   provider        = google-beta
   folder          = google_folder.test.folder_id
-  deletion_policy = "FORCE"
+  force = true
 
   enable_rules {
     services = [
