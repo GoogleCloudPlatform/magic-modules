@@ -1275,8 +1275,8 @@ func resourceOSConfigOSPolicyAssignmentRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error reading OSPolicyAssignment: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 
@@ -1286,7 +1286,7 @@ func resourceOSConfigOSPolicyAssignmentRead(d *schema.ResourceData, meta interfa
 func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	//UDP update shortcircuit start
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceOSConfigOSPolicyAssignment) {
-	    return ResourceOSConfigOSPolicyAssignment().Read(d, meta)
+		return ResourceOSConfigOSPolicyAssignment().Read(d, meta)
 	}
 	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
@@ -1400,10 +1400,10 @@ func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta inter
 
 func resourceOSConfigOSPolicyAssignmentDelete(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
