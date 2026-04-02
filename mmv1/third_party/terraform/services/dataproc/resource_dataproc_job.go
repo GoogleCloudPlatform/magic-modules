@@ -31,6 +31,7 @@ func ResourceDataprocJob() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			tpgresource.SetLabelsDiff,
 		),
@@ -416,8 +417,8 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 	return nil
@@ -425,10 +426,10 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
