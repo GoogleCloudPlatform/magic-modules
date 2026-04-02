@@ -40,10 +40,6 @@ properties:
           type: 'NestedObject'
           description: 'Configuration for the nodes in the pool.'
           properties:
-            - name: 'gpudirect_strategy'
-              type: 'String'
-              description: 'The type of GPU direct strategy to enable on the node pool'
-              immutable: true
             - name: 'guest_accelerator'
               type: 'Array'
               api_name: 'accelerators'
