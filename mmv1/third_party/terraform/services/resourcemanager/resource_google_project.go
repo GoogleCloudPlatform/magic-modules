@@ -43,6 +43,7 @@ func ResourceGoogleProject() *schema.Resource {
 		Delete: resourceGoogleProjectDelete,
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.SetLabelsDiff,
 		),
 
@@ -320,11 +321,11 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	// Explicitly set client-side fields to default values if unset
-	if _, ok := d.GetOkExists("deletion_policy"); !ok {
-		if err := d.Set("deletion_policy", "PREVENT"); err != nil {
-			return fmt.Errorf("Error setting deletion_policy: %s", err)
-		}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
 	}
+	//UDP default read end
 	if err := d.Set("project_id", pid); err != nil {
 		return fmt.Errorf("Error setting project_id: %s", err)
 	}
