@@ -42,7 +42,6 @@ properties:
       - name: 'gpudirect_strategy'
         type: 'String'
         description: 'The type of GPU direct strategy to enable on the node pool'
-        min_version: beta
         immutable: true
       - name: 'guest_accelerator'
         type: 'Array'
