@@ -231,7 +231,6 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 	}
 
 	ranges := connection.ReservedPeeringRanges
-	sort.Strings(ranges)
 	if err := d.Set("reserved_peering_ranges", ranges); err != nil {
 		return fmt.Errorf("Error setting reserved_peering_ranges: %s", err)
 	}
