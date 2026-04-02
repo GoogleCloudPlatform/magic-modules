@@ -45,8 +45,6 @@ async:
   include_project: true
 exclude_sweeper: true
 custom_code:
-  pre_update: 'templates/terraform/pre_update/folder_consumer_policy.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/folder_consumer_policy.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/folder_consumer_policy.go.tmpl'
 examples:
   - name: 'service_usage_folder_consumer_policy_basic'
