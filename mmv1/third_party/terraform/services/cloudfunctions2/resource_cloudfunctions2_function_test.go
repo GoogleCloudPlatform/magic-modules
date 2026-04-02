@@ -809,6 +809,7 @@ func TestAccCloudFunctions2Function_trafficSplit(t *testing.T) {
 			},
 			{
 				Config: testAccCloudfunctions2function_trafficSplitUpdate(context),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				ResourceName:            "google_cloudfunctions2_function.traffic-split-function",
