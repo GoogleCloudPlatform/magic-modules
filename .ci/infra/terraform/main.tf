@@ -540,6 +540,12 @@ resource "google_organization_iam_member" "sa_org2_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_org2_folder_admin" {
+  org_id = data.google_organization.org2.org_id
+  role   = "roles/resourcemanager.folderAdmin"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_org2_owner" {
   org_id = data.google_organization.org2.org_id
   role   = "roles/owner"
