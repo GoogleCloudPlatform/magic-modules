@@ -1,6 +1,13 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
+// IAM list resources enumerate rows for google_*_iam_member instances by reading
+// IAM policies on one or more GCP resources (policy targets).
+//
+// When IamMemberListCallConfig.ListUrlFunc is set, List() uses transport.ListCall to
+// discover multiple targets (e.g. all disks in a zone), then reads IAM for each.
+// Otherwise a single target is built from the list block.
+
 package tpgiamresource
 
 import (
@@ -10,10 +17,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
-	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
@@ -45,28 +49,11 @@ type IamMemberListResource struct {
 	newUpdater        NewResourceIamUpdaterFunc
 }
 
-// deriveSchemas extracts parent-identifying fields from memberResource.Schema (everything
-// except IamMemberBaseSchema). listBlockSchema is the same minus resourceNameField.
-func deriveSchemas(memberResource *schema.Resource, resourceNameField string) (iamResourceSchema, listBlockSchema map[string]*schema.Schema) {
-	iamResourceSchema = make(map[string]*schema.Schema, len(memberResource.Schema))
-	listBlockSchema = make(map[string]*schema.Schema, len(memberResource.Schema))
-	for k, v := range memberResource.Schema {
-		if _, isBase := IamMemberBaseSchema[k]; isBase {
-			continue
-		}
-		iamResourceSchema[k] = v
-		if k != resourceNameField {
-			listBlockSchema[k] = v
-		}
-	}
-	return
-}
-
 func NewIamMemberListResource(typeName string, memberResource *schema.Resource, newUpdater NewResourceIamUpdaterFunc, listCallConfig IamMemberListCallConfig) list.ListResource {
 	if memberResource.Identity == nil {
 		panic("tpgiamresource: NewIamMemberListResource requires a memberResource with identity (use IamWithResourceIdentity)")
 	}
-	iamResourceSchema, listBlockSchema := deriveSchemas(memberResource, listCallConfig.ResourceNameField)
+	iamResourceSchema, listBlockSchema := tpgresource.DeriveListSchemas(memberResource.Schema, IamMemberBaseSchema, listCallConfig.ResourceNameField)
 	return &IamMemberListResource{
 		typeName:          typeName,
 		memberResource:    memberResource,
@@ -93,61 +80,23 @@ func (r *IamMemberListResource) RawV5Schemas(ctx context.Context, _ list.RawV5Sc
 }
 
 func (r *IamMemberListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
-	attrs := make(map[string]listschema.Attribute, len(r.listBlockSchema))
-	for name, sch := range r.listBlockSchema {
-		attr := listschema.StringAttribute{Description: sch.Description}
-		if sch.Required {
-			attr.Required = true
-		} else {
-			attr.Optional = true
-		}
-		attrs[name] = attr
-	}
-	resp.Schema = listschema.Schema{Attributes: attrs}
-}
-
-// applyListBlockConfig copies list-block attributes from the Terraform config into rd.
-func applyListBlockConfig(ctx context.Context, req list.ListRequest, attrSchema map[string]*schema.Schema, rd *schema.ResourceData) diag.Diagnostics {
-	var diags diag.Diagnostics
-	for attrName := range attrSchema {
-		var v types.String
-		diags.Append(req.Config.GetAttribute(ctx, path.Root(attrName), &v)...)
-		if diags.HasError() {
-			return diags
-		}
-		if v.IsNull() || v.IsUnknown() {
-			continue
-		}
-		if err := rd.Set(attrName, v.ValueString()); err != nil {
-			diags.AddError("Error setting IAM resource field", fmt.Sprintf("%s: %v", attrName, err))
-			return diags
-		}
-	}
-	return diags
-}
-
-func copyIamResourceFields(dst, src *schema.ResourceData, fields map[string]*schema.Schema) {
-	for k := range fields {
-		_ = dst.Set(k, src.Get(k))
-	}
+	resp.Schema = tpgresource.SdkSchemaToListSchema(r.listBlockSchema)
 }
 
 // discoverPolicyTargets returns one ResourceData per GCP resource whose IAM policy should be read.
-func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req list.ListRequest) ([]*schema.ResourceData, diag.Diagnostics) {
+func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req list.ListRequest) ([]*schema.ResourceData, error) {
 	baseRd := r.memberResource.TestResourceData()
-	diags := applyListBlockConfig(ctx, req, r.listBlockSchema, baseRd)
-	if diags.HasError() {
-		return nil, diags
+	if diags := tpgresource.ApplyListBlockConfig(ctx, req, r.listBlockSchema, baseRd); diags.HasError() {
+		return nil, fmt.Errorf("%s", diags.Errors()[0].Detail())
 	}
 
 	if r.listCallConfig.ListUrlFunc == nil {
-		return []*schema.ResourceData{baseRd}, diags
+		return []*schema.ResourceData{baseRd}, nil
 	}
 
 	listUrl, err := r.listCallConfig.ListUrlFunc(baseRd, r.Client)
 	if err != nil {
-		diags.AddError("Error building list URL", err.Error())
-		return nil, diags
+		return nil, fmt.Errorf("building list URL: %w", err)
 	}
 
 	var targets []*schema.ResourceData
@@ -160,20 +109,21 @@ func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req l
 		Flattener: r.listCallConfig.Flattener,
 		Callback: func(temp *schema.ResourceData) error {
 			rd := r.memberResource.TestResourceData()
-			copyIamResourceFields(rd, temp, r.iamResourceSchema)
+			tpgresource.CopyResourceDataFields(rd, temp, r.iamResourceSchema)
 			targets = append(targets, rd)
 			return nil
 		},
 	}); err != nil {
-		diags.AddError("Error listing resources", err.Error())
-		return nil, diags
+		return nil, fmt.Errorf("listing resources: %w", err)
 	}
-	return targets, diags
+	return targets, nil
 }
 
 func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
-	policyTargets, diags := r.discoverPolicyTargets(ctx, req)
-	if diags.HasError() {
+	policyTargets, err := r.discoverPolicyTargets(ctx, req)
+	if err != nil {
+		var diags diag.Diagnostics
+		diags.AddError("Error discovering policy targets", err.Error())
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
@@ -236,7 +186,7 @@ func (r *IamMemberListResource) yieldPolicyMembers(ctx context.Context, req list
 // buildMemberResult populates a ResourceData for one binding member and converts it to a ListResult.
 func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.ListRequest, targetRd *schema.ResourceData, updater ResourceIamUpdater, binding *cloudresourcemanager.Binding, member, etag string) (list.ListResult, error) {
 	rd := r.memberResource.TestResourceData()
-	copyIamResourceFields(rd, targetRd, r.iamResourceSchema)
+	tpgresource.CopyResourceDataFields(rd, targetRd, r.iamResourceSchema)
 
 	normalized := tpgresource.NormalizeIamPrincipalCasing(member)
 	for k, v := range map[string]interface{}{
