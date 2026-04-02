@@ -1,7 +1,6 @@
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
-  org_id          = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
@@ -48,29 +47,6 @@ resource "google_service_networking_connection" "apigee_vpc_connection" {
   depends_on              = [google_project_service.servicenetworking]
 }
 
-resource "google_compute_address" "psc_ilb_consumer_address" {
-  name   = "psc-ilb-consumer-address"
-  region = "{{index $.TestEnvVars "location"}}"
-
-  subnetwork   = google_compute_subnetwork.psc_ilb_producer_subnetwork.id
-  address_type = "INTERNAL"
-
-  project    = google_project.project.project_id
-  depends_on = [google_project_service.compute]
-}
-
-resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
-  name   = "psc-ilb-consumer-forwarding-rule"
-  region = "{{index $.TestEnvVars "location"}}"
-
-  target                = google_compute_service_attachment.psc_ilb_service_attachment.id
-  load_balancing_scheme = "" # need to override EXTERNAL default when target is a service attachment
-  network               = "default"
-  ip_address            = google_compute_address.psc_ilb_consumer_address.address
-
-  project = google_project.project.project_id
-}
-
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
   name   = "producer-forwarding-rule"
   region = "{{index $.TestEnvVars "location"}}"
@@ -111,7 +87,7 @@ resource "google_compute_network" "psc_ilb_network" {
   auto_create_subnetworks = false
 
   project     = google_project.project.project_id
-  depends_on = [google_project_service.compute]
+  depends_on = [time_sleep.wait_300_seconds]
 }
 
 resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
