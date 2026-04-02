@@ -245,6 +245,16 @@ data "google_secret_manager_secret_version_access" "ghe_ac_client_secret" {
   project = "devconnect-terraform-creds"
 }
 
+data "google_secret_manager_secret_version_access" "ghe_ac_client_id_update" {
+  secret  = "ghe-ac-client-id-update"
+  project = "devconnect-terraform-creds"
+}
+
+data "google_secret_manager_secret_version_access" "ghe_ac_client_secret_update" {
+  secret  = "ghe-ac-client-secret-update"
+  project = "devconnect-terraform-creds"
+}
+
 resource "google_developer_connect_account_connector" "my-account-connector" {
   location = "us-central1"
   account_connector_id = "tf-test-ac%{random_suffix}"
@@ -259,11 +269,11 @@ resource "google_developer_connect_account_connector" "my-account-connector" {
   
   custom_oauth_config {
       auth_uri = "https://ghe.proctor-staging-test.com/login/oauth/authorize"
-      client_id = data.google_secret_manager_secret_version_access.ghe_ac_client_id.secret_data
-      client_secret = data.google_secret_manager_secret_version_access.ghe_ac_client_secret.secret_data
+      client_id = data.google_secret_manager_secret_version_access.ghe_ac_client_id_update.secret_data
+      client_secret = data.google_secret_manager_secret_version_access.ghe_ac_client_secret_update.secret_data
       token_uri = "https://ghe.proctor-staging-test.com/login/oauth/access_token"
       host_uri = "https://ghe.proctor-staging-test.com"
-      scm_provider = "GITHUB_ENTERPRISE"
+      scm_provider = "GITLAB_ENTERPRISE"
       scopes = ["repo", "user"]
       pkce_disabled = true
   }
