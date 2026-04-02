@@ -39,7 +39,7 @@ func TestAccServiceUsageV2FolderConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_folder_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder", "deletion_policy", "enable_rules.0.services"},
+				ImportStateVerifyIgnore: []string{"folder", "force", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2FolderConsumerPolicy_removeService(context),
