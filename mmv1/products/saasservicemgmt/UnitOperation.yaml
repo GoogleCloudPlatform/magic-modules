@@ -15,65 +15,64 @@
 name: UnitOperation
 description: A UnitOperation encapsulates the intent to change or interact with a Unit. Operations such as provisioning, upgrading, or deprovisioning a Unit are triggered by creating a UnitOperation resource.
 base_url: projects/{{project}}/locations/{{location}}/unitOperations
+immutable: true
 self_link: projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
 create_url: projects/{{project}}/locations/{{location}}/unitOperations?unitOperationId={{unit_operation_id}}
-id_format: projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
-immutable: true
 import_format:
   - projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
+autogen_status: VW5pdE9wZXJhdGlvbg==
+custom_code:
+  post_create: templates/terraform/post_create/saas_runtime_unit_operation_wait.go.tmpl
 examples:
   - name: saas_runtime_unit_operation_basic
-    primary_resource_id: "provision_unit_operation"
-    min_version: "beta"
-    vars:
-      saas_name: example-saas
-      unitkind_name: vm-unitkind
-      release_name: example-release
-      tenant_name: example-tenant
-      unit_name: example-unit
-      provision_operation_name: provision-unit-operation
-      upgrade_operation_name: upgrade-unit-operation
-      deprovision_operation_name: deprovision-unit-operation
-      actuation_service_account: actuator
-      tenant_project_name: tenant
-    test_env_vars:
-      project: "PROJECT_NAME"
-      project_number: "PROJECT_NUMBER"
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
+    primary_resource_id: provision_unit_operation
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
     ignore_read_extra:
-      - "etag"
-      - "error_category"
-      - "state"
-      - "update_time"
-      - "conditions"
-autogen_async: false
-autogen_status: VW5pdE9wZXJhdGlvbg==
+      - etag
+      - error_category
+      - state
+      - update_time
+      - conditions
+    vars:
+      actuation_service_account: actuator
+      deprovision_operation_name: deprovision-unit-operation
+      provision_operation_name: provision-unit-operation
+      release_name: example-release
+      saas_name: example-saas
+      tenant_name: example-tenant
+      tenant_project_name: tenant
+      unit_name: example-unit
+      unitkind_name: vm-unitkind
+      upgrade_operation_name: upgrade-unit-operation
+    test_env_vars:
+      billing_account: BILLING_ACCT
+      org_id: ORG_ID
+      project: PROJECT_NAME
+      project_number: PROJECT_NUMBER
 virtual_fields:
   - name: wait_for_completion
     type: Boolean
+    default_value: true
     description: |
       If true, wait for the UnitOperation to reach a terminal state (SUCCEEDED, FAILED, CANCELLED)
       before completing the apply.
-    default_value: true
-custom_code:
-  post_create: "templates/terraform/post_create/saas_runtime_unit_operation_wait.go.tmpl"
+    client_side: true
 parameters:
   - name: location
     type: String
+    required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: unitOperationId
     type: String
+    required: true
     description: The ID value for the new unit operation.
     immutable: true
     url_param_only: true
-    required: true
 properties:
   - name: annotations
     type: KeyValueAnnotations
@@ -133,9 +132,9 @@ properties:
       Deprovision is the unit operation that deprovision the underlying
       resources represented by a Unit. Can only execute if the Unit is currently
       provisioned.
-    properties: []
     send_empty_value: true
     allow_empty_object: true
+    properties: []
   - name: engineState
     type: String
     description: |-
@@ -200,9 +199,9 @@ properties:
               description: String encoded value for the variable.
             - name: variable
               type: String
+              required: true
               description: Name of the variable from actuation configs.
               immutable: true
-              required: true
       - name: release
         type: String
         description: Reference to the Release object to use for the Unit. (optional).
@@ -230,9 +229,9 @@ properties:
     output: true
   - name: unit
     type: String
+    required: true
     description: The Unit a given UnitOperation will act upon.
     immutable: true
-    required: true
   - name: updateTime
     type: String
     description: |-
@@ -267,9 +266,9 @@ properties:
               description: String encoded value for the variable.
             - name: variable
               type: String
+              required: true
               description: Name of the variable from actuation configs.
               immutable: true
-              required: true
       - name: release
         type: String
         description: Reference to the Release object to use for the Unit. (optional).

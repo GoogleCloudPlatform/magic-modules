@@ -62,7 +62,6 @@ custom_code:
 # Skipping the sweeper because we need to force-delete clusters.
 exclude_sweeper: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'alloydb_cluster_basic'
     primary_resource_id: 'default'
@@ -339,6 +338,7 @@ properties:
         description: |
           The initial password for the user.
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
         at_least_one_of:
           - 'initial_user.0.user'
@@ -694,3 +694,16 @@ properties:
         type: String
         description: |
           Grace end time of the trial cluster.
+  - name: 'dataplexConfig'
+    type: NestedObject
+    description: |
+      Configuration for Dataplex integration. This is an optional field. If not set, Dataplex integration will be enabled by default.
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_dataplex_config.go.tmpl'
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          Indicates whether Dataplex integration is enabled for the cluster.
+        required: true
+        send_empty_value: true

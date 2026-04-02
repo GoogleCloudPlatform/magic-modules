@@ -73,6 +73,12 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: RGF0YXN0b3Jl
+sweeper:
+  url_substitutions:
+    - region: "us-central1-a"
+    - region: "southamerica-west1-a"
+    - region: "me-west1-a"
+    - region: "me-west1-b"
 parameters:
   - name: location
     type: String

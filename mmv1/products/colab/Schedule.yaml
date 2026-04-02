@@ -117,16 +117,16 @@ properties:
     description:
       Timestamp after which no new runs can be scheduled. If specified, the schedule will be completed when either end_time is reached or when scheduled_run_count >= max_run_count. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
   - name: 'maxRunCount'
-    type: int
+    type: String  # Integer
     description:
       Maximum run count of the schedule. If specified, The schedule will be completed when either startedRunCount >= maxRunCount or when endTime is reached. If not specified, new runs will keep getting scheduled until this Schedule is paused or deleted. Already scheduled runs will be allowed to complete. Unset if not specified.
   - name: 'cron'
-    type: string
+    type: String
     description: |
       Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
     required: true
   - name: 'maxConcurrentRunCount'
-    type: int
+    type: String  # Integer
     required: true
     description:
       Maximum number of runs that can be started concurrently for this Schedule. This is the limit for starting the scheduled requests and not the execution of the notebook execution jobs created by the requests.

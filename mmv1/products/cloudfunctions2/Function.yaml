@@ -64,7 +64,6 @@ sweeper:
 examples:
   - name: 'cloudfunctions2_basic'
     primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])'
     vars:
       function: 'function-v2'
       bucket_name: 'gcf-source'
@@ -156,7 +155,6 @@ examples:
       - 'build_config.0.source.0.storage_source.0.bucket'
   - name: 'cloudfunctions2_basic_builder'
     primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])'
     vars:
       function: 'function-v2'
       bucket_name: 'gcf-source'
@@ -304,7 +302,6 @@ examples:
       - 'build_config.0.source.0.storage_source.0.bucket'
   - name: 'cloudfunctions2_directvpc'
     primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])'
     vars:
       function: 'function-v2'
       bucket_name: 'gcf-source'
@@ -318,7 +315,6 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-    min_version: 'beta'
 parameters:
   - name: 'location'
     type: String
@@ -569,6 +565,8 @@ properties:
         description:
           'The Serverless VPC Access connector that this cloud function can
           connect to.'
+        conflicts:
+          - service_config.0.direct_vpc_network_interface
       - name: 'vpcConnectorEgressSettings'
         type: Enum
         description: 'Available egress settings.'
@@ -577,9 +575,10 @@ properties:
           - 'PRIVATE_RANGES_ONLY'
           - 'ALL_TRAFFIC'
       - name: 'directVpcNetworkInterface'
-        min_version: 'beta'
         type: Array
         description: 'The Direct VPC network interface for the Cloud Function. Currently only a single Direct VPC is supported.'
+        conflicts:
+          - service_config.0.vpc_connector
         item_type:
           type: NestedObject
           properties:
@@ -597,7 +596,6 @@ properties:
               item_type:
                 type: String
       - name: 'directVpcEgress'
-        min_version: 'beta'
         type: Enum
         description: 'Egress settings for direct VPC. If not provided, it defaults to VPC_EGRESS_PRIVATE_RANGES_ONLY.'
         default_from_api: true

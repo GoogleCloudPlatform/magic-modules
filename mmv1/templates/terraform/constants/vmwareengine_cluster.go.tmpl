@@ -1,0 +1,172 @@
+// Mount and unmount on the clusters are performed
+// on the basis of a new datastore is being added or removed
+// This function doesn't account any change in the datastore mount config fields
+// Diff is calculated based on different Datastore full reosurce name
+func CalculateDatastoreMountsDiff(exsitingDatastoreMountCfg, requestedDatastoreMountCfg []interface{}) []interface{} {
+    existingCfgMap := make(map[string]map[string]interface{})
+    for _, item := range exsitingDatastoreMountCfg {
+        m := item.(map[string]interface{})
+        if datastore, ok := m["datastore"].(string); ok && datastore != "" {
+            existingCfgMap[datastore] = m
+        }
+    }
+
+    var diff []interface{}
+    for _, item := range requestedDatastoreMountCfg {
+        m := item.(map[string]interface{})
+        if datastore, ok := m["datastore"].(string); ok && datastore != "" {
+            if _, exists := existingCfgMap[datastore]; !exists {
+                diff = append(diff, item)
+            }
+        }
+    }
+    return diff
+}
+
+// For mount and unmount operation, update_mask is not used.
+func RemoveDatastoreMountConfigFieldFromUpdateMask (url string) (string) {
+
+    fieldToRemove := "datastoreMountConfig"
+    encodedComma  := "%2C"
+
+    // Matches ",field" to remove the field and the preceding comma.
+    // e.g., foo%2CdatastoreMountConfig -> foo
+    reCommaField := regexp.MustCompile(encodedComma + fieldToRemove)
+
+    // Matches "field," to remove the field and the succeeding comma.
+    // e.g., datastoreMountConfig%2Cbar -> bar
+    reFieldComma := regexp.MustCompile(fieldToRemove + encodedComma)
+
+    // Matches the field only if it's the entire string.
+    // e.g., datastoreMountConfig -> ""
+    reFieldOnly := regexp.MustCompile(fieldToRemove + `(?:%20|\+)*$`)
+
+    // Remove instances like "...%2CdatastoreMountConfig"
+    url = reCommaField.ReplaceAllString(url, "")
+
+    // Remove instances like "datastoreMountConfig%2C..."
+    url = reFieldComma.ReplaceAllString(url, "")
+
+    // Remove instance where the mask only contains "datastoreMountConfig"
+    url = reFieldOnly.ReplaceAllString(url, "")
+
+    return url
+}
+
+{{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
+func mountDatastores(mountsToAdd []interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+    var project string
+    userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+    if err != nil {
+        return err
+    }
+
+    // Mount operations
+    for _, mount := range mountsToAdd {
+        mountMap := mount.(map[string]interface{})
+        datastore, ok := mountMap["datastore"].(string)
+        if !ok || datastore == "" {
+            return fmt.Errorf("no datastore found in the mount request : %#v", mountMap)
+        }
+
+        datastoreMountConfigPayload := map[string]interface{}{
+            "datastore": datastore,
+        }
+
+        if networkData, ok := mountMap["datastore_network"]; ok {
+            datastoreMountConfigPayload["datastoreNetwork"] = networkData.([]interface{})[0]
+        }
+        if v, ok := mountMap["nfs_version"]; ok && v.(string) != "" {
+            datastoreMountConfigPayload["nfsVersion"] = v.(string)
+        }
+        if v, ok := mountMap["access_mode"]; ok && v.(string) != "" {
+            datastoreMountConfigPayload["accessMode"] = v.(string)
+        }
+
+        req := map[string]interface{}{
+            "datastoreMountConfig": datastoreMountConfigPayload,
+        }
+        if v, ok := mountMap["ignore_colocation"]; ok {
+            req["ignoreColocation"] = v.(bool)
+        }
+
+        // Construct the URL directly using d.Id() for the resource name
+        //mountUrl := fmt.Sprintf("%s%s:mountDatastore", config.VmwareengineBasePath, d.Id())
+        mountUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VmwareengineBasePath{{"}}"}}{{"{{"}}parent{{"}}"}}/clusters/{{"{{"}}name{{"}}"}}:mountDatastore")
+        if err != nil {
+                return err
+        }
+        log.Printf("[DEBUG] MountDatastore request on a Cluster %q: url: %q reqBody: %#v", d.Id(), mountUrl, req)
+        op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config:    config,
+            Method:    "POST",
+            RawURL:    mountUrl,
+            UserAgent: userAgent,
+            Body:      req,
+            Timeout:   d.Timeout(schema.TimeoutUpdate),
+        })
+        if err != nil {
+            return fmt.Errorf("error calling MountDatastore for %q: %s", datastore, err)
+        }
+
+        err = VmwareengineOperationWaitTime(
+                        config, op, project, "Mount Datastore", userAgent,
+                        d.Timeout(schema.TimeoutUpdate))
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+{{- end }}
+
+{{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
+func unmountDatastores(mountsToRemove []interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+    var project string
+    userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+    if err != nil {
+        return err
+    }
+
+    // Unmount operations
+    for _, mount := range mountsToRemove {
+        mountMap := mount.(map[string]interface{})
+        datastore, ok := mountMap["datastore"].(string)
+        if !ok || datastore == "" {
+            return fmt.Errorf("no datastore found in the unmount request : %#v", mountMap)
+        }
+
+        //unmountUrl := fmt.Sprintf("%s%s:unmountDatastore", config.VmwareengineBasePath, d.Id())
+        unmountUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VmwareengineBasePath{{"}}"}}{{"{{"}}parent{{"}}"}}/clusters/{{"{{"}}name{{"}}"}}:unmountDatastore")
+        if err != nil {
+            return err
+        }
+        req := map[string]interface{}{
+            "datastore": datastore,
+        }
+
+        log.Printf("[DEBUG] UnmountDatastore request on a Cluster %q: url: %q reqBody: %#v", d.Id(), unmountUrl, req)
+        op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config:    config,
+            Method:    "POST",
+            RawURL:    unmountUrl,
+            UserAgent: userAgent,
+            Body:      req,
+            Timeout:   d.Timeout(schema.TimeoutUpdate), // Adjust timeout if necessary
+        })
+        if err != nil {
+            return fmt.Errorf("error calling UnmountDatastore for %q: %s", datastore, err)
+        }
+
+        // Assuming VmwareengineOperationWaitTime is a function to poll the LRO
+        err = VmwareengineOperationWaitTime(
+                        config, op, project, "Unmount Datastore", userAgent,
+                        d.Timeout(schema.TimeoutUpdate)) // Adjust timeout if necessary
+        if err != nil {
+            return err
+        }
+        log.Printf("[DEBUG] Successfully unmounted Datastore %q from Cluster %q", datastore, d.Id())
+    }
+    return nil
+}
+{{- end }}

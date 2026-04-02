@@ -26,6 +26,7 @@ references:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
   api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
 docs:
+cai_resource_kind: 'RegionBackendService'
 base_url: 'projects/{{project}}/regions/{{region}}/backendServices'
 has_self_link: true
 timeouts:
@@ -45,11 +46,13 @@ iam_policy:
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
   decoder: 'templates/terraform/decoders/region_backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_region_backend_service.go.tmpl'
 custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
@@ -64,7 +67,6 @@ sweeper:
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-region-service%s", context["random_suffix"])'
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
@@ -139,6 +141,16 @@ examples:
       network_name: 'network'
     exclude_test: true
   - name: 'region_backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
@@ -879,6 +891,7 @@ properties:
         type: String
         description: |
           OAuth2 Client ID for IAP
+        send_empty_value: true
       - name: 'oauth2ClientSecret'
         type: String
         description: |
@@ -914,6 +927,7 @@ properties:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL'
       - 'INTERNAL_MANAGED'
+      - 'INTERNAL_SELF_MANAGED'
   - name: 'localityLbPolicy'
     type: Enum
     description: |
@@ -1552,6 +1566,28 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+      - name: 'forwardProxy'
+        type: NestedObject
+        description: |
+          Dynamic Forwarding Proxy configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling dynamic forwarding proxy.
+            immutable: true
+            required: true
+          - name: 'proxyMode'
+            type: Enum
+            min_version: beta
+            description: |
+              Determines the dynamic forwarding proxy mode
+            enum_values:
+              - 'DIRECT_FORWARDING'
+              - 'CLOUD_RUN'
+            required: true
   - name: 'haPolicy'
     type: NestedObject
     description: |
@@ -1571,6 +1607,7 @@ properties:
     properties:
       - name: 'fastIPMove'
         type: Enum
+        is_missing_in_cai: true
         description: |
           Specifies whether fast IP move is enabled, and if so, the mechanism to achieve it.
           Supported values are:
@@ -1598,6 +1635,7 @@ properties:
         properties:
           - name: 'backendGroup'
             type: ResourceRef
+            is_missing_in_cai: true
             description: |
               A fully-qualified URL of the zonal Network Endpoint Group (NEG) that the leader is
               attached to.

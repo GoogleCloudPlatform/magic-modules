@@ -123,6 +123,7 @@ var (
 		"scheduling.0.host_error_timeout_seconds",
 		"scheduling.0.graceful_shutdown",
 		"scheduling.0.skip_guest_os_shutdown",
+		"scheduling.0.preemption_notice_duration",
 {{- end }}
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
@@ -346,7 +347,6 @@ func ResourceComputeInstance() *schema.Resource {
 										Optional:     true,
 										AtLeastOneOf: initializeParamsKeys,
 										Computed:     true,
-										ForceNew:     true,
 										ValidateFunc: validation.IntAtLeast(1),
 										Description:  `The size of the image in gigabytes.`,
 									},
@@ -1294,6 +1294,27 @@ be from 0 to 999,999,999 inclusive.`,
 							Optional:    true,
 							Default:     false,
 							Description: `Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.`,
+						},
+						"preemption_notice_duration": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							AtLeastOneOf:  schedulingKeys,
+							Description: `The duration of the notice that the instance will receive before it is preempted.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"seconds": {
+										Type:     schema.TypeInt,
+										Required: true,
+										Description: `Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.`,
+									},
+									"nanos": {
+										Type:     schema.TypeInt,
+										Optional: true,
+										Description: `Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.`,
+									},
+								},
+							},
 						},
 						{{- end }}
 					},
@@ -2802,29 +2823,39 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if d.HasChange("boot_disk") {
-  		//default behavior for the disk is to have the same name as the instance
-  		diskName := instance.Name
-  		if v := tpgresource.GetResourceNameFromSelfLink(d.Get("boot_disk.0.source").(string)); v != diskName {
-  			diskName = v
-  		}
+		//default behavior for the disk is to have the same name as the instance
+		diskName := instance.Name
+		if v := tpgresource.GetResourceNameFromSelfLink(d.Get("boot_disk.0.source").(string)); v != diskName {
+			diskName = v
+		}
 
-  		disk, err := config.NewComputeClient(userAgent).Disks.Get(project, zone, diskName).Do()
-  		if err != nil {
-  			return fmt.Errorf("Error getting boot disk: %s", err)
-  		}
+		disk, err := config.NewComputeClient(userAgent).Disks.Get(project, zone, diskName).Do()
+		if err != nil {
+			return fmt.Errorf("Error getting boot disk: %s", err)
+		}
 
-  		obj := make(map[string]interface{})
+		obj := make(map[string]interface{})
 
-      if d.HasChange("boot_disk.0.initialize_params.0.labels") {
-        obj["labels"] = tpgresource.ConvertStringMap(d.Get("boot_disk.0.initialize_params.0.labels").(map[string]interface{}))
-        obj["labelFingerprint"] = disk.LabelFingerprint
-        url := "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/disks/{{"{{"}}name{{"}}"}}/setLabels"
-        err := updateDisk(d, config, userAgent, project, url, obj)
-        if err != nil {
-          return err
-        }
-      }
-  	}
+		if d.HasChange("boot_disk.0.initialize_params") {
+			if d.HasChange("boot_disk.0.initialize_params.0.size") {
+				obj["sizeGb"] = d.Get("boot_disk.0.initialize_params.0.size").(int)
+				url := "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/disks/{{"{{"}}name{{"}}"}}/resize"
+				err := updateDisk(d, config, userAgent, project, url, obj)
+				if err != nil {
+					return err
+				}
+			}
+			if d.HasChange("boot_disk.0.initialize_params.0.labels") {
+				obj["labels"] = tpgresource.ConvertStringMap(d.Get("boot_disk.0.initialize_params.0.labels").(map[string]interface{}))
+				obj["labelFingerprint"] = disk.LabelFingerprint
+				url := "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/disks/{{"{{"}}name{{"}}"}}/setLabels"
+				err := updateDisk(d, config, userAgent, project, url, obj)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 
 	if d.HasChange("attached_disk") {
 		o, n := d.GetChange("attached_disk")

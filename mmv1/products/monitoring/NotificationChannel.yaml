@@ -49,7 +49,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 custom_code:
   constants: 'templates/terraform/constants/monitoring_notification_channel.go.tmpl'
   encoder: 'templates/terraform/encoders/monitoring_notification_channel.go.tmpl'

@@ -35,7 +35,7 @@ type Type struct {
 	ApiName string `yaml:"api_name,omitempty"`
 
 	// TODO rewrite: improve the parsing of properties based on type in resource yaml files.
-	Type string
+	Type string `yaml:"type"`
 
 	// For nested fields, this only applies within the parent.
 	// For example, an optional parent can contain a required child.
@@ -145,8 +145,6 @@ type Type struct {
 	// Can only be overridden - we should never set this ourselves.
 	NewType string `yaml:"-"`
 
-	Properties []*Type `yaml:"properties,omitempty"`
-
 	EnumValues []string `yaml:"enum_values,omitempty"`
 
 	ExcludeDocsValues bool `yaml:"exclude_docs_values,omitempty"`
@@ -154,9 +152,8 @@ type Type struct {
 	// ====================
 	// Array Fields
 	// ====================
-	ItemType *Type  `yaml:"item_type,omitempty"`
-	MinSize  string `yaml:"min_size,omitempty"`
-	MaxSize  string `yaml:"max_size,omitempty"`
+	MinSize *int `yaml:"min_size,omitempty"`
+	MaxSize *int `yaml:"max_size,omitempty"`
 	// Adds a ValidateFunc to the item schema
 	ItemValidation resource.Validation `yaml:"item_validation,omitempty"`
 
@@ -239,10 +236,6 @@ type Type struct {
 	//
 	// The name of the key. Used in the Terraform schema as a field name.
 	KeyName string `yaml:"key_name,omitempty"`
-
-	// Deprecated. A description of the key's format. Used in Terraform to describe
-	// the field in documentation.
-	KeyDescription string `yaml:"key_description,omitempty"`
 
 	// ====================
 	// KeyValuePairs Fields
@@ -342,6 +335,9 @@ type Type struct {
 	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 
 	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
+
+	Properties []*Type `yaml:"properties,omitempty"`
+	ItemType   *Type   `yaml:"item_type,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -364,10 +360,12 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 	defaults.Resource = t.Resource
 	defaults.ParentName = t.ParentName
 	defaults.setShallowDefaults(resourceMetadata)
-	defaults.Name = ""
 	defaults.Type = ""
 	defaults.Resource = ""
-	defaults.ParentName = ""
+	if defaults.ParentName != defaults.Name {
+		defaults.ParentName = ""
+		defaults.Name = ""
+	}
 
 	// OmitDefaultsForMarshaling creates a clone of the struct where any field
 	// matching its default value is set to its zero-value, allowing `omitempty` to work.
@@ -387,6 +385,21 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 	err = node.Encode((*typeAlias)(clonePtr)) // Use the alias to prevent recursion
 	if err != nil {
 		return nil, err
+	}
+
+	// Fix: Ensure float values (like 0.0) are marshaled as floats (0.0) with !!float tag.
+	// If we don't set the tag, it might be emitted as '0' (int) or '!!int 0.0' (invalid).
+	if _, ok := t.DefaultValue.(float64); ok {
+		for i := 0; i < len(node.Content); i += 2 {
+			if node.Content[i].Value == "default_value" {
+				valNode := node.Content[i+1]
+				if !strings.Contains(valNode.Value, ".") && !strings.Contains(strings.ToLower(valNode.Value), "e") {
+					valNode.Value = valNode.Value + ".0"
+				}
+				valNode.Tag = "!!float"
+				break
+			}
+		}
 	}
 
 	// Special handling for `properties` field.
@@ -479,52 +492,66 @@ func (t *Type) SetDefault(r *Resource) {
 	}
 }
 
-func (t *Type) Validate(rName string) {
+func (t *Type) Validate(rName string) (es []error) {
+	// Use Lineage to get the full path (e.g. "parent.child.grandchild") for clearer error messages.
+	fullFieldPath := t.Name
+	if lineage := t.Lineage(); len(lineage) > 0 {
+		fullFieldPath = strings.Join(lineage, ".")
+	}
+
 	if t.Name == "" {
-		log.Fatalf("Missing `name` for proprty with type %s in resource %s", t.Type, rName)
+		es = append(es, fmt.Errorf("missing `name` for property with type %s in resource %s", t.Type, rName))
+	}
+
+	// Check type is valid. Also allow empty as it's currently used in unit tests.
+	if !slices.Contains([]string{"Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
+		es = append(es, fmt.Errorf("property %s unknown type %q in resource %s", fullFieldPath, t.Type, rName))
 	}
 
 	if t.Output && t.Required {
-		log.Fatalf("Property %s cannot be output and required at the same time in resource %s.", t.Name, rName)
+		es = append(es, fmt.Errorf("property %s cannot be output and required at the same time in resource %s.", fullFieldPath, rName))
 	}
 
 	if t.DefaultFromApi && t.DefaultValue != nil {
-		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
+		es = append(es, fmt.Errorf("property %s 'default_value' and 'default_from_api' cannot be both set in resource %s ", fullFieldPath, rName))
 	}
 
 	if (t.WriteOnlyLegacy || t.WriteOnly) && (t.DefaultFromApi || t.Output) {
-		log.Fatalf("Property %s cannot be write_only and default_from_api or output at the same time in resource %s", t.Name, rName)
+		es = append(es, fmt.Errorf("property %s cannot be write_only and default_from_api or output at the same time in resource %s", fullFieldPath, rName))
 	}
 
 	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
-		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
-	}
-
-	if t.KeyDescription != "" {
-		log.Fatalf("Property %s key_description can't be set in resource %s; it's deprecated", t.Name, rName)
+		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
 	}
 
 	t.validateLabelsField()
 
 	switch {
 	case t.IsA("Array"):
-		t.ItemType.Validate(rName)
+		es = append(es, t.ItemType.Validate(rName)...)
 	case t.IsA("Map"):
 		// ValueType.Name should be empty (because it's unused) but we require types to have names in all other cases.
 		// This logic allows both to be validated.
 		oldName := t.ValueType.Name
 		t.ValueType.Name = "any_value"
-		t.ValueType.Validate(rName)
+		es = append(es, t.ValueType.Validate(rName)...)
 		t.ValueType.Name = oldName
 		if t.ValueType.Name != "" {
-			log.Fatalf("Property %s value_type.name can't be set in resource %s", t.Name, rName)
+			es = append(es, fmt.Errorf("property %s value_type.name can't be set in resource %s", fullFieldPath, rName))
 		}
 	case t.IsA("NestedObject"):
 		for _, p := range t.Properties {
-			p.Validate(rName)
+			es = append(es, p.Validate(rName)...)
 		}
 	default:
 	}
+
+	// UpdateMask isn't supported on nested fields: https://github.com/hashicorp/terraform-provider-google/issues/26382
+	if t.ParentMetadata != nil && !t.ParentMetadata.FlattenObject && len(t.UpdateMaskFields) > 0 {
+		es = append(es, fmt.Errorf("property %s cannot set update_mask_fields because it is nested in resource %s", fullFieldPath, rName))
+	}
+
+	return es
 }
 
 // TODO rewrite: add validations
@@ -535,7 +562,6 @@ func (t *Type) Validate(rName string) {
 // check_at_least_one_of
 // check_exactly_one_of
 // check_required_with
-// check the allowed types for Type field
 // check the allowed fields for each type, for example, KeyName is only allowed for Map
 
 // Returns a slice of Terraform field names representing where the field is nested within the parent resource.
@@ -558,8 +584,19 @@ func (t Type) Lineage() []string {
 // include the field on the API resource that the fine-grained resource manages.
 func (t Type) ApiLineage() []string {
 	if t.ParentMetadata == nil {
-		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "" {
-			return []string{t.ResourceMetadata.ApiResourceField, t.ApiName}
+		// The special value "." indicates that the resource's shouldn't be considered "nested"
+		// even if it has NestedQuery set.
+		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "." {
+			if t.ResourceMetadata.ApiResourceField != "" {
+				return []string{t.ResourceMetadata.ApiResourceField, t.ApiName}
+			} else if t.ResourceMetadata.NestedQuery != nil {
+				// Handle `items` as a special case since that's a common container field name for a list endpoint,
+				// not a fine-grained field name within a resource.
+				keys := t.ResourceMetadata.NestedQuery.Keys
+				if len(keys) > 1 || keys[0] != "items" {
+					return append(t.ResourceMetadata.NestedQuery.Keys, t.ApiName)
+				}
+			}
 		}
 		return []string{t.ApiName}
 	}
@@ -607,7 +644,7 @@ func (t *Type) GetPrefix() string {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
 			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
-			if t.ResourceMetadata.NestedQuery != nil && !strings.Contains(t.ResourceMetadata.Compiler, "terraformgoogleconversion") {
+			if t.ResourceMetadata.NestedQuery != nil && !strings.Contains(t.ResourceMetadata.ProductMetadata.Compiler, "terraformgoogleconversion") {
 				nestedPrefix = "Nested"
 			}
 
@@ -670,17 +707,7 @@ func (t Type) FWResourceType() string {
 // check :default_value, type: clazz
 // }
 
-// Checks that all conflicting properties actually exist.
-// This currently just returns if empty, because we don't want to do the check, since
-// this list will have a full path for nested attributes.
-// func (t *Type) check_conflicts() {
-// check :conflicts, type: ::Array, default: [], item_type: ::String
-
-// return if @conflicts.empty?
-// }
-
 // Returns list of properties that are in conflict with this property.
-// func (t *Type) conflicting() {
 func (t Type) Conflicting() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
@@ -691,18 +718,7 @@ func (t Type) Conflicting() []string {
 	return t.Conflicts
 }
 
-// TODO rewrite: validation
-// Checks that all properties that needs at least one of their fields actually exist.
-// This currently just returns if empty, because we don't want to do the check, since
-// this list will have a full path for nested attributes.
-// func (t *Type) check_at_least_one_of() {
-// check :at_least_one_of, type: ::Array, default: [], item_type: ::String
-
-// return if @at_least_one_of.empty?
-// }
-
 // Returns list of properties that needs at least one of their fields set.
-// func (t *Type) at_least_one_of_list() {
 func (t Type) AtLeastOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
@@ -713,18 +729,7 @@ func (t Type) AtLeastOneOfList() []string {
 	return t.AtLeastOneOf
 }
 
-// TODO rewrite: validation
-// Checks that all properties that needs exactly one of their fields actually exist.
-// This currently just returns if empty, because we don't want to do the check, since
-// this list will have a full path for nested attributes.
-// func (t *Type) check_exactly_one_of() {
-// check :exactly_one_of, type: ::Array, default: [], item_type: ::String
-
-// return if @exactly_one_of.empty?
-// }
-
 // Returns list of properties that needs exactly one of their fields set.
-// func (t *Type) exactly_one_of_list() {
 func (t Type) ExactlyOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
@@ -734,16 +739,6 @@ func (t Type) ExactlyOneOfList() []string {
 	}
 	return t.ExactlyOneOf
 }
-
-// TODO rewrite: validation
-// Checks that all properties that needs required with their fields actually exist.
-// This currently just returns if empty, because we don't want to do the check, since
-// this list will have a full path for nested attributes.
-// func (t *Type) check_required_with() {
-// check :required_with, type: ::Array, default: [], item_type: ::String
-
-// return if @required_with.empty?
-// }
 
 // Returns list of properties that needs required with their fields set.
 func (t Type) RequiredWithList() []string {

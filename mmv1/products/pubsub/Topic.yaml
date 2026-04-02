@@ -55,11 +55,9 @@ custom_code:
 error_retry_predicates:
   - 'transport_tpg.PubsubTopicProjectNotReady'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'pubsub_topic_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
     vars:
       topic_name: 'example-topic'
   - name: 'pubsub_topic_cmek'

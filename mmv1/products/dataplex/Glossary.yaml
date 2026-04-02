@@ -36,15 +36,14 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
     - '{{glossary_id}}'
+include_in_tgc_next: true
 examples:
   - name: 'dataplex_glossary_basic'
     primary_resource_id: 'glossary_test_id'
-    primary_resource_name: 'fmt.Sprintf("tf-test-glossary-basic%s", context["random_suffix"])'
     vars:
       glossary_name: 'glossary-basic'
   - name: 'dataplex_glossary_full'
     primary_resource_id: 'glossary_test_id_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-glossary-full%s", context["random_suffix"])'
     vars:
       glossary_name: 'glossary-full'
 parameters:
@@ -89,12 +88,12 @@ properties:
       System generated unique id for the Glossary. This ID will be different if the Glossary is deleted and re-created with the same name.
     output: true
   - name: 'createTime'
-    type: Timestamp
+    type: Time
     description: |
       The time at which the glossary was created.
     output: true
   - name: 'updateTime'
-    type: Timestamp
+    type: Time
     description: |
       The time at which the glossary was last updated.
     output: true

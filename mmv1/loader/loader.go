@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
 	"golang.org/x/exp/slices"
@@ -19,6 +20,7 @@ type Loader struct {
 	// baseDirectory points to mmv1 root, if cwd can be empty as relative paths are used
 	baseDirectory     string
 	overrideDirectory string
+	compilerTarget    string
 	Products          map[string]*api.Product
 	version           string
 	sysfs             google.ReadDirReadFileFS
@@ -29,6 +31,7 @@ type Config struct {
 	OverrideDirectory string                   // optional
 	Version           string                   // required
 	Sysfs             google.ReadDirReadFileFS // required
+	CompilerTarget    string                   // optional
 }
 
 // NewLoader creates a new Loader instance, applying any
@@ -44,11 +47,17 @@ func NewLoader(config Config) *Loader {
 	if config.Sysfs == nil {
 		panic("sysfs is required")
 	}
+
+	if config.CompilerTarget == "" {
+		config.CompilerTarget = "terraform"
+	}
+
 	l := &Loader{
 		baseDirectory:     config.BaseDirectory,
 		overrideDirectory: config.OverrideDirectory,
 		version:           config.Version,
 		sysfs:             config.Sysfs,
+		compilerTarget:    config.CompilerTarget,
 	}
 
 	return l
@@ -200,6 +209,7 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 	p.Version = p.VersionObjOrClosest(l.version)
 
 	p.Objects = resources
+	p.SetCompiler(l.compilerTarget)
 	p.Validate()
 
 	return p, nil
@@ -343,7 +353,13 @@ func (l *Loader) Validate() {
 
 	for _, product := range l.Products {
 		for _, resource := range product.Objects {
-			resource.Validate()
+			es := resource.Validate()
+			if len(es) > 0 {
+				es = utils.TransformErrs(func(e error) error {
+					return fmt.Errorf("%s%s%s: %w", utils.ColorRed, resource.SourceYamlFile, utils.ColorReset, e)
+				}, es)
+				log.Fatalf("%v", errors.Join(es...))
+			}
 		}
 	}
 }

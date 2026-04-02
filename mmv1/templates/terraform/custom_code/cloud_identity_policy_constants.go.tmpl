@@ -1,0 +1,32 @@
+{{/* This file contains auxiliary Go functions that aren't tied to a specific 
+  CRUD operation but are needed by the Resource schema.
+*/}}
+
+func jsonSettingsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+    if old == "" || new == "" {
+        return old == new
+    }
+
+    var o, n interface{}
+    if err := json.Unmarshal([]byte(old), &o); err != nil {
+        return false
+    }
+    if err := json.Unmarshal([]byte(new), &n); err != nil {
+        return false
+    }
+
+    oldMap, okO := o.(map[string]interface{})
+    newMap, okN := n.(map[string]interface{})
+    if !okO || !okN {
+        return old == new
+    }
+
+    // Strip the server-generated fields that cause drift
+    driftFields := []string{"createTime", "updateTime", "ruleTypeMetadata"}
+    for _, f := range driftFields {
+        delete(oldMap, f)
+        delete(newMap, f)
+    }
+
+    return reflect.DeepEqual(oldMap, newMap)
+}

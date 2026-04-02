@@ -1780,7 +1780,7 @@ properties:
 
                     The value must be between 1 and 255 characters.
                 - name: 'pathTemplateRewrite'
-                  type: string
+                  type: String
                   description: |
                     If specified, the pattern rewrites the URL path (based on the :path header) using the HTTP template syntax.
 

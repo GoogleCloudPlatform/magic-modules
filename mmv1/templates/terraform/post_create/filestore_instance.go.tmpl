@@ -1,0 +1,9 @@
+if p, ok := d.GetOk("desired_replica_state"); ok && p.(string) == "PAUSED" {
+	billingProject := ""
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	  billingProject = bp
+	}
+	if err := ModifyFilestoreInstanceReplica(config, d, project, billingProject, userAgent, "pauseReplica"); err != nil {
+		return err
+	}
+}

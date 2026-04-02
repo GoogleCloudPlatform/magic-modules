@@ -88,7 +88,7 @@ properties:
       Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
     output: true
   - name: 'etag'
-    type: FingerPrint
+    type: Fingerprint
     description: |
       Fingerprint for optimistic concurrency returned in the response of GetSettings. Must be provided in the requests to UpdateSettings. If the value provided does not match the value known to the server, ABORTED will be thrown, and the client should retry the read-modify-write cycle.
     output: true

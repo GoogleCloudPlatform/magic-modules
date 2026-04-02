@@ -45,7 +45,6 @@ custom_code:
 examples:
   - name: 'pubsub_schema_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-schema%s", context["random_suffix"])'
     vars:
       schema_name: 'example-schema'
   - name: 'pubsub_schema_protobuf'

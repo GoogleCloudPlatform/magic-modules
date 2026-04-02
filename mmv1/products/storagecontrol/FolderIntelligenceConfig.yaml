@@ -69,7 +69,7 @@ properties:
     type: String
     required: true
     immutable: true
-    url_param_only: true
+    ignore_read: true
     description: |
       Identifier of the GCP Folder. For GCP Folder, this field can be folder number.
   - name: 'editionConfig'

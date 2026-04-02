@@ -62,13 +62,11 @@ custom_diff:
 examples:
   - name: 'deployment_manager_deployment_basic'
     primary_resource_id: 'deployment'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
     vars:
       deployment_name: 'my-deployment'
     exclude_test: true
   - name: 'deployment_manager_deployment_imports'
     primary_resource_id: 'deployment'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
     vars:
       deployment_name: 'my-deployment'
     exclude_test: true
