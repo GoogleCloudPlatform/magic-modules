@@ -183,27 +183,28 @@ func resourceSiteVerificationOwnerRead(d *schema.ResourceData, meta interface{})
 		return nil
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 
 	return nil
 }
 
-//UDP update start
+// UDP update start
 func resourceSiteVerificationOwnerUpdate(d *schema.ResourceData, meta interface{}) error {
-    // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
-    return resourceSiteVerificationOwnerRead(d, meta)
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceSiteVerificationOwnerRead(d, meta)
 }
+
 //UDP update end
 
 func resourceSiteVerificationOwnerDelete(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)

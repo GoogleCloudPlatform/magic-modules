@@ -217,27 +217,28 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, 
 		return fmt.Errorf("Error setting parent: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 
 	return nil
 }
 
-//UDP update start
+// UDP update start
 func resourceGoogleServiceNetworkingPeeredDNSDomainUpdate(d *schema.ResourceData, meta interface{}) error {
-    // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
-    return resourceGoogleServiceNetworkingPeeredDNSDomainRead(d, meta)
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceGoogleServiceNetworkingPeeredDNSDomainRead(d, meta)
 }
+
 //UDP update end
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)

@@ -142,7 +142,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 					}
 
 					d.SetId(sa.Name)
-					return populateResourceData(d, sa)
+					return populateResourceData(d, sa, config)
 				},
 				Timeout: d.Timeout(schema.TimeoutCreate),
 				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
@@ -157,7 +157,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	d.SetId(sa.Name)
-	populateResourceData(d, sa)
+	populateResourceData(d, sa, config)
 
 	// We poll until the resource is found due to eventual consistency issue
 	// on part of the api https://cloud.google.com/iam/docs/overview#consistency.
@@ -212,10 +212,10 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
 	}
 
-	return populateResourceData(d, sa)
+	return populateResourceData(d, sa, config)
 }
 
-func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error {
+func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount, config *transport_tpg.Config) error {
 	if err := d.Set("email", sa.Email); err != nil {
 		return fmt.Errorf("Error setting email: %s", err)
 	}
@@ -244,8 +244,8 @@ func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error 
 		return fmt.Errorf("Error setting member: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 	return nil
@@ -253,10 +253,10 @@ func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error 
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
@@ -280,7 +280,7 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	//UDP update shortcircuit start
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleServiceAccount) {
-	    return ResourceGoogleServiceAccount().Read(d, meta)
+		return ResourceGoogleServiceAccount().Read(d, meta)
 	}
 	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
