@@ -65,6 +65,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: 'force'
+    description: |
+      If true, bypass the check for dependencies. When adding a service, all service dependencies must be present in the policy.
+      When removing a service, no other services in the policy can depend on it. Otherwise, the update doesn't succeed and an
+      error is returned.
+    type: Boolean
+    url_param_only: true
+    default_value: false
 properties:
   - name: 'name'
     type: String
