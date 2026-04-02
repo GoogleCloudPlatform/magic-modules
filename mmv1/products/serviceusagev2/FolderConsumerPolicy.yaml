@@ -26,10 +26,11 @@ references:
   api: 'https://cloud.google.com/service-usage/docs/reference/rest/v2beta/consumerPolicies'
 base_url: 'folders/{{folder}}/consumerPolicies'
 self_link: 'folders/{{folder}}/consumerPolicies/default'
-create_url: 'folders/{{folder}}/consumerPolicies/default'
+create_url: 'folders/{{folder}}/consumerPolicies/default?force={{force}}'
 create_verb: 'PATCH'
-update_url: 'folders/{{folder}}/consumerPolicies/default'
+update_url: 'folders/{{folder}}/consumerPolicies/default?force={{force}}'
 update_verb: 'PATCH'
+delete_url: 'folders/{{folder}}/consumerPolicies/default?force={{force}}'
 delete_verb: 'PATCH'
 id_format: 'folders/{{folder}}/consumerPolicies/default'
 import_format:
