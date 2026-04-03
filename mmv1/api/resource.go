@@ -2143,10 +2143,9 @@ func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
 
 // Returns the asset type for this resource.
 func (r Resource) CaiAssetType() string {
-	baseURL := r.CaiProductBaseUrl()
-	productBackendName := r.CaiProductBackendName(baseURL)
-	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, r.CaiResourceName())
+	return fmt.Sprintf("%s/%s", r.ProductMetadata.ServiceName(), r.CaiResourceName())
 }
+
 
 // DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
 // It returns true if this is the first time it's been called for this resource,
@@ -2261,13 +2260,13 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 		return caiAssetNameFormat
 	}
 
-	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
+	return fmt.Sprintf("//%s/%s", r.ProductMetadata.ServiceName(), r.IdFormat)
 }
 
 // Gets a format string for CAI asset name
 func (r Resource) Cai2hclAssetNameTemplate() string {
 	if r.Cai2hclNameFormat != "" {
-		return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.Cai2hclNameFormat)
+		return fmt.Sprintf("//%s/%s", r.ProductMetadata.ServiceName(), r.Cai2hclNameFormat)
 	}
 
 	return r.GetCaiAssetNameTemplate()
