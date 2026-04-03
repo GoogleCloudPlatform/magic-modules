@@ -10,6 +10,38 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
+func TestAccComputeReservation_resourcePolicies(t *testing.T) {
+	t.Parallel()
+
+	rand := acctest.RandString(t, 10)
+	reservationName := fmt.Sprintf("tf-test-res-%s", rand)
+	policyName := fmt.Sprintf("tf-test-pol-%s", rand)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeReservation_resourcePolicies(reservationName, policyName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr(
+						"google_compute_reservation.reservation",
+						"resource_policies.policy1",
+						regexp.MustCompile(`resourcePolicies/`),
+					),
+				),
+			},
+			{
+				ResourceName:            "google_compute_reservation.reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"resource_policies"},
+			},
+		},
+	})
+}
+
 func TestAccComputeReservation_update(t *testing.T) {
 	t.Parallel()
 
@@ -97,6 +129,38 @@ func TestAccComputeReservation_deleteAfterDuration(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccComputeReservation_resourcePolicies(reservationName, policyName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_resource_policy" "placement" {
+  name   = "%s"
+  region = "us-central1"
+  group_placement_policy {
+    vm_count    = 2
+    collocation = "COLLOCATED"
+  }
+}
+
+resource "google_compute_reservation" "reservation" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  resource_policies = {
+    policy1 = google_compute_resource_policy.placement.self_link
+  }
+
+  specific_reservation {
+    count = 2
+    instance_properties {
+      min_cpu_platform = "Intel Cascade Lake"
+      machine_type     = "n2-standard-2"
+    }
+  }
+
+  depends_on = [google_compute_resource_policy.placement]
+}
+`, policyName, reservationName)
 }
 
 func testAccComputeReservation_basic(reservationName, count string) string {
