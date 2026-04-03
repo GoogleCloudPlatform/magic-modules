@@ -258,7 +258,21 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+    loc := tpgresource.LocationFromId(urlFormatted)
+
+    basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+    
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.CreateUri}}")
+    url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
+
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+{{- end }}
     if err != nil {
         return err
     }
@@ -352,11 +366,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
-    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}}{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
@@ -430,8 +448,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 {{        else -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -481,8 +503,20 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
 
+{{ if $.ProductMetadata.Version.RepEnabled }}
+        urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+        if err != nil {
+            return err
+        }
+        loc := tpgresource.LocationFromId(urlFormatted)
 
+        basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}")
+        url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
         url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+{{- end }}
 
         if err != nil {
             return nil, err
@@ -574,7 +608,21 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+    loc := tpgresource.LocationFromId(urlFormatted)
+
+    basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+    
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
+
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+{{- end }}
     if err != nil {
         return err
     }
@@ -803,7 +851,21 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{-             end}}
 
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+    loc := tpgresource.LocationFromId(urlFormatted)
+
+    basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+    
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.UpdateUri }}")
+    url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
+
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUri }}")
+{{- end }}
     if err != nil {
         return err
     }
@@ -865,8 +927,12 @@ if len(updateMask) > 0 {
 
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -897,7 +963,21 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $group.FingerprintName }}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.SelfLinkUri}}")
+        if err != nil {
+            return err
+        }
+        loc := tpgresource.LocationFromId(urlFormatted)
+
+        basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+        
+        getUrl, err := tpgresource.ReplaceVars(d, config, "{{ $.UpdateUri }}")
+        getUrl = fmt.Sprintf("%s%s", basePath, getUrl)
+{{ else }}
+
         getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+{{- end }}
         if err != nil {
             return err
         }
@@ -1024,8 +1104,12 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 
 {{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
-	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
 	        return err
@@ -1102,8 +1186,21 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     transport_tpg.MutexStore.Lock(lockName)
     defer transport_tpg.MutexStore.Unlock(lockName)
     {{- end }}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+    loc := tpgresource.LocationFromId(urlFormatted)
+
+    basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+    
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.DeleteUri}}")
+    url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
 
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
+{{- end }}
     if err != nil {
         return err
     }
@@ -1169,8 +1266,12 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
             {{- end }}
     }
         {{- else }}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal }}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {

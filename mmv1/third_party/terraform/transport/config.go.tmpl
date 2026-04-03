@@ -266,6 +266,9 @@ type Config struct {
 
 	{{ range $product := $.Products }}
 	{{ $product.Name }}BasePath string
+	{{- if ne $product.Version.RepUrl "" }}
+	{{ $product.Name }}RepBasePath string
+	{{- end -}}
 	{{- end }}
 
 	CloudBillingBasePath string
@@ -288,6 +291,9 @@ type Config struct {
 
 	RequestBatcherServiceUsage *RequestBatcher
 	RequestBatcherIam          *RequestBatcher
+
+	PreferGlobalEndpoints bool
+	PreferRegionalEndpoints bool
 }
 
 {{- range $product := $.Products }}
@@ -327,6 +333,15 @@ var DefaultBasePaths = map[string]string{
 	CloudResourceManagerEndpointEntryKey: "https://cloudresourcemanager.googleapis.com/",
 	FirebaserulesEndpointEntryKey: "https://firebaserules.googleapis.com/v1/",
 	RecaptchaEnterpriseEndpointEntryKey: "https://recaptchaenterprise.googleapis.com/v1/",
+}
+
+// Contains the REP status for each generated product. This allows us to track
+// default REP enablement across versions and have a central place to look up
+// product support
+var DefaultRepStatus = map[string]bool{
+{{- range $product := $.Products }}
+	{{ $product.Name }}BasePathKey : {{ $product.RepByDefault }},
+{{- end }}
 }
 
 var DefaultClientScopes = []string{
@@ -1631,4 +1646,32 @@ func GetUniverseDomainFromMeta(meta interface{}) string {
 		return "googleapis.com"
 	}
 	return config.UniverseDomain
+}
+
+// Returns the base path for a resource taking into account the following rules:
+// Overridden path takes precedence over everything
+// Regional endpoint should be returned if preferred
+// Global endpoint should be returned if preferred
+// If no preferences, return the product default based on DefaultRepStatus map
+func ResourceBasePath(basePath, repPath, basePathKey string, config *Config, location string) string {
+	var path string
+	// Set the default to the product-level default
+	if DefaultRepStatus[basePathKey] {
+		path = repPath
+	} else {
+		path = basePath
+	}
+    // If product default has been overridden, use override
+    if basePath != DefaultBasePaths[basePathKey] {
+        path = basePath
+    } else if config.PreferRegionalEndpoints {
+    	// If user has specified a preference, switch to that
+        path = repPath
+    } else if config.PreferGlobalEndpoints {
+    	// If user has specified a preference, switch to that
+        path = basePath
+    }
+    // Still try to replace location even if it may not exist, this allows
+    // for products that only support REP on their base_url
+    return strings.ReplaceAll(path, "{{"{{"}}location{{"}}"}}", location)
 }
