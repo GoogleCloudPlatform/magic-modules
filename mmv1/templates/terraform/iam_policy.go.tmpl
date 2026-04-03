@@ -49,7 +49,19 @@ func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
 			tpgiamresource.IamWithResourceIdentity({{ $.ResourceName }}IamResourceIdentityParser),
 		),
 		{{ $.ResourceName }}IamUpdaterProducer,
-		tpgiamresource.IamMemberListCallConfig{},
+		tpgiamresource.IamMemberListCallConfig{
+			ResourceNameField: "{{ $.IamParentResourceName }}",
+			ItemName: "{{ $.CollectionUrlKey }}",
+			ListUrlFunc: func(rd *schema.ResourceData, config *transport_tpg.Config) (string, error) {
+				return tpgresource.ReplaceVars(rd, config, "{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}{{ $.BaseUrl }}")
+			},
+			Flattener: func(item map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+				if v, ok := item["name"].(string); ok {
+					return d.Set("{{ $.IamParentResourceName }}", v)
+				}
+				return fmt.Errorf("list item missing 'name' field")
+			},
+		},
 	)
 }
 
