@@ -42,6 +42,9 @@ func ResourceGoogleProjectOrganizationPolicy() *schema.Resource {
 					ForceNew:    true,
 					Description: `The project ID.`,
 				},
+				//UDP schema start
+				"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+				//UDP schema end
 			},
 		),
 		UseJSONNumber: true,

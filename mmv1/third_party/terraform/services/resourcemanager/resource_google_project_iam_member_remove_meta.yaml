@@ -7,3 +7,5 @@ fields:
   - field: 'member'
   - field: 'project'
   - field: 'role'
+  - field: 'deletion_policy'
+    provider_only: true

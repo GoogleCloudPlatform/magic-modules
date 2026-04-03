@@ -37,6 +37,10 @@ func ResourceStorageDefaultObjectAcl() *schema.Resource {
 					ValidateFunc: validateRoleEntityPair,
 				},
 			},
+
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
