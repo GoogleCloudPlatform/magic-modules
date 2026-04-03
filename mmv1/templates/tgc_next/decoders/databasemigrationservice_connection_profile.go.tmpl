@@ -1,0 +1,62 @@
+if p, ok := res["postgresql"].(map[string]interface{}); ok {
+	if _, ok := p["alloydbClusterId"]; ok {
+		p["host"] = "unknown"
+		p["username"] = "unknown"
+		p["port"] = 0
+		p["password"] = "fake-password"
+		
+		pMap := map[string]interface{}{
+			"host":     "unknown",
+			"username": "unknown",
+			"port":     0,
+			"password": "fake-password",
+		}
+		d.Set("postgresql", []interface{}{pMap})
+	} else if _, ok := p["cloudSqlId"]; ok {
+		p["host"] = "unknown"
+		p["username"] = "unknown"
+		p["port"] = 0
+		p["password"] = "fake-password"
+		
+		pMap := map[string]interface{}{
+			"host":     "unknown",
+			"username": "unknown",
+			"port":     0,
+			"password": "fake-password",
+		}
+		d.Set("postgresql", []interface{}{pMap})
+	} else if _, ok := p["password"]; !ok || p["password"] == "" {
+		p["password"] = "fake-password"
+		
+		pMap := map[string]interface{}{
+			"password": "fake-password",
+		}
+		d.Set("postgresql", []interface{}{pMap})
+	}
+}
+
+if m, ok := res["mysql"].(map[string]interface{}); ok {
+	if _, ok := m["cloudSqlId"]; ok {
+		m["host"] = "unknown"
+		m["username"] = "unknown"
+		m["port"] = 0
+		m["password"] = "fake-password"
+		
+		pMap := map[string]interface{}{
+			"host":     "unknown",
+			"username": "unknown",
+			"port":     0,
+			"password": "fake-password",
+		}
+		d.Set("mysql", []interface{}{pMap})
+	} else if _, ok := m["password"]; !ok || m["password"] == "" {
+		m["password"] = "fake-password"
+		
+		pMap := map[string]interface{}{
+			"password": "fake-password",
+		}
+		d.Set("mysql", []interface{}{pMap})
+	}
+}
+
+return res, hclData, nil
