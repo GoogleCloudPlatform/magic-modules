@@ -86,6 +86,10 @@ examples:
     primary_resource_id: 'advanced_site_search_config'
     vars:
       data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_exclude_from_gen_ai_features'
+    primary_resource_id: 'exclude_from_gen_ai_features'
+    vars:
+      data_store_id: 'data-store-id'
 parameters:
   - name: 'location'
     type: String
@@ -419,6 +423,11 @@ properties:
                   required: false
                   item_type:
                     type: String
+  - name: 'excludeFromGenAiFeatures'
+    type: 'Boolean'
+    description: |
+      If set true, the DataStore will not be used for Generative AI features.
+    required: false
   - name: 'createTime'
     type: Time
     description: |
