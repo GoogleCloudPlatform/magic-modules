@@ -118,7 +118,7 @@ resource "google_apigee_instance" "apigee_instance" {
   org_id   = google_apigee_organization.apigee_org.id
   ip_range = "${google_compute_global_address.apigee_range.address}/22"
   consumer_accept_list = [
-    google_project.project1.project_id,
+    google_project.project1.number,
   ]
 
   access_logging_config {
@@ -206,8 +206,8 @@ resource "google_apigee_instance" "apigee_instance" {
   org_id   = google_apigee_organization.apigee_org.id
   ip_range = "${google_compute_global_address.apigee_range.address}/22"
   consumer_accept_list = [
-    google_project.project1.project_id,
-    google_project.project2.project_id,
+    google_project.project1.number,
+    google_project.project2.number,
   ]
 
   access_logging_config {
