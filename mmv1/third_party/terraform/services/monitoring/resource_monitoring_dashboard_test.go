@@ -39,8 +39,6 @@ func TestAccMonitoringDashboard_basic(t *testing.T) {
 }
 
 func TestAccMonitoringDashboard_gridLayout(t *testing.T) {
-	// TODO: Fix requires a breaking change https://github.com/hashicorp/terraform-provider-google/issues/9976
-	t.Skip()
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -71,6 +69,27 @@ func TestAccMonitoringDashboard_rowLayout(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringDashboard_rowLayout(),
+			},
+			{
+				ResourceName:            "google_monitoring_dashboard.dashboard",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
+
+func TestAccMonitoringDashboard_mosaicLayout(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringDashboardDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringDashboard_mosaicLayout(),
 			},
 			{
 				ResourceName:            "google_monitoring_dashboard.dashboard",
@@ -327,6 +346,79 @@ resource "google_monitoring_dashboard" "dashboard" {
             }
           }
         ]
+      }
+    ]
+  }
+}
+
+EOF
+}
+`)
+}
+
+func testAccMonitoringDashboard_mosaicLayout() string {
+	return fmt.Sprintf(`
+resource "google_monitoring_dashboard" "dashboard" {
+  dashboard_json = <<EOF
+{
+  "displayName": "Mosaic Layout Example",
+  "dashboardFilters": [
+    {
+      "filterType": "VALUE_ONLY",
+      "labelKey": "",
+      "stringValue": "",
+      "templateVariable": "region",
+      "valueType": "STRING"
+    }
+  ],
+  "mosaicLayout": {
+    "columns": 12,
+    "tiles": [
+      {
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "XY Chart with OpsAnalytics Query",
+          "xyChart": {
+            "chartOptions": {
+              "mode": "COLOR",
+              "showLegend": false
+            },
+            "dataSets": [
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "timeSeriesQuery": {
+                  "opsAnalyticsQuery": {
+                    "sql": "SELECT timestamp FROM test_project_dataset_table LIMIT 1"
+                  }
+                }
+              }
+            ],
+            "yAxis": {
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "xPos": 6,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "Time Series Table Widget",
+          "timeSeriesTable": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "outputFullDuration": true,
+                  "prometheusQuery": "up{job=\"prometheus\"}"
+                }
+              }
+            ],
+            "metricVisualization": "NUMBER"
+          }
+        }
       }
     ]
   }
