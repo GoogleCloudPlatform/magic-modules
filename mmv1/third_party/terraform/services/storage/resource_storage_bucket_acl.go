@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"google.golang.org/api/storage/v1"
@@ -17,11 +18,14 @@ import (
 
 func ResourceStorageBucketAcl() *schema.Resource {
 	return &schema.Resource{
-		Create:        resourceStorageBucketAclCreate,
-		Read:          resourceStorageBucketAclRead,
-		Update:        resourceStorageBucketAclUpdate,
-		Delete:        resourceStorageBucketAclDelete,
-		CustomizeDiff: resourceStorageRoleEntityCustomizeDiff,
+		Create: resourceStorageBucketAclCreate,
+		Read:   resourceStorageBucketAclRead,
+		Update: resourceStorageBucketAclUpdate,
+		Delete: resourceStorageBucketAclDelete,
+		CustomizeDiff: customdiff.All(
+			resourceStorageRoleEntityCustomizeDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -53,6 +57,9 @@ func ResourceStorageBucketAcl() *schema.Resource {
 				ConflictsWith: []string{"predefined_acl"},
 				Description:   `List of role/entity pairs in the form ROLE:entity. See GCS Bucket ACL documentation  for more details. Must be set if predefined_acl is not.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -273,11 +280,21 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("Error setting role_entity: %s", err)
 		}
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+	//UDP default read end
 
 	return nil
 }
 
 func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) error {
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceStorageBucketAcl) {
+		return ResourceStorageBucketAcl().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -374,6 +391,13 @@ func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
