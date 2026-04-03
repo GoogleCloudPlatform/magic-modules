@@ -5,6 +5,7 @@ resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
   private_ip_enabled = true
   public_ip_enabled  = false
   gemini_enabled     = true
+  catalog_integration_enabled = true
   reserved_range     = "${google_compute_global_address.looker_range.name}"
   consumer_network   = google_compute_network.looker_network.id
   admin_settings {
