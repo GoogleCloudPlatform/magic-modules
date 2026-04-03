@@ -1,0 +1,129 @@
+package compute
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+{{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
+{{- else }}
+	compute "google.golang.org/api/compute/v0.beta"
+{{- end }}
+)
+
+func TestComputeInstance_flattenBootDiskResourcePoliciesGuard(t *testing.T) {
+	t.Parallel()
+
+	apiResourcePolicies := []string{"policy-a", "policy-b"}
+	diskSource := "projects/test-project/zones/us-central1-a/disks/test-disk"
+
+	cases := map[string]struct {
+		resourcePolicies []interface{}
+		wantPolicies     []string
+	}{
+		"empty list stays unset": {
+			resourcePolicies: []interface{}{},
+			wantPolicies:     nil,
+		},
+		"configured value is preserved": {
+			resourcePolicies: []interface{}{"policy-a"},
+			wantPolicies:     apiResourcePolicies,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			d := schema.TestResourceDataRaw(t, ResourceComputeInstance().Schema, map[string]interface{}{
+				"name":         "test-instance",
+				"machine_type": "e2-medium",
+				"project":      "test-project",
+				"zone":         "us-central1-a",
+				"boot_disk": []interface{}{
+					map[string]interface{}{
+						"initialize_params": []interface{}{
+							map[string]interface{}{
+								"image":             "projects/debian-cloud/global/images/family/debian-11",
+								"resource_policies": tc.resourcePolicies,
+							},
+						},
+					},
+				},
+				"network_interface": []interface{}{
+					map[string]interface{}{
+						"network": "default",
+					},
+				},
+			})
+
+			if len(tc.resourcePolicies) == 0 {
+				if got := d.Get("boot_disk.0.initialize_params.0.resource_policies.0"); got != "" {
+					t.Fatalf("expected empty string for resource_policies.0, got %#v", got)
+				}
+
+				if got := d.Get("boot_disk.0.initialize_params.0.resource_policies"); !reflect.DeepEqual(got, []interface{}{}) {
+					t.Fatalf("expected empty list for resource_policies, got %#v", got)
+				}
+			}
+
+			config := testComputeInstanceFlattenBootDiskConfig(t, &compute.Disk{
+				ResourcePolicies: apiResourcePolicies,
+				Type:             "projects/test-project/zones/us-central1-a/diskTypes/pd-balanced",
+			})
+
+			flattened := flattenBootDisk(d, &compute.AttachedDisk{
+				AutoDelete: true,
+				DeviceName: "test-disk",
+				Mode:       "READ_WRITE",
+				Source:     diskSource,
+			}, config)
+
+			initializeParams, ok := flattened[0]["initialize_params"].([]map[string]interface{})
+			if !ok {
+				t.Fatalf("expected initialize_params to be []map[string]interface{}, got %T", flattened[0]["initialize_params"])
+			}
+
+			gotPolicies := initializeParams[0]["resource_policies"]
+			if !reflect.DeepEqual(gotPolicies, tc.wantPolicies) {
+				t.Fatalf("unexpected flattened resource_policies: got %#v, want %#v", gotPolicies, tc.wantPolicies)
+			}
+		})
+	}
+}
+
+func testComputeInstanceFlattenBootDiskConfig(t *testing.T, disk *compute.Disk) *transport_tpg.Config {
+	t.Helper()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Fatalf("unexpected method %q", r.Method)
+		}
+
+		if got, want := r.URL.Path, "/projects/test-project/zones/us-central1-a/disks/test-disk"; got != want {
+			t.Fatalf("unexpected path %q, want %q", got, want)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(disk); err != nil {
+			t.Fatalf("encoding disk response: %v", err)
+		}
+	}))
+
+	t.Cleanup(server.Close)
+
+	return &transport_tpg.Config{
+		Client:          server.Client(),
+		ComputeBasePath: server.URL + "/",
+		Context:         context.Background(),
+		Project:         "test-project",
+		UserAgent:       "test-agent",
+		Zone:            "us-central1-a",
+	}
+}
