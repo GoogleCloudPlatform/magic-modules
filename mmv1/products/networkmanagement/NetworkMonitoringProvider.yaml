@@ -1,0 +1,110 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'NetworkMonitoringProvider'
+description: |
+  A Network Monitoring Provider resource that allows third-party network monitoring
+  solutions to integrate with Google Cloud Network Management. A provider acts as
+  the parent resource for MonitoringPoints, NetworkPaths, and WebPaths.
+references:
+  guides:
+    'Network Monitoring overview': 'https://cloud.google.com/network-intelligence-center/docs/network-monitoring/overview'
+  api: 'https://cloud.google.com/network-intelligence-center/docs/reference/rest'
+docs:
+examples:
+  - name: 'network_management_network_monitoring_provider_basic'
+    primary_resource_id: 'provider'
+    vars:
+      network_monitoring_provider_id: 'my-provider'
+base_url: 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders'
+self_link: 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders/{{network_monitoring_provider_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders?networkMonitoringProviderId={{network_monitoring_provider_id}}'
+# No UpdateNetworkMonitoringProvider RPC exists; any field change requires recreation.
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders/{{network_monitoring_provider_id}}'
+sweeper:
+  url_substitutions:
+    - region: global
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/network_management_network_monitoring_provider.go.tmpl'
+  post_create: 'templates/terraform/post_create/network_management_network_monitoring_provider_wait.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/network_management_network_monitoring_provider_wait.go.tmpl'
+virtual_fields:
+  - name: 'force_destroy'
+    description: |
+      If set to true, all nested resources (MonitoringPoints, NetworkPaths, WebPaths)
+      belonging to this provider will also be deleted on provider deletion.
+    type: Boolean
+    default_value: false
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location of the Network Monitoring Provider. Currently only `global` is supported.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'networkMonitoringProviderId'
+    type: String
+    description: |
+      The ID to use for the Network Monitoring Provider. This will become the last
+      component of the provider's resource name.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The full resource name of the Network Monitoring Provider, in the format
+      `projects/{project}/locations/{location}/networkMonitoringProviders/{id}`.
+    output: true
+  - name: 'providerType'
+    type: String
+    description: |
+      The type of the Network Monitoring Provider.
+      Currently only `EXTERNAL` is supported.
+    required: true
+    immutable: true
+  - name: 'providerUri'
+    type: String
+    description: |
+      Link to the provider's UI.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time the Network Monitoring Provider was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time the Network Monitoring Provider was last updated.
+    output: true
+  - name: 'state'
+    type: String
+    description: |
+      The current state of the Network Monitoring Provider.
+    output: true
+  - name: 'errors'
+    type: Array
+    description: |
+      The list of error messages detected for the Network Monitoring Provider.
+    output: true
+    item_type:
+      type: String
