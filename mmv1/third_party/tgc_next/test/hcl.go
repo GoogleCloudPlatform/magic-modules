@@ -136,13 +136,13 @@ func flattenSlice(prefix string, v []any, result map[string]any) {
 	for i, value := range v {
 		flattened := make(map[string]any)
 		flatten(value, "", flattened)
-		keys := make([]string, 0, len(flattened))
-		for k := range flattened {
-			keys = append(keys, k)
+		keyVals := make([]string, 0, len(flattened))
+		for k, val := range flattened {
+			keyVals = append(keyVals, fmt.Sprintf("%s=%v", k, val))
 		}
-		sort.Strings(keys)
+		sort.Strings(keyVals)
 		sortable[i] = sortableElement{
-			flatKeys:  strings.Join(keys, ";"),
+			flatKeys:  strings.Join(keyVals, ";"),
 			flattened: flattened,
 		}
 	}
