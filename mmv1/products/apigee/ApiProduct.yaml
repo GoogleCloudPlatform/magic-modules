@@ -416,7 +416,6 @@ properties:
       - "QUOTA_COUNTER_SCOPE_UNSPECIFIED"
       - "PROXY"
       - "OPERATION"
-
   - name: "space"
     type: String
     immutable: true
