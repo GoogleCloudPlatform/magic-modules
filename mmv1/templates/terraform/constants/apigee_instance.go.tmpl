@@ -1,6 +1,11 @@
 // Suppress diffs when the lists of project have the same number of entries to handle the case that
 // API does not return what the user originally provided. Instead, API does some transformation.
 // For example, user provides a list of project number, but API returns a list of project Id.
+//
+// Additionally, the Apigee API may automatically add extra entries to consumer_accept_list
+// (e.g., the tenant project associated with the Apigee organization). When the API returns more
+// entries than the user specified, we suppress the diff if all user-specified entries are present
+// in the API response (treating the extra entries as auto-managed by the API).
 func projectListDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
     return ProjectListDiffSuppressFunc(d)
 }
@@ -20,5 +25,34 @@ func ProjectListDiffSuppressFunc(d tpgresource.TerraformResourceDataChange) bool
 	}
 	log.Printf("[DEBUG] - suppressing diff with oldInt %d, newInt %d", oldInt, newInt)
 
-	return oldInt == newInt
+	// If lengths are equal, suppress to handle project ID/number normalization by the API.
+	if oldInt == newInt {
+		return true
+	}
+
+	// If the API returned more items than the user specified (e.g., auto-added tenant project),
+	// suppress the diff if all user-specified (new) items are present in the API response (old).
+	// This avoids false-positive plan diffs from API-managed entries.
+	if oldInt > newInt && newInt > 0 {
+		oldValues := make(map[string]bool)
+		for i := 0; i < oldInt; i++ {
+			k := fmt.Sprintf("consumer_accept_list.%d", i)
+			oldVal, _ := d.GetChange(k)
+			if v, ok := oldVal.(string); ok && v != "" {
+				oldValues[v] = true
+			}
+		}
+		for i := 0; i < newInt; i++ {
+			k := fmt.Sprintf("consumer_accept_list.%d", i)
+			_, newVal := d.GetChange(k)
+			if v, ok := newVal.(string); ok && v != "" {
+				if !oldValues[v] {
+					return false
+				}
+			}
+		}
+		return true
+	}
+
+	return false
 }
