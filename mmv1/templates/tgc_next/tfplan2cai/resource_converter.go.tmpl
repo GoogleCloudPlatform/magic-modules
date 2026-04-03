@@ -18,8 +18,8 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
   "encoding/base64"
-  "fmt"
   "encoding/json"
+  "fmt"
   "log"
   "reflect"
   "regexp"
@@ -49,7 +49,6 @@ import (
 )
 
 var (
-    _ = json.Marshal
     _ = base64.StdEncoding
     _ = fmt.Sprintf
     _ = log.Print
@@ -72,6 +71,7 @@ var (
     _ = transport_tpg.Config{}
     _ = verify.ProjectRegex
     _ = googleapi.Error{}
+    _ = json.Unmarshal
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
