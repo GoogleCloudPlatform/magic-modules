@@ -815,7 +815,7 @@ func TestAccCloudFunctions2Function_trafficSplit(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.traffic-split-function",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "service_config.0.all_traffic_on_latest_revision"},
 			},
 		},
 	})
