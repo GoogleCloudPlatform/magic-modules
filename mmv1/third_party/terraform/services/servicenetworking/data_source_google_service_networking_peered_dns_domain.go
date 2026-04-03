@@ -32,6 +32,9 @@ func DataSourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 	}
 }
