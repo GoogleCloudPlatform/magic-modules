@@ -14,6 +14,15 @@
 	// Here, we will use the destination project specifically for reading and deleting.
 	// This cannot be done editing the self_link since the destination project is not a top-level field.
 	destinationProject, ok := d.GetOk("destination_dataset.0.dataset_reference.0.project_id")
+	if !ok {
+		if subName, subOk := d.GetOk("destination_pubsub_subscription.0.pubsub_subscription.0.name"); subOk {
+			parts := strings.Split(subName.(string), "/")
+			if len(parts) >= 2 {
+				destinationProject = parts[1]
+				ok = true
+			}
+		}
+	}
 	if ok {
 		billingProject = destinationProject.(string)
 
