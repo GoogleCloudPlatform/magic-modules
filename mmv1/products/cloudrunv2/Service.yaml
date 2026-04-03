@@ -186,7 +186,6 @@ samples:
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-iap-service'
         vars:
-          test_name: 'test-name'
           iap_enabled: 'true'
           max_instance_count: '100'
         ignore_read_extra:
@@ -195,9 +194,16 @@ samples:
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-iap-service'
         vars:
-          test_name: 'test_name'
           iap_enabled: 'false'
           max_instance_count: '100'
+        ignore_read_extra:
+          - deletion_protection
+      - name: cloudrunv2_service_iap_update_no_scaling
+        min_version: beta
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-iap-service'
+        vars:
+          iap_enabled: 'true'
         ignore_read_extra:
           - deletion_protection
         include_step_doc: true

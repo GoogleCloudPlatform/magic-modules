@@ -4,9 +4,6 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
   iap_enabled = {{index $.Vars "iap_enabled"}}
-  scaling {
-    max_instance_count = {{index $.Vars "max_instance_count"}}
-  }
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
