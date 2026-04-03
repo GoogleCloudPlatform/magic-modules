@@ -82,6 +82,11 @@ An **acceptance test** verifies that a resource can be created, updated, and des
 ### Steps:
 
 1. Add an entry to your `RESOURCE_NAME.yaml` file's `samples` list. Each sample can contain multiple steps. The first step will generate a `create` test, and any subsequent steps will generate `update` tests. For a comprehensive reference, see [MMv1 sample reference ↗]({{< ref "/reference/sample" >}}).
+
+   When defining variables for your steps, follow these guidelines:
+   - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values defined here must contain at least one `-` or `_` to automatically receive a `tf-test` (or `tf_test`) prefix and random suffix. This ensures they are picked up by resource sweepers for cleanup and avoids collisions.
+   - **Use `vars` only for fields that vary between steps** (e.g., to test the update functionality of specific fields).
+   - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Do not use `vars` for values that remain constant across all steps.
    ```yaml
    samples:
      # name is used to generate the test name.
@@ -109,7 +114,9 @@ An **acceptance test** verifies that a resource can be created, updated, and des
              network_name: "example-network"
            test_vars_overrides:
              network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
-           vars: # vars contains key/value pairs that are copied directly to tests without a prefix. Reference with `{{index $.Vars "key"}}`.
+           # vars should ONLY be used for fields that vary between steps.
+           # Fields that stay constant across steps should be hardcoded in the .tf.tmpl file.
+           vars: 
              display_name: "Display Name"
          - name: "pubsub_topic_full"
            resource_id_vars:
@@ -129,25 +136,41 @@ An **acceptance test** verifies that a resource can be created, updated, and des
    resource "google_pubsub_topic" "{{.PrimaryResourceId}}" {
      name          = "{{index $.ResourceIdVars "resource_name"}}"
      network       = google_compute_network.network.name
+
+     labels = {
+       env = "test"
+     }
    }
 
    resource "google_compute_network" "network" {
      name                    = "{{index $.ResourceIdVars "network_name"}}"
      auto_create_subnetworks = false
+     routing_mode            = "REGIONAL"
    }
    ```
 
   `pubsub_topic_full.tf.tmpl`: (This file added the `display_name` variable).
    ```tf
-   resource "google_product_resource" "{{.PrimaryResourceId}}" {
+   resource "google_pubsub_topic" "{{.PrimaryResourceId}}" {
      name          = "{{index $.ResourceIdVars "resource_name"}}"
+
+     # This is an example of a field whose value changes between steps
+     # to test update functionality of display_name
      display_name  = "{{index $.Vars "display_name"}}"
+     
+     # The rest of the fields can be baked in the configuration directly
+     message_retention_duration = "86600s"
+     labels = {
+       env = "test"
+     }
+     
      network       = google_compute_network.network.name
    }
 
    resource "google_compute_network" "network" {
      name                    = "{{index $.ResourceIdVars "network_name"}}"
      auto_create_subnetworks = false
+     routing_mode            = "REGIONAL"
    }
    ```
 
@@ -369,7 +392,7 @@ samples:
     steps:
       - name: create
         test_env_vars:
-          org_id: ORG_TARGET
+          org_id: ORG_TARGET # Resolves to envvar.GetTestOrgTargetFromEnv in tests
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}

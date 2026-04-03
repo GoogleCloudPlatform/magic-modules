@@ -60,7 +60,7 @@ samples:
 >
 > In the new `samples` format, these two use cases are explicitly separated into different fields within a step:
 > * **`resource_id_vars`**: Use this for variables like resource names that need random strings appended to avoid test collisions (corresponds to old `vars`).
-> * **`vars`**: Use this for plain literal values that should be passed to the test exactly as written (replaces the need for `test_vars_overrides`).
+> * **`vars`**: Use this for plain literal values that should be passed to the test exactly as written (replaces the need for `test_vars_overrides`). **Note:** This should ONLY be used for fields that vary between steps (e.g., to test update functionality). Constant values should be hardcoded directly in the `.tf.tmpl` file.
 
 ### Update Test Comparison
 
