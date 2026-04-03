@@ -488,6 +488,6 @@ properties:
 
 ## Samples
 
-`samples` are configurations used to generate documentation and tests. Each sample contains one or more `steps` representing consecutive update test footprints.
+`Samples` are configurations used to generate documentation and tests. Each sample contains one or more `steps` representing consecutive update test footprints.
 
 See the dedicated [MMv1 sample reference ↗]({{< ref "/reference/sample" >}}) page for a comprehensive list of all top-level sample and nested step attributes.
