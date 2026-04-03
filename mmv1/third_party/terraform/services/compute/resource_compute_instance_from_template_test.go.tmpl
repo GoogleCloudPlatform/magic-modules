@@ -2702,6 +2702,11 @@ resource "google_compute_instance_template" "foobar" {
     source      = google_compute_disk.foobarboot.name
     boot        = true
   }
+
+  network_interface {
+    network = "default"
+  }
+
 }
 
 resource "google_compute_instance_from_template" "foobar" {
