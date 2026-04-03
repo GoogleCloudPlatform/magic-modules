@@ -18,6 +18,7 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
 	"fmt"
+	"encoding/json"
 	"log"
 	"reflect"
 	"regexp"
@@ -50,6 +51,7 @@ import (
 )
 
 var (
+    _ = json.Marshal
     _ = fmt.Sprintf
     _ = reflect.ValueOf
     _ = strings.Trim
