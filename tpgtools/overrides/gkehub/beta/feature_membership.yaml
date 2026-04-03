@@ -14,6 +14,15 @@
 - type: CUSTOM_ID
   details:
     id: 'projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}'
+- type: IMPORT_FORMAT
+  details:
+    formats:
+      - 'projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}/membershipLocation/{{membership_location}}'
+      - '{{project}}/{{location}}/{{feature}}/{{membership}}/{{membership_location}}'
+      - '{{location}}/{{feature}}/{{membership}}/{{membership_location}}'
+      - 'projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}'
+      - '{{project}}/{{location}}/{{feature}}/{{membership}}'
+      - '{{location}}/{{feature}}/{{membership}}'
 - type: MUTEX
   details:
     mutex: '{{project}}/{{location}}/{{feature}}'
