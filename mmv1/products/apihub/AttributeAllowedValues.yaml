@@ -1,0 +1,108 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AttributeAllowedValues
+description: |-
+  Manages the allowed values of attributes in the API Hub. This resource can manage allowed values
+  for both system-defined and user-defined attributes of ENUM type. For system-defined attributes,
+  immutable values are automatically preserved and cannot be modified or removed.
+references:
+  guides:
+    "Manage attributes": "https://cloud.google.com/apigee/docs/apihub/manage-attributes"
+  api: "https://cloud.google.com/apigee/docs/reference/apis/apihub/rest/v1/projects.locations.attributes"
+base_url: projects/{{project}}/locations/{{location}}/attributes
+self_link: projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+update_url: projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+update_verb: "PATCH"
+update_mask: true
+id_format: projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+custom_code:
+  constants: templates/terraform/constants/apihub_attribute_allowed_values.go.tmpl
+  custom_create: templates/terraform/custom_create/apihub_attribute_allowed_values.go.tmpl
+  custom_delete: templates/terraform/custom_delete/apihub_attribute_allowed_values.go.tmpl
+  pre_update: templates/terraform/pre_update/apihub_attribute_allowed_values.go.tmpl
+examples:
+  - name: apihub_attribute_allowed_values_user_defined
+    primary_resource_id: user_attribute_allowed_values
+    vars:
+      attribute_id: "environment"
+    test_env_vars:
+      project_id: PROJECT_NAME
+    test_vars_overrides:
+      "attribute_id": '"tf-test-attr-values-" + acctest.RandString(t, 10)'
+    # Skip test as it requires API Hub instance
+    exclude_test: true
+  - name: apihub_attribute_allowed_values_system_defined
+    primary_resource_id: system_attribute_allowed_values
+    vars:
+      attribute_id: "system-lifecycle-stage"
+    test_env_vars:
+      project_id: PROJECT_NAME
+    # Skip test as it requires API Hub instance and system attributes to exist
+    exclude_test: true
+parameters:
+  - name: location
+    type: String
+    description: |-
+      The location of the API Hub instance where the system attribute exists.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: attributeId
+    type: String
+    api_name: name
+    description: |-
+      The ID of the attribute. This can be either a system-defined attribute
+      (e.g., "system-lifecycle-stage") or a user-defined attribute.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: allowedValues
+    type: Array
+    description: |-
+      The allowed values for the attribute. This is a list of allowed values
+      that can be used for the attribute. For system-defined attributes, some
+      values may be immutable and cannot be removed.
+    required: true
+    custom_flatten: templates/terraform/custom_flatten/apihub_attribute_allowed_values_allowed_values.go.tmpl
+    update_mask_fields:
+      - "allowed_values"
+    item_type:
+      type: NestedObject
+      properties:
+        - name: id
+          type: String
+          description: |-
+            Required. The ID of the allowed value. This should be unique within the
+            attribute. If this is an immutable value from the system, it cannot be
+            modified or removed.
+          required: true
+        - name: displayName
+          type: String
+          description: |-
+            Required. The display name of the allowed value. This can be updated
+            for mutable values.
+          required: true
+        - name: description
+          type: String
+          description: Optional. The description of the allowed value.
+        - name: immutable
+          type: Boolean
+          default_value: false
+          description: |-
+            Output only. Whether the allowed value is immutable. Immutable values
+            cannot be modified or removed and will be automatically preserved during updates.
