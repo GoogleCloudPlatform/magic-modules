@@ -25,6 +25,7 @@ self_link: 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
 update_verb: 'PATCH'
 update_mask: true
+deletion_policy_exclude: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -37,20 +38,33 @@ async:
   result:
     resource_inside_response: true
 examples:
+  - name: 'vertex_ai_reasoning_engine_deletion_policy'
+    primary_resource_id: 'reasoning_engine'
+    exclude_docs: true
+    vars:
+      name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_basic'
     primary_resource_id: 'reasoning_engine'
     exclude_docs: true
     vars:
       name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_source_based_deployment'
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_developer_connect_source'
     skip_docs: true  # skip docs until templatized (or decide to skip docs permanently then)
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_psc_interface'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -68,6 +82,8 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
         role: "roles/viewer"
     exclude_test: true
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_full'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -82,6 +98,31 @@ examples:
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
     external_providers: ["time"]
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_context_spec'
+    primary_resource_id: 'reasoning_engine'
+    min_version: beta
+    vars:
+      name: 're-ctx-spec'
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_granular_ttl'
+    primary_resource_id: 'reasoning_engine'
+    min_version: beta
+    vars:
+      name: 're-gran-ttl'
+    ignore_read_extra:
+      - 'deletion_policy'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      Optional. The deletion policy for the reasoning engine. Setting this to FORCE allows the reasoning engine to be deleted regardless of child undeleted resources.
+    type: Enum
+    enum_values:
+      - 'FORCE'
 parameters:
   - name: 'region'
     type: String
@@ -103,6 +144,7 @@ properties:
   - name: 'description'
     type: String
     description: The description of the ReasoningEngine.
+
   - name: 'createTime'
     type: String
     description: |-
@@ -427,3 +469,71 @@ properties:
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
+  - name: 'contextSpec'
+    min_version: 'beta'
+    type: NestedObject
+    description: |-
+      Optional. Configuration for how Agent Engine sub-resources should manage context.
+    properties:
+      - name: 'memoryBankConfig'
+        type: NestedObject
+        description: |-
+          Specification for a Memory Bank, which manages memories for the Agent Engine.
+        properties:
+          - name: 'generationConfig'
+            type: NestedObject
+            description: |-
+              Configuration for how to generate memories for the Memory Bank.
+            properties:
+              - name: 'model'
+                type: String
+                description: |-
+                  The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                required: true
+          - name: 'similaritySearchConfig'
+            type: NestedObject
+            description: |-
+              Configuration for how to perform similarity search on memories.
+            properties:
+              - name: 'embeddingModel'
+                type: String
+                description: |-
+                  The model used to generate embeddings to lookup similar memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                required: true
+          - name: 'ttlConfig'
+            type: NestedObject
+            description: |-
+              Configuration for automatic TTL ("time-to-live") of the memories in the Memory Bank.
+            properties:
+              - name: 'defaultTtl'
+                type: String
+                exactly_one_of:
+                  - defaultTtl
+                  - granularTtlConfig
+                description: |-
+                  The default TTL duration of the memories in the Memory Bank.
+              - name: 'granularTtlConfig'
+                type: NestedObject
+                description: |-
+                  The granular TTL configuration of the memories in the Memory Bank.
+                properties:
+                  - name: 'createTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories uploaded via CreateMemory.
+                  - name: 'generateCreatedTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories newly generated via GenerateMemories.
+                  - name: 'generateUpdatedTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories updated via GenerateMemories.
+              - name: 'memoryRevisionDefaultTtl'
+                type: String
+                description: |-
+                  The default TTL duration of the memory revisions in the Memory Bank.
+          - name: 'disableMemoryRevisions'
+            type: Boolean
+            description: |-
+              If true, no memory revisions will be created for any requests to the Memory Bank.

@@ -16,7 +16,6 @@ name: NetworkPeering
 description: |
   Represents a network peering resource. Network peerings are global resources.
 references:
-  guides: {}
   api: https://cloud.google.com/compute/docs/reference/rest/v1/networks/addPeering
 base_url: projects/{{project}}/locations/global/networkPeerings
 self_link: projects/{{project}}/locations/global/networkPeerings/{{name}}

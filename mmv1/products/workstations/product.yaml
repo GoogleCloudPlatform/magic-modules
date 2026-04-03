@@ -16,6 +16,8 @@ name: 'Workstations'
 display_name: 'Cloud Workstations'
 deletion_policy_opt_in: true
 versions:
+  - name: 'ga'
+    base_url: https://workstations.googleapis.com/v1/
   - name: 'beta'
     base_url: 'https://workstations.googleapis.com/v1beta/'
 scopes:

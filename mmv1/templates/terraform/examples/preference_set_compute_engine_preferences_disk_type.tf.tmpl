@@ -1,0 +1,19 @@
+resource "google_migration_center_preference_set" "{{$.PrimaryResourceId}}" {
+  location          = "us-central1"
+  preference_set_id = "{{index $.Vars "set_name"}}"
+  description       = "Terraform integration test description"
+  display_name      = "Terraform integration test display"
+  virtual_machine_preferences {
+    sizing_optimization_strategy = "SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE"
+    target_product = "COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE"
+    compute_engine_preferences {
+      license_type = "LICENSE_TYPE_BRING_YOUR_OWN_LICENSE"
+      machine_preferences {
+        allowed_machine_series {
+          code = "C3"
+        }
+      }
+      persistent_disk_type = "PERSISTENT_DISK_TYPE_SSD"
+    }
+  }
+}

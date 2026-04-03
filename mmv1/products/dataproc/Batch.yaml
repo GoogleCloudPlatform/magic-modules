@@ -303,6 +303,7 @@ properties:
               description: |
                 Scenario represents a specific goal that autotuning will attempt to achieve by modifying workloads.
               enum_values:
+                - AUTO
                 - SCALING
                 - BROADCAST_HASH_JOIN
                 - MEMORY

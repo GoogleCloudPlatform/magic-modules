@@ -293,10 +293,6 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 {{ if and $.IamPolicy $.IamPolicy.WrappedPolicyObj -}}
 	obj := make(map[string]interface{})
 	obj["policy"] = json
-	{{- if $.IamPolicy.UpdateMask }}
-	// Core APIs require the mask to acknowledge policy version 3 (conditions)
-	obj["updateMask"] = "bindings,etag,version"
-	{{- end }}
 {{- else }}
 	obj := json
 {{- end }}

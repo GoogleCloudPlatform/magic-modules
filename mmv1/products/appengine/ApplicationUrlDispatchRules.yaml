@@ -12,72 +12,60 @@
 # limitations under the License.
 
 ---
-name: 'ApplicationUrlDispatchRules'
+name: ApplicationUrlDispatchRules
 api_resource_type_kind: Application
 description: |
   Rules to match an HTTP request and dispatch that request to a service.
 references:
-  guides:
-  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule'
-docs:
+  api: https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule
+base_url: apps/{{project}}
+create_url: apps/{{project}}?updateMask=dispatch_rules
+delete_url: apps/{{project}}?updateMask=dispatch_rules
+update_url: apps/{{project}}?updateMask=dispatch_rules
+create_verb: PATCH
+update_verb: PATCH
+delete_verb: PATCH
 id_format: '{{project}}'
-base_url: 'apps/{{project}}'
-create_url: 'apps/{{project}}?updateMask=dispatch_rules'
-create_verb: 'PATCH'
-update_url: 'apps/{{project}}?updateMask=dispatch_rules'
-update_verb: 'PATCH'
-delete_url: 'apps/{{project}}?updateMask=dispatch_rules'
-delete_verb: 'PATCH'
-mutex: 'apps/{{project}}'
 import_format:
   - '{{project}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+mutex: apps/{{project}}
+exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
-custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/appengine.go.tmpl'
-exclude_sweeper: true
 error_retry_predicates:
-
-  - 'transport_tpg.IsAppEngineRetryableError'
+  - transport_tpg.IsAppEngineRetryableError
+custom_code:
+  test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.tmpl
 examples:
-  - name: 'app_engine_application_url_dispatch_rules_basic'
-    primary_resource_id: 'web_service'
+  - name: app_engine_application_url_dispatch_rules_basic
+    primary_resource_id: web_service
     vars:
-      bucket_name: 'appengine-test-bucket'
-parameters:
+      bucket_name: appengine-test-bucket
 properties:
-  - name: 'dispatchRules'
+  - name: dispatchRules
     type: Array
+    required: true
     description: |
       Rules to match an HTTP request and dispatch that request to a service.
-    required: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'domain'
+        - name: domain
           type: String
+          default_value: '*'
           description: |
             Domain name to match against. The wildcard "*" is supported if specified before a period: "*.".
             Defaults to matching all domains: "*".
-          default_value: "*"
-        - name: 'path'
+        - name: path
           type: String
+          required: true
           description: |
             Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
             The sum of the lengths of the domain and path may not exceed 100 characters.
-          required: true
-        - name: 'service'
+        - name: service
           type: String
+          required: true
           description: |
             Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
             The sum of the lengths of the domain and path may not exceed 100 characters.
-          required: true

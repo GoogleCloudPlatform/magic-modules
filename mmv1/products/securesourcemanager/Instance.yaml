@@ -104,6 +104,21 @@ examples:
     ignore_read_extra:
       - 'update_time'
       - 'deletion_policy'
+  - name: 'secure_source_manager_instance_private_custom_host'
+    primary_resource_id: 'default'
+    vars:
+      instance_id: 'my-instance'
+      ca_pool_id: 'ca-pool'
+      root_ca_id: 'root-ca'
+      deletion_policy: 'PREVENT'
+    test_vars_overrides:
+      'deletion_policy': '"DELETE"'
+    oics_vars_overrides:
+      'deletion_policy': '"DELETE"'
+    external_providers: ["time"]
+    ignore_read_extra:
+      - 'update_time'
+      - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_backend'
     primary_resource_id: 'default'
     vars:
@@ -267,6 +282,27 @@ properties:
           'Indicate if it's private instance.'
         required: true
         immutable: true
+      - name: 'customHostConfig'
+        type: NestedObject
+        description: |
+          Custom host configuration for the instance.
+        properties:
+          - name: 'html'
+            type: String
+            description: 'HTML hostname.'
+            required: true
+          - name: 'api'
+            type: String
+            description: 'API hostname.'
+            required: true
+          - name: 'gitHttp'
+            type: String
+            description: 'Git HTTP hostname.'
+            required: true
+          - name: 'gitSsh'
+            type: String
+            description: 'Git SSH hostname.'
+            required: true
       - name: 'caPool'
         type: String
         description: |

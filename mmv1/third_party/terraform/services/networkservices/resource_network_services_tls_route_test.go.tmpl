@@ -44,18 +44,20 @@ func TestAccNetworkServicesTlsRoute_update(t *testing.T) {
 func testAccNetworkServicesTlsRoute_basic(tlsServiceName string, tlsHealthCheckName string, tlsRouteName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foo" {
-  name          = "%s"
-  health_checks = [google_compute_http_health_check.bar.id]
+  name                  = "%s"
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+  health_checks         = [google_compute_health_check.bar.id]
 }
 
-resource "google_compute_http_health_check" "bar" {
-  name               = "%s"
-  request_path       = "/"
-  check_interval_sec = 1
-  timeout_sec        = 1
+resource "google_compute_health_check" "bar" {
+  name = "%s"
+
+  https_health_check {
+    port = 443
+  }
 }
 
-resource "google_network_services_tls_route" "foobar" { 
+resource "google_network_services_tls_route" "foobar" {
   name                   = "%s"
   description             = "my description"
   rules                   {
@@ -78,14 +80,16 @@ func testAccNetworkServicesTlsRoute_update(tlsServiceName string, tlsHealthCheck
 	return fmt.Sprintf(`
   resource "google_compute_backend_service" "foo" {
     name          = "%s"
-    health_checks = [google_compute_http_health_check.bar.id]
+    load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+    health_checks         = [google_compute_health_check.bar.id]
   }
 
-  resource "google_compute_http_health_check" "bar" {
-    name               = "%s"
-    request_path       = "/"
-    check_interval_sec = 1
-    timeout_sec        = 1
+  resource "google_compute_health_check" "bar" {
+    name = "%s"
+
+    https_health_check {
+      port = 443
+    }
   }
 
   resource "google_network_services_tls_route" "foobar" {

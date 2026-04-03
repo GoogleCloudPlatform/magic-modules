@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionBackendBucket'
+min_version: 'beta'
 kind: 'compute#backendBucket'
 description: |
   Regional backend buckets allow you to use Google Cloud Storage buckets with
@@ -36,7 +37,7 @@ description: |
 references:
   guides:
     'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/regionBackendBuckets'
+  api: 'https://cloud.google.com/compute/docs/reference/beta/regionBackendBuckets'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/backendBuckets'
 has_self_link: true
