@@ -720,3 +720,10 @@ properties:
           comply with RFC1035.
         item_type:
           type: String
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disks restored from source snapshots or source machine image should erase Windows specific VSS signature.
+    min_version: 'beta'
+    ignore_read: true
+    default_value: false
