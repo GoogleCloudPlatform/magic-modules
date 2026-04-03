@@ -1,0 +1,5 @@
+if v_headers, ok := d.GetOk("custom_headers"); ok {
+    for k, v := range v_headers.(map[string]interface{}) {
+        headers.Add(k, v.(string))
+    }
+}
