@@ -350,6 +350,17 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
 	return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }})
 }
 
+func {{ $.ResourceName }}IamResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, transportConfig *transport_tpg.Config) (string, error) {
+	return tpgiamresource.ParseIamResourceIdentity(d, identity, transportConfig, tpgiamresource.IamResourceIdentityConfig{
+		Params: []tpgiamresource.IamIdentityParam{
+{{- range $param := $.IamResourceParams }}
+			{Key: "{{ camelize $param "lower" }}", IdentityKey: "{{ underscore $param }}"},
+{{- end }}
+		},
+		UriFormat: "{{ $.IamResourceUriFormat }}",
+	})
+}
+
 func (u *{{ $.ResourceName }}IamUpdater) GetMutexKey() string {
 	return fmt.Sprintf("iam-{{ lower $.ProductMetadata.Name }}-{{ lower $.Name }}-%s", u.GetResourceId())
 }

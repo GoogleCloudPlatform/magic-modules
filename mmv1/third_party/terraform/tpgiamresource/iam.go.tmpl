@@ -55,6 +55,12 @@ type (
 
 	// Parser for Terraform resource identifier (d.Id) for resource whose IAM policy is being changed
 	ResourceIdParserFunc func(d *schema.ResourceData, config *transport_tpg.Config) error
+
+	// ResourceIdentityParserFunc builds the canonical resource identifier (first segment of
+	// google_*_iam_member import id) from Terraform import identity when d.Id() is empty.
+	// Parent attributes on identity match the IAM parent schema keys (project, folder, zone,
+	// name, …); resource_iam_member copies them from state on create/read alongside member/role.
+	ResourceIdentityParserFunc func(d *schema.ResourceData, identity *schema.IdentityData, config *transport_tpg.Config) (resourceID string, err error)
 )
 
 // Locking wrapper around read-only operation with retries.
@@ -428,6 +434,9 @@ type IamSettings struct {
 	StateUpgraders     []schema.StateUpgrader
 	SchemaVersion      int
 	CreateTimeOut      int64
+	// ResourceIdentityParser, when non-nil, enables Terraform resource identity for this IAM
+	// member resource (identity schema, create/read identity sync, and import when d.Id() is empty).
+	ResourceIdentityParser ResourceIdentityParserFunc
 }
 
 func NewIamSettings(options ...func(*IamSettings)) *IamSettings {
@@ -441,6 +450,14 @@ func NewIamSettings(options ...func(*IamSettings)) *IamSettings {
 func IamWithDeprecationMessage(message string) func(s *IamSettings) {
 	return func(s *IamSettings) {
 		s.DeprecationMessage = message
+	}
+}
+
+// IamWithResourceIdentity enables Terraform resource identity for this IAM member and sets the
+// parser that derives the canonical resource id from import identity when d.Id() is empty.
+func IamWithResourceIdentity(parser ResourceIdentityParserFunc) func(*IamSettings) {
+	return func(s *IamSettings) {
+		s.ResourceIdentityParser = parser
 	}
 }
 
@@ -543,4 +560,27 @@ func MissingBindings(a, b []*cloudresourcemanager.Binding) []*cloudresourcemanag
 		})
 	}
 	return results
+}
+
+// Converts an IAM parent resource schema to identity schema
+func ConvertToIdentitySchema(parentSchema map[string]*schema.Schema) map[string]*schema.Schema {
+	identitySchema := make(map[string]*schema.Schema)
+	for k, v := range parentSchema {
+		identitySchema[k] = &schema.Schema{
+			Type: v.Type,
+		}
+		if v.Required {
+			identitySchema[k].RequiredForImport = true
+		} else {
+			identitySchema[k].OptionalForImport = true
+		}
+	}
+	return identitySchema
+}
+
+// Copies IAM parent attributes from resource state into identity
+func PopulateIamParentIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSchema map[string]*schema.Schema) {
+	for attr := range parentSchema {
+		identity.Set(attr, d.Get(attr))
+	}
 }

@@ -380,9 +380,9 @@ var generatedResources = map[string]*schema.Resource{
 		"{{ $object.TerraformName }}": registry.Resource("{{ $object.TerraformName }}"),
 	{{- end }}
 	{{- if $object.IamClassName }}
-		"{{ $object.TerraformName }}_iam_binding": registry.Resource("{{ $object.TerraformName }}_iam_binding"),
-		"{{ $object.TerraformName }}_iam_member":  registry.Resource("{{ $object.TerraformName }}_iam_member"),
-		"{{ $object.TerraformName }}_iam_policy":  registry.Resource("{{ $object.TerraformName }}_iam_policy"),
+		"{{ $object.TerraformName }}_iam_binding":              tpgiamresource.ResourceIamBinding({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
+		"{{ $object.TerraformName }}_iam_member":               tpgiamresource.ResourceIamMember({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc, tpgiamresource.IamWithResourceIdentity({{ $object.IamClassName }}IamResourceIdentityParser)),
+		"{{ $object.TerraformName }}_iam_policy":               tpgiamresource.ResourceIamPolicy({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
 	{{- end }}
 	{{- end }}
 }
@@ -513,7 +513,7 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_dataproc_job_iam_member":               tpgiamresource.ResourceIamMember(dataproc.IamDataprocJobSchema, dataproc.NewDataprocJobUpdater, dataproc.DataprocJobIdParseFunc),
 	"google_dataproc_job_iam_policy":               tpgiamresource.ResourceIamPolicy(dataproc.IamDataprocJobSchema, dataproc.NewDataprocJobUpdater, dataproc.DataprocJobIdParseFunc),
 	"google_folder_iam_binding":                    tpgiamresource.ResourceIamBinding(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc),
-	"google_folder_iam_member":                     tpgiamresource.ResourceIamMember(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc),
+	"google_folder_iam_member":                     tpgiamresource.ResourceIamMember(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc, tpgiamresource.IamWithResourceIdentity(resourcemanager.FolderIamResourceIdentityParser)),
 	"google_folder_iam_policy":                     tpgiamresource.ResourceIamPolicy(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc),
 	"google_folder_iam_audit_config":               tpgiamresource.ResourceIamAuditConfig(resourcemanager.IamFolderSchema, resourcemanager.NewFolderIamUpdater, resourcemanager.FolderIdParseFunc),
 	"google_healthcare_dataset_iam_binding":        tpgiamresource.ResourceIamBinding(healthcare.IamHealthcareDatasetSchema, healthcare.NewHealthcareDatasetIamUpdater, healthcare.DatasetIdParseFunc, tpgiamresource.IamWithBatching),
@@ -552,7 +552,7 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_organization_iam_audit_config":         tpgiamresource.ResourceIamAuditConfig(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_project_iam_policy":                    tpgiamresource.ResourceIamPolicy(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater, resourcemanager.ProjectIdParseFunc),
 	"google_project_iam_binding":                   tpgiamresource.ResourceIamBinding(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater, resourcemanager.ProjectIdParseFunc, tpgiamresource.IamWithBatching),
-	"google_project_iam_member":                    tpgiamresource.ResourceIamMember(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater, resourcemanager.ProjectIdParseFunc, tpgiamresource.IamWithBatching),
+	"google_project_iam_member":                    tpgiamresource.ResourceIamMember(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater, resourcemanager.ProjectIdParseFunc, tpgiamresource.IamWithBatching, tpgiamresource.IamWithResourceIdentity(resourcemanager.ProjectIamResourceIdentityParser)),
 	"google_project_iam_audit_config":              tpgiamresource.ResourceIamAuditConfig(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater, resourcemanager.ProjectIdParseFunc, tpgiamresource.IamWithBatching),
 	"google_pubsub_subscription_iam_binding":       tpgiamresource.ResourceIamBinding(pubsub.IamPubsubSubscriptionSchema, pubsub.NewPubsubSubscriptionIamUpdater, pubsub.PubsubSubscriptionIdParseFunc),
 	"google_pubsub_subscription_iam_member":        tpgiamresource.ResourceIamMember(pubsub.IamPubsubSubscriptionSchema, pubsub.NewPubsubSubscriptionIamUpdater, pubsub.PubsubSubscriptionIdParseFunc),
