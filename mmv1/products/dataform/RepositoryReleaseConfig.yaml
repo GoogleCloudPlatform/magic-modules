@@ -36,6 +36,15 @@ examples:
       git_repository_name: my/repository
       release_name: my_release
       secret_name: my_secret
+  - name: dataform_repository_release_config_with_builtin_assertion
+    primary_resource_id: release
+    min_version: beta
+    vars:
+      data: secret-data
+      dataform_repository_name: dataform_repository
+      git_repository_name: my/repository
+      release_name: my_release
+      secret_name: my_secret
 parameters:
   - name: region
     type: String
@@ -112,6 +121,9 @@ properties:
         type: String
         description: Optional. The prefix that should be prepended to all table names.
         min_version: beta
+      - name: builtinAssertionNamePrefix
+        type: String
+        description: The prefix to prepend to built-in assertion names.
   - name: recentScheduledReleaseRecords
     type: Array
     description: Records of the 10 most recent scheduled release attempts, ordered in in descending order of releaseTime. Updated whenever automatic creation of a compilation result is triggered by cronSchedule.
