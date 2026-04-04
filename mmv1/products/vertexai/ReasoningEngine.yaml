@@ -64,6 +64,12 @@ examples:
       name: 'reasoning-engine'
     ignore_read_extra:
       - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_image_spec'
+    primary_resource_id: 'reasoning_engine'
+    vars:
+      name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_psc_interface'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -385,8 +391,25 @@ properties:
                   The application source code archive, provided as a compressed
                   tarball (.tar.gz) file. A base64-encoded string.
                 ignore_read: true
+          - name: 'imageSpec'
+            type: NestedObject
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - 'spec.0.source_code_spec.0.python_spec'
+            description: |-
+              Configuration for building an image with custom config file.
+            properties:
+              - name: 'buildArgs'
+                type: KeyValuePairs
+                send_empty_value: true
+                required: true
+                description: |
+                  Build arguments to be used. They will be passed through --build-arg flags.
           - name: 'pythonSpec'
             type: NestedObject
+            conflicts:
+              - 'spec.0.source_code_spec.0.image_spec'
             description: |-
               Specification for running a Python application from source.
             properties:
