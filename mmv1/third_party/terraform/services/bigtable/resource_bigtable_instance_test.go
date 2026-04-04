@@ -621,6 +621,35 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 	})
 }
 
+func TestAccBigtableInstance_tags(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigtableInstance_invalid(instanceName),
+				ExpectError: regexp.MustCompile("config is invalid: Too few cluster blocks: Should have at least 1 \"cluster\" block"),
+			},
+			{
+				Config: testAccBigtableInstance_tags(instanceName, map[string]string{"tagKeys/123": "tagValue/456"}),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "tags"}, // we don't read tags back
+			},
+		},
+	})
+}
+
 func TestAccBigtableInstance_createWithNodeScalingFactorThenFailFromDeletionProtection(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
@@ -1256,4 +1285,26 @@ resource "time_offset" "week-in-future" {
   offset_days = 7
 }
 `
+}
+
+func testAccBigtableInstance_tags(instanceName string, tags map[string]string) string {
+	l := fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id   = "%s-a"
+    zone         = "us-central1-a"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+deletion_protection = false
+  tags = {`, instanceName, instanceName)
+
+	r := ""
+	for key, value := range tags {
+		r += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	r += fmt.Sprintf("}\n")
+	return l + r
 }
