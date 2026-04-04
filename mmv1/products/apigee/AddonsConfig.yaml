@@ -27,6 +27,9 @@ update_url: 'organizations/{{org}}:setAddons'
 update_verb: 'POST'
 delete_url: 'organizations/{{org}}:setAddons'
 delete_verb: 'POST'
+import_format:
+  - 'organizations/{{org}}'
+  - '{{org}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
