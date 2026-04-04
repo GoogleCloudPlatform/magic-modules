@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -124,6 +126,145 @@ func BuildIAMImportId(name, role, member, condition string) string {
 		ret += " " + condition
 	}
 	return ret
+}
+
+// TagBindingCheckConfig configures a CheckTagBindings assertion.
+// BuildParent must return the full resource name used as the tagBindings parent.
+// If GetLocation is nil, the global tagBindings endpoint is used.
+// If GetLocation is set, the location-scoped endpoint is used.
+type TagBindingCheckConfig struct {
+	ResourceName                string
+	ExpectedTagValueResources   []string
+	UnexpectedTagValueResources []string
+	BuildParent                 func(rs *terraform.ResourceState) (string, error)
+	GetLocation                 func(rs *terraform.ResourceState) (string, error)
+}
+
+// CheckTagBindings verifies that the target resource has the expected tag value
+// bindings and does not have the unexpected ones.
+func CheckTagBindings(t *testing.T, cfg TagBindingCheckConfig) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if cfg.ResourceName == "" {
+			return fmt.Errorf("resource name must be set for CheckTagBindings")
+		}
+		if cfg.BuildParent == nil {
+			return fmt.Errorf("BuildParent must be set for CheckTagBindings on resource %s", cfg.ResourceName)
+		}
+
+		rs, err := getResourceState(s, cfg.ResourceName)
+		if err != nil {
+			return err
+		}
+
+		expectedTagValues := make([]string, 0, len(cfg.ExpectedTagValueResources))
+		for _, resourceName := range cfg.ExpectedTagValueResources {
+			tagValueID, err := getResourceID(s, resourceName)
+			if err != nil {
+				return err
+			}
+			expectedTagValues = append(expectedTagValues, tagValueID)
+		}
+
+		unexpectedTagValues := make([]string, 0, len(cfg.UnexpectedTagValueResources))
+		for _, resourceName := range cfg.UnexpectedTagValueResources {
+			tagValueID, err := getResourceID(s, resourceName)
+			if err != nil {
+				return err
+			}
+			unexpectedTagValues = append(unexpectedTagValues, tagValueID)
+		}
+
+		parent, err := cfg.BuildParent(rs)
+		if err != nil {
+			return err
+		}
+
+		config := GoogleProviderConfig(t)
+		basePath := config.TagsBasePath
+		if cfg.GetLocation != nil {
+			location, err := cfg.GetLocation(rs)
+			if err != nil {
+				return err
+			}
+			basePath = strings.Replace(config.TagsLocationBasePath, "{{location}}", location, 1)
+		}
+
+		listBindingsURL := fmt.Sprintf("%stagBindings/?parent=%s&pageSize=300", basePath, url.QueryEscape(parent))
+		resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    listBindingsURL,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("error calling tagBindings API for resource %s: %v", rs.Primary.ID, err)
+		}
+
+		tagBindingsVal, exists := resp["tagBindings"]
+		if !exists {
+			tagBindingsVal = []interface{}{}
+		}
+
+		tagBindings, ok := tagBindingsVal.([]interface{})
+		if !ok {
+			return fmt.Errorf("'tagBindings' is not a slice in response for resource %s. response: %v", rs.Primary.ID, resp)
+		}
+
+		foundExpected := make(map[string]bool, len(expectedTagValues))
+		foundUnexpected := make(map[string]bool, len(unexpectedTagValues))
+
+		for _, binding := range tagBindings {
+			bindingMap, ok := binding.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			tagValue, _ := bindingMap["tagValue"].(string)
+			for _, expectedTagValue := range expectedTagValues {
+				if tagValue == expectedTagValue {
+					foundExpected[expectedTagValue] = true
+				}
+			}
+			for _, unexpectedTagValue := range unexpectedTagValues {
+				if tagValue == unexpectedTagValue {
+					foundUnexpected[unexpectedTagValue] = true
+				}
+			}
+		}
+
+		for _, expectedTagValue := range expectedTagValues {
+			if !foundExpected[expectedTagValue] {
+				return fmt.Errorf("expected tag value %s not found in tag bindings for resource %s. bindings: %v", expectedTagValue, rs.Primary.ID, tagBindings)
+			}
+		}
+
+		for _, unexpectedTagValue := range unexpectedTagValues {
+			if foundUnexpected[unexpectedTagValue] {
+				return fmt.Errorf("unexpected tag value %s found in tag bindings for resource %s. bindings: %v", unexpectedTagValue, rs.Primary.ID, tagBindings)
+			}
+		}
+
+		return nil
+	}
+}
+
+func getResourceState(s *terraform.State, resourceName string) (*terraform.ResourceState, error) {
+	rs, ok := s.RootModule().Resources[resourceName]
+	if !ok {
+		return nil, fmt.Errorf("terraform resource not found: %s", resourceName)
+	}
+	return rs, nil
+}
+
+func getResourceID(s *terraform.State, resourceName string) (string, error) {
+	rs, err := getResourceState(s, resourceName)
+	if err != nil {
+		return "", err
+	}
+	if rs.Primary.ID == "" {
+		return "", fmt.Errorf("terraform resource %s has no id", resourceName)
+	}
+	return rs.Primary.ID, nil
 }
 
 // testStringValue returns string values from string pointers, handling nil pointers.
