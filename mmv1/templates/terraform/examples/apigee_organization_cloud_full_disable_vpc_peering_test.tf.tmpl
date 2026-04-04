@@ -5,7 +5,6 @@ resource "google_project" "project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
-  deletion_policy = "DELETE"
 }
 
 resource "time_sleep" "wait_60_seconds" {
@@ -71,7 +70,7 @@ resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
   crypto_key_id = google_kms_crypto_key.apigee_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-  member = google_project_service_identity.apigee_sa.member
+  member = "serviceAccount:${google_project_service_identity.apigee_sa.email}"
 }
 
 resource "time_sleep" "wait_for_iam" {
