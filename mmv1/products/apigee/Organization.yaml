@@ -59,6 +59,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     ignore_read_extra:
       - 'properties'
+      - 'addons_config'
     exclude_docs: true
     external_providers: ["time"]
   - name: 'apigee_organization_cloud_basic_disable_vpc_peering'
@@ -72,6 +73,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     ignore_read_extra:
       - 'properties'
+      - 'addons_config'
     exclude_docs: true
     external_providers: ["time"]
   - name: 'apigee_organization_cloud_basic_data_residency'
@@ -85,6 +87,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     ignore_read_extra:
       - 'properties'
+      - 'addons_config'
     exclude_docs: true
     external_providers: ["time"]
   - name: 'apigee_organization_cloud_full'
@@ -102,6 +105,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     ignore_read_extra:
       - 'properties'
+      - 'addons_config'
     exclude_docs: true
     external_providers: ["time"]
   - name: 'apigee_organization_cloud_full_disable_vpc_peering'
@@ -119,6 +123,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     ignore_read_extra:
       - 'properties'
+      - 'addons_config'
     exclude_docs: true
     external_providers: ["time"]
   - name: 'apigee_organization_retention_test'
@@ -262,6 +267,69 @@ properties:
             - name: 'value'
               type: String
               description: Value of the property.
+  - name: 'addonsConfig'
+    type: NestedObject
+    description: |
+      Addon configurations of the Apigee organization.
+    default_from_api: true
+    properties:
+      - name: 'advancedApiOpsConfig'
+        type: NestedObject
+        description: Configuration for the Advanced API Ops add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Advanced API Ops add-on is enabled.
+            send_empty_value: true
+      - name: 'integrationConfig'
+        type: NestedObject
+        description: Configuration for the Integration add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Integration add-on is enabled.
+            send_empty_value: true
+      - name: 'monetizationConfig'
+        type: NestedObject
+        description: Configuration for the Monetization add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Monetization add-on is enabled.
+            send_empty_value: true
+      - name: 'apiSecurityConfig'
+        type: NestedObject
+        description: Configuration for the API Security add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the API security add-on is enabled.
+            send_empty_value: true
+          - name: 'expiresAt'
+            type: String
+            description:
+              Time at which the API Security add-on expires in milliseconds since epoch.
+              If unspecified, the add-on will never expire.
+            output: true
+      - name: 'connectorsPlatformConfig'
+        type: NestedObject
+        description: Configuration for the Connectors Platform add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Connectors Platform add-on is enabled.
+            send_empty_value: true
+          - name: 'expiresAt'
+            type: String
+            description:
+              Time at which the Connectors Platform add-on expires in milliseconds since epoch.
+              If unspecified, the add-on will never expire.
+            output: true
   - name: 'apigeeProjectId'
     type: String
     description: |
