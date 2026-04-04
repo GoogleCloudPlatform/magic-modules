@@ -262,8 +262,7 @@ properties:
   - name: 'scaleType'
     type: Enum
     description: |
-      The effective scale type of the storage pool. If `scale_type` is not
-      specified during creation, this defaults to `SCALE_TYPE_DEFAULT`.
+      The scale type of the storage pool. Defaults to `SCALE_TYPE_DEFAULT` if not specified.
     enum_values:
       - 'SCALE_TYPE_UNSPECIFIED'
       - 'SCALE_TYPE_DEFAULT'
