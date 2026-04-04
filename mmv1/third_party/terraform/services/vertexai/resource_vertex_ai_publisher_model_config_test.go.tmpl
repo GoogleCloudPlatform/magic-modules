@@ -1,0 +1,145 @@
+package vertexai_test
+
+{{ if ne $.TargetVersionName `ga` -}}
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestAccVertexAIPublisherModelConfig_publisherModelConfigUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckVertexAIPublisherModelConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIPublisherModelConfig_publisherModelConfig_basic(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_publisher_model_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "model", "publisher", "publisher_model_config.0.logging_config.0.bigquery_destination.0.output_uri"},
+			},
+			{
+				Config: testAccVertexAIPublisherModelConfig_publisherModelConfigBasic_update(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_publisher_model_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "model", "publisher", "publisher_model_config.0.logging_config.0.bigquery_destination.0.output_uri"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIPublisherModelConfig_publisherModelConfig_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "default" {
+    provider = google-beta
+
+    publisher = "google"
+    model     = "gemini-2.0-flash"
+    location  = "us-central1"
+
+    publisher_model_config {
+        logging_config {
+            enabled             = true
+            sampling_rate       = 0.5
+            bigquery_destination  {
+                output_uri = "bq://%{project_id}"
+            }
+            enable_otel_logging = true
+        }
+    }
+}
+`, context)
+}
+
+func testAccVertexAIPublisherModelConfig_publisherModelConfigBasic_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "default" {
+  provider                    = google-beta
+  dataset_id                  = "%{random_suffix}_dataset"
+  location                    = "EU"
+}
+
+resource "google_vertex_ai_publisher_model_config" "default" {
+    provider = google-beta
+
+    publisher = "google"
+    model     = "gemini-2.0-flash"
+    location  = "us-central1"
+
+    publisher_model_config {
+        logging_config {
+            enabled             = false
+            sampling_rate       = 0.8
+            bigquery_destination  {
+							output_uri = "bq://%{project_id}.${google_bigquery_dataset.default.dataset_id}"
+            }
+            enable_otel_logging = false
+        }
+    }
+}
+`, context)
+}
+
+func testAccCheckVertexAIPublisherModelConfigDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_vertex_ai_publisher_model_config" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/publishers/{{"{{"}}publisher{{"}}"}}/models/{{"{{"}}model{{"}}"}}:fetchPublisherModelConfig")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("VertexAIPublisherModelConfig still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
+}
+
+{{ end }}
