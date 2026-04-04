@@ -656,6 +656,17 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	return nested
 }
 
+func (r Resource) AllNestedPropertiesWithExcluded(props []*Type) []*Type {
+	nested := props
+	for _, prop := range props {
+		if nestedProperties := prop.NestedPropertiesWithExcluded(); !prop.FlattenObject && nestedProperties != nil {
+			nested = google.Concat(nested, r.AllNestedPropertiesWithExcluded(nestedProperties))
+		}
+	}
+
+	return nested
+}
+
 func (r Resource) SensitiveProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
@@ -741,6 +752,21 @@ func (r Resource) RootProperties() []*Type {
 	for _, p := range r.AllUserProperties() {
 		if p.FlattenObject {
 			props = google.Concat(props, p.RootProperties())
+		} else {
+			props = append(props, p)
+		}
+	}
+	return props
+}
+
+// Returns the list of top-level properties once any nested objects with flatten_object
+// set to true have been collapsed, including excluded properties
+func (r Resource) RootPropertiesWithExcluded() []*Type {
+	props := make([]*Type, 0)
+
+	for _, p := range r.AllProperties() {
+		if p.FlattenObject {
+			props = google.Concat(props, p.RootPropertiesWithExcluded())
 		} else {
 			props = append(props, p)
 		}
@@ -2508,7 +2534,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	for _, tp := range r.VirtualFields {
 		props = append(props, strings.Join(tp.Lineage(), "."))
 	}
-	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
+	for _, tp := range r.AllNestedPropertiesWithExcluded(r.RootPropertiesWithExcluded()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
