@@ -170,5 +170,5 @@ resource "google_apigee_instance" "{{$.PrimaryResourceId}}" {
   name                 = "tf-test%{random_suffix}"
   location             = "us-central1"
   org_id               = google_apigee_organization.apigee_org.id
-  consumer_accept_list = [google_project.project.number]
+  consumer_accept_list = [google_project.project.project_id]
 }
