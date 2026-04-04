@@ -3,6 +3,7 @@ package apigee
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -39,6 +40,16 @@ func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The Apigee Organization associated with the Apigee instance`,
+				// Normalize org_id by stripping the "organizations/" prefix. Users may
+				// pass google_apigee_organization.id which returns "organizations/<project-id>",
+				// which would otherwise be doubled in the URL or cause a diff after import
+				// (since the import regex strips the prefix from the captured group).
+				StateFunc: func(v interface{}) string {
+					return strings.TrimPrefix(v.(string), "organizations/")
+				},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return strings.TrimPrefix(old, "organizations/") == strings.TrimPrefix(new, "organizations/")
+				},
 			},
 			"revision": {
 				Type:        schema.TypeString,
