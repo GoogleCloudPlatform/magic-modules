@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -156,10 +157,24 @@ func ResourceAppEngineApplication() *schema.Resource {
 							Description: `OAuth2 client ID to use for the authentication flow.`,
 						},
 						"oauth2_client_secret": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Sensitive:   true,
-							Description: `OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.`,
+							Type:          schema.TypeString,
+							Required:      true,
+							Sensitive:     true,
+							ConflictsWith: []string{"oauth_client_secret_wo"},
+							Description:   `OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.`,
+						},
+						"oauth_client_secret_wo": {
+							Type:          schema.TypeString,
+							Required:      true,
+							WriteOnly:     true,
+							ConflictsWith: []string{"oauth2_client_secret"},
+							RequiredWith:  []string{"oauth_client_secret_wo_version"},
+							Description:   `The Write-Only OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.`,
+						},
+						"oauth_client_secret_wo_version": {
+							Type:         schema.TypeString,
+							RequiredWith: []string{"oauth_client_secret_wo"},
+							Description:  `The Write-Only OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.`,
 						},
 						"oauth2_client_secret_sha256": {
 							Type:        schema.TypeString,
@@ -410,10 +425,16 @@ func expandAppEngineApplicationIap(d *schema.ResourceData) (*appengine.IdentityA
 	if len(blocks) < 1 {
 		return nil, nil
 	}
+	var clientSecret string
+	if clientSecretWo, _ := d.GetRawConfigAt(cty.GetAttrPath("iap").IndexInt(0).GetAttr("oauth2_client_secret_wo")); !clientSecretWo.IsNull() {
+		clientSecret = clientSecretWo.AsString()
+	} else {
+		clientSecret = d.Get("iap.0.oauth2_client_secret").(string)
+	}
 	return &appengine.IdentityAwareProxy{
 		Enabled:                  d.Get("iap.0.enabled").(bool),
 		Oauth2ClientId:           d.Get("iap.0.oauth2_client_id").(string),
-		Oauth2ClientSecret:       d.Get("iap.0.oauth2_client_secret").(string),
+		Oauth2ClientSecret:       clientSecret,
 		Oauth2ClientSecretSha256: d.Get("iap.0.oauth2_client_secret_sha256").(string),
 	}, nil
 }
