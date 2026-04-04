@@ -67,22 +67,25 @@ resource "google_project_service" "apigee" {
 resource "google_project_service" "compute" {
   provider = google-beta
 
-  project = google_project.project.project_id
-  service = "compute.googleapis.com"
+  project    = google_project.project.project_id
+  service    = "compute.googleapis.com"
+  depends_on = [google_project_service.apigee]
 }
 
 resource "google_project_service" "servicenetworking" {
   provider = google-beta
 
-  project = google_project.project.project_id
-  service = "servicenetworking.googleapis.com"
+  project    = google_project.project.project_id
+  service    = "servicenetworking.googleapis.com"
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_project_service" "kms" {
   provider = google-beta
 
-  project = google_project.project.project_id
-  service = "cloudkms.googleapis.com"
+  project    = google_project.project.project_id
+  service    = "cloudkms.googleapis.com"
+  depends_on = [google_project_service.servicenetworking]
 }
 
 resource "google_compute_network" "apigee_network" {
@@ -90,7 +93,7 @@ resource "google_compute_network" "apigee_network" {
 
   name       = "apigee-network"
   project    = google_project.project.project_id
-  depends_on = [google_project_service.compute]
+  depends_on = [google_project_service.compute, google_project_service.kms]
 }
 
 resource "google_compute_global_address" "apigee_range" {
@@ -125,15 +128,16 @@ resource "google_kms_key_ring" "apigee_keyring" {
 resource "google_kms_crypto_key" "apigee_key" {
   provider = google-beta
 
-  name            = "apigee-key"
-  key_ring        = google_kms_key_ring.apigee_keyring.id
+  name     = "apigee-key"
+  key_ring = google_kms_key_ring.apigee_keyring.id
 }
 
 resource "google_project_service_identity" "apigee_sa" {
   provider = google-beta
 
-  project = google_project.project.project_id
-  service = google_project_service.apigee.service
+  project    = google_project.project.project_id
+  service    = google_project_service.apigee.service
+  depends_on = [google_project_service.apigee, google_project_service.kms]
 }
 
 resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
