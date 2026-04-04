@@ -58,6 +58,8 @@ include_in_tgc_next: true
 custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/compute_snapshot.go.tmpl'
   decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
+  tgc_ignore_terraform_decoder: true
+  tgc_decoder: 'templates/terraform/decoders/tgc_snapshot.go.tmpl'
   pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
 sweeper:
   url_substitutions:
