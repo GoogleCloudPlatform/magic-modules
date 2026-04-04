@@ -22,7 +22,10 @@ func TestAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExampleUpdate(t *t
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckApigeeEnvironmentDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExample(context),
@@ -57,11 +60,17 @@ resource "google_project" "project" {
   billing_account = "%{billing_account}"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_project.project]
+}
+
 resource "google_project_service" "apigee" {
   provider = google-beta
 
-  project = google_project.project.project_id
-  service = "apigee.googleapis.com"
+  project    = google_project.project.project_id
+  service    = "apigee.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project_service" "compute" {
@@ -88,12 +97,17 @@ resource "google_project_service" "kms" {
   depends_on = [google_project_service.servicenetworking]
 }
 
+resource "time_sleep" "wait_for_services" {
+  create_duration = "300s"
+  depends_on      = [google_project_service.kms]
+}
+
 resource "google_compute_network" "apigee_network" {
   provider = google-beta
 
   name       = "apigee-network"
   project    = google_project.project.project_id
-  depends_on = [google_project_service.compute, google_project_service.kms]
+  depends_on = [time_sleep.wait_for_services]
 }
 
 resource "google_compute_global_address" "apigee_range" {
@@ -122,7 +136,7 @@ resource "google_kms_key_ring" "apigee_keyring" {
   name       = "apigee-keyring"
   location   = "us-central1"
   project    = google_project.project.project_id
-  depends_on = [google_project_service.kms]
+  depends_on = [time_sleep.wait_for_services]
 }
 
 resource "google_kms_crypto_key" "apigee_key" {
@@ -137,7 +151,7 @@ resource "google_project_service_identity" "apigee_sa" {
 
   project    = google_project.project.project_id
   service    = google_project_service.apigee.service
-  depends_on = [google_project_service.apigee, google_project_service.kms]
+  depends_on = [time_sleep.wait_for_services]
 }
 
 resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
@@ -147,6 +161,11 @@ resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = "serviceAccount:${google_project_service_identity.apigee_sa.email}"
+}
+
+resource "time_sleep" "wait_for_iam" {
+  create_duration = "120s"
+  depends_on      = [google_kms_crypto_key_iam_member.apigee_sa_keyuser]
 }
 
 resource "google_apigee_organization" "apigee_org" {
@@ -160,8 +179,7 @@ resource "google_apigee_organization" "apigee_org" {
 
   depends_on = [
     google_service_networking_connection.apigee_vpc_connection,
-    google_project_service.apigee,
-    google_kms_crypto_key_iam_member.apigee_sa_keyuser,
+    time_sleep.wait_for_iam,
   ]
 }
 
