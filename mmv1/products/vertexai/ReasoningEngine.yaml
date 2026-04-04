@@ -122,6 +122,13 @@ virtual_fields:
     type: Enum
     enum_values:
       - 'FORCE'
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'reasoning_engine'
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_reasoning_engine.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
 parameters:
   - name: 'region'
     type: String
