@@ -65,7 +65,6 @@ examples:
     ignore_read_extra:
       - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_image_spec'
-    skip_docs: true
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
