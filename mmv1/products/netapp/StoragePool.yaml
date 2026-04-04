@@ -269,7 +269,6 @@ properties:
       - 'SCALE_TYPE_DEFAULT'
       - 'SCALE_TYPE_SCALEOUT'
     immutable: true
-    min_version: beta
     default_from_api: true
   - name: 'mode'
     type: Enum
