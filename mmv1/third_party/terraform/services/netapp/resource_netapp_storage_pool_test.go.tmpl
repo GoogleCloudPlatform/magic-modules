@@ -932,7 +932,7 @@ func TestAccNetappStoragePool_ScaleTier(t *testing.T) {
 	})
 }
 
-func TestAccNetappStoragePool_ScaleTier(context map[string]interface{}) string {
+func testAccNetappStoragePool_ScaleTier(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
 	provider = google-beta
