@@ -342,10 +342,6 @@ resource "google_compute_organization_security_policy_rule" "policy" {
         value    = "freeform"
       }
       target_rule_set = "sqli-stable"
-      target_rule_ids = [
-        "owasp-crs-v030001-id942100-sqli",
-        "owasp-crs-v030001-id942110-sqli",
-      ]
     }
   }
   priority = 100
@@ -404,10 +400,6 @@ resource "google_compute_organization_security_policy_rule" "policy" {
         value    = "TokenExpired"
       }
       target_rule_set = "xss-stable"
-      target_rule_ids = [
-        "owasp-crs-v030001-id941330-xss",
-        "owasp-crs-v030001-id941340-xss",
-      ]
     }
   }
   priority = 100

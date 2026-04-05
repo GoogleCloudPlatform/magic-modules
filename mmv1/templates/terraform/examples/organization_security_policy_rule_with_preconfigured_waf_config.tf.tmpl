@@ -33,10 +33,6 @@ resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResource
         value    = "user_input"
       }
       target_rule_set = "sqli-stable"
-      target_rule_ids = [
-        "owasp-crs-v030001-id942100-sqli",
-        "owasp-crs-v030001-id942110-sqli",
-      ]
     }
   }
 
