@@ -40,6 +40,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+read_error_transform: 'transformApigeeNotFoundError'
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_environment_group.go.tmpl'
 exclude_sweeper: true
