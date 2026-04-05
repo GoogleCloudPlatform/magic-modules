@@ -113,6 +113,7 @@ func ResourceApigeeApi() *schema.Resource {
 			"detect_md5hash": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "Different Hash",
 				Description: `A hash of local config bundle in string, user needs to use a Terraform Hash function of their choice. A change in hash will trigger an update.`,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
