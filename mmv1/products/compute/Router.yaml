@@ -51,6 +51,9 @@ sweeper:
     - region: "us-central1"
     - region: "us-east1"
     - region: "us-east4"
+  dependencies:
+    - "google_compute_vpn_tunnel"
+    - "google_network_services_edge_cache_service"
 include_in_tgc_next: true
 examples:
   - name: 'router_basic'

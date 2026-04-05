@@ -42,6 +42,9 @@ examples:
     vars:
       app_id: app-id
       display_name: my-app-ambient-sound-gcs-uri
+sweeper:
+  url_substitutions:
+    - location: "us"
 parameters:
   - name: location
     type: String

@@ -60,6 +60,8 @@ sweeper:
     - region: "us-east1"
     - region: "europe-west1"
     - region: "us-west1"
+  dependencies:
+    - "google_network_services_gateway"
 examples:
   - name: 'address_basic'
     primary_resource_id: 'ip_address'
