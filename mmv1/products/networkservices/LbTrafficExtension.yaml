@@ -63,6 +63,28 @@ examples:
       callouts_instance_group: 'l7-ilb-callouts-ins-group'
       callouts_hc_name: 'l7-ilb-callouts-hc'
       callouts_backend_name: 'l7-ilb-callouts-backend'
+  - name: 'network_services_lb_traffic_extension_http_route'
+    primary_resource_id: 'default'
+    vars:
+      ilb_network_name: 'l7-ilb-network-route'
+      proxy_subnet_name: 'l7-ilb-proxy-subnet-route'
+      backend_subnet_name: 'l7-ilb-subnet-route'
+      forwarding_rule_name: 'l7-ilb-forwarding-rule-route'
+      target_http_proxy_name: 'l7-ilb-target-http-proxy-route'
+      regional_url_map_name: 'l7-ilb-regional-url-map-route'
+      backend_service_name: 'l7-ilb-backend-subnet-route'
+      mig_template_name: 'l7-ilb-mig-template-route'
+      hc_name: 'l7-ilb-hc-route'
+      mig_name: 'l7-ilb-mig1-route'
+      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc-route'
+      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends-route'
+      vm_test_name: 'l7-ilb-test-vm-route'
+      lb_traffic_extension_name: 'l7-ilb-traffic-ext-route'
+      callouts_instance_name: 'l7-ilb-callouts-ins-route'
+      callouts_instance_group: 'l7-ilb-callouts-ins-group-route'
+      callouts_hc_name: 'l7-ilb-callouts-hc-route'
+      callouts_backend_name: 'l7-ilb-callouts-backend-route'
+      http_route_name: 'l7-ilb-http-route'
 parameters:
   - name: 'location'
     type: String
@@ -91,10 +113,28 @@ properties:
     description: |
       A list of references to the forwarding rules to which this service extension is attached to.
       At least one forwarding rule is required. There can be only one LBTrafficExtension resource per forwarding rule.
-    required: true
+    exactly_one_of:
+      - 'forwardingRules'
+      - 'target'
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     item_type:
       type: String
+  - name: 'target'
+    type: NestedObject
+    description: |
+      `Target` Specifies the set of targets to which an extension should be applied to.
+    exactly_one_of:
+      - 'forwardingRules'
+      - 'target'
+    properties:
+      - name: 'resources'
+        type: Array
+        description: |
+          A list of references to the resources that are targeted by the extension.
+          Types of resources supported: `BackendService`, `HttpRoute`.
+        required: true
+        item_type:
+          type: String
   - name: 'extensionChains'
     type: Array
     description: |

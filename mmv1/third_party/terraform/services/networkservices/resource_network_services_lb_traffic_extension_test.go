@@ -1216,3 +1216,175 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 }
 `, context))
 }
+
+func TestAccNetworkServicesLbTrafficExtension_httpRoute(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesLbTrafficExtensionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesLbTrafficExtension_httpRoute(context),
+			},
+			{
+				ResourceName:            "google_network_services_lb_traffic_extension.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesLbTrafficExtension_httpRoute(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+# HTTP Route
+resource "google_network_services_http_route" "default" {
+  name        = "tf-test-http-route%{random_suffix}"
+  description = "my description"
+  hostnames   = ["example"]
+  rules {
+    matches {
+      query_parameters {
+        query_parameter = "key"
+        exact_match     = "value"
+      }
+      full_path_match = "example"
+    }
+  }
+}
+
+# LbTrafficExtension targeting HttpRoute
+resource "google_network_services_lb_traffic_extension" "default" {
+  name        = "tf-test-l7-ilb-traffic-ext%{random_suffix}"
+  description = "traffic extension for http route"
+  location    = "global"
+
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  
+  target {
+    resources = [google_network_services_http_route.default.id]
+  }
+
+  extension_chains {
+    name = "chain1"
+
+    match_condition {
+      cel_expression = "request.host == 'example.com'"
+    }
+
+    extensions {
+      name      = "ext11"
+      authority = "ext11.com"
+      service   = google_compute_region_backend_service.callouts_backend.self_link
+      timeout   = "0.1s"
+      fail_open = false
+
+      supported_events = ["REQUEST_HEADERS"]
+      forward_headers  = ["custom-header"]
+      metadata = {
+        "exampleId" = "test"
+      }
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+# Backend Service for Extension (Regional)
+resource "google_compute_region_backend_service" "callouts_backend" {
+  name                  = "tf-test-l7-ilb-callouts-backend%{random_suffix}"
+  region                = "us-west1"
+  protocol              = "HTTP2"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  timeout_sec           = 10
+  port_name             = "grpc"
+  health_checks         = [google_compute_region_health_check.callouts_health_check.id]
+
+  backend {
+    group           = google_compute_instance_group.callouts_instance_group.id
+    balancing_mode  = "UTILIZATION"
+    capacity_scaler = 1.0
+  }
+}
+
+# Health Check
+resource "google_compute_region_health_check" "callouts_health_check" {
+  name     = "tf-test-l7-ilb-callouts-hc%{random_suffix}"
+  region   = "us-west1"
+
+  http_health_check {
+    port = 80
+  }
+}
+
+# Instance Group
+resource "google_compute_instance_group" "callouts_instance_group" {
+  name        = "tf-test-l7-ilb-callouts-ins-group%{random_suffix}"
+  description = "Terraform test instance group"
+  zone        = "us-west1-a"
+
+  instances = [
+    google_compute_instance.callouts_instance.id,
+  ]
+
+  named_port {
+    name = "http"
+    port = "80"
+  }
+
+  named_port {
+    name = "grpc"
+    port = "443"
+  }
+}
+
+# Instance
+resource "google_compute_instance" "callouts_instance" {
+  name         = "tf-test-l7-ilb-callouts-ins%{random_suffix}"
+  zone         = "us-west1-a"
+  machine_type = "e2-small"
+
+  labels = {
+    "container-vm" = "cos-stable-109-17800-147-54"
+  }
+
+  tags = ["allow-ssh","load-balanced-backend"]
+
+  network_interface {
+    network = "default" # Simplification for test
+    access_config {
+      # add external ip to fetch packages
+    }
+  }
+
+  boot_disk {
+    auto_delete  = true
+
+    initialize_params {
+      type  = "pd-standard"
+      size  = 10
+      image = "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-stable-109-17800-147-54"
+    }
+  }
+
+  # Initialize an Envoy's Ext Proc gRPC API based on a docker container
+  metadata = {
+    gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
+    google-logging-enabled = "true"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+`, context)
+}
