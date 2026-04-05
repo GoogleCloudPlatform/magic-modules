@@ -278,8 +278,7 @@ properties:
                 - type: Boolean
                   name: 'enableResponseDebugInfo'
                   description: |
-                    If true, include debug information in suggestion responses (e.g. query rewrites, knowledge sources consulted).
-                    Supported for types: KNOWLEDGE_ASSIST, KNOWLEDGE_SEARCH.
+                    If true, include debug information in suggestion responses
           - type: Boolean
             name: 'groupSuggestionResponses'
             description: |
@@ -496,8 +495,7 @@ properties:
                 - type: Boolean
                   name: 'enableResponseDebugInfo'
                   description: |
-                    If true, include debug information in suggestion responses (e.g. query rewrites, knowledge sources consulted).
-                    Supported for types: KNOWLEDGE_ASSIST, KNOWLEDGE_SEARCH.
+                    If true, include debug information in suggestion responses
           - type: Boolean
             name: 'groupSuggestionResponses'
             description: |
