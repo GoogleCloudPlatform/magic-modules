@@ -521,3 +521,25 @@ func TestGetRegionFromRegionSelfLink(t *testing.T) {
 		})
 	}
 }
+
+func TestBigtableClientFactoryPropagatesEndpoints(t *testing.T) {
+	cfg := &transport_tpg.Config{
+		UniverseDomain:        "apis-tpczero.goog",
+		BigtableBasePath:      "https://bigtableadmin.apis-tpczero.goog/v2/",
+		BigtableAdminBasePath: "https://bigtableadmin.apis-tpczero.goog/v2/",
+	}
+
+	factory := cfg.BigTableClientFactory("test-agent")
+
+	if factory.UniverseDomain != "apis-tpczero.goog" {
+		t.Errorf("Expected UniverseDomain 'apis-tpczero.goog', got '%s'", factory.UniverseDomain)
+	}
+
+	expectedPath := "https://bigtableadmin.apis-tpczero.goog/"
+	if factory.AdminBasePath != expectedPath {
+		t.Errorf("Expected AdminBasePath '%s', got '%s'", expectedPath, factory.AdminBasePath)
+	}
+	if factory.BasePath != expectedPath {
+		t.Errorf("Expected BasePath '%s', got '%s'", expectedPath, factory.BasePath)
+	}
+}
