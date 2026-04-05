@@ -3,6 +3,9 @@ package apigee
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
+	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -12,6 +15,24 @@ import (
 	"net/http"
 	"time"
 )
+
+// transformApigeeNotFoundError converts a 403 that Apigee returns when a
+// resource does not exist (instead of 404) into a 404 error, so that
+// HandleNotFoundError can correctly remove the resource from state.
+//
+// Apigee deliberately returns 403 to avoid leaking information about whether a
+// resource exists, but for Terraform reads we must treat "may not exist" as
+// "not found".
+func transformApigeeNotFoundError(err error) error {
+	if gErr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error); ok {
+		if gErr.Code == 403 && strings.Contains(gErr.Message, "or it may not exist") {
+			log.Printf("[DEBUG] Treating Apigee 403 as 404 (resource may not exist)")
+			gErr.Code = 404
+		}
+		return gErr
+	}
+	return err
+}
 
 func resourceApigeeNatAddressActivate(config *transport_tpg.Config, d *schema.ResourceData, billingProject string, userAgent string) error {
 	// 1. check prepare for activation
