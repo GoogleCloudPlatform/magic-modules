@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,29 +13,24 @@
 
 ---
 name: ConnectivityTest
-description: |
-  A connectivity test are a static analysis of your resource configurations
-  that enables you to evaluate connectivity to and from Google Cloud
-  resources in your Virtual Private Cloud (VPC) network.
-references:
-  guides:
-    Official Documentation: https://cloud.google.com/network-intelligence-center/docs
-  api: https://cloud.google.com/network-intelligence-center/docs/connectivity-tests/reference/networkmanagement/rest/v1/projects.locations.global.connectivityTests
+description: Description
 base_url: projects/{{project}}/locations/global/connectivityTests
-create_url: projects/{{project}}/locations/global/connectivityTests?testId={{name}}
+self_link: projects/{{project}}/locations/global/connectivityTests/{{}}
+create_url: projects/{{project}}/locations/global/connectivityTests?={{}}
 update_mask: true
 update_verb: PATCH
-filename_override: connectivity_test_resource
-id_format: projects/{{project}}/locations/global/connectivityTests/{{name}}
-timeouts:
-  insert_minutes: 5
-  update_minutes: 5
-  delete_minutes: 5
+import_format:
+  - projects/{{project}}/locations/global/connectivityTests/{{}}
 async:
   operation:
     base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
   result:
     resource_inside_response: true
+autogen_status: Q29ubmVjdGl2aXR5VGVzdA==
 autogen_async: true
 examples:
   - name: network_management_connectivity_test_instances
@@ -56,201 +51,3396 @@ examples:
     primary_resource_id: endpoints-test
     vars:
       primary_resource_name: conn-test-endpoints
-properties:
-  - name: name
+parameters:
+  - name: testId
     type: String
     required: true
-    description: Unique name for the connectivity test.
+    description: |-
+      The logical name of the Connectivity Test in your project
+      with the following restrictions:
+
+      * Must contain only lowercase letters, numbers, and hyphens.
+      * Must start with a letter.
+      * Must be between 1-40 characters.
+      * Must end with a number or a letter.
+      * Must be unique within the customer project
     immutable: true
-    custom_expand: templates/terraform/custom_expand/network_management_connectivity_test_name.go.tmpl
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    url_param_only: true
+properties:
+  - name: bypassFirewallChecks
+    type: Boolean
+    description: Whether the analysis should skip firewall checking. Default value is false.
+  - name: createTime
+    type: String
+    description: The time the test was created.
+    output: true
   - name: description
     type: String
     description: |-
       The user-supplied description of the Connectivity Test.
       Maximum of 512 characters.
-  - name: source
-    type: NestedObject
-    required: true
-    description: |
-      Required. Source specification of the Connectivity Test.
-
-      You can use a combination of source IP address, URI of a supported
-      endpoint, project ID, or VPC network to identify the source location.
-
-      Reachability analysis might proceed even if the source location is
-      ambiguous. However, the test result might include endpoints or use a source
-      that you don't intend to test.
-    update_mask_fields:
-      - source.ipAddress
-      - source.port
-      - source.instance
-      - source.gkeMasterCluster
-      - source.cloudSqlInstance
-      - source.cloudFunction
-      - source.appEngineVersion
-      - source.cloudRunRevision
-      - source.network
-      - source.networkType
-      - source.projectId
-    properties:
-      - name: ipAddress
-        type: String
-        description: The IP address of the endpoint, which can be an external or internal IP.
-      - name: port
-        type: Integer
-        description: |-
-          The IP protocol port of the endpoint. Only applicable when protocol is
-          TCP or UDP.
-      - name: instance
-        type: String
-        description: A Compute Engine instance URI.
-      - name: gkeMasterCluster
-        type: String
-        description: A cluster URI for Google Kubernetes Engine cluster control plane.
-      - name: cloudSqlInstance
-        type: String
-        description: A Cloud SQL instance URI.
-      - name: cloudFunction
-        type: NestedObject
-        description: A Cloud Function.
-        immutable: true
-        properties:
-          - name: uri
-            type: String
-            description: A Cloud Function name.
-      - name: appEngineVersion
-        type: NestedObject
-        description: An App Engine service version.
-        immutable: true
-        properties:
-          - name: uri
-            type: String
-            description: An App Engine service version name.
-      - name: cloudRunRevision
-        type: NestedObject
-        description: A Cloud Run revision.
-        immutable: true
-        properties:
-          - name: uri
-            type: String
-            description: A Cloud Run revision URI.
-      - name: network
-        type: String
-        description: A VPC network URI.
-      - name: networkType
-        type: Enum
-        description: Type of the network where the endpoint is located.
-        enum_values:
-          - GCP_NETWORK
-          - NON_GCP_NETWORK
-      - name: projectId
-        type: String
-        description: |-
-          Project ID where the endpoint is located.
-          The project ID can be derived from the URI if you provide a endpoint or
-          network URI.
-          The following are two cases where you may need to provide the project ID:
-          1. Only the IP address is specified, and the IP address is within a Google
-          Cloud project.
-          2. When you are using Shared VPC and the IP address that you provide is
-          from the service project. In this case, the network that the IP address
-          resides in is defined in the host project.
   - name: destination
     type: NestedObject
     required: true
-    description: |
-      Required. Destination specification of the Connectivity Test.
-
-      You can use a combination of destination IP address, URI of a supported
-      endpoint, project ID, or VPC network to identify the destination location.
-
-      Reachability analysis proceeds even if the destination location is
-      ambiguous. However, the test result might include endpoints or use a
-      destination that you don't intend to test.
-    update_mask_fields:
-      - destination.ipAddress
-      - destination.port
-      - destination.instance
-      - destination.forwardingRule
-      - destination.gkeMasterCluster
-      - destination.fqdn
-      - destination.cloudSqlInstance
-      - destination.redisInstance
-      - destination.redisCluster
-      - destination.network
-      - destination.projectId
+    description: Source or destination of the Connectivity Test.
     properties:
-      - name: ipAddress
+      - name: appEngineVersion
+        type: NestedObject
+        description: Wrapper for the App Engine service version attributes.
+        properties:
+          - name: uri
+            type: String
+            description: |-
+              An [App Engine](https://cloud.google.com/appengine) [service
+              version](https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services.versions)
+              name.
+      - name: cloudFunction
+        type: NestedObject
+        description: Wrapper for Cloud Function attributes.
+        properties:
+          - name: uri
+            type: String
+            description: A [Cloud Function](https://cloud.google.com/functions) name.
+      - name: cloudRunRevision
+        type: NestedObject
+        description: Wrapper for Cloud Run revision attributes.
+        properties:
+          - name: serviceUri
+            type: String
+            description: |-
+              The URI of the Cloud Run service that the revision belongs to. The format
+              is: projects/{project}/locations/{location}/services/{service}
+            output: true
+          - name: uri
+            type: String
+            description: |-
+              A [Cloud Run](https://cloud.google.com/run)
+              [revision](https://cloud.google.com/run/docs/reference/rest/v1/namespaces.revisions/get)
+              URI. The format is:
+              projects/{project}/locations/{location}/revisions/{revision}
+      - name: cloudSqlInstance
         type: String
-        description: The IP address of the endpoint, which can be an external or internal IP.
-      - name: port
-        type: Integer
-        description: |-
-          The IP protocol port of the endpoint. Only applicable when protocol is
-          TCP or UDP.
-      - name: instance
-        type: String
-        description: A Compute Engine instance URI.
+        description: A [Cloud SQL](https://cloud.google.com/sql) instance URI.
       - name: forwardingRule
         type: String
         description: |-
-          Forwarding rule URI. Forwarding rules are frontends for load balancers,
-          PSC endpoints, and Protocol Forwarding.
-      - name: gkeMasterCluster
+          A forwarding rule and its corresponding IP address represent the frontend
+          configuration of a Google Cloud load balancer. Forwarding rules are also
+          used for protocol forwarding, Private Service Connect and other network
+          services to provide forwarding information in the control plane. Applicable
+          only to destination endpoint. Format:
+          `projects/{project}/global/forwardingRules/{id}` or
+          `projects/{project}/regions/{region}/forwardingRules/{id}`
+      - name: forwardingRuleTarget
         type: String
-        description: A cluster URI for Google Kubernetes Engine cluster control plane.
+        description: |-
+          Specifies the type of the target of the forwarding rule.
+          Possible values:
+          INSTANCE
+          LOAD_BALANCER
+          VPN_GATEWAY
+          PSC
+        output: true
       - name: fqdn
         type: String
         description: |-
-          A DNS endpoint of Google Kubernetes Engine cluster control plane.
+          DNS endpoint of [Google Kubernetes Engine cluster control
+          plane](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture).
           Requires gke_master_cluster to be set, can't be used simultaneoulsly with
           ip_address or network. Applicable only to destination endpoint.
-      - name: cloudSqlInstance
+      - name: gkeMasterCluster
         type: String
-        description: A Cloud SQL instance URI.
-      - name: redisInstance
+        description: |-
+          A cluster URI for [Google Kubernetes Engine cluster control
+          plane](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture).
+      - name: gkePod
         type: String
-        description: A Redis Instance URI.
-      - name: redisCluster
+        description: |-
+          A [GKE Pod](https://cloud.google.com/kubernetes-engine/docs/concepts/pod)
+          URI.
+      - name: instance
         type: String
-        description: A Redis Cluster URI.
+        description: A Compute Engine instance URI.
+      - name: ipAddress
+        type: String
+        description: The IP address of the endpoint, which can be an external or internal IP.
+      - name: loadBalancerId
+        type: String
+        description: |-
+          ID of the load balancer the forwarding rule points to. Empty for forwarding
+          rules not related to load balancers.
+        output: true
+      - name: loadBalancerType
+        type: String
+        description: |-
+          Possible values:
+          HTTPS_ADVANCED_LOAD_BALANCER
+          HTTPS_LOAD_BALANCER
+          REGIONAL_HTTPS_LOAD_BALANCER
+          INTERNAL_HTTPS_LOAD_BALANCER
+          SSL_PROXY_LOAD_BALANCER
+          TCP_PROXY_LOAD_BALANCER
+          INTERNAL_TCP_PROXY_LOAD_BALANCER
+          NETWORK_LOAD_BALANCER
+          LEGACY_NETWORK_LOAD_BALANCER
+          TCP_UDP_INTERNAL_LOAD_BALANCER
       - name: network
         type: String
-        description: A VPC network URI.
+        description: |-
+          A VPC network URI. For source endpoints, used according to the
+          `network_type`. For destination endpoints, used only when the source is an
+          external IP address endpoint, and the destination is an internal IP address
+          endpoint.
+      - name: networkType
+        type: String
+        description: |-
+          For source endpoints, type of the network where the endpoint is located.
+          Not relevant for destination endpoints.
+          Possible values:
+          GCP_NETWORK
+          NON_GCP_NETWORK
+          INTERNET
+      - name: port
+        type: Integer
+        description: |-
+          The IP protocol port of the endpoint.
+          Only applicable when protocol is TCP or UDP.
       - name: projectId
         type: String
         description: |-
-          Project ID where the endpoint is located.
-          The project ID can be derived from the URI if you provide a endpoint or
-          network URI.
-          The following are two cases where you may need to provide the project ID:
-          1. Only the IP address is specified, and the IP address is within a Google
-          Cloud project.
-          2. When you are using Shared VPC and the IP address that you provide is
-          from the service project. In this case, the network that the IP address
-          resides in is defined in the host project.
+          For source endpoints, endpoint project ID. Used according to the
+          `network_type`. Not relevant for destination endpoints.
+      - name: redisCluster
+        type: String
+        description: |-
+          A [Redis Cluster](https://cloud.google.com/memorystore/docs/cluster) URI.
+          Applicable only to destination endpoint.
+      - name: redisInstance
+        type: String
+        description: |-
+          A [Redis Instance](https://cloud.google.com/memorystore/docs/redis) URI.
+          Applicable only to destination endpoint.
+  - name: displayName
+    type: String
+    description: The display name of a Connectivity Test.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Resource labels to represent user-provided metadata.
+  - name: name
+    type: String
+    description: |-
+      Identifier. Unique name of the resource using the form:
+      `projects/{project_id}/locations/global/connectivityTests/{test_id}`
+    output: true
+  - name: probingDetails
+    type: NestedObject
+    description: Results of active probing from the last run of the test.
+    properties:
+      - name: abortCause
+        type: String
+        description: |-
+          The reason probing was aborted.
+          Possible values:
+          PERMISSION_DENIED
+          NO_SOURCE_LOCATION
+      - name: destinationEgressLocation
+        type: NestedObject
+        description: |-
+          Representation of a network edge location as per
+          https://cloud.google.com/vpc/docs/edge-locations.
+        properties:
+          - name: metropolitanArea
+            type: String
+            description: Name of the metropolitan area.
+      - name: edgeResponses
+        type: Array
+        description: Probing results for all edge devices.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: destinationEgressLocation
+              type: NestedObject
+              description: |-
+                Representation of a network edge location as per
+                https://cloud.google.com/vpc/docs/edge-locations.
+              properties:
+                - name: metropolitanArea
+                  type: String
+                  description: Name of the metropolitan area.
+            - name: destinationRouter
+              type: String
+              description: |-
+                Router name in the format '{router}.{metroshard}'. For example:
+                pf01.aaa01, pr02.aaa01.
+            - name: probingLatency
+              type: NestedObject
+              description: Describes measured latency distribution.
+              properties:
+                - name: latencyPercentiles
+                  type: Array
+                  description: Representative latency percentiles.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: latencyMicros
+                        type: String
+                        description: |-
+                          percent-th percentile of latency observed, in microseconds.
+                          Fraction of percent/100 of samples have latency lower or
+                          equal to the value of this field.
+                      - name: percent
+                        type: Integer
+                        description: Percentage of samples this data point applies to.
+            - name: result
+              type: String
+              description: |-
+                The overall result of active probing for this egress device.
+                Possible values:
+                REACHABLE
+                UNREACHABLE
+                REACHABILITY_INCONSISTENT
+                UNDETERMINED
+            - name: sentProbeCount
+              type: Integer
+              description: Number of probes sent.
+            - name: successfulProbeCount
+              type: Integer
+              description: Number of probes that reached the destination.
+      - name: endpointInfo
+        type: NestedObject
+        description: |-
+          For display only. The specification of the endpoints for the test.
+          EndpointInfo is derived from source and destination Endpoint and validated
+          by the backend data plane model.
+        properties:
+          - name: destinationIp
+            type: String
+            description: Destination IP address.
+          - name: destinationNetworkUri
+            type: String
+            description: URI of the network where this packet is sent to.
+          - name: destinationPort
+            type: Integer
+            description: Destination port. Only valid when protocol is TCP or UDP.
+          - name: protocol
+            type: String
+            description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+          - name: sourceAgentUri
+            type: String
+            description: URI of the source telemetry agent this packet originates from.
+          - name: sourceIp
+            type: String
+            description: Source IP address.
+          - name: sourceNetworkUri
+            type: String
+            description: URI of the network where this packet originates from.
+          - name: sourcePort
+            type: Integer
+            description: Source port. Only valid when protocol is TCP or UDP.
+      - name: error
+        type: NestedObject
+        description: |-
+          The `Status` type defines a logical error model that is suitable for
+          different programming environments, including REST APIs and RPC APIs. It is
+          used by [gRPC](https://github.com/grpc). Each `Status` message contains
+          three pieces of data: error code, error message, and error details.
+
+          You can find out more about this error model and how to work with it in the
+          [API Design Guide](https://cloud.google.com/apis/design/errors).
+        properties:
+          - name: code
+            type: Integer
+            description: The status code, which should be an enum value of google.rpc.Code.
+          - name: details
+            type: Array
+            description: |-
+              A list of messages that carry the error details.  There is a common set of
+              message types for APIs to use.
+            item_type:
+              type: NestedObject
+              properties: []
+          - name: message
+            type: String
+            description: |-
+              A developer-facing error message, which should be in English. Any
+              user-facing error message should be localized and sent in the
+              google.rpc.Status.details field, or localized by the client.
+      - name: probedAllDevices
+        type: Boolean
+        description: Whether all relevant edge devices were probed.
+      - name: probingLatency
+        type: NestedObject
+        description: Describes measured latency distribution.
+        properties:
+          - name: latencyPercentiles
+            type: Array
+            description: Representative latency percentiles.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: latencyMicros
+                  type: String
+                  description: |-
+                    percent-th percentile of latency observed, in microseconds.
+                    Fraction of percent/100 of samples have latency lower or
+                    equal to the value of this field.
+                - name: percent
+                  type: Integer
+                  description: Percentage of samples this data point applies to.
+      - name: result
+        type: String
+        description: |-
+          The overall result of active probing.
+          Possible values:
+          REACHABLE
+          UNREACHABLE
+          REACHABILITY_INCONSISTENT
+          UNDETERMINED
+      - name: sentProbeCount
+        type: Integer
+        description: Number of probes sent.
+      - name: successfulProbeCount
+        type: Integer
+        description: Number of probes that reached the destination.
+      - name: verifyTime
+        type: String
+        description: The time that reachability was assessed through active probing.
   - name: protocol
     type: String
-    default_value: TCP
     description: IP Protocol of the test. When not provided, "TCP" is assumed.
+  - name: reachabilityDetails
+    type: NestedObject
+    description: Results of the configuration analysis from the last run of the test.
+    properties:
+      - name: error
+        type: NestedObject
+        description: |-
+          The `Status` type defines a logical error model that is suitable for
+          different programming environments, including REST APIs and RPC APIs. It is
+          used by [gRPC](https://github.com/grpc). Each `Status` message contains
+          three pieces of data: error code, error message, and error details.
+
+          You can find out more about this error model and how to work with it in the
+          [API Design Guide](https://cloud.google.com/apis/design/errors).
+        properties:
+          - name: code
+            type: Integer
+            description: The status code, which should be an enum value of google.rpc.Code.
+          - name: details
+            type: Array
+            description: |-
+              A list of messages that carry the error details.  There is a common set of
+              message types for APIs to use.
+            item_type:
+              type: NestedObject
+              properties: []
+          - name: message
+            type: String
+            description: |-
+              A developer-facing error message, which should be in English. Any
+              user-facing error message should be localized and sent in the
+              google.rpc.Status.details field, or localized by the client.
+      - name: result
+        type: String
+        description: |-
+          The overall result of the test's configuration analysis.
+          Possible values:
+          REACHABLE
+          UNREACHABLE
+          AMBIGUOUS
+          UNDETERMINED
+      - name: traces
+        type: Array
+        description: |-
+          Result may contain a list of traces if a test has multiple possible
+          paths in the network, such as when destination endpoint is a load balancer
+          with multiple backends.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: endpointInfo
+              type: NestedObject
+              description: |-
+                For display only. The specification of the endpoints for the test.
+                EndpointInfo is derived from source and destination Endpoint and validated
+                by the backend data plane model.
+              properties:
+                - name: destinationIp
+                  type: String
+                  description: Destination IP address.
+                - name: destinationNetworkUri
+                  type: String
+                  description: URI of the network where this packet is sent to.
+                - name: destinationPort
+                  type: Integer
+                  description: Destination port. Only valid when protocol is TCP or UDP.
+                - name: protocol
+                  type: String
+                  description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+                - name: sourceAgentUri
+                  type: String
+                  description: URI of the source telemetry agent this packet originates from.
+                - name: sourceIp
+                  type: String
+                  description: Source IP address.
+                - name: sourceNetworkUri
+                  type: String
+                  description: URI of the network where this packet originates from.
+                - name: sourcePort
+                  type: Integer
+                  description: Source port. Only valid when protocol is TCP or UDP.
+            - name: forwardTraceId
+              type: Integer
+              description: |-
+                ID of trace. For forward traces, this ID is unique for each trace. For
+                return traces, it matches ID of associated forward trace. A single forward
+                trace can be associated with none, one or more than one return trace.
+            - name: steps
+              type: Array
+              description: |-
+                A trace of a test contains multiple steps from the initial state to the
+                final state (delivered, dropped, forwarded, or aborted).
+
+                The steps are ordered by the processing sequence within the simulated
+                network state machine. It is critical to preserve the order of the steps
+                and avoid reordering or sorting them.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: abort
+                    type: NestedObject
+                    description: Details of the final state "abort" and associated resource.
+                    properties:
+                      - name: cause
+                        type: String
+                        description: |-
+                          Causes that the analysis is aborted.
+                          Possible values:
+                          UNKNOWN_NETWORK
+                          UNKNOWN_PROJECT
+                          NO_EXTERNAL_IP
+                          UNINTENDED_DESTINATION
+                          SOURCE_ENDPOINT_NOT_FOUND
+                          MISMATCHED_SOURCE_NETWORK
+                          DESTINATION_ENDPOINT_NOT_FOUND
+                          MISMATCHED_DESTINATION_NETWORK
+                          UNKNOWN_IP
+                          GOOGLE_MANAGED_SERVICE_UNKNOWN_IP
+                          SOURCE_IP_ADDRESS_NOT_IN_SOURCE_NETWORK
+                          PERMISSION_DENIED
+                          PERMISSION_DENIED_NO_CLOUD_NAT_CONFIGS
+                          PERMISSION_DENIED_NO_NEG_ENDPOINT_CONFIGS
+                          PERMISSION_DENIED_NO_CLOUD_ROUTER_CONFIGS
+                          NO_SOURCE_LOCATION
+                          NO_SOURCE_GCP_NETWORK_LOCATION
+                          NO_SOURCE_NON_GCP_NETWORK_LOCATION
+                          NO_SOURCE_INTERNET_LOCATION
+                          INVALID_ARGUMENT
+                          TRACE_TOO_LONG
+                          INTERNAL_ERROR
+                          UNSUPPORTED
+                          MISMATCHED_IP_VERSION
+                          GKE_KONNECTIVITY_PROXY_UNSUPPORTED
+                          RESOURCE_CONFIG_NOT_FOUND
+                          VM_INSTANCE_CONFIG_NOT_FOUND
+                          NETWORK_CONFIG_NOT_FOUND
+                          FIREWALL_CONFIG_NOT_FOUND
+                          ROUTE_CONFIG_NOT_FOUND
+                          GOOGLE_MANAGED_SERVICE_AMBIGUOUS_PSC_ENDPOINT
+                          GOOGLE_MANAGED_SERVICE_AMBIGUOUS_ENDPOINT
+                          SOURCE_PSC_CLOUD_SQL_UNSUPPORTED
+                          SOURCE_EXTERNAL_CLOUD_SQL_UNSUPPORTED
+                          SOURCE_REDIS_CLUSTER_UNSUPPORTED
+                          SOURCE_REDIS_INSTANCE_UNSUPPORTED
+                          SOURCE_FORWARDING_RULE_UNSUPPORTED
+                          NON_ROUTABLE_IP_ADDRESS
+                          UNKNOWN_ISSUE_IN_GOOGLE_MANAGED_PROJECT
+                          UNSUPPORTED_GOOGLE_MANAGED_PROJECT_CONFIG
+                          NO_SERVERLESS_IP_RANGES
+                          IP_VERSION_PROTOCOL_MISMATCH
+                          GKE_POD_UNKNOWN_ENDPOINT_LOCATION
+                      - name: ipAddress
+                        type: String
+                        description: IP address that caused the abort.
+                      - name: projectsMissingPermission
+                        type: Array
+                        description: |-
+                          List of project IDs the user specified in the request but lacks access to.
+                          In this case, analysis is aborted with the PERMISSION_DENIED cause.
+                        item_type:
+                          type: String
+                      - name: resourceUri
+                        type: String
+                        description: URI of the resource that caused the abort.
+                  - name: appEngineVersion
+                    type: NestedObject
+                    description: For display only. Metadata associated with an App Engine version.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of an App Engine version.
+                      - name: environment
+                        type: String
+                        description: App Engine execution environment for a version.
+                      - name: runtime
+                        type: String
+                        description: Runtime of the App Engine version.
+                      - name: uri
+                        type: String
+                        description: URI of an App Engine version.
+                  - name: causesDrop
+                    type: Boolean
+                    description: This is a step that leads to the final state Drop.
+                  - name: cloudFunction
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Cloud Function.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Cloud Function.
+                      - name: location
+                        type: String
+                        description: Location in which the Cloud Function is deployed.
+                      - name: uri
+                        type: String
+                        description: URI of a Cloud Function.
+                      - name: versionId
+                        type: String
+                        description: Latest successfully deployed version id of the Cloud Function.
+                  - name: cloudRunRevision
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Cloud Run revision.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Cloud Run revision.
+                      - name: location
+                        type: String
+                        description: Location in which this revision is deployed.
+                      - name: serviceUri
+                        type: String
+                        description: URI of Cloud Run service this revision belongs to.
+                      - name: uri
+                        type: String
+                        description: URI of a Cloud Run revision.
+                  - name: cloudSqlInstance
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Cloud SQL instance.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Cloud SQL instance.
+                      - name: externalIp
+                        type: String
+                        description: External IP address of a Cloud SQL instance.
+                      - name: internalIp
+                        type: String
+                        description: Internal IP address of a Cloud SQL instance.
+                      - name: networkUri
+                        type: String
+                        description: |-
+                          URI of a Cloud SQL instance network or empty string if the instance does
+                          not have one.
+                      - name: region
+                        type: String
+                        description: Region in which the Cloud SQL instance is running.
+                      - name: uri
+                        type: String
+                        description: URI of a Cloud SQL instance.
+                  - name: deliver
+                    type: NestedObject
+                    description: Details of the final state "deliver" and associated resource.
+                    properties:
+                      - name: googleServiceType
+                        type: String
+                        description: |-
+                          Recognized type of a Google Service the packet is delivered to (if
+                          applicable).
+                          Possible values:
+                          IAP
+                          GFE_PROXY_OR_HEALTH_CHECK_PROBER
+                          CLOUD_DNS
+                          PRIVATE_GOOGLE_ACCESS
+                          SERVERLESS_VPC_ACCESS
+                      - name: ipAddress
+                        type: String
+                        description: IP address of the target (if applicable).
+                      - name: pscGoogleApiTarget
+                        type: String
+                        description: PSC Google API target the packet is delivered to (if applicable).
+                      - name: resourceUri
+                        type: String
+                        description: URI of the resource that the packet is delivered to.
+                      - name: storageBucket
+                        type: String
+                        description: |-
+                          Name of the Cloud Storage Bucket the packet is delivered to (if
+                          applicable).
+                      - name: target
+                        type: String
+                        description: |-
+                          Target type where the packet is delivered to.
+                          Possible values:
+                          INSTANCE
+                          INTERNET
+                          GOOGLE_API
+                          GKE_MASTER
+                          CLOUD_SQL_INSTANCE
+                          PSC_PUBLISHED_SERVICE
+                          PSC_GOOGLE_API
+                          PSC_VPC_SC
+                          SERVERLESS_NEG
+                          STORAGE_BUCKET
+                          PRIVATE_NETWORK
+                          CLOUD_FUNCTION
+                          APP_ENGINE_VERSION
+                          CLOUD_RUN_REVISION
+                          GOOGLE_MANAGED_SERVICE
+                          REDIS_INSTANCE
+                          REDIS_CLUSTER
+                          GKE_POD
+                  - name: description
+                    type: String
+                    description: A description of the step. Usually this is a summary of the state.
+                  - name: directVpcEgressConnection
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a serverless direct VPC egress
+                      connection.
+                    properties:
+                      - name: networkUri
+                        type: String
+                        description: URI of direct access network.
+                      - name: region
+                        type: String
+                        description: Region in which the Direct VPC egress is deployed.
+                      - name: selectedIpAddress
+                        type: String
+                        description: Selected starting IP address, from the selected IP range.
+                      - name: selectedIpRange
+                        type: String
+                        description: Selected IP range.
+                      - name: subnetworkUri
+                        type: String
+                        description: URI of direct access subnetwork.
+                  - name: drop
+                    type: NestedObject
+                    description: Details of the final state "drop" and associated resource.
+                    properties:
+                      - name: cause
+                        type: String
+                        description: |-
+                          Cause that the packet is dropped.
+                          Possible values:
+                          UNKNOWN_EXTERNAL_ADDRESS
+                          FOREIGN_IP_DISALLOWED
+                          FIREWALL_RULE
+                          NO_ROUTE
+                          ROUTE_BLACKHOLE
+                          ROUTE_WRONG_NETWORK
+                          ROUTE_NEXT_HOP_IP_ADDRESS_NOT_RESOLVED
+                          ROUTE_NEXT_HOP_RESOURCE_NOT_FOUND
+                          ROUTE_NEXT_HOP_INSTANCE_WRONG_NETWORK
+                          ROUTE_NEXT_HOP_INSTANCE_NON_PRIMARY_IP
+                          ROUTE_NEXT_HOP_FORWARDING_RULE_IP_MISMATCH
+                          ROUTE_NEXT_HOP_VPN_TUNNEL_NOT_ESTABLISHED
+                          ROUTE_NEXT_HOP_FORWARDING_RULE_TYPE_INVALID
+                          NO_ROUTE_FROM_INTERNET_TO_PRIVATE_IPV6_ADDRESS
+                          NO_ROUTE_FROM_INTERNET_TO_PRIVATE_IPV4_ADDRESS
+                          NO_ROUTE_FROM_EXTERNAL_IPV6_SOURCE_TO_PRIVATE_IPV6_ADDRESS
+                          VPN_TUNNEL_LOCAL_SELECTOR_MISMATCH
+                          VPN_TUNNEL_REMOTE_SELECTOR_MISMATCH
+                          PRIVATE_TRAFFIC_TO_INTERNET
+                          PRIVATE_GOOGLE_ACCESS_DISALLOWED
+                          PRIVATE_GOOGLE_ACCESS_VIA_VPN_TUNNEL_UNSUPPORTED
+                          NO_EXTERNAL_ADDRESS
+                          UNKNOWN_INTERNAL_ADDRESS
+                          FORWARDING_RULE_MISMATCH
+                          FORWARDING_RULE_NO_INSTANCES
+                          FIREWALL_BLOCKING_LOAD_BALANCER_BACKEND_HEALTH_CHECK
+                          INGRESS_FIREWALL_TAGS_UNSUPPORTED_BY_DIRECT_VPC_EGRESS
+                          INSTANCE_NOT_RUNNING
+                          GKE_CLUSTER_NOT_RUNNING
+                          GKE_POD_NOT_RUNNING
+                          CLOUD_SQL_INSTANCE_NOT_RUNNING
+                          REDIS_INSTANCE_NOT_RUNNING
+                          REDIS_CLUSTER_NOT_RUNNING
+                          TRAFFIC_TYPE_BLOCKED
+                          GKE_MASTER_UNAUTHORIZED_ACCESS
+                          CLOUD_SQL_INSTANCE_UNAUTHORIZED_ACCESS
+                          DROPPED_INSIDE_GKE_SERVICE
+                          DROPPED_INSIDE_CLOUD_SQL_SERVICE
+                          GOOGLE_MANAGED_SERVICE_NO_PEERING
+                          GOOGLE_MANAGED_SERVICE_NO_PSC_ENDPOINT
+                          GKE_PSC_ENDPOINT_MISSING
+                          CLOUD_SQL_INSTANCE_NO_IP_ADDRESS
+                          GKE_CONTROL_PLANE_REGION_MISMATCH
+                          PUBLIC_GKE_CONTROL_PLANE_TO_PRIVATE_DESTINATION
+                          GKE_CONTROL_PLANE_NO_ROUTE
+                          CLOUD_SQL_INSTANCE_NOT_CONFIGURED_FOR_EXTERNAL_TRAFFIC
+                          PUBLIC_CLOUD_SQL_INSTANCE_TO_PRIVATE_DESTINATION
+                          CLOUD_SQL_INSTANCE_NO_ROUTE
+                          CLOUD_SQL_CONNECTOR_REQUIRED
+                          CLOUD_FUNCTION_NOT_ACTIVE
+                          VPC_CONNECTOR_NOT_SET
+                          VPC_CONNECTOR_NOT_RUNNING
+                          VPC_CONNECTOR_SERVERLESS_TRAFFIC_BLOCKED
+                          VPC_CONNECTOR_HEALTH_CHECK_TRAFFIC_BLOCKED
+                          FORWARDING_RULE_REGION_MISMATCH
+                          PSC_CONNECTION_NOT_ACCEPTED
+                          PSC_ENDPOINT_ACCESSED_FROM_PEERED_NETWORK
+                          PSC_NEG_PRODUCER_ENDPOINT_NO_GLOBAL_ACCESS
+                          PSC_NEG_PRODUCER_FORWARDING_RULE_MULTIPLE_PORTS
+                          CLOUD_SQL_PSC_NEG_UNSUPPORTED
+                          NO_NAT_SUBNETS_FOR_PSC_SERVICE_ATTACHMENT
+                          PSC_TRANSITIVITY_NOT_PROPAGATED
+                          HYBRID_NEG_NON_DYNAMIC_ROUTE_MATCHED
+                          HYBRID_NEG_NON_LOCAL_DYNAMIC_ROUTE_MATCHED
+                          CLOUD_RUN_REVISION_NOT_READY
+                          DROPPED_INSIDE_PSC_SERVICE_PRODUCER
+                          LOAD_BALANCER_HAS_NO_PROXY_SUBNET
+                          CLOUD_NAT_NO_ADDRESSES
+                          ROUTING_LOOP
+                          DROPPED_INSIDE_GOOGLE_MANAGED_SERVICE
+                          LOAD_BALANCER_BACKEND_INVALID_NETWORK
+                          BACKEND_SERVICE_NAMED_PORT_NOT_DEFINED
+                          DESTINATION_IS_PRIVATE_NAT_IP_RANGE
+                          DROPPED_INSIDE_REDIS_INSTANCE_SERVICE
+                          REDIS_INSTANCE_UNSUPPORTED_PORT
+                          REDIS_INSTANCE_CONNECTING_FROM_PUPI_ADDRESS
+                          REDIS_INSTANCE_NO_ROUTE_TO_DESTINATION_NETWORK
+                          REDIS_INSTANCE_NO_EXTERNAL_IP
+                          REDIS_INSTANCE_UNSUPPORTED_PROTOCOL
+                          DROPPED_INSIDE_REDIS_CLUSTER_SERVICE
+                          REDIS_CLUSTER_UNSUPPORTED_PORT
+                          REDIS_CLUSTER_NO_EXTERNAL_IP
+                          REDIS_CLUSTER_UNSUPPORTED_PROTOCOL
+                          NO_ADVERTISED_ROUTE_TO_GCP_DESTINATION
+                          NO_TRAFFIC_SELECTOR_TO_GCP_DESTINATION
+                          NO_KNOWN_ROUTE_FROM_PEERED_NETWORK_TO_DESTINATION
+                          PRIVATE_NAT_TO_PSC_ENDPOINT_UNSUPPORTED
+                          PSC_PORT_MAPPING_PORT_MISMATCH
+                          PSC_PORT_MAPPING_WITHOUT_PSC_CONNECTION_UNSUPPORTED
+                          UNSUPPORTED_ROUTE_MATCHED_FOR_NAT64_DESTINATION
+                          TRAFFIC_FROM_HYBRID_ENDPOINT_TO_INTERNET_DISALLOWED
+                          NO_MATCHING_NAT64_GATEWAY
+                          NO_CONFIGURED_PRIVATE_NAT64_RULE
+                          LOAD_BALANCER_BACKEND_IP_VERSION_MISMATCH
+                          NO_KNOWN_ROUTE_FROM_NCC_NETWORK_TO_DESTINATION
+                          CLOUD_NAT_PROTOCOL_UNSUPPORTED
+                          L2_INTERCONNECT_UNSUPPORTED_PROTOCOL
+                          L2_INTERCONNECT_UNSUPPORTED_PORT
+                          L2_INTERCONNECT_DESTINATION_IP_MISMATCH
+                          NCC_ROUTE_WITHIN_HYBRID_SUBNET_UNSUPPORTED
+                          HYBRID_SUBNET_REGION_MISMATCH
+                          HYBRID_SUBNET_NO_ROUTE
+                          GKE_NETWORK_POLICY
+                          NO_VALID_ROUTE_FROM_GOOGLE_MANAGED_NETWORK_TO_DESTINATION
+                      - name: destinationGeolocationCode
+                        type: String
+                        description: Geolocation (region code) of the destination IP address (if relevant).
+                      - name: destinationIp
+                        type: String
+                        description: Destination IP address of the dropped packet (if relevant).
+                      - name: region
+                        type: String
+                        description: Region of the dropped packet (if relevant).
+                      - name: resourceUri
+                        type: String
+                        description: URI of the resource that caused the drop.
+                      - name: sourceGeolocationCode
+                        type: String
+                        description: Geolocation (region code) of the source IP address (if relevant).
+                      - name: sourceIp
+                        type: String
+                        description: Source IP address of the dropped packet (if relevant).
+                  - name: endpoint
+                    type: NestedObject
+                    description: |-
+                      For display only. The specification of the endpoints for the test.
+                      EndpointInfo is derived from source and destination Endpoint and validated
+                      by the backend data plane model.
+                    properties:
+                      - name: destinationIp
+                        type: String
+                        description: Destination IP address.
+                      - name: destinationNetworkUri
+                        type: String
+                        description: URI of the network where this packet is sent to.
+                      - name: destinationPort
+                        type: Integer
+                        description: Destination port. Only valid when protocol is TCP or UDP.
+                      - name: protocol
+                        type: String
+                        description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+                      - name: sourceAgentUri
+                        type: String
+                        description: URI of the source telemetry agent this packet originates from.
+                      - name: sourceIp
+                        type: String
+                        description: Source IP address.
+                      - name: sourceNetworkUri
+                        type: String
+                        description: URI of the network where this packet originates from.
+                      - name: sourcePort
+                        type: Integer
+                        description: Source port. Only valid when protocol is TCP or UDP.
+                  - name: firewall
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a VPC firewall rule, an implied
+                      VPC firewall rule, or a firewall policy rule.
+                    properties:
+                      - name: action
+                        type: String
+                        description: 'Possible values: ALLOW, DENY, APPLY_SECURITY_PROFILE_GROUP'
+                      - name: direction
+                        type: String
+                        description: 'Possible values: INGRESS, EGRESS'
+                      - name: displayName
+                        type: String
+                        description: |-
+                          The display name of the firewall rule. This field might be empty for
+                          firewall policy rules.
+                      - name: firewallRuleType
+                        type: String
+                        description: |-
+                          The firewall rule's type.
+                          Possible values:
+                          HIERARCHICAL_FIREWALL_POLICY_RULE
+                          VPC_FIREWALL_RULE
+                          IMPLIED_VPC_FIREWALL_RULE
+                          SERVERLESS_VPC_ACCESS_MANAGED_FIREWALL_RULE
+                          NETWORK_FIREWALL_POLICY_RULE
+                          NETWORK_REGIONAL_FIREWALL_POLICY_RULE
+                          SYSTEM_NETWORK_FIREWALL_POLICY_RULE
+                          SYSTEM_REGIONAL_NETWORK_FIREWALL_POLICY_RULE
+                          UNSUPPORTED_FIREWALL_POLICY_RULE
+                          TRACKING_STATE
+                          ANALYSIS_SKIPPED
+                      - name: networkUri
+                        type: String
+                        description: |-
+                          The URI of the VPC network that the firewall rule is associated with.
+                          This field is not applicable to hierarchical firewall policy rules.
+                      - name: policy
+                        type: String
+                        description: |-
+                          The name of the firewall policy that this rule is associated with.
+                          This field is not applicable to VPC firewall rules and implied VPC firewall
+                          rules.
+                      - name: policyPriority
+                        type: Integer
+                        description: |-
+                          The priority of the firewall policy that this rule is associated with.
+                          This field is not applicable to VPC firewall rules and implied VPC firewall
+                          rules.
+                      - name: policyUri
+                        type: String
+                        description: |-
+                          The URI of the firewall policy that this rule is associated with.
+                          This field is not applicable to VPC firewall rules and implied VPC firewall
+                          rules.
+                      - name: priority
+                        type: Integer
+                        description: The priority of the firewall rule.
+                      - name: targetServiceAccounts
+                        type: Array
+                        description: The target service accounts specified by the firewall rule.
+                        item_type:
+                          type: String
+                      - name: targetTags
+                        type: Array
+                        description: |-
+                          The target tags defined by the VPC firewall rule. This field is not
+                          applicable to firewall policy rules.
+                        item_type:
+                          type: String
+                      - name: targetType
+                        type: String
+                        description: |-
+                          Target type of the firewall rule.
+                          Possible values:
+                          INSTANCES
+                          INTERNAL_MANAGED_LB
+                      - name: uri
+                        type: String
+                        description: |-
+                          The URI of the firewall rule. This field is not applicable to implied
+                          VPC firewall rules.
+                  - name: forward
+                    type: NestedObject
+                    description: Details of the final state "forward" and associated resource.
+                    properties:
+                      - name: ipAddress
+                        type: String
+                        description: IP address of the target (if applicable).
+                      - name: resourceUri
+                        type: String
+                        description: URI of the resource that the packet is forwarded to.
+                      - name: target
+                        type: String
+                        description: |-
+                          Target type where this packet is forwarded to.
+                          Possible values:
+                          PEERING_VPC
+                          VPN_GATEWAY
+                          INTERCONNECT
+                          GKE_MASTER
+                          IMPORTED_CUSTOM_ROUTE_NEXT_HOP
+                          CLOUD_SQL_INSTANCE
+                          ANOTHER_PROJECT
+                          NCC_HUB
+                          ROUTER_APPLIANCE
+                          SECURE_WEB_PROXY_GATEWAY
+                  - name: forwardingRule
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine forwarding rule.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of the forwarding rule.
+                      - name: loadBalancerName
+                        type: String
+                        description: |-
+                          Name of the load balancer the forwarding rule belongs to. Empty for
+                          forwarding rules not related to load balancers (like PSC forwarding rules).
+                      - name: matchedPortRange
+                        type: String
+                        description: Port range defined in the forwarding rule that matches the packet.
+                      - name: matchedProtocol
+                        type: String
+                        description: Protocol defined in the forwarding rule that matches the packet.
+                      - name: networkUri
+                        type: String
+                        description: Network URI.
+                      - name: pscGoogleApiTarget
+                        type: String
+                        description: PSC Google API target this forwarding rule targets (if applicable).
+                      - name: pscServiceAttachmentUri
+                        type: String
+                        description: |-
+                          URI of the PSC service attachment this forwarding rule targets (if
+                          applicable).
+                      - name: region
+                        type: String
+                        description: Region of the forwarding rule. Set only for regional forwarding rules.
+                      - name: target
+                        type: String
+                        description: Target type of the forwarding rule.
+                      - name: uri
+                        type: String
+                        description: URI of the forwarding rule.
+                      - name: vip
+                        type: String
+                        description: VIP of the forwarding rule.
+                  - name: gkeMaster
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a Google Kubernetes Engine (GKE)
+                      cluster master.
+                    properties:
+                      - name: clusterNetworkUri
+                        type: String
+                        description: URI of a GKE cluster network.
+                      - name: clusterUri
+                        type: String
+                        description: URI of a GKE cluster.
+                      - name: dnsEndpoint
+                        type: String
+                        description: DNS endpoint of a GKE cluster control plane.
+                      - name: externalIp
+                        type: String
+                        description: External IP address of a GKE cluster control plane.
+                      - name: internalIp
+                        type: String
+                        description: Internal IP address of a GKE cluster control plane.
+                  - name: gkeNetworkPolicy
+                    type: NestedObject
+                    description: For display only. Metadata associated with a GKE Network Policy.
+                    properties:
+                      - name: action
+                        type: String
+                        description: 'Possible values: ALLOW, DENY'
+                      - name: direction
+                        type: String
+                        description: 'Possible values: INGRESS, EGRESS'
+                      - name: displayName
+                        type: String
+                        description: The name of the Network Policy.
+                      - name: uri
+                        type: String
+                        description: |-
+                          The URI of the Network Policy.
+                          Format for a Network Policy in a zonal cluster:
+                          `projects//zones//clusters//k8s/namespaces//networking.k8s.io/networkpolicies/`
+                          Format for a Network Policy in a regional cluster:
+                          `projects//locations//clusters//k8s/namespaces//networking.k8s.io/networkpolicies/`
+                  - name: gkeNetworkPolicySkipped
+                    type: NestedObject
+                    description: |-
+                      For display only. Contains information about why GKE Network Policy
+                      evaluation was skipped.
+                    properties:
+                      - name: reason
+                        type: String
+                        description: |-
+                          Reason why Network Policy evaluation was skipped.
+                          Possible values:
+                          NETWORK_POLICY_DISABLED
+                          INGRESS_SOURCE_ON_SAME_NODE
+                          EGRESS_FROM_NODE_NETWORK_NAMESPACE_POD
+                          NETWORK_POLICY_NOT_APPLIED_TO_RESPONSE_TRAFFIC
+                          NETWORK_POLICY_ANALYSIS_UNSUPPORTED
+                  - name: gkePod
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a Google Kubernetes Engine (GKE)
+                      Pod.
+                    properties:
+                      - name: ipAddress
+                        type: String
+                        description: |-
+                          IP address of a GKE Pod. If the Pod is dual-stack, this is the IP address
+                          relevant to the trace.
+                      - name: networkUri
+                        type: String
+                        description: URI of the network containing the GKE Pod.
+                      - name: podUri
+                        type: String
+                        description: |-
+                          URI of a GKE Pod.
+                          For Pods in regional Clusters, the URI format is:
+                          `projects/{project}/locations/{location}/clusters/{cluster}/k8s/namespaces/{namespace}/pods/{pod}`
+                          For Pods in zonal Clusters, the URI format is:
+                          `projects/{project}/zones/{zone}/clusters/{cluster}/k8s/namespaces/{namespace}/pods/{pod}`
+                  - name: googleService
+                    type: NestedObject
+                    description: |-
+                      For display only. Details of a Google Service sending packets to a
+                      VPC network. Although the source IP might be a publicly routable address,
+                      some Google Services use special routes within Google production
+                      infrastructure to reach Compute Engine Instances.
+                      https://cloud.google.com/vpc/docs/routes#special_return_paths
+                    properties:
+                      - name: googleServiceType
+                        type: String
+                        description: |-
+                          Recognized type of a Google Service.
+                          Possible values:
+                          IAP
+                          GFE_PROXY_OR_HEALTH_CHECK_PROBER
+                          CLOUD_DNS
+                          GOOGLE_API
+                          GOOGLE_API_PSC
+                          GOOGLE_API_VPC_SC
+                          SERVERLESS_VPC_ACCESS
+                      - name: sourceIp
+                        type: String
+                        description: Source IP address.
+                  - name: hybridSubnet
+                    type: NestedObject
+                    description: For display only. Metadata associated with a hybrid subnet.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a hybrid subnet.
+                      - name: region
+                        type: String
+                        description: Name of a Google Cloud region where the hybrid subnet is configured.
+                      - name: uri
+                        type: String
+                        description: URI of a hybrid subnet.
+                  - name: instance
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine instance.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Compute Engine instance.
+                      - name: externalIp
+                        type: String
+                        description: External IP address of the network interface.
+                      - name: interface
+                        type: String
+                        description: Name of the network interface of a Compute Engine instance.
+                      - name: internalIp
+                        type: String
+                        description: Internal IP address of the network interface.
+                      - name: networkTags
+                        type: Array
+                        description: Network tags configured on the instance.
+                        item_type:
+                          type: String
+                      - name: networkUri
+                        type: String
+                        description: URI of a Compute Engine network.
+                      - name: pscNetworkAttachmentUri
+                        type: String
+                        description: URI of the PSC network attachment the NIC is attached to (if relevant).
+                      - name: running
+                        type: Boolean
+                        description: |-
+                          Indicates whether the Compute Engine instance is running.
+                          Deprecated: use the `status` field instead.
+                      - name: serviceAccount
+                        type: String
+                        description: Service account authorized for the instance.
+                      - name: status
+                        type: String
+                        description: |-
+                          The status of the instance.
+                          Possible values:
+                          RUNNING
+                          NOT_RUNNING
+                      - name: uri
+                        type: String
+                        description: URI of a Compute Engine instance.
+                  - name: interconnectAttachment
+                    type: NestedObject
+                    description: For display only. Metadata associated with an Interconnect attachment.
+                    properties:
+                      - name: cloudRouterUri
+                        type: String
+                        description: URI of the Cloud Router to be used for dynamic routing.
+                      - name: displayName
+                        type: String
+                        description: Name of an Interconnect attachment.
+                      - name: interconnectUri
+                        type: String
+                        description: |-
+                          URI of the Interconnect where the Interconnect attachment is
+                          configured.
+                      - name: l2AttachmentMatchedIpAddress
+                        type: String
+                        description: Appliance IP address that was matched for L2_DEDICATED attachments.
+                      - name: region
+                        type: String
+                        description: |-
+                          Name of a Google Cloud region where the Interconnect attachment is
+                          configured.
+                      - name: type
+                        type: String
+                        description: |-
+                          The type of interconnect attachment this is.
+                          Possible values:
+                          DEDICATED
+                          PARTNER
+                          PARTNER_PROVIDER
+                          L2_DEDICATED
+                      - name: uri
+                        type: String
+                        description: URI of an Interconnect attachment.
+                  - name: ipMasqueradingSkipped
+                    type: NestedObject
+                    description: |-
+                      For display only. Contains information about why IP masquerading was skipped
+                      for the packet.
+                    properties:
+                      - name: nonMasqueradeRange
+                        type: String
+                        description: |-
+                          The matched non-masquerade IP range. Only set if reason is
+                          DESTINATION_IP_IN_CONFIGURED_NON_MASQUERADE_RANGE or
+                          DESTINATION_IP_IN_DEFAULT_NON_MASQUERADE_RANGE.
+                      - name: reason
+                        type: String
+                        description: |-
+                          Reason why IP masquerading was not applied.
+                          Possible values:
+                          DESTINATION_IP_IN_CONFIGURED_NON_MASQUERADE_RANGE
+                          DESTINATION_IP_IN_DEFAULT_NON_MASQUERADE_RANGE
+                          DESTINATION_ON_SAME_NODE
+                          DEFAULT_SNAT_DISABLED
+                          NO_MASQUERADING_FOR_IPV6
+                          POD_USES_NODE_NETWORK_NAMESPACE
+                          NO_MASQUERADING_FOR_RETURN_PACKET
+                  - name: loadBalancer
+                    type: NestedObject
+                    description: For display only. Metadata associated with a load balancer.
+                    properties:
+                      - name: backendType
+                        type: String
+                        description: |-
+                          Type of load balancer's backend configuration.
+                          Possible values:
+                          BACKEND_SERVICE
+                          TARGET_POOL
+                          TARGET_INSTANCE
+                      - name: backendUri
+                        type: String
+                        description: Backend configuration URI.
+                      - name: backends
+                        type: Array
+                        description: Information for the loadbalancer backends.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: displayName
+                              type: String
+                              description: Name of a Compute Engine instance or network endpoint.
+                            - name: healthCheckAllowingFirewallRules
+                              type: Array
+                              description: A list of firewall rule URIs allowing probes from health check IP ranges.
+                              item_type:
+                                type: String
+                            - name: healthCheckBlockingFirewallRules
+                              type: Array
+                              description: A list of firewall rule URIs blocking probes from health check IP ranges.
+                              item_type:
+                                type: String
+                            - name: healthCheckFirewallState
+                              type: String
+                              description: |-
+                                State of the health check firewall configuration.
+                                Possible values:
+                                CONFIGURED
+                                MISCONFIGURED
+                            - name: uri
+                              type: String
+                              description: URI of a Compute Engine instance or network endpoint.
+                      - name: healthCheckUri
+                        type: String
+                        description: |-
+                          URI of the health check for the load balancer. Deprecated and no longer
+                          populated as different load balancer backends might have different health
+                          checks.
+                      - name: loadBalancerType
+                        type: String
+                        description: |-
+                          Type of the load balancer.
+                          Possible values:
+                          INTERNAL_TCP_UDP
+                          NETWORK_TCP_UDP
+                          HTTP_PROXY
+                          TCP_PROXY
+                          SSL_PROXY
+                  - name: loadBalancerBackendInfo
+                    type: NestedObject
+                    description: For display only. Metadata associated with the load balancer backend.
+                    properties:
+                      - name: backendBucketUri
+                        type: String
+                        description: URI of the backend bucket this backend targets (if applicable).
+                      - name: backendServiceUri
+                        type: String
+                        description: URI of the backend service this backend belongs to (if applicable).
+                      - name: healthCheckFirewallsConfigState
+                        type: String
+                        description: |-
+                          Health check firewalls configuration state for the backend. This is a
+                          result of the static firewall analysis (verifying that health check traffic
+                          from required IP ranges to the backend is allowed or not). The backend
+                          might still be unhealthy even if these firewalls are configured. Please
+                          refer to the documentation for more information:
+                          https://cloud.google.com/load-balancing/docs/firewall-rules
+                          Possible values:
+                          FIREWALLS_CONFIGURED
+                          FIREWALLS_PARTIALLY_CONFIGURED
+                          FIREWALLS_NOT_CONFIGURED
+                          FIREWALLS_UNSUPPORTED
+                        output: true
+                      - name: healthCheckUri
+                        type: String
+                        description: URI of the health check attached to this backend (if applicable).
+                      - name: instanceGroupUri
+                        type: String
+                        description: URI of the instance group this backend belongs to (if applicable).
+                      - name: instanceUri
+                        type: String
+                        description: |-
+                          URI of the backend instance (if applicable). Populated for instance group
+                          backends, and zonal NEG backends.
+                      - name: name
+                        type: String
+                        description: |-
+                          Display name of the backend. For example, it might be an instance name for
+                          the instance group backends, or an IP address and port for zonal network
+                          endpoint group backends.
+                      - name: networkEndpointGroupUri
+                        type: String
+                        description: URI of the network endpoint group this backend belongs to (if applicable).
+                      - name: pscGoogleApiTarget
+                        type: String
+                        description: PSC Google API target this PSC NEG backend targets (if applicable).
+                      - name: pscServiceAttachmentUri
+                        type: String
+                        description: |-
+                          URI of the PSC service attachment this PSC NEG backend targets (if
+                          applicable).
+                  - name: nat
+                    type: NestedObject
+                    description: For display only. Metadata associated with NAT.
+                    properties:
+                      - name: cloudNatGatewayType
+                        type: String
+                        description: |-
+                          Type of Cloud NAT gateway. Only valid when `type` is CLOUD_NAT.
+                          Possible values:
+                          PUBLIC_NAT44
+                          PUBLIC_NAT64
+                          PRIVATE_NAT_NCC
+                          PRIVATE_NAT_HYBRID
+                          PRIVATE_NAT64
+                      - name: natGatewayName
+                        type: String
+                        description: The name of Cloud NAT Gateway. Only valid when type is CLOUD_NAT.
+                      - name: networkUri
+                        type: String
+                        description: URI of the network where NAT translation takes place.
+                      - name: newDestinationIp
+                        type: String
+                        description: Destination IP address after NAT translation.
+                      - name: newDestinationPort
+                        type: Integer
+                        description: |-
+                          Destination port after NAT translation. Only valid when protocol is TCP or
+                          UDP.
+                      - name: newSourceIp
+                        type: String
+                        description: Source IP address after NAT translation.
+                      - name: newSourcePort
+                        type: Integer
+                        description: Source port after NAT translation. Only valid when protocol is TCP or UDP.
+                      - name: oldDestinationIp
+                        type: String
+                        description: Destination IP address before NAT translation.
+                      - name: oldDestinationPort
+                        type: Integer
+                        description: |-
+                          Destination port before NAT translation. Only valid when protocol is TCP or
+                          UDP.
+                      - name: oldSourceIp
+                        type: String
+                        description: Source IP address before NAT translation.
+                      - name: oldSourcePort
+                        type: Integer
+                        description: Source port before NAT translation. Only valid when protocol is TCP or UDP.
+                      - name: protocol
+                        type: String
+                        description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+                      - name: routerUri
+                        type: String
+                        description: Uri of the Cloud Router. Only valid when type is CLOUD_NAT.
+                      - name: type
+                        type: String
+                        description: |-
+                          Type of NAT.
+                          Possible values:
+                          INTERNAL_TO_EXTERNAL
+                          EXTERNAL_TO_INTERNAL
+                          CLOUD_NAT
+                          PRIVATE_SERVICE_CONNECT
+                          GKE_POD_IP_MASQUERADING
+                  - name: network
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine network.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Compute Engine network.
+                      - name: matchedIpRange
+                        type: String
+                        description: The IP range of the subnet matching the source IP address of the test.
+                      - name: matchedSubnetUri
+                        type: String
+                        description: URI of the subnet matching the source IP address of the test.
+                      - name: region
+                        type: String
+                        description: The region of the subnet matching the source IP address of the test.
+                      - name: uri
+                        type: String
+                        description: URI of a Compute Engine network.
+                  - name: ngfwPacketInspection
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a layer 7 packet inspection by the
+                      firewall.
+                    properties:
+                      - name: securityProfileGroupUri
+                        type: String
+                        description: |-
+                          URI of the security profile group associated with this firewall packet
+                          inspection.
+                  - name: projectId
+                    type: String
+                    description: Project ID that contains the configuration this step is validating.
+                  - name: proxyConnection
+                    type: NestedObject
+                    description: For display only. Metadata associated with ProxyConnection.
+                    properties:
+                      - name: networkUri
+                        type: String
+                        description: URI of the network where connection is proxied.
+                      - name: newDestinationIp
+                        type: String
+                        description: Destination IP address of a new connection.
+                      - name: newDestinationPort
+                        type: Integer
+                        description: |-
+                          Destination port of a new connection. Only valid when protocol is TCP or
+                          UDP.
+                      - name: newSourceIp
+                        type: String
+                        description: Source IP address of a new connection.
+                      - name: newSourcePort
+                        type: Integer
+                        description: Source port of a new connection. Only valid when protocol is TCP or UDP.
+                      - name: oldDestinationIp
+                        type: String
+                        description: Destination IP address of an original connection
+                      - name: oldDestinationPort
+                        type: Integer
+                        description: |-
+                          Destination port of an original connection. Only valid when protocol is TCP
+                          or UDP.
+                      - name: oldSourceIp
+                        type: String
+                        description: Source IP address of an original connection.
+                      - name: oldSourcePort
+                        type: Integer
+                        description: |-
+                          Source port of an original connection. Only valid when protocol is TCP or
+                          UDP.
+                      - name: protocol
+                        type: String
+                        description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+                      - name: subnetUri
+                        type: String
+                        description: Uri of proxy subnet.
+                  - name: redisCluster
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Redis Cluster.
+                    properties:
+                      - name: discoveryEndpointIpAddress
+                        type: String
+                        description: Discovery endpoint IP address of a Redis Cluster.
+                      - name: displayName
+                        type: String
+                        description: Name of a Redis Cluster.
+                      - name: location
+                        type: String
+                        description: |-
+                          Name of the region in which the Redis Cluster is defined. For example,
+                          "us-central1".
+                      - name: networkUri
+                        type: String
+                        description: |-
+                          URI of the network containing the Redis Cluster endpoints in format
+                          "projects/{project_id}/global/networks/{network_id}".
+                      - name: secondaryEndpointIpAddress
+                        type: String
+                        description: Secondary endpoint IP address of a Redis Cluster.
+                      - name: uri
+                        type: String
+                        description: |-
+                          URI of a Redis Cluster in format
+                          "projects/{project_id}/locations/{location}/clusters/{cluster_id}"
+                  - name: redisInstance
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Cloud Redis Instance.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Cloud Redis Instance.
+                      - name: networkUri
+                        type: String
+                        description: URI of a Cloud Redis Instance network.
+                      - name: primaryEndpointIp
+                        type: String
+                        description: Primary endpoint IP address of a Cloud Redis Instance.
+                      - name: readEndpointIp
+                        type: String
+                        description: Read endpoint IP address of a Cloud Redis Instance (if applicable).
+                      - name: region
+                        type: String
+                        description: Region in which the Cloud Redis Instance is defined.
+                      - name: uri
+                        type: String
+                        description: URI of a Cloud Redis Instance.
+                  - name: route
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine route.
+                    properties:
+                      - name: advertisedRouteNextHopUri
+                        type: String
+                        description: |-
+                          For ADVERTISED routes, the URI of their next hop, i.e. the URI of the
+                          hybrid endpoint (VPN tunnel, Interconnect attachment, NCC router appliance)
+                          the advertised prefix is advertised through, or URI of the source peered
+                          network. Deprecated in favor of the next_hop_uri field, not used in new
+                          tests.
+                      - name: advertisedRouteSourceRouterUri
+                        type: String
+                        description: |-
+                          For ADVERTISED dynamic routes, the URI of the Cloud Router that advertised
+                          the corresponding IP prefix.
+                      - name: destIpRange
+                        type: String
+                        description: Destination IP range of the route.
+                      - name: destPortRanges
+                        type: Array
+                        description: Destination port ranges of the route. POLICY_BASED routes only.
+                        item_type:
+                          type: String
+                      - name: displayName
+                        type: String
+                        description: Name of a route.
+                      - name: instanceTags
+                        type: Array
+                        description: Instance tags of the route.
+                        item_type:
+                          type: String
+                      - name: nccHubRouteUri
+                        type: String
+                        description: |-
+                          For PEERING_SUBNET and PEERING_DYNAMIC routes that are advertised by NCC
+                          Hub, the URI of the corresponding route in NCC Hub's routing table.
+                      - name: nccHubUri
+                        type: String
+                        description: |-
+                          URI of the NCC Hub the route is advertised by. PEERING_SUBNET and
+                          PEERING_DYNAMIC routes that are advertised by NCC Hub only.
+                      - name: nccSpokeUri
+                        type: String
+                        description: |-
+                          URI of the destination NCC Spoke. PEERING_SUBNET and PEERING_DYNAMIC routes
+                          that are advertised by NCC Hub only.
+                      - name: networkUri
+                        type: String
+                        description: URI of a VPC network where route is located.
+                      - name: nextHop
+                        type: String
+                        description: |-
+                          String type of the next hop of the route (for example, "VPN tunnel").
+                          Deprecated in favor of the next_hop_type and next_hop_uri fields, not used
+                          in new tests.
+                      - name: nextHopNetworkUri
+                        type: String
+                        description: URI of a VPC network where the next hop resource is located.
+                      - name: nextHopType
+                        type: String
+                        description: |-
+                          Type of next hop.
+                          Possible values:
+                          NEXT_HOP_IP
+                          NEXT_HOP_INSTANCE
+                          NEXT_HOP_NETWORK
+                          NEXT_HOP_PEERING
+                          NEXT_HOP_INTERCONNECT
+                          NEXT_HOP_VPN_TUNNEL
+                          NEXT_HOP_VPN_GATEWAY
+                          NEXT_HOP_INTERNET_GATEWAY
+                          NEXT_HOP_BLACKHOLE
+                          NEXT_HOP_ILB
+                          NEXT_HOP_ROUTER_APPLIANCE
+                          NEXT_HOP_NCC_HUB
+                          SECURE_WEB_PROXY_GATEWAY
+                      - name: nextHopUri
+                        type: String
+                        description: URI of the next hop resource.
+                      - name: originatingRouteDisplayName
+                        type: String
+                        description: |-
+                          For PEERING_SUBNET, PEERING_STATIC and PEERING_DYNAMIC routes, the name of
+                          the originating SUBNET/STATIC/DYNAMIC route.
+                      - name: originatingRouteUri
+                        type: String
+                        description: |-
+                          For PEERING_SUBNET and PEERING_STATIC routes, the URI of the originating
+                          SUBNET/STATIC route.
+                      - name: priority
+                        type: Integer
+                        description: Priority of the route.
+                      - name: protocols
+                        type: Array
+                        description: Protocols of the route. POLICY_BASED routes only.
+                        item_type:
+                          type: String
+                      - name: region
+                        type: String
+                        description: |-
+                          Region of the route. DYNAMIC, PEERING_DYNAMIC, POLICY_BASED and ADVERTISED
+                          routes only. If set for POLICY_BASED route, this is a region of VLAN
+                          attachments for Cloud Interconnect the route applies to.
+                      - name: routeScope
+                        type: String
+                        description: |-
+                          Indicates where route is applicable. Deprecated, routes with NCC_HUB scope
+                          are not included in the trace in new tests.
+                          Possible values:
+                          NETWORK
+                          NCC_HUB
+                      - name: routeType
+                        type: String
+                        description: |-
+                          Type of route.
+                          Possible values:
+                          SUBNET
+                          STATIC
+                          DYNAMIC
+                          PEERING_SUBNET
+                          PEERING_STATIC
+                          PEERING_DYNAMIC
+                          POLICY_BASED
+                          ADVERTISED
+                      - name: srcIpRange
+                        type: String
+                        description: Source IP address range of the route. POLICY_BASED routes only.
+                      - name: srcPortRanges
+                        type: Array
+                        description: Source port ranges of the route. POLICY_BASED routes only.
+                        item_type:
+                          type: String
+                      - name: uri
+                        type: String
+                        description: |-
+                          URI of a route. SUBNET, STATIC, PEERING_SUBNET (only for peering network)
+                          and POLICY_BASED routes only.
+                  - name: serverlessExternalConnection
+                    type: NestedObject
+                    description: For display only. Metadata associated with a serverless public connection.
+                    properties:
+                      - name: selectedIpAddress
+                        type: String
+                        description: Selected starting IP address, from the Google dynamic address pool.
+                  - name: serverlessNeg
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with the serverless network endpoint
+                      group backend.
+                    properties:
+                      - name: negUri
+                        type: String
+                        description: URI of the serverless network endpoint group.
+                  - name: state
+                    type: String
+                    description: |-
+                      Each step is in one of the pre-defined states.
+                      Possible values:
+                      START_FROM_INSTANCE
+                      START_FROM_INTERNET
+                      START_FROM_GOOGLE_SERVICE
+                      START_FROM_PRIVATE_NETWORK
+                      START_FROM_GKE_MASTER
+                      START_FROM_CLOUD_SQL_INSTANCE
+                      START_FROM_GKE_POD
+                      START_FROM_REDIS_INSTANCE
+                      START_FROM_REDIS_CLUSTER
+                      START_FROM_CLOUD_FUNCTION
+                      START_FROM_APP_ENGINE_VERSION
+                      START_FROM_CLOUD_RUN_REVISION
+                      START_FROM_STORAGE_BUCKET
+                      START_FROM_PSC_PUBLISHED_SERVICE
+                      START_FROM_SERVERLESS_NEG
+                      APPLY_INGRESS_FIREWALL_RULE
+                      APPLY_EGRESS_FIREWALL_RULE
+                      APPLY_ROUTE
+                      APPLY_FORWARDING_RULE
+                      ANALYZE_LOAD_BALANCER_BACKEND
+                      SPOOFING_APPROVED
+                      ARRIVE_AT_INSTANCE
+                      ARRIVE_AT_INTERNAL_LOAD_BALANCER
+                      ARRIVE_AT_EXTERNAL_LOAD_BALANCER
+                      ARRIVE_AT_HYBRID_SUBNET
+                      ARRIVE_AT_VPN_GATEWAY
+                      ARRIVE_AT_VPN_TUNNEL
+                      ARRIVE_AT_INTERCONNECT_ATTACHMENT
+                      ARRIVE_AT_VPC_CONNECTOR
+                      ARRIVE_AT_GKE_POD
+                      DIRECT_VPC_EGRESS_CONNECTION
+                      SERVERLESS_EXTERNAL_CONNECTION
+                      NGFW_PACKET_INSPECTION
+                      NAT
+                      SKIP_GKE_POD_IP_MASQUERADING
+                      SKIP_GKE_INGRESS_NETWORK_POLICY
+                      SKIP_GKE_EGRESS_NETWORK_POLICY
+                      APPLY_INGRESS_GKE_NETWORK_POLICY
+                      APPLY_EGRESS_GKE_NETWORK_POLICY
+                      PROXY_CONNECTION
+                      DELIVER
+                      DROP
+                      FORWARD
+                      ABORT
+                      VIEWER_PERMISSION_MISSING
+                  - name: storageBucket
+                    type: NestedObject
+                    description: For display only. Metadata associated with Storage Bucket.
+                    properties:
+                      - name: bucket
+                        type: String
+                        description: Cloud Storage Bucket name.
+                  - name: vpcConnector
+                    type: NestedObject
+                    description: For display only. Metadata associated with a VPC connector.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a VPC connector.
+                      - name: location
+                        type: String
+                        description: Location in which the VPC connector is deployed.
+                      - name: uri
+                        type: String
+                        description: URI of a VPC connector.
+                  - name: vpnGateway
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine VPN gateway.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a VPN gateway.
+                      - name: ipAddress
+                        type: String
+                        description: IP address of the VPN gateway.
+                      - name: networkUri
+                        type: String
+                        description: URI of a Compute Engine network where the VPN gateway is configured.
+                      - name: region
+                        type: String
+                        description: Name of a Google Cloud region where this VPN gateway is configured.
+                      - name: uri
+                        type: String
+                        description: URI of a VPN gateway.
+                      - name: vpnTunnelUri
+                        type: String
+                        description: |-
+                          A VPN tunnel that is associated with this VPN gateway.
+                          There may be multiple VPN tunnels configured on a VPN gateway, and only
+                          the one relevant to the test is displayed.
+                  - name: vpnTunnel
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine VPN tunnel.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a VPN tunnel.
+                      - name: networkUri
+                        type: String
+                        description: URI of a Compute Engine network where the VPN tunnel is configured.
+                      - name: region
+                        type: String
+                        description: Name of a Google Cloud region where this VPN tunnel is configured.
+                      - name: remoteGateway
+                        type: String
+                        description: URI of a VPN gateway at remote end of the tunnel.
+                      - name: remoteGatewayIp
+                        type: String
+                        description: Remote VPN gateway's IP address.
+                      - name: routingType
+                        type: String
+                        description: |-
+                          Type of the routing policy.
+                          Possible values:
+                          ROUTE_BASED
+                          POLICY_BASED
+                          DYNAMIC
+                      - name: sourceGateway
+                        type: String
+                        description: URI of the VPN gateway at local end of the tunnel.
+                      - name: sourceGatewayIp
+                        type: String
+                        description: Local VPN gateway's IP address.
+                      - name: uri
+                        type: String
+                        description: URI of a VPN tunnel.
+      - name: verifyTime
+        type: String
+        description: The time of the configuration analysis.
   - name: relatedProjects
     type: Array
     description: |-
       Other projects that may be relevant for reachability analysis.
-      This is applicable to scenarios where a test can cross project
-      boundaries.
+      This is applicable to scenarios where a test can cross project boundaries.
     item_type:
       type: String
-  - name: labels
-    type: KeyValueLabels
-    description: |
-      Resource labels to represent user-provided metadata.
+  - name: returnReachabilityDetails
+    type: NestedObject
+    description: Results of the configuration analysis from the last run of the test.
+    properties:
+      - name: error
+        type: NestedObject
+        description: |-
+          The `Status` type defines a logical error model that is suitable for
+          different programming environments, including REST APIs and RPC APIs. It is
+          used by [gRPC](https://github.com/grpc). Each `Status` message contains
+          three pieces of data: error code, error message, and error details.
+
+          You can find out more about this error model and how to work with it in the
+          [API Design Guide](https://cloud.google.com/apis/design/errors).
+        properties:
+          - name: code
+            type: Integer
+            description: The status code, which should be an enum value of google.rpc.Code.
+          - name: details
+            type: Array
+            description: |-
+              A list of messages that carry the error details.  There is a common set of
+              message types for APIs to use.
+            item_type:
+              type: NestedObject
+              properties: []
+          - name: message
+            type: String
+            description: |-
+              A developer-facing error message, which should be in English. Any
+              user-facing error message should be localized and sent in the
+              google.rpc.Status.details field, or localized by the client.
+      - name: result
+        type: String
+        description: |-
+          The overall result of the test's configuration analysis.
+          Possible values:
+          REACHABLE
+          UNREACHABLE
+          AMBIGUOUS
+          UNDETERMINED
+      - name: traces
+        type: Array
+        description: |-
+          Result may contain a list of traces if a test has multiple possible
+          paths in the network, such as when destination endpoint is a load balancer
+          with multiple backends.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: endpointInfo
+              type: NestedObject
+              description: |-
+                For display only. The specification of the endpoints for the test.
+                EndpointInfo is derived from source and destination Endpoint and validated
+                by the backend data plane model.
+              properties:
+                - name: destinationIp
+                  type: String
+                  description: Destination IP address.
+                - name: destinationNetworkUri
+                  type: String
+                  description: URI of the network where this packet is sent to.
+                - name: destinationPort
+                  type: Integer
+                  description: Destination port. Only valid when protocol is TCP or UDP.
+                - name: protocol
+                  type: String
+                  description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+                - name: sourceAgentUri
+                  type: String
+                  description: URI of the source telemetry agent this packet originates from.
+                - name: sourceIp
+                  type: String
+                  description: Source IP address.
+                - name: sourceNetworkUri
+                  type: String
+                  description: URI of the network where this packet originates from.
+                - name: sourcePort
+                  type: Integer
+                  description: Source port. Only valid when protocol is TCP or UDP.
+            - name: forwardTraceId
+              type: Integer
+              description: |-
+                ID of trace. For forward traces, this ID is unique for each trace. For
+                return traces, it matches ID of associated forward trace. A single forward
+                trace can be associated with none, one or more than one return trace.
+            - name: steps
+              type: Array
+              description: |-
+                A trace of a test contains multiple steps from the initial state to the
+                final state (delivered, dropped, forwarded, or aborted).
+
+                The steps are ordered by the processing sequence within the simulated
+                network state machine. It is critical to preserve the order of the steps
+                and avoid reordering or sorting them.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: abort
+                    type: NestedObject
+                    description: Details of the final state "abort" and associated resource.
+                    properties:
+                      - name: cause
+                        type: String
+                        description: |-
+                          Causes that the analysis is aborted.
+                          Possible values:
+                          UNKNOWN_NETWORK
+                          UNKNOWN_PROJECT
+                          NO_EXTERNAL_IP
+                          UNINTENDED_DESTINATION
+                          SOURCE_ENDPOINT_NOT_FOUND
+                          MISMATCHED_SOURCE_NETWORK
+                          DESTINATION_ENDPOINT_NOT_FOUND
+                          MISMATCHED_DESTINATION_NETWORK
+                          UNKNOWN_IP
+                          GOOGLE_MANAGED_SERVICE_UNKNOWN_IP
+                          SOURCE_IP_ADDRESS_NOT_IN_SOURCE_NETWORK
+                          PERMISSION_DENIED
+                          PERMISSION_DENIED_NO_CLOUD_NAT_CONFIGS
+                          PERMISSION_DENIED_NO_NEG_ENDPOINT_CONFIGS
+                          PERMISSION_DENIED_NO_CLOUD_ROUTER_CONFIGS
+                          NO_SOURCE_LOCATION
+                          NO_SOURCE_GCP_NETWORK_LOCATION
+                          NO_SOURCE_NON_GCP_NETWORK_LOCATION
+                          NO_SOURCE_INTERNET_LOCATION
+                          INVALID_ARGUMENT
+                          TRACE_TOO_LONG
+                          INTERNAL_ERROR
+                          UNSUPPORTED
+                          MISMATCHED_IP_VERSION
+                          GKE_KONNECTIVITY_PROXY_UNSUPPORTED
+                          RESOURCE_CONFIG_NOT_FOUND
+                          VM_INSTANCE_CONFIG_NOT_FOUND
+                          NETWORK_CONFIG_NOT_FOUND
+                          FIREWALL_CONFIG_NOT_FOUND
+                          ROUTE_CONFIG_NOT_FOUND
+                          GOOGLE_MANAGED_SERVICE_AMBIGUOUS_PSC_ENDPOINT
+                          GOOGLE_MANAGED_SERVICE_AMBIGUOUS_ENDPOINT
+                          SOURCE_PSC_CLOUD_SQL_UNSUPPORTED
+                          SOURCE_EXTERNAL_CLOUD_SQL_UNSUPPORTED
+                          SOURCE_REDIS_CLUSTER_UNSUPPORTED
+                          SOURCE_REDIS_INSTANCE_UNSUPPORTED
+                          SOURCE_FORWARDING_RULE_UNSUPPORTED
+                          NON_ROUTABLE_IP_ADDRESS
+                          UNKNOWN_ISSUE_IN_GOOGLE_MANAGED_PROJECT
+                          UNSUPPORTED_GOOGLE_MANAGED_PROJECT_CONFIG
+                          NO_SERVERLESS_IP_RANGES
+                          IP_VERSION_PROTOCOL_MISMATCH
+                          GKE_POD_UNKNOWN_ENDPOINT_LOCATION
+                      - name: ipAddress
+                        type: String
+                        description: IP address that caused the abort.
+                      - name: projectsMissingPermission
+                        type: Array
+                        description: |-
+                          List of project IDs the user specified in the request but lacks access to.
+                          In this case, analysis is aborted with the PERMISSION_DENIED cause.
+                        item_type:
+                          type: String
+                      - name: resourceUri
+                        type: String
+                        description: URI of the resource that caused the abort.
+                  - name: appEngineVersion
+                    type: NestedObject
+                    description: For display only. Metadata associated with an App Engine version.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of an App Engine version.
+                      - name: environment
+                        type: String
+                        description: App Engine execution environment for a version.
+                      - name: runtime
+                        type: String
+                        description: Runtime of the App Engine version.
+                      - name: uri
+                        type: String
+                        description: URI of an App Engine version.
+                  - name: causesDrop
+                    type: Boolean
+                    description: This is a step that leads to the final state Drop.
+                  - name: cloudFunction
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Cloud Function.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Cloud Function.
+                      - name: location
+                        type: String
+                        description: Location in which the Cloud Function is deployed.
+                      - name: uri
+                        type: String
+                        description: URI of a Cloud Function.
+                      - name: versionId
+                        type: String
+                        description: Latest successfully deployed version id of the Cloud Function.
+                  - name: cloudRunRevision
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Cloud Run revision.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Cloud Run revision.
+                      - name: location
+                        type: String
+                        description: Location in which this revision is deployed.
+                      - name: serviceUri
+                        type: String
+                        description: URI of Cloud Run service this revision belongs to.
+                      - name: uri
+                        type: String
+                        description: URI of a Cloud Run revision.
+                  - name: cloudSqlInstance
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Cloud SQL instance.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Cloud SQL instance.
+                      - name: externalIp
+                        type: String
+                        description: External IP address of a Cloud SQL instance.
+                      - name: internalIp
+                        type: String
+                        description: Internal IP address of a Cloud SQL instance.
+                      - name: networkUri
+                        type: String
+                        description: |-
+                          URI of a Cloud SQL instance network or empty string if the instance does
+                          not have one.
+                      - name: region
+                        type: String
+                        description: Region in which the Cloud SQL instance is running.
+                      - name: uri
+                        type: String
+                        description: URI of a Cloud SQL instance.
+                  - name: deliver
+                    type: NestedObject
+                    description: Details of the final state "deliver" and associated resource.
+                    properties:
+                      - name: googleServiceType
+                        type: String
+                        description: |-
+                          Recognized type of a Google Service the packet is delivered to (if
+                          applicable).
+                          Possible values:
+                          IAP
+                          GFE_PROXY_OR_HEALTH_CHECK_PROBER
+                          CLOUD_DNS
+                          PRIVATE_GOOGLE_ACCESS
+                          SERVERLESS_VPC_ACCESS
+                      - name: ipAddress
+                        type: String
+                        description: IP address of the target (if applicable).
+                      - name: pscGoogleApiTarget
+                        type: String
+                        description: PSC Google API target the packet is delivered to (if applicable).
+                      - name: resourceUri
+                        type: String
+                        description: URI of the resource that the packet is delivered to.
+                      - name: storageBucket
+                        type: String
+                        description: |-
+                          Name of the Cloud Storage Bucket the packet is delivered to (if
+                          applicable).
+                      - name: target
+                        type: String
+                        description: |-
+                          Target type where the packet is delivered to.
+                          Possible values:
+                          INSTANCE
+                          INTERNET
+                          GOOGLE_API
+                          GKE_MASTER
+                          CLOUD_SQL_INSTANCE
+                          PSC_PUBLISHED_SERVICE
+                          PSC_GOOGLE_API
+                          PSC_VPC_SC
+                          SERVERLESS_NEG
+                          STORAGE_BUCKET
+                          PRIVATE_NETWORK
+                          CLOUD_FUNCTION
+                          APP_ENGINE_VERSION
+                          CLOUD_RUN_REVISION
+                          GOOGLE_MANAGED_SERVICE
+                          REDIS_INSTANCE
+                          REDIS_CLUSTER
+                          GKE_POD
+                  - name: description
+                    type: String
+                    description: A description of the step. Usually this is a summary of the state.
+                  - name: directVpcEgressConnection
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a serverless direct VPC egress
+                      connection.
+                    properties:
+                      - name: networkUri
+                        type: String
+                        description: URI of direct access network.
+                      - name: region
+                        type: String
+                        description: Region in which the Direct VPC egress is deployed.
+                      - name: selectedIpAddress
+                        type: String
+                        description: Selected starting IP address, from the selected IP range.
+                      - name: selectedIpRange
+                        type: String
+                        description: Selected IP range.
+                      - name: subnetworkUri
+                        type: String
+                        description: URI of direct access subnetwork.
+                  - name: drop
+                    type: NestedObject
+                    description: Details of the final state "drop" and associated resource.
+                    properties:
+                      - name: cause
+                        type: String
+                        description: |-
+                          Cause that the packet is dropped.
+                          Possible values:
+                          UNKNOWN_EXTERNAL_ADDRESS
+                          FOREIGN_IP_DISALLOWED
+                          FIREWALL_RULE
+                          NO_ROUTE
+                          ROUTE_BLACKHOLE
+                          ROUTE_WRONG_NETWORK
+                          ROUTE_NEXT_HOP_IP_ADDRESS_NOT_RESOLVED
+                          ROUTE_NEXT_HOP_RESOURCE_NOT_FOUND
+                          ROUTE_NEXT_HOP_INSTANCE_WRONG_NETWORK
+                          ROUTE_NEXT_HOP_INSTANCE_NON_PRIMARY_IP
+                          ROUTE_NEXT_HOP_FORWARDING_RULE_IP_MISMATCH
+                          ROUTE_NEXT_HOP_VPN_TUNNEL_NOT_ESTABLISHED
+                          ROUTE_NEXT_HOP_FORWARDING_RULE_TYPE_INVALID
+                          NO_ROUTE_FROM_INTERNET_TO_PRIVATE_IPV6_ADDRESS
+                          NO_ROUTE_FROM_INTERNET_TO_PRIVATE_IPV4_ADDRESS
+                          NO_ROUTE_FROM_EXTERNAL_IPV6_SOURCE_TO_PRIVATE_IPV6_ADDRESS
+                          VPN_TUNNEL_LOCAL_SELECTOR_MISMATCH
+                          VPN_TUNNEL_REMOTE_SELECTOR_MISMATCH
+                          PRIVATE_TRAFFIC_TO_INTERNET
+                          PRIVATE_GOOGLE_ACCESS_DISALLOWED
+                          PRIVATE_GOOGLE_ACCESS_VIA_VPN_TUNNEL_UNSUPPORTED
+                          NO_EXTERNAL_ADDRESS
+                          UNKNOWN_INTERNAL_ADDRESS
+                          FORWARDING_RULE_MISMATCH
+                          FORWARDING_RULE_NO_INSTANCES
+                          FIREWALL_BLOCKING_LOAD_BALANCER_BACKEND_HEALTH_CHECK
+                          INGRESS_FIREWALL_TAGS_UNSUPPORTED_BY_DIRECT_VPC_EGRESS
+                          INSTANCE_NOT_RUNNING
+                          GKE_CLUSTER_NOT_RUNNING
+                          GKE_POD_NOT_RUNNING
+                          CLOUD_SQL_INSTANCE_NOT_RUNNING
+                          REDIS_INSTANCE_NOT_RUNNING
+                          REDIS_CLUSTER_NOT_RUNNING
+                          TRAFFIC_TYPE_BLOCKED
+                          GKE_MASTER_UNAUTHORIZED_ACCESS
+                          CLOUD_SQL_INSTANCE_UNAUTHORIZED_ACCESS
+                          DROPPED_INSIDE_GKE_SERVICE
+                          DROPPED_INSIDE_CLOUD_SQL_SERVICE
+                          GOOGLE_MANAGED_SERVICE_NO_PEERING
+                          GOOGLE_MANAGED_SERVICE_NO_PSC_ENDPOINT
+                          GKE_PSC_ENDPOINT_MISSING
+                          CLOUD_SQL_INSTANCE_NO_IP_ADDRESS
+                          GKE_CONTROL_PLANE_REGION_MISMATCH
+                          PUBLIC_GKE_CONTROL_PLANE_TO_PRIVATE_DESTINATION
+                          GKE_CONTROL_PLANE_NO_ROUTE
+                          CLOUD_SQL_INSTANCE_NOT_CONFIGURED_FOR_EXTERNAL_TRAFFIC
+                          PUBLIC_CLOUD_SQL_INSTANCE_TO_PRIVATE_DESTINATION
+                          CLOUD_SQL_INSTANCE_NO_ROUTE
+                          CLOUD_SQL_CONNECTOR_REQUIRED
+                          CLOUD_FUNCTION_NOT_ACTIVE
+                          VPC_CONNECTOR_NOT_SET
+                          VPC_CONNECTOR_NOT_RUNNING
+                          VPC_CONNECTOR_SERVERLESS_TRAFFIC_BLOCKED
+                          VPC_CONNECTOR_HEALTH_CHECK_TRAFFIC_BLOCKED
+                          FORWARDING_RULE_REGION_MISMATCH
+                          PSC_CONNECTION_NOT_ACCEPTED
+                          PSC_ENDPOINT_ACCESSED_FROM_PEERED_NETWORK
+                          PSC_NEG_PRODUCER_ENDPOINT_NO_GLOBAL_ACCESS
+                          PSC_NEG_PRODUCER_FORWARDING_RULE_MULTIPLE_PORTS
+                          CLOUD_SQL_PSC_NEG_UNSUPPORTED
+                          NO_NAT_SUBNETS_FOR_PSC_SERVICE_ATTACHMENT
+                          PSC_TRANSITIVITY_NOT_PROPAGATED
+                          HYBRID_NEG_NON_DYNAMIC_ROUTE_MATCHED
+                          HYBRID_NEG_NON_LOCAL_DYNAMIC_ROUTE_MATCHED
+                          CLOUD_RUN_REVISION_NOT_READY
+                          DROPPED_INSIDE_PSC_SERVICE_PRODUCER
+                          LOAD_BALANCER_HAS_NO_PROXY_SUBNET
+                          CLOUD_NAT_NO_ADDRESSES
+                          ROUTING_LOOP
+                          DROPPED_INSIDE_GOOGLE_MANAGED_SERVICE
+                          LOAD_BALANCER_BACKEND_INVALID_NETWORK
+                          BACKEND_SERVICE_NAMED_PORT_NOT_DEFINED
+                          DESTINATION_IS_PRIVATE_NAT_IP_RANGE
+                          DROPPED_INSIDE_REDIS_INSTANCE_SERVICE
+                          REDIS_INSTANCE_UNSUPPORTED_PORT
+                          REDIS_INSTANCE_CONNECTING_FROM_PUPI_ADDRESS
+                          REDIS_INSTANCE_NO_ROUTE_TO_DESTINATION_NETWORK
+                          REDIS_INSTANCE_NO_EXTERNAL_IP
+                          REDIS_INSTANCE_UNSUPPORTED_PROTOCOL
+                          DROPPED_INSIDE_REDIS_CLUSTER_SERVICE
+                          REDIS_CLUSTER_UNSUPPORTED_PORT
+                          REDIS_CLUSTER_NO_EXTERNAL_IP
+                          REDIS_CLUSTER_UNSUPPORTED_PROTOCOL
+                          NO_ADVERTISED_ROUTE_TO_GCP_DESTINATION
+                          NO_TRAFFIC_SELECTOR_TO_GCP_DESTINATION
+                          NO_KNOWN_ROUTE_FROM_PEERED_NETWORK_TO_DESTINATION
+                          PRIVATE_NAT_TO_PSC_ENDPOINT_UNSUPPORTED
+                          PSC_PORT_MAPPING_PORT_MISMATCH
+                          PSC_PORT_MAPPING_WITHOUT_PSC_CONNECTION_UNSUPPORTED
+                          UNSUPPORTED_ROUTE_MATCHED_FOR_NAT64_DESTINATION
+                          TRAFFIC_FROM_HYBRID_ENDPOINT_TO_INTERNET_DISALLOWED
+                          NO_MATCHING_NAT64_GATEWAY
+                          NO_CONFIGURED_PRIVATE_NAT64_RULE
+                          LOAD_BALANCER_BACKEND_IP_VERSION_MISMATCH
+                          NO_KNOWN_ROUTE_FROM_NCC_NETWORK_TO_DESTINATION
+                          CLOUD_NAT_PROTOCOL_UNSUPPORTED
+                          L2_INTERCONNECT_UNSUPPORTED_PROTOCOL
+                          L2_INTERCONNECT_UNSUPPORTED_PORT
+                          L2_INTERCONNECT_DESTINATION_IP_MISMATCH
+                          NCC_ROUTE_WITHIN_HYBRID_SUBNET_UNSUPPORTED
+                          HYBRID_SUBNET_REGION_MISMATCH
+                          HYBRID_SUBNET_NO_ROUTE
+                          GKE_NETWORK_POLICY
+                          NO_VALID_ROUTE_FROM_GOOGLE_MANAGED_NETWORK_TO_DESTINATION
+                      - name: destinationGeolocationCode
+                        type: String
+                        description: Geolocation (region code) of the destination IP address (if relevant).
+                      - name: destinationIp
+                        type: String
+                        description: Destination IP address of the dropped packet (if relevant).
+                      - name: region
+                        type: String
+                        description: Region of the dropped packet (if relevant).
+                      - name: resourceUri
+                        type: String
+                        description: URI of the resource that caused the drop.
+                      - name: sourceGeolocationCode
+                        type: String
+                        description: Geolocation (region code) of the source IP address (if relevant).
+                      - name: sourceIp
+                        type: String
+                        description: Source IP address of the dropped packet (if relevant).
+                  - name: endpoint
+                    type: NestedObject
+                    description: |-
+                      For display only. The specification of the endpoints for the test.
+                      EndpointInfo is derived from source and destination Endpoint and validated
+                      by the backend data plane model.
+                    properties:
+                      - name: destinationIp
+                        type: String
+                        description: Destination IP address.
+                      - name: destinationNetworkUri
+                        type: String
+                        description: URI of the network where this packet is sent to.
+                      - name: destinationPort
+                        type: Integer
+                        description: Destination port. Only valid when protocol is TCP or UDP.
+                      - name: protocol
+                        type: String
+                        description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+                      - name: sourceAgentUri
+                        type: String
+                        description: URI of the source telemetry agent this packet originates from.
+                      - name: sourceIp
+                        type: String
+                        description: Source IP address.
+                      - name: sourceNetworkUri
+                        type: String
+                        description: URI of the network where this packet originates from.
+                      - name: sourcePort
+                        type: Integer
+                        description: Source port. Only valid when protocol is TCP or UDP.
+                  - name: firewall
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a VPC firewall rule, an implied
+                      VPC firewall rule, or a firewall policy rule.
+                    properties:
+                      - name: action
+                        type: String
+                        description: 'Possible values: ALLOW, DENY, APPLY_SECURITY_PROFILE_GROUP'
+                      - name: direction
+                        type: String
+                        description: 'Possible values: INGRESS, EGRESS'
+                      - name: displayName
+                        type: String
+                        description: |-
+                          The display name of the firewall rule. This field might be empty for
+                          firewall policy rules.
+                      - name: firewallRuleType
+                        type: String
+                        description: |-
+                          The firewall rule's type.
+                          Possible values:
+                          HIERARCHICAL_FIREWALL_POLICY_RULE
+                          VPC_FIREWALL_RULE
+                          IMPLIED_VPC_FIREWALL_RULE
+                          SERVERLESS_VPC_ACCESS_MANAGED_FIREWALL_RULE
+                          NETWORK_FIREWALL_POLICY_RULE
+                          NETWORK_REGIONAL_FIREWALL_POLICY_RULE
+                          SYSTEM_NETWORK_FIREWALL_POLICY_RULE
+                          SYSTEM_REGIONAL_NETWORK_FIREWALL_POLICY_RULE
+                          UNSUPPORTED_FIREWALL_POLICY_RULE
+                          TRACKING_STATE
+                          ANALYSIS_SKIPPED
+                      - name: networkUri
+                        type: String
+                        description: |-
+                          The URI of the VPC network that the firewall rule is associated with.
+                          This field is not applicable to hierarchical firewall policy rules.
+                      - name: policy
+                        type: String
+                        description: |-
+                          The name of the firewall policy that this rule is associated with.
+                          This field is not applicable to VPC firewall rules and implied VPC firewall
+                          rules.
+                      - name: policyPriority
+                        type: Integer
+                        description: |-
+                          The priority of the firewall policy that this rule is associated with.
+                          This field is not applicable to VPC firewall rules and implied VPC firewall
+                          rules.
+                      - name: policyUri
+                        type: String
+                        description: |-
+                          The URI of the firewall policy that this rule is associated with.
+                          This field is not applicable to VPC firewall rules and implied VPC firewall
+                          rules.
+                      - name: priority
+                        type: Integer
+                        description: The priority of the firewall rule.
+                      - name: targetServiceAccounts
+                        type: Array
+                        description: The target service accounts specified by the firewall rule.
+                        item_type:
+                          type: String
+                      - name: targetTags
+                        type: Array
+                        description: |-
+                          The target tags defined by the VPC firewall rule. This field is not
+                          applicable to firewall policy rules.
+                        item_type:
+                          type: String
+                      - name: targetType
+                        type: String
+                        description: |-
+                          Target type of the firewall rule.
+                          Possible values:
+                          INSTANCES
+                          INTERNAL_MANAGED_LB
+                      - name: uri
+                        type: String
+                        description: |-
+                          The URI of the firewall rule. This field is not applicable to implied
+                          VPC firewall rules.
+                  - name: forward
+                    type: NestedObject
+                    description: Details of the final state "forward" and associated resource.
+                    properties:
+                      - name: ipAddress
+                        type: String
+                        description: IP address of the target (if applicable).
+                      - name: resourceUri
+                        type: String
+                        description: URI of the resource that the packet is forwarded to.
+                      - name: target
+                        type: String
+                        description: |-
+                          Target type where this packet is forwarded to.
+                          Possible values:
+                          PEERING_VPC
+                          VPN_GATEWAY
+                          INTERCONNECT
+                          GKE_MASTER
+                          IMPORTED_CUSTOM_ROUTE_NEXT_HOP
+                          CLOUD_SQL_INSTANCE
+                          ANOTHER_PROJECT
+                          NCC_HUB
+                          ROUTER_APPLIANCE
+                          SECURE_WEB_PROXY_GATEWAY
+                  - name: forwardingRule
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine forwarding rule.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of the forwarding rule.
+                      - name: loadBalancerName
+                        type: String
+                        description: |-
+                          Name of the load balancer the forwarding rule belongs to. Empty for
+                          forwarding rules not related to load balancers (like PSC forwarding rules).
+                      - name: matchedPortRange
+                        type: String
+                        description: Port range defined in the forwarding rule that matches the packet.
+                      - name: matchedProtocol
+                        type: String
+                        description: Protocol defined in the forwarding rule that matches the packet.
+                      - name: networkUri
+                        type: String
+                        description: Network URI.
+                      - name: pscGoogleApiTarget
+                        type: String
+                        description: PSC Google API target this forwarding rule targets (if applicable).
+                      - name: pscServiceAttachmentUri
+                        type: String
+                        description: |-
+                          URI of the PSC service attachment this forwarding rule targets (if
+                          applicable).
+                      - name: region
+                        type: String
+                        description: Region of the forwarding rule. Set only for regional forwarding rules.
+                      - name: target
+                        type: String
+                        description: Target type of the forwarding rule.
+                      - name: uri
+                        type: String
+                        description: URI of the forwarding rule.
+                      - name: vip
+                        type: String
+                        description: VIP of the forwarding rule.
+                  - name: gkeMaster
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a Google Kubernetes Engine (GKE)
+                      cluster master.
+                    properties:
+                      - name: clusterNetworkUri
+                        type: String
+                        description: URI of a GKE cluster network.
+                      - name: clusterUri
+                        type: String
+                        description: URI of a GKE cluster.
+                      - name: dnsEndpoint
+                        type: String
+                        description: DNS endpoint of a GKE cluster control plane.
+                      - name: externalIp
+                        type: String
+                        description: External IP address of a GKE cluster control plane.
+                      - name: internalIp
+                        type: String
+                        description: Internal IP address of a GKE cluster control plane.
+                  - name: gkeNetworkPolicy
+                    type: NestedObject
+                    description: For display only. Metadata associated with a GKE Network Policy.
+                    properties:
+                      - name: action
+                        type: String
+                        description: 'Possible values: ALLOW, DENY'
+                      - name: direction
+                        type: String
+                        description: 'Possible values: INGRESS, EGRESS'
+                      - name: displayName
+                        type: String
+                        description: The name of the Network Policy.
+                      - name: uri
+                        type: String
+                        description: |-
+                          The URI of the Network Policy.
+                          Format for a Network Policy in a zonal cluster:
+                          `projects//zones//clusters//k8s/namespaces//networking.k8s.io/networkpolicies/`
+                          Format for a Network Policy in a regional cluster:
+                          `projects//locations//clusters//k8s/namespaces//networking.k8s.io/networkpolicies/`
+                  - name: gkeNetworkPolicySkipped
+                    type: NestedObject
+                    description: |-
+                      For display only. Contains information about why GKE Network Policy
+                      evaluation was skipped.
+                    properties:
+                      - name: reason
+                        type: String
+                        description: |-
+                          Reason why Network Policy evaluation was skipped.
+                          Possible values:
+                          NETWORK_POLICY_DISABLED
+                          INGRESS_SOURCE_ON_SAME_NODE
+                          EGRESS_FROM_NODE_NETWORK_NAMESPACE_POD
+                          NETWORK_POLICY_NOT_APPLIED_TO_RESPONSE_TRAFFIC
+                          NETWORK_POLICY_ANALYSIS_UNSUPPORTED
+                  - name: gkePod
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a Google Kubernetes Engine (GKE)
+                      Pod.
+                    properties:
+                      - name: ipAddress
+                        type: String
+                        description: |-
+                          IP address of a GKE Pod. If the Pod is dual-stack, this is the IP address
+                          relevant to the trace.
+                      - name: networkUri
+                        type: String
+                        description: URI of the network containing the GKE Pod.
+                      - name: podUri
+                        type: String
+                        description: |-
+                          URI of a GKE Pod.
+                          For Pods in regional Clusters, the URI format is:
+                          `projects/{project}/locations/{location}/clusters/{cluster}/k8s/namespaces/{namespace}/pods/{pod}`
+                          For Pods in zonal Clusters, the URI format is:
+                          `projects/{project}/zones/{zone}/clusters/{cluster}/k8s/namespaces/{namespace}/pods/{pod}`
+                  - name: googleService
+                    type: NestedObject
+                    description: |-
+                      For display only. Details of a Google Service sending packets to a
+                      VPC network. Although the source IP might be a publicly routable address,
+                      some Google Services use special routes within Google production
+                      infrastructure to reach Compute Engine Instances.
+                      https://cloud.google.com/vpc/docs/routes#special_return_paths
+                    properties:
+                      - name: googleServiceType
+                        type: String
+                        description: |-
+                          Recognized type of a Google Service.
+                          Possible values:
+                          IAP
+                          GFE_PROXY_OR_HEALTH_CHECK_PROBER
+                          CLOUD_DNS
+                          GOOGLE_API
+                          GOOGLE_API_PSC
+                          GOOGLE_API_VPC_SC
+                          SERVERLESS_VPC_ACCESS
+                      - name: sourceIp
+                        type: String
+                        description: Source IP address.
+                  - name: hybridSubnet
+                    type: NestedObject
+                    description: For display only. Metadata associated with a hybrid subnet.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a hybrid subnet.
+                      - name: region
+                        type: String
+                        description: Name of a Google Cloud region where the hybrid subnet is configured.
+                      - name: uri
+                        type: String
+                        description: URI of a hybrid subnet.
+                  - name: instance
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine instance.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Compute Engine instance.
+                      - name: externalIp
+                        type: String
+                        description: External IP address of the network interface.
+                      - name: interface
+                        type: String
+                        description: Name of the network interface of a Compute Engine instance.
+                      - name: internalIp
+                        type: String
+                        description: Internal IP address of the network interface.
+                      - name: networkTags
+                        type: Array
+                        description: Network tags configured on the instance.
+                        item_type:
+                          type: String
+                      - name: networkUri
+                        type: String
+                        description: URI of a Compute Engine network.
+                      - name: pscNetworkAttachmentUri
+                        type: String
+                        description: URI of the PSC network attachment the NIC is attached to (if relevant).
+                      - name: running
+                        type: Boolean
+                        description: |-
+                          Indicates whether the Compute Engine instance is running.
+                          Deprecated: use the `status` field instead.
+                      - name: serviceAccount
+                        type: String
+                        description: Service account authorized for the instance.
+                      - name: status
+                        type: String
+                        description: |-
+                          The status of the instance.
+                          Possible values:
+                          RUNNING
+                          NOT_RUNNING
+                      - name: uri
+                        type: String
+                        description: URI of a Compute Engine instance.
+                  - name: interconnectAttachment
+                    type: NestedObject
+                    description: For display only. Metadata associated with an Interconnect attachment.
+                    properties:
+                      - name: cloudRouterUri
+                        type: String
+                        description: URI of the Cloud Router to be used for dynamic routing.
+                      - name: displayName
+                        type: String
+                        description: Name of an Interconnect attachment.
+                      - name: interconnectUri
+                        type: String
+                        description: |-
+                          URI of the Interconnect where the Interconnect attachment is
+                          configured.
+                      - name: l2AttachmentMatchedIpAddress
+                        type: String
+                        description: Appliance IP address that was matched for L2_DEDICATED attachments.
+                      - name: region
+                        type: String
+                        description: |-
+                          Name of a Google Cloud region where the Interconnect attachment is
+                          configured.
+                      - name: type
+                        type: String
+                        description: |-
+                          The type of interconnect attachment this is.
+                          Possible values:
+                          DEDICATED
+                          PARTNER
+                          PARTNER_PROVIDER
+                          L2_DEDICATED
+                      - name: uri
+                        type: String
+                        description: URI of an Interconnect attachment.
+                  - name: ipMasqueradingSkipped
+                    type: NestedObject
+                    description: |-
+                      For display only. Contains information about why IP masquerading was skipped
+                      for the packet.
+                    properties:
+                      - name: nonMasqueradeRange
+                        type: String
+                        description: |-
+                          The matched non-masquerade IP range. Only set if reason is
+                          DESTINATION_IP_IN_CONFIGURED_NON_MASQUERADE_RANGE or
+                          DESTINATION_IP_IN_DEFAULT_NON_MASQUERADE_RANGE.
+                      - name: reason
+                        type: String
+                        description: |-
+                          Reason why IP masquerading was not applied.
+                          Possible values:
+                          DESTINATION_IP_IN_CONFIGURED_NON_MASQUERADE_RANGE
+                          DESTINATION_IP_IN_DEFAULT_NON_MASQUERADE_RANGE
+                          DESTINATION_ON_SAME_NODE
+                          DEFAULT_SNAT_DISABLED
+                          NO_MASQUERADING_FOR_IPV6
+                          POD_USES_NODE_NETWORK_NAMESPACE
+                          NO_MASQUERADING_FOR_RETURN_PACKET
+                  - name: loadBalancer
+                    type: NestedObject
+                    description: For display only. Metadata associated with a load balancer.
+                    properties:
+                      - name: backendType
+                        type: String
+                        description: |-
+                          Type of load balancer's backend configuration.
+                          Possible values:
+                          BACKEND_SERVICE
+                          TARGET_POOL
+                          TARGET_INSTANCE
+                      - name: backendUri
+                        type: String
+                        description: Backend configuration URI.
+                      - name: backends
+                        type: Array
+                        description: Information for the loadbalancer backends.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: displayName
+                              type: String
+                              description: Name of a Compute Engine instance or network endpoint.
+                            - name: healthCheckAllowingFirewallRules
+                              type: Array
+                              description: A list of firewall rule URIs allowing probes from health check IP ranges.
+                              item_type:
+                                type: String
+                            - name: healthCheckBlockingFirewallRules
+                              type: Array
+                              description: A list of firewall rule URIs blocking probes from health check IP ranges.
+                              item_type:
+                                type: String
+                            - name: healthCheckFirewallState
+                              type: String
+                              description: |-
+                                State of the health check firewall configuration.
+                                Possible values:
+                                CONFIGURED
+                                MISCONFIGURED
+                            - name: uri
+                              type: String
+                              description: URI of a Compute Engine instance or network endpoint.
+                      - name: healthCheckUri
+                        type: String
+                        description: |-
+                          URI of the health check for the load balancer. Deprecated and no longer
+                          populated as different load balancer backends might have different health
+                          checks.
+                      - name: loadBalancerType
+                        type: String
+                        description: |-
+                          Type of the load balancer.
+                          Possible values:
+                          INTERNAL_TCP_UDP
+                          NETWORK_TCP_UDP
+                          HTTP_PROXY
+                          TCP_PROXY
+                          SSL_PROXY
+                  - name: loadBalancerBackendInfo
+                    type: NestedObject
+                    description: For display only. Metadata associated with the load balancer backend.
+                    properties:
+                      - name: backendBucketUri
+                        type: String
+                        description: URI of the backend bucket this backend targets (if applicable).
+                      - name: backendServiceUri
+                        type: String
+                        description: URI of the backend service this backend belongs to (if applicable).
+                      - name: healthCheckFirewallsConfigState
+                        type: String
+                        description: |-
+                          Health check firewalls configuration state for the backend. This is a
+                          result of the static firewall analysis (verifying that health check traffic
+                          from required IP ranges to the backend is allowed or not). The backend
+                          might still be unhealthy even if these firewalls are configured. Please
+                          refer to the documentation for more information:
+                          https://cloud.google.com/load-balancing/docs/firewall-rules
+                          Possible values:
+                          FIREWALLS_CONFIGURED
+                          FIREWALLS_PARTIALLY_CONFIGURED
+                          FIREWALLS_NOT_CONFIGURED
+                          FIREWALLS_UNSUPPORTED
+                        output: true
+                      - name: healthCheckUri
+                        type: String
+                        description: URI of the health check attached to this backend (if applicable).
+                      - name: instanceGroupUri
+                        type: String
+                        description: URI of the instance group this backend belongs to (if applicable).
+                      - name: instanceUri
+                        type: String
+                        description: |-
+                          URI of the backend instance (if applicable). Populated for instance group
+                          backends, and zonal NEG backends.
+                      - name: name
+                        type: String
+                        description: |-
+                          Display name of the backend. For example, it might be an instance name for
+                          the instance group backends, or an IP address and port for zonal network
+                          endpoint group backends.
+                      - name: networkEndpointGroupUri
+                        type: String
+                        description: URI of the network endpoint group this backend belongs to (if applicable).
+                      - name: pscGoogleApiTarget
+                        type: String
+                        description: PSC Google API target this PSC NEG backend targets (if applicable).
+                      - name: pscServiceAttachmentUri
+                        type: String
+                        description: |-
+                          URI of the PSC service attachment this PSC NEG backend targets (if
+                          applicable).
+                  - name: nat
+                    type: NestedObject
+                    description: For display only. Metadata associated with NAT.
+                    properties:
+                      - name: cloudNatGatewayType
+                        type: String
+                        description: |-
+                          Type of Cloud NAT gateway. Only valid when `type` is CLOUD_NAT.
+                          Possible values:
+                          PUBLIC_NAT44
+                          PUBLIC_NAT64
+                          PRIVATE_NAT_NCC
+                          PRIVATE_NAT_HYBRID
+                          PRIVATE_NAT64
+                      - name: natGatewayName
+                        type: String
+                        description: The name of Cloud NAT Gateway. Only valid when type is CLOUD_NAT.
+                      - name: networkUri
+                        type: String
+                        description: URI of the network where NAT translation takes place.
+                      - name: newDestinationIp
+                        type: String
+                        description: Destination IP address after NAT translation.
+                      - name: newDestinationPort
+                        type: Integer
+                        description: |-
+                          Destination port after NAT translation. Only valid when protocol is TCP or
+                          UDP.
+                      - name: newSourceIp
+                        type: String
+                        description: Source IP address after NAT translation.
+                      - name: newSourcePort
+                        type: Integer
+                        description: Source port after NAT translation. Only valid when protocol is TCP or UDP.
+                      - name: oldDestinationIp
+                        type: String
+                        description: Destination IP address before NAT translation.
+                      - name: oldDestinationPort
+                        type: Integer
+                        description: |-
+                          Destination port before NAT translation. Only valid when protocol is TCP or
+                          UDP.
+                      - name: oldSourceIp
+                        type: String
+                        description: Source IP address before NAT translation.
+                      - name: oldSourcePort
+                        type: Integer
+                        description: Source port before NAT translation. Only valid when protocol is TCP or UDP.
+                      - name: protocol
+                        type: String
+                        description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+                      - name: routerUri
+                        type: String
+                        description: Uri of the Cloud Router. Only valid when type is CLOUD_NAT.
+                      - name: type
+                        type: String
+                        description: |-
+                          Type of NAT.
+                          Possible values:
+                          INTERNAL_TO_EXTERNAL
+                          EXTERNAL_TO_INTERNAL
+                          CLOUD_NAT
+                          PRIVATE_SERVICE_CONNECT
+                          GKE_POD_IP_MASQUERADING
+                  - name: network
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine network.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Compute Engine network.
+                      - name: matchedIpRange
+                        type: String
+                        description: The IP range of the subnet matching the source IP address of the test.
+                      - name: matchedSubnetUri
+                        type: String
+                        description: URI of the subnet matching the source IP address of the test.
+                      - name: region
+                        type: String
+                        description: The region of the subnet matching the source IP address of the test.
+                      - name: uri
+                        type: String
+                        description: URI of a Compute Engine network.
+                  - name: ngfwPacketInspection
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with a layer 7 packet inspection by the
+                      firewall.
+                    properties:
+                      - name: securityProfileGroupUri
+                        type: String
+                        description: |-
+                          URI of the security profile group associated with this firewall packet
+                          inspection.
+                  - name: projectId
+                    type: String
+                    description: Project ID that contains the configuration this step is validating.
+                  - name: proxyConnection
+                    type: NestedObject
+                    description: For display only. Metadata associated with ProxyConnection.
+                    properties:
+                      - name: networkUri
+                        type: String
+                        description: URI of the network where connection is proxied.
+                      - name: newDestinationIp
+                        type: String
+                        description: Destination IP address of a new connection.
+                      - name: newDestinationPort
+                        type: Integer
+                        description: |-
+                          Destination port of a new connection. Only valid when protocol is TCP or
+                          UDP.
+                      - name: newSourceIp
+                        type: String
+                        description: Source IP address of a new connection.
+                      - name: newSourcePort
+                        type: Integer
+                        description: Source port of a new connection. Only valid when protocol is TCP or UDP.
+                      - name: oldDestinationIp
+                        type: String
+                        description: Destination IP address of an original connection
+                      - name: oldDestinationPort
+                        type: Integer
+                        description: |-
+                          Destination port of an original connection. Only valid when protocol is TCP
+                          or UDP.
+                      - name: oldSourceIp
+                        type: String
+                        description: Source IP address of an original connection.
+                      - name: oldSourcePort
+                        type: Integer
+                        description: |-
+                          Source port of an original connection. Only valid when protocol is TCP or
+                          UDP.
+                      - name: protocol
+                        type: String
+                        description: 'IP protocol in string format, for example: "TCP", "UDP", "ICMP".'
+                      - name: subnetUri
+                        type: String
+                        description: Uri of proxy subnet.
+                  - name: redisCluster
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Redis Cluster.
+                    properties:
+                      - name: discoveryEndpointIpAddress
+                        type: String
+                        description: Discovery endpoint IP address of a Redis Cluster.
+                      - name: displayName
+                        type: String
+                        description: Name of a Redis Cluster.
+                      - name: location
+                        type: String
+                        description: |-
+                          Name of the region in which the Redis Cluster is defined. For example,
+                          "us-central1".
+                      - name: networkUri
+                        type: String
+                        description: |-
+                          URI of the network containing the Redis Cluster endpoints in format
+                          "projects/{project_id}/global/networks/{network_id}".
+                      - name: secondaryEndpointIpAddress
+                        type: String
+                        description: Secondary endpoint IP address of a Redis Cluster.
+                      - name: uri
+                        type: String
+                        description: |-
+                          URI of a Redis Cluster in format
+                          "projects/{project_id}/locations/{location}/clusters/{cluster_id}"
+                  - name: redisInstance
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Cloud Redis Instance.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a Cloud Redis Instance.
+                      - name: networkUri
+                        type: String
+                        description: URI of a Cloud Redis Instance network.
+                      - name: primaryEndpointIp
+                        type: String
+                        description: Primary endpoint IP address of a Cloud Redis Instance.
+                      - name: readEndpointIp
+                        type: String
+                        description: Read endpoint IP address of a Cloud Redis Instance (if applicable).
+                      - name: region
+                        type: String
+                        description: Region in which the Cloud Redis Instance is defined.
+                      - name: uri
+                        type: String
+                        description: URI of a Cloud Redis Instance.
+                  - name: route
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine route.
+                    properties:
+                      - name: advertisedRouteNextHopUri
+                        type: String
+                        description: |-
+                          For ADVERTISED routes, the URI of their next hop, i.e. the URI of the
+                          hybrid endpoint (VPN tunnel, Interconnect attachment, NCC router appliance)
+                          the advertised prefix is advertised through, or URI of the source peered
+                          network. Deprecated in favor of the next_hop_uri field, not used in new
+                          tests.
+                      - name: advertisedRouteSourceRouterUri
+                        type: String
+                        description: |-
+                          For ADVERTISED dynamic routes, the URI of the Cloud Router that advertised
+                          the corresponding IP prefix.
+                      - name: destIpRange
+                        type: String
+                        description: Destination IP range of the route.
+                      - name: destPortRanges
+                        type: Array
+                        description: Destination port ranges of the route. POLICY_BASED routes only.
+                        item_type:
+                          type: String
+                      - name: displayName
+                        type: String
+                        description: Name of a route.
+                      - name: instanceTags
+                        type: Array
+                        description: Instance tags of the route.
+                        item_type:
+                          type: String
+                      - name: nccHubRouteUri
+                        type: String
+                        description: |-
+                          For PEERING_SUBNET and PEERING_DYNAMIC routes that are advertised by NCC
+                          Hub, the URI of the corresponding route in NCC Hub's routing table.
+                      - name: nccHubUri
+                        type: String
+                        description: |-
+                          URI of the NCC Hub the route is advertised by. PEERING_SUBNET and
+                          PEERING_DYNAMIC routes that are advertised by NCC Hub only.
+                      - name: nccSpokeUri
+                        type: String
+                        description: |-
+                          URI of the destination NCC Spoke. PEERING_SUBNET and PEERING_DYNAMIC routes
+                          that are advertised by NCC Hub only.
+                      - name: networkUri
+                        type: String
+                        description: URI of a VPC network where route is located.
+                      - name: nextHop
+                        type: String
+                        description: |-
+                          String type of the next hop of the route (for example, "VPN tunnel").
+                          Deprecated in favor of the next_hop_type and next_hop_uri fields, not used
+                          in new tests.
+                      - name: nextHopNetworkUri
+                        type: String
+                        description: URI of a VPC network where the next hop resource is located.
+                      - name: nextHopType
+                        type: String
+                        description: |-
+                          Type of next hop.
+                          Possible values:
+                          NEXT_HOP_IP
+                          NEXT_HOP_INSTANCE
+                          NEXT_HOP_NETWORK
+                          NEXT_HOP_PEERING
+                          NEXT_HOP_INTERCONNECT
+                          NEXT_HOP_VPN_TUNNEL
+                          NEXT_HOP_VPN_GATEWAY
+                          NEXT_HOP_INTERNET_GATEWAY
+                          NEXT_HOP_BLACKHOLE
+                          NEXT_HOP_ILB
+                          NEXT_HOP_ROUTER_APPLIANCE
+                          NEXT_HOP_NCC_HUB
+                          SECURE_WEB_PROXY_GATEWAY
+                      - name: nextHopUri
+                        type: String
+                        description: URI of the next hop resource.
+                      - name: originatingRouteDisplayName
+                        type: String
+                        description: |-
+                          For PEERING_SUBNET, PEERING_STATIC and PEERING_DYNAMIC routes, the name of
+                          the originating SUBNET/STATIC/DYNAMIC route.
+                      - name: originatingRouteUri
+                        type: String
+                        description: |-
+                          For PEERING_SUBNET and PEERING_STATIC routes, the URI of the originating
+                          SUBNET/STATIC route.
+                      - name: priority
+                        type: Integer
+                        description: Priority of the route.
+                      - name: protocols
+                        type: Array
+                        description: Protocols of the route. POLICY_BASED routes only.
+                        item_type:
+                          type: String
+                      - name: region
+                        type: String
+                        description: |-
+                          Region of the route. DYNAMIC, PEERING_DYNAMIC, POLICY_BASED and ADVERTISED
+                          routes only. If set for POLICY_BASED route, this is a region of VLAN
+                          attachments for Cloud Interconnect the route applies to.
+                      - name: routeScope
+                        type: String
+                        description: |-
+                          Indicates where route is applicable. Deprecated, routes with NCC_HUB scope
+                          are not included in the trace in new tests.
+                          Possible values:
+                          NETWORK
+                          NCC_HUB
+                      - name: routeType
+                        type: String
+                        description: |-
+                          Type of route.
+                          Possible values:
+                          SUBNET
+                          STATIC
+                          DYNAMIC
+                          PEERING_SUBNET
+                          PEERING_STATIC
+                          PEERING_DYNAMIC
+                          POLICY_BASED
+                          ADVERTISED
+                      - name: srcIpRange
+                        type: String
+                        description: Source IP address range of the route. POLICY_BASED routes only.
+                      - name: srcPortRanges
+                        type: Array
+                        description: Source port ranges of the route. POLICY_BASED routes only.
+                        item_type:
+                          type: String
+                      - name: uri
+                        type: String
+                        description: |-
+                          URI of a route. SUBNET, STATIC, PEERING_SUBNET (only for peering network)
+                          and POLICY_BASED routes only.
+                  - name: serverlessExternalConnection
+                    type: NestedObject
+                    description: For display only. Metadata associated with a serverless public connection.
+                    properties:
+                      - name: selectedIpAddress
+                        type: String
+                        description: Selected starting IP address, from the Google dynamic address pool.
+                  - name: serverlessNeg
+                    type: NestedObject
+                    description: |-
+                      For display only. Metadata associated with the serverless network endpoint
+                      group backend.
+                    properties:
+                      - name: negUri
+                        type: String
+                        description: URI of the serverless network endpoint group.
+                  - name: state
+                    type: String
+                    description: |-
+                      Each step is in one of the pre-defined states.
+                      Possible values:
+                      START_FROM_INSTANCE
+                      START_FROM_INTERNET
+                      START_FROM_GOOGLE_SERVICE
+                      START_FROM_PRIVATE_NETWORK
+                      START_FROM_GKE_MASTER
+                      START_FROM_CLOUD_SQL_INSTANCE
+                      START_FROM_GKE_POD
+                      START_FROM_REDIS_INSTANCE
+                      START_FROM_REDIS_CLUSTER
+                      START_FROM_CLOUD_FUNCTION
+                      START_FROM_APP_ENGINE_VERSION
+                      START_FROM_CLOUD_RUN_REVISION
+                      START_FROM_STORAGE_BUCKET
+                      START_FROM_PSC_PUBLISHED_SERVICE
+                      START_FROM_SERVERLESS_NEG
+                      APPLY_INGRESS_FIREWALL_RULE
+                      APPLY_EGRESS_FIREWALL_RULE
+                      APPLY_ROUTE
+                      APPLY_FORWARDING_RULE
+                      ANALYZE_LOAD_BALANCER_BACKEND
+                      SPOOFING_APPROVED
+                      ARRIVE_AT_INSTANCE
+                      ARRIVE_AT_INTERNAL_LOAD_BALANCER
+                      ARRIVE_AT_EXTERNAL_LOAD_BALANCER
+                      ARRIVE_AT_HYBRID_SUBNET
+                      ARRIVE_AT_VPN_GATEWAY
+                      ARRIVE_AT_VPN_TUNNEL
+                      ARRIVE_AT_INTERCONNECT_ATTACHMENT
+                      ARRIVE_AT_VPC_CONNECTOR
+                      ARRIVE_AT_GKE_POD
+                      DIRECT_VPC_EGRESS_CONNECTION
+                      SERVERLESS_EXTERNAL_CONNECTION
+                      NGFW_PACKET_INSPECTION
+                      NAT
+                      SKIP_GKE_POD_IP_MASQUERADING
+                      SKIP_GKE_INGRESS_NETWORK_POLICY
+                      SKIP_GKE_EGRESS_NETWORK_POLICY
+                      APPLY_INGRESS_GKE_NETWORK_POLICY
+                      APPLY_EGRESS_GKE_NETWORK_POLICY
+                      PROXY_CONNECTION
+                      DELIVER
+                      DROP
+                      FORWARD
+                      ABORT
+                      VIEWER_PERMISSION_MISSING
+                  - name: storageBucket
+                    type: NestedObject
+                    description: For display only. Metadata associated with Storage Bucket.
+                    properties:
+                      - name: bucket
+                        type: String
+                        description: Cloud Storage Bucket name.
+                  - name: vpcConnector
+                    type: NestedObject
+                    description: For display only. Metadata associated with a VPC connector.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a VPC connector.
+                      - name: location
+                        type: String
+                        description: Location in which the VPC connector is deployed.
+                      - name: uri
+                        type: String
+                        description: URI of a VPC connector.
+                  - name: vpnGateway
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine VPN gateway.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a VPN gateway.
+                      - name: ipAddress
+                        type: String
+                        description: IP address of the VPN gateway.
+                      - name: networkUri
+                        type: String
+                        description: URI of a Compute Engine network where the VPN gateway is configured.
+                      - name: region
+                        type: String
+                        description: Name of a Google Cloud region where this VPN gateway is configured.
+                      - name: uri
+                        type: String
+                        description: URI of a VPN gateway.
+                      - name: vpnTunnelUri
+                        type: String
+                        description: |-
+                          A VPN tunnel that is associated with this VPN gateway.
+                          There may be multiple VPN tunnels configured on a VPN gateway, and only
+                          the one relevant to the test is displayed.
+                  - name: vpnTunnel
+                    type: NestedObject
+                    description: For display only. Metadata associated with a Compute Engine VPN tunnel.
+                    properties:
+                      - name: displayName
+                        type: String
+                        description: Name of a VPN tunnel.
+                      - name: networkUri
+                        type: String
+                        description: URI of a Compute Engine network where the VPN tunnel is configured.
+                      - name: region
+                        type: String
+                        description: Name of a Google Cloud region where this VPN tunnel is configured.
+                      - name: remoteGateway
+                        type: String
+                        description: URI of a VPN gateway at remote end of the tunnel.
+                      - name: remoteGatewayIp
+                        type: String
+                        description: Remote VPN gateway's IP address.
+                      - name: routingType
+                        type: String
+                        description: |-
+                          Type of the routing policy.
+                          Possible values:
+                          ROUTE_BASED
+                          POLICY_BASED
+                          DYNAMIC
+                      - name: sourceGateway
+                        type: String
+                        description: URI of the VPN gateway at local end of the tunnel.
+                      - name: sourceGatewayIp
+                        type: String
+                        description: Local VPN gateway's IP address.
+                      - name: uri
+                        type: String
+                        description: URI of a VPN tunnel.
+      - name: verifyTime
+        type: String
+        description: The time of the configuration analysis.
   - name: roundTrip
     type: Boolean
     description: |-
       Whether run analysis for the return path from destination to source.
       Default value is false.
-  - name: bypassFirewallChecks
-    type: Boolean
-    description: Whether the analysis should skip firewall checking. Default value is false.
+  - name: source
+    type: NestedObject
+    required: true
+    description: Source or destination of the Connectivity Test.
+    properties:
+      - name: appEngineVersion
+        type: NestedObject
+        description: Wrapper for the App Engine service version attributes.
+        properties:
+          - name: uri
+            type: String
+            description: |-
+              An [App Engine](https://cloud.google.com/appengine) [service
+              version](https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services.versions)
+              name.
+      - name: cloudFunction
+        type: NestedObject
+        description: Wrapper for Cloud Function attributes.
+        properties:
+          - name: uri
+            type: String
+            description: A [Cloud Function](https://cloud.google.com/functions) name.
+      - name: cloudRunRevision
+        type: NestedObject
+        description: Wrapper for Cloud Run revision attributes.
+        properties:
+          - name: serviceUri
+            type: String
+            description: |-
+              The URI of the Cloud Run service that the revision belongs to. The format
+              is: projects/{project}/locations/{location}/services/{service}
+            output: true
+          - name: uri
+            type: String
+            description: |-
+              A [Cloud Run](https://cloud.google.com/run)
+              [revision](https://cloud.google.com/run/docs/reference/rest/v1/namespaces.revisions/get)
+              URI. The format is:
+              projects/{project}/locations/{location}/revisions/{revision}
+      - name: cloudSqlInstance
+        type: String
+        description: A [Cloud SQL](https://cloud.google.com/sql) instance URI.
+      - name: forwardingRule
+        type: String
+        description: |-
+          A forwarding rule and its corresponding IP address represent the frontend
+          configuration of a Google Cloud load balancer. Forwarding rules are also
+          used for protocol forwarding, Private Service Connect and other network
+          services to provide forwarding information in the control plane. Applicable
+          only to destination endpoint. Format:
+          `projects/{project}/global/forwardingRules/{id}` or
+          `projects/{project}/regions/{region}/forwardingRules/{id}`
+      - name: forwardingRuleTarget
+        type: String
+        description: |-
+          Specifies the type of the target of the forwarding rule.
+          Possible values:
+          INSTANCE
+          LOAD_BALANCER
+          VPN_GATEWAY
+          PSC
+        output: true
+      - name: fqdn
+        type: String
+        description: |-
+          DNS endpoint of [Google Kubernetes Engine cluster control
+          plane](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture).
+          Requires gke_master_cluster to be set, can't be used simultaneoulsly with
+          ip_address or network. Applicable only to destination endpoint.
+      - name: gkeMasterCluster
+        type: String
+        description: |-
+          A cluster URI for [Google Kubernetes Engine cluster control
+          plane](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture).
+      - name: gkePod
+        type: String
+        description: |-
+          A [GKE Pod](https://cloud.google.com/kubernetes-engine/docs/concepts/pod)
+          URI.
+      - name: instance
+        type: String
+        description: A Compute Engine instance URI.
+      - name: ipAddress
+        type: String
+        description: The IP address of the endpoint, which can be an external or internal IP.
+      - name: loadBalancerId
+        type: String
+        description: |-
+          ID of the load balancer the forwarding rule points to. Empty for forwarding
+          rules not related to load balancers.
+        output: true
+      - name: loadBalancerType
+        type: String
+        description: |-
+          Possible values:
+          HTTPS_ADVANCED_LOAD_BALANCER
+          HTTPS_LOAD_BALANCER
+          REGIONAL_HTTPS_LOAD_BALANCER
+          INTERNAL_HTTPS_LOAD_BALANCER
+          SSL_PROXY_LOAD_BALANCER
+          TCP_PROXY_LOAD_BALANCER
+          INTERNAL_TCP_PROXY_LOAD_BALANCER
+          NETWORK_LOAD_BALANCER
+          LEGACY_NETWORK_LOAD_BALANCER
+          TCP_UDP_INTERNAL_LOAD_BALANCER
+      - name: network
+        type: String
+        description: |-
+          A VPC network URI. For source endpoints, used according to the
+          `network_type`. For destination endpoints, used only when the source is an
+          external IP address endpoint, and the destination is an internal IP address
+          endpoint.
+      - name: networkType
+        type: String
+        description: |-
+          For source endpoints, type of the network where the endpoint is located.
+          Not relevant for destination endpoints.
+          Possible values:
+          GCP_NETWORK
+          NON_GCP_NETWORK
+          INTERNET
+      - name: port
+        type: Integer
+        description: |-
+          The IP protocol port of the endpoint.
+          Only applicable when protocol is TCP or UDP.
+      - name: projectId
+        type: String
+        description: |-
+          For source endpoints, endpoint project ID. Used according to the
+          `network_type`. Not relevant for destination endpoints.
+      - name: redisCluster
+        type: String
+        description: |-
+          A [Redis Cluster](https://cloud.google.com/memorystore/docs/cluster) URI.
+          Applicable only to destination endpoint.
+      - name: redisInstance
+        type: String
+        description: |-
+          A [Redis Instance](https://cloud.google.com/memorystore/docs/redis) URI.
+          Applicable only to destination endpoint.
+  - name: updateTime
+    type: String
+    description: The time the test's configuration was updated.
+    output: true
