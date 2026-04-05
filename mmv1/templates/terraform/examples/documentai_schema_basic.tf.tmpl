@@ -1,0 +1,4 @@
+resource "google_document_ai_schema" "{{$.PrimaryResourceId}}" {
+  location     = "{{index $.Vars "location"}}"
+  display_name = "{{index $.Vars "display_name"}}"
+}
