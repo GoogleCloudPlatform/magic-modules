@@ -354,6 +354,12 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			if len(errStrs) > 0 {
 				errors[repo.Title] = append(errors[repo.Title], errStrs...)
 			}
+
+			// Validate test names
+			testNameErrs := validateTestNames(&repo, rnr)
+			if len(testNameErrs) > 0 {
+				errors[repo.Title] = append(errors[repo.Title], testNameErrs...)
+			}
 		}
 
 		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
@@ -754,4 +760,92 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 		}
 	}
 	return errs
+}
+
+func validateTestNames(repo *source.Repo, rnr ExecRunner) []string {
+	if err := rnr.PushDir(repo.Path); err != nil {
+		return []string{fmt.Sprintf("Error pushing dir %s: %v", repo.Path, err)}
+	}
+	defer rnr.PopDir()
+
+	var errs []string
+
+	for _, file := range repo.ChangedFiles {
+		if !strings.HasSuffix(file, "_test.go") {
+			continue
+		}
+		// Get diff for this file
+		diff, err := rnr.Run("git", []string{"diff", "--unified=0", "origin/" + repo.Branch + "-old", "origin/" + repo.Branch, "--", file}, nil)
+		if err != nil {
+			fmt.Printf("Error diffing file %s: %v\n", file, err)
+			continue
+		}
+		fileAddedTests := addedTestsRegexp.FindAllStringSubmatch(diff, -1)
+		if len(fileAddedTests) == 0 {
+			continue
+		}
+
+		// Read file content
+		content, err := rnr.ReadFile(filepath.Join(repo.Path, file))
+		if err != nil {
+			errs = append(errs, fmt.Sprintf("Error reading file %s: %v", file, err))
+			continue
+		}
+
+		for _, match := range fileAddedTests {
+			testName := match[1]
+			resourceName := convertTestNameToResource(testName)
+
+			// Get actual resource name
+			actualResource := getActualResourceName(content, testName, file)
+
+			if actualResource == "" {
+				errs = append(errs, fmt.Sprintf("Could not determine resource for test %s in file %s", testName, file))
+				continue
+			}
+
+			if resourceName != actualResource {
+				errs = append(errs, fmt.Sprintf("Test name %s does not match resource %s (inferred %s)", testName, actualResource, resourceName))
+			}
+		}
+	}
+
+	return errs
+}
+
+func getActualResourceName(content, testName, filePath string) string {
+	// 1. Try to find ResourceName in test function
+	// Find test function start
+	testIdx := strings.Index(content, "func "+testName)
+	if testIdx != -1 {
+		// Find next function or end of file
+		nextFuncIdx := strings.Index(content[testIdx:], "\nfunc ")
+		var testContent string
+		if nextFuncIdx != -1 {
+			testContent = content[testIdx : testIdx+nextFuncIdx]
+		} else {
+			testContent = content[testIdx:]
+		}
+
+		re := regexp.MustCompile(`ResourceName\s*:\s*"([^.]+)\.[^"]+"`)
+		match := re.FindStringSubmatch(testContent)
+		if len(match) > 1 {
+			return match[1]
+		}
+	}
+
+	// 2. Fallback to file name
+	fileName := filepath.Base(filePath)
+	fileName = strings.TrimSuffix(fileName, "_test.go")
+	if strings.HasPrefix(fileName, "resource_") {
+		return "google_" + strings.TrimPrefix(fileName, "resource_")
+	}
+	if strings.HasPrefix(fileName, "datasource_") {
+		return strings.TrimPrefix(fileName, "datasource_")
+	}
+	if strings.HasPrefix(fileName, "data_source_") {
+		return strings.TrimPrefix(fileName, "data_source_")
+	}
+
+	return ""
 }
