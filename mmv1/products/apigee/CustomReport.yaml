@@ -1,0 +1,197 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'CustomReport'
+description: |
+  A custom report definition for Apigee Analytics. Custom reports allow you
+  to drill into API metrics and dimensions to understand API performance
+  and usage patterns. Reports are scoped to an Apigee organization.
+references:
+  guides:
+    'Creating a custom report': 'https://cloud.google.com/apigee/docs/api-platform/analytics/create-custom-reports'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.reports'
+docs:
+base_url: '{{org_id}}/reports'
+self_link: '{{org_id}}/reports/{{name}}'
+update_url: '{{org_id}}/reports/{{name}}'
+update_verb: 'PUT'
+update_mask: false
+delete_url: '{{org_id}}/reports/{{name}}'
+import_format:
+  - '{{org_id}}/reports/{{name}}'
+  - '{{org_id}}/{{name}}'
+timeouts:
+  insert_minutes: 1
+  update_minutes: 1
+  delete_minutes: 1
+custom_code:
+  custom_import: 'templates/terraform/custom_import/apigee_custom_report.go.tmpl'
+exclude_sweeper: true
+examples:
+  - name: 'apigee_custom_report_basic'
+    vars:
+      display_name: 'my_custom_report'
+    exclude_test: true
+  - name: 'apigee_custom_report_basic_test'
+    primary_resource_id: 'apigee_custom_report'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    skip_vcr: true
+    external_providers: ["time"]
+parameters:
+  - name: 'orgId'
+    type: String
+    description: |
+      The Apigee Organization associated with the Apigee custom report,
+      in the format `organizations/{{org_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The internal resource name of the custom report, a UUID assigned
+      by the server on creation. Used as the identifier in the API URL path.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The display name for the custom report.
+    required: true
+  - name: 'metrics'
+    type: Array
+    description: |
+      The metrics to include in the custom report. Each metric specifies
+      a name and an optional aggregation function.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            The name of the metric. For example, `message_count` or `total_response_time`.
+          required: true
+        - name: 'function'
+          type: String
+          description: |
+            The aggregation function to apply to the metric.
+            Common values include `avg`, `min`, `max`, `sum`, and `rate`.
+  - name: 'dimensions'
+    type: Array
+    description: |
+      The dimensions to group the report by. For example, `apiproxy` or `target_host`.
+    item_type:
+      type: String
+  - name: 'filter'
+    type: String
+    description: |
+      A filter expression to apply to the report data. For example,
+      `(apiproxy eq 'my-proxy')`.
+  - name: 'timeUnit'
+    type: String
+    description: |
+      The time unit for aggregating report data. Valid values include
+      `minute`, `hour`, `day`, `week`, and `month`.
+  - name: 'sortByCols'
+    type: Array
+    description: |
+      The columns to sort the report results by.
+    item_type:
+      type: String
+  - name: 'sortOrder'
+    type: String
+    description: |
+      The sort order for the report results. For example, `ASC` or `DESC`.
+  - name: 'fromTime'
+    type: String
+    description: |
+      The start time for the report data. Typically a timestamp string.
+  - name: 'toTime'
+    type: String
+    description: |
+      The end time for the report data. Typically a timestamp string.
+  - name: 'topk'
+    type: String
+    description: |
+      The number of top results to return. Used for top-k queries.
+  - name: 'limit'
+    type: String
+    description: |
+      The maximum number of rows to return in the report.
+  - name: 'offset'
+    type: String
+    description: |
+      The offset for paginating through report results.
+  - name: 'chartType'
+    type: String
+    description: |
+      The chart type for displaying the report. For example, `line` or `column`.
+  - name: 'tags'
+    type: Array
+    description: |
+      Tags associated with the custom report.
+    item_type:
+      type: String
+  - name: 'comments'
+    type: Array
+    description: |
+      Comments associated with the custom report.
+    item_type:
+      type: String
+  - name: 'properties'
+    type: Array
+    description: |
+      Key-value properties associated with the report.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'property'
+          type: String
+          description: |
+            The property name.
+        - name: 'value'
+          type: Array
+          description: |
+            The property values.
+          item_type:
+            type: String
+  - name: 'organization'
+    type: String
+    description: |
+      The Apigee organization name.
+    output: true
+  - name: 'environment'
+    type: String
+    description: |
+      The Apigee environment name.
+    output: true
+  - name: 'createdAt'
+    type: String
+    description: |
+      The time at which the custom report was created in milliseconds since the epoch.
+    output: true
+  - name: 'lastModifiedAt'
+    type: String
+    description: |
+      The time at which the custom report was last modified in milliseconds since the epoch.
+    output: true
+  - name: 'lastViewedAt'
+    type: String
+    description: |
+      The time at which the custom report was last viewed in milliseconds since the epoch.
+    output: true
