@@ -263,7 +263,6 @@ properties:
   - name: 'observabilityConfig'
     type: NestedObject
     description: 'Configuration for enhanced query insights.'
-    min_version: 'beta'
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/alloydb_instance_observability_config.go.tmpl'
     properties:
@@ -310,8 +309,15 @@ properties:
         send_empty_value: true
         default_from_api: true
       - name: 'assistiveExperiencesEnabled'
+        min_version: beta
         type: Boolean
         description: 'Whether assistive experiences are enabled for this AlloyDB instance.'
+        send_empty_value: true
+        default_from_api: true
+      - name: 'trackClientAddress'
+        type: Boolean
+        min_version: beta
+        description: 'Track client address for an instance.'
         send_empty_value: true
         default_from_api: true
   - name: 'readPoolConfig'
