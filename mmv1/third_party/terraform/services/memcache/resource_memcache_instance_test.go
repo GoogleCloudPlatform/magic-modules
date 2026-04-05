@@ -37,6 +37,10 @@ func TestAccMemcacheInstance_update(t *testing.T) {
 				ResourceName:      "google_memcache_instance.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					// Check if effective_maintenance_version is present and not empty
+					testAccMemcacheInstance_checkMaintenanceVersionIsNotEmpty("effective_maintenance_version"),
+				),
 			},
 		},
 	})
@@ -161,4 +165,25 @@ data "google_compute_network" "memcache_network" {
   name = "%s"
 }
 `, name, region, deletionProtection, network)
+}
+
+// Helper function to check if a maintenance version attribute is not empty.
+func testAccMemcacheInstance_checkMaintenanceVersionIsNotEmpty(attr string) resource.TestCheckFunc {
+	return func(s *resource.State) error {
+		rs, ok := s.RootResourceStateMode.Resources["google_memcache_instance.test"]
+		if !ok {
+			return fmt.Errorf("root resource not found")
+		}
+
+		attrValue, ok := rs.Attributes[attr]
+		if !ok {
+			return fmt.Errorf("attribute %s not found", attr)
+		}
+		if attrValue == "" {
+			return fmt.Errorf("attribute %s is empty", attr)
+		}
+		// Optional: Add more specific checks if needed, e.g., format validation.
+		// For now, just checking for presence and non-empty is sufficient per the request.
+		return nil
+	}
 }
