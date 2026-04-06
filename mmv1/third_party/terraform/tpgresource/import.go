@@ -78,12 +78,6 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 				}
 			}
 
-			// The first id format is applied first and contains all the fields.
-			err := setDefaultValues(idRegexes[0], nil, d, config)
-			if err != nil {
-				return err
-			}
-
 			err = setDefaultValues(idRegexes[0], identity, d, config)
 			if err != nil {
 				return err
