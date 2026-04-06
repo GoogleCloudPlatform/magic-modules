@@ -167,6 +167,13 @@ examples:
       targz_path: './test-fixtures/function-source.tar.gz'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_service_emptydir_disk'
+    primary_resource_id: 'default'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
+    exclude_docs: true
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -996,6 +1003,7 @@ properties:
                   default_value: "MEMORY"
                   enum_values:
                     - 'MEMORY'
+                    - 'DISK'
                 - name: 'sizeLimit'
                   type: String
                   description: |-

@@ -31,8 +31,8 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
 legacy_long_form_project: true
+include_in_tgc_next: true
 examples:
   - name: 'region_network_firewall_policy_full'
     primary_resource_id: 'policy'
@@ -75,6 +75,7 @@ properties:
       A policy can be associated with a network only if the network has the matching policyType in its network profile.
       Different policy types may support some of the Firewall Rules features.
     default_from_api: true
+    is_missing_in_cai: true
     enum_values:
       - 'VPC_POLICY'
       - 'RDMA_ROCE_POLICY'

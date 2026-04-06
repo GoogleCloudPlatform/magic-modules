@@ -61,6 +61,7 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: SW5zdGFuY2U=
+include_in_tgc_next: true
 parameters:
   - name: location
     type: String

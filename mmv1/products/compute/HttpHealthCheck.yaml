@@ -43,6 +43,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'http_health_check_basic'
     primary_resource_id: 'default'

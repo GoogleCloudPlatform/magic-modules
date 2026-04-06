@@ -7,11 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-
-{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-{{- end }}
-
 )
 
 func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
@@ -76,8 +72,6 @@ resource "google_compute_network" "network1" {
 `, suffix, key, value, suffix)
 }
 
-
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeHaVpnGateway_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
@@ -95,7 +89,7 @@ func TestAccComputeHaVpnGateway_resourceManagerTags(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeHaVpnGateway_resourceManagerTags(context),
@@ -113,7 +107,6 @@ func TestAccComputeHaVpnGateway_resourceManagerTags(t *testing.T) {
 func testAccComputeHaVpnGateway_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
-  provider = google-beta
   region   = "us-central1"
   name     = "tf-test-ha-vpn-1%{suffix}"
   network  = google_compute_network.network1.id
@@ -125,11 +118,8 @@ resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
 }
 
 resource "google_compute_network" "network1" {
-  provider = google-beta
   name                    = "network1%{suffix}"
   auto_create_subnetworks = false
 }
 `, context)
 }
-{{- end }}
-

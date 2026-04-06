@@ -22,6 +22,9 @@ func ContainerClusterTfplan2CaiConverter() cai.Tfplan2caiConverter {
 
 func GetContainerCluster(d tpgresource.TerraformResourceData, config *transport.Config) ([]caiasset.Asset, error) {
 	name, err := cai.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
+	if v, ok := d.GetOk("location"); ok && tpgresource.IsZone(v.(string)) {
+		name = strings.Replace(name, "/locations/", "/zones/", 1)
+	}
 	if err != nil {
 		return []caiasset.Asset{}, err
 	}

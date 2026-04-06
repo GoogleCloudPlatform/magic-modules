@@ -17,6 +17,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl"
 	cai2hclconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai"
 	tfplan2caiconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
@@ -27,6 +28,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var (
@@ -64,16 +66,21 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 		t.Run(stepName, func(t *testing.T) {
 			retries := 0
 			tName := fmt.Sprintf("%s_%s", subTestName, stepName)
+			var attemptErrors []error
 			flakyAction := func(ctx context.Context) error {
 				testData, err := prepareTestData(subTestName, stepN, retries)
 				retries++
 				log.Printf("%s: Starting the attempt %d", tName, retries)
 				if err != nil {
-					return fmt.Errorf("%s: error preparing the input data: %v", tName, err)
+					err = fmt.Errorf("%s: error preparing the input data: %v", tName, err)
+					attemptErrors = append(attemptErrors, err)
+					return err
 				}
 
 				if testData == nil {
-					return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
+					err = retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
+					attemptErrors = append(attemptErrors, err)
+					return err
 				}
 
 				// If the primary resource is specified, only test the primary resource.
@@ -84,6 +91,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 					t.Logf("%s: Test for the primary resource %s begins.", tName, primaryResource)
 					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
 					if err != nil {
+						attemptErrors = append(attemptErrors, err)
 						return err
 					}
 				} else {
@@ -93,6 +101,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 						}
 						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
 						if err != nil {
+							attemptErrors = append(attemptErrors, err)
 							return err
 						}
 					}
@@ -107,10 +116,18 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 			t.Logf("%s: Starting test with retry logic.", tName)
 
 			if err := retry.Do(context.Background(), backoffPolicy, flakyAction); err != nil {
-				if strings.Contains(err.Error(), "test data is unavailable") {
-					t.Skipf("%s: Test skipped because data was unavailable after all retries: %v", tName, err)
+				allUnavailable := len(attemptErrors) > 0
+				for _, e := range attemptErrors {
+					if !strings.Contains(e.Error(), "test data is unavailable") {
+						allUnavailable = false
+						break
+					}
+				}
+
+				if allUnavailable {
+					t.Skipf("%s: Test skipped because data was unavailable after all %d attempts: %v", tName, len(attemptErrors), err)
 				} else {
-					t.Fatalf("%s: Failed after all attempts %d: %v", tName, maxAttempts, err)
+					t.Fatalf("%s: Failed after %d attempts. Last error: %v", tName, len(attemptErrors), err)
 				}
 			}
 		})
@@ -127,7 +144,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	if testData.Cai == nil {
 		log.Printf("SKIP: cai asset is unavailable for resource %s", testData.ResourceAddress)
-		return nil
+		return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 	}
 
 	assets := make([]caiasset.Asset, 0)
@@ -144,12 +161,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if !tfplan2caiSupported && !cai2hclSupported {
-		if primaryResource {
-			return fmt.Errorf("conversion of the primary resource %s is not supported in tgc", testData.ResourceAddress)
-		} else {
-			log.Printf("SKIP: conversion of the resource %s is not supported in tgc.", resourceType)
-			return nil
-		}
+		return fmt.Errorf("conversion of the resource %s is not supported in tgc", testData.ResourceAddress)
 	}
 
 	if !(tfplan2caiSupported && cai2hclSupported) {
@@ -205,7 +217,15 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	parsedExportConfig := exportResources[0].Attributes
-	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
+
+	// Get the resource schema to check for default values
+	provider := provider.Provider()
+	var resourceSchema *schema.Resource
+	if res, ok := provider.ResourcesMap[resourceType]; ok {
+		resourceSchema = res
+	}
+
+	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet, resourceSchema)
 
 	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
@@ -313,7 +333,7 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
-func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
+func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *schema.Resource) []string {
 	var missingKeys []string
 	for key, val := range map1 {
 		if isIgnored(key, ignoredFields) {
@@ -339,6 +359,17 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
 		}
 
 		if _, ok := map2[key]; !ok {
+			// Check if the missing key has a default value in schema and the value in map1 matches it
+			if resourceSchema != nil {
+				defaultValue := getSchemaDefault(resourceSchema, key)
+				// If default value is found, compare it with val
+				if defaultValue != nil {
+					// Handle type conversion for comparison
+					if reflect.DeepEqual(val, defaultValue) {
+						continue
+					}
+				}
+			}
 			missingKeys = append(missingKeys, key)
 		}
 	}

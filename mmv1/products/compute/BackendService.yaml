@@ -43,12 +43,12 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/backend_service.go.tmpl'
@@ -883,6 +883,7 @@ properties:
         type: String
         description: |
           OAuth2 Client ID for IAP
+        send_empty_value: true
       - name: 'oauth2ClientSecret'
         type: String
         description: |

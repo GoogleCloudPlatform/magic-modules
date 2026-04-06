@@ -22,12 +22,12 @@ func TestExecVCRMerge(t *testing.T) {
 			baseBranch: "main",
 			commitSha:  "sha",
 			calledMethods: []string{
-				"gsutil ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
-				"gsutil -m cp gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/fixtures/",
-				"gsutil -m rm -r gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
-				"gsutil ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
-				"gsutil -m cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/beta/fixtures/",
-				"gsutil -m rm -r gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
+				"gcloud storage ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
+				"gcloud storage cp gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/fixtures/",
+				"gcloud storage rm --recursive gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
+				"gcloud storage ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
+				"gcloud storage cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/beta/fixtures/",
+				"gcloud storage rm --recursive gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
 			},
 		},
 		{
@@ -35,12 +35,12 @@ func TestExecVCRMerge(t *testing.T) {
 			baseBranch: "test-branch",
 			commitSha:  "sha",
 			calledMethods: []string{
-				"gsutil ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
-				"gsutil -m cp gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/refs/branches/test-branch/fixtures/",
-				"gsutil -m rm -r gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
-				"gsutil ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
-				"gsutil -m cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/beta/refs/branches/test-branch/fixtures/",
-				"gsutil -m rm -r gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
+				"gcloud storage ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
+				"gcloud storage cp gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/refs/branches/test-branch/fixtures/",
+				"gcloud storage rm --recursive gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
+				"gcloud storage ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
+				"gcloud storage cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/beta/refs/branches/test-branch/fixtures/",
+				"gcloud storage rm --recursive gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
 			},
 		},
 		{
@@ -54,8 +54,8 @@ func TestExecVCRMerge(t *testing.T) {
 			lsReturnedError: true,
 			baseBranch:      "main",
 			calledMethods: []string{
-				"gsutil ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
-				"gsutil ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
+				"gcloud storage ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
+				"gcloud storage ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
 			},
 		},
 	}

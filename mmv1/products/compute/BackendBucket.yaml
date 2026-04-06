@@ -41,13 +41,13 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next: true
 iam_policy:
   parent_resource_attribute: 'name'
   import_format:
     - 'projects/{{project}}/global/backendBuckets/{{name}}'
     - '{{name}}'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/compute_backend_bucket.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'

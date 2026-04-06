@@ -104,6 +104,7 @@ var (
 
 	clusterConfigKeys = []string{
 		"cluster_config.0.cluster_tier",
+		"cluster_config.0.cluster_type",
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
 		"cluster_config.0.gce_cluster_config",
@@ -562,6 +563,15 @@ func ResourceDataprocCluster() *schema.Resource {
 							AtLeastOneOf: clusterConfigKeys,
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TIER_UNSPECIFIED", "CLUSTER_TIER_STANDARD", "CLUSTER_TIER_PREMIUM"}, false),
+						},
+						"cluster_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							Description:  `The type of the cluster.`,
+							AtLeastOneOf: clusterConfigKeys,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TYPE_UNSPECIFIED", "STANDARD", "SINGLE_NODE", "ZERO_SCALE"}, false),
 						},
 						"staging_bucket": {
 							Type:         schema.TypeString,
@@ -2268,6 +2278,10 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 		conf.ClusterTier = v.(string)
 	}
 
+	if v, ok := d.GetOk("cluster_config.0.cluster_type"); ok {
+		conf.ClusterType = v.(string)
+	}
+
 	c, err := expandGceClusterConfig(d, config)
 	if err != nil {
 		return nil, err
@@ -3215,6 +3229,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("cluster_config.0.staging_bucket").(string),
 		"cluster_tier":              d.Get("cluster_config.0.cluster_tier").(string),
+		"cluster_type":              cfg.ClusterType,
 		"bucket":                    cfg.ConfigBucket,
 		"temp_bucket":               cfg.TempBucket,
 		"gce_cluster_config":        flattenGceClusterConfig(d, cfg.GceClusterConfig),

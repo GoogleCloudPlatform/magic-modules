@@ -115,7 +115,6 @@ properties:
     type: String
     description: |
       The :authority header in the gRPC request sent from Envoy to the extension service.
-    required: true
   - name: 'service'
     type: ResourceRef
     description: |
