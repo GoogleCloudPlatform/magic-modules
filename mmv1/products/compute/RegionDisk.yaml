@@ -370,6 +370,8 @@ properties:
             - 'SEV_SNP_CAPABLE'
             - 'SUSPEND_RESUME_COMPATIBLE'
             - 'TDX_CAPABLE'
+            - 'SEV_LIVE_MIGRATABLE_V2'
+            - 'SNP_SVSM_CAPABLE'
   - name: 'licenses'
     type: Array
     description: Any applicable license URI.

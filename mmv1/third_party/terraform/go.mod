@@ -39,7 +39,7 @@ require (
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/net v0.52.0
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/api v0.273.0
+	google.golang.org/api v0.274.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260319201613-d00831a3d3e7
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
@@ -93,7 +93,7 @@ require (
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect

@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -24,12 +25,36 @@ func TestMapType(t *testing.T) {
 	}
 
 	petSchema := doc.Paths.Map()["/pets"].Post.RequestBody.Value.Content["application/json"].Schema
-	mmObject := WriteObject("pet", petSchema, propType(petSchema), false)
+	mmObject := WriteObject("pet", petSchema, propType(petSchema), false, make(map[string]bool))
 	if mmObject.KeyName == "" || mmObject.Type != "Map" {
 		t.Error("Failed to parse map type")
 	}
-	if len(mmObject.ValueType.Properties) != 4 {
-		t.Errorf("Expected 4 properties, found %d", len(mmObject.ValueType.Properties))
+	if len(mmObject.ValueType.Properties) != 5 {
+		t.Errorf("Expected 5 properties, found %d", len(mmObject.ValueType.Properties))
+	}
+
+	var recursivePet *api.Type
+	for _, p := range mmObject.ValueType.Properties {
+		if p.Name == "recursivePet" {
+			recursivePet = p
+			break
+		}
+	}
+	if recursivePet == nil {
+		t.Error("Failed to find recursivePet property")
+	}
+
+	var secondRecursivePet *api.Type
+	for _, p := range recursivePet.Properties {
+		if p.Name == "recursivePet" {
+			secondRecursivePet = p
+			break
+		}
+	}
+	if secondRecursivePet == nil {
+		t.Error("Failed to find second-level recursivePet property")
+	} else if secondRecursivePet.Type != "String" || secondRecursivePet.CustomExpand == "" {
+		t.Errorf("Expected second-level recursivePet to be a JSON field (String with templates), found Type: %s", secondRecursivePet.Type)
 	}
 }
 
