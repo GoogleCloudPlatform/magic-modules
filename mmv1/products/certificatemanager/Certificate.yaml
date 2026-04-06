@@ -49,12 +49,12 @@ schema_version: 1
 state_upgraders: true
 sweeper:
   url_substitutions:
-    - region: "us-central1"
-    - region: "us-east1"
-    - region: "global"
-    - region: "us-west2"
-    - region: "us-south1"
-    - region: "us-west1"
+    - location: "us-central1"
+    - location: "us-east1"
+    - location: "global"
+    - location: "us-west2"
+    - location: "us-south1"
+    - location: "us-west1"
   dependencies:
     - "google_compute_region_target_https_proxy"
     - "google_network_security_backend_authentication_config"

@@ -39,6 +39,9 @@ custom_code:
 # excluding identity due to name value inconsistency
 exclude_identity_generation: true
 legacy_long_form_project: true
+sweeper:
+  dependencies:
+    - google_network_connectivity_spoke
 examples:
   - name: 'network_connectivity_hub_basic'
     primary_resource_id: 'primary'
