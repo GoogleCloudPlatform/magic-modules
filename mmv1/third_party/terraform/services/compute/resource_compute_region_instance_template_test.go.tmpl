@@ -1179,6 +1179,98 @@ func TestAccComputeRegionInstanceTemplate_managedEnvoy(t *testing.T) {
 	})
 }
 
+func TestAccComputeRegionInstanceTemplate_flexStart(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories:    acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_flexStart(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeRegionInstanceTemplateAutomaticRestart(&instanceTemplate, false),
+					testAccCheckComputeRegionInstanceTemplateProvisioningModel(&instanceTemplate, "FLEX_START"),
+					testAccCheckComputeRegionInstanceTemplateInstanceTerminationAction(&instanceTemplate, "DELETE"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccComputeRegionInstanceTemplate_reservationBound(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	suffix := acctest.RandString(t, 10)
+	context := map[string]interface{}{
+		"suffix":           suffix,
+		"reservation_name": fmt.Sprintf("tf-test-res-%s", suffix),
+		"fr_name":          fmt.Sprintf("tf-test-fr-%s", suffix),
+		"start_time":       time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+		"end_time":         time.Now().Add(48 * time.Hour).Format(time.RFC3339),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories:    acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_reservationBound(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeRegionInstanceTemplateAutomaticRestart(&instanceTemplate, false),
+					testAccCheckComputeRegionInstanceTemplateProvisioningModel(&instanceTemplate, "RESERVATION_BOUND"),
+					testAccCheckComputeRegionInstanceTemplateInstanceTerminationAction(&instanceTemplate, "DELETE"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+{{- end }}
+
+func TestAccComputeRegionInstanceTemplate_provisioningModelEmptyString(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories:    acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_provisioningModelEmptyString(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeRegionInstanceTemplate_spot(t *testing.T) {
 	t.Parallel()
 
@@ -4273,6 +4365,152 @@ resource "google_compute_region_instance_template" "foobar" {
 
   labels = {
     gce-service-proxy = "on"
+  }
+}
+`, suffix)
+}
+
+func testAccComputeRegionInstanceTemplate_flexStart(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  region      = "us-central1"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    automatic_restart = false
+    provisioning_model = "FLEX_START"
+    instance_termination_action = "DELETE"
+    on_host_maintenance = "TERMINATE"
+    max_run_duration {
+      nanos = 0
+      seconds = 3600
+    }
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+`, suffix)
+}
+
+{{- if ne $.TargetVersionName "ga" }}
+func testAccComputeRegionInstanceTemplate_reservationBound(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_future_reservation" "foobar" {
+  provider = google-beta
+  name     = "%{fr_name}"
+  zone     = "us-central1-a"
+  planning_status = "SUBMITTED"
+  time_window {
+    start_time = "%{start_time}"
+    end_time   = "%{end_time}"
+  }
+  specific_sku_properties {
+    total_count = "1"
+    instance_properties {
+      machine_type = "n2-standard-2"
+    }
+  }
+  reservation_mode = "CALENDAR"
+  deployment_type = "DENSE"
+  specific_reservation_required = true
+  reservation_name = "%{reservation_name}"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  provider     = google-beta
+  name           = "tf-test-instance-template-%{suffix}"
+  region      = "us-central1"
+  machine_type   = "n2-standard-2"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = "debian-cloud/debian-11"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    automatic_restart = false
+    provisioning_model = "RESERVATION_BOUND"
+    instance_termination_action = "DELETE"
+    on_host_maintenance = "TERMINATE"
+  }
+
+  reservation_affinity {
+    type = "SPECIFIC_RESERVATION"
+    specific_reservation {
+      key    = "compute.googleapis.com/reservation-name"
+      values = [google_compute_future_reservation.foobar.reservation_name]
+    }
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+`, context)
+}
+{{- end }}
+
+func testAccComputeRegionInstanceTemplate_provisioningModelEmptyString(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  region         = "us-central1"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    automatic_restart = false
+    provisioning_model = ""
   }
 }
 `, suffix)
