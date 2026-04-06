@@ -52,7 +52,7 @@ The following arguments are supported:
 * `config_bundle` -
   (Required)
   Path to the config zip bundle.
-  
+
 - - -
 
 ## Attributes Reference

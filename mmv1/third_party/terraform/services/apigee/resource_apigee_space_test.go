@@ -11,12 +11,20 @@ import (
 func TestAccApigeeSpace_basicTest(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
+	context1 := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"space_id":        "test-space",
 		"display_name":    "Test Space",
 		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	context2 := map[string]interface{}{
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"space_id":        "test-space",
+		"display_name":    "Updated Test Space",
+		"random_suffix":   context1["random_suffix"],
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -28,7 +36,15 @@ func TestAccApigeeSpace_basicTest(t *testing.T) {
 		CheckDestroy: testAccCheckApigeeSpaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApigeeSpace_basicTest(context),
+				Config: testAccApigeeSpace_basicTest(context1),
+			},
+			{
+				ResourceName:      "google_apigee_space.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccApigeeSpace_basicTest(context2),
 			},
 			{
 				ResourceName:      "google_apigee_space.primary",

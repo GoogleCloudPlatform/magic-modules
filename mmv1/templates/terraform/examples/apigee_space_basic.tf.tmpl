@@ -28,4 +28,5 @@ resource "google_apigee_organization" "apigee_org" {
 resource "google_apigee_space" "space" {
   org_id   = google_apigee_organization.apigee_org.id
   space_id = "tf-test-space"
+  display_name = "tf test Space"
 }
