@@ -37,6 +37,10 @@ references:
 include_in_tgc_next: true
 description: |
  The Eventarc GoogleChannelConfig resource
+tgc_tests:
+  - name: 'TestAccEventarcGoogleChannelConfig/basic'
+  - name: 'TestAccEventarcGoogleChannelConfig/cryptoKeyUpdate'
+  - name: 'TestAccEventarcGoogleChannelConfig/longForm'
 examples:
   - name: eventarc_google_channel_config_with_cmek
     primary_resource_id: primary
