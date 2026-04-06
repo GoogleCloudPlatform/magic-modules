@@ -189,3 +189,77 @@ func IsApiNotEnabledError(err error) bool {
 	}
 	return false
 }
+
+type ListCallOptions struct {
+	Config         *Config
+	TempData       *schema.ResourceData
+	Url            string
+	BillingProject string
+	UserAgent      string
+	ItemName       string
+	Filter         string
+	Flattener      func(item map[string]interface{}, d *schema.ResourceData, config *Config) error
+	Callback       func(rd *schema.ResourceData) error
+}
+
+func ListCall(opts ListCallOptions) error {
+	// Set default ItemName if not provided
+	if opts.ItemName == "" {
+		opts.ItemName = "items"
+	}
+
+	params := make(map[string]string)
+	if opts.Filter != "" {
+		params["filter"] = opts.Filter
+	}
+
+	for {
+		// Depending on previous iterations, params might contain a pageToken param
+		url, err := AddQueryParams(opts.Url, params)
+		if err != nil {
+			return err
+		}
+
+		headers := make(http.Header)
+		res, err := SendRequest(SendRequestOptions{
+			Config:    opts.Config,
+			Method:    "GET",
+			Project:   opts.BillingProject,
+			RawURL:    url,
+			UserAgent: opts.UserAgent,
+			Headers:   headers,
+			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
+			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
+		})
+		if err != nil {
+			return HandleNotFoundError(err, opts.TempData, opts.ItemName)
+		}
+
+		if v, ok := res[opts.ItemName].([]interface{}); ok {
+			for _, item := range v {
+				itemMap, ok := item.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("expected item to be map[string]interface{}, got %T", item)
+				}
+
+				err = opts.Flattener(itemMap, opts.TempData, opts.Config)
+				if err != nil {
+					return fmt.Errorf("Error flattening instance: %s", err)
+				}
+				err = opts.Callback(opts.TempData)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		// Handle pagination for next loop, or break loop
+		v, ok := res["nextPageToken"]
+		if ok {
+			params["pageToken"] = v.(string)
+		}
+		if !ok {
+			break
+		}
+	}
+	return nil
+}
