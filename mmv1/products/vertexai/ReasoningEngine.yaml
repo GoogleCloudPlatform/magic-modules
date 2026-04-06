@@ -410,7 +410,6 @@ properties:
               - name: 'buildArgs'
                 type: KeyValuePairs
                 send_empty_value: true
-                required: true
                 description: |
                   Build arguments to be used. They will be passed through --build-arg flags.
           - name: 'pythonSpec'
