@@ -40,6 +40,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+  include_project: true
 sweeper:
   parent:
     resource_type: "google_vmwareengine_private_cloud"
