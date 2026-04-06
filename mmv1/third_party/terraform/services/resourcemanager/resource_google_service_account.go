@@ -34,6 +34,23 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			resourceServiceAccountCustomDiff,
 		),
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"email": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"email": {
 				Type:        schema.TypeString,
@@ -239,6 +256,18 @@ func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error 
 	if err := d.Set("member", "serviceAccount:"+sa.Email); err != nil {
 		return fmt.Errorf("Error setting member: %s", err)
 	}
+
+	identity, err := d.Identity()
+	if err != nil {
+		return fmt.Errorf("Error getting identity: %s", err)
+	}
+	if err := identity.Set("email", sa.Email); err != nil {
+		return fmt.Errorf("Error setting email: %s", err)
+	}
+	if err := identity.Set("project", sa.ProjectId); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+
 	return nil
 }
 
@@ -314,6 +343,17 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 	// a few milliseconds after the update goes through. 5 seconds is more than enough
 	// time to ensure following reads are correct.
 	time.Sleep(time.Second * 5)
+
+	identity, err := d.Identity()
+	if err != nil {
+		return fmt.Errorf("Error getting identity: %s", err)
+	}
+	if err := identity.Set("email", sa.Email); err != nil {
+		return fmt.Errorf("Error setting email: %s", err)
+	}
+	if err := identity.Set("project", sa.ProjectId); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return nil
 }
