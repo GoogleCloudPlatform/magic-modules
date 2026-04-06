@@ -65,7 +65,7 @@ parameters:
       The resource name of the private cloud to create a new management DNS zone binding in.
       Resource names are schemeless URIs that follow the conventions in https://cloud.google.com/apis/design/resource_names.
       For example: projects/my-project/locations/us-central1-a/privateClouds/my-cloud
-    
+
     url_param_only: true
     required: true
     immutable: true
@@ -73,7 +73,7 @@ parameters:
     type: String
     description: |
       The ID of the ManagementDnsZoneBinding.
-    
+
     url_param_only: true
     required: true
     immutable: true
@@ -98,7 +98,7 @@ properties:
     type: Enum
     description: |
       The state of the resource.
-    
+
     output: true
     enum_values:
       - 'STATE_UNSPECIFIED'
@@ -122,7 +122,7 @@ properties:
       Network to bind is a standard consumer VPC.
       Specify the name in the following form for consumer VPC network: projects/{project}/global/networks/{network_id}.
       {project} can either be a project number or a project ID.
-    
+
     conflicts:
       - 'vmwareEngineNetwork'
     immutable: true
@@ -132,7 +132,7 @@ properties:
       Network to bind is a VMware Engine network.
       Specify the name in the following form for VMware engine network: projects/{project}/locations/global/vmwareEngineNetworks/{vmwareEngineNetworkId}.
       {project} can either be a project number or a project ID.
-    
+
     conflicts:
       - 'vpcNetwork'
     immutable: true
