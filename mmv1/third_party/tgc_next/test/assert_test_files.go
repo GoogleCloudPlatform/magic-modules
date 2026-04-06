@@ -28,6 +28,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -169,7 +170,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		assetFile := fmt.Sprintf("%s.json", testName)
+		assetFile := fmt.Sprintf("%s.json", strings.ReplaceAll(testName, "/", "_"))
 		writeJSONFile(assetFile, assets)
 	}
 
@@ -184,14 +185,14 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		exportTfFile := fmt.Sprintf("%s_export.tf", testName)
+		exportTfFile := fmt.Sprintf("%s_export.tf", strings.ReplaceAll(testName, "/", "_"))
 		err = os.WriteFile(exportTfFile, exportConfigData, 0644)
 		if err != nil {
 			return fmt.Errorf("error writing file %s", exportTfFile)
 		}
 	}
 
-	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, testName)
+	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, strings.ReplaceAll(testName, "/", "_"))
 	defer os.Remove(exportTfFilePath)
 	err = os.WriteFile(exportTfFilePath, exportConfigData, 0644)
 	if err != nil {
@@ -208,7 +209,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		writeJSONFile(fmt.Sprintf("%s_export_attrs", testName), exportResources)
+		writeJSONFile(fmt.Sprintf("%s_export_attrs", strings.ReplaceAll(testName, "/", "_")), exportResources)
 	}
 
 	ignoredFieldSet := make(map[string]any, 0)
@@ -247,7 +248,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("error when converting the round-trip config: %#v", err)
 	}
 
-	rtTfFile := fmt.Sprintf("%s_roundtrip.tf", testName)
+	rtTfFile := fmt.Sprintf("%s_roundtrip.tf", strings.ReplaceAll(testName, "/", "_"))
 	roundtripTfFilePath := filepath.Join(tfDir, rtTfFile)
 	defer os.Remove(roundtripTfFilePath)
 	err = os.WriteFile(roundtripTfFilePath, roundtripConfigData, 0644)
@@ -262,8 +263,8 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
-		tfFileName := fmt.Sprintf("%s_roundtrip", testName)
-		jsonFileName := fmt.Sprintf("%s_reexport.json", testName)
+		tfFileName := fmt.Sprintf("%s_roundtrip", strings.ReplaceAll(testName, "/", "_"))
+		jsonFileName := fmt.Sprintf("%s_reexport.json", strings.ReplaceAll(testName, "/", "_"))
 
 		reexportAssets, err := tfplan2caiConvert(t, tfFileName, jsonFileName, tfDir, ancestryCache, defaultProject, logger)
 		if err != nil {
@@ -340,22 +341,36 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *
 			continue
 		}
 
-		if rVal := reflect.ValueOf(val); !rVal.IsValid() || rVal.IsZero() {
+		rVal := reflect.ValueOf(val)
+		if !rVal.IsValid() {
+			continue
+		}
+
+		isRequired := false
+		if resourceSchema != nil {
+			isRequired = getSchemaRequired(resourceSchema, key)
+		}
+
+		if !isRequired && rVal.IsZero() {
 			continue
 		}
 
 		if sVal, ok := val.(string); ok {
 			// TODO: convert to correct type when parsing HCL to fix the edge case where the field type is String and the only values are "false", "00", etc.
-			if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
-				continue
-			}
-			if iVal, err := strconv.Atoi(sVal); err == nil && iVal == 0 {
-				continue
+			if !isRequired {
+				if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
+					continue
+				}
+				if iVal, err := strconv.Atoi(sVal); err == nil && iVal == 0 {
+					continue
+				}
 			}
 		}
 
 		if vMap, ok := val.(map[string]any); ok && len(vMap) == 0 {
-			continue
+			if !isRequired {
+				continue
+			}
 		}
 
 		if _, ok := map2[key]; !ok {
@@ -369,7 +384,12 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *
 						continue
 					}
 				}
+
+				if isDiffSuppressed(key, val, resourceSchema) {
+					continue
+				}
 			}
+
 			missingKeys = append(missingKeys, key)
 		}
 	}
@@ -377,8 +397,113 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *
 	return missingKeys
 }
 
+// isDiffSuppressed traverses the resource schema using the given key (e.g., "foo.0.bar")
+// to determine if the field or any of its parent containers has a DiffSuppressFunc
+// that evaluates to true for the given value.
+func isDiffSuppressed(key string, val any, resourceSchema *schema.Resource) bool {
+	// Traverse the schema to find the field
+	parts := strings.Split(key, ".")
+	var currentSchema *schema.Schema
+	var currentResource *schema.Resource = resourceSchema
+
+	for i, part := range parts {
+		// Check DiffSuppressFunc on the container schema (Map/List/Set) before diving into it
+		if currentSchema != nil && currentSchema.DiffSuppressFunc != nil {
+			if callDiffSuppress(currentSchema, key, val) {
+				return true
+			}
+		}
+
+		if currentSchema != nil {
+			// We are inside a schema (List/Set/Map)
+			if currentSchema.Type == schema.TypeMap {
+				// Any part is a key. Elem is Schema.
+				if elemSchema, ok := currentSchema.Elem.(*schema.Schema); ok {
+					currentSchema = elemSchema
+					continue
+				}
+				return false // Should not happen for valid TF schema
+			} else if currentSchema.Type == schema.TypeList || currentSchema.Type == schema.TypeSet {
+				if _, err := strconv.Atoi(part); err == nil {
+					if elemRes, ok := currentSchema.Elem.(*schema.Resource); ok {
+						currentResource = elemRes
+						currentSchema = nil
+						continue
+					} else if elemSchema, ok := currentSchema.Elem.(*schema.Schema); ok {
+						currentSchema = elemSchema
+						continue
+					}
+				} else {
+					// Handle implicit index 0 for single blocks which might be flattened without index
+					if elemRes, ok := currentSchema.Elem.(*schema.Resource); ok {
+						if s, ok := elemRes.Schema[part]; ok {
+							currentResource = elemRes
+							currentSchema = s
+							continue
+						}
+					}
+				}
+			}
+
+			return false // Invalid path traversal
+		}
+
+		// Lookup in currentResource
+		if currentResource == nil {
+			return false
+		}
+
+		s, ok := currentResource.Schema[part]
+		if !ok {
+			return false
+		}
+		currentSchema = s
+
+		// If this is the last part, we will check DiffSuppressFunc after the loop
+		_ = i
+	}
+
+	if currentSchema == nil {
+		return false
+	}
+
+	// Check DiffSuppressFunc on the leaf schema
+	if currentSchema.DiffSuppressFunc != nil {
+		if callDiffSuppress(currentSchema, key, val) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// callDiffSuppress safely executes the DiffSuppressFunc for a given schema field.
+// It passes nil for the *schema.ResourceData argument, and uses a deferred recover()
+// to catch any panics that might occur if the custom DiffSuppressFunc attempts to access it.
+func callDiffSuppress(s *schema.Schema, key string, val any) bool {
+	// We populate basic ResourceData. Using nil might be risky if function uses it.
+	// But creating a full valid ResourceData is hard.
+	// We handle panic in case the function assumes 'd' is valid.
+	defer func() {
+		if r := recover(); r != nil {
+			// Ignore panic, return false
+		}
+	}()
+
+	valString := fmt.Sprintf("%v", val)
+	// 'valString' is the value from Config (new).
+	// 'old' is empty string because the field is missing in map2 (Export/State).
+	// The signature is func(k, old, new string, d *ResourceData) bool
+	return s.DiffSuppressFunc(key, "", valString, nil)
+}
+
 // Returns true if the given key should be ignored according to the given set of ignored fields.
 func isIgnored(key string, ignoredFields map[string]any) bool {
+	// Global ignores for write-only fields
+	if strings.HasSuffix(key, "_wo") || strings.HasSuffix(key, "_wo_version") {
+		return true
+	}
+
 	// Check for exact match first.
 	if _, ignored := ignoredFields[key]; ignored {
 		return true
@@ -411,8 +536,8 @@ func isIgnored(key string, ignoredFields map[string]any) bool {
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
 func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, []byte, error) {
-	fileName := fmt.Sprintf("%s_export", testName)
-	roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", testName)
+	fileName := fmt.Sprintf("%s_export", strings.ReplaceAll(testName, "/", "_"))
+	roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", strings.ReplaceAll(testName, "/", "_"))
 
 	roundtripAssets, err := tfplan2caiConvert(t, fileName, roundtripAssetFile, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {
@@ -509,7 +634,7 @@ func compareCaiAssets(assets1, assets2 []caiasset.Asset, ignoredFieldSet map[str
 				asset.Resource,
 				roundtripAsset.Resource,
 				// secretmanager.googleapis.com/SecretVersion has secret as parent, not project
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "Parent", "DiscoveryDocumentURI"),
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "Parent", "DiscoveryName", "DiscoveryDocumentURI"),
 				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
 				cmp.FilterPath(func(p cmp.Path) bool {
 					return p.Last().String() == ".DiscoveryDocumentURI"

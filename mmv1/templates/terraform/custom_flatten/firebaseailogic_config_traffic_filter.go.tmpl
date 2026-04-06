@@ -1,0 +1,31 @@
+func flatten{{$.GetPrefix}}TrafficFilter(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) interface{} {
+	userState := d.Get("traffic_filter").([]interface{})
+
+	var apiState []interface{}
+	apiEnabled := false
+	if original, ok := v.(map[string]interface{}); ok {
+		block := make(map[string]interface{})
+		if templateOnly, ok := original["templateOnly"].(bool); ok && templateOnly {
+			block["template_only"] = true
+			apiEnabled = true
+		} else {
+			block["template_only"] = false
+		}
+		apiState = []interface{}{block}
+	}
+
+	userEnabled := false
+	if len(userState) > 0 && userState[0] != nil {
+		if tfMap, ok := userState[0].(map[string]interface{}); ok {
+			userEnabled, _ = tfMap["template_only"].(bool)
+		}
+	}
+
+	if apiEnabled || userEnabled {
+		return apiState
+	}
+
+	// Both API and user agree the feature is disabled.
+	// Return the userState to prevent perpetual diffs.
+	return userState
+}

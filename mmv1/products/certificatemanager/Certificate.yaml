@@ -32,7 +32,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-include_in_tgc_next: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -41,6 +40,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/cert_manager.tmpl'
   tgc_encoder: 'templates/tgc_next/encoders/certificatemanager_certificate.go.tmpl'

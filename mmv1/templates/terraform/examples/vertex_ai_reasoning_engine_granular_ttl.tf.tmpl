@@ -1,0 +1,30 @@
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "name"}}"
+  description  = "Reasoning engine with granular ttl"
+  region       = "us-central1"
+  provider     = google-beta
+
+  context_spec {
+    memory_bank_config {
+      generation_config {
+        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+      }
+      similarity_search_config {
+        embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
+      }
+      disable_memory_revisions = false
+      ttl_config {
+        memory_revision_default_ttl = "86400s"
+        granular_ttl_config {
+          create_ttl = "86400s"
+          generate_created_ttl = "86400s"
+          generate_updated_ttl = "86400s"
+        }
+      }
+    }
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}

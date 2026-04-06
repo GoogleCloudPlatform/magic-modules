@@ -141,6 +141,15 @@ examples:
       tag_key: tag_key
       tag_value: tag_value
       topic_name: example-topic
+  - name: pubsub_subscription_ai_inference
+    primary_resource_id: example
+    external_providers: ["time"]
+    vars:
+      topic_name: example-topic
+      subscription_name: example-subscription
+      service_account_id: example-sa
+    test_env_vars:
+      project_name: PROJECT_NAME
 properties:
   - name: name
     type: String
@@ -285,14 +294,14 @@ properties:
             type: Boolean
             description: |
               When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
-      - name: 'textConfig'
+      - name: textConfig
         type: NestedObject
         description: |
           If set, message data will be written to Cloud Storage in text format.
         allow_empty_object: true
         default_from_api: true
         properties:
-          - name: 'state'
+          - name: state
             type: String
             description: |
               Output only. Placeholder to allow the empty text_config block.
@@ -370,7 +379,6 @@ properties:
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
         diff_suppress_func: IgnoreMissingKeyInMap("x-goog-version")
-        custom_tgc_expand: templates/tgc_next/custom_expand/pubsub_subscription_attributes.go.tmpl
       - name: noWrapper
         type: NestedObject
         description: |
@@ -556,7 +564,41 @@ properties:
       order specified.
     item_type:
       type: NestedObject
+      exactly_one_of:
+        - javascript_udf
+        - ai_inference
       properties:
+        - name: aiInference
+          type: NestedObject
+          description: |
+            AI Inference. Specifies the Vertex AI endpoint that inference
+            requests built from the Pub/Sub message data and provided parameters will
+            be sent to.
+          properties:
+            - name: endpoint
+              type: String
+              required: true
+              description: |
+                The endpoint to a Vertex AI model of the form
+                `projects/{project}/locations/{location}/endpoints/{endpoint}` or
+                `projects/{project}/locations/{location}/publishers/{publisher}/models/{model}`.
+                Vertex AI API requests will be sent to this endpoint.
+            - name: unstructuredInference
+              type: NestedObject
+              description: |
+                Configuration for making inferences using arbitrary JSON payloads.
+              properties:
+                - name: parameters
+                  type: KeyValuePairs
+                  description: |
+                    A parameters object to be included in each inference request.
+                    The parameters object is combined with the data field of the Pub/Sub
+                    message to form the inference request.
+            - name: serviceAccountEmail
+              type: String
+              description: |
+                The service account to use to make prediction requests against
+                endpoints.
         - name: javascriptUdf
           type: NestedObject
           description: |

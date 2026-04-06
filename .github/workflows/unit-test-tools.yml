@@ -18,7 +18,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.24'
+          go-version: '^1.26'
 
       - name: Build diff-processor with TPG
         run: |
@@ -54,7 +54,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.24'
+          go-version: '^1.26'
           cache-dependency-path: |
             tools/go-changelog/go.mod
 
@@ -76,7 +76,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.24'
+          go-version: '^1.26'
           cache-dependency-path: |
             tools/issue-labeler/go.mod
 
@@ -98,7 +98,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.24'
+          go-version: '^1.26'
           cache-dependency-path: |
             tools/template-check/go.mod
 
@@ -120,7 +120,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.24'
+          go-version: '^1.26'
           cache-dependency-path: |
             tools/test-reader/go.mod
 

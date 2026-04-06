@@ -1,0 +1,792 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: DashboardChart
+description: >
+  A chart resource used within a NativeDashboard. Its lifecycle (Create, Update, Delete) is
+  managed via custom methods on the NativeDashboard resource.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.dashboardCharts'
+
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts/{{chart_id}}
+create_url: "{{native_dashboard}}:addChart"
+
+update_url: "{{native_dashboard}}:editChart"
+update_verb: POST
+
+delete_url: "{{native_dashboard}}:removeChart"
+delete_verb: POST
+
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts/{{chart_id}}
+
+custom_code:
+  pre_delete: "templates/terraform/pre_delete/chronicle_dashboard_chart.go.tmpl"
+  pre_update: "templates/terraform/pre_update/chronicle_dashboard_chart_dashboard_query.go.tmpl"
+  update_encoder: "templates/terraform/update_encoder/chronicle_dashboard_chart_edit_mask.go.tmpl"
+  decoder: "templates/terraform/decoders/chronicle_dashboard_chart.go.tmpl"
+
+min_version: 'beta'
+examples:
+  - name: chronicle_dashboardchart_basic
+    primary_resource_id: my_chart
+    min_version: 'beta'
+    ignore_read_extra:
+      - "dashboardUserData.0.lastViewedTime"
+    vars:
+      chart_display_name: "testchart_1"
+    test_env_vars:
+      chronicle_id: "CHRONICLE_ID"
+
+  - name: chronicle_dashboardchart_full
+    primary_resource_id: my_chart
+    min_version: 'beta'
+    ignore_read_extra:
+      - "dashboardUserData.0.lastViewedTime"
+    vars:
+      dashboard_name: "dashboard_1"
+      dashboard_description: "dashboard_description"
+    test_env_vars:
+      chronicle_id: "CHRONICLE_ID"
+
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: The location of the Chronicle instance.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: The ID of the Chronicle instance.
+    immutable: true
+    url_param_only: true
+
+properties:
+  - name: nativeDashboard
+    type: String
+    description: The parent NativeDashboard resource name, formatted as projects/{project}/locations/{location}/instances/{instance}/nativeDashboards/{dashboard_id}
+    url_param_only: true
+    immutable: true
+
+  - name: name
+    type: String
+    output: true
+    description: The full resource name of the DashboardChart.
+
+  - name: chartId
+    type: String
+    custom_flatten: "templates/terraform/custom_flatten/id_from_name.tmpl"
+    output: true
+    description: The unique identifier of the chart, automatically extracted from the full resource name.
+
+  - name: dashboardQuery
+    type: NestedObject
+    ignore_read: true
+    description: The complete specification of the query for this chart. This includes the raw query string, execution parameters (like time windows), and server-generated metadata.
+    properties:
+      - name: name
+        type: String
+        output: true
+        description: name of the query.
+      - name: query
+        type: String
+        required: true
+        description: The raw query string.
+      - name: input
+        type: NestedObject
+        description: Input parameters for the query, such as time windows.
+        properties:
+          - name: timeWindow
+            type: NestedObject
+            description: Specific start and end times.
+            properties:
+              - name: startTime
+                type: String
+              - name: endTime
+                type: String
+          - name: relativeTime
+            type: NestedObject
+            description: Relative time range.
+            properties:
+              - name: startTimeVal
+                type: String
+                required: true
+              - name: timeUnit
+                type: Enum
+                required: true
+                enum_values:
+                  - 'SECOND'
+                  - 'MINUTE'
+                  - 'HOUR'
+                  - 'DAY'
+                  - 'WEEK'
+                  - 'MONTH'
+                  - 'YEAR'
+                description: The time unit for the relative range.
+      - name: etag
+        type: String
+        output: true
+        description: This checksum is computed by the server.
+
+  - name: chartLayout
+    type: NestedObject
+    description: The layout of this chart within the NativeDashboard.
+    ignore_read: true
+    properties:
+      - name: startX
+        type: Integer
+        send_empty_value: true
+      - name: spanX
+        type: Integer
+        required: true
+      - name: startY
+        type: Integer
+        send_empty_value: true
+      - name: spanY
+        type: Integer
+        required: true
+
+  - name: dashboardChart
+    type: NestedObject
+    description: Core configuration details for the DashboardChart.
+    required: true
+    properties:
+      - name: name
+        type: String
+        output: true
+        description: The resource name of the DashboardChart.
+      - name: displayName
+        type: String
+        required: true
+        description: Display name/Title of the dashboardChart visible to users.
+      - name: description
+        type: String
+        default_from_api: true
+        description: Description of the dashboardChart.
+      - name: tileType
+        type: Enum
+        enum_values:
+          - 'TILE_TYPE_UNSPECIFIED'
+          - 'TILE_TYPE_VISUALIZATION'
+          - 'TILE_TYPE_BUTTON'
+          - 'TILE_TYPE_MARKDOWN'
+        description: Type of tile (e.g., visualization, button, markdown).
+      - name: chartDatasource
+        type: NestedObject
+        diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+        description: Query and datasource used in the chart.
+        properties:
+          - name: dataSources
+            type: Array
+            diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+            description: |
+              Name(s) of the datasource used in the chart. Available values include:
+              'UDM', 'ENTITY', 'INGESTION_METRICS', 'RULE_DETECTIONS', 'RULESETS',
+              'GLOBAL', 'IOC_MATCHES', 'RULES', 'SOAR_CASES', 'SOAR_PLAYBOOKS',
+              'SOAR_CASE_HISTORY', 'DATA_TABLE', 'INVESTIGATION', 'INVESTIGATION_FEEDBACK'.
+            item_type:
+              type: String
+          - name: dashboardQuery
+            type: String
+            output: true
+            description: The unique system ID of the query linked to this chart.
+      - name: visualization
+        type: NestedObject
+        required: true
+        diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+        description: Visualization config for a chart.
+        properties:
+          - name: xAxes
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: axisType
+                  type: Enum
+                  enum_values:
+                    - 'VALUE'
+                    - 'CATEGORY'
+                    - 'TIME'
+                    - 'LOG'
+                - name: displayName
+                  type: String
+                - name: min
+                  type: Integer
+                  default_from_api: true
+                - name: max
+                  type: Integer
+                  default_from_api: true
+          - name: yAxes
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: axisType
+                  type: Enum
+                  enum_values:
+                    - 'VALUE'
+                    - 'CATEGORY'
+                    - 'TIME'
+                    - 'LOG'
+                - name: displayName
+                  type: String
+                - name: min
+                  type: Integer
+                  default_from_api: true
+                - name: max
+                  type: Integer
+                  default_from_api: true
+          - name: series
+            type: Array
+            diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+            item_type:
+              type: NestedObject
+              properties:
+                - name: seriesType
+                  type: Enum
+                  enum_values:
+                    - 'LINE'
+                    - 'BAR'
+                    - 'PIE'
+                    - 'TEXT'
+                    - 'MAP'
+                    - 'GAUGE'
+                    - 'SCATTERPLOT'
+                - name: seriesName
+                  type: String
+                  description: User specified series label.
+                - name: showSymbol
+                  default_value: false
+                  type: Boolean
+                - name: showBackground
+                  default_from_api: true
+                  type: Boolean
+                - name: stack
+                  type: String
+                - name: seriesStackStrategy
+                  type: Enum
+                  enum_values:
+                    - 'SAMESIGN'
+                    - 'ALL'
+                    - 'POSITIVE'
+                    - 'NEGATIVE'
+                - name: encode
+                  type: NestedObject
+                  properties:
+                    - name: x
+                      type: String
+                    - name: y
+                      type: String
+                    - name: value
+                      type: String
+                    - name: itemName
+                      type: String
+                - name: label
+                  type: String
+                - name: field
+                  type: String
+                - name: dataLabel
+                  send_empty_value: true
+                  diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+                  type: NestedObject
+                  properties:
+                    - name: show
+                      type: Boolean
+                      diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+                      description: Whether to show data label.
+                - name: radius
+                  type: Array
+                  diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+                  item_type:
+                    type: String
+                - name: itemStyle
+                  type: NestedObject
+                  properties:
+                    - name: borderWidth
+                      type: Integer
+                    - name: borderColor
+                      type: String
+                    - name: color
+                      type: String
+                - name: seriesUniqueValue
+                  type: String
+                - name: areaStyle
+                  type: NestedObject
+                  properties:
+                    - name: color
+                      type: String
+                    - name: origin
+                      type: String
+                    - name: shadowBlur
+                      type: Integer
+                    - name: shadowColor
+                      type: String
+                    - name: shadowOffsetX
+                      type: Integer
+                    - name: shadowOffsetY
+                      type: Integer
+                    - name: opacity
+                      type: Integer
+                - name: itemColors
+                  type: NestedObject
+                  properties:
+                    - name: colors
+                      type: Array
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: key
+                            type: String
+                          - name: value
+                            type: NestedObject
+                            properties:
+                              - name: color
+                                type: String
+                              - name: label
+                                type: String
+                - name: gaugeConfig
+                  type: NestedObject
+                  properties:
+                    - name: baseValue
+                      type: NestedObject
+                      properties:
+                        - name: value
+                          type: Integer
+                        - name: color
+                          type: String
+                    - name: limitValue
+                      type: NestedObject
+                      properties:
+                        - name: value
+                          type: Integer
+                        - name: color
+                          type: String
+                    - name: thresholdValues
+                      type: Array
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: value
+                            type: Integer
+                          - name: color
+                            type: String
+                - name: metricTrendConfig
+                  type: NestedObject
+                  properties:
+                    - name: metricFormat
+                      type: Enum
+                      enum_values:
+                        - 'METRIC_FORMAT_UNSPECIFIED'
+                        - 'METRIC_FORMAT_NUMBER'
+                        - 'METRIC_FORMAT_PLAIN_TEXT'
+                    - name: showMetricTrend
+                      type: Boolean
+                    - name: metricDisplayTrend
+                      type: Enum
+                      enum_values:
+                        - 'METRIC_DISPLAY_TREND_UNSPECIFIED'
+                        - 'METRIC_DISPLAY_TREND_ABSOLUTE_VALUE'
+                        - 'METRIC_DISPLAY_TREND_PERCENTAGE'
+                        - 'METRIC_DISPLAY_TREND_ABSOLUTE_VALUE_AND_PERCENTAGE'
+                    - name: metricTrendType
+                      type: Enum
+                      enum_values:
+                        - 'METRIC_TREND_TYPE_UNSPECIFIED'
+                        - 'METRIC_TREND_TYPE_REGULAR'
+                        - 'METRIC_TREND_TYPE_INVERSE'
+          - name: tooltip
+            type: NestedObject
+            properties:
+              - name: show
+                type: Boolean
+              - name: tooltipTrigger
+                type: Enum
+                enum_values:
+                  - 'TOOLTIP_TRIGGER_UNSPECIFIED'
+                  - 'TOOLTIP_TRIGGER_NONE'
+                  - 'TOOLTIP_TRIGGER_ITEM'
+                  - 'TOOLTIP_TRIGGER_AXIS'
+          - name: legends
+            diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: id
+                  type: String
+                - name: show
+                  type: Boolean
+                  default_from_api: true
+                - name: zLevel
+                  type: Integer
+                  default_from_api: true
+                - name: z
+                  type: Integer
+                  default_from_api: true
+                - name: left
+                  type: Integer
+                  default_from_api: true
+                - name: top
+                  type: Integer
+                  default_from_api: true
+                - name: right
+                  type: Integer
+                  default_from_api: true
+                - name: bottom
+                  type: Integer
+                  default_from_api: true
+                - name: legendOrient
+                  type: Enum
+                  enum_values:
+                    - 'VERTICAL'
+                    - 'HORIZONTAL'
+                - name: legendAlign
+                  type: Enum
+                  enum_values:
+                    - 'AUTO'
+                    - 'LEFT'
+                    - 'RIGHT'
+                - name: padding
+                  type: Array
+                  default_from_api: true
+                  item_type:
+                    type: Integer
+          - name: columnDefs
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: field
+                  type: String
+                - name: header
+                  type: String
+          - name: tableConfig
+            type: NestedObject
+            properties:
+              - name: enableTextWrap
+                type: Boolean
+              - name: columnRenderTypeSettings
+                type: Array
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: field
+                      type: String
+                    - name: columnRenderType
+                      type: Enum
+                      enum_values:
+                        - 'RENDER_TYPE_UNSPECIFIED'
+                        - 'RENDER_TYPE_TEXT'
+                        - 'RENDER_TYPE_ICON'
+                        - 'RENDER_TYPE_ICON_AND_TEXT'
+              - name: columnTooltipSettings
+                type: Array
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: field
+                      required: true
+                      type: String
+                    - name: headerTooltipText
+                      type: String
+                    - name: cellTooltipText
+                      type: String
+          - name: button
+            type: NestedObject
+            description: Button config if tileType is TILE_TYPE_BUTTON.
+            properties:
+              - name: label
+                type: String
+                required: true
+              - name: hyperlink
+                type: String
+                required: true
+              - name: description
+                type: String
+              - name: newTab
+                type: Boolean
+              - name: properties
+                type: NestedObject
+                properties:
+                  - name: color
+                    type: String
+                  - name: buttonStyle
+                    type: Enum
+                    enum_values:
+                      - 'BUTTON_STYLE_UNSPECIFIED'
+                      - 'BUTTON_STYLE_FILLED'
+                      - 'BUTTON_STYLE_OUTLINED'
+                      - 'BUTTON_STYLE_TRANSPARENT'
+          - name: markdown
+            type: NestedObject
+            description: Markdown config if tileType is TILE_TYPE_MARKDOWN.
+            properties:
+              - name: content
+                type: String
+                required: true
+              - name: properties
+                type: NestedObject
+                properties:
+                  - name: backgroundColor
+                    type: String
+          - name: seriesColumn
+            type: Array
+            diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+            item_type:
+              type: String
+          - name: groupingType
+            type: String
+          - name: googleMapsConfig
+            type: NestedObject
+            properties:
+              - name: dataSettings
+                type: NestedObject
+                properties:
+                  - name: latitudeColumn
+                    type: String
+                  - name: longitudeColumn
+                    type: String
+                  - name: countColumn
+                    type: String
+              - name: plotMode
+                type: Enum
+                enum_values:
+                  - 'PLOT_MODE_UNSPECIFIED'
+                  - 'PLOT_MODE_POINTS'
+                  - 'PLOT_MODE_HEATMAP'
+                  - 'PLOT_MODE_BOTH'
+              - name: mapPosition
+                type: NestedObject
+                properties:
+                  - name: fitData
+                    type: Boolean
+                  - name: latitudeValue
+                    type: Double
+                  - name: longitudeValue
+                    type: Double
+                  - name: zoomScaleValue
+                    type: Double
+              - name: pointSettings
+                type: NestedObject
+                properties:
+                  - name: pointSizeType
+                    type: Enum
+                    enum_values:
+                      - 'POINT_SIZE_TYPE_UNSPECIFIED'
+                      - 'POINT_SIZE_TYPE_FIXED'
+                      - 'POINT_SIZE_TYPE_PROPORTIONAL_TO_SIZE'
+                  - name: color
+                    type: String
+          - name: thresholdColoringEnabled
+            type: Boolean
+            default_value: false
+          - name: visualMaps
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: visualMapType
+                  type: Enum
+                  enum_values:
+                    - 'VISUAL_MAP_TYPE_UNSPECIFIED'
+                    - 'CONTINUOUS'
+                    - 'PIECEWISE'
+                - name: pieces
+                  type: Array
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: min
+                        type: Integer
+                      - name: max
+                        type: Integer
+                      - name: color
+                        type: String
+                      - name: label
+                        type: String
+      - name: drillDownConfig
+        type: NestedObject
+        description: Drill down configuration.
+        properties:
+          - name: leftDrillDowns
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: id
+                  type: String
+                  required: true
+                - name: displayName
+                  type: String
+                  required: true
+                - name: defaultSettings
+                  type: NestedObject
+                  properties:
+                    - name: enabled
+                      type: Boolean
+                      required: true
+                - name: customSettings
+                  type: NestedObject
+                  properties:
+                    - name: newTab
+                      type: Boolean
+                      required: true
+                    - name: leftClickColumn
+                      type: String
+                    - name: query
+                      type: NestedObject
+                      properties:
+                        - name: query
+                          type: String
+                          required: true
+                    - name: filter
+                      type: NestedObject
+                      properties:
+                        - name: dashboardFilters
+                          type: Array
+                          required: true
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: dashboardFilterId
+                                type: String
+                                required: true
+                              - name: filterOperatorAndValues
+                                type: Array
+                                required: true
+                                item_type:
+                                  type: NestedObject
+                                  properties:
+                                    - name: fieldValues
+                                      type: Array
+                                      item_type:
+                                        type: String
+                                    - name: filterOperator
+                                      type: Enum
+                                      enum_values:
+                                        - 'EQUAL'
+                                        - 'NOT_EQUAL'
+                                        - 'IN'
+                                        - 'GREATER_THAN'
+                                        - 'GREATER_THAN_OR_EQUAL_TO'
+                                        - 'LESS_THAN'
+                                        - 'LESS_THAN_OR_EQUAL_TO'
+                                        - 'BETWEEN'
+                                        - 'PAST'
+                                        - 'IS_NULL'
+                                        - 'IS_NOT_NULL'
+                                        - 'STARTS_WITH'
+                                        - 'ENDS_WITH'
+                                        - 'DOES_NOT_STARTS_WITH'
+                                        - 'DOES_NOT_ENDS_WITH'
+                                        - 'NOT_IN'
+                                        - 'CONTAINS'
+                                        - 'DOES_NOT_CONTAIN'
+                    - name: externalLink
+                      type: NestedObject
+                      properties:
+                        - name: link
+                          type: String
+                          required: true
+                        - name: description
+                          type: String
+          - name: rightDrillDowns
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: id
+                  type: String
+                  required: true
+                - name: displayName
+                  type: String
+                  required: true
+                - name: defaultSettings
+                  type: NestedObject
+                  properties:
+                    - name: enabled
+                      type: Boolean
+                      required: true
+                - name: customSettings
+                  type: NestedObject
+                  properties:
+                    - name: newTab
+                      type: Boolean
+                      required: true
+                    - name: query
+                      type: NestedObject
+                      properties:
+                        - name: query
+                          type: String
+                          required: true
+                    - name: filter
+                      type: NestedObject
+                      properties:
+                        - name: dashboardFilters
+                          type: Array
+                          required: true
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: dashboardFilterId
+                                type: String
+                                required: true
+                              - name: filterOperatorAndValues
+                                type: Array
+                                required: true
+                                item_type:
+                                  type: NestedObject
+                                  properties:
+                                    - name: fieldValues
+                                      type: Array
+                                      item_type:
+                                        type: String
+                                    - name: filterOperator
+                                      type: Enum
+                                      enum_values:
+                                        - 'EQUAL'
+                                        - 'NOT_EQUAL'
+                                        - 'IN'
+                                        - 'GREATER_THAN'
+                                        - 'GREATER_THAN_OR_EQUAL_TO'
+                                        - 'LESS_THAN'
+                                        - 'LESS_THAN_OR_EQUAL_TO'
+                                        - 'BETWEEN'
+                                        - 'PAST'
+                                        - 'IS_NULL'
+                                        - 'IS_NOT_NULL'
+                                        - 'STARTS_WITH'
+                                        - 'ENDS_WITH'
+                                        - 'DOES_NOT_STARTS_WITH'
+                                        - 'DOES_NOT_ENDS_WITH'
+                                        - 'NOT_IN'
+                                        - 'CONTAINS'
+                                        - 'DOES_NOT_CONTAIN'
+                    - name: externalLink
+                      type: NestedObject
+                      properties:
+                        - name: link
+                          type: String
+                          required: true
+                        - name: description
+                          type: String
+      - name: etag
+        type: String
+        output: true
+        description: This checksum is computed by the server.

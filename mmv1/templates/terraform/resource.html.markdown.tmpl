@@ -84,8 +84,8 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 
 {{- if $.Samples }}
 	{{- range $sample := $.Samples }}
-		{{- range $step := $sample.Steps }}
-			{{- if not $step.ExcludeDocs }}
+		{{- range $index, $step := $sample.Steps }}
+			{{- if $step.ShouldGenerateDoc $index $sample }}
 				{{- if not (or $sample.ExcludeTest $step.TestEnvVars) }}
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="{{ $step.OiCSLink }}" target="_blank">

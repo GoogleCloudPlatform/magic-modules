@@ -53,7 +53,7 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
     - '{{task_id}}'
-custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'dataplex_task_basic'
     primary_resource_id: 'example'

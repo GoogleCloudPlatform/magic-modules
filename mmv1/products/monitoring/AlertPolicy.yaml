@@ -254,7 +254,6 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -548,7 +547,6 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -773,7 +771,6 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer

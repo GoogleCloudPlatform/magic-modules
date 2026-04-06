@@ -111,7 +111,6 @@ examples:
       subnetwork_name: subnet-purpose-test-subnetwork
   - name: subnetwork_resolve_subnet_mask
     primary_resource_id: subnetwork-resolve-subnet-mask
-    min_version: beta
     vars:
       network_name: subnet-resolve-subnet-mask-test-network
       subnetwork_name: subnet-resolve-subnet-mask-test-subnetwork
@@ -296,7 +295,7 @@ properties:
       **Note**: This field uses [attr-as-block mode](https://developer.hashicorp.com/terraform/language/attr-as-blocks) to avoid
       breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
       set `send_secondary_ip_range_if_empty = true`
-    update_verb: PATCH
+    update_verb: NOOP
     update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     update_id: secondaryIpRanges
     fingerprint_name: fingerprint
@@ -558,7 +557,6 @@ properties:
     description: |
       'Configures subnet mask resolution for this subnetwork.'
     immutable: true
-    min_version: beta
     enum_values:
       - ARP_ALL_RANGES
       - ARP_PRIMARY_RANGE

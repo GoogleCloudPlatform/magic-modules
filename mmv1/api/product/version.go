@@ -19,7 +19,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var ORDER = []string{"ga", "beta", "alpha", "private"}
+var ORDER = []string{"ga", "beta", "nightly", "alpha", "private", "internal"}
 
 // A version of the API for a given product / API group
 // In GCP, different product versions are generally ordered where alpha is

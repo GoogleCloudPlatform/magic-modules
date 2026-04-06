@@ -13,9 +13,7 @@ fields:
   - field: 'clone.preferred_zone'
   - field: 'clone.source_instance_deletion_time'
   - field: 'clone.source_instance_name'
-  {{- if ne $.TargetVersionName "ga" }}
   - field: 'clone.source_project'
-  {{- end }}
   - api_field: 'connectionName'
   - api_field: 'databaseVersion'
   - field: 'deletion_protection'
@@ -45,6 +43,7 @@ fields:
   - field: 'point_in_time_restore_context.target_instance'
   - field: 'point_in_time_restore_context.point_in_time'
   - field: 'point_in_time_restore_context.preferred_zone'
+  - field: 'point_in_time_restore_context.region'
   - api_field: 'ipAddresses.ipAddress'
     field: 'private_ip_address'
   - api_field: 'project'
@@ -169,6 +168,7 @@ fields:
   - api_field: 'settings.ipConfiguration.pscConfig.pscEnabled'
   - api_field: 'settings.ipConfiguration.serverCaMode'
   - api_field: 'settings.ipConfiguration.serverCaPool'
+  - api_field: 'settings.ipConfiguration.serverCertificateRotationMode'
   - api_field: 'settings.ipConfiguration.sslMode'
   - api_field: 'settings.locationPreference.followGaeApplication'
   - api_field: 'settings.locationPreference.secondaryZone'

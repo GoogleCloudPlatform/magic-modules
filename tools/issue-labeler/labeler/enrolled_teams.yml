@@ -297,6 +297,7 @@ service/compute-router:
 service/compute-security-policy:
   resources:
   - google_compute_network_edge_security_service
+  - google_compute_organization_security_policy.*
   - google_compute_region_security_policy.*
   - google_compute_security_policy.*
   - google_compute_project_cloud_armor_tier
@@ -595,7 +596,6 @@ service/network-security-distributed-firewall:
   - google_network_security_security_profile.*
   - google_compute_firewall.*
   - google_compute_network_firewall_policy.*
-  - google_compute_organization_security_policy.*
   - google_compute_region_network_firewall_policy.*
 service/networkconnectivity-private-range:
   resources:
@@ -606,6 +606,13 @@ service/networkconnectivity-serviceautomation:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networksecurity-intercept:
+  resources:
+  - google_network_security_intercept.*
+service/networksecurity-mirroring:
+  resources:
+  - google_network_security_mirroring.*
+  - google_network_security_ull_mirroring.*
 service/networksecurity-mtls:
   resources:
   - google_network_security_backend_authentication_config
@@ -615,10 +622,6 @@ service/networksecurity-swp:
   - google_network_security_gateway_security_policy_rule
   - google_network_security_url_lists
   - google_network_security_tls_inspection_policy
-service/networksecurityintegrations:
-  resources:
-  - google_network_security_mirroring.*
-  - google_network_security_intercept.*
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
@@ -791,6 +794,9 @@ service/websecurityscanner:
 service/workflows:
   resources:
   - google_workflows.*
+service/workloadidentity:
+  resources:
+  - google_workload_identity_.*
 service/workstations:
   resources:
   - google_workstations_.*
