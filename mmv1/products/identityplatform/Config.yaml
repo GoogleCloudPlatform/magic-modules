@@ -386,6 +386,7 @@ properties:
         type: Boolean
         description: |
           Whether this project can have tenants or not.
+        default_from_api: true
       - name: 'defaultTenantLocation'
         type: String
         description: |
