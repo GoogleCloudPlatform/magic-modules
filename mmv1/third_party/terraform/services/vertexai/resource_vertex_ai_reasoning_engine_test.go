@@ -622,7 +622,6 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 }
 `, context)
 }
-{{- end }}
 
 func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(t *testing.T) {
 	t.Parallel()
