@@ -24,6 +24,9 @@ func ResourceEndpointsService() *schema.Resource {
 		Read:   resourceEndpointsServiceRead,
 		Delete: resourceEndpointsServiceDelete,
 		Update: resourceEndpointsServiceUpdate,
+		Importer: &schema.ResourceImporter{
+			State: resourceEndpointsServiceImport,
+		},
 
 		// Migrates protoc_output -> protoc_output_base64.
 		SchemaVersion: 1,
@@ -435,4 +438,16 @@ func flattenServiceManagementEndpoints(endpoints []*servicemanagement.Endpoint) 
 		}
 	}
 	return flattened
+}
+
+func resourceEndpointsServiceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{
+		"(?P<service_name>[^/]+)",
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	d.SetId(d.Get("service_name").(string))
+	return []*schema.ResourceData{d}, nil
 }

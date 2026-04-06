@@ -189,6 +189,9 @@ func ResourceDataprocCluster() *schema.Resource {
 		Read:   resourceDataprocClusterRead,
 		Update: resourceDataprocClusterUpdate,
 		Delete: resourceDataprocClusterDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceDataprocClusterImport,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(45 * time.Minute),
@@ -3921,4 +3924,24 @@ func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
 		subminor: matches[3],
 		osName:   matches[4],
 	}, nil
+}
+
+func resourceDataprocClusterImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{
+		"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/clusters/(?P<name>[^/]+)",
+		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
+		"(?P<name>[^/]+)",
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	// We populate the id using the format Dataproc currently uses
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/clusters/{{name}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }
