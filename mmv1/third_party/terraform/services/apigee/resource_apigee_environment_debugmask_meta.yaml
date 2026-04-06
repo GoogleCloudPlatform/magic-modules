@@ -6,6 +6,7 @@ api_resource_type_kind: 'DebugMask'
 fields:
   - field: 'env_id'
   - api_field: 'faultXPaths'
+  - api_field: 'name'
   - api_field: 'namespaces'
   - api_field: 'requestJSONPaths'
   - api_field: 'requestXPaths'
