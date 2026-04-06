@@ -11,5 +11,7 @@ resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
   schema_settings {
     schema = "projects/{{index $.TestEnvVars "project_name"}}/schemas/{{index $.Vars "schema_name"}}"
     encoding = "JSON"
+    first_revision_id = "1"
+    last_revision_id = "2"
   }
 }
