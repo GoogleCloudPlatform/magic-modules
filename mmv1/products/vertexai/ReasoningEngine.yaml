@@ -150,6 +150,11 @@ properties:
   - name: 'description'
     type: String
     description: The description of the ReasoningEngine.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The labels associated with this ReasoningEngine. You can use these to
+      organize and group your ReasoningEngines.
 
   - name: 'createTime'
     type: String
