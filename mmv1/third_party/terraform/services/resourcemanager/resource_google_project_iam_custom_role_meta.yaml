@@ -12,3 +12,5 @@ fields:
   - field: 'role_id'
   - api_field: 'stage'
   - api_field: 'title'
+  - field: 'deletion_policy'
+    provider_only: true

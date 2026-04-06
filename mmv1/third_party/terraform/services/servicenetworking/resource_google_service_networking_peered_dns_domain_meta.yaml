@@ -10,3 +10,5 @@ fields:
   - field: 'parent'
   - field: 'project'
   - field: 'service'
+  - field: 'deletion_policy'
+    provider_only: true
