@@ -144,6 +144,14 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $st }},
 			{{- end }}
 			},
+			{{- if not $st.ExcludeIdentityImport }}
+			{
+				ResourceName:       "{{ $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+			{{- end }}
 			{{- end }}
 		{{- end }}
 		},
