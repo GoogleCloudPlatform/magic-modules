@@ -33,16 +33,19 @@ timeouts:
 examples:
   - name: 'parameter_version_basic'
     primary_resource_id: 'parameter-version-basic'
+    exclude_identity_import: true
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
   - name: 'parameter_version_with_json_format'
     primary_resource_id: 'parameter-version-with-json-format'
+    exclude_identity_import: true
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
   - name: 'parameter_version_with_kms_key'
     primary_resource_id: 'parameter-version-with-kms-key'
+    exclude_identity_import: true
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
@@ -54,11 +57,13 @@ examples:
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   - name: 'parameter_version_with_yaml_format'
     primary_resource_id: 'parameter-version-with-yaml-format'
+    exclude_identity_import: true
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
   - name: 'parameter_version_with_json_format_with_file'
     primary_resource_id: 'parameter-version-with-json-format-with-file'
+    exclude_identity_import: true
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
@@ -67,6 +72,7 @@ examples:
       'data': '"./test-fixtures/parameter_data_json_format.json"'
   - name: 'parameter_version_with_yaml_format_with_file'
     primary_resource_id: 'parameter-version-with-yaml-format-with-file'
+    exclude_identity_import: true
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
@@ -75,6 +81,7 @@ examples:
       'data': '"./test-fixtures/parameter_data_yaml_format.yaml"'
 custom_code:
   custom_import: 'templates/terraform/custom_import/parameter_manager_parameter_version.go.tmpl'
+exclude_identity_generation: true
 parameters:
   - name: 'parameter'
     type: ResourceRef

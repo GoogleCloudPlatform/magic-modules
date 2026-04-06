@@ -40,10 +40,13 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_generative_settings.go.tmpl'
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_generative_settings_full'
     primary_resource_id: 'full_generative_settings'
+    exclude_identity_import: true
     vars:
       agent_name: 'dialogflowcx-agent'
 parameters:

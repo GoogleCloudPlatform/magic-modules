@@ -3,6 +3,8 @@
 
 package networkconnectivity_test
 
+{{- if ne $.TargetVersionName "ga" }}
+
 import (
 	"fmt"
 	"log"
@@ -125,3 +127,5 @@ resource "google_network_connectivity_transport" "primary"  {
 }
 `, context)
 }
+
+{{- end }}
