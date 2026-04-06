@@ -64,7 +64,7 @@ examples:
     primary_resource_id: 'policy_rule_one'
     min_version: 'beta'
     vars:
-      sec_policy_name: 'policywithmultiplerules'
+      sec_policy_name: 'policywithmultiplerulesandbodyexclude'
       backend_name: 'backendpolicywithmultiplerules'
 parameters:
   - name: 'security_policy'
