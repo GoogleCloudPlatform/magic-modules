@@ -458,7 +458,6 @@ properties:
           Agent in the project will be used.
       - name: 'identityType'
         type: Enum
-        min_version: 'beta'
         description: |-
           Optional. The identity type to use for the Reasoning Engine.
           If not specified, the `service_account` field will be used if set,
@@ -471,7 +470,6 @@ properties:
           - 'AGENT_IDENTITY'
       - name: 'effectiveIdentity'
         type: String
-        min_version: 'beta'
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
