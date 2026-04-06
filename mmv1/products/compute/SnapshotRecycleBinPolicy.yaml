@@ -1,0 +1,83 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'SnapshotRecycleBinPolicy'
+description: |
+  Represents the singleton resource Snapshot Recycle Bin Policy that
+  configures the retention duration for snapshots in the recycle bin.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/compute/docs/disks/snapshot-recycle-bin-policy#snapshot_recycle_bin_policy_how_to_update'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshotRecycleBinPolicy'
+min_version: beta
+examples:
+  - name: 'snapshot_recycle_bin_policy_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    exclude_test: true
+  - name: 'snapshot_recycle_bin_policy_multiple'
+    primary_resource_id: 'multiple'
+    min_version: 'beta'
+    exclude_test: true
+base_url: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
+update_url: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
+immutable: false
+import_format:
+  - 'projects/{{project}}/global/snapshotRecycleBinPolicy/'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+custom_code:
+  encoder: 'templates/terraform/encoders/compute_snapshot_recycle_bin_policy.go.tmpl'
+# there is only a GET and PATCH endpoint
+exclude_delete: true
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+  result:
+    resource_inside_response: false
+parameters:
+properties:
+  - name: 'rules'
+    type: Map
+    description: |
+      The rules for the snapshot recycle bin policy. The key name is either 'default'
+      or namespaced name of the tag value which can be in the format:
+      {organization_id}/{tag_key_short_name}/{tag_value_short_name} or
+      {project_id}/{tag_key_short_name}/{tag_value_short_name} or
+      {project_number}/{tag_key_short_name}/{tag_value_short_name}. The default rule is
+      applied if snapshots do not have any of these tags. The value is the rule for the key.
+    key_name: 'name'
+    value_type:
+      type: NestedObject
+      properties:
+      - name: 'standardSnapshots'
+        type: NestedObject
+        description: The rule config for standard snapshots.
+        send_empty_value: true
+        properties:
+        - name: 'retentionDurationDays'
+          type: Integer
+          description: |
+            The retention duration for snapshots in the recycle bin after which the
+            snapshots are automatically deleted from recycle bin.
