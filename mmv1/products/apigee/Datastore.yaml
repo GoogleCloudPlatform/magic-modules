@@ -53,6 +53,19 @@ examples:
     exclude_docs: true
     skip_vcr: true
     external_providers: ["time"]
+  - name: 'apigee_datastore_bigquery'
+    vars:
+      display_name: 'my_bigquery_datastore'
+      dataset_id: 'my_analytics_dataset'
+    exclude_test: true
+  - name: 'apigee_datastore_bigquery_test'
+    primary_resource_id: 'apigee_datastore'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: 'orgId'
     type: String
