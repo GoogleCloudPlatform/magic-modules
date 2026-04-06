@@ -165,7 +165,6 @@ properties:
     type: NestedObject
     description: |
       The share setting for reservations.
-    ignore_read: true
     default_from_api: true
     properties:
       - name: 'shareType'
