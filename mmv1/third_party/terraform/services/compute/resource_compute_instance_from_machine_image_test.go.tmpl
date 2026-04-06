@@ -27,6 +27,7 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 	var instance compute.Instance
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
+	saAccountID := fmt.Sprintf("tf-machimg-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -35,7 +36,7 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceFromMachineImage_basic(instanceName, generatedInstanceName),
+				Config: testAccComputeInstanceFromMachineImage_basic(instanceName, generatedInstanceName, saAccountID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, resourceName, &instance),
 
@@ -394,8 +395,14 @@ func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) fu
 	}
 }
 
-func testAccComputeInstanceFromMachineImage_basic(instance, newInstance string) string {
+func testAccComputeInstanceFromMachineImage_basic(instance, newInstance, saAccountID string) string {
 	return fmt.Sprintf(`
+resource "google_service_account" "machimg" {
+  provider     = google-beta
+  account_id   = "%s"
+  display_name = "Terraform acc test machine image basic"
+}
+
 resource "google_compute_instance" "vm" {
   provider     = google-beta
 
@@ -410,6 +417,11 @@ resource "google_compute_instance" "vm" {
 
   network_interface {
     network = "default"
+  }
+
+  service_account {
+    email  = google_service_account.machimg.email
+    scopes = ["cloud-platform"]
   }
 
   metadata = {
@@ -436,6 +448,11 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 
   source_machine_image = google_compute_machine_image.foobar.self_link
 
+  service_account {
+    email  = google_service_account.machimg.email
+    scopes = ["cloud-platform"]
+  }
+
   // Overrides
   can_ip_forward = false
   labels = {
@@ -445,7 +462,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
     automatic_restart = false
   }
 }
-`, instance, instance, newInstance)
+`, saAccountID, instance, instance, newInstance)
 }
 
 func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnable(instance string, newInstance string) string {

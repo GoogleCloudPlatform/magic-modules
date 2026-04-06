@@ -1,0 +1,398 @@
+package compute
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+{{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
+{{- else }}
+	compute "google.golang.org/api/compute/v0.beta"
+{{- end }}
+)
+
+func TestIsBulkInsertCompatible(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		raw            map[string]interface{}
+		wantCompatible bool
+		wantReasonLike string
+	}{
+		{
+			name:           "basic compatible",
+			raw:            baseBulkInsertTestResourceData(),
+			wantCompatible: true,
+		},
+		{
+			name: "enable_display incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["enable_display"] = true
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "enable_display",
+		},
+		{
+			name: "boot disk csek incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["boot_disk"] = []interface{}{
+					map[string]interface{}{
+						"initialize_params": []interface{}{
+							map[string]interface{}{
+								"image": "debian-cloud/debian-11",
+							},
+						},
+						"disk_encryption_key_raw": "c2VjcmV0Cg==",
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "disk_encryption_key_raw",
+		},
+		{
+			name: "instance encryption key incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["instance_encryption_key"] = []interface{}{
+					map[string]interface{}{
+						"kms_key_self_link": "projects/p/locations/global/keyRings/r/cryptoKeys/k",
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "instance_encryption_key",
+		},
+		{
+			name: "boot disk snapshot incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["boot_disk"] = []interface{}{
+					map[string]interface{}{
+						"initialize_params": []interface{}{
+							map[string]interface{}{
+								"snapshot": "projects/p/global/snapshots/snap-1",
+							},
+						},
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "initialize_params.snapshot",
+		},
+		{
+			name: "boot disk resource policies incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["boot_disk"] = []interface{}{
+					map[string]interface{}{
+						"initialize_params": []interface{}{
+							map[string]interface{}{
+								"image":             "debian-cloud/debian-11",
+								"resource_policies": []interface{}{"projects/p/regions/us-central1/resourcePolicies/policy-1"},
+							},
+						},
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "resource_policies",
+		},
+		{
+			name: "boot disk zonal source incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["boot_disk"] = []interface{}{
+					map[string]interface{}{
+						"source": "https://www.googleapis.com/compute/v1/projects/p/zones/us-central1-a/disks/d1",
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "regional disk",
+		},
+		{
+			name: "boot disk force attach incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["boot_disk"] = []interface{}{
+					map[string]interface{}{
+						"initialize_params": []interface{}{
+							map[string]interface{}{
+								"image": "debian-cloud/debian-11",
+							},
+						},
+						"force_attach": true,
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "force_attach",
+		},
+		{
+			name: "attached disk read write incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["attached_disk"] = []interface{}{
+					map[string]interface{}{
+						"source": "projects/p/regions/us-central1/disks/reg-disk",
+						"mode":   "READ_WRITE",
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "READ_ONLY",
+		},
+		{
+			name: "attached zonal disk incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["attached_disk"] = []interface{}{
+					map[string]interface{}{
+						"source": "https://www.googleapis.com/compute/v1/projects/p/zones/us-central1-a/disks/d1",
+						"mode":   "READ_ONLY",
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "regional disk",
+		},
+		{
+			name: "network ip incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["network_interface"] = []interface{}{
+					map[string]interface{}{
+						"network":    "default",
+						"network_ip": "10.0.0.5",
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "network_ip",
+		},
+		{
+			name: "nat ip incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["network_interface"] = []interface{}{
+					map[string]interface{}{
+						"network": "default",
+						"access_config": []interface{}{
+							map[string]interface{}{
+								"nat_ip": "34.0.0.5",
+							},
+						},
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "nat_ip",
+		},
+		{
+			name: "public ptr domain incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["network_interface"] = []interface{}{
+					map[string]interface{}{
+						"network": "default",
+						"access_config": []interface{}{
+							map[string]interface{}{
+								"public_ptr_domain_name": "vm.example.com.",
+							},
+						},
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "public_ptr_domain_name",
+		},
+		{
+			name: "alias ip range incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["network_interface"] = []interface{}{
+					map[string]interface{}{
+						"network": "default",
+						"alias_ip_range": []interface{}{
+							map[string]interface{}{
+								"ip_cidr_range": "10.1.0.0/24",
+							},
+						},
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "alias_ip_range",
+		},
+		{
+			name: "igmp query incompatible",
+			raw: func() map[string]interface{} {
+				rd := baseBulkInsertTestResourceData()
+				rd["network_interface"] = []interface{}{
+					map[string]interface{}{
+						"network":    "default",
+						"igmp_query": "IGMP_QUERY_V2",
+					},
+				}
+				return rd
+			}(),
+			wantCompatible: false,
+			wantReasonLike: "igmp_query",
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			d := schema.TestResourceDataRaw(t, ResourceComputeInstance().Schema, tc.raw)
+			gotCompatible, gotReason := isBulkInsertCompatible(d)
+			if gotCompatible != tc.wantCompatible {
+				t.Fatalf("got compatible=%t, want %t (reason=%q)", gotCompatible, tc.wantCompatible, gotReason)
+			}
+			if tc.wantReasonLike != "" && !strings.Contains(gotReason, tc.wantReasonLike) {
+				t.Fatalf("got reason %q, expected to contain %q", gotReason, tc.wantReasonLike)
+			}
+		})
+	}
+}
+
+func TestInstanceToInstancePropertiesSanitizes(t *testing.T) {
+	t.Parallel()
+
+	instance := &compute.Instance{
+		Name:        "vm-1",
+		CanIpForward: true,
+		MachineType: "https://www.googleapis.com/compute/v1/projects/test-p/zones/us-central1-a/machineTypes/e2-medium",
+		Disks: []*compute.AttachedDisk{
+			{
+				Source: "/projects/test-p/regions/us-central1/disks/disk-1",
+				DiskEncryptionKey: &compute.CustomerEncryptionKey{
+					RawKey:         "raw",
+					RsaEncryptedKey: "rsa",
+				},
+				InitializeParams: &compute.AttachedDiskInitializeParams{
+					DiskType: "https://www.googleapis.com/compute/v1/projects/test-p/zones/us-central1-a/diskTypes/pd-ssd",
+					SourceImageEncryptionKey: &compute.CustomerEncryptionKey{
+						RawKey:         "img-raw",
+						RsaEncryptedKey: "img-rsa",
+					},
+					SourceSnapshotEncryptionKey: &compute.CustomerEncryptionKey{
+						RawKey:         "snap-raw",
+						RsaEncryptedKey: "snap-rsa",
+					},
+				},
+			},
+		},
+		GuestAccelerators: []*compute.AcceleratorConfig{
+			{
+				AcceleratorType:  "https://www.googleapis.com/compute/v1/projects/test-p/zones/us-central1-a/acceleratorTypes/nvidia-tesla-t4",
+				AcceleratorCount: 1,
+			},
+		},
+		ResourcePolicies: []string{
+			"https://www.googleapis.com/compute/v1/projects/test-p/regions/us-central1/resourcePolicies/policy-a",
+		},
+		NetworkInterfaces: []*compute.NetworkInterface{
+			{Network: "global/networks/default"},
+		},
+		Params: &compute.InstanceParams{
+			ResourceManagerTags: map[string]string{
+				"tagKeys/111": "tagValues/222",
+			},
+		},
+	}
+
+	props := instanceToInstanceProperties(instance)
+	if props.MachineType != "e2-medium" {
+		t.Fatalf("got machine type %q, want %q", props.MachineType, "e2-medium")
+	}
+	if props.Disks[0].DiskEncryptionKey.RawKey != "" || props.Disks[0].DiskEncryptionKey.RsaEncryptedKey != "" {
+		t.Fatalf("expected disk encryption key raw/rsa to be stripped, got %+v", props.Disks[0].DiskEncryptionKey)
+	}
+	if props.Disks[0].InitializeParams.DiskType != "pd-ssd" {
+		t.Fatalf("got disk type %q, want %q", props.Disks[0].InitializeParams.DiskType, "pd-ssd")
+	}
+	if props.GuestAccelerators[0].AcceleratorType != "nvidia-tesla-t4" {
+		t.Fatalf("got accelerator type %q, want %q", props.GuestAccelerators[0].AcceleratorType, "nvidia-tesla-t4")
+	}
+	if len(props.ResourcePolicies) != 1 || props.ResourcePolicies[0] != "policy-a" {
+		t.Fatalf("unexpected resource policies: %#v", props.ResourcePolicies)
+	}
+	if props.ResourceManagerTags["tagKeys/111"] != "tagValues/222" {
+		t.Fatalf("resource manager tags were not copied: %#v", props.ResourceManagerTags)
+	}
+
+}
+
+func TestAssertExpectedCreateBackend(t *testing.T) {
+	tests := []struct {
+		name           string
+		expected       string
+		usedBulkInsert bool
+		wantErr        bool
+	}{
+		{name: "unset no-op", expected: "", usedBulkInsert: true, wantErr: false},
+		{name: "bulk expected bulk selected", expected: "bulk", usedBulkInsert: true, wantErr: false},
+		{name: "bulk expected insert selected", expected: "bulk", usedBulkInsert: false, wantErr: true},
+		{name: "insert expected insert selected", expected: "insert", usedBulkInsert: false, wantErr: false},
+		{name: "insert expected bulk selected", expected: "insert", usedBulkInsert: true, wantErr: true},
+		{name: "invalid expected value", expected: "whatever", usedBulkInsert: true, wantErr: true},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.expected != "" {
+				t.Setenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND", tc.expected)
+			}
+			err := assertExpectedCreateBackend(tc.usedBulkInsert)
+			if tc.wantErr && err == nil {
+				t.Fatalf("expected error but got nil")
+			}
+			if !tc.wantErr && err != nil {
+				t.Fatalf("expected nil error but got %v", err)
+			}
+		})
+	}
+}
+
+func baseBulkInsertTestResourceData() map[string]interface{} {
+	return map[string]interface{}{
+		"name":         "vm-test",
+		"machine_type": "e2-medium",
+		"zone":         "us-central1-a",
+		"boot_disk": []interface{}{
+			map[string]interface{}{
+				"initialize_params": []interface{}{
+					map[string]interface{}{
+						"image": "debian-cloud/debian-11",
+					},
+				},
+			},
+		},
+		"network_interface": []interface{}{
+			map[string]interface{}{
+				"network": "default",
+			},
+		},
+	}
+}
