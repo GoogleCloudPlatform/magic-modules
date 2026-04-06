@@ -193,13 +193,12 @@ resource "google_identity_platform_config" "basic" {
 }
 
 func TestAccIdentityPlatformConfig_multiTenantUnset(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":           envvar.GetTestOrgFromEnv(t),
-		"billing_acct":     envvar.GetTestBillingAccountFromEnv(t),
-		"random_suffix":    acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"billing_acct":  envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
