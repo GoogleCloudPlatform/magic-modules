@@ -51,6 +51,7 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service}}'
     - '{{service}}'
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/cloud_run_service.go.tmpl'
   encoder: 'templates/terraform/encoders/cloud_run_service.go.tmpl'
