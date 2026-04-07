@@ -59,7 +59,7 @@ samples:
 > In the old `examples` block, any key placed under `vars` was automatically appended with a random suffix (for example, `example-topic-12345`). If you wanted to pass a plain value (without random suffixes), you had to use `test_vars_overrides`.
 >
 > In the new `samples` format, these two use cases are explicitly separated into different fields within a step:
-> * **`resource_id_vars`**: Use this for variables like resource names that need random strings appended to avoid test collisions (corresponds to old `vars`).
+> * **`resource_id_vars`**: **Use this exclusively for resource identifier variables (such as resource names or IDs).** It will automatically prepend a `tf-test` (or `tf_test`) prefix and append a random suffix. If a resource identifier doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
 > * **`vars`**: Use this for plain literal values that should be passed to the test exactly as written (replaces the need for `test_vars_overrides`). **Note:** This should ONLY be used for fields that vary between steps (for example, to test update functionality). Constant values should be hardcoded directly in the `.tf.tmpl` file.
 
 ### Update Test Comparison

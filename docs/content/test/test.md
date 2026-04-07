@@ -87,7 +87,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
 1. Add an entry to your `RESOURCE_NAME.yaml` file's `samples` list. Each sample can contain multiple steps. The first step will generate a `create` test, and any subsequent steps will generate `update` tests. For a comprehensive reference, see [MMv1 sample reference ↗]({{< ref "/reference/sample" >}}).
 
    When defining variables for your steps, follow these guidelines:
-   - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values defined here must contain at least one `-` or `_` to automatically receive a `tf-test` (or `tf_test`) prefix and random suffix. This ensures they are picked up by resource sweepers for cleanup and avoids collisions.
+   - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values automatically receive a `tf-test` prefix and random suffix, unless they contain an underscore `_`, in which case they receive a `tf_test` prefix and random suffix. If a resource name doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
    - **Use `vars` only for fields that vary between steps** (for example, to test the update functionality of specific fields).
    - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Don't use `vars` for values that remain constant across all steps.
    ```yaml
