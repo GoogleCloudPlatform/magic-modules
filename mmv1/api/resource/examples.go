@@ -317,7 +317,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 			newVal = fmt.Sprintf("tf_test_%s", value)
 		} else {
 			// Some vars like descriptions shouldn't have prefix
-			newVal = value
+			newVal = fmt.Sprintf("tf-test-%s", value)
 		}
 		// Random suffix is 10 characters and standard name length <= 64
 		if len(newVal) > 54 {
