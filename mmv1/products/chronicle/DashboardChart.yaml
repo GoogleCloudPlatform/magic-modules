@@ -34,6 +34,7 @@ delete_verb: POST
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts/{{chart_id}}
 
+flatten_all_in_method: true
 custom_code:
   pre_delete: "templates/terraform/pre_delete/chronicle_dashboard_chart.go.tmpl"
   pre_update: "templates/terraform/pre_update/chronicle_dashboard_chart_dashboard_query.go.tmpl"

@@ -29,6 +29,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/resource_compute_firewall_policy_with_rules.go.tmpl'
   encoder: 'templates/terraform/encoders/resource_compute_firewall_policy_with_rules.go.tmpl'
