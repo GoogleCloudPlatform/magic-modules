@@ -40,6 +40,7 @@ error_retry_predicates:
 schema_version: 1
 state_upgraders: true
 cai_asset_name_format: projects/{{project}}/locations/{{location}}/domainmappings/{{name}}
+flatten_all_in_method: true
 custom_code:
   encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
   decoder: templates/terraform/decoders/cloud_run.go.tmpl

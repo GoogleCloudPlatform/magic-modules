@@ -27,6 +27,7 @@ create_url: projects/{{project}}/patchDeployments?patchDeploymentId={{patch_depl
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
+flatten_all_in_method: true
 custom_code:
   encoder: templates/terraform/encoders/os_config_patch_deployment.go.tmpl
   decoder: templates/terraform/decoders/os_config_patch_deployment.go.tmpl
