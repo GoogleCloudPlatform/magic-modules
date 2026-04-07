@@ -36,6 +36,7 @@ id_format: '{{project}}/{{region}}/{{disk}}/{{name}}'
 async:
   operation:
     base_url: '{{op_id}}'
+flatten_all_in_method: true
 custom_code:
   encoder: templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.tmpl
   decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl
