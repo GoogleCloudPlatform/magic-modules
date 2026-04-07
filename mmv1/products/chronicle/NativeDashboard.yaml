@@ -38,6 +38,9 @@ examples:
     vars:
       dashboard_name: 'dashboard'
       dashboard_description: 'dashboard_description'
+    test_vars_overrides:
+      # for backward compatible
+      dashboard_name: '"dashboard" + randomSuffix'
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
 

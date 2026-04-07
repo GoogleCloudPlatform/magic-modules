@@ -39,6 +39,11 @@ examples:
       log_scope_name: 'my-log-scope'
       log_view_name_1: 'view1'
       log_view_name_2: 'view2'
+    test_vars_overrides:
+      # for backward compatible
+      log_view_name_1: '"view1" + randomSuffix'
+      # for backward compatible
+      log_view_name_2: '"view2" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
 parameters:

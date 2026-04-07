@@ -40,6 +40,11 @@ examples:
       developer_app_name: "sample-app"
       developer_email: "john.doe@acme.com"
       instance_name: "instance"
+    test_vars_overrides:
+      # for backward compatible
+      developer_email: '"john.doe@acme.com" + randomSuffix'
+      # for backward compatible
+      instance_name: '"instance" + randomSuffix'
     exclude_test: true
   - name: "apigee_developer_app_basic_test"
     primary_resource_id: "apigee_developer_app"
@@ -49,6 +54,13 @@ examples:
       developer_email: "john.doe@acme.com"
       instance_name: "instance"
       project_name: "prj"
+    test_vars_overrides:
+      # for backward compatible
+      developer_email: '"john.doe@acme.com" + randomSuffix'
+      # for backward compatible
+      instance_name: '"instance" + randomSuffix'
+      # for backward compatible
+      project_name: '"prj" + randomSuffix'
     test_env_vars:
       org_id: "ORG_ID"
       billing_account: "BILLING_ACCT"
