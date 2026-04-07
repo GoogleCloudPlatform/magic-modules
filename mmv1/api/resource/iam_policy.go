@@ -47,6 +47,13 @@ type IamPolicy struct {
 	// as its IAM policies refer to compute resources.
 	ParentResourceType string `yaml:"parent_resource_type,omitempty"`
 
+	// By default, the parent resource id is stored as the full self link format
+	// ie. project/{{project}}/resource/{{resource}}. Setting this to true will
+	// instead use the short format ie. {{resource}}. The IAP product needs these
+	// for IAM policies that behave as singletons (their parent is often a
+	// project or location).
+	UseShortFormatForParent string `yaml:"use_short_format_for_parent,omitempty"`
+
 	// Some resources allow retrieving the IAM policy with GET requests,
 	// others expect POST requests
 	FetchIamPolicyVerb string `yaml:"fetch_iam_policy_verb,omitempty"`
