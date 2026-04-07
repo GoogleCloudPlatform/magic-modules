@@ -428,14 +428,6 @@ func SetEndpointDefaults(d *schema.ResourceData) error {
 		}, DefaultBasePaths[ResourceManagerV3BasePathKey]))
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
-	if d.Get(RuntimeConfigCustomEndpointEntryKey) == "" {
-		d.Set(RuntimeConfigCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[RuntimeConfigBasePathKey]))
-	}
-	{{- end }}
-
 	if d.Get(IAMCustomEndpointEntryKey) == "" {
 		d.Set(IAMCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_IAM_CUSTOM_ENDPOINT",

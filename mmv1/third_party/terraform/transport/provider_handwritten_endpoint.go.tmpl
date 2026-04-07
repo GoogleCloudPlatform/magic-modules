@@ -44,15 +44,6 @@ var ResourceManagerV3CustomEndpointEntry = &schema.Schema{
 	ValidateFunc: ValidateCustomEndpoint,
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-var RuntimeConfigCustomEndpointEntryKey = "runtimeconfig_custom_endpoint"
-var RuntimeConfigCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-{{- end }}
-
 var TagsLocationCustomEndpointEntryKey = "tags_location_custom_endpoint"
 var TagsLocationCustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
