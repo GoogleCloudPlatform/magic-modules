@@ -16,7 +16,11 @@ package provider
 import (
 	"reflect"
 	"testing"
+	"testing/fstest"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 )
+
 
 func TestFindIdentityParams(t *testing.T) {
 	cases := []struct {
@@ -125,3 +129,55 @@ func TestFindIdentityParams(t *testing.T) {
 		})
 	}
 }
+
+func TestAddTestsFromHandwrittenTests(t *testing.T) {
+	mockFS := fstest.MapFS{
+		"third_party/terraform/services/dummy/resource_dummy_dummy_test.go": &fstest.MapFile{
+			Data: []byte(`func TestAccDummy_basic(t *testing.T) {}`),
+		},
+		"third_party/terraform/services/dummy/resource_dummy_dummy_extra_test.go": &fstest.MapFile{
+			Data: []byte(`func TestAccDummy_extra(t *testing.T) {}`),
+		},
+	}
+
+	tgc := TerraformGoogleConversionNext{
+		Product: &api.Product{
+			Name: "Dummy",
+		},
+		templateFS: mockFS,
+	}
+
+	object := &api.Resource{
+		Name:             "DummyResource",
+		FilenameOverride: "dummy",
+		ProductMetadata: &api.Product{
+			Name: "Dummy",
+		},
+	}
+
+	err := tgc.addTestsFromHandwrittenTests(object)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedTests := []string{"TestAccDummy_basic", "TestAccDummy_extra"}
+	if len(object.TGCTests) != len(expectedTests) {
+		t.Errorf("expected %d tests, got %d", len(expectedTests), len(object.TGCTests))
+	}
+
+	foundBasic := false
+	foundExtra := false
+	for _, test := range object.TGCTests {
+		if test.Name == "TestAccDummy_basic" {
+			foundBasic = true
+		}
+		if test.Name == "TestAccDummy_extra" {
+			foundExtra = true
+		}
+	}
+
+	if !foundBasic || !foundExtra {
+		t.Errorf("did not find all expected tests. object.TGCTests: %v", object.TGCTests)
+	}
+}
+

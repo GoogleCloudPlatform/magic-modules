@@ -353,19 +353,15 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	}
 	productName := strings.ToLower(tgc.Product.Name)
 	resourceFullName := tgc.ResourceGoFilename(*object)
-	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
-	data, err := fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
-	for err != nil {
+	dirPath := fmt.Sprintf("third_party/terraform/services/%s", productName)
+
+	entries, err := fs.ReadDir(tgc.templateFS, dirPath)
+	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
-				log.Printf("no handwritten test file found for %s", resourceFullName)
-				return nil
-			}
-			handwrittenTestFilePath += ".tmpl"
-			data, err = fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
-		} else {
-			return fmt.Errorf("error reading handwritten test file %s: %v", handwrittenTestFilePath, err)
+			log.Printf("directory not found: %s", dirPath)
+			return nil
 		}
+		return fmt.Errorf("error reading directory %s: %v", dirPath, err)
 	}
 
 	// Skip adding handwritten tests that are already defined in yaml (because they have custom overrides etc.)
@@ -376,16 +372,48 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 		}
 	}
 
-	matches := testRegex.FindAllSubmatch(data, -1)
 	tests := make([]resource.TGCTest, 0)
-	for _, match := range matches {
-		if len(match) == 2 {
-			if _, ok := testNamesInYAML[string(match[1])]; ok {
-				continue
+	prefix := fmt.Sprintf("resource_%s", resourceFullName)
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if !strings.HasPrefix(name, prefix) {
+			continue
+		}
+		if !strings.HasSuffix(name, "_test.go") && !strings.HasSuffix(name, "_test.go.tmpl") {
+			continue
+		}
+
+		filePath := path.Join(dirPath, name)
+		data, err := fs.ReadFile(tgc.templateFS, filePath)
+		if err != nil {
+			return fmt.Errorf("error reading handwritten test file %s: %v", filePath, err)
+		}
+
+		matches := testRegex.FindAllSubmatch(data, -1)
+		for _, match := range matches {
+			if len(match) == 2 {
+				testName := string(match[1])
+				if _, ok := testNamesInYAML[testName]; ok {
+					continue
+				}
+				// Avoid duplicates if multiple files have same test name
+				alreadyAdded := false
+				for _, t := range tests {
+					if t.Name == testName {
+						alreadyAdded = true
+						break
+					}
+				}
+				if !alreadyAdded {
+					tests = append(tests, resource.TGCTest{
+						Name: testName,
+					})
+				}
 			}
-			tests = append(tests, resource.TGCTest{
-				Name: string(match[1]),
-			})
 		}
 	}
 
