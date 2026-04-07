@@ -52,6 +52,7 @@ include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccComputeBackendService_backendServiceCustomMetrics_update'
     skip: 'Test framework problem with single vs multiple block parsing of custom_metrics'
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/backend_service.go.tmpl'
