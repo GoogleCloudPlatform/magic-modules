@@ -47,9 +47,6 @@ async:
 identity:
   - appId
   - name
-custom_code:
-  custom_delete: 'templates/terraform/custom_delete/firebase_app_deletion_policy.tmpl'
-deletion_policy_exclude: true
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
@@ -77,14 +74,6 @@ examples:
     ignore_read_extra:
       - 'project'
       - 'deletion_policy'
-virtual_fields:
-  - name: 'deletion_policy'
-    description: |
-      Set to `ABANDON` to allow the WebApp to be untracked from terraform state
-      rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be
-      serving traffic. Set to `DELETE` to delete the WebApp. Default to `DELETE`
-    type: String
-    default_value: "DELETE"
 parameters:
 properties:
   - name: 'name'
