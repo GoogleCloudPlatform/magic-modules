@@ -287,9 +287,14 @@ type Resource struct {
 	// public ca external account keys
 	ExcludeRead bool `yaml:"exclude_read,omitempty"`
 
-	// Set to true for resources that are to generate deletion policy fields by default
-	// TODO: this will be inverted to an opt-out flag very soon
+	// Set to true for resources that are excluded from universal deletion policy due to differing
+	// behavior on a universal option or use a different data type
 	DeletionPolicyExclude bool `yaml:"deletion_policy_exclude,omitempty"`
+
+	// Set to true for resources that have deletion policy fields with custom options that are
+	// compatible with the universal deletion policy
+	// if set to true, use implement `deletion_policy` within the yaml of the resource
+	DeletionPolicyCustomDocs bool `yaml:"deletion_policy_custom_docs,omitempty"`
 
 	// Set to the default deletion policy value for the resource.
 	// By default this will be "DELETE".

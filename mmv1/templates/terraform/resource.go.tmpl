@@ -181,7 +181,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{template "SchemaFields" $prop -}}
 			{{- end }}
             {{- range $prop := $.VirtualFields }}
+            {{- if not $prop.Exclude }}
 {{template "SchemaFields" $prop -}}
+            {{- end }}
             {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
     {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
@@ -205,6 +207,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 Type:     schema.TypeString,
                 Optional: true,
                 Computed: true,
+    {{- if $.DeletionPolicyCustomDocs}}
+                Description: `This field uses a custom implementation please refer to documentation for specifics`,
+    {{else}}
                 Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
 When a 'terraform destroy' or 'terraform apply' would delete the instance,
 the command will fail if this field is set to "PREVENT" in Terraform state.
@@ -212,6 +217,7 @@ When set to "ABANDON", the command will remove the resource from Terraform
 management without updating or deleting the resource in the API.
 When set to "DELETE", deleting the resource is allowed.
 `,
+    {{- end}}
             },
 {{- end}}
         },
