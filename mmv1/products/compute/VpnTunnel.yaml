@@ -46,6 +46,7 @@ examples:
       udp4500_forwarding_rule_name: fr-udp4500
       vpn_tunnel_name: tunnel-1
     test_vars_overrides:
+      # for backward compatible
       route_name: '"route1" + randomSuffix'
   - name: vpn_tunnel_cipher_suite
     primary_resource_id: tunnel1
@@ -59,6 +60,7 @@ examples:
       udp4500_forwarding_rule_name: fr-udp4500
       vpn_tunnel_name: tunnel-cipher
     test_vars_overrides:
+      # for backward compatible
       route_name: '"route1" + randomSuffix'
 parameters:
   - name: region

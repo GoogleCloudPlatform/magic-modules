@@ -55,6 +55,7 @@ examples:
       name: 'workflow'
       account_id: 'my-account'
     test_vars_overrides:
+      # for backward compatible
       name: '"workflow" + randomSuffix'
     exclude_import_test: true
     ignore_read_extra:
@@ -67,6 +68,7 @@ examples:
       tag_key: 'tag_key'
       tag_value: 'tag_value'
     test_vars_overrides:
+      # for backward compatible
       name: '"workflow" + randomSuffix'
     exclude_import_test: true
     ignore_read_extra:

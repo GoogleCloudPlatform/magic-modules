@@ -51,6 +51,7 @@ examples:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
     test_vars_overrides:
+      # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_identity_import: true
   - name: 'bigquery_dataset_with_max_time_travel_hours'
@@ -59,6 +60,7 @@ examples:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
     test_vars_overrides:
+      # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
     exclude_identity_import: true
@@ -77,8 +79,11 @@ examples:
       public: 'public'
       account_name: 'bqowner'
     test_vars_overrides:
+      # for backward compatible
       private: '"private" + randomSuffix'
+      # for backward compatible
       public: '"public" + randomSuffix'
+      # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_identity_import: true
   - name: 'bigquery_dataset_authorized_routine'
@@ -96,6 +101,7 @@ examples:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
     test_vars_overrides:
+      # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
     exclude_identity_import: true
@@ -105,6 +111,7 @@ examples:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
     test_vars_overrides:
+      # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
     exclude_identity_import: true
@@ -128,6 +135,7 @@ examples:
       tag_key2: 'tag_key2'
       tag_value2: 'tag_value2'
     test_vars_overrides:
+      # for backward compatible
       dataset_id: '"dataset" + randomSuffix'
     exclude_docs: true
     exclude_identity_import: true

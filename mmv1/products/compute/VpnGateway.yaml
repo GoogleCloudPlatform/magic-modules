@@ -53,7 +53,9 @@ examples:
       vpn_tunnel_name: 'tunnel1'
       route_name: 'route1'
     test_vars_overrides:
+      # for backward compatible
       vpn_tunnel_name: '"tunnel1" + randomSuffix'
+      # for backward compatible
       route_name: '"route1" + randomSuffix'
   - name: 'target_vpn_gateway_tags'
     primary_resource_id: 'target_gateway_tags'
@@ -73,7 +75,9 @@ examples:
       'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
       'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
       'org_id': 'envvar.GetTestOrgFromEnv(t)'
+      # for backward compatible
       vpn_tunnel_name: '"tunnel1" + randomSuffix'
+      # for backward compatible
       route_name: '"route1" + randomSuffix'
 parameters:
   - name: 'region'

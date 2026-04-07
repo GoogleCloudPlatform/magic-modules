@@ -117,6 +117,7 @@ examples:
       zone_name: 'peering-zone'
       network_name: 'network'
     test_vars_overrides:
+      # for backward compatible
       network_name: '"network" + randomSuffix'
   - name: 'dns_managed_zone_cloud_logging'
     primary_resource_id: 'cloud-logging-enabled-zone'

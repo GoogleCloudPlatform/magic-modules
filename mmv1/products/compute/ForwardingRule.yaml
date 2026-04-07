@@ -142,6 +142,7 @@ examples:
       service_name: 'service'
       health_check_name: 'health-check'
     test_vars_overrides:
+      # for backward compatible
       service_name: '"service" + randomSuffix'
   - name: 'forwarding_rule_internallb'
     primary_resource_id: 'default'

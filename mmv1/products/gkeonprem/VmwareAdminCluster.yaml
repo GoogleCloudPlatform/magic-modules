@@ -44,6 +44,7 @@ examples:
     vars:
       name: "basic"
     test_vars_overrides:
+      # for backward compatible
       name: '"basic" + randomSuffix'
     test_env_vars:
       project: "fake-backend-360322"
@@ -52,6 +53,7 @@ examples:
     vars:
       name: 'full'
     test_vars_overrides:
+      # for backward compatible
       name: '"full" + randomSuffix'
     test_env_vars:
       project: 'fake-backend-360322'
@@ -60,6 +62,7 @@ examples:
     vars:
       name: 'metallb'
     test_vars_overrides:
+      # for backward compatible
       name: '"metallb" + randomSuffix'
     test_env_vars:
       project: 'fake-backend-360322'

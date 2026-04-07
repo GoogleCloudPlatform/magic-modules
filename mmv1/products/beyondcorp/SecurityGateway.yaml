@@ -37,6 +37,7 @@ examples:
     vars:
       security_gateway_name: default
     test_vars_overrides:
+      # for backward compatible
       security_gateway_name: '"default" + randomSuffix'
   - name: beyondcorp_security_gateway_logging
     primary_resource_id: example-logging

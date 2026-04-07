@@ -50,9 +50,13 @@ examples:
       backend_name: 'backend'
       healthcheck_name: 'healthcheck'
     test_vars_overrides:
+      # for backward compatible
       proxy_name: '"proxy" + randomSuffix'
+      # for backward compatible
       urlmap_name: '"urlmap" + randomSuffix'
+      # for backward compatible
       backend_name: '"backend" + randomSuffix'
+      # for backward compatible
       healthcheck_name: '"healthcheck" + randomSuffix'
 parameters:
 properties:

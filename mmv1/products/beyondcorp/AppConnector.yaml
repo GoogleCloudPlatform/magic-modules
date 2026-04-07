@@ -56,6 +56,7 @@ examples:
       account_id: 'my-account'
       display_name: 'some display name'
     test_vars_overrides:
+      # for backward compatible
       display_name: '"some display name" + randomSuffix'
 parameters:
 properties:

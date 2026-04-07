@@ -49,6 +49,7 @@ examples:
     vars:
       display_name: 'Example Billing Budget'
     test_vars_overrides:
+      # for backward compatible
       display_name: '"Example Billing Budget" + randomSuffix'
     test_env_vars:
       billing_acct: 'MASTER_BILLING_ACCT'
@@ -57,6 +58,7 @@ examples:
     vars:
       display_name: 'Example Billing Budget'
     test_vars_overrides:
+      # for backward compatible
       display_name: '"Example Billing Budget" + randomSuffix'
     test_env_vars:
       billing_acct: 'MASTER_BILLING_ACCT'
@@ -65,6 +67,7 @@ examples:
     vars:
       display_name: 'Example Billing Budget'
     test_vars_overrides:
+      # for backward compatible
       display_name: '"Example Billing Budget" + randomSuffix'
     test_env_vars:
       billing_acct: 'MASTER_BILLING_ACCT'
@@ -75,7 +78,9 @@ examples:
       budget_name: 'Example Billing Budget'
       channel_name: 'Example Notification Channel'
     test_vars_overrides:
+      # for backward compatible
       budget_name: '"Example Billing Budget" + randomSuffix'
+      # for backward compatible
       channel_name: '"Example Notification Channel" + randomSuffix'
     test_env_vars:
       billing_acct: 'MASTER_BILLING_ACCT'
@@ -84,6 +89,7 @@ examples:
     vars:
       budget_name: 'Example Billing Budget'
     test_vars_overrides:
+      # for backward compatible
       budget_name: '"Example Billing Budget" + randomSuffix'
     test_env_vars:
       billing_acct: 'MASTER_BILLING_ACCT'
@@ -92,6 +98,7 @@ examples:
     vars:
       display_name: 'Example Billing Budget'
     test_vars_overrides:
+      # for backward compatible
       display_name: '"Example Billing Budget" + randomSuffix'
     test_env_vars:
       billing_acct: 'MASTER_BILLING_ACCT'
@@ -101,6 +108,7 @@ examples:
       display_name: 'Example Billing Budget'
       topic_name: 'example-topic'
     test_vars_overrides:
+      # for backward compatible
       display_name: '"Example Billing Budget" + randomSuffix'
     test_env_vars:
       billing_acct: 'MASTER_BILLING_ACCT'

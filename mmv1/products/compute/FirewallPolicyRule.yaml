@@ -55,6 +55,7 @@ examples:
       tag_key: 'tag-key'
       tag_value: 'tag-value'
     test_vars_overrides:
+      # for backward compatible
       folder: '"folder" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -68,7 +69,9 @@ examples:
       tag_key: 'tag-key'
       tag_value: 'tag-value'
     test_vars_overrides:
+      # for backward compatible
       folder: '"folder" + randomSuffix'
+      # for backward compatible
       network: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -82,7 +85,9 @@ examples:
       tag_key: 'tag-key'
       tag_value: 'tag-value'
     test_vars_overrides:
+      # for backward compatible
       folder: '"folder" + randomSuffix'
+      # for backward compatible
       network: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -94,6 +99,7 @@ examples:
       tag_key: 'tag-key'
       tag_value: 'tag-value'
     test_vars_overrides:
+      # for backward compatible
       folder: '"folder" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'

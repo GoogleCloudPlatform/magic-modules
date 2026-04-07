@@ -45,6 +45,7 @@ examples:
       network_name: 'net-spoke'
       hub_name: 'hub'
     test_vars_overrides:
+      # for backward compatible
       hub_name: '"hub" + randomSuffix'
 parameters:
   - name: 'location'

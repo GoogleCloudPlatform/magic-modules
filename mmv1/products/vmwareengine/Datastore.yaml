@@ -41,6 +41,7 @@ examples:
       resource_name: filestore-datastore
       network_name: default
     test_vars_overrides:
+      # for backward compatible
       network_name: '"default" + randomSuffix'
     test_env_vars:
       region: "REGION"
@@ -54,6 +55,7 @@ examples:
       resource_name: netapp-datastore
       network_name: default
     test_vars_overrides:
+      # for backward compatible
       network_name: '"default" + randomSuffix'
     test_env_vars:
       region: "REGION"

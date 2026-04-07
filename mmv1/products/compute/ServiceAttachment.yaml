@@ -112,6 +112,7 @@ examples:
     vars:
       name: 'sa'
     test_vars_overrides:
+      # for backward compatible
       name: '"sa" + randomSuffix'
 parameters:
   - name: 'region'

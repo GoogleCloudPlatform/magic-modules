@@ -61,6 +61,7 @@ examples:
       tag_key: 'tag-key'
       tag_value: 'tag-value'
     test_vars_overrides:
+      # for backward compatible
       network: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -82,6 +83,7 @@ examples:
       fw_policy: 'fw-policy'
       network: 'network'
     test_vars_overrides:
+      # for backward compatible
       network: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -102,6 +104,7 @@ examples:
       fw_policy: 'fw-policy'
       network: 'network'
     test_vars_overrides:
+      # for backward compatible
       network: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -114,6 +117,7 @@ examples:
       folder: 'folder'
       fw_policy: 'fw-policy'
     test_vars_overrides:
+      # for backward compatible
       folder: '"folder" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'

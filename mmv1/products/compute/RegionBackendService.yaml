@@ -133,6 +133,7 @@ examples:
       health_check_name: 'rbs-health-check'
       network_name: 'network'
     test_vars_overrides:
+      # for backward compatible
       network_name: '"network" + randomSuffix'
   - name: 'region_backend_service_dynamic_backend_count'
     primary_resource_id: 'default'
@@ -142,6 +143,7 @@ examples:
       instance_group_name: 'instance_group'
       network_name: 'network'
     test_vars_overrides:
+      # for backward compatible
       network_name: '"network" + randomSuffix'
     exclude_test: true
   - name: 'region_backend_service_dynamic_forwarding'
@@ -179,6 +181,7 @@ examples:
       health_check_name: 'health-check'
       authentication_name: 'authentication'
     test_vars_overrides:
+      # for backward compatible
       authentication_name: '"authentication" + randomSuffix'
 parameters:
   - name: 'region'

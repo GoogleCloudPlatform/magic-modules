@@ -49,7 +49,9 @@ examples:
       connection_name: 'connection'
       repository_name: 'repository'
     test_vars_overrides:
+      # for backward compatible
       connection_name: '"connection" + randomSuffix'
+      # for backward compatible
       repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_github'
@@ -58,7 +60,9 @@ examples:
       connection_name: 'connection'
       repository_name: 'repository'
     test_vars_overrides:
+      # for backward compatible
       connection_name: '"connection" + randomSuffix'
+      # for backward compatible
       repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_gle'
@@ -67,7 +71,9 @@ examples:
       connection_name: 'connection'
       repository_name: 'repository'
     test_vars_overrides:
+      # for backward compatible
       connection_name: '"connection" + randomSuffix'
+      # for backward compatible
       repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_ghe_doc'

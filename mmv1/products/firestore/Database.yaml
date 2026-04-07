@@ -83,7 +83,9 @@ examples:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+      # for backward compatible
       tag_key_id: '"keyname" + randomSuffix'
+      # for backward compatible
       tag_value_id: '"valuename" + randomSuffix'
     ignore_read_extra:
       - 'project'

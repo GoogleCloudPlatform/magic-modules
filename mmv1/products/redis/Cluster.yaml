@@ -180,6 +180,7 @@ examples:
     test_vars_overrides:
       'primary_cluster_deletion_protection_enabled': 'false'
       'secondary_cluster_deletion_protection_enabled': 'false'
+      # for backward compatible
       network_name: '"mynetwork" + randomSuffix'
     oics_vars_overrides:
       'primary_cluster_deletion_protection_enabled': 'false'

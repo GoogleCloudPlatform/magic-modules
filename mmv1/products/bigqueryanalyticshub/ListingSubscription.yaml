@@ -48,6 +48,7 @@ examples:
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
     test_vars_overrides:
+      # for backward compatible
       description: '"example data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_subscription_multiregion'
     primary_resource_id: 'subscription'
@@ -59,6 +60,7 @@ examples:
       destination_dataset_id: 'destination_dataset'
       description: 'example listing multiregion subscription'
     test_vars_overrides:
+      # for backward compatible
       description: '"example listing multiregion subscription" + randomSuffix'
 parameters:
   - name: 'dataExchangeId'

@@ -58,6 +58,7 @@ examples:
     vars:
       project_id: quota
     test_vars_overrides:
+      # for backward compatible
       project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
@@ -68,6 +69,7 @@ examples:
     vars:
       project_id: quota
     test_vars_overrides:
+      # for backward compatible
       project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
@@ -77,6 +79,7 @@ examples:
     vars:
       project_id: quota
     test_vars_overrides:
+      # for backward compatible
       project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
@@ -86,6 +89,7 @@ examples:
     vars:
       project_id: quota
     test_vars_overrides:
+      # for backward compatible
       project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID

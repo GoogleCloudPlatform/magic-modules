@@ -43,6 +43,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -51,6 +52,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -59,6 +61,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -67,6 +70,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -76,6 +80,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -85,6 +90,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -110,6 +116,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -128,6 +135,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -136,6 +144,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -144,6 +153,7 @@ examples:
     vars:
       trigger: 'trigger'
     test_vars_overrides:
+      # for backward compatible
       trigger: '"trigger" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'

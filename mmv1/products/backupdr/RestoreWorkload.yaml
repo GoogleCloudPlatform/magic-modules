@@ -46,6 +46,7 @@ examples:
       backup_id: 'backup'
       instance_name: 'restored-instance'
     test_vars_overrides:
+      # for backward compatible
       backup_id: '"backup" + randomSuffix'
   - name: 'backup_dr_restore_workload_compute_instance_full'
     primary_resource_id: 'restore_compute_full'
@@ -58,6 +59,7 @@ examples:
       backup_id: 'backup'
       instance_name: 'restored-instance-full'
     test_vars_overrides:
+      # for backward compatible
       backup_id: '"backup" + randomSuffix'
   - name: 'backup_dr_restore_workload_disk_basic'
     primary_resource_id: 'restore_disk_basic'
@@ -70,6 +72,7 @@ examples:
       backup_id: 'backup'
       disk_name: 'restored-disk'
     test_vars_overrides:
+      # for backward compatible
       backup_id: '"backup" + randomSuffix'
   - name: 'backup_dr_restore_workload_regional_disk'
     primary_resource_id: 'restore_regional_disk'
@@ -82,6 +85,7 @@ examples:
       backup_id: 'backup'
       disk_name: 'restored-regional-disk'
     test_vars_overrides:
+      # for backward compatible
       backup_id: '"backup" + randomSuffix'
   - name: 'backup_dr_restore_workload_without_delete'
     primary_resource_id: 'restore_without_delete'
@@ -94,6 +98,7 @@ examples:
       backup_id: 'backup'
       disk_name: 'persistent-disk'
     test_vars_overrides:
+      # for backward compatible
       backup_id: '"backup" + randomSuffix'
 parameters:
   - name: 'location'

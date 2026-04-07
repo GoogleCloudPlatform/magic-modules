@@ -39,6 +39,7 @@ examples:
       service_account_name: dataform-sa
       workflow_name: my_workflow
     test_vars_overrides:
+      # for backward compatible
       git_repository_name: '"my/repository" + randomSuffix'
 parameters:
   - name: region

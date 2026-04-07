@@ -68,6 +68,7 @@ examples:
       neg_name: 'ip-port-neg'
       network_name: 'network'
     test_vars_overrides:
+      # for backward compatible
       network_name: '"network" + randomSuffix'
   - name: 'region_network_endpoint_internet_fqdn_port'
     primary_resource_id: 'region-internet-fqdn-port-endpoint'
@@ -75,6 +76,7 @@ examples:
       neg_name: 'fqdn-port-neg'
       network_name: 'network'
     test_vars_overrides:
+      # for backward compatible
       network_name: '"network" + randomSuffix'
   - name: 'region_network_endpoint_portmap'
     primary_resource_id: 'region_network_endpoint_portmap'
@@ -88,8 +90,11 @@ examples:
       # still exists, rather than during CheckDestroy (when read returns
       # nothing because the parent resource has then also been destroyed)
     test_vars_overrides:
+      # for backward compatible
       network_name: '"network" + randomSuffix'
+      # for backward compatible
       subnetwork_name: '"subnetwork" + randomSuffix'
+      # for backward compatible
       instance_name: '"instance" + randomSuffix'
     exclude_test: true
 parameters:

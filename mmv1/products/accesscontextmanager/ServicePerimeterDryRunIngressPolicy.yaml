@@ -87,12 +87,14 @@ examples:
     vars:
       ingress_policy_title: 'ingress policy title'
     test_vars_overrides:
+      # for backward compatible
       ingress_policy_title: '"ingress policy title" + randomSuffix'
     exclude_test: true
   - name: 'access_context_manager_service_perimeter_dry_run_ingress_policy_granular_controls'
     vars:
       ingress_policy_title: 'granular controls ingress policy title'
     test_vars_overrides:
+      # for backward compatible
       ingress_policy_title: '"granular controls ingress policy title" + randomSuffix'
     exclude_test: true
 parameters:

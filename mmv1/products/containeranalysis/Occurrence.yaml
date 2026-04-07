@@ -45,6 +45,7 @@ examples:
       attestor: 'attestor'
     # Occurrence requires custom logic for signing payloads.
     test_vars_overrides:
+      # for backward compatible
       attestor: '"attestor" + randomSuffix'
     exclude_test: true
 parameters:

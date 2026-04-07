@@ -54,7 +54,9 @@ examples:
       keyring_name: keyring
       vm_name: my-vm
     test_vars_overrides:
+      # for backward compatible
       key_name: '"key" + randomSuffix'
+      # for backward compatible
       keyring_name: '"keyring" + randomSuffix'
 properties:
   - name: name

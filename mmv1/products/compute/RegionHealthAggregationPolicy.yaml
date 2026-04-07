@@ -159,6 +159,7 @@ examples:
       name: "test-health-aggregation-policy"
       description: "Example health aggregation policy basic"
     test_vars_overrides:
+      # for backward compatible
       description: '"Example health aggregation policy basic" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'

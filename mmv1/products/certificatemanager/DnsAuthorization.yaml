@@ -50,6 +50,7 @@ examples:
       zone_name: 'my-zone'
       subdomain: 'subdomain'
     test_vars_overrides:
+      # for backward compatible
       subdomain: '"subdomain" + randomSuffix'
   - name: 'certificate_manager_dns_authorization_regional'
     primary_resource_id: 'default'
@@ -58,6 +59,7 @@ examples:
       zone_name: 'my-zone'
       subdomain: 'subdomain'
     test_vars_overrides:
+      # for backward compatible
       subdomain: '"subdomain" + randomSuffix'
 parameters:
   - name: 'name'

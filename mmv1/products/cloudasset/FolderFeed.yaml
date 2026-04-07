@@ -51,6 +51,7 @@ examples:
       feed_id: 'network-updates'
       folder_name: 'Networking'
     test_vars_overrides:
+      # for backward compatible
       folder_name: '"Networking" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'

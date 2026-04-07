@@ -41,6 +41,7 @@ examples:
       name: 'test-cross-site-network'
       description: 'Example cross site network'
     test_vars_overrides:
+      # for backward compatible
       description: '"Example cross site network" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'

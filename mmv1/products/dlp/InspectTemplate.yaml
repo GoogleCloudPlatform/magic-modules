@@ -43,6 +43,7 @@ examples:
     vars:
       template: 'temp'
     test_vars_overrides:
+      # for backward compatible
       template: '"temp" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -51,6 +52,7 @@ examples:
     vars:
       template: 'temp'
     test_vars_overrides:
+      # for backward compatible
       template: '"temp" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'

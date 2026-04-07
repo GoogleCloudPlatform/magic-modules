@@ -64,7 +64,9 @@ examples:
       # 'tfgen' is the only option here.
       domain_name: 'tfgen'
     test_vars_overrides:
+      # for backward compatible
       name: '"myorg" + randomSuffix'
+      # for backward compatible
       domain_name: '"tfgen" + randomSuffix'
     ignore_read_extra:
       - 'deletion_protection'

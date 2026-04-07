@@ -36,6 +36,7 @@ examples:
       instance_name: "my-instance"
       developer_email: "john.doe@acme.com"
     test_vars_overrides:
+      # for backward compatible
       developer_email: '"john.doe@acme.com" + randomSuffix'
     exclude_test: true
   - name: "apigee_developer_basic_test"
@@ -51,6 +52,7 @@ examples:
       instance_name: "my-instance"
       developer_email: "john.doe@acme.com"
     test_vars_overrides:
+      # for backward compatible
       developer_email: '"john.doe@acme.com" + randomSuffix'
     exclude_test: true
   - name: "apigee_developer_with_attributes_test"

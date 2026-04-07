@@ -71,7 +71,9 @@ examples:
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
     test_vars_overrides:
+      # for backward compatible
       dns_auth_subdomain: '"subdomain" + randomSuffix'
+      # for backward compatible
       dns_auth_subdomain2: '"subdomain2" + randomSuffix'
   - name: 'certificate_manager_google_managed_certificate_issuance_config'
     primary_resource_id: 'default'
@@ -104,7 +106,9 @@ examples:
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
     test_vars_overrides:
+      # for backward compatible
       dns_auth_subdomain: '"subdomain" + randomSuffix'
+      # for backward compatible
       dns_auth_subdomain2: '"subdomain2" + randomSuffix'
   - name: 'certificate_manager_google_managed_regional_certificate_dns_auth'
     primary_resource_id: 'default'
@@ -113,6 +117,7 @@ examples:
       dns_auth_subdomain: 'subdomain'
       cert_name: 'dns-cert'
     test_vars_overrides:
+      # for backward compatible
       dns_auth_subdomain: '"subdomain" + randomSuffix'
   - name: 'certificate_manager_client_auth_certificate'
     primary_resource_id: 'default'

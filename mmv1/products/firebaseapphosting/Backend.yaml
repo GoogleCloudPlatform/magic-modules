@@ -37,6 +37,7 @@ examples:
     test_vars_overrides:
       # prevent tests from colliding with each other
       service_act_id: '"tf-test-fah-minimal"'
+      # for backward compatible
       backend_id: '"mini" + randomSuffix'
   - name: firebase_app_hosting_backend_full
     primary_resource_id: example
@@ -48,6 +49,7 @@ examples:
     test_vars_overrides:
       # prevent tests from colliding with each other
       service_act_id: '"tf-test-fah-full"'
+      # for backward compatible
       backend_id: '"full" + randomSuffix'
   - name: firebase_app_hosting_backend_github
     primary_resource_id: example

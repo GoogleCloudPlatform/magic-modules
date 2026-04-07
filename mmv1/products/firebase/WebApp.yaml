@@ -72,6 +72,7 @@ examples:
       display_name: 'Display Name'
       api_key_name: 'api-key'
     test_vars_overrides:
+      # for backward compatible
       display_name: '"Display Name" + randomSuffix'
     test_env_vars:
       project_id: 'PROJECT_NAME'

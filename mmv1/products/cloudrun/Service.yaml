@@ -114,6 +114,7 @@ examples:
       cloud_run_service_name: 'cloudrun-srv'
       secret_id: 'secret'
     test_vars_overrides:
+      # for backward compatible
       secret_id: '"secret" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -126,6 +127,7 @@ examples:
       cloud_run_service_name: 'cloudrun-srv'
       secret_id: 'secret'
     test_vars_overrides:
+      # for backward compatible
       secret_id: '"secret" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'

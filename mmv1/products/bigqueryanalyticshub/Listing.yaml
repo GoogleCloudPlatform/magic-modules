@@ -52,6 +52,7 @@ examples:
       listing_id: 'my_listing'
       desc: 'example data exchange'
     test_vars_overrides:
+      # for backward compatible
       desc: '"example data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
@@ -61,6 +62,7 @@ examples:
       listing_id: 'my_listing'
       desc: 'example data exchange'
     test_vars_overrides:
+      # for backward compatible
       desc: '"example data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_dcr'
     primary_resource_id: 'listing'
@@ -70,6 +72,7 @@ examples:
       listing_id: 'dcr_listing'
       desc: 'example dcr data exchange'
     test_vars_overrides:
+      # for backward compatible
       desc: '"example dcr data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_log_linked_dataset_query_user'
     primary_resource_id: 'listing'
@@ -80,6 +83,7 @@ examples:
       dataset_id: 'tf_test_log_email_ds'
       description: 'Example for log email test'
     test_vars_overrides:
+      # for backward compatible
       description: '"Example for log email test" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_pubsub'
     primary_resource_id: 'listing'
@@ -90,6 +94,7 @@ examples:
       pubsub_topic_name: 'test_pubsub'
       description: 'Example for pubsub topic source'
     test_vars_overrides:
+      # for backward compatible
       description: '"Example for pubsub topic source" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_dcr_routine'
     primary_resource_id: 'listing'
@@ -102,6 +107,7 @@ examples:
       routine_id: 'tf_test_routine'
       desc: 'Example for listing with routine'
     test_vars_overrides:
+      # for backward compatible
       desc: '"Example for listing with routine" + randomSuffix'
   - name: 'bigquery_analyticshub_public_listing'
     primary_resource_id: 'listing'
@@ -111,6 +117,7 @@ examples:
       listing_id: 'my_listing'
       desc: 'example public listing'
     test_vars_overrides:
+      # for backward compatible
       desc: '"example public listing" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_marketplace'
     primary_resource_id: 'listing'
@@ -120,6 +127,7 @@ examples:
       listing_id: 'my_listing'
       desc: 'example data exchange'
     test_vars_overrides:
+      # for backward compatible
       desc: '"example data exchange" + randomSuffix'
     ignore_read_extra:
       - 'delete_commercial'
@@ -132,6 +140,7 @@ examples:
       listing_id: 'my_listing'
       description: 'example listing for multiregion'
     test_vars_overrides:
+      # for backward compatible
       description: '"example listing for multiregion" + randomSuffix'
 virtual_fields:
   - name: 'delete_commercial'

@@ -67,6 +67,7 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     test_vars_overrides:
+      # for backward compatible
       git_repository_name: '"my/repository" + randomSuffix'
     exclude_docs: true
     ignore_read_extra:
@@ -84,6 +85,7 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     test_vars_overrides:
+      # for backward compatible
       git_repository_name: '"my/repository" + randomSuffix'
     exclude_docs: true
 virtual_fields:

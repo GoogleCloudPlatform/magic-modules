@@ -120,9 +120,13 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
       database_name: '"db" + randomSuffix'
+      # for backward compatible
       database_password: '"password" + randomSuffix'
+      # for backward compatible
       database_user: '"user" + randomSuffix'
+      # for backward compatible
       stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_sql_server_change_tables'
@@ -140,9 +144,13 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     # Requires SQLServer Configuration
+      # for backward compatible
       database_name: '"db" + randomSuffix'
+      # for backward compatible
       database_password: '"password" + randomSuffix'
+      # for backward compatible
       database_user: '"user" + randomSuffix'
+      # for backward compatible
       stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_mysql_gtid'
@@ -160,10 +168,15 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     # Requires MySQL Configuration
+      # for backward compatible
       database_name: '"db" + randomSuffix'
+      # for backward compatible
       database_password: '"password" + randomSuffix'
+      # for backward compatible
       database_user: '"user" + randomSuffix'
+      # for backward compatible
       mysql_name: '"mysql" + randomSuffix'
+      # for backward compatible
       stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
@@ -176,6 +189,7 @@ examples:
       sql_user_name: 'my-user'
       source_connection_profile_id: 'source-profile'
     test_vars_overrides:
+      # for backward compatible
       dataset_id: '"postgres" + randomSuffix'
     external_providers: ["random", "time"]
     # Random provider

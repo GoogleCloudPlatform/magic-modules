@@ -51,6 +51,7 @@ examples:
       kms_key_name: "example-key"
     test_vars_overrides:
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+      # for backward compatible
       location: '"us" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -61,6 +62,7 @@ examples:
     vars:
       location: "global"
     test_vars_overrides:
+      # for backward compatible
       location: '"global" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
