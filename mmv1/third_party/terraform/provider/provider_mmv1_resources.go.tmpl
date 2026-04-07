@@ -9,11 +9,9 @@ import (
 		"github.com/hashicorp/terraform-provider-google/google/services/{{ $service }}"
 	{{- end }}
 
-	"github.com/hashicorp/terraform-provider-google/google/registry"
-	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
-	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
-	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
-	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containeraws"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containerazure"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dataflow"
 )
 
 // Datasources

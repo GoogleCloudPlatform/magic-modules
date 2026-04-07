@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -122,4 +123,13 @@ func dataSourceNetworkSecurityAddressGroups(d *schema.ResourceData, meta interfa
 	d.SetId(fmt.Sprintf("projects/%s/locations/%s", project, location))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_network_security_address_groups",
+		ProductName: "networksecurity",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceNetworkSecurityAddressGroups(),
+	}.Register()
 }
