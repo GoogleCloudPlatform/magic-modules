@@ -16,18 +16,6 @@ import (
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
-
-	// The mtls service client gives the type of endpoint (mtls/regular)
-	// at client creation. Since we use a shared client for requests we must
-	// rewrite the endpoints to be mtls endpoints for the scenario where
-	// mtls is enabled.
-	if isMtls() {
-		// if mtls is enabled switch all default endpoints to use the mtls endpoint
-		for key, bp := range transport_tpg.DefaultBasePaths {
-			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
-		}
-	}
-
 	provider := &schema.Provider{
 		// See: https://developer.hashicorp.com/terraform/plugin/framework/migrating/mux
 		// "The schema and configuration handling must exactly match between all underlying providers of the mux server"
@@ -176,15 +164,6 @@ func Provider() *schema.Provider {
 				Optional: true,
 			},
 
-			// Generated Products
-			{{- range $product := $.Products }}
-			"{{ underscore $product.Name }}_custom_endpoint": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
-			},
-			{{- end }}
-
 			// Handwritten Products / Versioned / Atypical Entries
 			transport_tpg.CloudBillingCustomEndpointEntryKey:           transport_tpg.CloudBillingCustomEndpointEntry,
 			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
@@ -222,6 +201,13 @@ func Provider() *schema.Provider {
 		DataSourcesMap: DatasourceMap(),
 {{- end }}
 		ResourcesMap: ResourceMap(),
+	}
+	for _, p := range registry.ListProducts() {
+		provider.schema[p.CustomEndpointField] = &schema.Schema{
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: transport_tpg.ValidateCustomEndpoint,
+		}
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -347,13 +333,41 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.UniverseDomain = v.(string)
 	}
 
+	// The mtls service client gives the type of endpoint (mtls/regular)
+	// at client creation. Since we use a shared client for requests we must
+	// rewrite the endpoints to be mtls endpoints for the scenario where
+	// mtls is enabled.
+	mtlsEnabled := isMtls()
+
+	for _, p := range registry.ListProducts() {
+		if d.Get(p.CustomEndpointField) == "" {
+			baseUrl := p.BaseUrl
+			if mtlsEnabled {
+				baseUrl := getMtlsEndpoint(baseUrl)
+			}
+			if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
+				baseUrl := strings.ReplaceAll(basePath, "googleapis.com", config.UniverseDomain)
+			}
+			d.Set(p.CustomEndpointField, MultiEnvDefault([]string{
+				p.CustomEndpointEnvVar,
+			}, baseUrl))
+		}
+	}
+
+	// For non-registered products, use legacy DefaultBasePaths / SetEndpointDefaults.
+	if mtlsEnabled {
+		// if mtls is enabled switch all default endpoints to use the mtls endpoint
+		for key, bp := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
+		}
+	}
+
 	// Replace hostname by the universe_domain field.
 	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
 		for key, basePath := range transport_tpg.DefaultBasePaths {
 			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(basePath, "googleapis.com", config.UniverseDomain)
 		}
 	}
-
 	err = transport_tpg.SetEndpointDefaults(d)
 	if err != nil {
 		return nil, diag.FromErr(err)
@@ -407,10 +421,10 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 	config.BatchingConfig = batchCfg
 
-	// Generated products
-	{{- range $product := $.Products }}
-	config.{{ $product.Name }}BasePath = d.Get("{{ underscore $product.Name }}_custom_endpoint").(string)
-	{{- end }}
+	// Registered products
+	for _, p := range registry.ListProducts() {
+		config.BasePaths[p.Name] = d.Get(p.CustomEndpointField).(string)
+	}
 
 	// Handwritten Products / Versioned / Atypical Entries
 	config.CloudBillingBasePath = d.Get(transport_tpg.CloudBillingCustomEndpointEntryKey).(string)

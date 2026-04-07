@@ -14,6 +14,10 @@ type Product struct {
 	Name string
 	// BaseUrl is the base URL for API requests. It may contain Magic Modules templating directives.
 	BaseUrl string
+	// CustomEndpointField is the name of the product's custom endpoint field in the provider schema.
+	CustomEndpointField string
+	// CustomEndpointEnvVar is the name of the product's custom endpoint environment variable.
+	CustomEndpointEnvVar string
 }
 
 // Register adds the product definition to the internal product registry.

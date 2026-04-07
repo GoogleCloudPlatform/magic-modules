@@ -28,6 +28,8 @@ const ProductName = "{{ lower $.Name }}"
 func init() {
     registry.Product{
         Name: "{{ lower $.Name }}",
-	    BaseUrl: "{{ $.Version.BaseUrl }}",
+        BaseUrl: "{{ $.Version.BaseUrl }}",
+        CustomEndpointField: "{{ underscore $.Name }}_custom_endpoint",
+        CustomEndpointEnvVar: "GOOGLE_{{ upper (underscore $.Name) }}_CUSTOM_ENDPOINT",
     }.Register()
 }

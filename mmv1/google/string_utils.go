@@ -21,8 +21,6 @@ import (
 	"unicode"
 )
 
-// // Helper class to process and mutate strings.
-// class StringUtils
 // Converts string from camel case to underscore
 func Underscore(source string) string {
 	tmp := regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`).ReplaceAllString(source, "${1}_${2}")

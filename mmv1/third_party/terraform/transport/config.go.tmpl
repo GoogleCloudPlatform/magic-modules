@@ -29,6 +29,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"golang.org/x/oauth2"
@@ -263,10 +264,7 @@ type Config struct {
 
 	TokenSource oauth2.TokenSource
 
-	{{ range $product := $.Products }}
-	{{ $product.Name }}BasePath string
-	{{- end }}
-
+	BasePaths map[string]string
 	CloudBillingBasePath string
 	DataflowBasePath string
 	IamCredentialsBasePath string
@@ -286,10 +284,6 @@ type Config struct {
 	RequestBatcherServiceUsage *RequestBatcher
 	RequestBatcherIam          *RequestBatcher
 }
-
-{{- range $product := $.Products }}
-const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
-{{- end }}
 const CloudBillingBasePathKey = "CloudBilling"
 const DataflowBasePathKey = "Dataflow"
 const IAMBasePathKey = "IAM"
@@ -301,9 +295,6 @@ const TagsLocationBasePathKey = "TagsLocation"
 
 // Generated product base paths
 var DefaultBasePaths = map[string]string{
-{{- range $product := $.Products }}
-	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
-{{- end }}
 	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
 	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
 	IAMBasePathKey : "https://iam.googleapis.com/v1/",
@@ -323,6 +314,7 @@ var DefaultBasePaths = map[string]string{
 	FirebaserulesEndpointEntryKey: "https://firebaserules.googleapis.com/v1/",
 	RecaptchaEnterpriseEndpointEntryKey: "https://recaptchaenterprise.googleapis.com/v1/",
 }
+
 
 var DefaultClientScopes = []string{
 	"https://www.googleapis.com/auth/cloud-platform",
@@ -395,15 +387,6 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 }
 
 func SetEndpointDefaults(d *schema.ResourceData) error {
-	// Generated Products
-	{{- range $product := $.Products }}
-	if d.Get("{{ underscore $product.Name }}_custom_endpoint") == "" {
-		d.Set("{{ underscore $product.Name }}_custom_endpoint", MultiEnvDefault([]string{
-			"GOOGLE_{{ upper (underscore $product.Name) }}_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[{{ $product.Name }}BasePathKey]))
-	}
-	{{- end }}
-
 	if d.Get(CloudBillingCustomEndpointEntryKey) == "" {
 		d.Set(CloudBillingCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
@@ -1482,10 +1465,10 @@ func RemoveBasePathVersion(url string) string {
 // have its own endpoint mechanism such as sweepers, init {{"{{"}}service{{"}}"}}BasePath
 // values to a default. After using this, you should call config.LoadAndValidate.
 func ConfigureBasePaths(c *Config) {
-	// Generated Products
-	{{- range $product := $.Products }}
-	c.{{ $product.Name }}BasePath = DefaultBasePaths[{{ $product.Name }}BasePathKey]
-	{{- end }}
+	// Registered Products
+	for _, p := range registry.ListProducts() {
+		c.BasePaths[p.Name] = p.BaseUrl
+	}
 
 	// Handwritten Products / Versioned / Atypical Entries
 	c.CloudBillingBasePath = DefaultBasePaths[CloudBillingBasePathKey]
