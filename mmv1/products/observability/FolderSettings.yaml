@@ -54,12 +54,15 @@ examples:
       org_id: 'ORG_ID'
     test_vars_overrides:
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+      location: '"us" + randomSuffix'
   - name: "observability_folder_settings_basic_global"
     config_path: "templates/terraform/examples/observability_folder_settings_basic_global.tf.tmpl"
     primary_resource_id: "primary_global"
     external_providers: ["time"]
     vars:
       location: "global"
+    test_vars_overrides:
+      location: '"global" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
 

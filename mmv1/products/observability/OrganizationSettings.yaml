@@ -51,6 +51,7 @@ examples:
       kms_key_name: "example-key"
     test_vars_overrides:
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+      location: '"us" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
   - name: "observability_organization_settings_basic_global"
@@ -59,6 +60,8 @@ examples:
     external_providers: ["time"]
     vars:
       location: "global"
+    test_vars_overrides:
+      location: '"global" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
 

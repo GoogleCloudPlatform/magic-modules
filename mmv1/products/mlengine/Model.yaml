@@ -48,11 +48,15 @@ examples:
     primary_resource_id: 'default'
     vars:
       model_name: 'default'
+    test_vars_overrides:
+      model_name: '"default" + randomSuffix'
   - name: 'ml_model_full'
     exclude_test: true
     primary_resource_id: 'default'
     vars:
       model_name: 'default'
+    test_vars_overrides:
+      model_name: '"default" + randomSuffix'
 parameters:
 properties:
   - name: 'name'

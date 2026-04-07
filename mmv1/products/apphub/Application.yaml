@@ -79,6 +79,15 @@ examples:
       developer_email: 'bob@google.com'
       operator_name: 'Charlie'
       operator_email: 'charlie@google.com'
+    test_vars_overrides:
+      display_name: '"Application Full" + randomSuffix'
+      desc: '"Application for testing" + randomSuffix'
+      business_name: '"Alice" + randomSuffix'
+      business_email: '"alice@google.com" + randomSuffix'
+      developer_name: '"Bob" + randomSuffix'
+      developer_email: '"bob@google.com" + randomSuffix'
+      operator_name: '"Charlie" + randomSuffix'
+      operator_email: '"charlie@google.com" + randomSuffix'
 parameters:
   - name: 'location'
     type: String

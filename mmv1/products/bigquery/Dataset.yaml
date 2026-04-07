@@ -50,12 +50,16 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     exclude_identity_import: true
   - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
     exclude_identity_import: true
   - name: 'bigquery_dataset_cmek'
@@ -72,6 +76,10 @@ examples:
       private: 'private'
       public: 'public'
       account_name: 'bqowner'
+    test_vars_overrides:
+      private: '"private" + randomSuffix'
+      public: '"public" + randomSuffix'
+      account_name: '"bqowner" + randomSuffix'
     exclude_identity_import: true
   - name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
@@ -87,6 +95,8 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
     exclude_identity_import: true
   - name: 'bigquery_dataset_default_collation_set'
@@ -94,6 +104,8 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
     exclude_identity_import: true
   - name: 'bigquery_dataset_external_reference_aws'
@@ -115,6 +127,8 @@ examples:
       tag_value1: 'tag_value1'
       tag_key2: 'tag_key2'
       tag_value2: 'tag_value2'
+    test_vars_overrides:
+      dataset_id: '"dataset" + randomSuffix'
     exclude_docs: true
     exclude_identity_import: true
 virtual_fields:

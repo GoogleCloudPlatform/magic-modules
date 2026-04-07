@@ -78,6 +78,9 @@ examples:
       network_name: 'network'
       network_attachment_name: 'network-attachment'
       subnetwork_name: 'subnetwork'
+    test_vars_overrides:
+      network_name: '"network" + randomSuffix'
+      subnetwork_name: '"subnetwork" + randomSuffix'
     external_providers: ["time"]
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
@@ -102,6 +105,8 @@ examples:
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+      secret_name: '"secret" + randomSuffix'
+      service_account_id: '"sa" + randomSuffix'
     external_providers: ["time"]
     ignore_read_extra:
       - 'deletion_policy'

@@ -36,6 +36,8 @@ examples:
     region_override: 'global'
     vars:
       security_gateway_name: default
+    test_vars_overrides:
+      security_gateway_name: '"default" + randomSuffix'
   - name: beyondcorp_security_gateway_logging
     primary_resource_id: example-logging
     region_override: 'global'

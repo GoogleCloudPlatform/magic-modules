@@ -37,6 +37,8 @@ examples:
     primary_resource_id: 'endpoints_service'
     vars:
       name: 'endpoint'
+    test_vars_overrides:
+      name: '"endpoint" + randomSuffix'
     test_env_vars:
       project_name: 'PROJECT_NAME'
 parameters:

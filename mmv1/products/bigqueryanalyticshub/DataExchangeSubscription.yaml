@@ -56,6 +56,9 @@ examples:
       # Variables for the Destination Dataset created by the Subscription
       destination_dataset_id: 'subscribed_dest_dataset'
       destination_dataset_friendly_name: 'Subscribed Destination Dataset'
+    test_vars_overrides:
+      subscriber_contact_email: '"testuser@example.com" + randomSuffix'
+      destination_dataset_friendly_name: '"Subscribed Destination Dataset" + randomSuffix'
 virtual_fields:
   - name: 'refresh_policy'
     type: Enum

@@ -36,6 +36,8 @@ examples:
       git_repository_name: my/repository
       release_name: my_release
       secret_name: my_secret
+    test_vars_overrides:
+      git_repository_name: '"my/repository" + randomSuffix'
 parameters:
   - name: region
     type: String

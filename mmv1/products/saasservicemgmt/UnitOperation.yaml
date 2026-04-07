@@ -47,6 +47,9 @@ examples:
       unit_name: example-unit
       unitkind_name: vm-unitkind
       upgrade_operation_name: upgrade-unit-operation
+    test_vars_overrides:
+      actuation_service_account: '"actuator" + randomSuffix'
+      tenant_project_name: '"tenant" + randomSuffix'
     test_env_vars:
       billing_account: BILLING_ACCT
       org_id: ORG_ID

@@ -42,6 +42,8 @@ examples:
     primary_resource_id: 'tensorboard'
     vars:
       display_name: 'terraform'
+    test_vars_overrides:
+      display_name: '"terraform" + randomSuffix'
     ignore_read_extra:
       - 'project'
   - name: 'vertex_ai_tensorboard_full'
@@ -51,6 +53,7 @@ examples:
       kms_key_name: 'kms-name'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      display_name: '"terraform" + randomSuffix'
     ignore_read_extra:
       - 'project'
 parameters:

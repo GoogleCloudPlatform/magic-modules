@@ -49,12 +49,16 @@ examples:
       dns_auth_name: 'dns-auth'
       zone_name: 'my-zone'
       subdomain: 'subdomain'
+    test_vars_overrides:
+      subdomain: '"subdomain" + randomSuffix'
   - name: 'certificate_manager_dns_authorization_regional'
     primary_resource_id: 'default'
     vars:
       dns_auth_name: 'dns-auth'
       zone_name: 'my-zone'
       subdomain: 'subdomain'
+    test_vars_overrides:
+      subdomain: '"subdomain" + randomSuffix'
 parameters:
   - name: 'name'
     type: String

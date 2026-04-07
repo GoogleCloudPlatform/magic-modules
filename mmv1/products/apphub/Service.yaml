@@ -74,6 +74,15 @@ examples:
       forwarding_rule: 'l7-ilb-forwarding-rule'
       backend_service: 'l7-ilb-backend-subnet'
       health_check: 'l7-ilb-hc'
+    test_vars_overrides:
+      display_name: '"Example Service Full" + randomSuffix'
+      desc: '"Register service for testing" + randomSuffix'
+      business_name: '"Alice" + randomSuffix'
+      business_email: '"alice@google.com" + randomSuffix'
+      developer_name: '"Bob" + randomSuffix'
+      developer_email: '"bob@google.com" + randomSuffix'
+      operator_name: '"Charlie" + randomSuffix'
+      operator_email: '"charlie@google.com" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'

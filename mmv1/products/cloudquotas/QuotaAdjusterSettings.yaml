@@ -45,6 +45,9 @@ examples:
     vars:
       parent: "projects/104740170505"
       enablement: "ENABLED"
+    test_vars_overrides:
+      parent: '"projects/104740170505" + randomSuffix'
+      enablement: '"ENABLED" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'parent'

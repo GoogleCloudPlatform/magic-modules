@@ -137,6 +137,8 @@ examples:
     primary_resource_id: 'documentation'
     vars:
       datascan_name: 'datadocumentation'
+    test_vars_overrides:
+      datascan_name: '"datadocumentation" + randomSuffix'
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'

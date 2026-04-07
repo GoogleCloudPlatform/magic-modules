@@ -50,24 +50,32 @@ examples:
     vars:
       data_exchange_id: 'my_data_exchange'
       desc: 'example data exchange'
+    test_vars_overrides:
+      desc: '"example data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_data_exchange_dcr'
     primary_resource_id: 'data_exchange'
     region_override: 'US'
     vars:
       data_exchange_id: 'dcr_data_exchange'
       desc: 'example dcr data exchange'
+    test_vars_overrides:
+      desc: '"example dcr data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_data_exchange_log_linked_dataset_query_user'
     primary_resource_id: 'data_exchange'
     region_override: 'US'
     vars:
       data_exchange_id: 'tf_test_log_email_data_exchange'
       description: 'Example for log email test for data exchange'
+    test_vars_overrides:
+      description: '"Example for log email test for data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_public_data_exchange'
     primary_resource_id: 'data_exchange'
     region_override: 'US'
     vars:
       data_exchange_id: 'public_data_exchange'
       desc: 'Example for public data exchange'
+    test_vars_overrides:
+      desc: '"Example for public data exchange" + randomSuffix'
 parameters:
 properties:
   - name: 'name'

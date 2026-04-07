@@ -141,6 +141,8 @@ examples:
       forwarding_rule_name: 'l3-forwarding-rule'
       service_name: 'service'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      service_name: '"service" + randomSuffix'
   - name: 'forwarding_rule_internallb'
     primary_resource_id: 'default'
     vars:

@@ -47,6 +47,8 @@ examples:
     primary_resource_id: 'testmanagedzone'
     vars:
       managed_zone_name: 'test'
+    test_vars_overrides:
+      managed_zone_name: '"test" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'

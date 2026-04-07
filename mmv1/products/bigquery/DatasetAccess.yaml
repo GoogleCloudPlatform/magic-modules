@@ -77,6 +77,8 @@ examples:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
  # not importable
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     exclude_test: true
   - name: 'bigquery_dataset_access_view'
     primary_resource_id: 'access'
@@ -92,6 +94,9 @@ examples:
       private: 'private'
       public: 'public'
  # not importable
+    test_vars_overrides:
+      private: '"private" + randomSuffix'
+      public: '"public" + randomSuffix'
     exclude_test: true
   - name: 'bigquery_dataset_access_authorized_routine'
     primary_resource_id: 'authorized_routine'

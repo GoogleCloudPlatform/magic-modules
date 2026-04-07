@@ -56,6 +56,8 @@ examples:
     vars:
       target_name: 'target'
       instance_name: 'target-vm'
+    test_vars_overrides:
+      target_name: '"target" + randomSuffix'
   - name: 'target_instance_custom_network'
     primary_resource_id: 'custom_network'
     min_version: 'beta'

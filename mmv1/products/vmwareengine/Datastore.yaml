@@ -40,6 +40,8 @@ examples:
     vars:
       resource_name: filestore-datastore
       network_name: default
+    test_vars_overrides:
+      network_name: '"default" + randomSuffix'
     test_env_vars:
       region: "REGION"
       zone: "ZONE"
@@ -51,6 +53,8 @@ examples:
     vars:
       resource_name: netapp-datastore
       network_name: default
+    test_vars_overrides:
+      network_name: '"default" + randomSuffix'
     test_env_vars:
       region: "REGION"
       project: "PROJECT"

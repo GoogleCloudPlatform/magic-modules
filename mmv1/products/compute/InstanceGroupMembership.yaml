@@ -73,6 +73,9 @@ examples:
       network_name: 'network'
       instance_group_name: 'instance-group'
       instance_name: 'instance'
+    test_vars_overrides:
+      network_name: '"network" + randomSuffix'
+      instance_name: '"instance" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'zone'

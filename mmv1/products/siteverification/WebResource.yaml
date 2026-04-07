@@ -52,6 +52,10 @@ examples:
       managed_zone: 'example.com'
       domain: 'www.example.com'
       dns_name: 'www.example.com.'
+    test_vars_overrides:
+      managed_zone: '"example.com" + randomSuffix'
+      domain: '"www.example.com" + randomSuffix'
+      dns_name: '"www.example.com." + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'verification_method'

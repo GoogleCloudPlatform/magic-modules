@@ -53,6 +53,9 @@ examples:
       key_name: key
       keyring_name: keyring
       vm_name: my-vm
+    test_vars_overrides:
+      key_name: '"key" + randomSuffix'
+      keyring_name: '"keyring" + randomSuffix'
 properties:
   - name: name
     type: String

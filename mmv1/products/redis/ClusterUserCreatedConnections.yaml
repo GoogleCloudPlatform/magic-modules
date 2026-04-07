@@ -60,6 +60,9 @@ examples:
       network2_name: network2
       subnet_network1_name: subnet-net1
       subnet_network2_name: subnet-net2
+    test_vars_overrides:
+      network1_name: '"net1" + randomSuffix'
+      network2_name: '"network2" + randomSuffix'
   - name: redis_cluster_user_and_auto_created_connections
     primary_resource_id: cluster-user-auto-conn
     vars:
@@ -73,6 +76,10 @@ examples:
       policy_name: scpolicy
       subnet_network1_name: subnet-net1
       subnet_network2_name: subnet-net2
+    test_vars_overrides:
+      network1_name: '"net1" + randomSuffix'
+      network2_name: '"network2" + randomSuffix'
+      policy_name: '"scpolicy" + randomSuffix'
 parameters:
   - name: name
     type: String

@@ -49,6 +49,11 @@ examples:
       urlmap_name: 'urlmap'
       backend_name: 'backend'
       healthcheck_name: 'healthcheck'
+    test_vars_overrides:
+      proxy_name: '"proxy" + randomSuffix'
+      urlmap_name: '"urlmap" + randomSuffix'
+      backend_name: '"backend" + randomSuffix'
+      healthcheck_name: '"healthcheck" + randomSuffix'
 parameters:
 properties:
   - name: 'creationTimestamp'

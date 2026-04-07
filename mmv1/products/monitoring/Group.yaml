@@ -44,11 +44,16 @@ examples:
     primary_resource_id: 'basic'
     vars:
       display_name: 'MonitoringGroup'
+    test_vars_overrides:
+      display_name: '"MonitoringGroup" + randomSuffix'
   - name: 'monitoring_group_subgroup'
     primary_resource_id: 'subgroup'
     vars:
       display_name: 'MonitoringParentGroup'
       display_name2: 'MonitoringSubGroup'
+    test_vars_overrides:
+      display_name: '"MonitoringParentGroup" + randomSuffix'
+      display_name2: '"MonitoringSubGroup" + randomSuffix'
 parameters:
 properties:
   - name: 'parentName'

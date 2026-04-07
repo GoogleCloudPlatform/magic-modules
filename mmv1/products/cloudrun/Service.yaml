@@ -113,6 +113,8 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-srv'
       secret_id: 'secret'
+    test_vars_overrides:
+      secret_id: '"secret" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
     ignore_read_extra:
@@ -123,6 +125,8 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-srv'
       secret_id: 'secret'
+    test_vars_overrides:
+      secret_id: '"secret" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
     ignore_read_extra:

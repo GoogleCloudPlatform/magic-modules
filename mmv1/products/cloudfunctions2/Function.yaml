@@ -186,6 +186,7 @@ examples:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
+      secret: '"secret" + randomSuffix'
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -205,6 +206,7 @@ examples:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
+      secret: '"secret" + randomSuffix'
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -221,6 +223,7 @@ examples:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
+      pool: '"workerpool" + randomSuffix'
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -242,6 +245,7 @@ examples:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
     # ignore these fields during import step
+      kms_service_name: '"cloudkms.googleapis.com" + randomSuffix'
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -261,6 +265,8 @@ examples:
       kms_key_name: 'cmek-key'
       project: 'my-project-name'
  # this example file will cause IAM conflicts between tests if used to make a test
+    test_vars_overrides:
+      kms_service_name: '"cloudkms.googleapis.com" + randomSuffix'
     exclude_test: true
   - name: 'cloudfunctions2_automatic_base_image_update'
     primary_resource_id: 'function'

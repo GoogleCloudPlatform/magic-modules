@@ -57,6 +57,8 @@ examples:
     vars:
       job_id: 'job_query'
       account_name: 'bqowner'
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -76,6 +78,8 @@ examples:
     vars:
       job_id: 'job_query'
       account_name: 'bqowner'
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'query.0.default_dataset.0.dataset_id'
@@ -127,6 +131,7 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -141,6 +146,7 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'copy.0.destination_table.0.table_id'
@@ -155,6 +161,8 @@ examples:
     vars:
       job_id: 'job_extract'
       account_name: 'bqowner'
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -164,6 +172,8 @@ examples:
     vars:
       job_id: 'job_extract'
       account_name: 'bqowner'
+    test_vars_overrides:
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'extract.0.source_table.0.table_id'

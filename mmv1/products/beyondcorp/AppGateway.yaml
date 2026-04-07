@@ -58,6 +58,8 @@ examples:
     vars:
       app_gateway_name: 'my-app-gateway'
       display_name: 'some display name'
+    test_vars_overrides:
+      display_name: '"some display name" + randomSuffix'
 parameters:
 properties:
   - name: 'name'

@@ -83,6 +83,8 @@ examples:
       network_name: 'net-spoke'
       hub_name: 'hub'
       ncc_gw_name: 'my-ncc-gw'
+    test_vars_overrides:
+      hub_name: '"hub" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef

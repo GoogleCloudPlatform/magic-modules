@@ -145,5 +145,7 @@ examples:
     vars:
       name: "test-composite-health-check"
       description: "Example composite health check basic"
+    test_vars_overrides:
+      description: '"Example composite health check basic" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'

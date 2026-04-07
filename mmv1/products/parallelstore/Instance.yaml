@@ -48,6 +48,10 @@ examples:
       name: 'instance'
       network_name: 'network'
       address_name: 'address'
+    test_vars_overrides:
+      name: '"instance" + randomSuffix'
+      network_name: '"network" + randomSuffix'
+      address_name: '"address" + randomSuffix'
     ignore_read_extra:
       - "update_time"
   - name: 'parallelstore_instance_basic'
@@ -56,6 +60,10 @@ examples:
       name: 'instance'
       network_name: 'network'
       address_name: 'address'
+    test_vars_overrides:
+      name: '"instance" + randomSuffix'
+      network_name: '"network" + randomSuffix'
+      address_name: '"address" + randomSuffix'
     ignore_read_extra:
       - "update_time"
 parameters:

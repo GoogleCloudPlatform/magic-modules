@@ -100,6 +100,9 @@ examples:
       sql_server_root_password: 'root-password'
     test_vars_overrides:
       'deletion_protection': 'false'
+      database_name: '"db" + randomSuffix'
+      database_password: '"password" + randomSuffix'
+      database_user: '"user" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_postgresql_sslconfig_server_and_client_verification'
     primary_resource_id: 'default'

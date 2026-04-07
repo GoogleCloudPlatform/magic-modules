@@ -59,6 +59,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      name: '"terraform" + randomSuffix'
     ignore_read_extra:
       - 'force_destroy'
   - name: 'vertex_ai_featurestore_with_beta_fields'
@@ -73,6 +74,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      name: '"terraform2" + randomSuffix'
     ignore_read_extra:
       - 'force_destroy'
   - name: 'vertex_ai_featurestore_scaling'
@@ -86,6 +88,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      name: '"terraform3" + randomSuffix'
     ignore_read_extra:
       - 'force_destroy'
 virtual_fields:

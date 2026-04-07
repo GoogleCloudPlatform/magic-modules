@@ -50,6 +50,10 @@ examples:
       source_sqldb_cert: cert
       source_sqldb_pass: password
       source_sqldb_user: username
+    test_vars_overrides:
+      source_sqldb_cert: '"cert" + randomSuffix'
+      source_sqldb_pass: '"password" + randomSuffix'
+      source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_postgres
     primary_resource_id: psqltopsql
     vars:
@@ -61,6 +65,10 @@ examples:
       source_sqldb_cert: cert
       source_sqldb_pass: password
       source_sqldb_user: username
+    test_vars_overrides:
+      source_sqldb_cert: '"cert" + randomSuffix'
+      source_sqldb_pass: '"password" + randomSuffix'
+      source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_alloydb
     primary_resource_id: psqltoalloydb
     vars:
@@ -72,6 +80,10 @@ examples:
       source_sqldb_cert: cert
       source_sqldb_pass: password
       source_sqldb_user: username
+    test_vars_overrides:
+      source_sqldb_cert: '"cert" + randomSuffix'
+      source_sqldb_pass: '"password" + randomSuffix'
+      source_sqldb_user: '"username" + randomSuffix'
 parameters:
   - name: migrationJobId
     type: String

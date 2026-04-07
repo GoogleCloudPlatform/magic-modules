@@ -52,6 +52,8 @@ examples:
     primary_resource_id: 'my-repo'
     vars:
       repository_name: 'my/repository'
+    test_vars_overrides:
+      repository_name: '"my/repository" + randomSuffix'
   - name: 'sourcerepo_repository_full'
     primary_resource_id: 'my-repo'
     vars:

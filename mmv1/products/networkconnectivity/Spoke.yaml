@@ -48,6 +48,10 @@ examples:
       network_name: 'net'
       hub_name: 'hub1'
       spoke_name: 'spoke1'
+    test_vars_overrides:
+      network_name: '"net" + randomSuffix'
+      hub_name: '"hub1" + randomSuffix'
+      spoke_name: '"spoke1" + randomSuffix'
   - name: 'network_connectivity_spoke_linked_vpc_network_group'
     primary_resource_id: 'primary'
     vars:
@@ -80,6 +84,9 @@ examples:
       vpn_tunnel_1_spoke_name: 'vpn-tunnel-1-spoke'
       vpn_tunnel_2_spoke_name: 'vpn-tunnel-2-spoke'
   # Skip due to multiple fine-grained resources
+    test_vars_overrides:
+      vpn_tunnel_1_name: '"tunnel1" + randomSuffix'
+      vpn_tunnel_2_name: '"tunnel2" + randomSuffix'
     skip_vcr: true
   - name: 'network_connectivity_spoke_interconnect_attachment_basic'
     primary_resource_id: 'primary'
@@ -104,12 +111,18 @@ examples:
       spoke_name: "vpc-spoke"
       auto_accept_project_1_name: "foo"
       auto_accept_project_2_name: "bar"
+    test_vars_overrides:
+      auto_accept_project_1_name: '"foo" + randomSuffix'
+      auto_accept_project_2_name: '"bar" + randomSuffix'
   - name: 'network_connectivity_spoke_linked_vpc_network_ipv6_support'
     primary_resource_id: 'primary'
     vars:
       network_name: 'net'
       hub_name: 'hub1'
       spoke_name: 'spoke1-ipv6'
+    test_vars_overrides:
+      network_name: '"net" + randomSuffix'
+      hub_name: '"hub1" + randomSuffix'
   - name: 'network_connectivity_spoke_gateway'
     primary_resource_id: 'primary'
     min_version: beta
@@ -117,6 +130,9 @@ examples:
       network_name: 'net-spoke'
       hub_name: 'hub'
       spoke_name: 'gateway'
+    test_vars_overrides:
+      hub_name: '"hub" + randomSuffix'
+      spoke_name: '"gateway" + randomSuffix'
 parameters:
   - name: 'location'
     type: String

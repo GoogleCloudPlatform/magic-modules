@@ -54,6 +54,8 @@ examples:
       fw_policy: 'fw-policy'
       tag_key: 'tag-key'
       tag_value: 'tag-value'
+    test_vars_overrides:
+      folder: '"folder" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       service_acct: 'SERVICE_ACCT'
@@ -65,6 +67,9 @@ examples:
       network: 'network'
       tag_key: 'tag-key'
       tag_value: 'tag-value'
+    test_vars_overrides:
+      folder: '"folder" + randomSuffix'
+      network: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
     min_version: beta
@@ -76,6 +81,9 @@ examples:
       network: 'network'
       tag_key: 'tag-key'
       tag_value: 'tag-value'
+    test_vars_overrides:
+      folder: '"folder" + randomSuffix'
+      network: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'firewall_policy_rule_secure_tags'
@@ -85,6 +93,8 @@ examples:
       fw_policy: 'fw-policy'
       tag_key: 'tag-key'
       tag_value: 'tag-value'
+    test_vars_overrides:
+      folder: '"folder" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:

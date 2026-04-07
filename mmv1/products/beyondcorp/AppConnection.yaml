@@ -61,6 +61,8 @@ examples:
       app_connector_name: 'my-app-connector'
       app_connection_name: 'my-app-connection'
       display_name: 'some display name'
+    test_vars_overrides:
+      display_name: '"some display name" + randomSuffix'
 parameters:
 properties:
   - name: 'name'

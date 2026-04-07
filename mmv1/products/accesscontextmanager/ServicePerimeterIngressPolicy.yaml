@@ -85,10 +85,14 @@ examples:
   - name: 'access_context_manager_service_perimeter_ingress_policy'
     vars:
       ingress_policy_title: 'ingress policy title'
+    test_vars_overrides:
+      ingress_policy_title: '"ingress policy title" + randomSuffix'
     exclude_test: true
   - name: 'access_context_manager_service_perimeter_ingress_policy_granular_controls'
     vars:
       ingress_policy_title: 'ingress policy title'
+    test_vars_overrides:
+      ingress_policy_title: '"ingress policy title" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'perimeter'

@@ -48,18 +48,27 @@ examples:
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
+    test_vars_overrides:
+      connection_name: '"connection" + randomSuffix'
+      repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_github'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
+    test_vars_overrides:
+      connection_name: '"connection" + randomSuffix'
+      repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_gle'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
+    test_vars_overrides:
+      connection_name: '"connection" + randomSuffix'
+      repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_ghe_doc'
     exclude_test: true

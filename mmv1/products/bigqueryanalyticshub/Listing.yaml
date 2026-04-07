@@ -51,6 +51,8 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example data exchange'
+    test_vars_overrides:
+      desc: '"example data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
     region_override: 'US'
@@ -58,6 +60,8 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example data exchange'
+    test_vars_overrides:
+      desc: '"example data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_dcr'
     primary_resource_id: 'listing'
     region_override: 'US'
@@ -65,6 +69,8 @@ examples:
       data_exchange_id: 'dcr_data_exchange'
       listing_id: 'dcr_listing'
       desc: 'example dcr data exchange'
+    test_vars_overrides:
+      desc: '"example dcr data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_log_linked_dataset_query_user'
     primary_resource_id: 'listing'
     region_override: 'US'
@@ -73,6 +79,8 @@ examples:
       listing_id: 'tf_test_log_email_listing'
       dataset_id: 'tf_test_log_email_ds'
       description: 'Example for log email test'
+    test_vars_overrides:
+      description: '"Example for log email test" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_pubsub'
     primary_resource_id: 'listing'
     region_override: 'US'
@@ -81,6 +89,8 @@ examples:
       listing_id: 'tf_test_pubsub_listing'
       pubsub_topic_name: 'test_pubsub'
       description: 'Example for pubsub topic source'
+    test_vars_overrides:
+      description: '"Example for pubsub topic source" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_dcr_routine'
     primary_resource_id: 'listing'
     region_override: 'US'
@@ -91,6 +101,8 @@ examples:
       dataset_id: 'tf_test_dataset'
       routine_id: 'tf_test_routine'
       desc: 'Example for listing with routine'
+    test_vars_overrides:
+      desc: '"Example for listing with routine" + randomSuffix'
   - name: 'bigquery_analyticshub_public_listing'
     primary_resource_id: 'listing'
     region_override: 'US'
@@ -98,6 +110,8 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example public listing'
+    test_vars_overrides:
+      desc: '"example public listing" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_marketplace'
     primary_resource_id: 'listing'
     region_override: 'us'
@@ -105,6 +119,8 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example data exchange'
+    test_vars_overrides:
+      desc: '"example data exchange" + randomSuffix'
     ignore_read_extra:
       - 'delete_commercial'
   - name: 'bigquery_analyticshub_listing_multiregion'
@@ -115,6 +131,8 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       description: 'example listing for multiregion'
+    test_vars_overrides:
+      description: '"example listing for multiregion" + randomSuffix'
 virtual_fields:
   - name: 'delete_commercial'
     type: Boolean

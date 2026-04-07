@@ -43,6 +43,8 @@ examples:
       provider_id: 'example-prvdr'
       scim_tenant_id: 'example-scim-tenant'
       hard_delete: 'true'
+    test_vars_overrides:
+      hard_delete: '"true" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
 properties:

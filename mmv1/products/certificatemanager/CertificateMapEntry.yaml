@@ -44,6 +44,9 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_map_entry_name: 'cert-map-entry'
+    test_vars_overrides:
+      dns_auth_subdomain: '"subdomain" + randomSuffix'
+      dns_auth_subdomain2: '"subdomain2" + randomSuffix'
 parameters:
   - name: 'name'
     type: String

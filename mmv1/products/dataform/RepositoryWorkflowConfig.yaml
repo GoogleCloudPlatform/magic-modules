@@ -38,6 +38,8 @@ examples:
       secret_name: my_secret
       service_account_name: dataform-sa
       workflow_name: my_workflow
+    test_vars_overrides:
+      git_repository_name: '"my/repository" + randomSuffix'
 parameters:
   - name: region
     type: String

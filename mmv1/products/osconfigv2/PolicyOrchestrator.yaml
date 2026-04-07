@@ -41,6 +41,8 @@ examples:
       policy_orchestrator_id: po
       orchestrated_resource_id: test-orchestrated-resource
       os_policy_id: test-os-policy
+    test_vars_overrides:
+      policy_orchestrator_id: '"po" + randomSuffix'
     test_env_vars:
       project_number: PROJECT_NUMBER
       project: PROJECT_NAME

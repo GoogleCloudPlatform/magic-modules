@@ -35,6 +35,7 @@ examples:
       resource_name: 'autolabelingrulebasic'
     test_vars_overrides:
       'id_suffix': 'strings.ToLower(acctest.RandString(t, 10))'
+      resource_name: '"autolabelingrulebasic" + randomSuffix'
 autogen_status: QXV0b0xhYmVsaW5nUnVsZQ==
 parameters:
   - name: location
