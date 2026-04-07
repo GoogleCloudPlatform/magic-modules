@@ -2728,7 +2728,6 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		}
 	}
 
-
 	config = append(config, map[string]interface{}{
 		"machine_type":             c.MachineType,
 		"containerd_config":        flattenContainerdConfig(c.ContainerdConfig),
