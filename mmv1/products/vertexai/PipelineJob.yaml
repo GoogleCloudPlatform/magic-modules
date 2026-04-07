@@ -92,10 +92,12 @@ properties:
         type: String
   - name: pipelineSpec
     type: String
+    required: false
     description: A compiled definition of a pipeline, represented as a JSON object.
     validation:
       function: 'validation.StringIsJSON'
   - name: pscInterfaceConfig
+    required: false
     type: String
     description: JSON-encoded PSC interface configuration.
     validation:
@@ -161,6 +163,7 @@ properties:
     type: Boolean
     description: Reserved for future use.
   - name: 'originalPipelineJobId'
+    required: false
     min_version: 'beta'
     type: String
-    description: Optional, The original pipeline job id if this job is a rerun of a previous job.
+    description: The original pipeline job id if this job is a rerun of a previous job.
