@@ -63,6 +63,8 @@ custom_code:
   constants: 'templates/terraform/constants/region_disk.go.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
+  tgc_ignore_terraform_decoder: true
+  tgc_decoder: 'templates/terraform/decoders/tgc_disk.tmpl'
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
   post_import: 'templates/terraform/post_import/disk.go.tmpl'
