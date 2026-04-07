@@ -137,16 +137,12 @@ func TestAddTestsFromHandwrittenTests(t *testing.T) {
 		"third_party/terraform/services/dummy/resource_dummy_dummy_extra_test.go": &fstest.MapFile{
 			Data: []byte(`func TestAccDummy_extra(t *testing.T) {}`),
 		},
-	}
-
-	tgc := TerraformGoogleConversionNext{
-		Product: &api.Product{
-			Name: "Dummy",
+		"third_party/terraform/services/dummy/resource_dummy_dummy_association_test.go": &fstest.MapFile{
+			Data: []byte(`func TestAccDummyAssociation_basic(t *testing.T) {}`),
 		},
-		templateFS: mockFS,
 	}
 
-	object := &api.Resource{
+	dummyRes := &api.Resource{
 		Name:             "DummyResource",
 		FilenameOverride: "dummy",
 		ProductMetadata: &api.Product{
@@ -154,28 +150,54 @@ func TestAddTestsFromHandwrittenTests(t *testing.T) {
 		},
 	}
 
-	err := tgc.addTestsFromHandwrittenTests(object)
+	dummyAssocRes := &api.Resource{
+		Name:             "DummyResourceAssociation",
+		FilenameOverride: "dummy_association",
+		ProductMetadata: &api.Product{
+			Name: "Dummy",
+		},
+	}
+
+	tgc := TerraformGoogleConversionNext{
+		Product: &api.Product{
+			Name: "Dummy",
+			Objects: []*api.Resource{
+				dummyRes,
+				dummyAssocRes,
+			},
+		},
+		templateFS: mockFS,
+	}
+
+	err := tgc.addTestsFromHandwrittenTests(dummyRes)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	expectedTests := []string{"TestAccDummy_basic", "TestAccDummy_extra"}
-	if len(object.TGCTests) != len(expectedTests) {
-		t.Errorf("expected %d tests, got %d", len(expectedTests), len(object.TGCTests))
+	if len(dummyRes.TGCTests) != len(expectedTests) {
+		t.Errorf("expected %d tests, got %d", len(expectedTests), len(dummyRes.TGCTests))
 	}
 
 	foundBasic := false
 	foundExtra := false
-	for _, test := range object.TGCTests {
+	foundAssoc := false
+	for _, test := range dummyRes.TGCTests {
 		if test.Name == "TestAccDummy_basic" {
 			foundBasic = true
 		}
 		if test.Name == "TestAccDummy_extra" {
 			foundExtra = true
 		}
+		if test.Name == "TestAccDummyAssociation_basic" {
+			foundAssoc = true
+		}
 	}
 
 	if !foundBasic || !foundExtra {
-		t.Errorf("did not find all expected tests. object.TGCTests: %v", object.TGCTests)
+		t.Errorf("did not find all expected tests. dummyRes.TGCTests: %v", dummyRes.TGCTests)
+	}
+	if foundAssoc {
+		t.Errorf("found test from association resource in dummyRes.TGCTests: %v", dummyRes.TGCTests)
 	}
 }

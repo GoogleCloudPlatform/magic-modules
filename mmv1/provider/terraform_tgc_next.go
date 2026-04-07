@@ -383,6 +383,23 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 		if !strings.HasPrefix(name, prefix) {
 			continue
 		}
+
+		// Skip files that belong to another resource with a longer name sharing the prefix
+		belongsToOther := false
+		for _, obj := range tgc.Product.Objects {
+			if obj == object {
+				continue
+			}
+			otherPrefix := fmt.Sprintf("resource_%s", tgc.ResourceGoFilename(*obj))
+			if strings.HasPrefix(name, otherPrefix) && len(otherPrefix) > len(prefix) {
+				belongsToOther = true
+				break
+			}
+		}
+		if belongsToOther {
+			continue
+		}
+
 		if !strings.HasSuffix(name, "_test.go") && !strings.HasSuffix(name, "_test.go.tmpl") {
 			continue
 		}
