@@ -1,5 +1,7 @@
 package chronicle_test
 
+{{- if ne $.TargetVersionName "ga" }}
+
 import (
 	"fmt"
 	"os"
@@ -104,3 +106,5 @@ resource "google_chronicle_feed" "example" {
 }
 `, context)
 }
+
+{{- end }}

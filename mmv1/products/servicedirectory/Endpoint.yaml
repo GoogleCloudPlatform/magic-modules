@@ -35,15 +35,19 @@ custom_code:
   encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
   decoder: 'templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl'
   pre_update: 'templates/terraform/pre_update/service_directory_endpoint.go.tmpl'
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 exclude_sweeper: true
 examples:
   - name: 'service_directory_endpoint_basic'
+    exclude_identity_import: true
     primary_resource_id: 'example'
     vars:
       service_id: 'example-service'
       namespace_id: 'example-namespace'
       endpoint_id: 'example-endpoint'
   - name: 'service_directory_endpoint_with_network'
+    exclude_identity_import: true
     primary_resource_id: 'example'
     vars:
       service_id: 'example-service'

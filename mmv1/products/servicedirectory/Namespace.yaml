@@ -28,6 +28,8 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}'
+# exluding resource_identity due to namespace_id field
+exclude_identity_generation: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -45,6 +47,7 @@ examples:
     primary_resource_id: 'example'
     vars:
       namespace_id: 'example-namespace'
+    exclude_identity_import: true
 parameters:
   - name: 'location'
     type: String

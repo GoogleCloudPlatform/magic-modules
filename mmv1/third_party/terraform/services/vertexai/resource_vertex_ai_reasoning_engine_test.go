@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -560,7 +561,6 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 `)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -570,7 +570,7 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t 
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -598,8 +598,6 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t 
 func testAccVertexAIReasoningEngine_identityTypeServiceAccount(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
-  provider = google-beta
-
   display_name = "tf-test-sample-reasoning-engine%{random_suffix}"
   description  = "A reasoning engine for identity type testing"
   region       = "us-central1"
@@ -614,8 +612,6 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 func testAccVertexAIReasoningEngine_identityTypeAgentIdentity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
-  provider = google-beta
-
   display_name = "tf-test-sample-reasoning-engine%{random_suffix}"
   description  = "A reasoning engine for identity type testing"
   region       = "us-central1"
@@ -626,4 +622,77 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 }
 `, context)
 }
-{{- end }}
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"name":          "tf-test-reasoning-engine" + randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecExample(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_reasoning_engine.reasoning_engine", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecExample(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_reasoning_engine.reasoning_engine", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "%{name}"
+  description  = "Deployed with BYOC Dockerfile through Terraform (Updated)"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/agent_src2.tar.gz")
+      }
+
+      image_spec {
+        build_args = {
+          "tag" = "latest"
+        }
+      }
+    }
+  }
+}
+`, context)
+}
