@@ -32,13 +32,16 @@ ifneq ($(SKIP_CLEAN),)
   endif
 endif
 
-terraform build provider: validate_environment clean-provider mmv1
+TEMP_DIR := $(shell mktemp -d)
+export TEMP_DIR
+
+terraform build provider: validate_environment clean-provider mmv1 clean-temp
 	@echo "Provider generation process finished for $(VERSION) in $(OUTPUT_PATH)"
 
 
-mmv1:
+mmv1: prepare-temp
 	@echo "Executing mmv1 build for $(OUTPUT_PATH)"; 
-	@cd mmv1;\
+	@cd $(TEMP_DIR)/mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
 			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
 			&& go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
@@ -87,15 +90,17 @@ clean-tgc:
 		rm -rf ./test/*;\
 		rm -rf ./cmd/*;\
 
-tgc:
-	cd mmv1;\
+tgc: prepare-temp
+	cd $(TEMP_DIR)/mmv1;\
 		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile)\
 		&& go run . --version ga --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
-		&& go run . --version ga --provider tgc_next --output $(OUTPUT_PATH) $(mmv1_compile);\
+		&& go run . --version ga --provider tgc_next --output $(OUTPUT_PATH) $(mmv1_compile);
+	$(MAKE) clean-temp\
 
-tf-oics:
-	cd mmv1;\
-		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);\
+tf-oics: prepare-temp
+	cd $(TEMP_DIR)/mmv1;\
+		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);
+	$(MAKE) clean-temp\
 
 test:
 	cd mmv1; \
@@ -122,4 +127,34 @@ check_safe_build:
 doctor:
 	./scripts/doctor
 
-.PHONY: mmv1 test clean-provider validate_environment doctor
+prepare-temp:
+	@echo "Setting up temporary workspace for conversion at $(TEMP_DIR)..."
+	@rm -rf $(TEMP_DIR)
+	@mkdir -p $(TEMP_DIR)/mmv1 $(TEMP_DIR)/tpgtools $(TEMP_DIR)/tools
+	@echo "Copying files to $(TEMP_DIR)..."
+	@cp -R ./mmv1/. $(TEMP_DIR)/mmv1/
+	@cp -R ./tpgtools/. $(TEMP_DIR)/tpgtools/
+	@cp -R ./tools/. $(TEMP_DIR)/tools/
+	@echo "Building resource template converter in temp..."
+	cd $(TEMP_DIR)/tools/resource-template-converter && go env -w GO111MODULE=on && go mod tidy && go build -v -o $(TEMP_DIR)/tools/convert-resource-template . && echo "BUILD SUCCEEDED" || (echo "BUILD FAILED"; exit 1)
+	@echo "Build finished, running converter..."
+	@ls -la $(TEMP_DIR)/tools/convert-resource-template
+	@$(TEMP_DIR)/tools/convert-resource-template convert-resource-template $(TEMP_DIR)
+	@echo "Temporary workspace setup complete."
+
+test-convert:
+	@echo $(TEMP_DIR)
+
+clean-temp:
+	@echo "Cleaning up temporary workspace $(TEMP_DIR)..."
+	@rm -rf $(TEMP_DIR)
+
+convert-templates:
+	@echo "Checking and running resource template converter..."
+	@if [ ! -f ./convert-resource-template ]; then \
+		echo "Building convert-resource-template tool..."; \
+		(cd tools/resource-template-converter && go build -o ../../convert-resource-template); \
+	fi
+	@./convert-resource-template convert-resource-template .
+
+.PHONY: mmv1 test clean-provider validate_environment doctor convert-templates prepare-temp clean-temp
