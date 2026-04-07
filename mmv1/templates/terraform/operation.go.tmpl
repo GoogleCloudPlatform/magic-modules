@@ -64,7 +64,10 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) QueryOp() (interface{}, er
     return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
   }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-  basePath := transport_tpg.ResourceBasePath(w.Config.{{$.ProductMetadata.Name}}BasePath, w.Config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", w.Config, w.Location)
+  basePath, err := transport_tpg.ResourceBasePath(w.Config.{{$.ProductMetadata.Name}}BasePath, w.Config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", w.Config, w.Location)
+  if err != nil {
+    return nil, err
+  }
   url := fmt.Sprintf("%s{{ replaceAll $.GetAsync.Operation.BaseUrl "{{op_id}}" "%s" }}", basePath, w.CommonOperationWaiter.Op.Name)
 {{ else }}
   // Returns the proper get.

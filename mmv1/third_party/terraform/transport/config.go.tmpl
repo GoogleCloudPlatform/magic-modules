@@ -1653,7 +1653,7 @@ func GetUniverseDomainFromMeta(meta interface{}) string {
 // Regional endpoint should be returned if preferred
 // Global endpoint should be returned if preferred
 // If no preferences, return the product default based on DefaultRepStatus map
-func ResourceBasePath(basePath, repPath, basePathKey string, config *Config, location string) string {
+func ResourceBasePath(basePath, repPath, basePathKey string, config *Config, location string) (string, error) {
 	var path string
 	// Set the default to the product-level default
 	if DefaultRepStatus[basePathKey] {
@@ -1671,7 +1671,11 @@ func ResourceBasePath(basePath, repPath, basePathKey string, config *Config, loc
     	// If user has specified a preference, switch to that
         path = basePath
     }
+		if strings.Contains(path, "{{"{{"}}location{{"}}"}}") && location == "" {
+			log.Printf("[WARN] Found base path with location but no location provided: %s", path)
+			return path, fmt.Errorf("failed to find location for a resource with a regionalized endpoint %s", path)
+		}
     // Still try to replace location even if it may not exist, this allows
     // for products that only support REP on their base_url
-    return strings.ReplaceAll(path, "{{"{{"}}location{{"}}"}}", location)
+    return strings.ReplaceAll(path, "{{"{{"}}location{{"}}"}}", location), nil
 }
