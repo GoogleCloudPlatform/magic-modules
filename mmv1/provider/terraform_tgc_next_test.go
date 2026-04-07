@@ -21,7 +21,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 )
 
-
 func TestFindIdentityParams(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -180,4 +179,3 @@ func TestAddTestsFromHandwrittenTests(t *testing.T) {
 		t.Errorf("did not find all expected tests. object.TGCTests: %v", object.TGCTests)
 	}
 }
-
