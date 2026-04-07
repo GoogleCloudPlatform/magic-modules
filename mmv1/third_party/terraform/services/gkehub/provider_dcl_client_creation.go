@@ -11,7 +11,7 @@ func NewDCLGkeHubClient(config *transport_tpg.Config, userAgent, billingProject 
 		dcl.WithHTTPClient(config.Client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dcl.DCLLogger{}),
-		dcl.WithBasePath(config.GKEHubBasePath),
+		dcl.WithBasePath(config.BasePaths["gkehub"]),
 	}
 
 	if timeout != 0 {

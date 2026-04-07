@@ -11,7 +11,7 @@ func NewDCLCloudbuildClient(config *transport_tpg.Config, userAgent, billingProj
 		dcl.WithHTTPClient(config.Client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dcl.DCLLogger{}),
-		dcl.WithBasePath(config.CloudBuildBasePath),
+		dcl.WithBasePath(config.BasePaths["cloudbuild"]),
 	}
 
 	if timeout != 0 {

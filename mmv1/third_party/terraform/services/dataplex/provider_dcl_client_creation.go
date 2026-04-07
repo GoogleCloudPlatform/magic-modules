@@ -11,7 +11,7 @@ func NewDCLDataplexClient(config *transport_tpg.Config, userAgent, billingProjec
 		dcl.WithHTTPClient(config.Client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dcl.DCLLogger{}),
-		dcl.WithBasePath(config.DataplexBasePath),
+		dcl.WithBasePath(config.BasePaths["dataplex"]),
 	}
 
 	if timeout != 0 {

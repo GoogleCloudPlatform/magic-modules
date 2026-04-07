@@ -11,7 +11,7 @@ func NewDCLClouddeployClient(config *transport_tpg.Config, userAgent, billingPro
 		dcl.WithHTTPClient(config.Client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dcl.DCLLogger{}),
-		dcl.WithBasePath(config.ClouddeployBasePath),
+		dcl.WithBasePath(config.BasePaths["clouddeploy"]),
 	}
 
 	if timeout != 0 {

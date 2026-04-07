@@ -32,7 +32,7 @@ func (w *TagsLocationOperationWaiter) QueryOp() (interface{}, error) {
 			UserAgent: w.UserAgent,
 		})
 	} else {
-		url := fmt.Sprintf("%s%s", w.Config.TagsBasePath, w.CommonOperationWaiter.Op.Name)
+		url := fmt.Sprintf("%s%s", w.Config.BasePaths["tags"], w.CommonOperationWaiter.Op.Name)
 		return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    w.Config,
 			Method:    "GET",

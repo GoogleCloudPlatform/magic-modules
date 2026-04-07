@@ -139,7 +139,7 @@ func (p *googleEphemeralSecretManagerSecretVersion) Open(ctx context.Context, re
 		fullSecretName = fmt.Sprintf("projects/%s/secrets/%s", project, secret)
 	}
 
-	url = fmt.Sprintf("%s%s/versions/%s", config.SecretManagerBasePath, fullSecretName, versionID)
+	url = fmt.Sprintf("%s%s/versions/%s", config.BasePaths["secretmanager"], fullSecretName, versionID)
 
 	versionResp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
@@ -153,7 +153,7 @@ func (p *googleEphemeralSecretManagerSecretVersion) Open(ctx context.Context, re
 		return
 	}
 
-	accessURL := fmt.Sprintf("%s%s:access", config.SecretManagerBasePath, versionResp["name"])
+	accessURL := fmt.Sprintf("%s%s:access", config.BasePaths["secretmanager"], versionResp["name"])
 	accessResp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",

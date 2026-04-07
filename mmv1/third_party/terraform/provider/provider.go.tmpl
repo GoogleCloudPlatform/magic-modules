@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/version"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
@@ -203,7 +204,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: ResourceMap(),
 	}
 	for _, p := range registry.ListProducts() {
-		provider.schema[p.CustomEndpointField] = &schema.Schema{
+		provider.Schema[p.CustomEndpointField] = &schema.Schema{
 			Type:         schema.TypeString,
 			Optional:     true,
 			ValidateFunc: transport_tpg.ValidateCustomEndpoint,
@@ -343,12 +344,12 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		if d.Get(p.CustomEndpointField) == "" {
 			baseUrl := p.BaseUrl
 			if mtlsEnabled {
-				baseUrl := getMtlsEndpoint(baseUrl)
+				baseUrl = getMtlsEndpoint(baseUrl)
 			}
 			if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
-				baseUrl := strings.ReplaceAll(basePath, "googleapis.com", config.UniverseDomain)
+				baseUrl = strings.ReplaceAll(baseUrl, "googleapis.com", config.UniverseDomain)
 			}
-			d.Set(p.CustomEndpointField, MultiEnvDefault([]string{
+			d.Set(p.CustomEndpointField, transport_tpg.MultiEnvDefault([]string{
 				p.CustomEndpointEnvVar,
 			}, baseUrl))
 		}

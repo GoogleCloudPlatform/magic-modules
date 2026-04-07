@@ -2,6 +2,9 @@ package registry
 
 import (
 	"log"
+	"maps"
+	"slices"
+	"strings"
 	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -37,6 +40,14 @@ type registeredProducts struct {
 
 var products = &registeredProducts{
 	m: make(map[string]Product),
+}
+
+func ListProducts() []Product {
+	l := slices.Collect(maps.Values(products.m))
+	slices.SortFunc(l, func(a, b Product) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+	return l
 }
 
 // SchemaType differentitates a registered Terraform schema in cases where multiple schemas

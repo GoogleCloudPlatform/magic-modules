@@ -11,7 +11,7 @@ func NewDCLDataprocClient(config *transport_tpg.Config, userAgent, billingProjec
 		dcl.WithHTTPClient(config.Client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dcl.DCLLogger{}),
-		dcl.WithBasePath(config.DataprocBasePath),
+		dcl.WithBasePath(config.BasePaths["dataproc"]),
 	}
 
 	if timeout != 0 {

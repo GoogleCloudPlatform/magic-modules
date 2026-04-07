@@ -827,7 +827,7 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 			// migrated and other config fields).
 			if pName, found := strings.CutSuffix(m, "BasePath"); found {
 				// the field will look like ComputeBasePath, but the product name will be like compute (just lowercase, no underscores)
-				if v, ok := config.BasePaths[strings.Lower(pName)]; ok {
+				if v, ok := config.BasePaths[strings.ToLower(pName)]; ok {
 					return v
 				}
 			}
