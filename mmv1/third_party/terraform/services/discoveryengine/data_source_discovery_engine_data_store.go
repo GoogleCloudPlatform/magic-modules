@@ -172,4 +172,3 @@ func init() {
 		Schema:      DataSourceGoogleDiscoveryEngineDataStore(),
 	}.Register()
 }
-
