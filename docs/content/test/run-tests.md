@@ -62,7 +62,7 @@ aliases:
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
-    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+    To run all tests matching, for example, `TestAccContainerNodePool*`, omit the trailing `$$`:
 
     ```bash
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
@@ -100,7 +100,7 @@ aliases:
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
-    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+    To run all tests matching, for example, `TestAccContainerNodePool*`, omit the trailing `$$`:
 
     ```bash
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
