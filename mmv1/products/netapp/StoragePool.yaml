@@ -258,7 +258,7 @@ properties:
     immutable: true
     min_version: beta
     default_from_api: true
-    deprecation_message: '`scaleTier` is deprecated and will be removed in a future major release. Use other `scaleType` instead.'
+    deprecation_message: '`scaleTier` is deprecated and will be removed in a future major release. Use `scaleType` instead.'
   - name: 'scaleType'
     type: Enum
     description: |
