@@ -47,6 +47,9 @@ examples:
       private_connection_id: 'my-connection'
       network_name: 'my-network'
       create_without_validation: 'false'
+    test_vars_overrides:
+      # for backward compatible
+      create_without_validation: '"false" + randomSuffix'
 parameters:
   - name: 'privateConnectionId'
     type: String

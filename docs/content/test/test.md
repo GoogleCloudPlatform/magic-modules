@@ -73,89 +73,125 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 }
 ```
 
-## Add a create test
+## Add an acceptance test
 
-A create test is an **acceptance test** that creates the target resource and immediately destroys it.
+An **acceptance test** verifies that a resource can be created, updated, and destroyed successfully.
 
-> **Note:** All resources should have a "basic" create test, which uses the smallest possible number of fields. Additional create tests can be used to ensure all fields on the resource are used in at least one test.
+> **Note:** All resources should have a "basic" test covering the minimal required fields. Additional tests should be added to cover all fields, with updatable fields being covered by an update step. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code
 
-{{% tabs "create" %}}
+{{% tabs "add-acceptance-test" %}}
 {{< tab "MMv1" >}}
-1. Add an entry to your `RESOURCE_NAME.yaml` file's `examples`. The fields listed here are the most commonly-used. For a comprehensive reference, see [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}}).
+
+### Steps
+
+1. Add an entry to your `RESOURCE_NAME.yaml` file's `samples` list. Each sample can contain multiple steps. The first step will generate a `create` test, and any subsequent steps will generate `update` tests. For a comprehensive reference, see [MMv1 sample reference ↗]({{< ref "/reference/sample" >}}).
+
+   When defining variables for your steps, follow these guidelines:
+   - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values automatically receive a `tf-test` prefix and random suffix, unless they contain an underscore `_`, in which case they receive a `tf_test` prefix and random suffix. If a resource name doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
+   - **Use `vars` only for fields that vary between steps** (for example, to test the update functionality of specific fields).
+   - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Don't use `vars` for values that remain constant across all steps.
    ```yaml
-   examples:
-     # name must correspond to a configuration file that you'll create in the next step.
-     # The name should include the product name, resource name, and a basic description
-     # of the test. This will be used to generate the test name and the documentation
-     # header.
-     - name: "PRODUCT_RESOURCE_basic"
+   samples:
+     # name is used to generate the test name.
+     - name: "pubsub_topic_update"
        # primary_resource_id will be used for the Terraform resource id in the configuration file.
-       primary_resource_id: "example"
-       # vars contains key/value pairs of variables to inject into the configuration file.
-       # These can be referenced in the configuration file as a key inside `{{$.Vars}}`.
-       # All resource IDs (even for resources not under test) should be declared
-       # with variables that contain a `-` or `_`; this will ensure that, in tests,
-       # the resources are created with a `tf-test` prefix to allow automatic cleanup
-       # of dangling resources and a random suffix to avoid name collisions.
-       vars:
-         network_name: "example-network"
-       # test_vars_overrides contains key/value pairs of literal overrides for
-       # variables used in tests. This can be used to call functions to
-       # generate or determine a variable's value – for example, bootstrapping
-       # a shared network for your product to avoid test failures due to limits
-       # on the default network.
-       test_vars_overrides:
-         network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
-       # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
+       primary_resource_id: "default"
+       # min_version can be set at the top level if it applies to all steps.
        min_version: beta
+       steps:
+         # The first step defines the initial create configuration.
+         # Step name: Matches the template file name by default (for example, pubsub_topic_minimal.tf.tmpl). Use config_path to override this.
+         - name: "pubsub_topic_minimal" 
+           # resource_id_vars contains key/value pairs to inject into the configuration file.
+           # These can be referenced as a key inside `{{$.ResourceIdVars}}`.
+           resource_id_vars:
+             resource_name: "example-resource"
+             network_name: "example-network"
+           # test_vars_overrides contains literal overrides for variables in tests.
+           test_vars_overrides:
+             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+         # Subsequent steps define update configurations.
+         - name: "pubsub_topic_full"
+           resource_id_vars:
+             resource_name: "example-resource"
+             network_name: "example-network"
+           test_vars_overrides:
+             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+           # vars should ONLY be used for fields that vary between steps.
+           # Fields that stay constant across steps should be hardcoded in the .tf.tmpl file.
+           vars: 
+             display_name: "Display Name"
+         - name: "pubsub_topic_full"
+           resource_id_vars:
+             resource_name: "example-resource"
+             network_name: "example-network"
+           test_vars_overrides:
+             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+           vars:
+             display_name: "Updated Display Name" # The new value for the updatable field
    ```
 
-2. Create a `.tf.tmpl` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should match the name of the example created in the previous step. For example, `PRODUCT_RESOURCE_basic.tf.tmpl`.
-3. In that file, write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
+2. Create one or more `.tf.tmpl` files in `mmv1/templates/terraform/samples/services/SERVICE_NAME/`. The file names should match the step name (for example, `pubsub_topic_minimal.tf.tmpl` and `pubsub_topic_full.tf.tmpl`).
+3. In those files, write the Terraform configuration for your test steps. This should include all required dependencies.
+
+  `pubsub_topic_minimal.tf.tmpl`:
    ```tf
-   resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
-     name          = "{{index $.Vars "subnetwork_name"}}"
-     ip_cidr_range = "10.1.0.0/16"
-     region        = "us-central1"
+   resource "google_pubsub_topic" "{{.PrimaryResourceId}}" {
+     name          = "{{index $.ResourceIdVars "resource_name"}}"
+     network       = google_compute_network.network.name
+
+     labels = {
+       env = "test"
+     }
+   }
+
+   resource "google_compute_network" "network" {
+     name                    = "{{index $.ResourceIdVars "network_name"}}"
+     auto_create_subnetworks = false
+     routing_mode            = "REGIONAL"
+   }
+   ```
+
+  `pubsub_topic_full.tf.tmpl`: (This file added the `display_name` variable).
+   ```tf
+   resource "google_pubsub_topic" "{{.PrimaryResourceId}}" {
+     name          = "{{index $.ResourceIdVars "resource_name"}}"
+
+     # This is an example of a field whose value changes between steps
+     # to test update functionality of display_name
+     display_name  = "{{index $.Vars "display_name"}}"
+     
+     # The rest of the fields can be baked in the configuration directly
+     message_retention_duration = "86600s"
+     labels = {
+       env = "test"
+     }
+     
      network       = google_compute_network.network.name
    }
 
    resource "google_compute_network" "network" {
-     name                    = "{{index $.Vars "network_name"}}"
+     name                    = "{{index $.ResourceIdVars "network_name"}}"
      auto_create_subnetworks = false
+     routing_mode            = "REGIONAL"
    }
    ```
-4. If the resource or the example is beta-only:
-   - Add `provider = google-beta` to every resource in the file.
+
+4. For beta-only resources or features:
+   - If the resource or the whole test is beta-only
+      - Add `provider = google-beta` to every resource in the file.
+      - Add `min_version: beta` at the top sample level
+   - If only a single test step is beta-only
+      - Add `min_version: beta` at the individual step level
+
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-This section assumes you've used the [Add a resource]({{< ref "/develop/add-resource" >}}) guide to create your handwritten resource, and you have a working MMv1 config.
 
-> **Note:** If not, you can create one now, or skip this guide and construct the test by hand. Writing tests by hand can sometimes be a better option if there is a similar test you can copy from.
+> [!NOTE]
+> This workflow is an alternative for when the recommended `samples` generator framework is insufficient (for example, when you require a custom `CheckFunction` or other complex test assertions).
 
-1. Add the test in MMv1. Repeat for all the create tests you will need.
-2. [Generate the beta provider]({{< ref "/develop/generate-providers" >}}).
-3. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services/) as a new file call `*_test.go`.
-4. Modify the tests as needed.
-   - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
-   - Remove the comments at the top of the file.
-   - Remove the `Example` suffix from all function names.
-   - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.tmpl`
-     - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
-     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
-     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
-{{< /tab >}}
-{{% /tabs %}}
+An update test ensures that updatable fields can be changed without recreating the entire resource. All updatable fields must be covered by at least one update test (often a single update step covering all fields is sufficient).
 
-## Add an update test
-
-An update test is an **acceptance test** that creates the target resource and then makes updates to fields that are updatable. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code.
-
-> **Note:** All updatable fields must be covered by at least one update test. In most cases, only a single update test is needed to test all fields at once.
-
-{{% tabs "update" %}}
-{{< tab "MMv1" >}}
 1. [Generate the beta provider]({{< ref "/develop/generate-providers" >}}).
 2. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) as a new file call `*_test.go`.
 3. Using an editor of your choice, delete the `*DestroyProducer` function, and all but one test. The remaining test should be the "full" test, or if there is no "full" test, the "basic" test. This will be the starting point for your new update test.
@@ -218,64 +254,67 @@ An update test is an **acceptance test** that creates the target resource and th
      - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
      - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
      - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
-{{< /tab >}}
-{{< tab "Handwritten" >}}
-1. Using an editor of your choice, open the existing `*_test.go` or `*_test.go.tmpl` file in the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) which contains your create tests.
-2. Copy the `TestAcc*` *test function* for the existing "full" test. If there is no "full" test, use the "basic" test. This will be the starting point for your new update test.
-3. Modify the test function to support updates.
-   - Change the suffix of the test function to `_update`.
-   - Copy the 2 `TestStep` blocks and paste them immediately after, so that there are 4 total test steps.
-   - Change the suffix of the second `Config` value to `_update`.
-   - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
-   - The resulting test function would look similar to this:
-   ```go
-   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
 
-   func TestAccPubsubTopic_update(t *testing.T) {
-      ...
-      acctest.VcrTest(t, resource.TestCase{
-         ...
-         Steps: []resource.TestStep{
-            {
-               Config: testAccPubsubTopic_full(...),
-            },
-            {
-               ...
-            },
-            {
-               Config: testAccPubsubTopic_update(...),
-               ConfigPlanChecks: resource.ConfigPlanChecks{
-                  PreApply: []plancheck.PlanCheck{
-                     plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
-                  },
-               },
-            },
-            {
-               ...
-            },
-         },
-      })
-   }
-   ```
-4. Add a Terraform *template function* to support updates.
-   - Copy the full (or basic) `testAcc*` template function.
-   - Change the suffix of the new template function to `_update`.
-   - The new template function would look similar to this:
-   ```go
-   func testAccPubsubTopic_update(...) string {
-       ...
-   }
-   ```
-5. Modify the test as needed.
-   - Modify the new template function so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
-   - Remove the comments at the top of the file.
-   - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.tmpl`
-     - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
-     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
-     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 {{< /tab >}}
 {{% /tabs %}}
+
+## Legacy: Examples-based Framework
+
+> [!WARNING]
+> The `examples` block is legacy and has been replaced by `samples`. This footprint is still supported for approximately 2 months to allow for transition. New tests should use the `samples` framework.
+
+Tests within the legacy `examples` generator are configured directly on the resource YAML. **Note that this legacy framework only supports generating create tests;** multi-step update tests must be configured via the new `samples` framework or handwritten manual testing procedures.
+
+### Steps
+
+1. Add an entry to your `RESOURCE_NAME.yaml` file's `examples`. The fields listed here are the most commonly-used. For a comprehensive reference, see [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}}).
+   ```yaml
+   examples:
+     # name must correspond to a configuration file that you'll create in the next step.
+     # The name should include the product name, resource name, and a basic description
+     # of the test. This will be used to generate the test name and the documentation
+     # header.
+     - name: "PRODUCT_RESOURCE_basic"
+       # primary_resource_id will be used for the Terraform resource id in the configuration file.
+       primary_resource_id: "example"
+       # vars contains key/value pairs of variables to inject into the configuration file.
+       # These can be referenced in the configuration file as a key inside `{{$.Vars}}`.
+       # All resource IDs (even for resources not under test) should be declared
+       # with variables that contain a `-` or `_`; this will ensure that, in tests,
+       # the resources are created with a `tf-test` prefix to allow automatic cleanup
+       # of dangling resources and a random suffix to avoid name collisions.
+       vars:
+         network_name: "example-network"
+       # test_vars_overrides contains key/value pairs of literal overrides for
+       # variables used in tests. This can be used to call functions to
+       # generate or determine a variable's value – for example, bootstrapping
+       # a shared network for your product to avoid test failures due to limits
+       # on the default network.
+       test_vars_overrides:
+         network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
+       # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
+       min_version: beta
+   ```
+
+2. Create a `.tf.tmpl` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should match the name of the example created in the previous step. For example, `PRODUCT_RESOURCE_basic.tf.tmpl`.
+3. In that file, write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
+   ```tf
+   resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
+     name          = "{{index $.Vars "subnetwork_name"}}"
+     ip_cidr_range = "10.1.0.0/16"
+     region        = "us-central1"
+     network       = google_compute_network.network.name
+   }
+
+   resource "google_compute_network" "network" {
+     name                    = "{{index $.Vars "network_name"}}"
+     auto_create_subnetworks = false
+   }
+   ```
+4. If the resource or the example is beta-only:
+   - Add `provider = google-beta` to every resource in the file.
+
+For instructions on how to migrate existing `examples` over to `samples`, see the [Test Template Migration Guide]({{< ref "/reference/update-test-changes" >}}).
 
 ## Bootstrap API resources {#bootstrapping}
 
@@ -300,13 +339,15 @@ Example usage:
 {{% tabs "bootstrap-cryptokeys" %}}
 {{< tab "MMv1" >}}
 ```yaml
-examples:
+samples:
   - name: service_resource_basic
     primary_resource_id: example
-    vars:
-      kms_key_name: 'kms-key'
-    test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+    steps:
+      - name: service_resource_basic
+        resource_id_vars:
+          kms_key_name: 'kms-key'
+        test_vars_overrides:
+          kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
@@ -336,24 +377,29 @@ Example usage:
 {{< tab "MMv1" >}}
 ```yaml
 # Project-level IAM
-examples:
+samples:
   - name: service_resource_basic
     primary_resource_id: example
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
         role: "roles/bigquery.dataEditor"
+    steps:
+      - name: service_resource_basic
+        config_path: samples/basic.tf.tmpl
 ```
 
 ```yaml
 # Org-level IAM
-examples:
+samples:
   - name: service_resource_basic
     primary_resource_id: example
     bootstrap_iam:
       - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
         role: "roles/osconfig.serviceAgent"
-    test_env_vars:
-      org_id: ORG_TARGET
+    steps:
+      - name: service_resource_basic
+        test_env_vars:
+          org_id: ORG_TARGET # Resolves to envvar.GetTestOrgTargetFromEnv in tests
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
@@ -416,15 +462,17 @@ Example usage:
 {{% tabs "bootstrap-networks" %}}
 {{< tab "MMv1" >}}
 ```yaml
-examples:
+samples:
   - name: service_resource_basic
     primary_resource_id: example
-    vars:
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "network-identifier")'
-      subnetwork_name: 'acctest.BootstrapSubnet(t, "subnet-identifier", acctest.BootstrapSharedTestNetwork(t, "network-identifier"))'
+    steps:
+      - name: service_resource_basic
+        resource_id_vars:
+          network_name: 'default'
+          subnetwork_name: 'default'
+        test_vars_overrides:
+          network_name: 'acctest.BootstrapSharedTestNetwork(t, "network-identifier")'
+          subnetwork_name: 'acctest.BootstrapSubnet(t, "subnet-identifier", acctest.BootstrapSharedTestNetwork(t, "network-identifier"))'
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
@@ -527,12 +575,14 @@ Acceptance tests are run in VCR replaying mode on PRs (using pre-recorded HTTP r
 Skipping acceptance tests that are generated from example files can be achieved by adding `skip_vcr: true` in the example's YAML:
 
 ```yaml
-examples:
+samples:
 - name: 'bigtable_app_profile_anycluster'
    ...
 
    # bigtable instance does not use the shared HTTP client, this test creates an instance
    skip_vcr: true
+   steps:
+     - name: service_resource_basic
 ```
 
 If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
@@ -566,10 +616,12 @@ Please include a comment with context where the skip is defined.
 Skipping acceptance tests that are generated from example files can be achieved by adding `skip_func: acctest.SkipTestUntil(t, "YYYY-MM-DD")` in the example's YAML:
 
 ```yaml
-examples:
+samples:
 - name: 'compute_address_basic'
    ...
   skip_func: acctest.SkipTestUntil(t, "2026-01-31")  # waiting for rollout
+  steps:
+    - name: service_resource_basic
 ```
 
 {{< /tab >}}
@@ -591,7 +643,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 
 | Problem                                          | How to fix/Other info  | Skip in VCR replaying? |
 | ------------------------------------------------ | ---------------------- |------------- |
-| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test, e.g. by unnecessarily using the random provider to set a resource's name.| If you cannot avoid this issue you should skip the test, but try to ensure that it cannot be fixed first.|
+| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test, such as by unnecessarily using the random provider to set a resource's name.| If you cannot avoid this issue you should skip the test, but try to ensure that it cannot be fixed first.|
 *Bigtable acceptance tests aren't working in VCR mode*. `Requested interaction not found` errors are seen during Bigtable tests run in REPLAYING mode | Currently the provider uses a separate client than the rest of the provider to interact with the Bigtable API. As HTTP traffic to the Bigtable API doesn't go via the shared client it cannot be recorded in RECORDING mode.| Skip the test in VCR for Bigtable. |
 | *Using multiple provider aliases doesn't work in VCR*. You may have two instances of the google provider in the test config but one of them doesn't seem to be using its provider arguments - for example, using the wrong default project. | See this GitHub issue: https://github.com/hashicorp/terraform-provider-google/issues/20019 . The problem is that, due to how the VCR system works, one provider instance will be configured and the other will be forced to reuse the first instance's configuration, despite them being given different provider arguments. |  Skip the test in VCR is using aliases is unavoidable. |
 | *Using multiple versions of the google/google-beta provider in a single test isn't working in VCR*. Unexpected test failures may occur during tests in REPLAYING mode where `ExternalProviders` is used to pull in past versions of the google/google-beta provider. | When ExternalProviders is used to pulling in other versions of the provider, any HTTP traffic through the external provider will not be recorded. If the HTTP traffic produces an unexpected result or returns an API error then the test will fail in REPLAYING mode. | Skip the test in VCR when testing the current provider behaviour versus previous released versions. |
@@ -611,5 +663,5 @@ These tests can still run in VCR replaying mode; however, REPLAYING mode can't b
 ## References
 
 * [Official Terraform documentation on Acceptance Tests](https://developer.hashicorp.com/terraform/plugin/sdkv2/testing/acceptance-tests)
-* [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}})
+* [MMv1 resource reference: `samples` ↗]({{<ref "/reference/resource#samples" >}})
 

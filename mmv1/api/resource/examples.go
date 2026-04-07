@@ -87,6 +87,9 @@ type Examples struct {
 	// Whether to skip generating docs for this example
 	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
 
+	// Whether to skip identity import for this example
+	ExcludeIdentityImport bool `yaml:"exclude_identity_import,omitempty"`
+
 	// Whether to skip import tests for this example
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 

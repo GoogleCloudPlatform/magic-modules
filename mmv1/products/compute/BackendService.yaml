@@ -139,12 +139,18 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'health-check'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
       authentication_name: 'authentication'
+    test_vars_overrides:
+      # for backward compatible
+      authentication_name: '"authentication" + randomSuffix'
   - name: 'backend_service_dynamic_backends'
     primary_resource_id: 'default'
     vars:

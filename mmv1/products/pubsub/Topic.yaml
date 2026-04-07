@@ -76,6 +76,9 @@ examples:
     vars:
       topic_name: 'example-topic'
       schema_name: 'example'
+    test_vars_overrides:
+      # for backward compatible
+      schema_name: '"example" + randomSuffix'
     test_env_vars:
       project_name: 'PROJECT_NAME'
   - name: 'pubsub_topic_ingestion_kinesis'

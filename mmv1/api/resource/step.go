@@ -104,6 +104,9 @@ type Step struct {
 	// These properties will likely be custom code.
 	IgnoreReadExtra []string `yaml:"ignore_read_extra,omitempty"`
 
+	// Whether to skip identity import for this test step
+	ExcludeIdentityImport bool `yaml:"exclude_identity_import,omitempty"`
+
 	// Whether to skip import tests for this test step
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
@@ -198,13 +201,10 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	//   - "%{my_var}" for overrides that have custom Golang values
 	for key, value := range originalResourceIdVars {
 		var newVal string
-		if strings.Contains(value, "-") {
-			newVal = fmt.Sprintf("tf-test-%s", value)
-		} else if strings.Contains(value, "_") {
+		if strings.Contains(value, "_") {
 			newVal = fmt.Sprintf("tf_test_%s", value)
 		} else {
-			// Some vars like descriptions shouldn't have prefix
-			newVal = value
+			newVal = fmt.Sprintf("tf-test-%s", value)
 		}
 		// Random suffix is 10 characters and standard name length <= 64
 		if len(newVal) > 54 {
