@@ -749,7 +749,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     {{ customTemplate $ $.CustomCode.PostRead false -}}
 {{- end }}
 
-{{if $.NestedQuery -}}
+{{if and $.NestedQuery (not $.FlattenAllInMethod) -}}
     res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
     if err != nil {
         return err
@@ -1573,6 +1573,13 @@ if res == nil {
 res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
 if err != nil {
     return fmt.Errorf("Error decoding response: %s", err)
+}
+
+if res == nil {
+    // Decoding the object has resulted in it being gone. It may be marked deleted
+    log.Printf("[DEBUG] Removing {{ $.ResourceName }} because it no longer exists.")
+    d.SetId("")
+    return nil
 }
 {{ end }}
 {{ range $prop := $.GettableProperties }}
