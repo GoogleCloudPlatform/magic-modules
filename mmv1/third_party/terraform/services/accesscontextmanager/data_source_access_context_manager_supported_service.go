@@ -75,7 +75,7 @@ func dataSourceAccessContextManagerSupportedServiceRead(d *schema.ResourceData, 
 	}
 
 	serviceName := d.Get("service_name").(string)
-	urlRequest := fmt.Sprintf("%sservices/%s", config.AccessContextManagerBasePath, serviceName)
+	urlRequest := fmt.Sprintf("%sservices/%s", config.BasePaths["accesscontextmanager"], serviceName)
 
 	headers := make(http.Header)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
