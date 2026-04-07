@@ -71,8 +71,8 @@ examples:
     ignore_read_extra:
       - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_byoc'
-    skip_func: acctest.SkipTestUntil(t, "2026-05-15") # requires valid image in Artifact Registry, give time for things to settle
-    skip_vcr: true # multiple IAM members
+    skip_func: acctest.SkipTestUntil(t, "2026-05-15")  # requires valid image in Artifact Registry, give time for things to settle
+    skip_vcr: true  # multiple IAM members
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
@@ -405,13 +405,13 @@ properties:
         description: |-
           Deploy from a container image with a defined entrypoint and commands.
         properties:
-         - name: 'imageUri'
-           type: String
-           required: true
-           description: |-
-             The Artifact Registry Docker image URI (e.g.,
-             `us-central1-docker.pkg.dev/my-project/my-repo/my-image:tag`) of the
-             container image that is to be run on each worker replica.
+          - name: 'imageUri'
+            type: String
+            required: true
+            description: |-
+              The Artifact Registry Docker image URI (e.g.,
+              `us-central1-docker.pkg.dev/my-project/my-repo/my-image:tag`) of the
+              container image that is to be run on each worker replica.
       - name: 'sourceCodeSpec'
         type: NestedObject
         conflicts:
