@@ -590,7 +590,7 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 	_, err := config.NewComputeClient(config.UserAgent).Networks.Get(project, networkName).Do()
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Network %q not found, bootstrapping", networkName)
-		url := fmt.Sprintf("%sprojects/%s/global/networks", config.ComputeBasePath, project)
+		url := fmt.Sprintf("%sprojects/%s/global/networks", config.BasePaths["compute"], project)
 		netObj := map[string]interface{}{
 			"name":                  networkName,
 			"autoCreateSubnetworks": false,
@@ -665,7 +665,7 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...fun
 	_, err := config.NewComputeClient(config.UserAgent).GlobalAddresses.Get(project, addressName).Do()
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Global address %q not found, bootstrapping", addressName)
-		url := fmt.Sprintf("%sprojects/%s/global/addresses", config.ComputeBasePath, project)
+		url := fmt.Sprintf("%sprojects/%s/global/addresses", config.BasePaths["compute"], project)
 
 		settings := NewAddressSettings(params...)
 
@@ -1346,8 +1346,8 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Subnet %q not found, bootstrapping", subnetName)
 
-		networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", config.ComputeBasePath, projectID, networkName)
-		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks", config.ComputeBasePath, projectID, region)
+		networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", config.BasePaths["compute"], projectID, networkName)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks", config.BasePaths["compute"], projectID, region)
 
 		defaultSubnetObj := map[string]interface{}{
 			"name":        subnetName,
@@ -1412,9 +1412,9 @@ func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subn
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		// Create Network Attachment Here.
 		log.Printf("[DEBUG] Network Attachment %s not found, bootstrapping", networkAttachmentName)
-		url := fmt.Sprintf("%sprojects/%s/regions/%s/networkAttachments", config.ComputeBasePath, projectID, region)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/networkAttachments", config.BasePaths["compute"], projectID, region)
 
-		subnetURL := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", config.ComputeBasePath, projectID, region, subnetName)
+		subnetURL := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", config.BasePaths["compute"], projectID, region, subnetName)
 		networkAttachmentObj := map[string]interface{}{
 			"name":                 networkAttachmentName,
 			"region":               region,
@@ -1475,7 +1475,7 @@ func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string
 	_, err := config.NewComputeClient(config.UserAgent).Firewalls.Get(project, firewallName).Do()
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] firewallName %q not found, bootstrapping", firewallName)
-		url := fmt.Sprintf("%sprojects/%s/global/firewalls", config.ComputeBasePath, project)
+		url := fmt.Sprintf("%sprojects/%s/global/firewalls", config.BasePaths["compute"], project)
 
 		networkId := fmt.Sprintf("projects/%s/global/networks/%s", project, networkName)
 		allowObj := []interface{}{
@@ -1550,7 +1550,7 @@ func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType 
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Storage pool %q not found, bootstrapping", storagePoolName)
 
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/storagePools", config.ComputeBasePath, projectID, zone)
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/storagePools", config.BasePaths["compute"], projectID, zone)
 		storagePoolTypeUrl := fmt.Sprintf("/projects/%s/zones/%s/storagePoolTypes/%s", projectID, zone, storagePoolType)
 
 		storagePoolObj := map[string]interface{}{

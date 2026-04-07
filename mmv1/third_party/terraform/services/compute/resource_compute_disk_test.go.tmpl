@@ -1981,7 +1981,7 @@ func TestExpandStoragePoolUrl_withDataProjectAndZone(t *testing.T) {
 	name := "test-storage-pool"
 	zoneUrl := "zones/test-zone/storagePools/" + name
 	projectUrl := "projects/test-project/" + zoneUrl
-	fullUrl := config.ComputeBasePath + projectUrl
+	fullUrl := config.BasePaths["compute"] + projectUrl
 
 	cases := []struct {
 		name     string
@@ -2041,7 +2041,7 @@ func TestExpandStoragePoolUrl_withConfigProjectAndZone(t *testing.T) {
 	name := "test-storage-pool"
 	zoneUrl := "zones/test-zone/storagePools/" + name
 	projectUrl := "projects/test-project/" + zoneUrl
-	fullUrl := config.ComputeBasePath + projectUrl
+	fullUrl := config.BasePaths["compute"] + projectUrl
 
 	cases := []struct {
 		name     string
@@ -2099,7 +2099,7 @@ func TestExpandStoragePoolUrl_noProjectAndZoneFromConfigAndData(t *testing.T) {
 	name := "test-storage-pool"
 	zoneUrl := "zones/test-zone/storagePools/" + name
 	projectUrl := "projects/test-project/" + zoneUrl
-	fullUrl := config.ComputeBasePath + projectUrl
+	fullUrl := config.BasePaths["compute"] + projectUrl
 
 	cases := []struct {
 		name     string

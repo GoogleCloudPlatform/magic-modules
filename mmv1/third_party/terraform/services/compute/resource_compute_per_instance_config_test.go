@@ -686,7 +686,7 @@ func testAccCheckComputePerInstanceConfigInstanceDestroyed(t *testing.T, igmId, 
 func testAccComputePerInstanceConfigListInstances(t *testing.T, igmId string) (map[string]struct{}, error) {
 	config := acctest.GoogleProviderConfig(t)
 
-	url := fmt.Sprintf("%s%s/listManagedInstances", config.ComputeBasePath, igmId)
+	url := fmt.Sprintf("%s%s/listManagedInstances", config.BasePaths["compute"], igmId)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",
@@ -713,7 +713,7 @@ func testAccComputePerInstanceConfigListInstances(t *testing.T, igmId string) (m
 func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[string]struct{}, error) {
 	config := acctest.GoogleProviderConfig(t)
 
-	url := fmt.Sprintf("%s%s/listPerInstanceConfigs", config.ComputeBasePath, igmId)
+	url := fmt.Sprintf("%s%s/listPerInstanceConfigs", config.BasePaths["compute"], igmId)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",

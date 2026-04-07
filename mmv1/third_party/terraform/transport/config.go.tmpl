@@ -711,14 +711,14 @@ func (c *Config) NewCertificateManagerClient(userAgent string) *certificatemanag
 }
 
 func (c *Config) NewComputeClient(userAgent string) *compute.Service {
-	log.Printf("[INFO] Instantiating GCE client for path %s", c.ComputeBasePath)
+	log.Printf("[INFO] Instantiating GCE client for path %s", c.BasePaths["compute"])
 	clientCompute, err := compute.NewService(c.Context, option.WithHTTPClient(c.Client))
 	if err != nil {
 		log.Printf("[WARN] Error creating client compute: %s", err)
 		return nil
 	}
 	clientCompute.UserAgent = userAgent
-	clientCompute.BasePath = c.ComputeBasePath
+	clientCompute.BasePath = c.BasePaths["compute"]
 
 	return clientCompute
 }
