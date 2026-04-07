@@ -79,14 +79,17 @@ An **acceptance test** verifies that a resource can be created, updated, and des
 
 > **Note:** All resources should have a "basic" test covering the minimal required fields. Additional tests should be added to cover all fields, with updatable fields being covered by an update step. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code
 
-### Steps:
+{{% tabs "add-acceptance-test" %}}
+{{< tab "MMv1" >}}
+
+### Steps
 
 1. Add an entry to your `RESOURCE_NAME.yaml` file's `samples` list. Each sample can contain multiple steps. The first step will generate a `create` test, and any subsequent steps will generate `update` tests. For a comprehensive reference, see [MMv1 sample reference ↗]({{< ref "/reference/sample" >}}).
 
    When defining variables for your steps, follow these guidelines:
    - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values defined here must contain at least one `-` or `_` to automatically receive a `tf-test` (or `tf_test`) prefix and random suffix. This ensures they are picked up by resource sweepers for cleanup and avoids collisions.
-   - **Use `vars` only for fields that vary between steps** (e.g., to test the update functionality of specific fields).
-   - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Do not use `vars` for values that remain constant across all steps.
+   - **Use `vars` only for fields that vary between steps** (for example, to test the update functionality of specific fields).
+   - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Don't use `vars` for values that remain constant across all steps.
    ```yaml
    samples:
      # name is used to generate the test name.
@@ -97,7 +100,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
        min_version: beta
        steps:
          # The first step defines the initial create configuration.
-         # Step name: Matches the template file name by default (e.g. pubsub_topic_minimal.tf.tmpl). Use config_path to override this.
+         # Step name: Matches the template file name by default (for example, pubsub_topic_minimal.tf.tmpl). Use config_path to override this.
          - name: "pubsub_topic_minimal" 
            # resource_id_vars contains key/value pairs to inject into the configuration file.
            # These can be referenced as a key inside `{{$.ResourceIdVars}}`.
@@ -128,7 +131,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
              display_name: "Updated Display Name" # The new value for the updatable field
    ```
 
-2. Create one or more `.tf.tmpl` files in `mmv1/templates/terraform/samples/services/SERVICE_NAME/`. The file names should match the step name (e.g. `pubsub_topic_minimal.tf.tmpl` and `pubsub_topic_full.tf.tmpl`).
+2. Create one or more `.tf.tmpl` files in `mmv1/templates/terraform/samples/services/SERVICE_NAME/`. The file names should match the step name (for example, `pubsub_topic_minimal.tf.tmpl` and `pubsub_topic_full.tf.tmpl`).
 3. In those files, write the Terraform configuration for your test steps. This should include all required dependencies.
 
   `pubsub_topic_minimal.tf.tmpl`:
@@ -181,10 +184,11 @@ An **acceptance test** verifies that a resource can be created, updated, and des
    - If only a single test step is beta-only
       - Add `min_version: beta` at the individual step level
 
-## Manual Update Tests (Alternative Workflow)
+{{< /tab >}}
+{{< tab "Handwritten" >}}
 
 > [!NOTE]
-> This workflow is an alternative for when the recommended `samples` generator framework is insufficient (e.g., when you require a custom `CheckFunction` or other complex test assertions).
+> This workflow is an alternative for when the recommended `samples` generator framework is insufficient (for example, when you require a custom `CheckFunction` or other complex test assertions).
 
 An update test ensures that updatable fields can be changed without recreating the entire resource. All updatable fields must be covered by at least one update test (often a single update step covering all fields is sufficient).
 
@@ -251,14 +255,17 @@ An update test ensures that updatable fields can be changed without recreating t
      - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
      - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 
-## Legacy: Examples-based Framework (MMv1)
+{{< /tab >}}
+{{% /tabs %}}
+
+## Legacy: Examples-based Framework
 
 > [!WARNING]
 > The `examples` block is legacy and has been replaced by `samples`. This footprint is still supported for approximately 2 months to allow for transition. New tests should use the `samples` framework.
 
 Tests within the legacy `examples` generator are configured directly on the resource YAML. **Note that this legacy framework only supports generating create tests;** multi-step update tests must be configured via the new `samples` framework or handwritten manual testing procedures.
 
-### Steps:
+### Steps
 
 1. Add an entry to your `RESOURCE_NAME.yaml` file's `examples`. The fields listed here are the most commonly-used. For a comprehensive reference, see [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}}).
    ```yaml
@@ -336,7 +343,7 @@ samples:
   - name: service_resource_basic
     primary_resource_id: example
     steps:
-      - name: create
+      - name: service_resource_basic
         resource_id_vars:
           kms_key_name: 'kms-key'
         test_vars_overrides:
@@ -377,7 +384,7 @@ samples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
         role: "roles/bigquery.dataEditor"
     steps:
-      - name: create
+      - name: service_resource_basic
         config_path: samples/basic.tf.tmpl
 ```
 
@@ -390,7 +397,7 @@ samples:
       - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
         role: "roles/osconfig.serviceAgent"
     steps:
-      - name: create
+      - name: service_resource_basic
         test_env_vars:
           org_id: ORG_TARGET # Resolves to envvar.GetTestOrgTargetFromEnv in tests
 ```
@@ -459,7 +466,7 @@ samples:
   - name: service_resource_basic
     primary_resource_id: example
     steps:
-      - name: create
+      - name: service_resource_basic
         resource_id_vars:
           network_name: 'default'
           subnetwork_name: 'default'
@@ -575,7 +582,7 @@ samples:
    # bigtable instance does not use the shared HTTP client, this test creates an instance
    skip_vcr: true
    steps:
-     - name: create
+     - name: service_resource_basic
 ```
 
 If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
@@ -614,7 +621,7 @@ samples:
    ...
   skip_func: acctest.SkipTestUntil(t, "2026-01-31")  # waiting for rollout
   steps:
-    - name: create
+    - name: service_resource_basic
 ```
 
 {{< /tab >}}
@@ -636,7 +643,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 
 | Problem                                          | How to fix/Other info  | Skip in VCR replaying? |
 | ------------------------------------------------ | ---------------------- |------------- |
-| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test, e.g. by unnecessarily using the random provider to set a resource's name.| If you cannot avoid this issue you should skip the test, but try to ensure that it cannot be fixed first.|
+| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test, such as by unnecessarily using the random provider to set a resource's name.| If you cannot avoid this issue you should skip the test, but try to ensure that it cannot be fixed first.|
 *Bigtable acceptance tests aren't working in VCR mode*. `Requested interaction not found` errors are seen during Bigtable tests run in REPLAYING mode | Currently the provider uses a separate client than the rest of the provider to interact with the Bigtable API. As HTTP traffic to the Bigtable API doesn't go via the shared client it cannot be recorded in RECORDING mode.| Skip the test in VCR for Bigtable. |
 | *Using multiple provider aliases doesn't work in VCR*. You may have two instances of the google provider in the test config but one of them doesn't seem to be using its provider arguments - for example, using the wrong default project. | See this GitHub issue: https://github.com/hashicorp/terraform-provider-google/issues/20019 . The problem is that, due to how the VCR system works, one provider instance will be configured and the other will be forced to reuse the first instance's configuration, despite them being given different provider arguments. |  Skip the test in VCR is using aliases is unavoidable. |
 | *Using multiple versions of the google/google-beta provider in a single test isn't working in VCR*. Unexpected test failures may occur during tests in REPLAYING mode where `ExternalProviders` is used to pull in past versions of the google/google-beta provider. | When ExternalProviders is used to pulling in other versions of the provider, any HTTP traffic through the external provider will not be recorded. If the HTTP traffic produces an unexpected result or returns an API error then the test will fail in REPLAYING mode. | Skip the test in VCR when testing the current provider behaviour versus previous released versions. |
