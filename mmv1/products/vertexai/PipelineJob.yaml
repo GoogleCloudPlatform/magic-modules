@@ -92,13 +92,11 @@ properties:
         type: String
   - name: pipelineSpec
     type: String
-    send_empty_value: true
     description: A compiled definition of a pipeline, represented as a JSON object.
     validation:
       function: 'validation.StringIsJSON'
   - name: pscInterfaceConfig
     type: String
-    send_empty_value: true
     description: JSON-encoded PSC interface configuration.
     validation:
       function: 'validation.StringIsJSON'
@@ -154,17 +152,15 @@ properties:
     description: Whether to do component level validations before job creation.
   - name: 'satisfiesPzs'
     min_version: 'beta'
-    send_empty_value: true
     type: Boolean
     description: Reserved for future use.
     output: true
   - name: 'satisfiesPzi'
     min_version: 'beta'
+    output: true
     type: Boolean
     description: Reserved for future use.
-    send_empty_value: true
   - name: 'originalPipelineJobId'
     min_version: 'beta'
-    send_empty_value: true
     type: String
-    description: The original pipeline job id if this job is a rerun of a previous job.
+    description: Optional, The original pipeline job id if this job is a rerun of a previous job.
