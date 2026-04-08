@@ -50,6 +50,7 @@ examples:
       production_ssl_policy_name: 'production-ssl-policy'
       nonprod_ssl_policy_name: 'nonprod-ssl-policy'
       custom_ssl_policy_name: 'custom-ssl-policy'
+      post_quantum_ssl_policy_name: 'post-quantum-ssl-policy'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -128,6 +129,20 @@ properties:
     is_set: true
     item_type:
       type: String
+  - name: 'postQuantumKeyExchange'
+    api_name: 'postQuantumKeyExchange'
+    type: Enum
+    description: |
+      Controls whether the load balancer allows negotiating X25519MLKEM768 key exchange when clients advertise support for it.
+
+      When set to `ENABLED`, the load balancer allows X25519MLKEM768 key exchange.
+      When set to `DEFAULT`, or if no SSL Policy is attached to the Target proxy, the load balancer disallows X25519MLKEM768 key exchange until October 2026, when it will start allowing it.
+      When set to `DEFERRED`, the load balancer disallows X25519MLKEM768 key exchange until October 2027, and allows it afterward.
+    default_value: "POST_QUANTUM_KEY_EXCHANGE_UNSPECIFIED"
+    enum_values:
+      - 'DEFAULT'
+      - 'ENABLED'
+      - 'DEFERRED'
   - name: 'fingerprint'
     type: String
     description: |

@@ -188,6 +188,77 @@ func TestAccComputeSslPolicy_update_from_custom(t *testing.T) {
 	})
 }
 
+func TestAccComputeSslPolicy_postQuantumKeyExchange(t *testing.T) {
+	t.Parallel()
+
+	var sslPolicy compute.SslPolicy
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSslPostQuantum(sslPolicyName, "ENABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSslPolicyExists(
+						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.post_quantum", "post_quantum_key_exchange", "ENABLED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_ssl_policy.post_quantum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSslPostQuantum(sslPolicyName, "DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSslPolicyExists(
+						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.post_quantum", "post_quantum_key_exchange", "DEFAULT"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_ssl_policy.post_quantum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSslPostQuantum(sslPolicyName, "ENABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSslPolicyExists(
+						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.post_quantum", "post_quantum_key_exchange", "ENABLED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_ssl_policy.post_quantum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSslPostQuantum(sslPolicyName, "DEFERRED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSslPolicyExists(
+						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.post_quantum", "post_quantum_key_exchange", "DEFERRED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_ssl_policy.post_quantum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *compute.SslPolicy) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -278,4 +349,15 @@ resource "google_compute_ssl_policy" "update" {
   profile         = "RESTRICTED"
 }
 `, resourceName)
+}
+
+func testAccComputeSslPostQuantum(resourceName, pqke string) string {
+	return fmt.Sprintf(`
+resource "google_compute_ssl_policy" "post_quantum" {
+  name                         = "%%s"
+  profile                      = "MODERN"
+  min_tls_version              = "TLS_1_2"
+  post_quantum_key_exchange    = "%%s"
+}
+`, resourceName, pqke)
 }

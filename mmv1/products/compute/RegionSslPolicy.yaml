@@ -43,6 +43,12 @@ custom_code:
   constants: 'templates/terraform/constants/region_ssl_policy.tmpl'
 custom_diff:
   - 'regionSslPolicyCustomizeDiff'
+examples:
+  - name: 'region_ssl_policy_basic'
+    primary_resource_id: 'region-ssl-policy'
+    vars:
+      region_ssl_policy_name: 'region-ssl-policy'
+      post_quantum_region_ssl_policy_name: 'region-post-quantum-ssl-policy'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -129,6 +135,20 @@ properties:
     send_empty_value: true
     item_type:
       type: String
+  - name: 'postQuantumKeyExchange'
+    api_name: 'postQuantumKeyExchange'
+    type: Enum
+    description: |
+      Controls whether the load balancer allows negotiating X25519MLKEM768 key exchange when clients advertise support for it.
+
+      When set to `ENABLED`, the load balancer allows X25519MLKEM768 key exchange.
+      When set to `DEFAULT`, or if no SSL Policy is attached to the Target proxy, the load balancer disallows X25519MLKEM768 key exchange until October 2026, when it will start allowing it.
+      When set to `DEFERRED`, the load balancer disallows X25519MLKEM768 key exchange until October 2027, and allows it afterward.
+    default_value: "POST_QUANTUM_KEY_EXCHANGE_UNSPECIFIED"
+    enum_values:
+      - 'DEFAULT'
+      - 'ENABLED'
+      - 'DEFERRED'
   - name: 'fingerprint'
     type: Fingerprint
     description: |
