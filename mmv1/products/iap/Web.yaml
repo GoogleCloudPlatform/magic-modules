@@ -35,7 +35,7 @@ iam_policy:
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   parent_resource_attribute: 'project'
   iam_conditions_request_type: 'REQUEST_BODY'
-  use_short_format_for_parent: true
+  parent_is_resource_id: true
 custom_code:
 examples:
   - name: 'iap_project'

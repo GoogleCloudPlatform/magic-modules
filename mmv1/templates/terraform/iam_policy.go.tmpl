@@ -149,7 +149,7 @@ func {{ $.ResourceName }}IamUpdaterProducer(d tpgresource.TerraformResourceData,
 
 {{/* Set all URL qualifiers in state so that we have consistent storage of needed fields */ -}}
 {{-  range $i, $param := $.IamResourceParams }}
-{{-    if and (eq $i (sub (len $.IamResourceParams) 1)) (not $.IamPolicy.UseShortFormatForParent) }}
+{{-    if and (eq $i (sub (len $.IamResourceParams) 1)) (not $.IamPolicy.ParentIsResourceId) }}
 {{/* Set the last parameter as the long name */ -}}
 	if err := d.Set("{{ $.IamParentResourceName }}", u.GetResourceId()); err != nil {
 		return nil, fmt.Errorf("Error setting {{ $.IamParentResourceName }}: %s", err)
@@ -193,7 +193,7 @@ func {{ $.ResourceName }}IdParseFunc(d *schema.ResourceData, config *transport_t
 		d:       d,
 		Config:  config,
 	}
-{{  if $.IamPolicy.UseShortFormatForParent }}
+{{  if $.IamPolicy.ParentIsResourceId }}
 	if err := d.Set("{{  $.IamParentResourceName }}", u.{{ camelize (index $.IamResourceParams (sub (len $.IamResourceParams) 1)) "lower" }}); err != nil {
 		return fmt.Errorf("Error setting {{  $.IamParentResourceName }}: %s", err)
 	}
