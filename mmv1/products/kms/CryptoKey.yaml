@@ -52,6 +52,7 @@ custom_code:
 schema_version: 1
 state_upgraders: true
 supports_indirect_user_project_override: true
+flatten_all_in_method: true
 examples:
   - name: 'kms_crypto_key_basic'
     primary_resource_id: 'example-key'
