@@ -832,8 +832,22 @@ func IsPartialSelfLink(s string) bool {
 
 // IsSelfLink returns true if this string represents a full self link.
 func IsSelfLink(s string) bool {
-	r := regexp.MustCompile(`(https:\/\/)?(www\.)?([a-z]*)?googleapis.com\/`)
-	return r.MatchString(s)
+	candidate := s
+	if !strings.Contains(candidate, "://") {
+		candidate = "https://" + candidate
+	}
+
+	u, err := url.Parse(candidate)
+	if err != nil {
+		return false
+	}
+
+	host := strings.ToLower(u.Hostname())
+	if host == "" {
+		return false
+	}
+
+	return host == "googleapis.com" || strings.HasSuffix(host, ".googleapis.com")
 }
 
 // ValueShouldBeSent returns if a value should be sent as part of the JSON request.
