@@ -627,6 +627,7 @@ func TestAccBigtableInstance_tags(t *testing.T) {
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	pid := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -638,13 +639,13 @@ func TestAccBigtableInstance_tags(t *testing.T) {
 				ExpectError: regexp.MustCompile("config is invalid: Too few cluster blocks: Should have at least 1 \"cluster\" block"),
 			},
 			{
-				Config: testAccBigtableInstance_tags(instanceName, map[string]string{"tagKeys/123": "tagValue/456"}),
+				Config: testAccBigtableInstance_tags(pid, instanceName),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "tags"}, // we don't read tags back
+				ImportStateVerifyIgnore: []string{"instance_type", "deletion_protection", "tags"}, // we don't read tags back
 			},
 		},
 	})
@@ -1287,8 +1288,22 @@ resource "time_offset" "week-in-future" {
 `
 }
 
-func testAccBigtableInstance_tags(instanceName string, tags map[string]string) string {
-	l := fmt.Sprintf(`
+func testAccBigtableInstance_tags(pid, instanceName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_tags_tag_key" "key" {
+  parent     = "projects/${data.google_project.project.project_id}"
+  short_name = "key"
+}
+
+resource "google_tags_tag_value" "value" {
+  parent     = "tagKeys/${google_tags_tag_key.key.name}"
+  short_name = "value"
+}
+
 resource "google_bigtable_instance" "instance" {
   name = "%s"
   cluster {
@@ -1297,14 +1312,13 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = 1
     storage_type = "HDD"
   }
-deletion_protection = false
-  tags = {`, instanceName, instanceName)
-
-	r := ""
-	for key, value := range tags {
-		r += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	r += fmt.Sprintf("}\n")
-	return l + r
+  deletion_protection = false
+  tags = {
+	"${google_tags_tag_key.key.id}" = "${google_tags_tag_value.value.id}"
+  }
+  depends_on = [
+    google_tags_tag_value.value
+  ]
+}
+`, pid, instanceName, instanceName)
 }
