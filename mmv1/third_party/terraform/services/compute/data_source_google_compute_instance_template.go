@@ -138,9 +138,9 @@ func (a ByCreationTimestamp) Less(i, j int) bool {
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_instance_template",
+		Name:        "google_compute_instance_template",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeInstanceTemplate(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstanceTemplate(),
 	}.Register()
 }

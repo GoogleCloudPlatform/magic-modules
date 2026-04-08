@@ -162,9 +162,9 @@ func flattenQueryValues(queryValue interface{}) []map[string]interface{} {
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_instance_guest_attributes",
+		Name:        "google_compute_instance_guest_attributes",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeInstanceGuestAttributes(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstanceGuestAttributes(),
 	}.Register()
 }
