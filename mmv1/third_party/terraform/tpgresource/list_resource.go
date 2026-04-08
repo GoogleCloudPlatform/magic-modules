@@ -3,6 +3,7 @@ package tpgresource
 import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -42,4 +43,37 @@ func (r *ListResourceMetadata) Defaults(request resource.ConfigureRequest, respo
 	r.ProjectId = c.Project
 	r.Region = c.Region
 	r.Zone = c.Zone
+}
+
+// ResolveProject returns the project from override if it is set and non-empty,
+// otherwise falls back to the provider-level default.
+func (r *ListResourceMetadata) GetProject(override types.String) string {
+	if !override.IsNull() && !override.IsUnknown() {
+		if v := override.ValueString(); v != "" {
+			return v
+		}
+	}
+	return r.ProjectId
+}
+
+// ResolveRegion returns the region from override if it is set and non-empty,
+// otherwise falls back to the provider-level default.
+func (r *ListResourceMetadata) GetRegion(override types.String) string {
+	if !override.IsNull() && !override.IsUnknown() {
+		if v := override.ValueString(); v != "" {
+			return v
+		}
+	}
+	return r.Region
+}
+
+// ResolveZone returns the zone from override if it is set and non-empty,
+// otherwise falls back to the provider-level default.
+func (r *ListResourceMetadata) GetZone(override types.String) string {
+	if !override.IsNull() && !override.IsUnknown() {
+		if v := override.ValueString(); v != "" {
+			return v
+		}
+	}
+	return r.Zone
 }

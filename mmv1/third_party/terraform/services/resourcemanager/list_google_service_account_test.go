@@ -16,7 +16,7 @@ import (
 // TestAccServiceAccount_listResource_queryIdentity lists service accounts via the
 // provider list resource API and asserts a known identity appears in the query
 // results (Terraform 1.14+).
-func TestAccServiceAccount_listResource_queryIdentity(t *testing.T) {
+func TestAccServiceAccountListResource_queryIdentity(t *testing.T) {
 	t.Parallel()
 
 	accountId := "a" + acctest.RandString(t, 10)

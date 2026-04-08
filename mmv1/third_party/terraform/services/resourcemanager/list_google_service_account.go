@@ -75,13 +75,7 @@ func (r *GoogleServiceAccountListResource) List(ctx context.Context, req list.Li
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
-	var project string
-	if !data.Project.IsNull() && !data.Project.IsUnknown() {
-		project = data.Project.ValueString()
-	}
-	if project == "" {
-		project = r.Client.Project
-	}
+	project := r.GetProject(data.Project)
 
 	stream.Results = func(push func(list.ListResult) bool) {
 		err := ListServiceAccounts(r.Client, project, func(rd *schema.ResourceData) error {
@@ -113,6 +107,7 @@ func (r *GoogleServiceAccountListResource) List(ctx context.Context, req list.Li
 					return errors.New("error setting resource")
 				}
 			}
+
 			if !push(result) {
 				return errors.New("stream closed")
 			}
