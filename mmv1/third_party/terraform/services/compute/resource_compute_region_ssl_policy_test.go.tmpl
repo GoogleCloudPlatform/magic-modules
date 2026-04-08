@@ -230,6 +230,24 @@ func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccComputeRegionSslUpdate1(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "MODERN"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_0"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", ""),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "ENABLED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionSslPolicyExists(
@@ -396,7 +414,7 @@ resource "google_compute_region_ssl_policy" "foobar" {
 
 func testAccComputeRegionSslPostQuantum(resourceName, pqke string) string {
 	return fmt.Sprintf(`
-resource "google_compute_region_ssl_policy" "post_quantum" {
+resource "google_compute_region_ssl_policy" "postquantum" {
   name                         = "%%s"
   profile                      = "MODERN"
   min_tls_version              = "TLS_1_2"

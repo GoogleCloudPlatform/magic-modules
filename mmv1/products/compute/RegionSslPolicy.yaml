@@ -144,7 +144,6 @@ properties:
       When set to `ENABLED`, the load balancer allows X25519MLKEM768 key exchange.
       When set to `DEFAULT`, or if no SSL Policy is attached to the Target proxy, the load balancer disallows X25519MLKEM768 key exchange until October 2026, when it will start allowing it.
       When set to `DEFERRED`, the load balancer disallows X25519MLKEM768 key exchange until October 2027, and allows it afterward.
-    default_value: "POST_QUANTUM_KEY_EXCHANGE_UNSPECIFIED"
     enum_values:
       - 'DEFAULT'
       - 'ENABLED'
