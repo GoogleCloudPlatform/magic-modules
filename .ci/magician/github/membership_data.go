@@ -103,7 +103,7 @@ var (
 				},
 				{
 					startDate: newDate(2026, 04, 08),
-					endDate:   newDate(2025, 04, 14),
+					endDate:   newDate(2026, 04, 14),
 				},
 			},
 		},
