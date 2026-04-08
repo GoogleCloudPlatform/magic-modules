@@ -100,6 +100,12 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.preemptible_worker_config.0.instance_names.#", "0"),
 				),
 			},
+			{
+				ResourceName:            "google_dataproc_cluster.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "graceful_decommission_timeout"},
+			},
 		},
 	})
 }

@@ -17,6 +17,9 @@ func ResourceContainerRegistry() *schema.Resource {
 		Create:             resourceContainerRegistryCreate,
 		Read:               resourceContainerRegistryRead,
 		Delete:             resourceContainerRegistryDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceContainerRegistryImport,
+		},
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
@@ -129,4 +132,34 @@ func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) err
 func resourceContainerRegistryDelete(d *schema.ResourceData, meta interface{}) error {
 	// Don't delete the backing bucket as this is not a supported GCR action
 	return nil
+}
+
+func resourceContainerRegistryImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{
+		"^(?P<location>[a-zA-Z]+)\\.artifacts\\.(?P<project>[^/]+)\\.appspot\\.com$",
+		"^artifacts\\.(?P<project>[^/]+)\\.appspot\\.com$",
+		"^(?P<project>[^/]+)/(?P<location>[a-zA-Z]+)$",
+		"^(?P<project>[^/]+)$",
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	location := d.Get("location").(string)
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return nil, err
+	}
+
+	name := ""
+	if location != "" {
+		name = fmt.Sprintf("%s.artifacts.%s.appspot.com", strings.ToLower(location), project)
+	} else {
+		name = fmt.Sprintf("artifacts.%s.appspot.com", project)
+	}
+	d.SetId(name)
+
+	d.Set("location", strings.ToUpper(location))
+
+	return []*schema.ResourceData{d}, nil
 }

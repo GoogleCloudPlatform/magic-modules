@@ -18,6 +18,11 @@ func TestAccContainerRegistry_basic(t *testing.T) {
 			{
 				Config: testAccContainerRegistry_basic(),
 			},
+			{
+				ResourceName:      "google_container_registry.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

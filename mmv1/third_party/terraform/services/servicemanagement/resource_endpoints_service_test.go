@@ -37,6 +37,12 @@ func TestAccEndpointsService_basic(t *testing.T) {
 				Config: testAccEndpointsService_basic(serviceId, envvar.GetTestProjectFromEnv(), "3"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
+			{
+				ResourceName:            "google_endpoints_service.endpoints_service",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"openapi_config", "grpc_config", "protoc_output_base64", "project"},
+			},
 		},
 	})
 }
