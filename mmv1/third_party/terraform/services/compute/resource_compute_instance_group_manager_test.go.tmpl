@@ -2359,7 +2359,6 @@ resource "google_compute_instance_group_manager" "igm-workload-policy" {
 }
 
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccInstanceGroupManager_targetSizePolicy(t *testing.T) {
 	t.Parallel()
 
@@ -2374,7 +2373,7 @@ func TestAccInstanceGroupManager_targetSizePolicy(t *testing.T) {
 			{
 				Config: testAccInstanceGroupManager_targetSizePolicy(templateName, igmName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-tsp", "target_size_policy.0.mode", "INDIVIDUAL"),
+					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-tsp", "target_size_policy.0.mode", "BULK"),
 				),
 			},
 			{
@@ -2413,11 +2412,24 @@ resource "google_compute_instance_template" "igm-basic" {
   service_account {
     scopes = ["userinfo-email", "compute-ro", "storage-ro"]
   }
+
+  scheduling {
+    instance_termination_action  = "DELETE"
+    provisioning_model = "FLEX_START"
+    on_host_maintenance = "TERMINATE"
+    max_run_duration {
+      seconds = 900
+    }
+  }
 }
 
 resource "google_compute_instance_group_manager" "igm-tsp" {
   description = "Terraform test instance group manager"
   name        = "%s"
+
+  instance_lifecycle_policy {
+    default_action_on_failure = "DO_NOTHING"
+  }
 
   version {
     name              = "primary"
@@ -2429,12 +2441,13 @@ resource "google_compute_instance_group_manager" "igm-tsp" {
   target_size        = 2
 
   target_size_policy {
-    mode = "INDIVIDUAL"
+    mode = "BULK"
   }
 }
 `, template, igm)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2488,4 +2501,5 @@ resource "google_compute_instance_group_manager" "igm-tags" {
 }
 `, template_name, project_id, tag_name, tag_name, igm_name)
 }
+
 {{- end }}

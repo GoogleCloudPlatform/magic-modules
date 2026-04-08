@@ -256,7 +256,7 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `resource_policies` - (Optional) Resource policies for this managed instance group. Structure is [documented below](#nested_resource_policies).
 
-* `target_size_policy` - (Optional [Beta](../guides/provider_versions.html.markdown)) The target size policy for the instance group. Structure is [documented below](#nested_target_size_policy).
+* `target_size_policy` - (Optional [Beta](../guides/provider_versions.html.markdown)) The policy that specifies how the MIG creates its VMs to achieve the target size. Structure is [documented below](#nested_target_size_policy).
 
 - - -
 
@@ -442,7 +442,7 @@ params{
 
 <a name="nested_target_size_policy"></a>The `target_size_policy` block supports:
 
-* `mode` - (Required) The mode of the target size policy. Values: "BULK", "INDIVIDUAL".
+* `mode` - (Required)The mode of target size policy based on which the MIG creates its VMs individually or all at once. Values: "BULK", "INDIVIDUAL".
 
 ## Attributes Reference
 
