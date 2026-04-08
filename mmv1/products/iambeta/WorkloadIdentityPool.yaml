@@ -52,7 +52,6 @@ iam_policy:
     - '{{workload_identity_pool_id}}'
   allowed_iam_role: 'roles/iam.workloadIdentityPoolViewer'
   iam_conditions_request_type: 'REQUEST_BODY'
-  min_version: beta
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
