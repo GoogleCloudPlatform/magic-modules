@@ -77,7 +77,7 @@ var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 {{- range $i, $param := $.IamResourceParams }}
 	"{{ underscore $param }}": {
 		Type:             schema.TypeString,
-{{-   if or (eq $param "project") (eq $param "zone") (eq $param "region") (eq $param "location") }}
+{{-   if or (eq $param "project") (eq $param "zone") (eq $param "region") (and (eq $param "location") (not $.IamPolicy.ParentIsResourceId)) }}
 		Computed: true,
 		Optional: true,
 {{-   else }}
@@ -194,9 +194,11 @@ func {{ $.ResourceName }}IdParseFunc(d *schema.ResourceData, config *transport_t
 		Config:  config,
 	}
 {{  if $.IamPolicy.ParentIsResourceId }}
-	if err := d.Set("{{  $.IamParentResourceName }}", u.{{ camelize (index $.IamResourceParams (sub (len $.IamResourceParams) 1)) "lower" }}); err != nil {
-		return fmt.Errorf("Error setting {{  $.IamParentResourceName }}: %s", err)
+{{-   range $param := $.IamResourceParams }}
+	if err := d.Set("{{ underscore $param }}", u.{{ camelize $param "lower" }}); err != nil {
+		return fmt.Errorf("Error setting {{ underscore $param }}: %s", err)
 	}
+{{-   end }}
 {{-  else }}
 {{- /* Set resource long name in state, this has all the information that we need to identify it */ -}}
 	if err := d.Set("{{  $.IamParentResourceName }}", u.GetResourceId()); err != nil {
