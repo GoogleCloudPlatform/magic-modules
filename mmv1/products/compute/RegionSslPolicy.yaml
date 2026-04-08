@@ -139,8 +139,7 @@ properties:
     api_name: 'postQuantumKeyExchange'
     type: Enum
     description: |
-      One of `DEFAULT`, `ENABLED`, or
-      `DEFERRED`. Controls whether the load balancer negotiates
+      One of `DEFAULT`, `ENABLED`, or `DEFERRED`. Controls whether the load balancer negotiates
       X25519MLKEM768 key exchange when clients advertise support for it.
       When set to `DEFAULT`, or if no SSL Policy is attached to
       the target proxy, the load balancer disallows X25519MLKEM768 key
