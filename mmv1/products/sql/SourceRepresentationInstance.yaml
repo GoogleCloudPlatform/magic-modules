@@ -22,20 +22,6 @@ description: |
   affect billing. You cannot update the source representation instance.
 base_url: projects/{{project}}/instances
 immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: 'projects/{{project}}/operations/{{op_id}}'
-  result:
-    resource_inside_response: false
-custom_code:
-  encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.tmpl'
-  decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.tmpl'
 kind: sql#instance
 id_format: projects/{{project}}/instances/{{name}}
 sweeper:
@@ -43,6 +29,12 @@ sweeper:
     field: settings.deletionProtectionEnabled
     value: "false"
     include_full_resource: true
+async:
+  operation:
+    base_url: projects/{{project}}/operations/{{op_id}}
+custom_code:
+  encoder: templates/terraform/encoders/sql_source_representation_instance.go.tmpl
+  decoder: templates/terraform/decoders/sql_source_representation_instance.go.tmpl
 examples:
   - name: sql_source_representation_instance_basic
     primary_resource_id: instance
