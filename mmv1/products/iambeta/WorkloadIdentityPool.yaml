@@ -278,6 +278,7 @@ properties:
                       certificate(either root or intermediate cert).
                     required: true
   - name: 'attestationRules'
+    is_missing_in_cai: true
     type: Array
     description: |
       Defines which workloads can receive an identity within a pool. When an AttestationRule is

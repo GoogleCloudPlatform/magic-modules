@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+	neturl "net/url"
 	"sort"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
@@ -9,12 +10,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func DataSourceGoogleComputeInstanceTemplate() *schema.Resource {
@@ -37,8 +32,8 @@ func DataSourceGoogleComputeInstanceTemplate() *schema.Resource {
 	// Set 'Optional' schema elements
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "name", "filter", "most_recent", "project", "self_link_unique")
 
-	mutuallyExclusive:= []string{"name", "filter", "self_link_unique"}
-	for _, n:= range mutuallyExclusive {
+	mutuallyExclusive := []string{"name", "filter", "self_link_unique"}
+	for _, n := range mutuallyExclusive {
 		dsSchema[n].ExactlyOneOf = mutuallyExclusive
 	}
 
@@ -60,27 +55,47 @@ func datasourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interfac
 		return retrieveInstance(d, meta, project, v.(string))
 	}
 	if v, ok := d.GetOk("filter"); ok {
-		userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}
 
-		templates, err := config.NewComputeClient(userAgent).InstanceTemplates.List(project).Filter(v.(string)).Do()
+		params := neturl.Values{}
+		params.Set("filter", v.(string))
+		listUrl := fmt.Sprintf("%sprojects/%s/global/instanceTemplates?%s", config.ComputeBasePath, project, params.Encode())
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    listUrl,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("error retrieving list of instance templates: %s", err)
 		}
 
+		var items []map[string]interface{}
+		if rawItems, ok := res["items"].([]interface{}); ok {
+			for _, rawItem := range rawItems {
+				item, ok := rawItem.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				items = append(items, item)
+			}
+		}
+
 		mostRecent := d.Get("most_recent").(bool)
 		if mostRecent {
-			sort.Sort(ByCreationTimestamp(templates.Items))
+			sort.Sort(ByCreationTimestamp(items))
 		}
 
-		count := len(templates.Items)
+		count := len(items)
 		if count == 1 || count > 1 && mostRecent {
-			return retrieveInstance(d, meta, project, templates.Items[0].Name)
+			return retrieveInstance(d, meta, project, items[0]["name"].(string))
 		}
 
-		return fmt.Errorf("your filter has returned %d instance template(s). Please refine your filter or set most_recent to return exactly one instance template", len(templates.Items))
+		return fmt.Errorf("your filter has returned %d instance template(s). Please refine your filter or set most_recent to return exactly one instance template", len(items))
 	}
 	if v, ok := d.GetOk("self_link_unique"); ok {
 		return retrieveInstanceFromUniqueId(d, meta, project, v.(string))
@@ -109,14 +124,16 @@ func retrieveInstanceFromUniqueId(d *schema.ResourceData, meta interface{}, proj
 	return tpgresource.SetDataSourceLabels(d)
 }
 
-// ByCreationTimestamp implements sort.Interface for []*InstanceTemplate based on
+// ByCreationTimestamp implements sort.Interface for []map[string]interface{} based on
 // the CreationTimestamp field.
-type ByCreationTimestamp []*compute.InstanceTemplate
+type ByCreationTimestamp []map[string]interface{}
 
 func (a ByCreationTimestamp) Len() int      { return len(a) }
 func (a ByCreationTimestamp) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByCreationTimestamp) Less(i, j int) bool {
-	return a[i].CreationTimestamp > a[j].CreationTimestamp
+	ti, _ := a[i]["creationTimestamp"].(string)
+	tj, _ := a[j]["creationTimestamp"].(string)
+	return ti > tj
 }
 
 func init() {

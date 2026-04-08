@@ -87,6 +87,9 @@ examples:
       filestore_instance_id: 'test-fs-filestore'
       datastore_id: ext-fs-datastore
       svc_ip_cidr: '10.0.0.0/24'
+    test_vars_overrides:
+      # for backward compatible
+      svc_ip_cidr: '"10.0.0.0/24" + randomSuffix'
     test_env_vars:
       region: 'REGION'
       zone: 'ZONE'
@@ -102,6 +105,9 @@ examples:
       filestore_instance_id: 'test-fs-filestore'
       datastore_id: ext-fs-datastore
       svc_ip_cidr: '10.0.0.0/24'
+    test_vars_overrides:
+      # for backward compatible
+      svc_ip_cidr: '"10.0.0.0/24" + randomSuffix'
     test_env_vars:
       region: 'REGION'
       zone: 'ZONE'
