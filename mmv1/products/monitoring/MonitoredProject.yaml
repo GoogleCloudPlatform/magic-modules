@@ -51,7 +51,6 @@ exclude_sweeper: true
 examples:
   - name: 'monitoring_monitored_project_basic'
     primary_resource_id: 'primary'
-    exclude_identity_import: true
     vars:
       monitored_project: 'm-id'
     test_env_vars:
@@ -65,7 +64,6 @@ examples:
       org_id: 'ORG_ID'
       project_id: 'PROJECT_NAME'
     exclude_docs: true
-    exclude_identity_import: true
 parameters:
   - name: 'metricsScope'
     type: String

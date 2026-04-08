@@ -42,7 +42,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    exclude_identity_import: true
     external_providers: ["time"]
 parameters:
   - name: 'orgId'
