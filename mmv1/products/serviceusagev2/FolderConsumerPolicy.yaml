@@ -77,7 +77,7 @@ properties:
   - name: 'name'
     type: String
     description: |
-      The resource name of the policy.
+      Output only. The resource name of the policy.
       Format: `folders/{folder}/consumerPolicies/default`
     output: true
   - name: 'etag'
@@ -88,12 +88,12 @@ properties:
   - name: 'createTime'
     type: Time
     description: |
-      The time the policy was created.
+      Output only. The time the policy was created.
     output: true
   - name: 'updateTime'
     type: Time
     description: |
-      The time the policy was last updated.
+      Output only. The time the policy was last updated.
     output: true
   - name: 'enableRules'
     type: Array
