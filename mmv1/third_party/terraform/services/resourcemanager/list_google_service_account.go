@@ -176,5 +176,5 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 		Callback:       callback,
 	}
 
-	return transport_tpg.ListCall(opts)
+	return transport_tpg.ListPages(opts)
 }

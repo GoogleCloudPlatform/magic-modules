@@ -202,7 +202,13 @@ type ListCallOptions struct {
 	Callback       func(rd *schema.ResourceData) error
 }
 
-func ListCall(opts ListCallOptions) error {
+// ListPages performs a paginated GET request against the given URL and processes
+// each item in the response. Rate-limited responses (HTTP 429) are retried automatically.
+//
+// On each page the function extracts the array at the JSON key opts.ItemName
+// (default "items"), calls opts.Flattener to write each element into
+// opts.TempData, and then invokes opts.Callback where further processing is done of each item.
+func ListPages(opts ListCallOptions) error {
 	// Set default ItemName if not provided
 	if opts.ItemName == "" {
 		opts.ItemName = "items"
