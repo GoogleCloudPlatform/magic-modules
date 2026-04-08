@@ -47,7 +47,6 @@ iam_policy:
   parent_resource_attribute: 'ca_pool'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
   example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.tmpl'
-flatten_all_in_method: true
 custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/privateca_capool.go.tmpl'
 examples:

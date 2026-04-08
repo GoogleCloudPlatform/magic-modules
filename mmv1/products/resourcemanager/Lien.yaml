@@ -44,7 +44,6 @@ nested_query:
     - liens
   is_list_of_ids: false
   modify_by_patch: false
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/resourcemanager_lien.go.tmpl'
   test_constants: 'templates/terraform/constants/resourcemanager_lien.go.tpml'

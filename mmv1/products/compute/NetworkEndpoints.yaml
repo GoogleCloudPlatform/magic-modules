@@ -58,7 +58,6 @@ async:
     resource_inside_response: false
 identity:
   - networkEndpointGroup
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/network_endpoints.go.tmpl'
   encoder: 'templates/terraform/encoders/compute_network_endpoints.go.tmpl'

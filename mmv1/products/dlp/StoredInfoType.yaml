@@ -37,7 +37,6 @@ async:
   suppress_error: false
   target_occurrences: 1
   actions: ['create']
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/dlp_stored_info_type.go.tmpl'
   encoder: 'templates/terraform/encoders/dlp_stored_info_type.go.tmpl'

@@ -38,7 +38,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-flatten_all_in_method: true
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'

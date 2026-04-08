@@ -26,7 +26,6 @@ create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_gro
 update_verb: 'PATCH'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
-flatten_all_in_method: true
 custom_code:
   constants: templates/terraform/constants/dataplex_entry_link.go.tmpl
   decoder: templates/terraform/decoders/dataplex_entry_link.go.tmpl

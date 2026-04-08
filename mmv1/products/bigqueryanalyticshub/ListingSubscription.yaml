@@ -29,7 +29,6 @@ create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_ex
 immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
-flatten_all_in_method: true
 custom_code:
   constants: templates/terraform/constants/bigqueryanalyticshub_listing_subscription.go.tmpl
   decoder: 'templates/terraform/decoders/bigqueryanalyticshub_listing_subscription.go.tmpl'

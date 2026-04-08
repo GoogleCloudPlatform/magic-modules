@@ -59,7 +59,6 @@ iam_policy:
     - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     - '{{name}}'
 include_in_tgc_next: true
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/region_disk.go.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
