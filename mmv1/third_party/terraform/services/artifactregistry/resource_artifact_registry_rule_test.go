@@ -79,6 +79,7 @@ func TestAccArtifactRegistryRule_artifactRegistryRuleFull_update(t *testing.T) {
 					resource.TestCheckResourceAttr("google_artifact_registry_rule.my-rule", "condition.0.expression", "pkg.version.id < '3.0'"),
 					resource.TestCheckResourceAttr("google_artifact_registry_rule.my-rule", "condition.0.description", "Allows downloading images with version IDs less than 3.0"),
 					resource.TestCheckResourceAttr("google_artifact_registry_rule.my-rule", "condition.0.title", "Allow versions before 3.0"),
+					resource.TestCheckResourceAttr("google_artifact_registry_rule.my-rule", "condition.0.location", "artifact-registry-rules/policy.cel:2"),
 				),
 			},
 			{
@@ -112,6 +113,7 @@ resource "google_artifact_registry_rule" "my-rule" {
     expression  = "pkg.version.id < '2.0'"
     title       = "Block legacy versions"
     description = "Prevents downloading images with version IDs less than 2.0"
+    location    = "artifact-registry-rules/policy.cel:1"
   }
 }
 `, context)
@@ -138,6 +140,7 @@ resource "google_artifact_registry_rule" "my-rule" {
     expression  = "pkg.version.id < '3.0'"
     title       = "Allow versions before 3.0"
     description = "Allows downloading images with version IDs less than 3.0"
+    location    = "artifact-registry-rules/policy.cel:2"
   }
 }
 `, context)
