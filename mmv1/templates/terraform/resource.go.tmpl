@@ -202,6 +202,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
           },
 {{- end }}
         },
+        ResourceBehavior: schema.ResourceBehavior{
+            MutableIdentity: true,
+        },
 {{- end }}
 
         Schema: map[string]*schema.Schema{
