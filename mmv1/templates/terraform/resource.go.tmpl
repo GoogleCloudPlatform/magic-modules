@@ -1073,8 +1073,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         url, err := tpgresource.ReplaceVars(d, config, "{{ $group.UpdateUrl }}")
         url = fmt.Sprintf("%s%s", basePath, url)
 {{ else }}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{"}}"}}{{ $group.UpdateUrl }}")
-{{- end }}
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $group.UpdateUrl }}"){{- end }}
         if err != nil {
             return err
         }
