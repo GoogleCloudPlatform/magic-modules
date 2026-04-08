@@ -415,11 +415,11 @@ resource "google_compute_region_ssl_policy" "foobar" {
 func testAccComputeRegionSslPostQuantum(resourceName, pqke string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_ssl_policy" "postquantum" {
-  name                         = "%%s"
+  name                         = "%s"
   profile                      = "MODERN"
   min_tls_version              = "TLS_1_2"
   region                       = "us-central1"
-  post_quantum_key_exchange    = "%%s"
+  post_quantum_key_exchange    = "%s"
 }
 `, resourceName, pqke)
 }

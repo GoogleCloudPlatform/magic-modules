@@ -200,7 +200,7 @@ func TestAccComputeSslPolicy_postQuantumKeyExchange(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeSslPostQuantum(sslPolicyName, "ENABLED"),
+				Config: testAccComputeSslPostQuantum(sslPolicyName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSslPolicyExists(
 						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
@@ -354,10 +354,10 @@ resource "google_compute_ssl_policy" "update" {
 func testAccComputeSslPostQuantum(resourceName, pqke string) string {
 	return fmt.Sprintf(`
 resource "google_compute_ssl_policy" "post_quantum" {
-  name                         = "%%s"
+  name                         = "%s"
   profile                      = "MODERN"
   min_tls_version              = "TLS_1_2"
-  post_quantum_key_exchange    = "%%s"
+  post_quantum_key_exchange    = "%s"
 }
 `, resourceName, pqke)
 }
