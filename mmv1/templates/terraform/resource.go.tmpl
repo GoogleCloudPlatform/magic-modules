@@ -1114,6 +1114,15 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     return nil
 {{- else }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+{{- end }}
 {{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
     var project string
 {{- end }}
@@ -1181,15 +1190,6 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     headers := make(http.Header)
     {{- if $.CustomCode.PreDelete }} 
         {{ customTemplate $ $.CustomCode.PreDelete false -}}
-    {{- end }}
-    {{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
-    if d.Get("deletion_policy").(string) == "PREVENT" {
-        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
-    }
-    if d.Get("deletion_policy").(string) == "ABANDON" {
-        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
-        return nil
-    }
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
