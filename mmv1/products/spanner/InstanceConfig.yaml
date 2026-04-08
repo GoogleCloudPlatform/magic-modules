@@ -34,6 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+flatten_all_in_method: true
 async:
   actions: ['create', 'update']
   type: 'OpAsync'
