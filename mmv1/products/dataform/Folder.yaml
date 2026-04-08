@@ -15,7 +15,6 @@
 name: 'Folder'
 description: |
   A resource represents a Dataform folder
-min_version: beta
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataform/docs/'
@@ -34,7 +33,6 @@ parameters:
   - name: 'region'
     type: String
     description: 'A reference to the region'
-    min_version: 'beta'
     required: true
     url_param_only: true
     immutable: true
@@ -42,7 +40,6 @@ properties:
   - name: 'name'
     type: String
     description: The Folder's name.
-    min_version: 'beta'
     output: true
     immutable: true
   - name: 'folder_id'
@@ -55,18 +52,14 @@ properties:
   - name: 'displayName'
     type: String
     description: Required. The Folder's user-friendly name.
-    min_version: 'beta'
     required: true
   - name: 'containingFolder'
     type: String
     description: |-
       Optional. The containing Folder resource name.
       Format: `projects/*/locations/*/folders/*` or `projects/*/locations/*/teamFolders/*`.
-    min_version: 'beta'
 examples:
   - name: 'dataform_folder_basic'
     primary_resource_id: 'dataform_folder_basic'
-    min_version: 'beta'
   - name: 'dataform_folder_full'
     primary_resource_id: 'dataform_folder_full'
-    min_version: 'beta'
