@@ -44,6 +44,7 @@ async:
     resource_inside_response: true
 sweeper:
   identifier_field: "organization"
+read_error_transform: 'transformApigeeOrganizationReadError'
 custom_code:
   encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
