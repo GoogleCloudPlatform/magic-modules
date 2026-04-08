@@ -248,3 +248,36 @@ func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResourc
 
 	return nil
 }
+
+// ResolveProject returns the project from override if it is set and non-empty,
+// otherwise falls back to the provider-level default.
+func (r *ListResourceMetadata) GetProject(override types.String) string {
+	if !override.IsNull() && !override.IsUnknown() {
+		if v := override.ValueString(); v != "" {
+			return v
+		}
+	}
+	return r.ProjectId
+}
+
+// ResolveRegion returns the region from override if it is set and non-empty,
+// otherwise falls back to the provider-level default.
+func (r *ListResourceMetadata) GetRegion(override types.String) string {
+	if !override.IsNull() && !override.IsUnknown() {
+		if v := override.ValueString(); v != "" {
+			return v
+		}
+	}
+	return r.Region
+}
+
+// ResolveZone returns the zone from override if it is set and non-empty,
+// otherwise falls back to the provider-level default.
+func (r *ListResourceMetadata) GetZone(override types.String) string {
+	if !override.IsNull() && !override.IsUnknown() {
+		if v := override.ValueString(); v != "" {
+			return v
+		}
+	}
+	return r.Zone
+}
