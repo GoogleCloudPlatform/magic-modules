@@ -44,7 +44,6 @@ nested_query:
     - liens
   is_list_of_ids: false
   modify_by_patch: false
-flatten_all_in_method: true
 custom_code:
   decoder: 'templates/terraform/decoders/avoid_meaningless_project_update.tmpl'
   pre_delete: 'templates/terraform/pre_delete/modify_delete_url.tmpl'

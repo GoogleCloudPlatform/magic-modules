@@ -42,7 +42,6 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/notes/{{name}}'
     - '{{name}}'
-flatten_all_in_method: true
 custom_code:
   encoder: 'templates/terraform/encoders/containeranalysis_attestation_field_name.go.tmpl'
   decoder: 'templates/terraform/decoders/containeranalysis_attestation_field_name.go.tmpl'

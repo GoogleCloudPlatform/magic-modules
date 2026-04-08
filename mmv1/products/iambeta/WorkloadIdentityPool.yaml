@@ -52,6 +52,7 @@ iam_policy:
     - '{{workload_identity_pool_id}}'
   allowed_iam_role: 'roles/iam.workloadIdentityPoolViewer'
   iam_conditions_request_type: 'REQUEST_BODY'
+  min_version: beta
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
@@ -277,15 +278,6 @@ properties:
                       PEM certificate of the PKI used for validation. Must only contain one ca
                       certificate(either root or intermediate cert).
                     required: true
-            - name: 'trustDefaultSharedCa'
-              type: Boolean
-              description: |
-                If set to True, the trust bundle will include the private ca managed identity regional root
-                public certificates.
-
-
-                ~> **Note** `trust_default_shared_ca` is only supported for managed identity trust domain
-                resource.
   - name: 'attestationRules'
     is_missing_in_cai: true
     type: Array

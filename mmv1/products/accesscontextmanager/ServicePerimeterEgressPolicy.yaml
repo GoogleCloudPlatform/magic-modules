@@ -69,7 +69,6 @@ nested_query:
     - egressPolicies
   is_list_of_ids: false
   modify_by_patch: true
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_egress_policy.go.tmpl'
