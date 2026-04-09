@@ -1,14 +1,14 @@
 resource "google_compute_node_template" "soletenant-tmpl" {
   provider  = google-beta
   name      = "{{index $.Vars "template_name"}}"
-  region    = "us-central1"
+  region    = "us-west1"
   node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_group" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
   name        = "{{index $.Vars "group_name"}}"
-  zone        = "us-central1-d"
+  zone        = "us-west1-a"
   description = "example google_compute_node_group for Terraform Google Provider"
 
   initial_size          = 1
