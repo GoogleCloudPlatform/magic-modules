@@ -389,6 +389,11 @@ properties:
     type: String
     description: |
       Optional. The name of the ACL policy to attach to the cluster.
+  - name: isAclPolicyInSync
+    type: Boolean
+    description: |
+      Optional. Whether the ACL policy is in sync with the cluster.
+    output: true
   - name: transitEncryptionMode
     type: Enum
     description: |

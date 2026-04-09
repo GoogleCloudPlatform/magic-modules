@@ -1,4 +1,4 @@
-package redis_test
+package memorystore_test
 
 import (
 	"fmt"
@@ -10,10 +10,7 @@ import (
 )
 
 
-{{- if ne $.TargetVersionName "ga" }}
-
-
-func TestAccRedisAclPolicy_basic(t *testing.T) {
+func TestAccMemorystoreAclPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -23,21 +20,21 @@ func TestAccRedisAclPolicy_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRedisAclPolicyDestroyProducer(t),
+		CheckDestroy:             testAccCheckMemorystoreAclPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisAclPolicy_basic(context),
+				Config: testAccMemorystoreAclPolicy_basic(context),
 			},
 			{
-				ResourceName:      "google_redis_acl_policy.test",
+				ResourceName:      "google_memorystore_acl_policy.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccRedisAclPolicy_update(context),
+				Config: testAccMemorystoreAclPolicy_update(context),
 			},
 			{
-				ResourceName:      "google_redis_acl_policy.test",
+				ResourceName:      "google_memorystore_acl_policy.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -45,9 +42,9 @@ func TestAccRedisAclPolicy_basic(t *testing.T) {
 	})
 }
 
-func testAccRedisAclPolicy_basic(context map[string]interface{}) string {
+func testAccMemorystoreAclPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_redis_acl_policy" "test" {
+resource "google_memorystore_acl_policy" "test" {
   acl_policy_id = "tf-test-policy-%{random_suffix}"
   location      = "us-central1"
   rules {
@@ -58,9 +55,9 @@ resource "google_redis_acl_policy" "test" {
 `, context)
 }
 
-func testAccRedisAclPolicy_update(context map[string]interface{}) string {
+func testAccMemorystoreAclPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_redis_acl_policy" "test" {
+resource "google_memorystore_acl_policy" "test" {
   acl_policy_id = "tf-test-policy-%{random_suffix}"
   location      = "us-central1"
   rules {
@@ -70,11 +67,3 @@ resource "google_redis_acl_policy" "test" {
 }
 `, context)
 }
-
-func testAccCheckRedisAclPolicyDestroyProducer(t *testing.T) resource.TestCheckFunc {
-	// Standard CheckDestroy logic or simple empty check for now
-	return func(s *terraform.State) error {
-		return nilß
-	}
-}
-{{- end }}

@@ -14,7 +14,6 @@
 ---
 name: AclPolicy
 description: Description
-min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/aclPolicies
 self_link: projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
 create_url: projects/{{project}}/locations/{{location}}/aclPolicies?aclPolicyId={{acl_policy_id}}
@@ -45,7 +44,6 @@ parameters:
     description: |-
       The logical name of the ACL Policy in the customer project
       with the following restrictions:
-
       * Must contain only lowercase letters, numbers, and hyphens.
       * Must start with a letter.
       * Must be between 1-63 characters.
