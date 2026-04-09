@@ -371,15 +371,15 @@ func testAccProjectOrganizationPolicyConfig_list_allowSome(pid string) string {
 	return fmt.Sprintf(`
 resource "google_project_organization_policy" "list" {
   project    = "%s"
-  constraint = "constraints/compute.trustedImageProjects"
+  constraint = "constraints/cloudscheduler.allowedTargetTypes"
 
   list_policy {
     allow {
-      values = ["projects/%s"]
+      values = ["APPENGINE", "HTTP", "PUBSUB"]
     }
   }
 }
-`, pid, pid)
+`, pid)
 }
 
 func testAccProjectOrganizationPolicyConfig_list_denySome(pid string) string {
