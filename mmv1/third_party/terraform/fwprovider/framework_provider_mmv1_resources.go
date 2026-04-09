@@ -3,7 +3,7 @@ package fwprovider
 import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func listResourceFunc(lr list.ListResource) func() list.ListResource {
