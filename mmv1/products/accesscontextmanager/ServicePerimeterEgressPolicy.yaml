@@ -24,9 +24,6 @@ description: |
   perimeter in certain contexts (e.g. to read data from a Cloud Storage bucket
   or query against a BigQuery dataset).
 
-  ~> **Note:** By default, updates to this resource will remove the EgressPolicy from the
-  from the perimeter and add it back in a non-atomic manner. To ensure that the new EgressPolicy
-  is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
   ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
   the service perimeter resource must have a `lifecycle` block with `ignore_changes = [status[0].egress_policies]` so
   they don't fight over which egress rules should be in the policy.
@@ -40,9 +37,10 @@ base_url: ''
 self_link: '{{perimeter}}'
 create_url: '{{perimeter}}'
 create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_url: '{{perimeter}}'
 update_mask: true
 delete_verb: 'PATCH'
-immutable: true
 mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter}}'
@@ -228,6 +226,7 @@ properties:
                       corresponding `serviceName` in `ApiOperation`.
   - name: 'title'
     type: String
+    immutable: true
     description: |
       Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'accessPolicyId'
