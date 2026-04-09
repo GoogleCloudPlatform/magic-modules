@@ -231,6 +231,16 @@ func Provider() *schema.Provider {
 	return provider
 }
 
+// Compatibility shim for diff-processor.
+func ResourceMap() map[string]*schema.Resource{
+	return registry.ResourceMap()
+}
+
+// Compatibility shim for diff-processor.
+func DatasourceMap() map[string]*schema.Resource{
+	return registry.DatasourceMap()
+}
+
 func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
 	err := transport_tpg.HandleSDKDefaults(d)
 	if err != nil {
