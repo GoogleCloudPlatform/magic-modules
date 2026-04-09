@@ -1,10 +1,8 @@
 package bigqueryanalyticshub_test
 
 import (
-	{{- if ne $.TargetVersionName "ga" }}
 	"fmt"
 	"os"
-	{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -14,10 +12,8 @@ import (
 
 // Dummy usages to ensure imports are satisfied in both versions
 var _ = envvar.GetTestProjectFromEnv
-{{- if ne $.TargetVersionName "ga" }}
 var _ = fmt.Sprintf
 var _ = os.Getenv
-{{- end }}
 
 func TestAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingUpdate(t *testing.T) {
 	t.Parallel()
@@ -49,7 +45,6 @@ func TestAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingUpdate(t *tes
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccBigqueryAnalyticsHubListing_multiregion(t *testing.T) {
 	if v := os.Getenv("TF_ACC"); v == "" {
 		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
@@ -76,7 +71,7 @@ func TestAccBigqueryAnalyticsHubListing_multiregion(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryAnalyticsHubListingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -95,7 +90,6 @@ func TestAccBigqueryAnalyticsHubListing_multiregion(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func testAccBigqueryAnalyticsHubListing_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -150,18 +144,15 @@ resource "google_bigquery_dataset" "listing" {
 `, context)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccBigqueryAnalyticsHubListing_multiregion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_analytics_hub_data_exchange" "listing" {
-  provider         = google-beta
   location         = "us"
   data_exchange_id = "tf_test_de_%{random_suffix}"
   display_name     = "tf_test_de_%{random_suffix}"
 }
 
 resource "google_bigquery_analytics_hub_listing" "listing" {
-  provider         = google-beta
   location         = "us"
   data_exchange_id = google_bigquery_analytics_hub_data_exchange.listing.data_exchange_id
   listing_id       = "tf_test_listing_%{random_suffix}"
@@ -174,4 +165,3 @@ resource "google_bigquery_analytics_hub_listing" "listing" {
 }
 `, context)
 }
-{{- end }}
