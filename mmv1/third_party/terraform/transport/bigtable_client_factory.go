@@ -2,7 +2,6 @@ package transport
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"cloud.google.com/go/bigtable"
@@ -19,12 +18,13 @@ type BigtableClientFactory struct {
 	TokenSource         oauth2.TokenSource
 	BillingProject      string
 	UserProjectOverride bool
+	RequestReason       string
 }
 
 func (s BigtableClientFactory) getClientOptions(isDataClient bool) []option.ClientOption {
 	var opts []option.ClientOption
-	if requestReason := os.Getenv("CLOUDSDK_CORE_REQUEST_REASON"); requestReason != "" {
-		opts = append(opts, option.WithRequestReason(requestReason))
+	if s.RequestReason != "" {
+		opts = append(opts, option.WithRequestReason(s.RequestReason))
 	}
 
 	if s.UserProjectOverride && s.BillingProject != "" {

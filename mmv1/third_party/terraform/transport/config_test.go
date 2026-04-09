@@ -543,3 +543,41 @@ func TestBigtableClientFactoryPropagatesEndpoints(t *testing.T) {
 		t.Errorf("Expected BasePath '%s', got '%s'", expectedPath, factory.BasePath)
 	}
 }
+
+func TestBigtableClientFactoryPropagatesRequestReason(t *testing.T) {
+	expectedReason := "test-request-reason"
+	cfg := &transport_tpg.Config{
+		RequestReason: expectedReason,
+	}
+
+	factory := cfg.BigTableClientFactory("test-agent")
+
+	if factory.RequestReason != expectedReason {
+		t.Errorf("Expected RequestReason '%s', got '%s'", expectedReason, factory.RequestReason)
+	}
+}
+
+func TestBigtableClientFactoryPropagatesRequestReasonFromEnv(t *testing.T) {
+	expectedReason := "env-request-reason"
+	t.Setenv("CLOUDSDK_CORE_REQUEST_REASON", expectedReason)
+
+	// Create empty schema.ResourceData using the SDK Provider schema
+	emptyConfigMap := map[string]interface{}{}
+	d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
+
+	err := transport_tpg.HandleSDKDefaults(d)
+	if err != nil {
+		t.Fatalf("error: %v", err)
+	}
+
+	cfg := &transport_tpg.Config{}
+	if v, ok := d.GetOk("request_reason"); ok {
+		cfg.RequestReason = v.(string)
+	}
+
+	factory := cfg.BigTableClientFactory("test-agent")
+
+	if factory.RequestReason != expectedReason {
+		t.Errorf("Expected RequestReason '%s' from env, got '%s'", expectedReason, factory.RequestReason)
+	}
+}

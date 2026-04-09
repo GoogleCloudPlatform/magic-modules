@@ -1206,6 +1206,7 @@ func (c *Config) BigTableClientFactory(userAgent string) *BigtableClientFactory 
 		gRPCLoggingOptions:  c.gRPCLoggingOptions,
 		BillingProject:      c.BillingProject,
 		UserProjectOverride: c.UserProjectOverride,
+		RequestReason:       c.RequestReason,
 	}
 
 	return bigtableClientFactory
