@@ -24,7 +24,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"regexp"
+{{- if and $.HasProject $.LegacyLongFormProject }}
+	"strings"
+{{- end }}
 
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
@@ -35,8 +39,6 @@ import (
 
 	"{{ $.ImportPath }}/tpgresource"
 	transport_tpg "{{ $.ImportPath }}/transport"
-
-	"google.golang.org/api/googleapi"
 )
 
 var _ tpgresource.ListResourceWithRawV5Schemas = &{{ $.ResourceName -}}ListResource{}
@@ -234,129 +236,118 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 		userAgent,
 		"{{ $.ResourceListKey }}",
 		filter,
-		flatten{{ $.ResourceName }}ListItem,
-		callback,
-	)
-}
-
-func flatten{{ $.ResourceName }}ListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
-{{- if $.NestedQuery }}
-	res, err := flattenNested{{ $.ResourceName }}(d, interface{}(config), res)
-	if err != nil {
-		return err
-	}
-	if res == nil {
-		return nil
-	}
-{{- end }}
-{{- if $.CustomCode.Decoder }}
-	{{- if $.NestedQuery }}
-	res, err = resource{{ $.ResourceName }}Decoder(d, interface{}(config), res)
-	{{- else }}
-	var err error
-	res, err = resource{{ $.ResourceName }}Decoder(d, interface{}(config), res)
-	{{- end }}
-	if err != nil {
-		return err
-	}
-	if res == nil {
-		return nil
-	}
-{{- end }}
+		func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+{{- if $.ExcludeRead }}
+			return fmt.Errorf("list resource for {{ $.Name }} requires read support (resource{{ $.ResourceName }}Flatten is not generated when exclude_read is set)")
+{{- else }}
+			meta := interface{}(config)
 {{- if $.VirtualFields }}
+
+			// Explicitly set virtual fields to default values if unset (same order as resource{{ $.ResourceName }}Read)
 {{- range $prop := $.VirtualFields }}
 {{- if not (eq $prop.DefaultValue nil) }}
-	if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
-		if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
-			return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
-		}
-	}
+			if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
+				if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
+					return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
+				}
+			}
 {{- end }}
 {{- end }}
 {{- end }}
 {{- if $.HasProject }}
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
-	}
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-	}
+			project, err := tpgresource.GetProject(d, config)
+			if err != nil {
+				return fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
+			}
+			if err := d.Set("project", project); err != nil {
+				return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+			}
 {{- end }}
 {{- if $.HasRegion }}
-	region, err := tpgresource.GetRegion(d, config)
-	if err != nil {
-		return err
-	}
-	if err := d.Set("region", region); err != nil {
-		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-	}
+			region, err := tpgresource.GetRegion(d, config)
+			if err != nil {
+				return err
+			}
+			if err := d.Set("region", region); err != nil {
+				return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+			}
 {{- end }}
 {{- if $.HasZone }}
-	zone, err := tpgresource.GetZone(d, config)
-	if err != nil {
-		return err
-	}
-	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-	}
-{{- end }}
-{{- range $prop := $.GettableProperties }}
-{{- if $prop.FlattenObject }}
-	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
-		if gerr, ok := flattenedProp.(*googleapi.Error); ok {
-			return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
-		}
-		casted := flattenedProp.([]interface{})[0]
-		if casted != nil {
-			for k, v := range casted.(map[string]interface{}) {
-				if err := d.Set(k, v); err != nil {
-					return fmt.Errorf("Error setting %s: %s", k, err)
-				}
+			zone, err := tpgresource.GetZone(d, config)
+			if err != nil {
+				return err
 			}
-		}
-	}
+			if err := d.Set("zone", zone); err != nil {
+				return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+			}
+{{- end }}
+
+			itemUserAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+			if err != nil {
+				return err
+			}
+
+			readURL, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+			if err != nil {
+				return err
+			}
+
+			itemBillingProject := ""
+{{- if $.HasProject }}
+{{- if $.LegacyLongFormProject }}
+			itemBillingProject = strings.TrimPrefix(project, "projects/")
 {{- else }}
-	if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-	}
+			itemBillingProject = project
 {{- end }}
 {{- end }}
-{{- if $.HasSelfLink }}
-	if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-	}
+{{- if $.SupportsIndirectUserProjectOverride }}
+			if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(readURL); parts != nil {
+				itemBillingProject = parts[1]
+			}
 {{- end }}
+			if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+				itemBillingProject = bp
+			}
 
-	id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
-	if err != nil {
-		return fmt.Errorf("Error constructing id: %s", err)
-	}
-	d.SetId(id)
+			headers := make(http.Header)
 
-{{- if and (not $.ExcludeIdentityGeneration) (not $.ExcludeRead) }}
-	identity, err := d.Identity()
-	if err == nil && identity != nil {
+			if err := resource{{ $.ResourceName }}Flatten(d, meta, res, config, {{- if $.HasProject }}project,{{ end }} itemUserAgent, itemBillingProject, readURL, headers); err != nil {
+				return err
+			}
+
+			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
+			if err != nil {
+				return fmt.Errorf("Error constructing id: %s", err)
+			}
+			d.SetId(id)
+
+{{- if not $.ExcludeIdentityGeneration }}
+			identity, err := d.Identity()
+			if err == nil && identity != nil {
 {{- range $p := $.IdentityProperties }}
 {{- if eq $p.Type "Integer" }}
-		if _, ok := identity.GetOk("{{ underscore $p.Name}}"); !ok {
-			err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(int))
-			if err != nil {
-				return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
-			}
-		}
+				if _, ok := identity.GetOk("{{ underscore $p.Name}}"); !ok {
+					err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(int))
+					if err != nil {
+						return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+					}
+				}
 {{- else }}
-		if v, ok := identity.GetOk("{{ underscore $p.Name}}"); !ok && v == "" {
-			err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
-			if err != nil {
-				return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+				if v, ok := identity.GetOk("{{ underscore $p.Name}}"); !ok && v == "" {
+					err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
+					if err != nil {
+						return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+					}
+				}
+{{- end }}
+{{- end }}
+			} else {
+				log.Printf("[DEBUG] (list item) identity not set: %s", err)
 			}
-		}
 {{- end }}
+			return nil
 {{- end }}
-	} else {
-		log.Printf("[DEBUG] (list item) identity not set: %s", err)
-	}
-{{- end }}
-	return nil
+		},
+		callback,
+	)
 }
