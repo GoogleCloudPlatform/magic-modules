@@ -81,7 +81,7 @@ func (r *GoogleServiceAccountListResource) List(ctx context.Context, req list.Li
 		err := ListServiceAccounts(r.Client, project, func(rd *schema.ResourceData) error {
 			result := req.NewListResult(ctx)
 
-			if err := tpgresource.SetIdentityFields(rd, map[string]string{
+			if err := tpgresource.SetIdentityFields(ctx, result, rd, map[string]string{
 				"email":   rd.Get("email").(string),
 				"project": project,
 			}); err != nil {
