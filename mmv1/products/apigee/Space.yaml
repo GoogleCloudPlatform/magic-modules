@@ -15,6 +15,7 @@
 name: 'Space'
 description: |
   A Space in Apigee
+exclude_identity_generation: true
 references:
   guides:
     "Managing Spaces": "https://cloud.google.com/apigee/docs/api-platform/system-administration/spaces/manage-spaces"
