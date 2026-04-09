@@ -101,6 +101,10 @@ var (
 					startDate: newDate(2025, 10, 22),
 					endDate:   newDate(2025, 10, 28),
 				},
+				{
+					startDate: newDate(2026, 04, 8),
+					endDate:   newDate(2026, 04, 14),
+				},
 			},
 		},
 		"rileykarson": {
