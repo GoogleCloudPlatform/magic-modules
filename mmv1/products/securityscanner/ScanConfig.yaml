@@ -36,6 +36,12 @@ examples:
     vars:
       address_name: scan-basic-static-ip
       scan_config_name: terraform-scan-config
+  - name: scan_config_risk_level
+    primary_resource_id: scan-config
+    min_version: beta
+    vars:
+      address_name: scan-risk-level-ip
+      scan_config_name: scan-config-risk-level
 properties:
   - name: name
     type: String
@@ -189,3 +195,9 @@ properties:
     enum_values:
       - ENABLED
       - DISABLED
+  - name: riskLevel
+    type: Enum
+    description: The risk level selected for the scan
+    enum_values:
+      - NORMAL
+      - LOW
