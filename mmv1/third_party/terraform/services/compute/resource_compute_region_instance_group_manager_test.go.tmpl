@@ -2640,7 +2640,7 @@ func TestAccRegionInstanceGroupManager_targetSizePolicy(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_instance_group_manager.igm-tsp",
+				ResourceName:            "google_compute_region_instance_group_manager.igm-tsp",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"status"},
