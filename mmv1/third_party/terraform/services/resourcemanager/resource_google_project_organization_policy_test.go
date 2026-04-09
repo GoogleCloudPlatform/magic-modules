@@ -100,7 +100,6 @@ func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
 
 func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
-	canonicalProject := canonicalProjectId(project)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -108,7 +107,7 @@ func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectOrganizationPolicyConfig_list_allowSome(project),
-				Check:  testAccCheckGoogleProjectOrganizationListPolicyAllowedValues(t, "list", []string{canonicalProject}),
+				Check:  testAccCheckGoogleProjectOrganizationListPolicyAllowedValues(t, "list", []string{"APPENGINE", "HTTP", "PUBSUB"}),
 			},
 			{
 				ResourceName:      "google_project_organization_policy.list",
