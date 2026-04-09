@@ -1,9 +1,14 @@
 package tpgresource
 
 import (
+	"context"
+	"errors"
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -76,4 +81,24 @@ func (r *ListResourceMetadata) GetZone(override types.String) string {
 		}
 	}
 	return r.Zone
+}
+
+func SetIdentityFields(ctx context.Context, result *list.ListResult, rd *schema.ResourceData, fields map[string]string) error {
+	identity, err := rd.Identity()
+	if err != nil {
+		return fmt.Errorf("error getting identity: %s", err)
+	}
+	for k, v := range fields {
+		if err := identity.Set(k, v); err != nil {
+			return fmt.Errorf("error setting identity field %q: %s", k, err)
+		}
+	}
+	tfTypeIdentity, err := rd.TfTypeIdentityState()
+	if err != nil {
+		return err
+	}
+	if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
+		return errors.New("error setting identity")
+	}
+	return nil
 }

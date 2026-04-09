@@ -81,23 +81,13 @@ func (r *GoogleServiceAccountListResource) List(ctx context.Context, req list.Li
 		err := ListServiceAccounts(r.Client, project, func(rd *schema.ResourceData) error {
 			result := req.NewListResult(ctx)
 
-			identity, err := rd.Identity()
-			if err != nil {
-				return fmt.Errorf("Error getting identity: %s", err)
-			}
-			if err = identity.Set("email", rd.Get("email").(string)); err != nil {
-				return fmt.Errorf("Error setting email: %s", err)
-			}
-			if err = identity.Set("project", project); err != nil {
-				return fmt.Errorf("Error setting project: %s", err)
-			}
-			tfTypeIdentity, err := rd.TfTypeIdentityState()
-			if err != nil {
+			if err := tpgresource.SetIdentityFields(rd, map[string]string{
+				"email":   rd.Get("email").(string),
+				"project": project,
+			}); err != nil {
 				return err
 			}
-			if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
-				return errors.New("error setting identity")
-			}
+
 			if req.IncludeResource {
 				tfTypeResource, err := rd.TfTypeResourceState()
 				if err != nil {
