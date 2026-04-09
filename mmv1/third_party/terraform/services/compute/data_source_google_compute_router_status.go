@@ -74,10 +74,8 @@ func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-
-	var name string
-	if n, ok := d.GetOk("name"); ok {
-		name = n.(string)
+	if err := d.Set("region", region); err != nil {
+		return fmt.Errorf("Error setting region: %s", err)
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{name}}/getRouterStatus")
@@ -96,7 +94,11 @@ func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	status := res
+	status, ok := res["result"].(map[string]interface{})
+
+	if !ok {
+		return fmt.Errorf("result field is missing or not a map in router status response")
+	}
 
 	if err := d.Set("network", status["network"]); err != nil {
 		return fmt.Errorf("Error setting network: %s", err)
