@@ -63,7 +63,6 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/update_mask.go.tmpl",
 		"templates/terraform/nested_query.go.tmpl",
 		"templates/terraform/unordered_list_customize_diff.go.tmpl",
-		"templates/terraform/list_resource.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }

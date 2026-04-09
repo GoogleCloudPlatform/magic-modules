@@ -1,31 +1,42 @@
-{{/*# The license inside this block applies to this file.
-  # Copyright 2024 Google Inc.
-  # Licensed under the Apache License, Version 2.0 (the "License");
-  # you may not use this file except in compliance with the License.
-  # You may obtain a copy of the License at
-  #
-  #     http://www.apache.org/licenses/LICENSE-2.0
-  #
-  # Unless required by applicable law or agreed to in writing, software
-  # distributed under the License is distributed on an "AS IS" BASIS,
-  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  # See the License for the specific language governing permissions and
-  # limitations under the License.
-*/}}
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+{{$.CodeHeader TemplatePath}}
 
 package {{ lower $.ProductMetadata.Name }}
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"log"
+	"regexp"
 
-	// This shouldn't be from the cloud pkg but instead an internal package within magicmodules (e.g tpgresource/...)
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"google.golang.org/api/iterator"
 
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	"{{ $.ImportPath }}/tpgresource"
+	transport_tpg "{{ $.ImportPath }}/transport"
+
+	"google.golang.org/api/googleapi"
 )
 
 var _ tpgresource.ListResourceWithRawV5Schemas = &{{ $.ResourceName -}}ListResource{}
@@ -39,7 +50,7 @@ func New{{ $.ResourceName -}}ListResource() list.ListResource {
 }
 
 func (r *{{ $.ResourceName -}}ListResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "google_{{ $.ProductMetadata.TerraformName -}}_{{ $.Name -}}"
+	resp.TypeName = "{{ $.TerraformName }}"
 }
 
 func (r *{{ $.ResourceName -}}ListResource) RawV5Schemas(ctx context.Context, _ list.RawV5SchemaRequest, resp *list.RawV5SchemaResponse) {
@@ -55,60 +66,24 @@ func (r *{{ $.ResourceName -}}ListResource) Configure(_ context.Context, req res
 func (r *{{ $.ResourceName -}}ListResource) ListResourceConfigSchema(ctx context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
-            {{- range $identity := $.IdentityProperties }} // we can't rely on this because of some resources not containing all the possible parent combinations for list, we should rely more on `base_url`
-			"{{ $identity.Name }}": listschema.StringAttribute{
+{{- range $identity := $.IdentityProperties }}
+			"{{ underscore $identity.Name }}": listschema.StringAttribute{
 				Optional: true,
 			},
-            {{- end }},
-			~> we need logic to determine whether we can add filter support here or not
-			<!-- {{ if or (not $.ExcludeFilter) ($.CustomFilter) -}} -->
+{{- end }}
 			"filter": listschema.StringAttribute{
 				Optional: true,
 			},
-			<!-- {{ end }} -->
 		},
 	}
 }
 
 type {{ $.ResourceName -}}ListModel struct {
-    {{- range $identity := $.IdentityProperties }}
-	{{ $identity.Name }} string `tfsdk:"{{ $identity.Name }}"`
-    {{- end }}
+{{- range $identity := $.IdentityProperties }}
+	{{ $identity.TitlelizeProperty }} types.String `tfsdk:"{{ underscore $identity.Name }}"`
+{{- end }}
+	Filter types.String `tfsdk:"filter"`
 }
-
-{{ if $.CustomListMethod }}
-	{{ $.CustomTemplate $.CustomListMethod false -}}
-{{ else }}
-	func List{{ $.ResourceName -}}s(ctx context.Context, req list.ListRequest) {
-		client := r.Client.New{{ $.ResourceName -}}sClient(r.Client.UserAgent)
-
-		listReq := {{lower $.ProductMetadata.Name }}.List{{ $.Name -}}sRequest{
-			{{if $.NonParent }}
-			Parent: {{ $.ParentResourceName}},
-			{{else}}
-			{{- range $identity := $.IdentityProperties }}
-			{{ $identity.Name }}: data.{{ $identity.Name }},
-			{{- end }}
-			{{ if not (or $.ExcludeFilter $.CustomFilter) -}}
-			Filter: data.Filter
-			{{ end }}
-			{{ end }}
-		}
-
-		it := client.List{{ $.Name -}}s(ctx, &listReq)
-
-		for {
-			resp, err := it.Next()
-			if err == iterator.Done {
-				break
-			} else if err != nil {
-				diags.AddError("API Error", err.Error())
-				break
-			}
-
-		}
-	}
-{{ end }}
 
 func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data {{ $.ResourceName -}}ListModel
@@ -118,49 +93,270 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 		return
 	}
 
-    /* INSERT IDENTITY SETTING GENERATION CODE HERE */
+{{- range $identity := $.IdentityProperties }}
+	var {{ $identity.CamelizeProperty }} string
+	if !data.{{ $identity.TitlelizeProperty }}.IsNull() && !data.{{ $identity.TitlelizeProperty }}.IsUnknown() {
+		{{ $identity.CamelizeProperty }} = data.{{ $identity.TitlelizeProperty }}.ValueString()
+	}
+{{- if eq $identity.Name "project" }}
+	if {{ $identity.CamelizeProperty }} == "" {
+		{{ $identity.CamelizeProperty }} = r.Client.Project
+	}
+{{- else if eq $identity.Name "zone" }}
+	if {{ $identity.CamelizeProperty }} == "" {
+		{{ $identity.CamelizeProperty }} = r.Client.Zone
+	}
+{{- else if eq $identity.Name "region" }}
+	if {{ $identity.CamelizeProperty }} == "" {
+		{{ $identity.CamelizeProperty }} = r.Client.Region
+	}
+{{- end }}
+{{- end }}
 
+	filterString := ""
+	if !data.Filter.IsNull() && !data.Filter.IsUnknown() {
+		filterString = data.Filter.ValueString()
+	}
 
 	stream.Results = func(push func(list.ListResult) bool) {
+		err := List{{ $.ResourceName }}s(
+			r.Client,
+			filterString,
+{{- range $identity := $.IdentityProperties }}
+			{{ $identity.CamelizeProperty }},
+{{- end }}
+			func(rd *schema.ResourceData) error {
+{{- $hasListName := false -}}
+{{- range $identity := $.IdentityProperties }}
+{{- if eq $identity.Name "name" }}
+{{- $hasListName = true -}}
+{{- end }}
+{{- end }}
+{{- if $hasListName }}
+				if name != "" {
+					if n, ok := rd.GetOk("name"); !ok || n.(string) != name {
+						return nil
+					}
+				}
+{{- end }}
+				result := req.NewListResult(ctx)
 
-		LIST METHOD (func(){
-
-			result := req.NewListResult(ctx)
-			result.DisplayName = resp.Name
-
-			{{ $.ResourceName -}}Resource := Resource{{ $.ResourceName -}}()
-			rd := {{ $.ResourceName -}}Resource.Data(&terraform.InstanceState{})
-			rd.SetId(resp.Name)
-
-            /* INSERT IDENTITY SETTING GENERATION CODE HERE */
+				identity, err := rd.Identity()
+				if err != nil {
+					return fmt.Errorf("Error getting identity: %s", err)
+				}
+{{- range $p := $.IdentityProperties }}
+{{- if or (eq $p.Name "project") (eq $p.Name "zone") (eq $p.Name "region") (eq $p.Name "location") }}
+				if err = identity.Set("{{ underscore $p.Name }}", {{ $p.CamelizeProperty }}); err != nil {
+					return fmt.Errorf("Error setting {{ underscore $p.Name }}: %s", err)
+				}
+{{- end }}
+{{- end }}
 
 				tfTypeIdentity, err := rd.TfTypeIdentityState()
 				if err != nil {
-					diags.AddError("error getting identity state", err.Error())
-					break
+					return err
 				}
 				if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
-					diags = err
-					break
+					return errors.New("error setting identity")
 				}
 
-				tfTypeResource, err := rd.TfTypeResourceState()
-				if err != nil {
-					diags.AddError("error getting resource state", err.Error())
-					break
+				if n, ok := rd.GetOk("name"); ok {
+					if s, ok := n.(string); ok {
+						result.DisplayName = s
+					}
 				}
-				if err := result.Resource.Set(ctx, *tfTypeResource); err != nil {
-					diags = err
-					break
+
+				if req.IncludeResource {
+					tfTypeResource, err := rd.TfTypeResourceState()
+					if err != nil {
+						return err
+					}
+					if err := result.Resource.Set(ctx, *tfTypeResource); err != nil {
+						return errors.New("error setting resource")
+					}
 				}
 
 				if !push(result) {
-					diags.AddError("stream closed", "stream closed")
-					break
+					return errors.New("stream closed")
 				}
-			}
-			
-		)}
-
+				return nil
+			},
+		)
+		if err != nil {
+			diags.AddError("API Error", err.Error())
+			result := req.NewListResult(ctx)
+			result.Diagnostics = diags
+			push(result)
+		}
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 	}
+}
+
+func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
+{{- range $identity := $.IdentityProperties }}
+	{{ $identity.CamelizeProperty }} string,
+{{- end }}
+	callback func(*schema.ResourceData) error,
+) error {
+	resourceData := Resource{{ $.ResourceName }}().Data(&terraform.InstanceState{})
+{{- range $identity := $.IdentityProperties }}
+	if {{ $identity.CamelizeProperty }} != "" {
+		if err := resourceData.Set("{{ underscore $identity.Name }}", {{ $identity.CamelizeProperty }}); err != nil {
+			return fmt.Errorf("error setting {{ underscore $identity.Name }} on temporary resource data: %w", err)
+		}
+	}
+{{- end }}
+
+	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
+	if err != nil {
+		return err
+	}
+
+	billingProject := ""
+	if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+		billingProject = parts[1]
+	}
+	if bp, err := tpgresource.GetBillingProject(resourceData, config); err == nil {
+		billingProject = bp
+	}
+
+	userAgent, err := tpgresource.GenerateUserAgentString(resourceData, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	return transport_tpg.ListPages(
+		config,
+		resourceData,
+		url,
+		billingProject,
+		userAgent,
+		"{{ $.ResourceListKey }}",
+		filter,
+		flatten{{ $.ResourceName }}ListItem,
+		callback,
+	)
+}
+
+func flatten{{ $.ResourceName }}ListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+{{- if $.NestedQuery }}
+	res, err := flattenNested{{ $.ResourceName }}(d, interface{}(config), res)
+	if err != nil {
+		return err
+	}
+	if res == nil {
+		return nil
+	}
+{{- end }}
+{{- if $.CustomCode.Decoder }}
+	{{- if $.NestedQuery }}
+	res, err = resource{{ $.ResourceName }}Decoder(d, interface{}(config), res)
+	{{- else }}
+	var err error
+	res, err = resource{{ $.ResourceName }}Decoder(d, interface{}(config), res)
+	{{- end }}
+	if err != nil {
+		return err
+	}
+	if res == nil {
+		return nil
+	}
+{{- end }}
+{{- if $.VirtualFields }}
+{{- range $prop := $.VirtualFields }}
+{{- if not (eq $prop.DefaultValue nil) }}
+	if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
+		if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
+			return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
+		}
+	}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $.HasProject }}
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+	}
+{{- end }}
+{{- if $.HasRegion }}
+	region, err := tpgresource.GetRegion(d, config)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("region", region); err != nil {
+		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+	}
+{{- end }}
+{{- if $.HasZone }}
+	zone, err := tpgresource.GetZone(d, config)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("zone", zone); err != nil {
+		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+	}
+{{- end }}
+{{- range $prop := $.GettableProperties }}
+{{- if $prop.FlattenObject }}
+	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
+		if gerr, ok := flattenedProp.(*googleapi.Error); ok {
+			return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
+		}
+		casted := flattenedProp.([]interface{})[0]
+		if casted != nil {
+			for k, v := range casted.(map[string]interface{}) {
+				if err := d.Set(k, v); err != nil {
+					return fmt.Errorf("Error setting %s: %s", k, err)
+				}
+			}
+		}
+	}
+{{- else }}
+	if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+	}
+{{- end }}
+{{- end }}
+{{- if $.HasSelfLink }}
+	if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
+		return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+	}
+{{- end }}
+
+	id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+{{- if and (not $.ExcludeIdentityGeneration) (not $.ExcludeRead) }}
+	identity, err := d.Identity()
+	if err == nil && identity != nil {
+{{- range $p := $.IdentityProperties }}
+{{- if eq $p.Type "Integer" }}
+		if _, ok := identity.GetOk("{{ underscore $p.Name}}"); !ok {
+			err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(int))
+			if err != nil {
+				return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+			}
+		}
+{{- else }}
+		if v, ok := identity.GetOk("{{ underscore $p.Name}}"); !ok && v == "" {
+			err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
+			if err != nil {
+				return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+			}
+		}
+{{- end }}
+{{- end }}
+	} else {
+		log.Printf("[DEBUG] (list item) identity not set: %s", err)
+	}
+{{- end }}
+	return nil
+}
