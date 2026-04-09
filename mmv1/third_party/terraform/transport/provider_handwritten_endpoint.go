@@ -16,20 +16,6 @@ var CloudBillingCustomEndpointEntry = &schema.Schema{
 	ValidateFunc: ValidateCustomEndpoint,
 }
 
-var ComposerCustomEndpointEntryKey = "composer_custom_endpoint"
-var ComposerCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-
-var ContainerCustomEndpointEntryKey = "container_custom_endpoint"
-var ContainerCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-
 var DataflowCustomEndpointEntryKey = "dataflow_custom_endpoint"
 var DataflowCustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
@@ -56,52 +42,6 @@ var ResourceManagerV3CustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	ValidateFunc: ValidateCustomEndpoint,
-}
-
-{{ if ne $.TargetVersionName `ga` -}}
-var RuntimeConfigCustomEndpointEntryKey = "runtimeconfig_custom_endpoint"
-var RuntimeConfigCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-{{- end }}
-
-var ServiceNetworkingCustomEndpointEntryKey = "service_networking_custom_endpoint"
-var ServiceNetworkingCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-
-var ServiceUsageCustomEndpointEntryKey = "service_usage_custom_endpoint"
-var ServiceUsageCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_SERVICE_USAGE_CUSTOM_ENDPOINT",
-	}, DefaultBasePaths[ServiceUsageBasePathKey]),
-}
-
-var BigtableAdminCustomEndpointEntryKey = "bigtable_custom_endpoint"
-var BigtableAdminCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_BIGTABLE_CUSTOM_ENDPOINT",
-	}, DefaultBasePaths[BigtableAdminBasePathKey]),
-}
-
-var PrivatecaCertificateTemplateEndpointEntryKey = "privateca_custom_endpoint"
-var PrivatecaCertificateTemplateCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_PRIVATECA_CUSTOM_ENDPOINT",
-	}, DefaultBasePaths[PrivatecaBasePathKey]),
 }
 
 var TagsLocationCustomEndpointEntryKey = "tags_location_custom_endpoint"
