@@ -47,7 +47,6 @@ exclude_identity_generation: true
 examples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'
-    exclude_identity_import: true
     vars:
       policy_name: 'my-policy'
     test_env_vars:

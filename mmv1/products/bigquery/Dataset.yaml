@@ -53,7 +53,6 @@ examples:
     test_vars_overrides:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
-    exclude_identity_import: true
   - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
     vars:
@@ -63,7 +62,6 @@ examples:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
     vars:
@@ -71,7 +69,6 @@ examples:
       key_name: 'example-key'
       keyring_name: 'example-keyring'
     exclude_test: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_authorized_dataset'
     primary_resource_id: 'dataset'
     vars:
@@ -85,7 +82,6 @@ examples:
       public: '"public" + randomSuffix'
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
-    exclude_identity_import: true
   - name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
     vars:
@@ -94,7 +90,6 @@ examples:
       public_routine: 'public_routine'
     test_env_vars:
       service_account: 'SERVICE_ACCT'
-    exclude_identity_import: true
   - name: 'bigquery_dataset_case_insensitive_names'
     primary_resource_id: 'dataset'
     vars:
@@ -104,7 +99,6 @@ examples:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
     vars:
@@ -114,18 +108,15 @@ examples:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
     exclude_test: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_external_catalog_dataset_options'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
-    exclude_identity_import: true
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
     vars:
@@ -138,7 +129,6 @@ examples:
       # for backward compatible
       dataset_id: '"dataset" + randomSuffix'
     exclude_docs: true
-    exclude_identity_import: true
 virtual_fields:
   - name: 'delete_contents_on_destroy'
     description: |

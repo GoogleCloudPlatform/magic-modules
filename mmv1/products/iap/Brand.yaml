@@ -69,7 +69,6 @@ examples:
       org_id: 'ORG_ID'
       org_domain: 'ORG_DOMAIN'
     exclude_test: true
-    exclude_identity_import: true
 parameters:
   - name: 'name'
     type: String
