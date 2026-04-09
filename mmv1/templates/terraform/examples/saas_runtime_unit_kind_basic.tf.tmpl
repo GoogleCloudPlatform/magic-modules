@@ -34,6 +34,6 @@ resource "google_saas_runtime_release" "example_release" {
   release_id        = "{{index $.Vars "release_name"}}"
   unit_kind         = google_saas_runtime_unit_kind.cluster_unit_kind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-alpha-image@sha256:7992fdbaeaf998ecd31a7f937bb26e38a781ecf49b24857a6176c1e9bfc299ee"
+    package = "us-docker.pkg.dev/cloudrun/container/hello@sha256:b82beaa0e9c1ec6cb0b4d7ccacc9ae2bc1db4d5ccfa42f8cbdf18322ff1fead1"
   }
 }
