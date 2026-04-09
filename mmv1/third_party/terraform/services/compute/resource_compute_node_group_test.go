@@ -113,13 +113,13 @@ func testAccComputeNodeGroup_update(groupName, tmplPrefix, tmplToUse string) str
 resource "google_compute_node_template" "tmpl1" {
   name      = "%s-first"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_template" "tmpl2" {
   name      = "%s-second"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_group" "nodes" {
