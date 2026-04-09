@@ -83,7 +83,7 @@ resource "google_vertex_ai_pipeline_job" "primary" {
   region       = "us-east1"
   display_name = "tf-test-example-pipeline-job%{random_suffix}"
   template_uri = "gs://cloud-samples-data/ai-platform/pipelines/hello-world-pipeline.json"
-
+  
   labels = {
     env  = "test"
     tier = "ml"
@@ -111,5 +111,55 @@ resource "google_vertex_ai_pipeline_job" "primary" {
     google_project_iam_member.pipeline_sa_roles,
     google_vertex_ai_metadata_store.default_test,
     google_compute_network_attachment.net_attachment
+  ]
+}
+
+resource "google_vertex_ai_pipeline_job" "clone" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  region       = "us-east1"
+  display_name = "tf-test-clone-job%{random_suffix}"
+
+  original_pipeline_job_id = google_vertex_ai_pipeline_job.primary.id
+
+  template_uri = "gs://cloud-samples-data/ai-platform/pipelines/hello-world-pipeline.json"
+
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.pipeline_output.name}/outputs/"
+  }
+
+  service_account = google_service_account.pipeline_sa.email
+
+  depends_on = [
+    google_vertex_ai_pipeline_job.primary
+  ]
+}
+
+resource "google_vertex_ai_pipeline_job" "with_spec" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  region       = "us-east1"
+  display_name = "tf-test-spec-job%{random_suffix}"
+
+  # Usamos pipeline_spec aqui, sem o template_uri!
+  pipeline_spec = jsonencode({
+    pipelineInfo = {
+      name = "minimal-test-pipeline"
+    }
+    root = {
+      dag = {
+        tasks = {}
+      }
+    }
+  })
+
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.pipeline_output.name}/outputs/"
+  }
+
+  service_account = google_service_account.pipeline_sa.email
+
+  depends_on = [
+    google_project_iam_member.pipeline_sa_roles
   ]
 }
