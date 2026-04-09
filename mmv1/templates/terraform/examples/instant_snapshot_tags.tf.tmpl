@@ -1,0 +1,26 @@
+resource "google_compute_disk" "foo" {
+  name = "{{index $.Vars "disk_name"}}"
+  type = "pd-ssd"
+  size = 10
+}
+
+resource "google_compute_instant_snapshot" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "instance_name"}}"
+  zone        = "us-central1-a"
+  source_disk = google_compute_disk.foo.self_link
+  params {
+    resource_manager_tags = {
+      (google_tags_tag_key.tag_key1.id) = (google_tags_tag_value.tag_value1.id)
+    }
+  }
+}
+
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = "organizations/{{index $.Vars "org_id"}}"
+  short_name = "{{index $.Vars "tag_key"}}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "{{index $.Vars "tag_value"}}"
+}
