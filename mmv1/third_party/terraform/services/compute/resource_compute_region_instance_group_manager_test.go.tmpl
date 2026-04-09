@@ -2693,6 +2693,7 @@ resource "google_compute_region_instance_group_manager" "igm-tsp" {
   instance_lifecycle_policy {
     default_action_on_failure = "DO_NOTHING"
   }
+  distribution_policy_target_shape = "ANY_SINGLE_ZONE"
 
   version {
     name              = "primary"
