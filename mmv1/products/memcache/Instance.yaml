@@ -43,6 +43,9 @@ examples:
       address_name: address
       instance_name: test-instance
       network_name: test-network
+    test_vars_overrides:
+      # for backward compatible
+      address_name: '"address" + randomSuffix'
   - name: memcache_instance_basic_test
     primary_resource_id: instance
     exclude_docs: true
@@ -52,6 +55,8 @@ examples:
       network_name: test-network
     test_vars_overrides:
       network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+      # for backward compatible
+      address_name: '"address" + randomSuffix'
 virtual_fields:
   - name: deletion_protection
     type: Boolean

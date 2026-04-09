@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -107,6 +108,9 @@ locals {
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine"
   description  = "A sample reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
   region       = "us-central1"
 
   encryption_spec {
@@ -286,6 +290,9 @@ locals {
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine-updated"
   description  = "A sample reasoning engine updated"
+  labels       = {
+    "key" = "updated"
+  }
   region       = "us-central1"
 
   encryption_spec {
@@ -515,6 +522,9 @@ func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic() string 
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine"
   description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
   region       = "us-central1"
 
   spec {
@@ -540,6 +550,9 @@ func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate() string
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine"
   description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "updated"
+  }
   region       = "us-central1"
 
   spec {
@@ -617,6 +630,80 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 
   spec {
     identity_type = "AGENT_IDENTITY"
+  }
+}
+`, context)
+}
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"name":          "tf-test-reasoning-engine" + randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecExample(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_reasoning_engine.reasoning_engine", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecExample(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_reasoning_engine.reasoning_engine", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "%{name}"
+  description  = "Deployed with BYOC Dockerfile through Terraform (Updated)"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/agent_src2.tar.gz")
+      }
+
+      image_spec {
+        build_args = {
+          "tag" = "latest"
+        }
+      }
+    }
   }
 }
 `, context)

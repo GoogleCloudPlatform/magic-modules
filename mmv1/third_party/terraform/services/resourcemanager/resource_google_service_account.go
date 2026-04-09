@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -366,4 +367,13 @@ func resourceServiceAccountCustomDiff(_ context.Context, diff *schema.ResourceDi
 
 	// separate func to allow unit testing
 	return ResourceServiceAccountCustomDiffFunc(diff)
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_service_account",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleServiceAccount(),
+	}.Register()
 }

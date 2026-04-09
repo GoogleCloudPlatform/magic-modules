@@ -57,6 +57,9 @@ examples:
     min_version: beta
     vars:
       project_id: quota
+    test_vars_overrides:
+      # for backward compatible
+      project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
   - name: consumer_quota_override_zero_value
@@ -65,6 +68,9 @@ examples:
     exclude_docs: true
     vars:
       project_id: quota
+    test_vars_overrides:
+      # for backward compatible
+      project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
   - name: region_consumer_quota_override
@@ -72,6 +78,9 @@ examples:
     min_version: beta
     vars:
       project_id: quota
+    test_vars_overrides:
+      # for backward compatible
+      project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
   - name: consumer_quota_override_custom_dimension
@@ -79,6 +88,9 @@ examples:
     min_version: beta
     vars:
       project_id: quota
+    test_vars_overrides:
+      # for backward compatible
+      project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
 parameters:

@@ -101,6 +101,10 @@ var (
 					startDate: newDate(2025, 10, 22),
 					endDate:   newDate(2025, 10, 28),
 				},
+				{
+					startDate: newDate(2026, 04, 8),
+					endDate:   newDate(2026, 04, 14),
+				},
 			},
 		},
 		"rileykarson": {
@@ -146,8 +150,8 @@ var (
 		"SirGitsalot": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 1, 18),
-					endDate:   newDate(2026, 1, 27),
+					startDate: newDate(2026, 4, 8),
+					endDate:   newDate(2026, 4, 15),
 				},
 			},
 		},

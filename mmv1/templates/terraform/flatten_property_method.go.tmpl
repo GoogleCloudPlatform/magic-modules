@@ -208,6 +208,14 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		return "unknown"
 	}
 	return v
+  {{- else if and ($.ResourceMetadata.ProductMetadata.IsTgcCompiler) ($.IsA "String") (not $.Required) (not $.DefaultFromApi) (eq $.DefaultValue nil) (not $.SendEmptyValue) }}
+	if v == nil {
+		return nil
+	}
+	if strVal, ok := v.(string); ok && strVal == "" {
+		return nil
+	}
+	return v
   {{- else }}
   return v
 {{- end }}

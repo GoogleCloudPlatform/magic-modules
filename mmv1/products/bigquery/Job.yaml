@@ -52,17 +52,18 @@ schema_version: 1
 state_upgraders: true
 examples:
   - name: 'bigquery_job_query'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_query'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
   - name: 'bigquery_job_query_continuous'
     exclude_docs: true
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_query_continuous'
@@ -71,11 +72,13 @@ examples:
       - 'status.0.state'
     min_version: beta
   - name: 'bigquery_job_query_table_reference'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_query'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'query.0.default_dataset.0.dataset_id'
@@ -117,7 +120,6 @@ examples:
  # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_copy'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_copy'
@@ -127,11 +129,12 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
   - name: 'bigquery_job_copy_table_reference'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_copy'
@@ -141,6 +144,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'copy.0.destination_table.0.table_id'
@@ -150,20 +155,24 @@ examples:
  # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_extract'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_extract'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
   - name: 'bigquery_job_extract_table_reference'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_extract'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'extract.0.source_table.0.table_id'
