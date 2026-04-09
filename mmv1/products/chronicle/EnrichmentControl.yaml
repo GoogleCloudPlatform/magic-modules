@@ -152,4 +152,3 @@ properties:
                 If specified, a Timestamp matching this interval will have to be the same
                 or after the start.
               output: true
-
