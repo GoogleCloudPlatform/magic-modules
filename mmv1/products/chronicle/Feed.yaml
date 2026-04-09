@@ -1,0 +1,2657 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Feed
+description: The FeedsService is responsible for configuring and managing the ingestion of third-party security data and logs into Google Security Operations through various feed creation, updates, and lifecycle management, and schema validation.
+min_version: 'beta'
+references:
+  guides:
+    'Feed management overview': 'https://docs.cloud.google.com/chronicle/docs/administration/feed-management-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.feeds'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds
+update_verb: PATCH
+update_mask: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
+delete_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
+
+examples:
+  - name: 'chronicle_feed_basic'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+  - name: 'chronicle_feed_gcs'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+      description: test-feeds-description
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
+    ignore_read_extra:
+      - 'feed_service_account'
+  - name: 'chronicle_feed_https_push'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+      description: test-feeds-description
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+    exclude_import_test: true
+
+custom_code:
+  update_encoder: 'templates/terraform/encoders/chronicle_feed_update.go.tmpl'
+  post_update: 'templates/terraform/post_update/chronicle_feed_state.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/chronicle_feed_service_account.go.tmpl'
+  post_create: 'templates/terraform/post_create/chronicle_feed_generate_secret.go.tmpl'
+virtual_fields:
+  - name: 'secret'
+    type: String
+    description: |
+      Output only. The secret generated for the feed. This is only available when the feed source type is HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE.
+    output: true
+    sensitive: true
+  - name: 'feed_service_account'
+    type: String
+    description: |
+      Output only. The service account used by Chronicle to ingest data from Cloud Storage. This is only available when the feed source type is GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN or GOOGLE_CLOUD_STORAGE.
+    output: true
+    ignore_read: true
+autogen_status: RmVlZA==
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: feed
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+properties:
+  - name: state
+    type: String
+    description: 'The state of the feed (e.g., ACTIVE, INACTIVE).'
+    # Mark as output if the API only allows changing it via custom endpoints
+    output: true
+  - name: enabled
+    type: Boolean
+    description: 'Whether the feed is enabled.'
+    # Use a virtual/client-side field to trigger enable/disable calls
+  - name: details
+    type: NestedObject
+    description: |-
+      Additional details of the feed, these details are dynamic and will be
+      different for each of the feeds.
+    properties:
+      - name: amazonKinesisFirehoseSettings
+        type: NestedObject
+        description: Settings required by Amazon Kinesis Firehose Feeds(HTTP-Push).
+        exactly_one_of: &all_feed_settings
+          - details.0.anomali_settings
+          - details.0.azure_ad_context_settings
+          - details.0.cloud_passage_settings
+          - details.0.cortex_xdr_settings
+          - details.0.duo_auth_settings
+          - details.0.duo_user_context_settings
+          - details.0.microsoft_graph_alert_settings
+          - details.0.microsoft_security_center_alert_settings
+          - details.0.mimecast_mail_settings
+          - details.0.office365_settings
+          - details.0.proofpoint_mail_settings
+          - details.0.recorded_future_ioc_settings
+          - details.0.workday_settings
+          - details.0.pan_ioc_settings
+          - details.0.okta_settings
+          - details.0.okta_user_context_settings
+          - details.0.fox_it_stix_settings
+          - details.0.threat_connect_ioc_settings
+          - details.0.service_now_cmdb_settings
+          - details.0.imperva_waf_settings
+          - details.0.thinkst_canary_settings
+          - details.0.rh_isac_ioc_settings
+          - details.0.rapid7_insight_settings
+          - details.0.salesforce_settings
+          - details.0.netskope_alert_settings
+          - details.0.azure_mdm_intune_settings
+          - details.0.azure_ad_settings
+          - details.0.proofpoint_on_demand_settings
+          - details.0.workspace_users_settings
+          - details.0.workspace_activity_settings
+          - details.0.workspace_alerts_settings
+          - details.0.workspace_privileges_settings
+          - details.0.workspace_mobile_settings
+          - details.0.workspace_chrome_os_settings
+          - details.0.workspace_groups_settings
+          - details.0.azure_ad_audit_settings
+          - details.0.symantec_event_export_settings
+          - details.0.qualys_vm_settings
+          - details.0.pan_prisma_cloud_settings
+          - details.0.gcs_settings
+          - details.0.http_settings
+          - details.0.sftp_settings
+          - details.0.amazon_s3_settings
+          - details.0.azure_blob_store_settings
+          - details.0.amazon_sqs_settings
+          - details.0.google_cloud_identity_devices_settings
+          - details.0.google_cloud_identity_device_users_settings
+          - details.0.crowdstrike_detects_settings
+          - details.0.mandiant_ioc_settings
+          - details.0.sentinelone_alert_settings
+          - details.0.qualys_scan_settings
+          - details.0.pubsub_settings
+          - details.0.amazon_kinesis_firehose_settings
+          - details.0.webhook_settings
+          - details.0.dummy_log_type_settings
+          - details.0.https_push_google_cloud_pubsub_settings
+          - details.0.https_push_amazon_kinesis_firehose_settings
+          - details.0.https_push_webhook_settings
+          - details.0.aws_ec2_hosts_settings
+          - details.0.aws_ec2_instances_settings
+          - details.0.aws_ec2_vpcs_settings
+          - details.0.aws_iam_settings
+          - details.0.netskope_alert_v2_settings
+          - details.0.gcs_v2_settings
+          - details.0.amazon_s3_v2_settings
+          - details.0.amazon_sqs_v2_settings
+          - details.0.azure_event_hub_settings
+          - details.0.trellix_hx_hosts_settings
+          - details.0.azure_blob_store_v2_settings
+          - details.0.trellix_hx_alerts_settings
+          - details.0.google_cloud_storage_event_driven_settings
+          - details.0.crowdstrike_alerts_settings
+          - details.0.trellix_hx_bulk_acqs_settings
+          - details.0.mimecast_mail_v2_settings
+          - details.0.threat_connect_ioc_v3_settings
+        properties: []
+      - name: amazonS3Settings
+        type: NestedObject
+        description: Amazon S3 settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Amazon S3 auth.
+            properties:
+              - name: accessKeyId
+                type: String
+                description: Access key ID. Used when using access key auth.
+              - name: clientId
+                type: String
+                description: Client ID. Used when using OAuth auth.
+              - name: clientSecret
+                type: String
+                description: Client secret. Used when using OAuth auth.
+              - name: refreshUri
+                type: String
+                sensitive: true
+                description: Refresh URI. Used when using OAuth auth.
+              - name: region
+                type: String
+                required: true
+                description: |-
+                  Possible values:
+                  US_EAST_1
+                  US_EAST_2
+                  US_WEST_1
+                  US_WEST_2
+                  US_GOV_CLOUD
+                  US_GOV_EAST_1
+                  EU_WEST_1
+                  EU_WEST_2
+                  EU_WEST_3
+                  EU_CENTRAL_1
+                  EU_NORTH_1
+                  EU_SOUTH_1
+                  AP_SOUTH_1
+                  AP_SOUTHEAST_1
+                  AP_SOUTHEAST_2
+                  AP_SOUTHEAST_3
+                  AP_NORTHEAST_1
+                  AP_NORTHEAST_2
+                  AP_NORTHEAST_3
+                  AP_EAST_1
+                  SA_EAST_1
+                  CN_NORTH_1
+                  CN_NORTHWEST_1
+                  CA_CENTRAL_1
+                  AF_SOUTH_1
+                  ME_SOUTH_1
+                  AP_SOUTH_2
+                  AP_SOUTHEAST_4
+                  CA_WEST_1
+                  EU_SOUTH_2
+                  EU_CENTRAL_2
+                  IL_CENTRAL_1
+                  ME_CENTRAL_1
+              - name: secretAccessKey
+                type: String
+                description: Secret access key. Used when using access key auth.
+          - name: s3Uri
+            type: String
+            required: true
+            description: S3 URI.
+          - name: sourceDeletionOption
+            type: String
+            required: true
+            description: |-
+              Possible values:
+              SOURCE_DELETION_NEVER
+              SOURCE_DELETION_ON_SUCCESS
+              SOURCE_DELETION_ON_SUCCESS_FILES_ONLY
+          - name: sourceType
+            type: String
+            required: true
+            description: |-
+              Possible values:
+              FILES
+              FOLDERS
+              FOLDERS_RECURSIVE
+      - name: amazonS3V2Settings
+        type: NestedObject
+        description: |-
+          AmazonS3V2Settings is the settings proto for Omniflow S3 feeds.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            required: true
+            description: A message containing fields used to authenticate with Amazon S3.
+            properties:
+              - name: accessKeySecretAuth
+                type: NestedObject
+                description: S3 V2 access key and secret auth.
+                properties:
+                  - name: accessKeyId
+                    type: String
+                    required: true
+                    description: Access Key ID for an AWS account (a 20-character, alphanumeric string).
+                  - name: secretAccessKey
+                    type: String
+                    required: true
+                    sensitive: true
+                    description: Secret Access Key for an AWS account (a 40-character string).
+              - name: awsIamRoleAuth
+                type: NestedObject
+                description: AWS IAM Role Auth for S3 V2.
+                properties:
+                  - name: awsIamRoleArn
+                    type: String
+                    description: AWS IAM Role for Identity Federation.
+                  - name: subjectId
+                    type: String
+                    description: Subject ID to use for S3.
+          - name: chronicleServiceAccount
+            type: String
+            description: |-
+              SA that will read data, this is Storage Transfer Service SA of Customer's
+              Tenancy Project.
+            output: true
+          - name: maxLookbackDays
+            type: Integer
+            description: Maximum File Age to ingest in days.
+          - name: s3Uri
+            type: String
+            required: true
+            description: S3 URI.
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              NEVER
+              ON_SUCCESS
+      - name: amazonSqsSettings
+        type: NestedObject
+        description: Amazon SQS settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: accountNumber
+            type: String
+            description: Account number of the owner of the queue.
+          - name: authentication
+            type: NestedObject
+            description: Amazon SQS auth.
+            properties:
+              - name: additionalS3AccessKeySecretAuth
+                type: NestedObject
+                description: Additional S3 access key secret auth.
+                properties:
+                  - name: accessKeyId
+                    type: String
+                    description: Access key ID.
+                  - name: secretAccessKey
+                    type: String
+                    sensitive: true
+                    description: Secret access key.
+              - name: sqsAccessKeySecretAuth
+                type: NestedObject
+                description: Amazon SQS access key and secret auth.
+                properties:
+                  - name: accessKeyId
+                    type: String
+                    description: Access key ID.
+                  - name: secretAccessKey
+                    type: String
+                    sensitive: true
+                    description: Secret access key.
+          - name: queue
+            type: String
+            description: Name of the queue.
+          - name: region
+            type: String
+            description: |-
+              Possible values:
+              US_EAST_1
+              US_EAST_2
+              US_WEST_1
+              US_WEST_2
+              US_GOV_CLOUD
+              US_GOV_EAST_1
+              EU_WEST_1
+              EU_WEST_2
+              EU_WEST_3
+              EU_CENTRAL_1
+              EU_NORTH_1
+              EU_SOUTH_1
+              AP_SOUTH_1
+              AP_SOUTHEAST_1
+              AP_SOUTHEAST_2
+              AP_SOUTHEAST_3
+              AP_NORTHEAST_1
+              AP_NORTHEAST_2
+              AP_NORTHEAST_3
+              AP_EAST_1
+              SA_EAST_1
+              CN_NORTH_1
+              CN_NORTHWEST_1
+              CA_CENTRAL_1
+              AF_SOUTH_1
+              ME_SOUTH_1
+              AP_SOUTH_2
+              AP_SOUTHEAST_4
+              CA_WEST_1
+              EU_SOUTH_2
+              EU_CENTRAL_2
+              IL_CENTRAL_1
+              ME_CENTRAL_1
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              SOURCE_DELETION_NEVER
+              SOURCE_DELETION_ON_SUCCESS
+              SOURCE_DELETION_ON_SUCCESS_FILES_ONLY
+      - name: amazonSqsV2Settings
+        type: NestedObject
+        description: |-
+          AmazonSQSV2Settings is the settings proto for Omniflow SQS feeds.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            required: true
+            description: A message containing fields used to authenticate with Amazon SQS.
+            properties:
+              - name: awsIamRoleAuth
+                type: NestedObject
+                required: true
+                description: AWS IAM Role Auth for SQS V2.
+                properties:
+                  - name: awsIamRoleArn
+                    type: String
+                    description: AWS IAM Role for Identity Federation.
+                  - name: subjectId
+                    type: String
+                    description: Subject ID to use for SQS.
+              - name: sqsV2AccessKeySecretAuth
+                type: NestedObject
+                required: true
+                description: SQS V2 access key and secret auth.
+                properties:
+                  - name: accessKeyId
+                    type: String
+                    description: 'Access key ID of the S3 bucket.  Ex: AKIABCDEFGHIJKL.'
+                  - name: secretAccessKey
+                    type: String
+                    sensitive: true
+                    description: Secret access key to access the S3 bucket.
+          - name: chronicleServiceAccount
+            type: String
+            description: |-
+              SA that will read data, this is Storage Transfer Service SA of Customer's
+              Tenancy Project.
+            output: true
+          - name: maxLookbackDays
+            type: Integer
+            description: Maximum File Age to ingest in days.
+          - name: queue
+            type: String
+            required: true
+            description: Amazon Resource Name(ARN) of the queue.
+          - name: s3Uri
+            type: String
+            required: true
+            description: S3 URI.
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              NEVER
+              ON_SUCCESS
+      - name: anomaliSettings
+        type: NestedObject
+        description: Anomali IOC settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+      - name: assetNamespace
+        type: String
+        description: The asset namespace to apply to all logs ingested through this feed.
+      - name: awsEc2HostsSettings
+        type: NestedObject
+        description: AWS EC2 Hosts Settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+      - name: awsEc2InstancesSettings
+        type: NestedObject
+        description: AWS EC2 Instances Settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+      - name: awsEc2VpcsSettings
+        type: NestedObject
+        description: AWS EC2 Vpcs Settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+      - name: awsIamSettings
+        type: NestedObject
+        description: AWSIAMSettings contains details needed for creating an AWS IAM feed.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: apiType
+            type: String
+            description: |-
+              Supported AWS IAM api type.
+              Possible values:
+              USERS
+              ROLES
+              GROUPS
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+      - name: azureAdAuditSettings
+        type: NestedObject
+        description: Azure AD Audit settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authEndpoint
+            type: String
+            description: API Auth Endpoint.
+          - name: authentication
+            type: NestedObject
+            description: Microsoft OAuth 2.0 client credentials grant.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: tenantId
+            type: String
+            description: Tenant ID.
+      - name: azureAdContextSettings
+        type: NestedObject
+        description: Azure AD Context settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authEndpoint
+            type: String
+            description: API Auth Endpoint.
+          - name: authentication
+            type: NestedObject
+            description: Microsoft OAuth 2.0 client credentials grant.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: retrieveDevices
+            type: Boolean
+            description: Whether to retrieve device information in user context.
+          - name: retrieveGroups
+            type: Boolean
+            description: Whether to retrieve group information in user context.
+          - name: tenantId
+            type: String
+            description: Tenant ID.
+      - name: azureAdSettings
+        type: NestedObject
+        description: Azure AD settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authEndpoint
+            type: String
+            description: API Auth Endpoint.
+          - name: authentication
+            type: NestedObject
+            description: Microsoft OAuth 2.0 client credentials grant.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: tenantId
+            type: String
+            description: Tenant ID.
+      - name: azureBlobStoreSettings
+        type: NestedObject
+        description: Azure Blob Storage settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Azure auth.
+            properties:
+              - name: sasToken
+                type: String
+                sensitive: true
+                description: SAS Token.
+              - name: sharedKey
+                type: String
+                sensitive: true
+                description: Shared Key.
+          - name: azureUri
+            type: String
+            description: Azure URI.
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              SOURCE_DELETION_NEVER
+              SOURCE_DELETION_ON_SUCCESS
+              SOURCE_DELETION_ON_SUCCESS_FILES_ONLY
+          - name: sourceType
+            type: String
+            description: |-
+              Possible values:
+              FILES
+              FOLDERS
+              FOLDERS_RECURSIVE
+      - name: azureBlobStoreV2Settings
+        type: NestedObject
+        description: |-
+          AzureBlobStoreV2Settings is the settings proto for Azure Blob Storage feeds.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            required: true
+            description: A message containing fields used to authenticate with Azure Blob Storage.
+            properties:
+              - name: accessKey
+                type: String
+                required: true
+                sensitive: true
+                description: Access Key also known as shared key.
+              - name: azureV2WorkloadIdentityFederation
+                type: NestedObject
+                required: true
+                description: Azure V2 Workload Identity Federation.
+                properties:
+                  - name: clientId
+                    type: String
+                    required: true
+                    description: OAuth client ID.
+                  - name: subjectId
+                    type: String
+                    required: true
+                    description: Subject ID of the Azure subscription.
+                  - name: tenantId
+                    type: String
+                    required: true
+                    description: Tenant ID.
+              - name: sasToken
+                type: String
+                required: true
+                sensitive: true
+                description: SAS Token.
+          - name: azureUri
+            type: String
+            required: true
+            description: Azure URI.
+          - name: chronicleServiceAccount
+            type: String
+            description: |-
+              SA that will read data, this is Storage Transfer Service SA of Customer's
+              Tenancy Project.
+            output: true
+          - name: maxLookbackDays
+            type: Integer
+            description: Maximum File Age to ingest in days.
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              NEVER
+              ON_SUCCESS
+      - name: azureEventHubSettings
+        type: NestedObject
+        description: Settings required by Azure Event Hub Feeds.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: azureSasToken
+            type: String
+            sensitive: true
+            description: SAS token
+          - name: azureStorageConnectionString
+            type: String
+            description: Blob store connection string for authentication.
+          - name: azureStorageContainer
+            type: String
+            description: Blob storage container name.
+          - name: consumerGroup
+            type: String
+            required: true
+            description: Event hub consumer group to read from.
+          - name: eventHubConnectionString
+            type: String
+            required: true
+            description: Event hub connection string for authentication.
+          - name: eventHubNamespace
+            type: String
+            description: Event hub namespace
+            output: true
+          - name: name
+            type: String
+            required: true
+            description: Event hub to read from.
+      - name: azureMdmIntuneSettings
+        type: NestedObject
+        description: Azure MDM Intune settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authEndpoint
+            type: String
+            description: API Auth Endpoint.
+          - name: authentication
+            type: NestedObject
+            description: Microsoft OAuth 2.0 client credentials grant.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: tenantId
+            type: String
+            description: Tenant ID.
+      - name: cloudPassageSettings
+        type: NestedObject
+        description: CloudPassage settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: eventTypes
+            type: Array
+            description: Event types filter for the events API.
+            item_type:
+              type: String
+      - name: cortexXdrSettings
+        type: NestedObject
+        description: PAN Cortex XDR settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: endpoint
+            type: String
+            description: API Endpoint.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: crowdstrikeAlertsSettings
+        type: NestedObject
+        description: CrowdStrike Alerts settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            required: true
+            description: OAuth 2.0 client credentials grant. See https://tools.ietf.org/html/rfc6749.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint.
+          - name: hostname
+            type: String
+            required: true
+            description: API Hostname.
+          - name: ingestionType
+            type: String
+            description: |-
+              Ingestion Type.
+              Possible values:
+              BRING_ALL_ALERTS
+              BRING_ONLY_NEW_ALERTS
+      - name: crowdstrikeDetectsSettings
+        type: NestedObject
+        description: CrowdStrike Detects settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 client credentials grant. See https://tools.ietf.org/html/rfc6749.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: ingestionType
+            type: String
+            description: |-
+              Ingestion Type.
+              Possible values:
+              BRING_ONLY_NEW_DETECTIONS
+              BRING_ALL_DETECTIONS
+      - name: dummyLogTypeSettings
+        type: NestedObject
+        description: Settings required by Feeds of DummyLogType(used for testing purposes).
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: apiEndpoint
+            type: String
+            description: Full API Endpoint.
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+      - name: duoAuthSettings
+        type: NestedObject
+        description: Duo Authentication settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: duoUserContextSettings
+        type: NestedObject
+        description: Duo User Context settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: hostname
+            type: String
+            description: API hostname.
+      - name: feedSourceType
+        type: Enum
+        immutable: true
+        enum_values:
+          - 'GOOGLE_CLOUD_STORAGE'
+          - 'HTTP'
+          - 'SFTP'
+          - 'AMAZON_S3'
+          - 'AZURE_BLOBSTORE'
+          - 'API'
+          - 'AMAZON_SQS'
+          - 'PUBSUB'
+          - 'AMAZON_KINESIS_FIREHOSE'
+          - 'WEBHOOK'
+          - 'HTTPS_PUSH_GOOGLE_CLOUD_PUBSUB'
+          - 'HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE'
+          - 'HTTPS_PUSH_WEBHOOK'
+          - 'AZURE_EVENT_HUB'
+          - 'GOOGLE_CLOUD_STORAGE_V2'
+          - 'AMAZON_S3_V2'
+          - 'AMAZON_SQS_V2'
+          - 'AZURE_BLOBSTORE_V2'
+          - 'GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN'
+        description: |-
+          Source Type of the feed.
+          Possible values:
+          GOOGLE_CLOUD_STORAGE
+          HTTP
+          SFTP
+          AMAZON_S3
+          AZURE_BLOBSTORE
+          API
+          AMAZON_SQS
+          PUBSUB
+          AMAZON_KINESIS_FIREHOSE
+          WEBHOOK
+          HTTPS_PUSH_GOOGLE_CLOUD_PUBSUB
+          HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE
+          HTTPS_PUSH_WEBHOOK
+          AZURE_EVENT_HUB
+          GOOGLE_CLOUD_STORAGE_V2
+          AMAZON_S3_V2
+          AMAZON_SQS_V2
+          AZURE_BLOBSTORE_V2
+          GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN
+      - name: foxItStixSettings
+        type: NestedObject
+        description: Fox-IT STIX settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: collection
+            type: String
+            description: Collection available at the poll service.
+          - name: pollServiceUri
+            type: String
+            description: TAXII poll service URI.
+          - name: ssl
+            type: NestedObject
+            description: An SSL client certificate keypair.
+            properties:
+              - name: encodedPrivateKey
+                type: String
+                sensitive: true
+                description: |-
+                  The encoded private key. The string should be a private key in PEM format,
+                  and should include the begin header and end footer lines. It may also
+                  include newlines.
+
+                  Example:
+                  -----BEGIN RSA PRIVATE KEY-----
+                  Proc-Type: 4,ENCRYPTED
+                  DEK-Info: DES-EDE3-CBC,F23074E02CF47304
+
+
+                  -----END RSA PRIVATE KEY-----
+              - name: sslCertificate
+                type: String
+                sensitive: true
+                description: |-
+                  The encoded SSL certificate. The string should be an SSL certificate in
+                  PEM format, and should include the begin header and end footer lines. It
+                  may also include newlines.
+
+                  Example:
+                  -----BEGIN CERTIFICATE-----
+
+                  -----END CERTIFICATE-----
+      - name: gcsSettings
+        type: NestedObject
+        description: Google Cloud Storage settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: bucketUri
+            type: String
+            description: Bucket URI.
+          - name: chronicleServiceAccount
+            type: String
+            description: Service Account Chronicle will be using to pull data.
+            output: true
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              SOURCE_DELETION_NEVER
+              SOURCE_DELETION_ON_SUCCESS
+              SOURCE_DELETION_ON_SUCCESS_FILES_ONLY
+          - name: sourceType
+            type: String
+            description: |-
+              Possible values:
+              FILES
+              FOLDERS
+              FOLDERS_RECURSIVE
+      - name: gcsV2Settings
+        type: NestedObject
+        description: |-
+          GoogleCloudStorageV2Settings is the settings proto for Omniflow Google Cloud
+          Storage feeds.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: bucketUri
+            type: String
+            required: true
+            description: Google Cloud Storage Bucket URI for the feed.
+          - name: chronicleServiceAccount
+            type: String
+            description: |-
+              SA that will read data, this is Storage Transfer Service SA of Customer's
+              Tenancy Project.
+            output: true
+          - name: maxLookbackDays
+            type: Integer
+            description: Maximum File Age to ingest in days.
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              NEVER
+              ON_SUCCESS
+      - name: googleCloudIdentityDeviceUsersSettings
+        type: NestedObject
+        description: Google Cloud Identity Device Users settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+      - name: googleCloudIdentityDevicesSettings
+        type: NestedObject
+        description: Google Cloud Identity Devices settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: apiVersion
+            type: String
+            description: API Version
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+      - name: googleCloudStorageEventDrivenSettings
+        type: NestedObject
+        description: |-
+          GoogleCloudStorageEventDrivenSettings is the settings proto for Omniflow
+          Google Cloud Storage feeds driven by pubsub events.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: bucketUri
+            type: String
+            required: true
+            description: Google Cloud Storage Bucket URI for the feed.
+          - name: chronicleServiceAccount
+            type: String
+            description: |-
+              SA that will read data, this is Storage Transfer Service SA of Customer's
+              Tenancy Project.
+            output: true
+          - name: maxLookbackDays
+            type: Integer
+            description: Maximum File Age to ingest in days.
+          - name: pubsubSubscription
+            type: String
+            required: true
+            description: Subscription name for pubsub topic.
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              NEVER
+              ON_SUCCESS
+      - name: httpSettings
+        type: NestedObject
+        description: HTTP settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              SOURCE_DELETION_NEVER
+              SOURCE_DELETION_ON_SUCCESS
+              SOURCE_DELETION_ON_SUCCESS_FILES_ONLY
+          - name: sourceType
+            type: String
+            description: |-
+              Possible values:
+              FILES
+              FOLDERS
+              FOLDERS_RECURSIVE
+          - name: uri
+            type: String
+            description: HTTP URI.
+      - name: httpsPushAmazonKinesisFirehoseSettings
+        type: NestedObject
+        description: Settings required by Amazon Kinesis Firehose Feeds(HTTPS-Push V2).
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: splitDelimiter
+            type: String
+            description: Delimiter to split on for the feed.
+      - name: httpsPushGoogleCloudPubsubSettings
+        type: NestedObject
+        description: Settings required by Google Cloud Platform Pub/Sub Feeds(HTTPS-Push V2).
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: splitDelimiter
+            type: String
+            description: Delimiter to split on for the feed.
+      - name: httpsPushWebhookSettings
+        type: NestedObject
+        description: Settings required by Webhook Feeds(HTTPS-Push V2).
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: splitDelimiter
+            type: String
+            description: Delimiter to split on for the feed.
+      - name: impervaWafSettings
+        type: NestedObject
+        description: Imperva WAF settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+      - name: labels
+        type: KeyValuePairs
+        description: |-
+          The ingestion metadata labels to apply to all logs ingested through this
+          feed, and the resulting normalized data.
+      - name: logType
+        type: String
+        required: true
+        description: |-
+          LogType.
+          Format:
+          projects/{project}/locations/{location}/instances/{instance}/logTypes/{log_type}
+      - name: mandiantIocSettings
+        type: NestedObject
+        description: Mandiant IOC settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: startTime
+            type: String
+            description: time since when to start fetching the IOCs
+      - name: microsoftGraphAlertSettings
+        type: NestedObject
+        description: Microsoft Graph Alert settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authEndpoint
+            type: String
+            description: API Auth Endpoint.
+          - name: authentication
+            type: NestedObject
+            description: Microsoft OAuth 2.0 client credentials grant.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: tenantId
+            type: String
+            description: Tenant ID.
+      - name: microsoftSecurityCenterAlertSettings
+        type: NestedObject
+        description: Microsoft Security Center alert settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authEndpoint
+            type: String
+            description: API Auth Endpoint.
+          - name: authentication
+            type: NestedObject
+            description: Microsoft OAuth 2.0 client credentials grant.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: subscriptionId
+            type: String
+            description: Subscription ID of the Microsoft security center alert settings alert.
+          - name: tenantId
+            type: String
+            description: Tenant ID.
+      - name: mimecastMailSettings
+        type: NestedObject
+        description: Mimecast Mail settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: mimecastMailV2Settings
+        type: NestedObject
+        description: Mimecast Mail V2 Settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authCredentials
+            type: NestedObject
+            description: |-
+              OAuth 2.0 client credentials grant. See https://tools.ietf.org/html/rfc6749.
+              NEXT TAG: 3
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client Secret.
+      - name: netskopeAlertSettings
+        type: NestedObject
+        description: Netskope Alert settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: contentType
+            type: String
+            description: Content type.
+          - name: feedname
+            type: String
+            description: Feedname.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: netskopeAlertV2Settings
+        type: NestedObject
+        description: Netskope Alert V2 settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: contentCategory
+            type: String
+            description: Content Category.
+          - name: contentTypes
+            type: Array
+            description: Content type.
+            item_type:
+              type: String
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: office365Settings
+        type: NestedObject
+        description: Office 365 settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authEndpoint
+            type: String
+            description: API Auth Endpoint.
+          - name: authentication
+            type: NestedObject
+            description: Microsoft OAuth 2.0 client credentials grant.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+          - name: contentType
+            type: String
+            description: |-
+              Supported office 365 content type.
+              Possible values:
+              AUDIT_AZURE_ACTIVE_DIRECTORY
+              AUDIT_EXCHANGE
+              AUDIT_SHARE_POINT
+              AUDIT_GENERAL
+              DLP_ALL
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: tenantId
+            type: String
+            description: Tenant ID.
+      - name: oktaSettings
+        type: NestedObject
+        description: Okta settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: oktaUserContextSettings
+        type: NestedObject
+        description: Okta user context settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: managerIdReferenceField
+            type: String
+            description: Manager id reference field.
+      - name: panIocSettings
+        type: NestedObject
+        description: PAN IOC settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: feed
+            type: String
+            description: PAN IOC feed name.
+          - name: feedId
+            type: String
+            description: PAN IOC feed ID.
+      - name: panPrismaCloudSettings
+        type: NestedObject
+        description: PAN Prisma Cloud settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: PAN Prisma Cloud auth.
+            properties:
+              - name: password
+                type: String
+                sensitive: true
+                description: Password.
+              - name: user
+                type: String
+                description: Username.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: proofpointMailSettings
+        type: NestedObject
+        description: Proofpoint Mail settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+      - name: proofpointOnDemandSettings
+        type: NestedObject
+        description: Proofpoint On-demand settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: clusterId
+            type: String
+            description: Cluster ID.
+      - name: pubsubSettings
+        type: NestedObject
+        description: Settings required by Google Cloud Pub/Sub Feeds(HTTP-Push).
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: googleServiceAccountEmail
+            type: String
+            description: Google Service Account Email.
+      - name: qualysScanSettings
+        type: NestedObject
+        description: Qualys Scan settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: apiType
+            type: String
+            description: |-
+              Supported Qualys Scan api type.
+              Possible values:
+              SCAN_SUMMARY_OUTPUT
+              SCAN_COMPLIANCE_OUTPUT
+              SCAN_COMPLIANCE_CONTROL_OUTPUT
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: hostname
+            type: String
+            description: Hostname.
+      - name: qualysVmSettings
+        type: NestedObject
+        description: Qualys VM settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: rapid7InsightSettings
+        type: NestedObject
+        description: Rapid7 Insight settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: endpoint
+            type: String
+            description: Rapid7 API endpoint. Should be "vulnerabilities" or "assets".
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: recordedFutureIocSettings
+        type: NestedObject
+        description: Recorded Future IOC settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+      - name: rhIsacIocSettings
+        type: NestedObject
+        description: RH-ISAC settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 client credentials grant. See https://tools.ietf.org/html/rfc6749.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint.
+      - name: salesforceSettings
+        type: NestedObject
+        description: Salesforce settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: hostname
+            type: String
+            description: API hostname.
+          - name: oauthJwtCredentials
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+          - name: oauthPasswordGrantAuth
+            type: NestedObject
+            description: OAuth 2.0 password grant. See https://tools.ietf.org/html/rfc6749.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                description: Client secret.
+              - name: password
+                type: String
+                description: Password.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+              - name: user
+                type: String
+                description: Username.
+      - name: sentineloneAlertSettings
+        type: NestedObject
+        description: SentinelOne Alert settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: hostname
+            type: String
+            description: Hostname of SentinelOne alert settings.
+          - name: initialStartTime
+            type: String
+            description: initialStartTime from when to fetch the alerts
+          - name: isAlertApiSubscribed
+            type: Boolean
+            description: Is the customer subscribed to Alerts Api
+      - name: serviceNowCmdbSettings
+        type: NestedObject
+        description: ServiceNow CMDB settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: feedname
+            type: String
+            description: Feedname.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: sftpSettings
+        type: NestedObject
+        description: SFTP settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: SFTP Auth.
+            properties:
+              - name: password
+                type: String
+                sensitive: true
+                description: Password. Used for username and password authentication.
+              - name: privateKey
+                type: String
+                sensitive: true
+                description: Private key. Used for private key authentication.
+              - name: privateKeyPassphrase
+                type: String
+                description: Private key passphrase. Used for private key authentication.
+              - name: username
+                type: String
+                description: Username. Used for username and password authentication.
+          - name: sourceDeletionOption
+            type: String
+            description: |-
+              Possible values:
+              SOURCE_DELETION_NEVER
+              SOURCE_DELETION_ON_SUCCESS
+              SOURCE_DELETION_ON_SUCCESS_FILES_ONLY
+          - name: sourceType
+            type: String
+            description: |-
+              Possible values:
+              FILES
+              FOLDERS
+              FOLDERS_RECURSIVE
+          - name: uri
+            type: String
+            description: SFTP URI.
+      - name: stsMigrationReadiness
+        type: String
+        output: true
+        description: |-
+          The status of the feed's migration to STS.
+          Possible values:
+          NOT_READY
+          READY
+          AUTH_RECONFIG_REQUIRED
+      - name: symantecEventExportSettings
+        type: NestedObject
+        description: Symantec Event Export settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 refresh token grant. See https://tools.ietf.org/html/rfc6749.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client secret.
+              - name: refreshToken
+                type: String
+                description: Refresh token.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+      - name: thinkstCanarySettings
+        type: NestedObject
+        description: Thinkst Canary settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: HTTP header based authentication.
+            properties:
+              - name: headerKeyValues
+                type: Array
+                description: Header key-value pairs.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: String
+                      description: Key.
+                    - name: value
+                      type: String
+                      sensitive: true
+                      description: Value.
+          - name: hostname
+            type: String
+            description: API Hostname.
+      - name: threatConnectIocSettings
+        type: NestedObject
+        description: ThreatConnect IOC Settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: owners
+            type: Array
+            description: Owners.
+            item_type:
+              type: String
+      - name: threatConnectIocV3Settings
+        type: NestedObject
+        description: ThreatConnectIoCV3Settings
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Info for username and secret based authentication.
+            properties:
+              - name: secret
+                type: String
+                sensitive: true
+                description: Secret of the account identified by user_name.
+              - name: user
+                type: String
+                description: Username of an identity used for authentication.
+          - name: fields
+            type: Array
+            description: Fields
+            item_type:
+              type: String
+          - name: hostname
+            type: String
+            description: hostname.
+          - name: owners
+            type: Array
+            description: Owners.
+            item_type:
+              type: String
+          - name: schedule
+            type: Integer
+            description: Schedule
+          - name: tqlQuery
+            type: String
+            description: ThreatConnect Query Language filter.
+      - name: trellixHxAlertsSettings
+        type: NestedObject
+        description: Settings required by Feeds of TrellixHxAlerts.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: |-
+              TrellixStarXAuthentication contains a oneof with all of the authentication
+              types supported by Trellix *X devices.
+            properties:
+              - name: msso
+                type: NestedObject
+                description: |-
+                  Info for MssoAuthentication using a username, password, and login api
+                  endpoint.
+                properties:
+                  - name: apiEndpoint
+                    type: String
+                    description: |-
+                      The login api endpoint url.
+                      This must be a valid URL with an http or https scheme. It has no default.
+                  - name: password
+                    type: String
+                    sensitive: true
+                    description: |-
+                      Password of the account identified by username.
+                      There are no restrictions on the format of the password. It has no default,
+                      specifically enforced min / max length or character set. The password
+                      will have been provided by an MSSO administrator and it is assumed that
+                      they have provided a password that is internally consistent with MSSO
+                      authentication requirements / validation.
+                  - name: username
+                    type: String
+                    description: |-
+                      Username for MSSO authentication.
+                      There are no restrictions on the format of the username. It has no default,
+                      specifically enforced min / max length or character set. The username
+                      will have been provided by an MSSO administrator and it is assumed that
+                      they have provided a username that is internally consistent with MSSO
+                      authentication requirements / validation.
+              - name: trellixIam
+                type: NestedObject
+                description: Settings for TrellixIAMAuthentication.
+                properties:
+                  - name: clientId
+                    type: String
+                    description: |-
+                      Client ID generated in Trellix IAM.
+                      This is a unique identifier for the user that is generated in Trellix IAM.
+                      It has no default, specifically enforced min / max length or character set.
+                      It is assumed that the Client ID generated in Trellix IAM is internally
+                      consistent with Trellix IAM authentication requirements / validation.
+                  - name: clientSecret
+                    type: String
+                    sensitive: true
+                    description: |-
+                      Secret associated with the Client ID.
+                      This is the secret generated in Trellix IAM for the Client ID. It has no
+                      default, specifically enforced min / max length or character set. It is
+                      assumed that the secret generated in Trellix IAM is internally
+                      consistent with Trellix IAM authentication requirements / validation.
+                  - name: scope
+                    type: String
+                    description: |-
+                      OAUTH 2 scope to request for the authentication token.
+                      This is the OAUTH 2 scope to request for the authentication token. It has
+                      no default, specifically enforced min / max length or character set. It is
+                      assumed that the scope provided is internally consistent with Trellix IAM
+                      authentication requirements / validation.
+          - name: endpoint
+            type: String
+            description: |-
+              Trellix HX Device URL.
+              This must be a valid URL with an http or https scheme. It has no default.
+              Usually a device URL is in the form of either:
+              https://xxx.trellix.com/hx/id//
+              - or -
+              https://htapdeviceproxy.md.mandiant.net/dphb/hx//
+      - name: trellixHxBulkAcqsSettings
+        type: NestedObject
+        description: Settings required by Feeds of TrellixHxBulkAcqs.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: |-
+              TrellixStarXAuthentication contains a oneof with all of the authentication
+              types supported by Trellix *X devices.
+            properties:
+              - name: msso
+                type: NestedObject
+                description: |-
+                  Info for MssoAuthentication using a username, password, and login api
+                  endpoint.
+                properties:
+                  - name: apiEndpoint
+                    type: String
+                    required: true
+                    description: |-
+                      The login api endpoint url.
+                      This must be a valid URL with an http or https scheme. It has no default.
+                  - name: password
+                    type: String
+                    sensitive: true
+                    required: true
+                    description: |-
+                      Password of the account identified by username.
+                      There are no restrictions on the format of the password. It has no default,
+                      specifically enforced min / max length or character set. The password
+                      will have been provided by an MSSO administrator and it is assumed that
+                      they have provided a password that is internally consistent with MSSO
+                      authentication requirements / validation.
+                  - name: username
+                    type: String
+                    required: true
+                    description: |-
+                      Username for MSSO authentication.
+                      There are no restrictions on the format of the username. It has no default,
+                      specifically enforced min / max length or character set. The username
+                      will have been provided by an MSSO administrator and it is assumed that
+                      they have provided a username that is internally consistent with MSSO
+                      authentication requirements / validation.
+              - name: trellixIam
+                type: NestedObject
+                description: Settings for TrellixIAMAuthentication.
+                properties:
+                  - name: clientId
+                    type: String
+                    required: true
+                    description: |-
+                      Client ID generated in Trellix IAM.
+                      This is a unique identifier for the user that is generated in Trellix IAM.
+                      It has no default, specifically enforced min / max length or character set.
+                      It is assumed that the Client ID generated in Trellix IAM is internally
+                      consistent with Trellix IAM authentication requirements / validation.
+                  - name: clientSecret
+                    type: String
+                    sensitive: true
+                    required: true
+                    description: |-
+                      Secret associated with the Client ID.
+                      This is the secret generated in Trellix IAM for the Client ID. It has no
+                      default, specifically enforced min / max length or character set. It is
+                      assumed that the secret generated in Trellix IAM is internally
+                      consistent with Trellix IAM authentication requirements / validation.
+                  - name: scope
+                    type: String
+                    required: true
+                    description: |-
+                      OAUTH 2 scope to request for the authentication token.
+                      This is the OAUTH 2 scope to request for the authentication token. It has
+                      no default, specifically enforced min / max length or character set. It is
+                      assumed that the scope provided is internally consistent with Trellix IAM
+                      authentication requirements / validation.
+          - name: endpoint
+            type: String
+            required: true
+            description: |-
+              Trellix HX Device URL.
+              This must be a valid URL with an http or https scheme. It has no default.
+              Usually a device URL is in the form of either:
+              https://xxx.trellix.com/hx/id//
+              - or -
+              https://htapdeviceproxy.md.mandiant.net/dphb/hx//
+      - name: trellixHxHostsSettings
+        type: NestedObject
+        description: Settings required by Feeds of TrellixHxHosts.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: |-
+              TrellixStarXAuthentication contains a oneof with all of the authentication
+              types supported by Trellix *X devices.
+            properties:
+              - name: msso
+                type: NestedObject
+                description: |-
+                  Info for MssoAuthentication using a username, password, and login api
+                  endpoint.
+                properties:
+                  - name: apiEndpoint
+                    type: String
+                    required: true
+                    description: |-
+                      The login api endpoint url.
+                      This must be a valid URL with an http or https scheme. It has no default.
+                  - name: password
+                    type: String
+                    sensitive: true
+                    required: true
+                    description: |-
+                      Password of the account identified by username.
+                      There are no restrictions on the format of the password. It has no default,
+                      specifically enforced min / max length or character set. The password
+                      will have been provided by an MSSO administrator and it is assumed that
+                      they have provided a password that is internally consistent with MSSO
+                      authentication requirements / validation.
+                  - name: username
+                    type: String
+                    required: true
+                    description: |-
+                      Username for MSSO authentication.
+                      There are no restrictions on the format of the username. It has no default,
+                      specifically enforced min / max length or character set. The username
+                      will have been provided by an MSSO administrator and it is assumed that
+                      they have provided a username that is internally consistent with MSSO
+                      authentication requirements / validation.
+              - name: trellixIam
+                type: NestedObject
+                description: Settings for TrellixIAMAuthentication.
+                properties:
+                  - name: clientId
+                    type: String
+                    required: true
+                    description: |-
+                      Client ID generated in Trellix IAM.
+                      This is a unique identifier for the user that is generated in Trellix IAM.
+                      It has no default, specifically enforced min / max length or character set.
+                      It is assumed that the Client ID generated in Trellix IAM is internally
+                      consistent with Trellix IAM authentication requirements / validation.
+                  - name: clientSecret
+                    type: String
+                    sensitive: true
+                    required: true
+                    description: |-
+                      Secret associated with the Client ID.
+                      This is the secret generated in Trellix IAM for the Client ID. It has no
+                      default, specifically enforced min / max length or character set. It is
+                      assumed that the secret generated in Trellix IAM is internally
+                      consistent with Trellix IAM authentication requirements / validation.
+                  - name: scope
+                    type: String
+                    required: true
+                    description: |-
+                      OAUTH 2 scope to request for the authentication token.
+                      This is the OAUTH 2 scope to request for the authentication token. It has
+                      no default, specifically enforced min / max length or character set. It is
+                      assumed that the scope provided is internally consistent with Trellix IAM
+                      authentication requirements / validation.
+          - name: endpoint
+            type: String
+            required: true
+            description: |-
+              Trellix HX Device URL.
+              This must be a valid URL with an http or https scheme. It has no default.
+              Usually a device URL is in the form of either:
+              https://xxx.trellix.com/hx/id//
+              - or -
+              https://htapdeviceproxy.md.mandiant.net/dphb/hx//
+      - name: webhookSettings
+        type: NestedObject
+        description: Settings required by Webhook Feeds(HTTP-Push).
+        exactly_one_of: *all_feed_settings
+        properties: []
+      - name: workdaySettings
+        type: NestedObject
+        description: Workday settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: Authentication for Workday.
+            properties:
+              - name: clientId
+                type: String
+                description: Client ID.
+              - name: clientSecret
+                type: String
+                sensitive: true
+                description: Client Secret.
+              - name: refreshToken
+                type: String
+                description: Refresh Token.
+              - name: secret
+                type: String
+                sensitive: true
+                description: |-
+                  The access token used to authenticate against Workday. This field is called
+                  "secret" to maintain backwards compatibility. Workday was (only) configured
+                  using username (which was unused) and secret (which is used as the access
+                  token). Either this field or all of the other OAuth fields below must be
+                  specified.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+              - name: user
+                type: String
+                description: |-
+                  Username. This is unused: Workday feeds were originally configured using a
+                  username and secret authentication method, but only the secret field was
+                  used, and it was used to supply the OAuth access token.
+          - name: hostname
+            type: String
+            description: API Hostname.
+          - name: tenantId
+            type: String
+            description: Tenant ID.
+      - name: workspaceActivitySettings
+        type: NestedObject
+        description: Workspace Activity settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: applications
+            type: Array
+            description: Applications.
+            item_type:
+              type: String
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+          - name: workspaceCustomerId
+            type: String
+            description: Customer ID.
+      - name: workspaceAlertsSettings
+        type: NestedObject
+        description: Workspace Alert settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+          - name: workspaceCustomerId
+            type: String
+            description: Customer ID.
+      - name: workspaceChromeOsSettings
+        type: NestedObject
+        description: Workspace Chrome OS settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+          - name: workspaceCustomerId
+            type: String
+            description: Customer ID.
+      - name: workspaceGroupsSettings
+        type: NestedObject
+        description: Workspace Groups settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+          - name: workspaceCustomerId
+            type: String
+            description: Customer ID.
+      - name: workspaceMobileSettings
+        type: NestedObject
+        description: Workspace Mobile settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+          - name: workspaceCustomerId
+            type: String
+            description: Customer ID.
+      - name: workspacePrivilegesSettings
+        type: NestedObject
+        description: Workspace Privileges settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+          - name: workspaceCustomerId
+            type: String
+            description: Customer ID.
+      - name: workspaceUsersSettings
+        type: NestedObject
+        description: Workspace Users settings.
+        exactly_one_of: *all_feed_settings
+        properties:
+          - name: authentication
+            type: NestedObject
+            description: OAuth 2.0 JWT grant. See, https://tools.ietf.org/html/rfc7519
+            properties:
+              - name: claims
+                type: NestedObject
+                description: Claims identifying a specific customer.
+                properties:
+                  - name: audience
+                    type: String
+                    description: Audience.
+                  - name: issuer
+                    type: String
+                    description: Issuer. Usually the client_id.
+                  - name: subject
+                    type: String
+                    description: Subject. Usually the email.
+              - name: rsCredentials
+                type: NestedObject
+                description: RS credentials.
+                properties:
+                  - name: privateKey
+                    type: String
+                    sensitive: true
+                    description: Private key in PEM format.
+              - name: tokenEndpoint
+                type: String
+                description: Token endpoint to get the OAuth token from.
+          - name: projectionType
+            type: String
+            description: |-
+              Projection Type.
+              Possible values:
+              BASIC_PROJECTION
+              FULL_PROJECTION
+          - name: workspaceCustomerId
+            type: String
+            description: Customer ID.
+  - name: displayName
+    type: String
+    description: Customer-provided feed name.
+  - name: failureDetails
+    type: NestedObject
+    description: |-
+      FeedFailureDetails contains details about the errors thrown by chronicle for
+      the feeds. These are user visible details. These details help user identify
+      the root cause and take appropriate action for the feed errors.
+      NEXT TAG: 5
+    properties:
+      - name: errorAction
+        type: String
+        description: |-
+          error_action contains the user action prescribed for remediation of feed
+          error.
+        output: true
+      - name: errorCause
+        type: String
+        description: error_cause contains the information regarding the failure cause.
+        output: true
+      - name: errorCode
+        type: String
+        description: |-
+          error_code contains the error code for the feed. The field is populated for
+          the feeds with failed status.
+        output: true
+      - name: httpErrorCode
+        type: Integer
+        description: |-
+          http_error_code contains the HTTP error code for the feed failure.
+          feed transfer failure may or may not result in http error code.
+        output: true
+  - name: failureMsg
+    type: String
+    description: Details about the most recent failure when feed state is FAILED.
+    output: true
+  - name: lastFeedInitiationTime
+    type: String
+    description: Latest timestamp when the transfer was successful for the feed.
+    output: true
+  - name: name
+    type: String
+    output: true
+    description: |-
+      The resource name of the feed.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/feeds/{feed}
+  - name: readOnly
+    type: Boolean
+    description: Whether this feed can be updated or deleted.
+    output: true
+  - name: referenceId
+    type: String
+    description: Reference ID, this field will contain the legacy id of the feed.
+    output: true
+  - name: uid
+    type: String
+    description: Unique identifier for the feed.
+    output: true

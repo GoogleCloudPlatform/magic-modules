@@ -111,6 +111,9 @@ examples:
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
       name: 'sa'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"sa" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef

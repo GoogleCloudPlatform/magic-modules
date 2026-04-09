@@ -1,4 +1,3 @@
-{{- if ne $.TargetVersionName "ga" -}}
 package iambeta_test
 
 import (
@@ -19,7 +18,7 @@ func TestAccIAMBetaWorkloadIdentityPoolNamespace_minimal(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckIAMBetaWorkloadIdentityPoolNamespaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,7 +57,7 @@ func TestAccIAMBetaWorkloadIdentityPoolNamespace_full(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckIAMBetaWorkloadIdentityPoolNamespaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -73,7 +72,7 @@ func TestAccIAMBetaWorkloadIdentityPoolNamespace_full(t *testing.T) {
 			{
 				Config: testAccIAMBetaWorkloadIdentityPoolNamespace_updated(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-				PreApply: []plancheck.PlanCheck{
+					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_iam_workload_identity_pool_namespace.example", plancheck.ResourceActionUpdate),
 					},
 				},
@@ -91,15 +90,11 @@ func TestAccIAMBetaWorkloadIdentityPoolNamespace_full(t *testing.T) {
 func testAccIAMBetaWorkloadIdentityPoolNamespace_minimal(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "tf-test-example-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
 }
 
 resource "google_iam_workload_identity_pool_namespace" "example" {
-  provider = google-beta
-
   workload_identity_pool_id           = google_iam_workload_identity_pool.pool.workload_identity_pool_id
   workload_identity_pool_namespace_id = "tf-test-example-namespace%{random_suffix}"
 }
@@ -109,15 +104,11 @@ resource "google_iam_workload_identity_pool_namespace" "example" {
 func testAccIAMBetaWorkloadIdentityPoolNamespace_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "tf-test-example-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
 }
 
 resource "google_iam_workload_identity_pool_namespace" "example" {
-  provider = google-beta
-
   workload_identity_pool_id           = google_iam_workload_identity_pool.pool.workload_identity_pool_id
   workload_identity_pool_namespace_id = "tf-test-example-namespace%{random_suffix}"
   description                         = "Example Namespace in a Workload Identity Pool"
@@ -129,15 +120,11 @@ resource "google_iam_workload_identity_pool_namespace" "example" {
 func testAccIAMBetaWorkloadIdentityPoolNamespace_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "tf-test-example-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
 }
 
 resource "google_iam_workload_identity_pool_namespace" "example" {
-  provider = google-beta
-
   workload_identity_pool_id           = google_iam_workload_identity_pool.pool.workload_identity_pool_id
   workload_identity_pool_namespace_id = "tf-test-example-namespace%{random_suffix}"
   description                         = "Updated Namespace in a Workload Identity Pool"
@@ -145,4 +132,3 @@ resource "google_iam_workload_identity_pool_namespace" "example" {
 }
 `, context)
 }
-{{- end -}}

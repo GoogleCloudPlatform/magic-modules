@@ -133,6 +133,13 @@ state.
 `false`. This field should only be enabled for Autopilot clusters (`enable_autopilot`
 set to `true`).
 
+* `autopilot_privileged_admission` - (Optional) The customer
+allowlist Cloud Storage paths for the cluster. These paths are used with the
+`--autopilot-privileged-admission` flag to authorize privileged workloads in
+Autopilot clusters. See the Cluster API's
+[PrivilegedAdmissionConfig](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters#privilegedadmissionconfig)
+documentation for more details.
+
 * `cluster_ipv4_cidr` - (Optional) The IP address range of the Kubernetes pods
 in this cluster in CIDR notation (e.g. `10.96.0.0/14`). Leave blank to have one
 automatically chosen or specify a `/14` block in `10.0.0.0/8`. This field will
@@ -529,10 +536,11 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    which allows the usage of a Lustre instances as volumes.
    It is disabled by default for Standard clusters; set `enabled = true` to enable.
    It is disabled by default for Autopilot clusters; set `enabled = true` to enable.
-   Lustre CSI Driver Config has optional subfield
-   `enable_legacy_lustre_port` which allows the Lustre CSI driver to initialize LNet (the virtual networklayer for Lustre kernel module) using port 6988. 
-   This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
    See [Enable Lustre CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/lustre-csi-driver-new-volume) for more information.
+   Lustre CSI Driver Config has optional subfields:
+   * `enable_legacy_lustre_port` which allows the Lustre CSI driver to initialize LNet (the virtual networklayer for Lustre kernel module) using port 6988. 
+   This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
+   * `disable_multi_nic` When set to true, this disables multi-NIC support for the Lustre CSI driver. By default, GKE enables multi-NIC support, which allows the Lustre CSI driver to automatically detect and configure all suitable network interfaces on a node to maximize I/O performance for demanding workloads.
 
 * `pod_snapshot_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
 

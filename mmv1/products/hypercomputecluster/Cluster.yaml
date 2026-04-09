@@ -749,5 +749,7 @@ examples:
     primary_resource_id: 'cluster'
     vars:
       cluster_id: 'my-cluster'
+      network_id: 'cluster-net1'
     test_vars_overrides:
       cluster_id: 'fmt.Sprintf("tf%s", acctest.RandString(t, 8))'
+      network_id: 'fmt.Sprintf("cluster-net1-%s", acctest.RandString(t,10))'

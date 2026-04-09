@@ -1,0 +1,7 @@
+// The Chronicle API rejects update requests if an existing displayName is sent in the body.
+// Therefore, we must explicitly strip it out of the JSON payload if the user didn't modify it.
+if !d.HasChange("display_name") {
+	delete(obj, "displayName")
+}
+
+return obj, nil

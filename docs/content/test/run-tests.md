@@ -62,7 +62,7 @@ aliases:
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
-    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+    To run all tests matching, for example, `TestAccContainerNodePool*`, omit the trailing `$$`:
 
     ```bash
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
@@ -100,7 +100,7 @@ aliases:
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
-    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+    To run all tests matching, for example, `TestAccContainerNodePool*`, omit the trailing `$$`:
 
     ```bash
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
@@ -171,7 +171,7 @@ Tests require all of the providers they use (except the one actually being teste
       ```
   - GA+beta test: This indicates that one of the `google_*` resources in the test has `provider = google-beta` set. `provider = google-beta` can't be set unless the test is beta-only.
 - If the error mentions some other provider: The test relies on an external provider, such as `time`, and that is not explicitly declared
-  - For MMv1 example-based tests, use [`examples.external_providers`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#examples).
+  - For MMv1 sample-based tests, use [`samples.external_providers`]({{< ref "/reference/sample/#sample-attributes-top-level" >}}).
   - For Handwritten tests, use TestCase.ExternalProviders:
     ```go
     acctest.VcrTest(t, resource.TestCase{

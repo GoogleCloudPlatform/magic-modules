@@ -36,6 +36,7 @@ fields:
   - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- end }}
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enableLegacyLustrePort'
+  - api_field: 'addonsConfig.lustreCsiDriverConfig.disableMultiNic'
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enabled'
   - api_field: 'addonsConfig.networkPolicyConfig.disabled'
   - api_field: 'addonsConfig.parallelstoreCsiDriverConfig.enabled'
@@ -47,6 +48,8 @@ fields:
   - api_field: 'anonymousAuthenticationConfig.mode'
   - field: 'allow_net_admin'
     api_field: 'autopilot.workloadPolicyConfig.allowNetAdmin'
+  - field: 'autopilot_privileged_admission'
+    api_field: 'autopilot.privilegedAdmissionConfig.allowlistPaths'
   - api_field: 'authenticatorGroupsConfig.securityGroup'
   - api_field: 'binaryAuthorization.enabled'
   - api_field: 'binaryAuthorization.evaluationMode'
