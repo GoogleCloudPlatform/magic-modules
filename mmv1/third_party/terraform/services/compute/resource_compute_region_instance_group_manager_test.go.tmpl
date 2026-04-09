@@ -2704,6 +2704,10 @@ resource "google_compute_region_instance_group_manager" "igm-tsp" {
   region             = "us-central1"
   target_size        = 2
 
+  update_policy {
+    instance_redistribution_type = "NONE"
+  }
+
   target_size_policy {
     mode = "BULK"
   }
