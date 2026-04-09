@@ -49,6 +49,10 @@ iam_policy:
     - '{{name}}'
   min_version: 'beta'
 custom_code:
+sweeper:
+  prefixes:
+    - "tf-test-"
+    - "mg-endpoint-"
 examples:
   - name: 'vertex_ai_endpoint_network'
     primary_resource_id: 'endpoint'
