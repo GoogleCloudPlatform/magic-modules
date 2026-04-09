@@ -124,7 +124,7 @@ resource "google_compute_node_template" "tmpl2" {
 
 resource "google_compute_node_group" "nodes" {
   name        = "%s"
-  zone        = "us-central1-a"
+  zone        = "us-central1-b"
   description = "example google_compute_node_group for Terraform Google Provider"
 
   initial_size = 1
@@ -150,7 +150,7 @@ resource "google_compute_node_template" "tmpl2" {
 
 resource "google_compute_node_group" "nodes" {
   name        = "%s"
-  zone        = "us-central1-a"
+  zone        = "us-central1-b"
   description = "example google_compute_node_group for Terraform Google Provider"
 
   autoscaling_policy {
