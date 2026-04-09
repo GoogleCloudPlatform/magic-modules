@@ -5,6 +5,7 @@ import (
 	neturl "net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -157,4 +158,13 @@ func flattenQueryValues(queryValue interface{}) []map[string]interface{} {
 		})
 	}
 	return queryValueItems
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_instance_guest_attributes",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstanceGuestAttributes(),
+	}.Register()
 }

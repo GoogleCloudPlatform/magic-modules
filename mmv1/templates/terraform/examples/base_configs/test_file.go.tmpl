@@ -116,7 +116,7 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToStringLegacy $e }},
 		{{- end }}
 			},
-		{{- if not $e.ExcludeIdentityImport }}
+		{{- if not $.Res.ExcludeIdentityGeneration }}
 			{
 				ResourceName:       "{{ $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 				RefreshState:       true,

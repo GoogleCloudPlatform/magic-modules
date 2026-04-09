@@ -104,9 +104,6 @@ type Step struct {
 	// These properties will likely be custom code.
 	IgnoreReadExtra []string `yaml:"ignore_read_extra,omitempty"`
 
-	// Whether to skip identity import for this test step
-	ExcludeIdentityImport bool `yaml:"exclude_identity_import,omitempty"`
-
 	// Whether to skip import tests for this test step
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
