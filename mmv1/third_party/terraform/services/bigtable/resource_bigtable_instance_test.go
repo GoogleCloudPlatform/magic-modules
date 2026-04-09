@@ -1296,12 +1296,12 @@ data "google_project" "project" {
 
 resource "google_tags_tag_key" "key" {
   parent     = "projects/${data.google_project.project.project_id}"
-  short_name = "key"
+  short_name = "key-%s"
 }
 
 resource "google_tags_tag_value" "value" {
   parent     = "tagKeys/${google_tags_tag_key.key.name}"
-  short_name = "value"
+  short_name = "value-%s"
 }
 
 resource "google_bigtable_instance" "instance" {
@@ -1320,5 +1320,5 @@ resource "google_bigtable_instance" "instance" {
     google_tags_tag_value.value
   ]
 }
-`, pid, instanceName, instanceName)
+`, pid, instanceName, instanceName, instanceName, instanceName)
 }
