@@ -36,7 +36,6 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-min_version: 'beta'
 examples:
   - name: 'network_connectivity_transport_basic'
     primary_resource_id: 'primary'

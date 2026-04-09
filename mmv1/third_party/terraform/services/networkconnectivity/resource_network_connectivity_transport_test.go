@@ -72,18 +72,14 @@ func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExampl
 
 func testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
+data "google_project" "project" {}
 
 resource "google_compute_network" "primary-network" {
-  provider                = google-beta
   name                    = "tf-test-my-vpc-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_connectivity_transport" "primary"  {
-  provider          = google-beta
   name              = "tf-test-basic-transport%{random_suffix}"
   region            = "us-east4"
   description       = "A sample transport"
@@ -100,18 +96,14 @@ resource "google_network_connectivity_transport" "primary"  {
 
 func testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
+data "google_project" "project" {}
 
 resource "google_compute_network" "primary-network" {
-  provider                = google-beta
   name                    = "tf-test-my-vpc-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_connectivity_transport" "primary"  {
-  provider          = google-beta
   name              = "tf-test-basic-transport%{random_suffix}"
   region            = "us-east4"
   description       = "New description"
