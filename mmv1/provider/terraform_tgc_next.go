@@ -63,7 +63,7 @@ type ResourceIdentifier struct {
 	AliasName          string // It can be "Default" or the same with ResourceName
 	CaiAssetNameFormat string
 	ImportFormats      []string
-	IdentityParam      string
+	IdentityParams     []string
 }
 
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time, templateFS fs.FS) TerraformGoogleConversionNext {
@@ -75,9 +75,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 		templateFS:                 templateFS,
 	}
 
-	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
@@ -104,14 +102,15 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
-	if !object.IsExcluded() {
+	if !object.ExcludeResource {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
-		tgc.addTestsFromSamples(&object)
-		if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
-			log.Printf("Error adding examples from handwritten tests: %v", err)
-		}
-		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
+	tgc.addTestsFromSamples(&object)
+	if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+		log.Printf("Error adding examples from handwritten tests: %v", err)
+	}
+
+	tgc.GenerateResourceTests(object, *templateData, outputFolder)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -247,6 +246,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/services/compute/disk_type.go":         "third_party/terraform/services/compute/disk_type.go",
 		"pkg/services/kms/kms_utils.go":             "third_party/terraform/services/kms/kms_utils.go",
 		"pkg/services/privateca/privateca_utils.go": "third_party/terraform/services/privateca/privateca_utils.go",
+		"pkg/services/eventarc/eventarc_utils.go":   "third_party/terraform/services/eventarc/eventarc_utils.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
@@ -446,7 +446,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 	for _, productDefinition := range products {
 		service := strings.ToLower(productDefinition.Name)
 		for _, object := range productDefinition.Objects {
-			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(tgc.TargetVersionName)) {
+			if object.ExcludeResource || object.NotInVersion(productDefinition.VersionObjOrClosest(tgc.TargetVersionName)) {
 				continue
 			}
 
@@ -487,12 +487,14 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 	}
 }
 
-// Analyzes a list of CAI asset names and finds the single path segment
-// (by index) that contains different values across all names.
-// Example:
-// "folders/{{folder}}/feeds/{{feed_id}}" -> folders
-// "organizations/{{org_id}}/feeds/{{feed_id}} -> organizations
-// "projects/{{project}}/feeds/{{feed_id}}" -> projects
+// Analyzes a list of CAI asset names and finds all path segments
+// that contain different values across all names, dropping only the segments
+// that are identical across the entire group. This robustly retains identifying
+// combinations of segments (e.g., ["projects", "global"] vs ["locations", "global"]).
+// Example (simplest case, single unique segment):
+// "folders/{{folder}}/feeds/{{feed_id}}" -> ["folders"]
+// "organizations/{{org_id}}/feeds/{{feed_id}}" -> ["organizations"]
+// "projects/{{project}}/feeds/{{feed_id}}" -> ["projects"]
 func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	segmentsList := make([][]string, len(rids))
 	for i, rid := range rids {
@@ -502,22 +504,19 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	segmentsList = removeSharedElements(segmentsList)
 
 	for i, segments := range segmentsList {
-		if len(segments) == 0 {
-			rids[i].IdentityParam = ""
-		} else {
-			rids[i].IdentityParam = segments[0]
-		}
+		rids[i].IdentityParams = segments
 	}
 
-	// Check if we have multiple resources with the same IdentityParam
-	identityParams := make(map[string]int)
+	// Check if we have multiple resources with the same IdentityParams
+	identityParamsCounts := make(map[string]int)
 	for _, rid := range rids {
-		identityParams[rid.IdentityParam]++
+		key := strings.Join(rid.IdentityParams, "|")
+		identityParamsCounts[key]++
 	}
 
 	// If we have collisions or empty params, try using ImportFormats
 	hasCollision := false
-	for _, count := range identityParams {
+	for _, count := range identityParamsCounts {
 		if count > 1 {
 			hasCollision = true
 			break
@@ -525,40 +524,33 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	}
 
 	if hasCollision {
-		// Reset segmentsList using ImportFormats
+		// Reset segmentsList using ImportFormats where available, else CaiAssetNameFormat
 		for i, rid := range rids {
 			if len(rid.ImportFormats) > 0 {
 				segmentsList[i] = processPathIntoSegments(rid.ImportFormats[0])
 			} else {
-				// If no import format, fallback to previous empty list or keep as is?
-				// For now let's assume if we are falling back, we want fresh segments.
-				segmentsList[i] = []string{}
+				segmentsList[i] = processPathIntoSegments(rid.CaiAssetNameFormat)
 			}
 		}
 
 		segmentsList = removeSharedElements(segmentsList)
 
 		for i, segments := range segmentsList {
-			if len(segments) == 0 {
-				rids[i].IdentityParam = ""
-			} else {
-				rids[i].IdentityParam = segments[0]
-			}
+			rids[i].IdentityParams = segments
 		}
 	}
 
-	// Move the id with empty IdentityParam to the end of the list
-	for i, ids := range rids {
-		if ids.IdentityParam == "" {
-			temp := ids
-			lastIndex := len(rids) - 1
-			if i != lastIndex {
-				rids[i] = rids[lastIndex]
-				rids[lastIndex] = temp
-			}
-			break
+	// Move the ids with empty IdentityParams to the end of the list
+	var withParam []ResourceIdentifier
+	var withoutParam []ResourceIdentifier
+	for _, ids := range rids {
+		if len(ids.IdentityParams) == 0 {
+			withoutParam = append(withoutParam, ids)
+		} else {
+			withParam = append(withParam, ids)
 		}
 	}
+	rids = append(withParam, withoutParam...)
 
 	return rids
 }

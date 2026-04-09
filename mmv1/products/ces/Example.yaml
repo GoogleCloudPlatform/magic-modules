@@ -172,6 +172,7 @@ properties:
                           `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
                         required: true
                       - name: toolId
+                        type: String
                         description: |-
                           The tool ID to filter the tools to retrieve the schema for.
               - name: toolResponse
@@ -214,6 +215,7 @@ properties:
                           `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
                         required: true
                       - name: toolId
+                        type: String
                         description: |-
                           The tool ID to filter the tools to retrieve the schema for.
               - name: updatedVariables

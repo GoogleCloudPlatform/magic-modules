@@ -30,6 +30,13 @@ examples:
       org_id: "ORG_ID"
       billing_account: "BILLING_ACCT"
     skip_vcr: true
+  - name: 'developer_connect_insights_config_projects'
+    external_providers: ["time"]
+    primary_resource_id: 'insights_config_projects'
+    test_env_vars:
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
+    skip_vcr: true
 autogen_async: true
 async:
   operation:
@@ -67,7 +74,23 @@ properties:
       The name of the App Hub Application.
       Format:
       projects/{project}/locations/{location}/applications/{application}
-    required: true
+    conflicts:
+      - targetProjects
+  - name: targetProjects
+    type: NestedObject
+    api_name: projects
+    description: The projects to track with the InsightsConfig.
+    conflicts:
+      - appHubApplication
+    immutable: true
+    properties:
+      - name: projectIds
+        type: Array
+        description: The project IDs. Format {project}.
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        item_type:
+          type: String
+        immutable: true
   - name: name
     type: String
     description: |-

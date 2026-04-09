@@ -191,6 +191,12 @@ For `key_name`, provide a domain-appropriate field name. For example, a map that
 > **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/reference/field" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
+Handwritten resource code lives in per-service directories in [mmv1/third_party/terraform/services/](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services). Files related to a handwritten resource usually have names like `resource_PRODUCT_RESOURCE.EXTENSION(.tmpl)`. For example, the main implementation for `google_compute_instance` would be `resource_compute_instance.go`, and the metadata file would be `resource_compute_instance_meta.yaml`.
+
+Handwritten files will have a `.tmpl` extension if they are Golang templates, for example due to using "version guards" to keep certain code out of the `google` provider.
+
+To add a field:
+
 1. Add the field to the handwritten resource's schema.
    - The new field(s) should mirror the API's structure to ease predictability and maintenance. However, if there is an existing related / similar field in the resource that uses a different convention, follow that convention instead.
    - Enum fields in the API should be represented as `TypeString` in Terraform for forwards-compatibility. Link to the API documentation of allowed values in the field description.
@@ -206,6 +212,12 @@ For `key_name`, provide a domain-appropriate field name. For example, a map that
    - For other fields, add logic to the parent field's flattener to convert the value from the API response to the Terraform state value. Use a nested flattener for complex logic.
 4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.tmpl` and wrap the beta-only code in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
    - Add a new guard rather than adding the field to an existing guard; it is easier to read.
+5. Add the field to the resource's meta.yaml file.
+   - Fields that have an API equivalent must set `api_field` to the REST API field name, including the full path. For example, `buildConfig.source.storageSource.bucket`.
+   - Fields whose the Terraform name can't be [derived](https://github.com/GoogleCloudPlatform/magic-modules/blob/b2e08f7e71d3131f2d8d0d7e8b17a744c1b16c22/mmv1/google/string_utils.go#L27) from the REST API field name (or that don't have an API equivalent) must set `field` to the Terraform field name, including the full path. For example, `build_config.source.storage_source.bucket`.
+   - Fields without an API equivalent must set `provider_only: true`
+   - If the field is beta-only, change the file suffix to `.yaml.tmpl` and wrap the beta-only field in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
+   -  For more information, see [Metadata (meta.yaml) reference]({{< ref "/reference/metadata" >}}).
 {{< /tab >}}
 {{% /tabs %}}
 

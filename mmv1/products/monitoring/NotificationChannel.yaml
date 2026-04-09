@@ -49,7 +49,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 custom_code:
   constants: 'templates/terraform/constants/monitoring_notification_channel.go.tmpl'
   encoder: 'templates/terraform/encoders/monitoring_notification_channel.go.tmpl'
@@ -64,11 +63,17 @@ examples:
     primary_resource_id: 'basic'
     vars:
       display_name: 'Test Notification Channel'
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"Test Notification Channel" + randomSuffix'
   - name: 'notification_channel_sensitive'
     primary_resource_id: 'default'
     vars:
       display_name: 'Sensitive Notification Channel test'
       # sensitive labels will fail the import verification step.
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"Sensitive Notification Channel test" + randomSuffix'
     exclude_test: true
 virtual_fields:
   - name: 'force_delete'

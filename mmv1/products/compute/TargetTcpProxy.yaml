@@ -12,57 +12,69 @@
 # limitations under the License.
 
 ---
-name: 'TargetTcpProxy'
-kind: 'compute#targetTcpProxy'
+name: TargetTcpProxy
 description: |
   Represents a TargetTcpProxy resource, which is used by one or more
   global forwarding rule to route incoming TCP requests to a Backend
   service.
 references:
   guides:
-    'Setting Up TCP proxy for Google Cloud Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/targetTcpProxies'
-docs:
-base_url: 'projects/{{project}}/global/targetTcpProxies'
-has_self_link: true
+    Setting Up TCP proxy for Google Cloud Load Balancing: https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy
+  api: https://cloud.google.com/compute/docs/reference/v1/targetTcpProxies
+base_url: projects/{{project}}/global/targetTcpProxies
 immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+has_self_link: true
+collection_url_key: items
+kind: compute#targetTcpProxy
+id_format: projects/{{project}}/global/targetTcpProxies/{{name}}
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
-collection_url_key: 'items'
-custom_code:
+include_in_tgc_next: true
 examples:
-  - name: 'target_tcp_proxy_basic'
-    primary_resource_id: 'default'
+  - name: target_tcp_proxy_basic
+    primary_resource_id: default
     vars:
-      target_tcp_proxy_name: 'test-proxy'
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-parameters:
+      backend_service_name: backend-service
+      health_check_name: health-check
+      target_tcp_proxy_name: test-proxy
+  - name: target_tcp_proxy_basic_beta
+    primary_resource_id: default
+    min_version: beta
+    vars:
+      backend_service_name: backend-service
+      health_check_name: health-check
+      target_tcp_proxy_name: test-proxy
+  - name: target_tcp_proxy_backendless
+    min_version: beta
+    primary_resource_id: default
+    vars:
+      target_tcp_proxy_name: test-proxy
+  - name: target_tcp_proxy_tls_route
+    min_version: beta
+    primary_resource_id: default
+    vars:
+      backend_service_name: backend-service
+      health_check_name: health-check
+      target_tcp_proxy_name: test-proxy
+      tls_route_name: tls-route-check
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     immutable: true
-  - name: 'proxyId'
-    type: Integer
-    description: 'The unique identifier for the resource.'
+  - name: proxyId
     api_name: id
+    type: Integer
+    description: The unique identifier for the resource.
     output: true
-  - name: 'name'
+  - name: name
     type: String
+    required: true
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -71,33 +83,49 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    required: true
     immutable: true
-  - name: 'proxyHeader'
+  - name: proxyHeader
     type: Enum
+    default_value: NONE
     description: |
       Specifies the type of proxy header to append before sending data to
       the backend.
-    update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setProxyHeader'
-    update_verb: 'POST'
-    default_value: "NONE"
+    update_verb: POST
+    update_url: projects/{{project}}/global/targetTcpProxies/{{name}}/setProxyHeader
     enum_values:
-      - 'NONE'
-      - 'PROXY_V1'
-  - name: 'backendService'
+      - NONE
+      - PROXY_V1
+  - name: backendService
+    api_name: service
     type: ResourceRef
     description: |
-      A reference to the BackendService resource.
-    api_name: service
-    required: true
-    update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
-    update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'BackendService'
-    imports: 'selfLink'
-  - name: 'proxyBind'
+      A reference to the BackendService resource. This field is optional when
+      the loadBalancingScheme (available in beta) is set to INTERNAL_MANAGED.
+    update_verb: POST
+    update_url: projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService
+    at_least_one_of:
+      - backend_service
+      - load_balancing_scheme
+    resource: BackendService
+    imports: selfLink
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+  - name: proxyBind
     type: Boolean
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
+  - name: loadBalancingScheme
+    type: Enum
+    description: |
+      Specifies the load balancer type. A target TCP proxy created for one type
+      of load balancer cannot be used with another. For more information, refer
+      to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
+    min_version: beta
+    at_least_one_of:
+      - backend_service
+      - load_balancing_scheme
+    enum_values:
+      - EXTERNAL
+      - EXTERNAL_MANAGED
+      - INTERNAL_MANAGED

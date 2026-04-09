@@ -47,7 +47,6 @@ custom_code:
   post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
   post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 tgc_tests:
   - name: 'TestAccDatastreamStream_mongoDb'
     skip: 'Test data has mismatched steps'
@@ -121,6 +120,14 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_sql_server_change_tables'
     primary_resource_id: 'default'
@@ -137,6 +144,14 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     # Requires SQLServer Configuration
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_mysql_gtid'
     primary_resource_id: 'default'
@@ -153,6 +168,16 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     # Requires MySQL Configuration
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      mysql_name: '"mysql" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
@@ -163,6 +188,9 @@ examples:
       instance_name: 'instance-name'
       sql_user_name: 'my-user'
       source_connection_profile_id: 'source-profile'
+    test_vars_overrides:
+      # for backward compatible
+      dataset_id: '"postgres" + randomSuffix'
     external_providers: ["random", "time"]
     # Random provider
     skip_vcr: true
@@ -524,6 +552,7 @@ properties:
             type: NestedObject
             allow_empty_object: true
             send_empty_value: true
+            default_from_api: true
             conflicts:
               - source_config.0.mysql_source_config.gtid
             description: |
@@ -1586,7 +1615,8 @@ properties:
             type: String
             description: |
               The maximum duration for which new events are added before a file is closed and a new file is created.
-              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
+              Values within the range of 15-60 seconds are allowed.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
             default_from_api: true
           - name: 'avroFileFormat'
             type: NestedObject
@@ -1686,7 +1716,7 @@ properties:
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
                     immutable: true
               - name: 'projectId'
-                type: string
+                type: String
                 description: |
                   Optional. The project id of the BigQuery dataset. If not specified, the project will be inferred from the stream resource.
           - name: 'blmtConfig'

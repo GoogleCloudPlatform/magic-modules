@@ -59,7 +59,6 @@ custom_code:
 examples:
   - name: 'dataplex_datascan_basic_profile'
     primary_resource_id: 'basic_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataprofile-basic%s", context["random_suffix"])'
     vars:
       datascan_name: 'dataprofile-basic'
     test_env_vars:
@@ -81,7 +80,6 @@ examples:
     exclude_docs: true
   - name: 'dataplex_datascan_onetime_profile'
     primary_resource_id: 'onetime_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataprofile-onetime%s", context["random_suffix"])'
     vars:
       datascan_name: 'dataprofile-onetime'
     test_env_vars:
@@ -139,6 +137,9 @@ examples:
     primary_resource_id: 'documentation'
     vars:
       datascan_name: 'datadocumentation'
+    test_vars_overrides:
+      # for backward compatible
+      datascan_name: '"datadocumentation" + randomSuffix'
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
@@ -284,7 +285,7 @@ properties:
               - 'execution_spec.0.trigger.0.one_time'
             properties:
               - name: ttlAfterScanCompletion
-                type: DURATION
+                type: String
                 description: |
                   Time to live for the DataScan and its results after the one-time run completes. Accepts a string with a unit suffix 's' (e.g., '7200s'). Default is 24 hours. Ranges between 0 and 31536000 seconds (1 year).
       - name: 'field'

@@ -51,10 +51,10 @@ iam_policy:
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
+include_in_tgc_next: true
 examples:
   - name: 'instant_snapshot_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-instant-snapshot%s", context["random_suffix"])'
     vars:
       instance_name: 'instant-snapshot'
       disk_name: 'example-disk'

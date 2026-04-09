@@ -44,40 +44,51 @@ func TestAccFirebaseAILogicConfig_firebaseailogicConfigUpdate(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
+    ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
 		CheckDestroy:             testAccCheckFirebaseAILogicConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(context, "key1", 0.5, "ALL"),
+				Config: testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(context, "key1", 0.5, "ALL", ""),
 			},
 			{
 				ResourceName:            "google_firebase_ai_logic_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"generative_language_config.0.api_key", "generative_language_config.0.api_key_wo", "location"},
+				ImportStateVerifyIgnore: []string{"generative_language_config.0.api_key", "generative_language_config.0.api_key_wo", "location", "traffic_filter.#", "traffic_filter.0.%", "traffic_filter.0.template_only"},
 			},
 			{
-				Config: testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(context, "key2", 1.0, "NONE"),
+				Config: testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(context, "key2", 1.0, "NONE", "traffic_filter {\n\t\ttemplate_only = true\n\t}"),
 			},
 			{
 				ResourceName:            "google_firebase_ai_logic_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"generative_language_config.0.api_key", "generative_language_config.0.api_key_wo", "location"},
+				ImportStateVerifyIgnore: []string{"generative_language_config.0.api_key", "generative_language_config.0.api_key_wo", "location", "traffic_filter.#", "traffic_filter.0.%", "traffic_filter.0.template_only"},
+			},
+			{
+				Config: testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(context, "key3", 1.0, "ALL", "traffic_filter {\n\t\ttemplate_only = false\n\t}"),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"generative_language_config.0.api_key", "generative_language_config.0.api_key_wo", "location", "traffic_filter.#", "traffic_filter.0.%", "traffic_filter.0.template_only"},
 			},
 		},
 	})
 }
 
 func testAccFirebaseAILogicConfig_firebaseailogicConfigUpdateExample(
-	context map[string]interface{}, apiKeyId string, samplingRate float32, telemetryMode string) string {
+  context map[string]interface{}, apiKeyId string, samplingRate float32, telemetryMode string, trafficFilterBlock string) string {
 	context["api_key_id"] = apiKeyId
 	context["sampling_rate"] = samplingRate
 	context["telemetry_mode"] = telemetryMode
+  context["traffic_filter_block"] = trafficFilterBlock
+
 	return acctest.Nprintf(`
 resource "google_project" "project" {
   provider = google-beta
@@ -147,6 +158,8 @@ resource "google_firebase_ai_logic_config" "default" {
     mode = "%{telemetry_mode}"
     sampling_rate = %{sampling_rate}
   }
+
+  %{traffic_filter_block}
 
   depends_on = [time_sleep.wait_30s]
 }

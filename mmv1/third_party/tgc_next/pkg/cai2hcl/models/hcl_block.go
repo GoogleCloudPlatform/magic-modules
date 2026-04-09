@@ -65,9 +65,6 @@ func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 			}
 			fallthrough
 		default:
-			if objValType.FriendlyName() == "string" && objVal.AsString() == "" {
-				continue
-			}
 			body.SetAttributeValue(objKey.AsString(), objVal)
 		}
 	}

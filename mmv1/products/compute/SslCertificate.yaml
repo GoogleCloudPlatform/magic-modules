@@ -47,10 +47,17 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
 examples:
   - name: 'ssl_certificate_basic'
+    primary_resource_id: 'default'
+    ignore_read_extra:
+      - 'name_prefix'
+      # Uses id.UniqueId
+    skip_vcr: true
+  - name: 'ssl_certificate_basic_writeonly'
     primary_resource_id: 'default'
     ignore_read_extra:
       - 'name_prefix'
@@ -121,5 +128,6 @@ properties:
     immutable: true
     ignore_read: true
     sensitive: true
+    write_only: true
     diff_suppress_func: 'sha256DiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'

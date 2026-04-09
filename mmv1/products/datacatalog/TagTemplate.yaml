@@ -54,7 +54,6 @@ exclude_sweeper: true
 examples:
   - name: 'data_catalog_tag_template_basic'
     primary_resource_id: 'basic_tag_template'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_template%s", context["random_suffix"])'
     vars:
       tag_template_id: 'my_template'
       force_delete: 'false'

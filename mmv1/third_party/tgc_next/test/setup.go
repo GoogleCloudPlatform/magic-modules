@@ -84,7 +84,7 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 		for i := 0; i < len(TestsMetadata); i++ {
 			var metadata map[string]map[int]TgcMetadataPayload
 			if os.Getenv("WRITE_FILES") != "" {
-				filename := fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat))
+				filename := fmt.Sprintf("../../../test_mata/tests_metadata_%s.json", currentDate.Format(ymdFormat))
 				_, err := os.Stat(filename)
 				if !os.IsNotExist(err) {
 					metadata = readTestsDataFromLocalFile(filename)
@@ -101,7 +101,8 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 				}
 				metadata, err = readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
 				if os.Getenv("WRITE_FILES") != "" {
-					writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+					os.MkdirAll("../../../test_mata", 0755)
+					writeJSONFile(fmt.Sprintf("../../../test_mata/tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
 				}
 
 				if err != nil {
@@ -226,7 +227,7 @@ func prepareTestData(testName string, stepNumber int, retries int) (*StepTestDat
 	if stepMetadata, ok := testMetadata[stepNumber]; ok {
 		resourceMetadata := stepMetadata.ResourceMetadata
 
-		rawTfFile := fmt.Sprintf("%s_step%d.tf", testName, stepNumber)
+		rawTfFile := fmt.Sprintf("%s_step%d.tf", strings.ReplaceAll(testName, "/", "_"), stepNumber)
 		err = os.WriteFile(rawTfFile, []byte(stepMetadata.RawConfig), 0644)
 		if err != nil {
 			return nil, fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
@@ -245,7 +246,7 @@ func prepareTestData(testName string, stepNumber int, retries int) (*StepTestDat
 		}
 
 		if os.Getenv("WRITE_FILES") != "" {
-			writeJSONFile(fmt.Sprintf("%s_attrs", testName), rawResourceConfigs)
+			writeJSONFile(fmt.Sprintf("%s_step%d_attrs", strings.ReplaceAll(testName, "/", "_"), stepNumber), rawResourceConfigs)
 		}
 
 		rawConfigMap := convertToConfigMap(rawResourceConfigs)

@@ -50,7 +50,6 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/gke_hub_membership_diff.go.tmpl'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 schema_version: 1
@@ -58,7 +57,6 @@ state_upgraders: true
 examples:
   - name: 'gkehub_membership_regional'
     primary_resource_id: 'membership'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
       cluster_name: 'basic-cluster'
@@ -70,9 +68,10 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      # for backward compatible
+      name: '"basic" + randomSuffix'
   - name: 'gkehub_membership_basic'
     primary_resource_id: 'membership'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
       cluster_name: 'basic-cluster'
@@ -83,6 +82,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      # for backward compatible
+      name: '"basic" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkehub_membership_issuer'
@@ -99,6 +100,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      # for backward compatible
+      name: '"basic" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
 parameters:

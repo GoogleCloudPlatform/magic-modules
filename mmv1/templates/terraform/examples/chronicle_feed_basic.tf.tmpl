@@ -1,0 +1,16 @@
+# This is a basic example for Terraform support in Chronicle feeds APIs.
+
+resource "google_chronicle_feed" "{{$.PrimaryResourceId}}" {
+  location     = "us"
+  provider     = google-beta
+  instance     = "{{index $.TestEnvVars "chronicle_id"}}"
+  display_name = "{{index $.Vars "resource_name"}}"
+
+  details {
+    feed_source_type = "HTTPS_PUSH_GOOGLE_CLOUD_PUBSUB"
+    log_type         = "projects/{{index $.TestEnvVars "project_name"}}/locations/us/instances/{{index $.TestEnvVars "chronicle_id"}}/logTypes/GCP_CLOUDAUDIT"
+    https_push_google_cloud_pubsub_settings {
+      split_delimiter = "\n"
+    }
+  }
+}

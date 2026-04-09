@@ -9,6 +9,9 @@ api_version: 'v1'
 api_resource_type_kind: 'Cluster'
 api_variant_patterns:
   - 'projects/{project}/locations/{location}/clusters/{cluster}'
+cai_asset_name_formats:
+  - {{"//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}"}}
+  - {{"//container.googleapis.com/projects/{{project}}/zones/{{location}}/clusters/{{name}}"}}
 fields:
   - field: 'addons_config.cloudrun_config.disabled'
     api_field: 'addonsConfig.cloudRunConfig.disabled'
@@ -33,6 +36,7 @@ fields:
   - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- end }}
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enableLegacyLustrePort'
+  - api_field: 'addonsConfig.lustreCsiDriverConfig.disableMultiNic'
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enabled'
   - api_field: 'addonsConfig.networkPolicyConfig.disabled'
   - api_field: 'addonsConfig.parallelstoreCsiDriverConfig.enabled'
@@ -40,9 +44,20 @@ fields:
   - api_field: 'addonsConfig.rayOperatorConfig.rayClusterLoggingConfig.enabled'
   - api_field: 'addonsConfig.rayOperatorConfig.rayClusterMonitoringConfig.enabled'
   - api_field: 'addonsConfig.statefulHaConfig.enabled'
+  - api_field: 'addonsConfig.sliceControllerConfig.enabled'
   - api_field: 'anonymousAuthenticationConfig.mode'
   - field: 'allow_net_admin'
     api_field: 'autopilot.workloadPolicyConfig.allowNetAdmin'
+  - field: 'autopilot_privileged_admission'
+    api_field: 'autopilot.privilegedAdmissionConfig.allowlistPaths'
+  - field: 'autopilot_cluster_policy_config.no_system_mutation'
+    api_field: 'autopilot.clusterPolicyConfig.noSystemMutation'
+  - field: 'autopilot_cluster_policy_config.no_system_impersonation'
+    api_field: 'autopilot.clusterPolicyConfig.noSystemImpersonation'
+  - field: 'autopilot_cluster_policy_config.no_unsafe_webhooks'
+    api_field: 'autopilot.clusterPolicyConfig.noUnsafeWebhooks'
+  - field: 'autopilot_cluster_policy_config.no_standard_node_pools'
+    api_field: 'autopilot.clusterPolicyConfig.noStandardNodePools'
   - api_field: 'authenticatorGroupsConfig.securityGroup'
   - api_field: 'binaryAuthorization.enabled'
   - api_field: 'binaryAuthorization.evaluationMode'
@@ -175,6 +190,7 @@ fields:
   - api_field: 'ipAllocationPolicy.additionalPodRangesConfig.podRangeNames'
   - field: 'ip_allocation_policy.additional_ip_ranges_config.subnetwork'
   - field: 'ip_allocation_policy.additional_ip_ranges_config.pod_ipv4_range_names'
+  - field: 'ip_allocation_policy.additional_ip_ranges_config.status'
   - api_field: 'ipAllocationPolicy.autoIpamConfig.enabled'
   - api_field: 'ipAllocationPolicy.clusterIpv4CidrBlock'
   - api_field: 'ipAllocationPolicy.clusterSecondaryRangeName'
@@ -209,6 +225,10 @@ fields:
     api_field: 'maintenancePolicy.window.recurringWindow.recurrence'
   - field: 'maintenance_policy.recurring_window.start_time'
     api_field: 'maintenancePolicy.window.recurringWindow.window.startTime'
+  - api_field: 'maintenancePolicy.disruptionBudget.lastDisruptionTime'  
+  - api_field: 'maintenancePolicy.disruptionBudget.lastMinorVersionDisruptionTime'  
+  - api_field: 'maintenancePolicy.disruptionBudget.MinorVersionDisruptionInterval'
+  - api_field: 'maintenancePolicy.disruptionBudget.PatchVersionDisruptionInterval'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedOpentelemetryConfig.scope'
 {{- end }}
@@ -365,6 +385,7 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'nodeConfig.sandboxConfig.sandboxType'
 {{- end }}
+  - api_field: 'nodeConfig.sandboxConfig.type'
   - api_field: 'nodeConfig.secondaryBootDisks.diskImage'
   - api_field: 'nodeConfig.secondaryBootDisks.mode'
   - api_field: 'nodeConfig.serviceAccount'
@@ -661,6 +682,8 @@ fields:
   - field: 'node_pool.node_config.sandbox_config.sandbox_type'
     api_field: 'nodePools.config.sandboxConfig.sandboxType'
 {{- end }}
+  - field: 'node_pool.node_config.sandbox_config.type'
+    api_field: 'nodePools.config.sandboxConfig.type'
   - field: 'node_pool.node_config.secondary_boot_disks.disk_image'
     api_field: 'nodePools.config.secondaryBootDisks.diskImage'
   - field: 'node_pool.node_config.secondary_boot_disks.mode'
@@ -822,6 +845,7 @@ fields:
   - api_field: 'userManagedKeysConfig.aggregationCa'
   - api_field: 'userManagedKeysConfig.clusterCa'
   - api_field: 'userManagedKeysConfig.controlPlaneDiskEncryptionKey'
+  - api_field: 'userManagedKeysConfig.controlPlaneDiskEncryptionKeyVersions'
   - api_field: 'userManagedKeysConfig.etcdApiCa'
   - api_field: 'userManagedKeysConfig.etcdPeerCa'
   - api_field: 'userManagedKeysConfig.gkeopsEtcdBackupEncryptionKey'

@@ -61,19 +61,16 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 	if err != nil {
 		return fmt.Errorf("error diffing repo: %w", err)
 	}
-	hasGoFiles := false
-	for _, diff := range strings.Split(diffs, "\n") {
-		if strings.HasSuffix(diff, ".go") {
-			hasGoFiles = true
-			break
-		}
-	}
-	if !hasGoFiles {
-		fmt.Println("Skipping tests: No go files changed")
+
+	// Convert the raw diff string into a slice of strings
+	changedFiles := strings.Split(strings.TrimSpace(diffs), "\n")
+
+	if !shouldRunTests(changedFiles) {
+		fmt.Println("Skipping tests: No relevant go files changed")
 		return nil
 	}
 
-	fmt.Println("Running tests: Go files changed")
+	fmt.Println("Running tests: Relevant go files changed!")
 
 	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
 	if err := gh.PostBuildStatus(prNumber, ghRepo+"-test-integration", "pending", targetURL, mmCommit); err != nil {
@@ -100,6 +97,33 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 		return fmt.Errorf("error posting build status: %w", err)
 	}
 	return nil
+}
+
+func shouldRunTests(changedFiles []string) bool {
+	for _, file := range changedFiles {
+		fmt.Println("current file:", file)
+		if !strings.HasSuffix(file, ".go") {
+			continue
+		}
+
+		// Handle pkg/services/ and its exceptions
+		if strings.HasPrefix(file, "pkg/services/") {
+			if strings.HasSuffix(file, "_cai2hcl.go") || strings.HasSuffix(file, "_tfplan2cai.go") {
+				return true
+			}
+			continue
+		}
+
+		// Skip the fully ignored directories
+		if strings.HasPrefix(file, "cai2hcl/") || strings.HasPrefix(file, "caiasset/") || strings.HasPrefix(file, "tfplan2cai/") {
+			continue
+		}
+
+		// If a .go file makes it this far, it needs testing
+		return true
+	}
+
+	return false
 }
 
 func init() {

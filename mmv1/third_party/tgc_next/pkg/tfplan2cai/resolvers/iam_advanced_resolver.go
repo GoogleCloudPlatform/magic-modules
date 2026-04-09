@@ -46,6 +46,10 @@ func (r *IamAdvancedPreResolver) Resolve(jsonPlan []byte) map[string][]*tfjson.R
 		return idToResourceChange
 	}
 
+	if resourceConfig == nil || resourceConfig.RootModule == nil {
+		return idToResourceChange
+	}
+
 	// Stores information about resources, address as key, expression as value
 	addressToExpressionMap := make(map[string]map[string]*tfjson.Expression)
 

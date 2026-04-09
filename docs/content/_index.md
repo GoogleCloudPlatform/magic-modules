@@ -35,11 +35,10 @@ detection.
 
 ### Resource types
 
-There are three types of resources supported by Magic Modules:
+There are two types of resources supported by Magic Modules:
 
 + MMv1
 + Handwritten
-+ DCL/tpgtools
 
 The following sections describe these tools in detail.
 
@@ -95,17 +94,6 @@ In addition to the core implementation, handwritten resources and datasources wi
 In the providers, handwritten resources and datasources are stored in `PROVIDER/services/SERVICE/FILENAME.go`, where `PROVIDER`
 is `google` or `google-beta`, `SERVICE` is the service name, and `FILENAME` is the name of the handwritten file in magic-modules.
 Handwritten files do not have an `AUTO GENERATED CODE` header.
-
-#### DCL aka tpgtools (maintenance mode)
-
-DCL / tpgtools is similar to MMv1; however, it is in maintenance mode, which means that new resources using the DCL are not being added.
-
-DCL-based files start with the following header:
-
-```
-***     AUTO GENERATED CODE    ***    Type: DCL     ***
-```
-
 
 ## Other Resources
 

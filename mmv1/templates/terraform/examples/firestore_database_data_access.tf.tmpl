@@ -1,0 +1,10 @@
+resource "google_firestore_database" "{{$.PrimaryResourceId}}" {
+  project                             = "{{index $.TestEnvVars "project_id"}}"
+  name                                = "{{index $.Vars "database_id"}}"
+  location_id                         = "nam5"
+  type                                = "FIRESTORE_NATIVE"
+  database_edition                    = "ENTERPRISE"
+  firestore_data_access_mode          = "DATA_ACCESS_MODE_ENABLED"
+  mongodb_compatible_data_access_mode = "DATA_ACCESS_MODE_DISABLED"
+  realtime_updates_mode               = "REALTIME_UPDATES_MODE_DISABLED"
+}

@@ -1,0 +1,200 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'AgentGateway'
+min_version: beta
+description: |
+  AgentGateway represents the agent gateway resource.
+references:
+  guides:
+  api: 'https://cloud.google.com/network-services/docs/reference/network-services/rest/v1beta1/projects.locations.agentGateways'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/agentGateways'
+self_link: 'projects/{{project}}/locations/{{location}}/agentGateways/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/agentGateways?agentGatewayId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/agentGateways/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+examples:
+  - name: 'network_services_agent_gateway_full'
+    skip_docs: true  # temporary b/484137930
+    skip_test: true  # temporary b/484137930
+    primary_resource_id: 'default'
+    vars:
+      name: 'my-full-agent-gateway'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_services_agent_gateway_client_to_agent'
+    skip_docs: true  # temporary b/484137930
+    skip_test: true  # temporary b/484137930
+    primary_resource_id: 'default'
+    vars:
+      name: 'my-client-to-agent-gateway'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_services_agent_gateway_self_managed'
+    skip_docs: true  # temporary b/484137930
+    skip_test: true  # temporary b/484137930
+    primary_resource_id: 'default'
+    vars:
+      name: 'my-self-managed-agent-gateway'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the AgentGateway resource.
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the agent gateway.
+    url_param_only: true
+    required: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Set of label tags associated with the AgentGateway resource.
+  - name: 'description'
+    type: String
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      Etag of the resource.
+      If this is provided, it must match the server's etag. If the provided etag
+      does not match the server's etag, the request will fail with a 409 ABORTED
+      error.
+  - name: 'protocols'
+    type: Array
+    description: |
+      List of protocols supported by an Agent Gateway.
+    item_type:
+      type: Enum
+      enum_values:
+        - 'MCP'
+    required: true
+  - name: 'googleManaged'
+    immutable: true
+    exactly_one_of:
+      - google_managed
+      - self_managed
+    type: NestedObject
+    description: |
+      Configuration for Google Managed deployment mode.
+      Proxy is orchestrated and managed by GoogleCloud in a tenant project.
+    properties:
+      - name: 'governedAccessPath'
+        type: Enum
+        immutable: true
+        required: true
+        description: |
+          Operating Mode of Agent Gateway.
+        enum_values:
+          - 'AGENT_TO_ANYWHERE'
+          - 'CLIENT_TO_AGENT'
+  - name: 'selfManaged'
+    type: NestedObject
+    immutable: true
+    exactly_one_of:
+      - google_managed
+      - self_managed
+    description: |
+      Configuration for Self Managed deployment mode.
+      Attach to existing Application Load Balancers or Secure Web Proxies.
+    properties:
+      - name: 'resourceUri'
+        type: String
+        immutable: true
+        required: true
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        description: |
+          A supported Google Cloud networking proxy in the Project and Location.
+  - name: 'registries'
+    type: Array
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    description: |
+      A list of Agent registries containing the agents, MCP servers and tools governed by the Agent Gateway.
+      Note: Currently limited to project-scoped registries Must be of format
+      `//agentregistry.googleapis.com/{version}/projects/{{project}}/locations/{{location}}`
+    item_type:
+      type: String
+  - name: 'networkConfig'
+    type: NestedObject
+    description: |
+      Network configuration for the AgentGateway.
+    properties:
+      - name: 'egress'
+        type: NestedObject
+        required: true
+        description: |
+          Optional PSC-Interface network attachment for connectivity to your
+          private VPCs network.
+        properties:
+          - name: 'networkAttachment'
+            type: String
+            required: true
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+            description: |
+              The URI of the Network Attachment resource.
+  - name: 'agentGatewayCard'
+    type: NestedObject
+    description: |
+      AgentGatewayOutputCard contains informational output-only fields.
+    output: true
+    properties:
+      - name: 'mtlsEndpoint'
+        type: String
+        description: |
+          mTLS Endpoint associated with this AgentGateway.
+        output: true
+      - name: 'rootCertificates'
+        type: Array
+        description: |
+          Root Certificates for Agents to validate this AgentGateway.
+        output: true
+        item_type:
+          type: String
+      - name: 'serviceExtensionsServiceAccount'
+        type: String
+        description: |
+          Service Account used by Service Extensions to operate.
+        output: true

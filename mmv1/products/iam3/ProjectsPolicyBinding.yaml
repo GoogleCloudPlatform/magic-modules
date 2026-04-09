@@ -54,6 +54,9 @@ examples:
       pab_policy_id: 'my-pab-policy'
       display_name: 'binding for all principals in the project'
       project_binding_id: 'binding-for-all-project-principals'
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"binding for all principals in the project" + randomSuffix'
 parameters:
   - name: 'location'
     type: String

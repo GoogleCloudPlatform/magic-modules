@@ -39,7 +39,6 @@ import_format:
   - '{{instance}}/{{name}}'
 cai_asset_name_format: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -72,11 +71,10 @@ examples:
     primary_resource_id: 'database'
     vars:
       database_name: 'my-database'
+      instance_name: 'my-instance'
     ignore_read_extra:
       - 'deletion_protection'
       - 'default_time_zone'
-      # Randomness due to spanner instance
-    skip_vcr: true
 virtual_fields:
   - name: 'deletion_protection'
     description: |

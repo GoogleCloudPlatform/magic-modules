@@ -40,7 +40,6 @@ async:
   result:
     resource_inside_response: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/artifactregistry.reader'
@@ -61,21 +60,28 @@ sweeper:
 examples:
   - name: 'artifact_registry_repository_basic'
     primary_resource_id: 'my-repo'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example docker repository" + randomSuffix'
   - name: 'artifact_registry_repository_multi_region'
     primary_resource_id: 'my-repo'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example docker repository" + randomSuffix'
   - name: 'artifact_registry_repository_docker'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example docker repository" + randomSuffix'
   - name: 'artifact_registry_repository_cmek'
     primary_resource_id: 'my-repo'
     vars:
@@ -91,26 +97,43 @@ examples:
       upstream_repository_id: 'my-repository-upstream'
       upstream_desc: 'example docker repository (upstream source)'
       upstream_policy_id: 'my-repository-upstream'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example virtual docker repository" + randomSuffix'
+      # for backward compatible
+      upstream_desc: '"example docker repository (upstream source)" + randomSuffix'
   - name: 'artifact_registry_repository_remote'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
       desc: 'example remote docker repository'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote docker repository" + randomSuffix'
   - name: 'artifact_registry_repository_remote_apt'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'debian-stable'
       desc: 'example remote apt repository'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote apt repository" + randomSuffix'
   - name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'rocky-9'
       desc: 'example remote yum repository'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote yum repository" + randomSuffix'
   - name: 'artifact_registry_repository_cleanup'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository with cleanup policies'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example docker repository with cleanup policies" + randomSuffix'
   - name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
     vars:
@@ -122,6 +145,9 @@ examples:
       secret_data: 'remote-password'
     # Ignore this field as it is INPUT_ONLY. AR will not return this in the
     # response.
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote dockerhub repository with credentials" + randomSuffix'
     ignore_read_extra:
       - 'remote_repository_config.0.disable_upstream_validation'
   - name: 'artifact_registry_repository_remote_docker_custom_with_auth'
@@ -133,6 +159,9 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote custom docker repository with credentia" + randomSuffix'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
@@ -146,6 +175,9 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote custom maven repository with credential" + randomSuffix'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
@@ -159,6 +191,9 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote custom npm repository with credentials" + randomSuffix'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
@@ -172,6 +207,9 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote custom python repository with credentia" + randomSuffix'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
@@ -183,6 +221,11 @@ examples:
       desc: 'example remote common repository with docker upstream'
       upstream_repository_id: 'example-upstream-repo'
       upstream_repository_desc: 'example upstream repository'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote common repository with docker upstream" + randomSuffix'
+      # for backward compatible
+      upstream_repository_desc: '"example upstream repository" + randomSuffix'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
@@ -194,6 +237,11 @@ examples:
       desc: 'example remote common repository with docker upstream'
       upstream_repository_id: 'example-upstream-repo'
       upstream_repository_desc: 'example upstream repository'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote common repository with docker upstream" + randomSuffix'
+      # for backward compatible
+      upstream_repository_desc: '"example upstream repository" + randomSuffix'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
@@ -207,16 +255,21 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example remote custom docker repository with credentia" + randomSuffix'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
   - name: 'artifact_registry_repository_vulnerability_scanning'
     primary_resource_id: 'my-repo'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository with vulnerability scanning config'
+    test_vars_overrides:
+      # for backward compatible
+      desc: '"example docker repository with vulnerability scanning " + randomSuffix'
 parameters:
   - name: 'repository_id'
     type: String

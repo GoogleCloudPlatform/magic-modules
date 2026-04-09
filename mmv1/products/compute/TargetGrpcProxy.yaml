@@ -39,6 +39,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
 examples:
   - name: 'target_grpc_proxy_basic'
@@ -48,6 +49,15 @@ examples:
       urlmap_name: 'urlmap'
       backend_name: 'backend'
       healthcheck_name: 'healthcheck'
+    test_vars_overrides:
+      # for backward compatible
+      proxy_name: '"proxy" + randomSuffix'
+      # for backward compatible
+      urlmap_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      backend_name: '"backend" + randomSuffix'
+      # for backward compatible
+      healthcheck_name: '"healthcheck" + randomSuffix'
 parameters:
 properties:
   - name: 'creationTimestamp'

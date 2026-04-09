@@ -1,5 +1,5 @@
 /*
- * Copyright (c) HashiCorp, Inc.
+ * Copyright IBM Corp. 2014, 2026
  * SPDX-License-Identifier: MPL-2.0
  */
 
@@ -501,6 +501,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Healthcare",
         "path" to "./google-beta/services/healthcare"
     ),
+    "hypercomputecluster" to mapOf(
+        "name" to "hypercomputecluster",
+        "displayName" to "ClusterDirector",
+        "path" to "./google/services/hypercomputecluster"
+    ),
     "iam2" to mapOf(
         "name" to "iam2",
         "displayName" to "Iam2",
@@ -861,6 +866,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Transcoder",
         "path" to "./google-beta/services/transcoder"
     ),
+    "vectorsearch" to mapOf(
+        "name" to "vectorsearch",
+        "displayName" to "VectorSearch",
+        "path" to "./google-beta/services/vectorsearch",
+      ),
     "vertexai" to mapOf(
         "name" to "vertexai",
         "displayName" to "Vertexai",
@@ -880,6 +890,11 @@ var ServicesListBeta = mapOf(
         "name" to "workbench",
         "displayName" to "Workbench",
         "path" to "./google-beta/services/workbench"
+    ),
+    "workloadidentity" to mapOf(
+        "name" to "workloadidentity",
+        "displayName" to "Workload Identity",
+        "path" to "./google-beta/services/workloadidentity"
     ),
     "workflows" to mapOf(
         "name" to "workflows",

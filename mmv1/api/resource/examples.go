@@ -87,6 +87,9 @@ type Examples struct {
 	// Whether to skip generating docs for this example
 	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
 
+	// Whether to skip identity import for this example
+	ExcludeIdentityImport bool `yaml:"exclude_identity_import,omitempty"`
+
 	// Whether to skip import tests for this example
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
@@ -106,7 +109,7 @@ type Examples struct {
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
 	// insert it into the docs verbatim.
-	Vars map[string]string
+	Vars map[string]string `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
 	// be inferred by Open in Cloud Shell.  For instance, org_id
@@ -164,14 +167,18 @@ type Examples struct {
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
 
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
+
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
 	ExternalProviders []string `yaml:"external_providers,omitempty"`
 
-	DocumentationHCLText string `yaml:"-"`
-	TestHCLText          string `yaml:"-"`
-	OicsHCLText          string `yaml:"-"`
+	DocumentationHCLText string            `yaml:"-"`
+	TestHCLText          string            `yaml:"-"`
+	OicsHCLText          string            `yaml:"-"`
+	TestContextVars      map[string]string `yaml:"-"`
 
 	// ====================
 	// TGC
@@ -250,7 +257,7 @@ func (e *Examples) ValidateExternalProviders() error {
 	}
 
 	if len(unallowedProviders) > 0 {
-		return fmt.Errorf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		return fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
 	}
 
 	return nil
@@ -298,6 +305,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 
 	testVars := make(map[string]string)
 	testTestEnvVars := make(map[string]string)
+	testContextVars := make(map[string]string)
 	// Override vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
@@ -315,12 +323,14 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		// testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+		testContextVars[key] = fmt.Sprintf("\"%s\"+randomSuffix", newVal)
 	}
 
 	// Apply overrides from YAML
-	for key := range e.TestVarsOverrides {
-		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	for key, value := range e.TestVarsOverrides {
+		testContextVars[key] = fmt.Sprintf("%s", value)
 	}
 	for key := range originalTestEnvVars {
 		testTestEnvVars[key] = fmt.Sprintf("%%{%s}", key)
@@ -328,6 +338,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
+	e.TestContextVars = testContextVars
 	e.TestHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		return err

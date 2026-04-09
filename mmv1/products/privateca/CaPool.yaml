@@ -52,7 +52,6 @@ custom_code:
 examples:
   - name: 'privateca_capool_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-pool%s", context["random_suffix"])'
     vars:
       name: 'my-pool'
   - name: 'privateca_capool_all_fields'
@@ -72,7 +71,9 @@ examples:
     exclude_test: true
     exclude_docs: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: 'TestAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions'
+    skip: 'testing framework issue'
 parameters:
   - name: 'location'
     type: String

@@ -29,7 +29,7 @@ supports_indirect_user_project_override: true
 base_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs'
 self_link: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{name}}'
 immutable: false
-create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}'
+create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}&primary_location={{primary_location}}'
 custom_code:
   custom_update:
     templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
@@ -50,6 +50,13 @@ examples:
     test_env_vars:
       GOOGLE_BILLING_PROJECT: 'PROJECT'
       USER_PROJECT_OVERRIDE: 'true'
+  - name: 'biglake_iceberg_catalog_primary_location'
+    primary_resource_id: 'my_iceberg_catalog'
+    vars:
+      name: 'my_iceberg_catalog'
+    test_env_vars:
+      GOOGLE_BILLING_PROJECT: 'PROJECT'
+      USER_PROJECT_OVERRIDE: 'true'
 parameters:
   - name: 'name'
     type: String
@@ -57,8 +64,18 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The name of the IcebergCatalog. Format:
-      projects/{project_id_or_number}/catalogs/{iceberg_catalog_id}
+      The name of the IcebergCatalog.
+      For CATALOG_TYPE_GCS_BUCKET typed catalogs, the name needs to be the
+      exact same value of the GCS bucket's name. For example, for a bucket:
+      gs://bucket-name, the catalog name will be exactly "bucket-name".
+  - name: 'primaryLocation'
+    type: String
+    url_param_only: true
+    immutable: true
+    description: |
+      The primary location for mirroring the remote catalog metadata. It must be
+      a BigLake-supported location, and it should be proximate to the remote
+      catalog's location.
 properties:
   - name: 'credential_mode'
     api_name: 'credential-mode'

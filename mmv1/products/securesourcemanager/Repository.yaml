@@ -50,7 +50,6 @@ custom_code:
 examples:
   - name: 'secure_source_manager_repository_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
@@ -63,7 +62,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_repository_initial_config'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'

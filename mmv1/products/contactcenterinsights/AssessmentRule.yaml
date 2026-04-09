@@ -1,0 +1,163 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AssessmentRule
+description: |
+  The CCAI Insights project wide assessment rule. This assessment rule will be
+  applied to all conversations from the previous sampling cycle that match the
+  sample rule defined in the assessment rule. One project can have multiple
+  assessment rules.
+references:
+  guides:
+    'Configure assessment rules using the API': 'https://cloud.google.com/contact-center/insights/docs/assessment-rule'
+  api: 'https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.assessmentRules'
+base_url: projects/{{project}}/locations/{{location}}/assessmentRules
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/assessmentRules/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/assessmentRules?assessmentRuleId={{assessment_rule_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/assessmentRules/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/assessmentRules/{{name}}
+examples:
+  - name: 'contact_center_insights_assessment_rule_basic'
+    primary_resource_id: 'assessment_rule_basic'
+    vars:
+      resource_name: 'assessmentrulebasic'
+      assessment_rule_id: 'assessmentrulebasic'
+    test_vars_overrides:
+      'id_suffix': 'strings.ToLower(acctest.RandString(t, 10))'
+      # for backward compatible
+      resource_name: '"assessmentrulebasic" + randomSuffix'
+      # for backward compatible
+      assessment_rule_id: '"assessmentrulebasic" + randomSuffix'
+  - name: 'contact_center_insights_assessment_rule_full'
+    primary_resource_id: 'assessment_rule_full'
+    vars:
+      resource_name: 'assessmentrulefull'
+      assessment_rule_id: 'assessmentrulefull'
+    test_vars_overrides:
+      'id_suffix': 'strings.ToLower(acctest.RandString(t, 10))'
+      # for backward compatible
+      resource_name: '"assessmentrulefull" + randomSuffix'
+      # for backward compatible
+      assessment_rule_id: '"assessmentrulefull" + randomSuffix'
+autogen_status: QXNzZXNzbWVudFJ1bGU=
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Location of the resource.
+    immutable: true
+    url_param_only: true
+  - name: assessmentRuleId
+    type: String
+    description: |-
+      A unique ID for the new AssessmentRule. This ID will become the final
+      component of the AssessmentRule's resource name. If no ID is specified,
+      a server-generated ID will be used.
+
+      This value should be 4-64 characters and must match the regular
+      expression `^[A-Za-z0-9]{4,64}$`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: active
+    type: Boolean
+    description: |-
+      If true, apply this rule to conversations. Otherwise, this rule is
+      inactive.
+  - name: createTime
+    type: String
+    description: The time at which this assessment rule was created.
+    output: true
+  - name: displayName
+    type: String
+    description: Display Name of the assessment rule.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the assessment rule.
+      Format:
+      projects/{project}/locations/{location}/assessmentRules/{assessment_rule}
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: sampleRule
+    type: NestedObject
+    description: Message for sampling conversations.
+    properties:
+      - name: conversationFilter
+        type: String
+        description: |-
+          To specify the filter for the conversions that should apply this sample
+          rule. An empty filter means this sample rule applies to all conversations.
+      - name: dimension
+        type: String
+        description: |-
+          Group by dimension to sample the conversation. If no dimension is
+          provided, the sampling will be applied to the project level.
+          Current supported dimensions is 'quality_metadata.agent_info.agent_id'.
+      - name: samplePercentage
+        type: Double
+        description: |-
+          Percentage of conversations that we should sample  based on the dimension
+          between [0, 100].
+        conflicts:
+          - sample_row
+      - name: sampleRow
+        type: Integer
+        description: Number of the conversations that we should sample based on the dimension.
+        conflicts:
+          - sample_percentage
+  - name: scheduleInfo
+    type: NestedObject
+    description: Message for schedule info.
+    properties:
+      - name: endTime
+        type: String
+        description: |-
+          End time of the schedule. If not specified, will keep scheduling new
+          pipelines for execution until the schedule is no longer active or deleted.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
+          up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      - name: schedule
+        type: String
+        description: |-
+          The groc expression.
+          Format: `every number [synchronized]`
+          Cron syntax is not supported.
+          Time units can be: minutes, hours
+          Synchronized is optional and indicates that the schedule should be
+          synchronized to the start of the interval: every 5 minutes synchronized
+          means 00:00, 00:05 ...
+          Otherwise the start time is random within the interval.
+          Example: `every 5 minutes`
+          could be  00:02, 00:07, 00:12, ...
+      - name: startTime
+        type: String
+        description: |-
+          Start time of the schedule. If not specified, will start as soon as the
+          schedule is created.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
+          up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      - name: timeZone
+        type: String
+        description: |-
+          The timezone to use for the groc expression.
+          If not specified, defaults to UTC.
+        default_value: 'UTC'
+  - name: updateTime
+    type: String
+    description: The most recent time at which this assessment rule was updated.
+    output: true

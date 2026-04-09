@@ -500,6 +500,16 @@ cluster_config {
       boot_disk_size_gb = 30
       num_local_ssds    = 1
     }
+    instance_flexibility_policy {
+      instance_selection_list {
+        machine_types = ["n2-standard-2","n1-standard-2"]
+        rank          = 1
+      }
+      instance_selection_list {
+        machine_types = ["n2d-standard-2"]
+        rank          = 3
+      }
+    }
   }
 }
 ```
@@ -530,6 +540,10 @@ cluster_config {
 	computed value if not set (currently 500GB). Note: If SSDs are not
 	attached, it also contains the HDFS data blocks and Hadoop working directories.
 
+	* `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.
+
+	* `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.
+
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each master cluster node. Defaults to 0.
 
@@ -537,6 +551,12 @@ cluster_config {
 	Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile
 	Memory Express). See
 	[local SSD performance](https://cloud.google.com/compute/docs/disks/local-ssd#performance).
+* `instance_flexibility_policy` (Optional) Instance flexibility Policy allowing a mixture of VM shapes.
+
+    * `instance_selection_list` - (Optional) List of instance selection options that the group will use when creating new VMs.
+        * `machine_types` - (Optional) Full machine-type names, e.g. `"n1-standard-16"`.
+
+        * `rank` - (Optional) Preference of this instance selection. A lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
 
 * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
 
@@ -563,6 +583,16 @@ cluster_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
       num_local_ssds    = 1
+    }
+    instance_flexibility_policy {
+      instance_selection_list {
+        machine_types = ["n2-standard-2","n1-standard-2"]
+        rank          = 1
+      }
+      instance_selection_list {
+        machine_types = ["n2d-standard-2"]
+        rank          = 3
+      }
     }
   }
 }
@@ -595,6 +625,10 @@ cluster_config {
     computed value if not set (currently 500GB). Note: If SSDs are not
 	attached, it also contains the HDFS data blocks and Hadoop working directories.
 
+    * `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.
+
+    * `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.
+
     * `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each worker cluster node. Defaults to 0.
 
@@ -602,6 +636,12 @@ cluster_config {
     for more information.
 
 * `min_num_instances` (Optional) The minimum number of primary worker instances to create.  If `min_num_instances` is set, cluster creation will succeed if the number of primary workers created is at least equal to the `min_num_instances` number.
+* `instance_flexibility_policy` (Optional) Instance flexibility Policy allowing a mixture of VM shapes.
+
+    * `instance_selection_list` - (Optional) List of instance selection options that the group will use when creating new VMs.
+        * `machine_types` - (Optional) Full machine-type names, e.g. `"n1-standard-16"`.
+
+        * `rank` - (Optional) Preference of this instance selection. A lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
 
 * `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
 
@@ -667,6 +707,10 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
     in GB. The smallest allowed disk size is 10GB. GCP will default to a predetermined
     computed value if not set (currently 500GB). Note: If SSDs are not
 	attached, it also contains the HDFS data blocks and Hadoop working directories.
+
+	* `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.
+
+	* `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.
 
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each preemptible worker node. Defaults to 0.
@@ -924,6 +968,10 @@ auxiliary_node_groups{
          computed value if not set (currently 500GB). Note: If SSDs are not
          attached, it also contains the HDFS data blocks and Hadoop working directories.
          
+      * `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.
+
+      * `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.
+
       * `num_local_ssds` - (Optional) The amount of local SSD disks that will be attached to each master cluster node. 
          Defaults to 0.
 

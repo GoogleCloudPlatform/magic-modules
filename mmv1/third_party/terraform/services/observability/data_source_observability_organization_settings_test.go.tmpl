@@ -1,0 +1,64 @@
+package observability_test
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+
+	context := map[string]interface{}{
+		"org_id":   orgId,
+		"location": "us",
+	}
+	dataResourceName := "data.google_observability_organization_settings.settings"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObservabilityOrganizationSettings_datasource(context),
+				Check: acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_organization_settings.settings"),
+			},
+		},
+	})
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityOrganizationSettings_datasource(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "time_sleep" "wait_for_org" {
+		create_duration = "60s"
+	}
+
+	resource "google_observability_organization_settings" "settings" {
+		provider 	      						= "google-beta"
+		organization 	  						= "%{org_id}"
+		location 	           				= "global"
+		default_storage_location    = "%{location}"
+		depends_on 	    						= [time_sleep.wait_for_org]
+	}
+
+	data "google_observability_organization_settings" "settings" {
+		provider 	      = "google-beta"
+		organization 	  = "%{org_id}"
+		location 	      = "global"
+		depends_on 	    = [google_observability_organization_settings.settings]
+	}
+`, context)
+}
+{{- else }}
+{{- end }}

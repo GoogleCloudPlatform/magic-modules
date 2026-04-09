@@ -963,6 +963,7 @@ properties:
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
+                      type: String
                       description: |-
                         Optional. Default value of the data. Represents a dynamically typed value
                         which can be either null, a number, a string, a boolean, a struct,
@@ -1155,6 +1156,7 @@ properties:
                                     `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
                                   output: true
                                 - name: toolId
+                                  type: String
                                   description: |-
                                     The tool ID to filter the tools to retrieve the schema for.
                                   output: true
@@ -1199,6 +1201,7 @@ properties:
                                     `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
                                   output: true
                                 - name: toolId
+                                  type: String
                                   description: |-
                                     The tool ID to filter the tools to retrieve the schema for.
                                   output: true
@@ -1710,6 +1713,7 @@ properties:
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
+                      type: String
                       description: |-
                         Optional. Default value of the data. Represents a dynamically typed value
                         which can be either null, a number, a string, a boolean, a struct,
@@ -1822,6 +1826,7 @@ properties:
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
+                      type: String
                       description: |-
                         Optional. Default value of the data. Represents a dynamically typed value
                         which can be either null, a number, a string, a boolean, a struct,
