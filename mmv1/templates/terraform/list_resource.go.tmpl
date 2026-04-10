@@ -23,7 +23,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
 {{- if and $.HasProject $.LegacyLongFormProject }}
@@ -48,7 +47,13 @@ type {{ $.ResourceName -}}ListResource struct {
 }
 
 func New{{ $.ResourceName -}}ListResource() list.ListResource {
-	return &{{ $.ResourceName -}}ListResource{}
+	r := &{{ $.ResourceName -}}ListResource{}
+	r.IdentityAttributes = []string{
+{{- range $identity := $.IdentityProperties }}
+		"{{ underscore $identity.Name }}",
+{{- end }}
+	}
+	return r
 }
 
 func (r *{{ $.ResourceName -}}ListResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -140,30 +145,14 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 {{- end }}
 				result := req.NewListResult(ctx)
 
-				if err := tpgresource.SetIdentityFields(ctx, &result, rd, map[string]string{
-{{- range $p := $.IdentityProperties }}
-{{- if or (eq $p.Name "project") (eq $p.Name "zone") (eq $p.Name "region") (eq $p.Name "location") }}
-					"{{ underscore $p.Name }}": {{ $p.CamelizeProperty }},
-{{- end }}
-{{- end }}
-				}); err != nil {
-					return err
-				}
-
 				if n, ok := rd.GetOk("name"); ok {
 					if s, ok := n.(string); ok {
 						result.DisplayName = s
 					}
 				}
 
-				if req.IncludeResource {
-					tfTypeResource, err := rd.TfTypeResourceState()
-					if err != nil {
-						return err
-					}
-					if err := result.Resource.Set(ctx, *tfTypeResource); err != nil {
-						return errors.New("error setting resource")
-					}
+				if err := r.SetResult(ctx, req.IncludeResource, &result, rd); err != nil {
+					return err
 				}
 
 				if !push(result) {
@@ -350,27 +339,6 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 				return fmt.Errorf("Error constructing id: %s", err)
 			}
 			d.SetId(id)
-
-			identity, err := d.Identity()
-			if err == nil && identity != nil {
-{{- range $p := $.IdentityProperties }}
-{{- if eq $p.Type "Integer" }}
-				if v, ok := d.GetOk("{{ underscore $p.Name}}"); ok {
-					if err := identity.Set("{{ underscore $p.Name}}", v.(int)); err != nil {
-						return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
-					}
-				}
-{{- else }}
-				if v, ok := d.GetOk("{{ underscore $p.Name}}"); ok {
-					if err := identity.Set("{{ underscore $p.Name}}", v.(string)); err != nil {
-						return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
-					}
-				}
-{{- end }}
-{{- end }}
-			} else {
-				log.Printf("[DEBUG] (list item) identity not set: %s", err)
-			}
 			return nil
 {{- end }}
 		},
