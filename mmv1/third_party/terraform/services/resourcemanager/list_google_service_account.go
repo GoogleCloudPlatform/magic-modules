@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
-	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -27,26 +26,20 @@ type GoogleServiceAccountListResource struct {
 	tpgresource.ListResourceMetadata
 }
 
+// GoogleServiceAccountListModel matches [ListResourceMetadata.ListConfigFields] (tfsdk names and types).
+type GoogleServiceAccountListModel struct {
+	Project types.String `tfsdk:"project"`
+}
+
 func NewGoogleServiceAccountListResource() list.ListResource {
 	r := &GoogleServiceAccountListResource{}
 	r.TypeName = "google_service_account"
 	r.ResourceSchema = ResourceGoogleServiceAccount()
 	r.IdentityAttributes = []string{"email", "project"}
-	return r
-}
-
-func (r *GoogleServiceAccountListResource) ListResourceConfigSchema(ctx context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
-	resp.Schema = listschema.Schema{
-		Attributes: map[string]listschema.Attribute{
-			"project": listschema.StringAttribute{
-				Optional: true,
-			},
-		},
+	r.ListConfigFields = []tpgresource.ListConfigField{
+		{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true},
 	}
-}
-
-type GoogleServiceAccountListModel struct {
-	Project types.String `tfsdk:"project"`
+	return r
 }
 
 func (r *GoogleServiceAccountListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
