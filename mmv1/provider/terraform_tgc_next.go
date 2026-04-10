@@ -374,14 +374,16 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 
 	tests := make([]resource.TGCTest, 0)
 	prefix := fmt.Sprintf("resource_%s", resourceFullName)
-	testPrefix := strings.ToLower("TestAcc" + object.ProductMetadata.Name + object.Name + "_")
+	normalizedPrefix := strings.ReplaceAll(prefix, "_", "")
+	testPrefix := strings.ToLower("TestAcc" + object.ProductMetadata.Name + object.Name)
 
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
 		}
 		name := entry.Name()
-		if !strings.HasPrefix(name, prefix) {
+		normalizedName := strings.ReplaceAll(name, "_", "")
+		if !strings.HasPrefix(normalizedName, normalizedPrefix) {
 			continue
 		}
 
