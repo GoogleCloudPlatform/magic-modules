@@ -72,39 +72,17 @@ func NewListConfigSchema(fields ...ListConfigField) (listschema.Schema, error) {
 	return listschema.Schema{Attributes: attrs}, nil
 }
 
-// IdentityAttributeKeys returns top-level attribute names from res.Identity (SDKv2 SchemaFunc).
-// It panics if res is nil, Identity is nil, or the identity schema is empty (programmer error when wiring a list resource to a managed resource that must define identity).
-// Order follows map iteration; identity field order does not affect correctness.
-func IdentityAttributeKeys(res *schema.Resource) []string {
-	if res == nil {
-		panic("tpgresource.IdentityAttributeKeys: resource is nil")
-	}
-	if res.Identity == nil {
-		panic("tpgresource.IdentityAttributeKeys: resource has no Identity block")
-	}
-	m := res.Identity.SchemaMap()
-	if len(m) == 0 {
-		panic("tpgresource.IdentityAttributeKeys: resource identity schema is empty")
-	}
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
 type ListResourceMetadata struct {
 	ListResourceWithRawV5Schemas
 
 	TypeName string
 	// SDKv2Resource is the plugin SDK v2 *schema.Resource (schema, CRUD, Identity, etc.), not only attribute definitions.
-	SDKv2Resource      *schema.Resource
-	Client             *transport_tpg.Config
-	ProjectId          string
-	Region             string
-	Zone               string
-	IdentityAttributes []string // e.g. IdentityAttributeKeys(SDKv2Resource) in the list resource constructor
-	ListConfigFields   []ListConfigField
+	SDKv2Resource    *schema.Resource
+	Client           *transport_tpg.Config
+	ProjectId        string
+	Region           string
+	Zone             string
+	ListConfigFields []ListConfigField
 }
 
 func (listR *ListResourceMetadata) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -187,13 +165,15 @@ func (listR *ListResourceMetadata) GetLocation(override types.String) string {
 	return listR.Region
 }
 
-// setResourceIdentity copies IdentityAttributes from rd into resource identity.
+// setResourceIdentity copies identity fields from rd using SDKv2Resource.Identity.SchemaMap().
+// It panics if SDKv2Resource, Identity, or the identity schema is empty (wiring error).
 func (listR *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) error {
+	idSchema := listR.SDKv2Resource.Identity.SchemaMap()
 	identity, err := rd.Identity()
 	if err != nil {
 		return fmt.Errorf("error getting identity: %w", err)
 	}
-	for _, attr := range listR.IdentityAttributes {
+	for attr := range idSchema {
 		if v, ok := rd.GetOk(attr); ok {
 			if err := identity.Set(attr, v); err != nil {
 				return fmt.Errorf("error setting identity field %q: %w", attr, err)

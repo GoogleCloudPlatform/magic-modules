@@ -35,7 +35,6 @@ func NewGoogleServiceAccountListResource() list.ListResource {
 	listR := &GoogleServiceAccountListResource{}
 	listR.TypeName = "google_service_account"
 	listR.SDKv2Resource = ResourceGoogleServiceAccount()
-	listR.IdentityAttributes = tpgresource.IdentityAttributeKeys(listR.SDKv2Resource)
 	listR.ListConfigFields = []tpgresource.ListConfigField{{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true}}
 	return listR
 }
