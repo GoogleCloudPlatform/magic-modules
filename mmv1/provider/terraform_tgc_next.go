@@ -421,22 +421,6 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTestsMultiFile(o
 		return nil
 	}
 
-	// 1. Keep old logic for main file
-	mainFilePaths := []string{
-		path.Join(dirPath, mainFileName),
-		path.Join(dirPath, mainFileName+".tmpl"),
-	}
-	for _, fp := range mainFilePaths {
-		// Check if file exists in templateFS
-		if _, err := fs.Stat(tgc.templateFS, fp); err == nil {
-			if err := processFile(fp); err != nil {
-				return err
-			}
-			break // Only process one if both exist
-		}
-	}
-
-	// 2. Apply new logic only to extra files
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -526,6 +510,8 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	}
 
 	object.TGCTests = append(object.TGCTests, tests...)
+
+	tgc.addTestsFromHandwrittenTestsMultiFile(object)
 
 	return nil
 }
