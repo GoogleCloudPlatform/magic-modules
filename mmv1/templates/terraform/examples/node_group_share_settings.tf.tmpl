@@ -7,13 +7,13 @@ resource "google_project" "guest_project" {
 
 resource "google_compute_node_template" "soletenant-tmpl" {
   name      = "{{index $.Vars "template_name"}}"
-  region    = "us-east1"
+  region    = "us-central1"
   node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_group" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "group_name"}}"
-  zone        = "us-east1-c"
+  zone        = "us-central1-f"
   description = "example google_compute_node_group for Terraform Google Provider"
 
   initial_size          = 1
