@@ -524,9 +524,8 @@ func TestGetRegionFromRegionSelfLink(t *testing.T) {
 
 func TestBigtableClientFactoryPropagatesEndpoints(t *testing.T) {
 	cfg := &transport_tpg.Config{
-		UniverseDomain:        "apis-tpczero.goog",
-		BigtableBasePath:      "https://bigtableadmin.apis-tpczero.goog/v2/",
-		BigtableAdminBasePath: "https://bigtableadmin.apis-tpczero.goog/v2/",
+		UniverseDomain:   "apis-tpczero.goog",
+		BigtableBasePath: "https://bigtableadmin.apis-tpczero.goog/v2/",
 	}
 
 	factory := cfg.BigTableClientFactory("test-agent")
