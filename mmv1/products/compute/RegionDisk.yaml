@@ -91,6 +91,12 @@ examples:
     primary_resource_id: 'primary'
     vars:
       region_disk_name: 'my-region-hyperdisk'
+  - name: 'region_disk_from_image'
+    primary_resource_id: 'regiondisk'
+    vars:
+      region_disk_name: 'my-region-disk-from-image'
+    # Hidden from docs because this feature is behind an allowlist
+    exclude_docs: true
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -116,9 +122,27 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Snapshot'
     imports: 'selfLink'
+  - name: 'image'
+    type: String
+    description: |
+      The image from which to initialize this disk. This can be
+      one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
+      `projects/{project}/global/images/family/{family}`, `global/images/{image}`,
+      `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
+      `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
+      images names must include the family name. If they don't, use the
+      [google_compute_image data source](/docs/providers/google/d/compute_image.html).
+      For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
+      These images can be referred by family name here.
+
+      **Note:** This field is currently behind an allowlist and requires special permission to use.
+    api_name: sourceImage
+    immutable: true
+    diff_suppress_func: 'DiskImageDiffSuppress'
 properties:
   - name: 'diskEncryptionKey'
     type: NestedObject
+    
     description: |
       Encrypts the disk using a customer-supplied encryption key.
 
@@ -160,6 +184,42 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+  - name: 'sourceImageEncryptionKey'
+    type: NestedObject
+    description: |
+      The customer-supplied encryption key of the source image. Required if
+      the source image is protected by a customer-supplied encryption key.
+
+      **Note:** This field is currently behind an allowlist and requires special permission to use.
+    immutable: true
+    properties:
+      - name: 'rawKey'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+      - name: 'sha256'
+        type: String
+        description: |
+          The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
+          encryption key that protects this resource.
+        output: true
+        # TODO Change to ResourceRef once KMS is in Magic Modules
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          The name of the encryption key that is stored in Google Cloud KMS.
+  - name: 'sourceImageId'
+    type: String
+    description: |
+      The ID value of the image used to create this disk. This value
+      identifies the exact image that was used to create this persistent
+      disk. For example, if you created the persistent disk from an image
+      that was later deleted and recreated under the same name, the source
+      image ID would identify the exact version of the image that was used.
+
+      **Note:** This field is currently behind an allowlist and requires special permission to use.
+    output: true
   - name: 'sourceSnapshotEncryptionKey'
     type: NestedObject
     description: |
