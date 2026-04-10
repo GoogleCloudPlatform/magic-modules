@@ -139,13 +139,13 @@ func testAccComputeNodeGroup_update2(groupName, tmplPrefix, tmplToUse string) st
 resource "google_compute_node_template" "tmpl1" {
   name      = "%s-first"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_template" "tmpl2" {
   name      = "%s-second"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_group" "nodes" {
@@ -169,7 +169,7 @@ func testAccComputeNodeGroup_fail(groupName, tmplPrefix, tmplToUse string) strin
 resource "google_compute_node_template" "tmpl1" {
   name      = "%s-first"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_group" "nodes" {
