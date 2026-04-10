@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -180,7 +181,7 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 	}
 
 	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)
-	credentials := transport_tpg.TestFakeCredentialsPath
+	credentials := acctest.GenerateFakeCredentialsJson("test")
 
 	// Define old version (without external_credentials)
 	oldVersion := map[string]resource.ExternalProvider{
@@ -223,18 +224,17 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 			},
 			// old provider - credentials
 			{
-				ExternalProviders:        oldVersion,
+				ExternalProviders: oldVersion,
 				PreConfig: func() {
 					for _, env := range envvar.CredsEnvVars {
 						t.Setenv(env, "")
 					}
 				},
 				Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(map[string]interface{}{
-					"credentials": credentials,
+					"credentials": strconv.Quote(credentials),
 				}),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "credentials", credentials),
-				),
+				// google_provider_config_sdk is not available in 6.10.0, so we cannot verify credentials here.
+				// The fact that this step succeeds implies the provider accepted the credentials.
 			},
 			{
 				// new provider - credentials
@@ -244,8 +244,8 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 						t.Setenv(env, "")
 					}
 				},
-				Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(map[string]interface{}{
-					"credentials": credentials,
+				Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfigNew(map[string]interface{}{
+					"credentials": strconv.Quote(credentials),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "credentials", credentials),
@@ -268,7 +268,15 @@ data "google_client_config" "default" {}
 func testAccProviderExternalCredentialsUpgrade_CredentialsConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  credentials = "%{credentials}"
+  credentials = %{credentials}
+}
+`, context)
+}
+
+func testAccProviderExternalCredentialsUpgrade_CredentialsConfigNew(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+  credentials = %{credentials}
 }
 
 data "google_provider_config_sdk" "default" {}
