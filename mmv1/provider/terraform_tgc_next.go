@@ -377,37 +377,10 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	normalizedPrefix := strings.ReplaceAll(prefix, "_", "")
 	testPrefix := strings.ToLower("TestAcc" + object.ProductMetadata.Name + object.Name)
 
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		name := entry.Name()
-		normalizedName := strings.ReplaceAll(name, "_", "")
-		if !strings.HasPrefix(normalizedName, normalizedPrefix) {
-			continue
-		}
+	mainFileName := fmt.Sprintf("resource_%s_test.go", resourceFullName)
 
-		// Skip files that belong to another resource with a longer name sharing the prefix
-		belongsToOther := false
-		for _, obj := range tgc.Product.Objects {
-			if obj == object {
-				continue
-			}
-			otherPrefix := fmt.Sprintf("resource_%s", tgc.ResourceGoFilename(*obj))
-			if strings.HasPrefix(name, otherPrefix) && len(otherPrefix) > len(prefix) {
-				belongsToOther = true
-				break
-			}
-		}
-		if belongsToOther {
-			continue
-		}
-
-		if !strings.HasSuffix(name, "_test.go") && !strings.HasSuffix(name, "_test.go.tmpl") {
-			continue
-		}
-
-		filePath := path.Join(dirPath, name)
+	// Helper to process a file and extract tests
+	processFile := func(filePath string) error {
 		data, err := fs.ReadFile(tgc.templateFS, filePath)
 		if err != nil {
 			return fmt.Errorf("error reading handwritten test file %s: %v", filePath, err)
@@ -437,6 +410,64 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 					})
 				}
 			}
+		}
+		return nil
+	}
+
+	// 1. Keep old logic for main file
+	mainFilePaths := []string{
+		path.Join(dirPath, mainFileName),
+		path.Join(dirPath, mainFileName+".tmpl"),
+	}
+	for _, fp := range mainFilePaths {
+		// Check if file exists in templateFS
+		if _, err := fs.Stat(tgc.templateFS, fp); err == nil {
+			if err := processFile(fp); err != nil {
+				return err
+			}
+			break // Only process one if both exist
+		}
+	}
+
+	// 2. Apply new logic only to extra files
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		// Skip main file as it was handled directly
+		if name == mainFileName || name == mainFileName+".tmpl" {
+			continue
+		}
+
+		normalizedName := strings.ReplaceAll(name, "_", "")
+		if !strings.HasPrefix(normalizedName, normalizedPrefix) {
+			continue
+		}
+
+		// Skip files that belong to another resource with a longer name sharing the prefix
+		belongsToOther := false
+		for _, obj := range tgc.Product.Objects {
+			if obj == object {
+				continue
+			}
+			otherPrefix := fmt.Sprintf("resource_%s", tgc.ResourceGoFilename(*obj))
+			if strings.HasPrefix(name, otherPrefix) && len(otherPrefix) > len(prefix) {
+				belongsToOther = true
+				break
+			}
+		}
+		if belongsToOther {
+			continue
+		}
+
+		if !strings.HasSuffix(name, "_test.go") && !strings.HasSuffix(name, "_test.go.tmpl") {
+			continue
+		}
+
+		filePath := path.Join(dirPath, name)
+		if err := processFile(filePath); err != nil {
+			return err
 		}
 	}
 
