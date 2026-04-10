@@ -355,16 +355,14 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 			if err == nil && identity != nil {
 {{- range $p := $.IdentityProperties }}
 {{- if eq $p.Type "Integer" }}
-				if _, ok := identity.GetOk("{{ underscore $p.Name}}"); !ok {
-					err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(int))
-					if err != nil {
+				if v, ok := d.GetOk("{{ underscore $p.Name}}"); ok {
+					if err := identity.Set("{{ underscore $p.Name}}", v.(int)); err != nil {
 						return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
 					}
 				}
 {{- else }}
-				if v, ok := identity.GetOk("{{ underscore $p.Name}}"); !ok && v == "" {
-					err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
-					if err != nil {
+				if v, ok := d.GetOk("{{ underscore $p.Name}}"); ok {
+					if err := identity.Set("{{ underscore $p.Name}}", v.(string)); err != nil {
 						return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
 					}
 				}
