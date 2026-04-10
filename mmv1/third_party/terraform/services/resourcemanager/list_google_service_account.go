@@ -32,24 +32,22 @@ type GoogleServiceAccountListModel struct {
 }
 
 func NewGoogleServiceAccountListResource() list.ListResource {
-	r := &GoogleServiceAccountListResource{}
-	r.TypeName = "google_service_account"
-	r.ResourceSchema = ResourceGoogleServiceAccount()
-	r.IdentityAttributes = []string{"email", "project"}
-	r.ListConfigFields = []tpgresource.ListConfigField{
-		{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true},
-	}
-	return r
+	listR := &GoogleServiceAccountListResource{}
+	listR.TypeName = "google_service_account"
+	listR.SDKv2Resource = ResourceGoogleServiceAccount()
+	listR.IdentityAttributes = tpgresource.IdentityAttributeKeys(listR.SDKv2Resource)
+	listR.ListConfigFields = []tpgresource.ListConfigField{{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true}}
+	return listR
 }
 
-func (r *GoogleServiceAccountListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
+func (listR *GoogleServiceAccountListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data GoogleServiceAccountListModel
 	diags := req.Config.Get(ctx, &data)
 	if diags.HasError() {
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
-	if r.Client == nil {
+	if listR.Client == nil {
 		diags = append(diags, diag.NewErrorDiagnostic(
 			"Provider not configured",
 			"The Google provider client is not available; ensure the provider is configured (e.g. credentials and default project).",
@@ -57,13 +55,13 @@ func (r *GoogleServiceAccountListResource) List(ctx context.Context, req list.Li
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
-	project := r.GetProject(data.Project)
+	project := listR.GetProject(data.Project)
 
 	stream.Results = func(push func(list.ListResult) bool) {
-		err := ListServiceAccounts(r.Client, project, func(rd *schema.ResourceData) error {
+		err := ListServiceAccounts(listR.Client, project, func(rd *schema.ResourceData) error {
 			result := req.NewListResult(ctx)
 
-			if err := r.SetResult(ctx, req.IncludeResource, &result, rd); err != nil {
+			if err := listR.SetResult(ctx, req.IncludeResource, &result, rd); err != nil {
 				return err
 			}
 

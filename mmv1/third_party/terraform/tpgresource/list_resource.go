@@ -72,41 +72,65 @@ func NewListConfigSchema(fields ...ListConfigField) (listschema.Schema, error) {
 	return listschema.Schema{Attributes: attrs}, nil
 }
 
+// IdentityAttributeKeys returns top-level attribute names from res.Identity (SDKv2 SchemaFunc).
+// It panics if res is nil, Identity is nil, or the identity schema is empty (programmer error when wiring a list resource to a managed resource that must define identity).
+// Order follows map iteration; identity field order does not affect correctness.
+func IdentityAttributeKeys(res *schema.Resource) []string {
+	if res == nil {
+		panic("tpgresource.IdentityAttributeKeys: resource is nil")
+	}
+	if res.Identity == nil {
+		panic("tpgresource.IdentityAttributeKeys: resource has no Identity block")
+	}
+	m := res.Identity.SchemaMap()
+	if len(m) == 0 {
+		panic("tpgresource.IdentityAttributeKeys: resource identity schema is empty")
+	}
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 type ListResourceMetadata struct {
 	ListResourceWithRawV5Schemas
 
-	TypeName           string
-	ResourceSchema     *schema.Resource
+	TypeName string
+	// SDKv2Resource is the plugin SDK v2 *schema.Resource (schema, CRUD, Identity, etc.), not only attribute definitions.
+	SDKv2Resource      *schema.Resource
 	Client             *transport_tpg.Config
 	ProjectId          string
 	Region             string
 	Zone               string
-	IdentityAttributes []string
+	IdentityAttributes []string // e.g. IdentityAttributeKeys(SDKv2Resource) in the list resource constructor
 	ListConfigFields   []ListConfigField
 }
 
-func (r *ListResourceMetadata) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = r.TypeName
+func (listR *ListResourceMetadata) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = listR.TypeName
 }
 
-func (r *ListResourceMetadata) RawV5Schemas(ctx context.Context, _ list.RawV5SchemaRequest, resp *list.RawV5SchemaResponse) {
-	resp.ProtoV5Schema = r.ResourceSchema.ProtoSchema(ctx)()
-	resp.ProtoV5IdentitySchema = r.ResourceSchema.ProtoIdentitySchema(ctx)()
+func (listR *ListResourceMetadata) RawV5Schemas(ctx context.Context, _ list.RawV5SchemaRequest, resp *list.RawV5SchemaResponse) {
+	resp.ProtoV5Schema = listR.SDKv2Resource.ProtoSchema(ctx)()
+	resp.ProtoV5IdentitySchema = listR.SDKv2Resource.ProtoIdentitySchema(ctx)()
 }
 
-func (r *ListResourceMetadata) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	r.Defaults(req, resp)
+func (listR *ListResourceMetadata) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	listR.Defaults(req, resp)
 }
 
-func (r *ListResourceMetadata) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
-	s, err := NewListConfigSchema(r.ListConfigFields...)
+func (listR *ListResourceMetadata) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
+	s, err := NewListConfigSchema(listR.ListConfigFields...)
 	if err != nil {
-		panic("tpgresource.ListResourceConfigSchema: " + err.Error())
+		resp.Diagnostics.AddError("Invalid list resource configuration", err.Error())
+		resp.Schema = listschema.Schema{Attributes: map[string]listschema.Attribute{}}
+		return
 	}
 	resp.Schema = s
 }
 
-func (r *ListResourceMetadata) Defaults(request resource.ConfigureRequest, response *resource.ConfigureResponse) {
+func (listR *ListResourceMetadata) Defaults(request resource.ConfigureRequest, response *resource.ConfigureResponse) {
 	if request.ProviderData == nil {
 		return
 	}
@@ -117,59 +141,59 @@ func (r *ListResourceMetadata) Defaults(request resource.ConfigureRequest, respo
 		return
 	}
 
-	r.Client = c
-	r.ProjectId = c.Project
-	r.Region = c.Region
-	r.Zone = c.Zone
+	listR.Client = c
+	listR.ProjectId = c.Project
+	listR.Region = c.Region
+	listR.Zone = c.Zone
 }
 
 // GetProject: list config override, else provider default project.
-func (r *ListResourceMetadata) GetProject(override types.String) string {
+func (listR *ListResourceMetadata) GetProject(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
 			return v
 		}
 	}
-	return r.ProjectId
+	return listR.ProjectId
 }
 
 // GetRegion: list config override, else provider default region.
-func (r *ListResourceMetadata) GetRegion(override types.String) string {
+func (listR *ListResourceMetadata) GetRegion(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
 			return v
 		}
 	}
-	return r.Region
+	return listR.Region
 }
 
 // GetZone: list config override, else provider default zone.
-func (r *ListResourceMetadata) GetZone(override types.String) string {
+func (listR *ListResourceMetadata) GetZone(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
 			return v
 		}
 	}
-	return r.Zone
+	return listR.Zone
 }
 
 // GetLocation: list config override, else provider default region.
-func (r *ListResourceMetadata) GetLocation(override types.String) string {
+func (listR *ListResourceMetadata) GetLocation(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
 			return v
 		}
 	}
-	return r.Region
+	return listR.Region
 }
 
 // setResourceIdentity copies IdentityAttributes from rd into resource identity.
-func (r *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) error {
+func (listR *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) error {
 	identity, err := rd.Identity()
 	if err != nil {
 		return fmt.Errorf("error getting identity: %w", err)
 	}
-	for _, attr := range r.IdentityAttributes {
+	for _, attr := range listR.IdentityAttributes {
 		if v, ok := rd.GetOk(attr); ok {
 			if err := identity.Set(attr, v); err != nil {
 				return fmt.Errorf("error setting identity field %q: %w", attr, err)
@@ -180,8 +204,8 @@ func (r *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) erro
 }
 
 // SetResult fills list result identity from rd; if includeResource, also full resource state.
-func (r *ListResourceMetadata) SetResult(ctx context.Context, includeResource bool, result *list.ListResult, rd *schema.ResourceData) error {
-	if err := r.setResourceIdentity(rd); err != nil {
+func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResource bool, result *list.ListResult, rd *schema.ResourceData) error {
+	if err := listR.setResourceIdentity(rd); err != nil {
 		return err
 	}
 
