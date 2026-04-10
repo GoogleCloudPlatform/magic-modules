@@ -374,7 +374,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 
 	tests := make([]resource.TGCTest, 0)
 	prefix := fmt.Sprintf("resource_%s", resourceFullName)
-	testPrefix := "TestAcc" + object.ProductMetadata.Name + object.Name + "_"
+	testPrefix := strings.ToLower("TestAcc" + object.ProductMetadata.Name + object.Name + "_")
 
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -415,7 +415,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 		for _, match := range matches {
 			if len(match) == 2 {
 				testName := string(match[1])
-				if !strings.HasPrefix(testName, testPrefix) {
+				if !strings.HasPrefix(strings.ToLower(testName), testPrefix) {
 					continue
 				}
 				if _, ok := testNamesInYAML[testName]; ok {

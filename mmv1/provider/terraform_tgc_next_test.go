@@ -132,10 +132,10 @@ func TestFindIdentityParams(t *testing.T) {
 func TestAddTestsFromHandwrittenTests(t *testing.T) {
 	mockFS := fstest.MapFS{
 		"third_party/terraform/services/dummy/resource_dummy_dummy_test.go": &fstest.MapFile{
-			Data: []byte(`func TestAccDummy_basic(t *testing.T) {}`),
+			Data: []byte(`func TestAccDummyDummyResource_basic(t *testing.T) {}`),
 		},
 		"third_party/terraform/services/dummy/resource_dummy_dummy_extra_test.go": &fstest.MapFile{
-			Data: []byte(`func TestAccDummy_extra(t *testing.T) {}`),
+			Data: []byte(`func TestAccDummyDummyResource_extra(t *testing.T) {}`),
 		},
 		"third_party/terraform/services/dummy/resource_dummy_dummy_association_test.go": &fstest.MapFile{
 			Data: []byte(`func TestAccDummyAssociation_basic(t *testing.T) {}`),
@@ -174,7 +174,7 @@ func TestAddTestsFromHandwrittenTests(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expectedTests := []string{"TestAccDummy_basic", "TestAccDummy_extra"}
+	expectedTests := []string{"TestAccDummyDummyResource_basic", "TestAccDummyDummyResource_extra"}
 	if len(dummyRes.TGCTests) != len(expectedTests) {
 		t.Errorf("expected %d tests, got %d", len(expectedTests), len(dummyRes.TGCTests))
 	}
@@ -183,10 +183,10 @@ func TestAddTestsFromHandwrittenTests(t *testing.T) {
 	foundExtra := false
 	foundAssoc := false
 	for _, test := range dummyRes.TGCTests {
-		if test.Name == "TestAccDummy_basic" {
+		if test.Name == "TestAccDummyDummyResource_basic" {
 			foundBasic = true
 		}
-		if test.Name == "TestAccDummy_extra" {
+		if test.Name == "TestAccDummyDummyResource_extra" {
 			foundExtra = true
 		}
 		if test.Name == "TestAccDummyAssociation_basic" {
