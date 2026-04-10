@@ -189,17 +189,15 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 	callback func(*schema.ResourceData) error,
 ) error {
 	resourceData := Resource{{ $.ResourceName }}().Data(&terraform.InstanceState{})
-{{- $listUrlIds := $.ExtractIdentifiers $.BaseUrl }}
+	// ReplaceVars expands {{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}} (product default_base_url) and base_url using resourceData.
+	// base_url often omits vars that still appear in the base path (e.g. {{"{{"}}location{{"}}"}} in the host, {{"{{"}}project{{"}}"}} only in the path).
+	// Set every resolved list identity on resourceData before building the list URL.
 {{- range $identity := $.IdentityProperties }}
-{{- range $id := $listUrlIds }}
-{{- if eq $id (underscore $identity.Name) }}
 	if {{ $identity.CamelizeProperty }} != "" {
 		if err := resourceData.Set("{{ underscore $identity.Name }}", {{ $identity.CamelizeProperty }}); err != nil {
 			return fmt.Errorf("error setting {{ underscore $identity.Name }} on temporary resource data: %w", err)
 		}
 	}
-{{- end }}
-{{- end }}
 {{- end }}
 
 	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
