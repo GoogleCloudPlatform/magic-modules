@@ -390,7 +390,14 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 		for _, match := range matches {
 			if len(match) == 2 {
 				testName := string(match[1])
-				if !strings.HasPrefix(strings.ToLower(testName), testPrefix) {
+				lowercasedTestName := strings.ToLower(testName)
+				prefixWithUnderscore := testPrefix + "_"
+				prefixWithSUnderscore := testPrefix + "s_"
+
+				if !strings.HasPrefix(lowercasedTestName, prefixWithUnderscore) &&
+					!strings.HasPrefix(lowercasedTestName, prefixWithSUnderscore) &&
+					lowercasedTestName != testPrefix &&
+					lowercasedTestName != testPrefix+"s" {
 					continue
 				}
 				if _, ok := testNamesInYAML[testName]; ok {
