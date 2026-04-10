@@ -347,6 +347,10 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		})
 	}
 }
+
+// addTestsFromHandwrittenTestsMultiFile scans the product's service directory for extra handwritten test files
+// (other than the main file) that belong to the resource, and adds their tests to the generated test suite.
+// It applies strict prefix matching to avoid collisions and handles plural resource names in test prefixes.
 func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTestsMultiFile(object *api.Resource) error {
 	if object.ProductMetadata == nil {
 		return nil
@@ -515,7 +519,6 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 
 	return nil
 }
-
 
 // Similar to FullResourceName, but override-aware to prevent things like ending in _test.
 // Non-Go files should just use FullResourceName.
