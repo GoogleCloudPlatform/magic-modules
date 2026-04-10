@@ -1,0 +1,51 @@
+{{ define "listResourceMethod" }}
+func List{{ $.ResourceName }}s(config *transport_tpg.Config,
+{{- range $scope := $.ListScopeProperties }}
+	{{ $scope.CamelizeProperty }} string,
+{{- end }}
+	callback func(*schema.ResourceData) error,
+) error {
+	resourceData := Resource{{ $.ResourceName }}().Data(&terraform.InstanceState{})
+	// ReplaceVars expands {{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}} (product base_url) and base_url using resourceData.
+	// Set every resolved list scope parameter on resourceData before building the list URL.
+{{- range $scope := $.ListScopeProperties }}
+	if {{ $scope.CamelizeProperty }} != "" {
+		if err := resourceData.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
+			return fmt.Errorf("error setting {{ underscore $scope.Name }} on temporary resource data: %w", err)
+		}
+	}
+{{- end }}
+
+	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
+	if err != nil {
+		return err
+	}
+
+	billingProject := ""
+	if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+		billingProject = parts[1]
+	}
+	if bp, err := tpgresource.GetBillingProject(resourceData, config); err == nil {
+		billingProject = bp
+	}
+
+	userAgent, err := tpgresource.GenerateUserAgentString(resourceData, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	return transport_tpg.ListPages(
+		config,
+		resourceData,
+		url,
+		billingProject,
+		userAgent,
+		"{{ $.ResourceListKey }}",
+		"",
+		func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+{{ template "listResourceListPagesFlattener" $ }}
+		},
+		callback,
+	)
+}
+{{ end }}
