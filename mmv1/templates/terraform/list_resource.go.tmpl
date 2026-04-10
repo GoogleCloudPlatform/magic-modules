@@ -65,9 +65,6 @@ func (r *{{ $.ResourceName -}}ListResource) ListResourceConfigSchema(ctx context
 				Optional: true,
 			},
 {{- end }}
-			"filter": listschema.StringAttribute{
-				Optional: true,
-			},
 		},
 	}
 }
@@ -76,7 +73,6 @@ type {{ $.ResourceName -}}ListModel struct {
 {{- range $scope := $.ListScopeProperties }}
 	{{ $scope.TitlelizeProperty }} types.String `tfsdk:"{{ underscore $scope.Name }}"`
 {{- end }}
-	Filter types.String `tfsdk:"filter"`
 }
 
 func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
@@ -104,15 +100,9 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 {{- end }}
 {{- end }}
 
-	filterString := ""
-	if !data.Filter.IsNull() && !data.Filter.IsUnknown() {
-		filterString = data.Filter.ValueString()
-	}
-
 	stream.Results = func(push func(list.ListResult) bool) {
 		err := List{{ $.ResourceName }}s(
 			r.Client,
-			filterString,
 {{- range $scope := $.ListScopeProperties }}
 			{{ $scope.CamelizeProperty }},
 {{- end }}
@@ -145,7 +135,7 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 	}
 }
 
-func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
+func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 {{- range $scope := $.ListScopeProperties }}
 	{{ $scope.CamelizeProperty }} string,
 {{- end }}
@@ -187,7 +177,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 		billingProject,
 		userAgent,
 		"{{ $.ResourceListKey }}",
-		filter,
+		"",
 		func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 {{- if $.ExcludeRead }}
 			return fmt.Errorf("list resource for {{ $.Name }} requires read support (resource{{ $.ResourceName }}Flatten is not generated when exclude_read is set)")
