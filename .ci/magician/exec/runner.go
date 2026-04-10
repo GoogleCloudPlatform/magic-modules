@@ -16,9 +16,11 @@
 package exec
 
 import (
+	"bytes"
 	"container/list"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -123,10 +125,12 @@ func (ar *Runner) Run(name string, args []string, env map[string]string) (string
 	for ev, val := range env {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", ev, val))
 	}
+	var stderrBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
 	out, err := cmd.Output()
 	switch typedErr := err.(type) {
 	case *exec.ExitError:
-		return string(out), fmt.Errorf("error running %s: %v\nstdout:\n%sstderr:\n%s", name, err, out, typedErr.Stderr)
+		return string(out), fmt.Errorf("error running %s: %v\nstdout:\n%sstderr:\n%s", name, err, out, stderrBuf.String())
 	case *fs.PathError:
 		return "", fmt.Errorf("path error running %s: %v", name, typedErr)
 
