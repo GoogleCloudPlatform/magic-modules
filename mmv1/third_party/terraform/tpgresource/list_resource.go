@@ -282,6 +282,18 @@ func (r *ListResourceMetadata) GetZone(override types.String) string {
 	return r.Zone
 }
 
+// GetLocation returns the location from the list block override if set and non-empty,
+// otherwise falls back to the provider-level region (typical default for regional APIs).
+// Used by MM-generated list resources together with GetProject/GetRegion/GetZone + SetIdentityFields above.
+func (r *ListResourceMetadata) GetLocation(override types.String) string {
+	if !override.IsNull() && !override.IsUnknown() {
+		if v := override.ValueString(); v != "" {
+			return v
+		}
+	}
+	return r.Region
+}
+
 func SetIdentityFields(ctx context.Context, result *list.ListResult, rd *schema.ResourceData, fields map[string]string) error {
 	identity, err := rd.Identity()
 	if err != nil {

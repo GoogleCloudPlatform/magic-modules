@@ -96,21 +96,18 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 	}
 
 {{- range $identity := $.IdentityProperties }}
+{{- if eq $identity.Name "project" }}
+	{{ $identity.CamelizeProperty }} := r.GetProject(data.{{ $identity.TitlelizeProperty }})
+{{- else if eq $identity.Name "region" }}
+	{{ $identity.CamelizeProperty }} := r.GetRegion(data.{{ $identity.TitlelizeProperty }})
+{{- else if eq $identity.Name "zone" }}
+	{{ $identity.CamelizeProperty }} := r.GetZone(data.{{ $identity.TitlelizeProperty }})
+{{- else if eq $identity.Name "location" }}
+	{{ $identity.CamelizeProperty }} := r.GetLocation(data.{{ $identity.TitlelizeProperty }})
+{{- else }}
 	var {{ $identity.CamelizeProperty }} string
 	if !data.{{ $identity.TitlelizeProperty }}.IsNull() && !data.{{ $identity.TitlelizeProperty }}.IsUnknown() {
 		{{ $identity.CamelizeProperty }} = data.{{ $identity.TitlelizeProperty }}.ValueString()
-	}
-{{- if eq $identity.Name "project" }}
-	if {{ $identity.CamelizeProperty }} == "" {
-		{{ $identity.CamelizeProperty }} = r.Client.Project
-	}
-{{- else if eq $identity.Name "zone" }}
-	if {{ $identity.CamelizeProperty }} == "" {
-		{{ $identity.CamelizeProperty }} = r.Client.Zone
-	}
-{{- else if eq $identity.Name "region" }}
-	if {{ $identity.CamelizeProperty }} == "" {
-		{{ $identity.CamelizeProperty }} = r.Client.Region
 	}
 {{- end }}
 {{- end }}
@@ -143,24 +140,14 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 {{- end }}
 				result := req.NewListResult(ctx)
 
-				identity, err := rd.Identity()
-				if err != nil {
-					return fmt.Errorf("Error getting identity: %s", err)
-				}
+				if err := tpgresource.SetIdentityFields(ctx, &result, rd, map[string]string{
 {{- range $p := $.IdentityProperties }}
 {{- if or (eq $p.Name "project") (eq $p.Name "zone") (eq $p.Name "region") (eq $p.Name "location") }}
-				if err = identity.Set("{{ underscore $p.Name }}", {{ $p.CamelizeProperty }}); err != nil {
-					return fmt.Errorf("Error setting {{ underscore $p.Name }}: %s", err)
-				}
+					"{{ underscore $p.Name }}": {{ $p.CamelizeProperty }},
 {{- end }}
 {{- end }}
-
-				tfTypeIdentity, err := rd.TfTypeIdentityState()
-				if err != nil {
+				}); err != nil {
 					return err
-				}
-				if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
-					return errors.New("error setting identity")
 				}
 
 				if n, ok := rd.GetOk("name"); ok {
@@ -202,12 +189,17 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 	callback func(*schema.ResourceData) error,
 ) error {
 	resourceData := Resource{{ $.ResourceName }}().Data(&terraform.InstanceState{})
+{{- $listUrlIds := $.ExtractIdentifiers $.BaseUrl }}
 {{- range $identity := $.IdentityProperties }}
+{{- range $id := $listUrlIds }}
+{{- if eq $id (underscore $identity.Name) }}
 	if {{ $identity.CamelizeProperty }} != "" {
 		if err := resourceData.Set("{{ underscore $identity.Name }}", {{ $identity.CamelizeProperty }}); err != nil {
 			return fmt.Errorf("error setting {{ underscore $identity.Name }} on temporary resource data: %w", err)
 		}
 	}
+{{- end }}
+{{- end }}
 {{- end }}
 
 	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
@@ -254,31 +246,71 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 {{- end }}
 {{- end }}
 {{- end }}
+{{- /* List scope (project/region/zone/location) is constant for the whole list call; re-apply from ListXxxs args so ReplaceVars sees correct values after Flatten mutates shared d. */ -}}
+{{- $liProject := false -}}
+{{- $liRegion := false -}}
+{{- $liZone := false -}}
+{{- $liLocation := false -}}
+{{- range $identity := $.IdentityProperties }}
+{{- if eq $identity.Name "project" }}{{- $liProject = true -}}{{- end }}
+{{- if eq $identity.Name "region" }}{{- $liRegion = true -}}{{- end }}
+{{- if eq $identity.Name "zone" }}{{- $liZone = true -}}{{- end }}
+{{- if eq $identity.Name "location" }}{{- $liLocation = true -}}{{- end }}
+{{- end }}
 {{- if $.HasProject }}
-			project, err := tpgresource.GetProject(d, config)
-			if err != nil {
-				return fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
+			var itemProject string
+{{- if $liProject }}
+			itemProject = project
+			if itemProject != "" {
+				if err := d.Set("project", itemProject); err != nil {
+					return fmt.Errorf("error setting project on list item temporary resource data: %w", err)
+				}
 			}
-			if err := d.Set("project", project); err != nil {
-				return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+{{- else }}
+			var errProj error
+			itemProject, errProj = tpgresource.GetProject(d, config)
+			if errProj != nil {
+				return fmt.Errorf("error fetching project for {{ $.Name }}: %w", errProj)
+			}
+			if err := d.Set("project", itemProject); err != nil {
+				return fmt.Errorf("error setting project on list item temporary resource data: %w", err)
 			}
 {{- end }}
-{{- if $.HasRegion }}
+{{- end }}
+{{- range $identity := $.IdentityProperties }}
+{{- if or (eq $identity.Name "region") (eq $identity.Name "zone") (eq $identity.Name "location") }}
+			if {{ $identity.CamelizeProperty }} != "" {
+				if err := d.Set("{{ underscore $identity.Name }}", {{ $identity.CamelizeProperty }}); err != nil {
+					return fmt.Errorf("error setting {{ underscore $identity.Name }} on list item temporary resource data: %w", err)
+				}
+			}
+{{- end }}
+{{- end }}
+{{- if and $.HasRegion (not $liRegion) }}
 			region, err := tpgresource.GetRegion(d, config)
 			if err != nil {
 				return err
 			}
 			if err := d.Set("region", region); err != nil {
-				return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+				return fmt.Errorf("error setting region on list item temporary resource data: %w", err)
 			}
 {{- end }}
-{{- if $.HasZone }}
+{{- if and $.HasZone (not $liZone) }}
 			zone, err := tpgresource.GetZone(d, config)
 			if err != nil {
 				return err
 			}
 			if err := d.Set("zone", zone); err != nil {
-				return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+				return fmt.Errorf("error setting zone on list item temporary resource data: %w", err)
+			}
+{{- end }}
+{{- if and $.HasLocation (not $liLocation) }}
+			location, err := tpgresource.GetLocation(d, config)
+			if err != nil {
+				return err
+			}
+			if err := d.Set("location", location); err != nil {
+				return fmt.Errorf("error setting location on list item temporary resource data: %w", err)
 			}
 {{- end }}
 
@@ -295,9 +327,9 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 			itemBillingProject := ""
 {{- if $.HasProject }}
 {{- if $.LegacyLongFormProject }}
-			itemBillingProject = strings.TrimPrefix(project, "projects/")
+			itemBillingProject = strings.TrimPrefix(itemProject, "projects/")
 {{- else }}
-			itemBillingProject = project
+			itemBillingProject = itemProject
 {{- end }}
 {{- end }}
 {{- if $.SupportsIndirectUserProjectOverride }}
@@ -311,7 +343,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 
 			headers := make(http.Header)
 
-			if err := resource{{ $.ResourceName }}Flatten(d, meta, res, config, {{- if $.HasProject }}project,{{ end }} itemUserAgent, itemBillingProject, readURL, headers); err != nil {
+			if err := resource{{ $.ResourceName }}Flatten(d, meta, res, config, {{- if $.HasProject }}itemProject,{{ end }} itemUserAgent, itemBillingProject, readURL, headers); err != nil {
 				return err
 			}
 
@@ -321,7 +353,6 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 			}
 			d.SetId(id)
 
-{{- if not $.ExcludeIdentityGeneration }}
 			identity, err := d.Identity()
 			if err == nil && identity != nil {
 {{- range $p := $.IdentityProperties }}
@@ -344,7 +375,6 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 			} else {
 				log.Printf("[DEBUG] (list item) identity not set: %s", err)
 			}
-{{- end }}
 			return nil
 {{- end }}
 		},

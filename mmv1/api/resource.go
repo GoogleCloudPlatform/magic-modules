@@ -251,7 +251,7 @@ type Resource struct {
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
-	// If true, skip identity generation for this resource
+	// If true, skip identity generation for this resource. Incompatible with generate_list_resource.
 	ExcludeIdentityGeneration bool `yaml:"exclude_identity_generation,omitempty"`
 
 	// Override sweeper settings
@@ -1315,6 +1315,13 @@ func (r Resource) HasZone() bool {
 		}
 	}
 	return found && strings.Contains(r.BaseUrl, "{{zone}}")
+}
+
+// HasLocation is true when URLs use a {{location}} segment (e.g. Cloud Run, Cloud Functions).
+func (r Resource) HasLocation() bool {
+	return strings.Contains(r.BaseUrl, "{{location}}") ||
+		strings.Contains(r.CreateUrl, "{{location}}") ||
+		strings.Contains(r.SelfLinkUri(), "{{location}}")
 }
 
 // resource functions needed for template that previously existed in terraform.go
