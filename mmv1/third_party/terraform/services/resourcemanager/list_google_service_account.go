@@ -63,10 +63,6 @@ func (r *GoogleServiceAccountListResource) List(ctx context.Context, req list.Li
 		err := ListServiceAccounts(r.Client, project, func(rd *schema.ResourceData) error {
 			result := req.NewListResult(ctx)
 
-			if project != "" {
-				rd.Set("project", project)
-			}
-
 			if err := r.SetResult(ctx, req.IncludeResource, &result, rd); err != nil {
 				return err
 			}
