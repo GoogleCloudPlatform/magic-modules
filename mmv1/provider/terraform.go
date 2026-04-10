@@ -1065,3 +1065,59 @@ type ProviderWithProducts struct {
 	Compiler string
 	Products []*api.Product
 }
+
+// GeneratedListResourceRegistration describes one MMv1-generated list resource constructor
+// for framework_provider_mmv1_resources.go.tmpl.
+type GeneratedListResourceRegistration struct {
+	Package string // Go service package name (product ApiName), e.g. "cloudrun"
+	NewFunc string // e.g. "NewCloudRunServiceListResource"
+}
+
+// GetGeneratedListResourcesInVersion returns list-resource registrations for all products
+// in the same order as list_resource_*.go generation (version, exclude, generate_list_resource).
+func (t Terraform) GetGeneratedListResourcesInVersion(products []*api.Product) []GeneratedListResourceRegistration {
+	var out []GeneratedListResourceRegistration
+	for _, productDefinition := range products {
+		for _, object := range productDefinition.Objects {
+			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(t.TargetVersionName)) {
+				continue
+			}
+			if object.IsExcluded() {
+				continue
+			}
+			if !object.GenerateListResource {
+				continue
+			}
+			if object.ExcludeIdentityGeneration {
+				continue
+			}
+			out = append(out, GeneratedListResourceRegistration{
+				Package: productDefinition.ApiName,
+				NewFunc: fmt.Sprintf("New%sListResource", object.ResourceName()),
+			})
+		}
+	}
+	slices.SortFunc(out, func(a, b GeneratedListResourceRegistration) int {
+		if c := strings.Compare(a.Package, b.Package); c != 0 {
+			return c
+		}
+		return strings.Compare(a.NewFunc, b.NewFunc)
+	})
+	return out
+}
+
+// GetListResourceImportPackages returns sorted unique service import paths for generated list resources.
+func (t Terraform) GetListResourceImportPackages(products []*api.Product) []string {
+	reg := t.GetGeneratedListResourcesInVersion(products)
+	seen := make(map[string]struct{}, len(reg))
+	var pkgs []string
+	for _, r := range reg {
+		if _, ok := seen[r.Package]; ok {
+			continue
+		}
+		seen[r.Package] = struct{}{}
+		pkgs = append(pkgs, r.Package)
+	}
+	slices.Sort(pkgs)
+	return pkgs
+}

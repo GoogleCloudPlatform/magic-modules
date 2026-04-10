@@ -1,0 +1,26 @@
+package fwprovider
+
+import (
+	"github.com/hashicorp/terraform-plugin-framework/list"
+
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+{{- $listPkgs := $.GetListResourceImportPackages $.Products }}
+{{- range $pkg := $listPkgs }}
+	"github.com/hashicorp/terraform-provider-google/google/services/{{ $pkg }}"
+{{- end }}
+)
+
+func listResourceFunc(lr list.ListResource) func() list.ListResource {
+	return func() list.ListResource { return lr }
+}
+
+// generatedListResources registers MMv1-generated list resources (generate_list_resource in YAML).
+var generatedListResources = []func() list.ListResource{
+{{- range $lr := $.GetGeneratedListResourcesInVersion $.Products }}
+	listResourceFunc({{ $lr.Package }}.{{ $lr.NewFunc }}()),
+{{- end }}
+}
+
+var handwrittenListResources = []func() list.ListResource{
+	listResourceFunc(resourcemanager.NewGoogleServiceAccountListResource()),
+}
