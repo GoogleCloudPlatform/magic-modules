@@ -124,6 +124,7 @@ properties:
             description: |
               Destination IP address range in CIDR format. Required for EGRESS rules.
               This field may only be specified when versionedExpr is set to FIREWALL.
+            deprecation_message: '`destIpRanges` is deprecated and will be removed in a future major release. Please use `google_compute_firewall_policy_rule` resource instead when working with policies of FIREWALL type.'
             min_version: 'beta'
             exactly_one_of:
               - 'match.0.config.0.src_ip_ranges'
@@ -135,6 +136,7 @@ properties:
             description: |
               Pairs of IP protocols and ports that the rule should match.
               This field may only be specified when versionedExpr is set to FIREWALL.
+            deprecation_message: '`layer4Config` is deprecated and will be removed in a future major release. Please use `google_compute_firewall_policy_rule` resource instead when working with policies of FIREWALL type.'
             api_name: layer4Configs
             min_version: 'beta'
             item_type:
@@ -176,6 +178,7 @@ properties:
     description: |
       The direction in which this rule applies. If unspecified an INGRESS rule is created.
       This field may only be specified when the versionedExpr is set to FIREWALL.
+    deprecation_message: '`direction` is deprecated and will be removed in a future major release. Please use `google_compute_firewall_policy_rule` resource instead when working with policies of FIREWALL type.'
     min_version: 'beta'
     enum_values:
       - 'INGRESS'
@@ -187,6 +190,7 @@ properties:
       This field allows you to control which network's VMs get
       this rule. If this field is left blank, all VMs
       within the organization will receive the rule.
+    deprecation_message: '`targetResources` is deprecated and will be removed in a future major release. Please use `google_compute_firewall_policy_rule` resource instead when working with policies of FIREWALL type.'
     min_version: 'beta'
     item_type:
       type: String
@@ -197,6 +201,7 @@ properties:
       If logging is enabled, logs will be exported to the
       configured export destination in Stackdriver.
       This field may only be specified when the versionedExpr is set to FIREWALL.
+    deprecation_message: '`enableLogging` is deprecated and will be removed in a future major release. Please use `google_compute_firewall_policy_rule` resource instead when working with policies of FIREWALL type.'
     min_version: 'beta'
     send_empty_value: true
   - name: 'targetServiceAccounts'
@@ -204,6 +209,7 @@ properties:
     description: |
       A list of service accounts indicating the sets of
       instances that are applied with this rule.
+    deprecation_message: '`targetServiceAccounts` is deprecated and will be removed in a future major release.'
     min_version: 'beta'
     item_type:
       type: String
