@@ -11,9 +11,11 @@
 	limitations under the License.
 */ -}}
 
+{{- if not $.ProductMetadata.IsTgcCompiler }}
 import (
 	tpgcompute "{{ $.ImportPath }}/services/compute"
 )
+{{- end }}
 
 // Checks if there is another gateway under the same location.
 func gatewaysSameLocation(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) ([]interface{}, error) {
@@ -78,6 +80,7 @@ func isLastSWGGateway(gateways []interface{}, network string) bool {
 	return true
 }
 
+{{- if not $.ProductMetadata.IsTgcCompiler }}
 //Deletes the swg-autogen-router if the current gateway being deleted is the type of swg so there is no other gateway using it.
 func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) error {
 	log.Printf("[DEBUG] Searching the network id by name %q.", d.Get("network"))
@@ -133,3 +136,4 @@ func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config
 
 	return nil
 }
+{{- end }}
