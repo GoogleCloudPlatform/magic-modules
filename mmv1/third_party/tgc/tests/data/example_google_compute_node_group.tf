@@ -14,7 +14,7 @@ provider "google" {
 resource "google_compute_node_template" "soletenant-tmpl" {
   name      = "soletenant-tmpl"
   region    = "us-central1"
-  node_type = "c2-node-60-240"
+  node_type = "n1-node-96-624"
 }
 
 resource "google_compute_node_group" "nodes" {
