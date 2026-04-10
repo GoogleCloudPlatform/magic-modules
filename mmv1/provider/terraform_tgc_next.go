@@ -347,7 +347,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		})
 	}
 }
-func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
+func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTestsMultiFile(object *api.Resource) error {
 	if object.ProductMetadata == nil {
 		return nil
 	}
@@ -482,6 +482,54 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 
 	return nil
 }
+
+func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
+	if object.ProductMetadata == nil {
+		return nil
+	}
+	productName := strings.ToLower(tgc.Product.Name)
+	resourceFullName := tgc.ResourceGoFilename(*object)
+	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
+	data, err := fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
+	for err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
+				log.Printf("no handwritten test file found for %s", resourceFullName)
+				return nil
+			}
+			handwrittenTestFilePath += ".tmpl"
+			data, err = fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
+		} else {
+			return fmt.Errorf("error reading handwritten test file %s: %v", handwrittenTestFilePath, err)
+		}
+	}
+
+	// Skip adding handwritten tests that are already defined in yaml (because they have custom overrides etc.)
+	testNamesInYAML := make(map[string]struct{})
+	for _, test := range object.TGCTests {
+		if test.Name != "" {
+			testNamesInYAML[test.Name] = struct{}{}
+		}
+	}
+
+	matches := testRegex.FindAllSubmatch(data, -1)
+	tests := make([]resource.TGCTest, 0)
+	for _, match := range matches {
+		if len(match) == 2 {
+			if _, ok := testNamesInYAML[string(match[1])]; ok {
+				continue
+			}
+			tests = append(tests, resource.TGCTest{
+				Name: string(match[1]),
+			})
+		}
+	}
+
+	object.TGCTests = append(object.TGCTests, tests...)
+
+	return nil
+}
+
 
 // Similar to FullResourceName, but override-aware to prevent things like ending in _test.
 // Non-Go files should just use FullResourceName.
