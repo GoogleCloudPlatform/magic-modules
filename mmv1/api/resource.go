@@ -718,6 +718,23 @@ func (r Resource) IdentityProperties() []*Type {
 	return props
 }
 
+// ListScopeProperties returns the subset of IdentityProperties whose
+// template variable (e.g. {{project}}) appears in the full collection URL
+// (product base_url + resource base_url). These are the scoping parameters
+// a practitioner must supply for a list call — not the resource's own
+// identifier like "name".
+func (r Resource) ListScopeProperties() []*Type {
+	collectionUrl := r.CollectionUrl()
+	var props []*Type
+	for _, p := range r.IdentityProperties() {
+		varName := "{{" + google.Underscore(p.Name) + "}}"
+		if strings.Contains(collectionUrl, varName) {
+			props = append(props, p)
+		}
+	}
+	return props
+}
+
 func (r Resource) SensitiveProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {

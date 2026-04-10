@@ -23,7 +23,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-"net/http"
+	"net/http"
 	"regexp"
 {{- if and $.HasProject $.LegacyLongFormProject }}
 	"strings"
@@ -60,8 +60,8 @@ func New{{ $.ResourceName -}}ListResource() list.ListResource {
 func (r *{{ $.ResourceName -}}ListResource) ListResourceConfigSchema(ctx context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
-{{- range $identity := $.IdentityProperties }}
-			"{{ underscore $identity.Name }}": listschema.StringAttribute{
+{{- range $scope := $.ListScopeProperties }}
+			"{{ underscore $scope.Name }}": listschema.StringAttribute{
 				Optional: true,
 			},
 {{- end }}
@@ -73,8 +73,8 @@ func (r *{{ $.ResourceName -}}ListResource) ListResourceConfigSchema(ctx context
 }
 
 type {{ $.ResourceName -}}ListModel struct {
-{{- range $identity := $.IdentityProperties }}
-	{{ $identity.TitlelizeProperty }} types.String `tfsdk:"{{ underscore $identity.Name }}"`
+{{- range $scope := $.ListScopeProperties }}
+	{{ $scope.TitlelizeProperty }} types.String `tfsdk:"{{ underscore $scope.Name }}"`
 {{- end }}
 	Filter types.String `tfsdk:"filter"`
 }
@@ -87,19 +87,19 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 		return
 	}
 
-{{- range $identity := $.IdentityProperties }}
-{{- if eq $identity.Name "project" }}
-	{{ $identity.CamelizeProperty }} := r.GetProject(data.{{ $identity.TitlelizeProperty }})
-{{- else if eq $identity.Name "region" }}
-	{{ $identity.CamelizeProperty }} := r.GetRegion(data.{{ $identity.TitlelizeProperty }})
-{{- else if eq $identity.Name "zone" }}
-	{{ $identity.CamelizeProperty }} := r.GetZone(data.{{ $identity.TitlelizeProperty }})
-{{- else if eq $identity.Name "location" }}
-	{{ $identity.CamelizeProperty }} := r.GetLocation(data.{{ $identity.TitlelizeProperty }})
+{{- range $scope := $.ListScopeProperties }}
+{{- if eq $scope.Name "project" }}
+	{{ $scope.CamelizeProperty }} := r.GetProject(data.{{ $scope.TitlelizeProperty }})
+{{- else if eq $scope.Name "region" }}
+	{{ $scope.CamelizeProperty }} := r.GetRegion(data.{{ $scope.TitlelizeProperty }})
+{{- else if eq $scope.Name "zone" }}
+	{{ $scope.CamelizeProperty }} := r.GetZone(data.{{ $scope.TitlelizeProperty }})
+{{- else if eq $scope.Name "location" }}
+	{{ $scope.CamelizeProperty }} := r.GetLocation(data.{{ $scope.TitlelizeProperty }})
 {{- else }}
-	var {{ $identity.CamelizeProperty }} string
-	if !data.{{ $identity.TitlelizeProperty }}.IsNull() && !data.{{ $identity.TitlelizeProperty }}.IsUnknown() {
-		{{ $identity.CamelizeProperty }} = data.{{ $identity.TitlelizeProperty }}.ValueString()
+	var {{ $scope.CamelizeProperty }} string
+	if !data.{{ $scope.TitlelizeProperty }}.IsNull() && !data.{{ $scope.TitlelizeProperty }}.IsUnknown() {
+		{{ $scope.CamelizeProperty }} = data.{{ $scope.TitlelizeProperty }}.ValueString()
 	}
 {{- end }}
 {{- end }}
@@ -113,23 +113,10 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 		err := List{{ $.ResourceName }}s(
 			r.Client,
 			filterString,
-{{- range $identity := $.IdentityProperties }}
-			{{ $identity.CamelizeProperty }},
+{{- range $scope := $.ListScopeProperties }}
+			{{ $scope.CamelizeProperty }},
 {{- end }}
 			func(rd *schema.ResourceData) error {
-{{- $hasListName := false -}}
-{{- range $identity := $.IdentityProperties }}
-{{- if eq $identity.Name "name" }}
-{{- $hasListName = true -}}
-{{- end }}
-{{- end }}
-{{- if $hasListName }}
-				if name != "" {
-					if n, ok := rd.GetOk("name"); !ok || n.(string) != name {
-						return nil
-					}
-				}
-{{- end }}
 				result := req.NewListResult(ctx)
 
 				if n, ok := rd.GetOk("name"); ok {
@@ -159,19 +146,18 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 }
 
 func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
-{{- range $identity := $.IdentityProperties }}
-	{{ $identity.CamelizeProperty }} string,
+{{- range $scope := $.ListScopeProperties }}
+	{{ $scope.CamelizeProperty }} string,
 {{- end }}
 	callback func(*schema.ResourceData) error,
 ) error {
 	resourceData := Resource{{ $.ResourceName }}().Data(&terraform.InstanceState{})
-	// ReplaceVars expands {{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}} (product default_base_url) and base_url using resourceData.
-	// base_url often omits vars that still appear in the base path (e.g. {{"{{"}}location{{"}}"}} in the host, {{"{{"}}project{{"}}"}} only in the path).
-	// Set every resolved list identity on resourceData before building the list URL.
-{{- range $identity := $.IdentityProperties }}
-	if {{ $identity.CamelizeProperty }} != "" {
-		if err := resourceData.Set("{{ underscore $identity.Name }}", {{ $identity.CamelizeProperty }}); err != nil {
-			return fmt.Errorf("error setting {{ underscore $identity.Name }} on temporary resource data: %w", err)
+	// ReplaceVars expands {{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}} (product base_url) and base_url using resourceData.
+	// Set every resolved list scope parameter on resourceData before building the list URL.
+{{- range $scope := $.ListScopeProperties }}
+	if {{ $scope.CamelizeProperty }} != "" {
+		if err := resourceData.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
+			return fmt.Errorf("error setting {{ underscore $scope.Name }} on temporary resource data: %w", err)
 		}
 	}
 {{- end }}
@@ -220,16 +206,16 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 {{- end }}
 {{- end }}
 {{- end }}
-{{- /* List scope (project/region/zone/location) is constant for the whole list call; re-apply from ListXxxs args so ReplaceVars sees correct values after Flatten mutates shared d. */ -}}
+{{- /* Re-apply list scope values so ReplaceVars sees correct values after Flatten mutates shared d. */ -}}
 {{- $liProject := false -}}
 {{- $liRegion := false -}}
 {{- $liZone := false -}}
 {{- $liLocation := false -}}
-{{- range $identity := $.IdentityProperties }}
-{{- if eq $identity.Name "project" }}{{- $liProject = true -}}{{- end }}
-{{- if eq $identity.Name "region" }}{{- $liRegion = true -}}{{- end }}
-{{- if eq $identity.Name "zone" }}{{- $liZone = true -}}{{- end }}
-{{- if eq $identity.Name "location" }}{{- $liLocation = true -}}{{- end }}
+{{- range $scope := $.ListScopeProperties }}
+{{- if eq $scope.Name "project" }}{{- $liProject = true -}}{{- end }}
+{{- if eq $scope.Name "region" }}{{- $liRegion = true -}}{{- end }}
+{{- if eq $scope.Name "zone" }}{{- $liZone = true -}}{{- end }}
+{{- if eq $scope.Name "location" }}{{- $liLocation = true -}}{{- end }}
 {{- end }}
 {{- if $.HasProject }}
 			var itemProject string
@@ -251,11 +237,11 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config, filter string,
 			}
 {{- end }}
 {{- end }}
-{{- range $identity := $.IdentityProperties }}
-{{- if or (eq $identity.Name "region") (eq $identity.Name "zone") (eq $identity.Name "location") }}
-			if {{ $identity.CamelizeProperty }} != "" {
-				if err := d.Set("{{ underscore $identity.Name }}", {{ $identity.CamelizeProperty }}); err != nil {
-					return fmt.Errorf("error setting {{ underscore $identity.Name }} on list item temporary resource data: %w", err)
+{{- range $scope := $.ListScopeProperties }}
+{{- if or (eq $scope.Name "region") (eq $scope.Name "zone") (eq $scope.Name "location") }}
+			if {{ $scope.CamelizeProperty }} != "" {
+				if err := d.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
+					return fmt.Errorf("error setting {{ underscore $scope.Name }} on list item temporary resource data: %w", err)
 				}
 			}
 {{- end }}
