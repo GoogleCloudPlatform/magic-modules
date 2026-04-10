@@ -1,3 +1,6 @@
+// Copyright (c) IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
 package tpgresource
 
 import (
@@ -27,10 +30,26 @@ var _ ListResourceWithRawV5Schemas = &ListResourceMetadata{}
 type ListResourceMetadata struct {
 	ListResourceWithRawV5Schemas
 
-	Client    *transport_tpg.Config
-	ProjectId string
-	Region    string
-	Zone      string
+	TypeName           string
+	ResourceSchema     *schema.Resource
+	Client             *transport_tpg.Config
+	ProjectId          string
+	Region             string
+	Zone               string
+	IdentityAttributes []string
+}
+
+func (r *ListResourceMetadata) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeName
+}
+
+func (r *ListResourceMetadata) RawV5Schemas(ctx context.Context, _ list.RawV5SchemaRequest, resp *list.RawV5SchemaResponse) {
+	resp.ProtoV5Schema = r.ResourceSchema.ProtoSchema(ctx)()
+	resp.ProtoV5IdentitySchema = r.ResourceSchema.ProtoIdentitySchema(ctx)()
+}
+
+func (r *ListResourceMetadata) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	r.Defaults(req, resp)
 }
 
 func (r *ListResourceMetadata) Defaults(request resource.ConfigureRequest, response *resource.ConfigureResponse) {
@@ -50,8 +69,7 @@ func (r *ListResourceMetadata) Defaults(request resource.ConfigureRequest, respo
 	r.Zone = c.Zone
 }
 
-// ResolveProject returns the project from override if it is set and non-empty,
-// otherwise falls back to the provider-level default.
+// GetProject: list config override, else provider default project.
 func (r *ListResourceMetadata) GetProject(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
@@ -61,8 +79,7 @@ func (r *ListResourceMetadata) GetProject(override types.String) string {
 	return r.ProjectId
 }
 
-// ResolveRegion returns the region from override if it is set and non-empty,
-// otherwise falls back to the provider-level default.
+// GetRegion: list config override, else provider default region.
 func (r *ListResourceMetadata) GetRegion(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
@@ -72,8 +89,7 @@ func (r *ListResourceMetadata) GetRegion(override types.String) string {
 	return r.Region
 }
 
-// ResolveZone returns the zone from override if it is set and non-empty,
-// otherwise falls back to the provider-level default.
+// GetZone: list config override, else provider default zone.
 func (r *ListResourceMetadata) GetZone(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
@@ -83,22 +99,55 @@ func (r *ListResourceMetadata) GetZone(override types.String) string {
 	return r.Zone
 }
 
-func SetIdentityFields(ctx context.Context, result *list.ListResult, rd *schema.ResourceData, fields map[string]string) error {
-	identity, err := rd.Identity()
-	if err != nil {
-		return fmt.Errorf("error getting identity: %s", err)
-	}
-	for k, v := range fields {
-		if err := identity.Set(k, v); err != nil {
-			return fmt.Errorf("error setting identity field %q: %s", k, err)
+// GetLocation: list config override, else provider default region.
+func (r *ListResourceMetadata) GetLocation(override types.String) string {
+	if !override.IsNull() && !override.IsUnknown() {
+		if v := override.ValueString(); v != "" {
+			return v
 		}
 	}
-	tfTypeIdentity, err := rd.TfTypeIdentityState()
+	return r.Region
+}
+
+// setResourceIdentity copies IdentityAttributes from rd into resource identity.
+func (r *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) error {
+	identity, err := rd.Identity()
 	if err != nil {
+		return fmt.Errorf("error getting identity: %w", err)
+	}
+	for _, attr := range r.IdentityAttributes {
+		if v, ok := rd.GetOk(attr); ok {
+			if err := identity.Set(attr, v); err != nil {
+				return fmt.Errorf("error setting identity field %q: %w", attr, err)
+			}
+		}
+	}
+	return nil
+}
+
+// SetResult fills list result identity from rd; if includeResource, also full resource state.
+func (r *ListResourceMetadata) SetResult(ctx context.Context, includeResource bool, result *list.ListResult, rd *schema.ResourceData) error {
+	if err := r.setResourceIdentity(rd); err != nil {
 		return err
 	}
-	if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
-		return errors.New("error setting identity")
+
+	tfTypeIdentity, err := rd.TfTypeIdentityState()
+	if err != nil {
+		return fmt.Errorf("error converting identity state: %w", err)
 	}
+	if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
+		return errors.New("error setting identity on list result")
+	}
+
+	if includeResource {
+		tfTypeResource, err := rd.TfTypeResourceState()
+		if err != nil {
+			return fmt.Errorf("error converting resource state: %w", err)
+		}
+		if err := result.Resource.Set(ctx, *tfTypeResource); err != nil {
+			return errors.New("error setting resource on list result")
+		}
+	}
+
 	return nil
 }
