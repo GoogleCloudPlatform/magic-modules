@@ -11400,6 +11400,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_reservationBound(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
+  provider  = google-beta
   family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
