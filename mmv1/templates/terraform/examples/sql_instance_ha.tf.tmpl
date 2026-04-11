@@ -33,7 +33,7 @@ resource "google_sql_database_instance" "postgres_instance_ha" {
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "sqlserver_instance_ha"}}"
   region           = "us-central1"
-  database_version = "SQLSERVER_2019_STANDARD"
+  database_version = "SQLSERVER_2022_STANDARD"
   root_password = "INSERT-PASSWORD-HERE"
   settings {
     tier              = "db-custom-2-7680"

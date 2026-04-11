@@ -37,6 +37,11 @@ examples:
       hub_name: "network-connectivity-hub1"
       auto_accept_project_1_name: "foo"
       auto_accept_project_2_name: "bar"
+    test_vars_overrides:
+      # for backward compatible
+      auto_accept_project_1_name: '"foo" + randomSuffix'
+      # for backward compatible
+      auto_accept_project_2_name: '"bar" + randomSuffix'
 description: The NetworkConnectivity Group resource
 parameters:
   - name: 'hub'

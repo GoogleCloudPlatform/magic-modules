@@ -1,0 +1,32 @@
+resource "google_service_account" "gemini_query_service_account" {
+  account_id   = "{{index $.Vars "service_account_id"}}"
+  display_name = "Gemini Query Service Account"
+}
+
+resource "google_project_iam_member" "gemini_inference_get" {
+  project = "{{index $.TestEnvVars "project_name"}}"
+  role   = "roles/aiplatform.user"
+  member = "serviceAccount:${google_service_account.gemini_query_service_account.email}"
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_iam_member.gemini_inference_get]
+}
+
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
+  depends_on = [time_sleep.wait_120_seconds]
+
+  message_transforms {
+    ai_inference {
+      endpoint = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+      unstructured_inference {
+        parameters = {
+          "max_tokens" = 25000
+        }
+      }
+      service_account_email = google_service_account.gemini_query_service_account.email
+    }
+  }
+}

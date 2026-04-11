@@ -41,6 +41,8 @@ include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
+# exluding resource_identity due to dataset_id field
+exclude_identity_generation: true
 exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
@@ -48,11 +50,17 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
   - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
   - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
@@ -67,6 +75,13 @@ examples:
       private: 'private'
       public: 'public'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      private: '"private" + randomSuffix'
+      # for backward compatible
+      public: '"public" + randomSuffix'
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
   - name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
     vars:
@@ -80,12 +95,18 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
   - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
@@ -104,6 +125,9 @@ examples:
       tag_value1: 'tag_value1'
       tag_key2: 'tag_key2'
       tag_value2: 'tag_value2'
+    test_vars_overrides:
+      # for backward compatible
+      dataset_id: '"dataset" + randomSuffix'
     exclude_docs: true
 virtual_fields:
   - name: 'delete_contents_on_destroy'

@@ -143,6 +143,7 @@ properties:
             - 'SUSPEND_RESUME_COMPATIBLE'
             - 'TDX_CAPABLE'
             - 'SEV_LIVE_MIGRATABLE_V2'
+            - 'SNP_SVSM_CAPABLE'
   - name: 'imageEncryptionKey'
     type: NestedObject
     description: |

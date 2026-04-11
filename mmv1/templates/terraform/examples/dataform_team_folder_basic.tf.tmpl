@@ -1,5 +1,4 @@
 resource "google_dataform_team_folder" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   region = "us-central1"
   display_name = "Basic TeamFolder-%{random_suffix}"
 }

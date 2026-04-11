@@ -14,7 +14,7 @@ resource "google_hypercomputecluster_cluster" "{{$.PrimaryResourceId}}" {
     config {
       new_network {
         description = "Network one"
-        network = "projects/${local.project_id}/global/networks/cluster-net1"
+        network = "projects/${local.project_id}/global/networks/{{index $.Vars "network_id"}}"
       }
     }
   }

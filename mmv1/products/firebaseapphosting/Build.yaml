@@ -42,6 +42,8 @@ examples:
     test_vars_overrides:
       # prevent tests from colliding with each other
       service_act_id: '"tf-test-build-min"'
+      # for backward compatible
+      backend_id: '"mini" + randomSuffix'
   - name: firebase_app_hosting_build_full
     primary_resource_id: example
     vars:
@@ -53,11 +55,16 @@ examples:
     test_vars_overrides:
       # prevent tests from colliding with each other
       service_act_id: '"tf-test-build-full"'
+      # for backward compatible
+      backend_id: '"full" + randomSuffix'
   - name: firebase_app_hosting_build_github
     primary_resource_id: example
     vars:
       backend_id: "mini"
       build_id: "gh-build"
+    test_vars_overrides:
+      # for backward compatible
+      backend_id: '"mini" + randomSuffix'
     test_env_vars:
       project_id: "PROJECT_NAME"
     # Can't establish a Github connection in automated tests.
