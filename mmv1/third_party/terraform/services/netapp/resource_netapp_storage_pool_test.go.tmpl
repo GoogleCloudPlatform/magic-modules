@@ -946,7 +946,6 @@ resource "google_netapp_storage_pool" "test_pool" {
 }
 
 data "google_compute_network" "default" {
-	provider = google-beta
     name = "%{network_name}"
 }
 `, context)
@@ -970,7 +969,6 @@ resource "google_netapp_storage_pool" "test_pool" {
 }
 
 data "google_compute_network" "default" {
-	provider = google-beta
     name = "%{network_name}"
 }
 `, context)
