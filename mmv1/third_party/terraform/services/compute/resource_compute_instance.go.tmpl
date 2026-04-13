@@ -3773,12 +3773,6 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 
 	diskDetails, err := getDisk(disk.Source, d, config)
 
-	// Resource policies can get autofilled from the API and on this field and this will cause the instance to recreate
-	// This overrides any value set by the API not to cause a diff when the user didn't set this in their config.
-	if v, ok := d.GetOkExists("boot_disk.0.initialize_params.0.resource_policies"); !ok || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
-		diskDetails.ResourcePolicies = nil
-	}
-
 	if err != nil {
 		log.Printf("[WARN] Cannot retrieve boot disk details: %s", err)
 
@@ -3789,6 +3783,13 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			result["initialize_params"] = m
 		}
 	} else {
+		// Resource policies can get autofilled from the API on this field and cause the
+		// instance to recreate. Ignore those API-provided values when the user left the
+		// field unset or explicitly configured an empty list.
+		if v, ok := d.GetOkExists("boot_disk.0.initialize_params.0.resource_policies"); !ok || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+			diskDetails.ResourcePolicies = nil
+		}
+
 		result["initialize_params"] = []map[string]interface{}{{"{{"}}
 			"type": tpgresource.GetResourceNameFromSelfLink(diskDetails.Type),
 			// If the config specifies a family name that doesn't match the image name, then

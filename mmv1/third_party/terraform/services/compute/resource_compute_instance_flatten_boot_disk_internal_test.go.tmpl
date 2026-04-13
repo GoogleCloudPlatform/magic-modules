@@ -98,6 +98,51 @@ func TestComputeInstance_flattenBootDiskResourcePoliciesGuard(t *testing.T) {
 	}
 }
 
+func TestComputeInstance_flattenBootDiskResourcePoliciesGuard_handlesGetDiskError(t *testing.T) {
+	t.Parallel()
+
+	d := schema.TestResourceDataRaw(t, ResourceComputeInstance().Schema, map[string]interface{}{
+		"name":         "test-instance",
+		"machine_type": "e2-medium",
+		"project":      "test-project",
+		"zone":         "us-central1-a",
+		"boot_disk": []interface{}{
+			map[string]interface{}{
+				"initialize_params": []interface{}{
+					map[string]interface{}{
+						"image":             "projects/debian-cloud/global/images/family/debian-11",
+						"resource_policies": []interface{}{},
+					},
+				},
+			},
+		},
+		"network_interface": []interface{}{
+			map[string]interface{}{
+				"network": "default",
+			},
+		},
+	})
+
+	config := testComputeInstanceFlattenBootDiskErrorConfig(t)
+
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("flattenBootDisk panicked when disk lookup failed: %v", r)
+		}
+	}()
+
+	flattened := flattenBootDisk(d, &compute.AttachedDisk{
+		AutoDelete: true,
+		DeviceName: "test-disk",
+		Mode:       "READ_WRITE",
+		Source:     "projects/test-project/zones/us-central1-a/disks/test-disk",
+	}, config)
+
+	if got, want := flattened[0]["initialize_params"], d.Get("boot_disk.0.initialize_params"); !reflect.DeepEqual(got, want) {
+		t.Fatalf("expected initialize_params fallback when disk lookup fails: got %#v, want %#v", got, want)
+	}
+}
+
 func testComputeInstanceFlattenBootDiskConfig(t *testing.T, disk *compute.Disk) *transport_tpg.Config {
 	t.Helper()
 
@@ -114,6 +159,29 @@ func testComputeInstanceFlattenBootDiskConfig(t *testing.T, disk *compute.Disk) 
 		if err := json.NewEncoder(w).Encode(disk); err != nil {
 			t.Fatalf("encoding disk response: %v", err)
 		}
+	}))
+
+	t.Cleanup(server.Close)
+
+	return &transport_tpg.Config{
+		Client:          server.Client(),
+		ComputeBasePath: server.URL + "/",
+		Context:         context.Background(),
+		Project:         "test-project",
+		UserAgent:       "test-agent",
+		Zone:            "us-central1-a",
+	}
+}
+
+func testComputeInstanceFlattenBootDiskErrorConfig(t *testing.T) *transport_tpg.Config {
+	t.Helper()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Fatalf("unexpected method %q", r.Method)
+		}
+
+		http.Error(w, "boom", http.StatusInternalServerError)
 	}))
 
 	t.Cleanup(server.Close)
