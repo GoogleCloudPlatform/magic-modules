@@ -193,7 +193,7 @@ properties:
   - name: 'tasks'
     type: NestedObject
     description: "Configures render and deploy for the `CustomTargetType` using tasks."
-    exactly_one_of:
+    conflicts_with:
       - 'customActions'
       - 'tasks'
     properties:
