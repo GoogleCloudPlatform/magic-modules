@@ -92,13 +92,13 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 	if config == nil {
 		return fmt.Errorf("provider client is not configured")
 	}
-	resourceData := ResourceGoogleServiceAccount().Data(&terraform.InstanceState{})
+	d := ResourceGoogleServiceAccount().Data(&terraform.InstanceState{})
 	if project != "" {
-		if err := resourceData.Set("project", project); err != nil {
+		if err := d.Set("project", project); err != nil {
 			return fmt.Errorf("error setting project on temporary resource data: %w", err)
 		}
 	}
-	url, err := tpgresource.ReplaceVars(resourceData, config, "{{IAMBasePath}}projects/{{project}}/serviceAccounts")
+	url, err := tpgresource.ReplaceVars(d, config, "{{IAMBasePath}}projects/{{project}}/serviceAccounts")
 	if err != nil {
 		return err
 	}
@@ -107,18 +107,18 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 	if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
 		billingProject = parts[1]
 	}
-	if bp, err := tpgresource.GetBillingProject(resourceData, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	userAgent, err := tpgresource.GenerateUserAgentString(resourceData, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
 		Config:         config,
-		TempData:       resourceData,
+		TempData:       d,
 		ListURL:        url,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
