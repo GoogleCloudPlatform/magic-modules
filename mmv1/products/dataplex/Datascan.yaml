@@ -150,6 +150,25 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
+  - name: 'dataplex_datascan_execution_identity_user_credential'
+    primary_resource_id: 'identity_user_credential'
+    vars:
+      datascan_name: 'dataplex-id-user-cred'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
+  - name: 'dataplex_datascan_execution_identity_service_account'
+    primary_resource_id: 'identity_service_account'
+    vars:
+      datascan_name: 'dataplex-id-sa'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
+    external_providers: ["time"]
 parameters:
   - name: 'location'
     type: String
@@ -302,13 +321,55 @@ properties:
       - name: 'latestJobEndTime'
         type: String
         description: |
-          The time when the latest DataScanJob started.
+          The time when the latest DataScanJob ended.
         output: true
       - name: 'latestJobStartTime'
         type: String
         description: |
-          The time when the latest DataScanJob ended.
+          The time when the latest DataScanJob started.
         output: true
+  - name: 'executionIdentity'
+    type: NestedObject
+    immutable: true
+    description: |
+      The identity to run the datascan. If not specified, defaults to the Dataplex Service Agent.
+    properties:
+      - name: 'dataplexServiceAgent'
+        type: NestedObject
+        description: |
+          The Dataplex service agent associated with the user's project.
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of:
+          - 'execution_identity.0.dataplex_service_agent'
+          - 'execution_identity.0.user_credential'
+          - 'execution_identity.0.service_account'
+        properties: []
+      - name: 'userCredential'
+        type: NestedObject
+        description: |
+          The credential of the calling user. Supports only ONE_TIME trigger type.
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of:
+          - 'execution_identity.0.dataplex_service_agent'
+          - 'execution_identity.0.user_credential'
+          - 'execution_identity.0.service_account'
+        properties: []
+      - name: 'serviceAccount'
+        type: NestedObject
+        description: |
+          Service account to use to execute a datascan.
+        exactly_one_of:
+          - 'execution_identity.0.dataplex_service_agent'
+          - 'execution_identity.0.user_credential'
+          - 'execution_identity.0.service_account'
+        properties:
+          - name: 'email'
+            type: String
+            description: |
+              Service account email.
+            required: true
   - name: 'type'
     type: Enum
     description: |
