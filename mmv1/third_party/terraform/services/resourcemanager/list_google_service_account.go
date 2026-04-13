@@ -20,8 +20,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-var _ tpgresource.ListResourceWithRawV5Schemas = &GoogleServiceAccountListResource{}
-
 type GoogleServiceAccountListResource struct {
 	tpgresource.ListResourceMetadata
 }
