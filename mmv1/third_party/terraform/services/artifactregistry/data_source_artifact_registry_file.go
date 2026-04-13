@@ -1,6 +1,9 @@
 package artifactregistry
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"net/url"
 	"strings"
@@ -82,6 +85,11 @@ func buildFileResourceURL(base, project, location, repository, fileID string) st
 		"%sprojects/%s/locations/%s/repositories/%s/files/%s",
 		base, project, location, repository, encoded,
 	)
+}
+
+func sha256Hashes(b []byte) (hexStr, b64Str string) {
+	sum := sha256.Sum256(b)
+	return hex.EncodeToString(sum[:]), base64.StdEncoding.EncodeToString(sum[:])
 }
 
 func init() {

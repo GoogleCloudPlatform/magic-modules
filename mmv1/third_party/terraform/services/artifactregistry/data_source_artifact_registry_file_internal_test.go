@@ -50,3 +50,25 @@ func TestBuildFileResourceURL(t *testing.T) {
 		})
 	}
 }
+
+func TestSHA256Hashes(t *testing.T) {
+	// Empty input has a well-known SHA-256.
+	hex, b64 := sha256Hashes(nil)
+	wantHex := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	wantB64 := "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU="
+	if hex != wantHex {
+		t.Errorf("hex = %q, want %q", hex, wantHex)
+	}
+	if b64 != wantB64 {
+		t.Errorf("b64 = %q, want %q", b64, wantB64)
+	}
+
+	// "hello" has known hashes.
+	hex, b64 = sha256Hashes([]byte("hello"))
+	if hex != "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824" {
+		t.Errorf("hex for hello = %q", hex)
+	}
+	if b64 != "LPJNul+wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ=" {
+		t.Errorf("b64 for hello = %q", b64)
+	}
+}
