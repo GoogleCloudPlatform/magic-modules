@@ -2,6 +2,8 @@ package artifactregistry
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
@@ -68,6 +70,18 @@ func DataSourceArtifactRegistryFile() *schema.Resource {
 
 func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}) error {
 	return fmt.Errorf("not implemented")
+}
+
+// buildFileResourceURL constructs the AR file resource URL with fileID properly URL-encoded.
+// AR file IDs may contain slashes and colons (e.g. Maven artifact paths).
+// url.PathEscape encodes slashes but leaves colons unescaped (valid per RFC 3986 path segments).
+// AR API requires colons to be percent-encoded as well, so we encode them explicitly.
+func buildFileResourceURL(base, project, location, repository, fileID string) string {
+	encoded := strings.ReplaceAll(url.PathEscape(fileID), ":", "%3A")
+	return fmt.Sprintf(
+		"%sprojects/%s/locations/%s/repositories/%s/files/%s",
+		base, project, location, repository, encoded,
+	)
 }
 
 func init() {
