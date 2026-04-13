@@ -16,17 +16,15 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// ListResource is the base contract for Google provider list resources
+// It embeds list.ListResourceWithConfigure and list.ListResourceWithRawV5Schemas
+// to extend the plugin-framework list API with Configure and RawV5Schemas.
 type ListResource interface {
 	list.ListResourceWithConfigure
-}
-
-type ListResourceWithRawV5Schemas interface {
-	ListResource
-
 	list.ListResourceWithRawV5Schemas
 }
 
-var _ ListResourceWithRawV5Schemas = &ListResourceMetadata{}
+var _ ListResource = &ListResourceMetadata{}
 
 // ListConfigFieldKind selects the Terraform type for one attribute in a list resource config block.
 type ListConfigFieldKind uint8
@@ -73,7 +71,7 @@ func NewListConfigSchema(fields ...ListConfigField) (listschema.Schema, error) {
 }
 
 type ListResourceMetadata struct {
-	ListResourceWithRawV5Schemas
+	ListResource
 
 	TypeName string
 	// SDKv2Resource is the plugin SDK v2 *schema.Resource (schema, CRUD, Identity, etc.), not only attribute definitions.
