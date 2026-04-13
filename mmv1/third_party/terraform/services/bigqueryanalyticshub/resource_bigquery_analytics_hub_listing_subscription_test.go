@@ -3,7 +3,6 @@ package bigqueryanalyticshub_test
 import (
 	"fmt"
 	"os"
-    {{- end }}
 	"regexp"
 	"testing"
 
@@ -209,7 +208,6 @@ resource "google_bigquery_analytics_hub_listing_subscription" "subscription" {
 `, context)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccBigqueryAnalyticsHubListingSubscription_multiregion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
