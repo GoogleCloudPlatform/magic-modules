@@ -67,6 +67,10 @@ examples:
     primary_resource_id: 'custom-target-type'
     vars:
       custom_target_type_name: 'my-custom-target-type'
+  - name: 'clouddeploy_custom_target_type_tasks'
+    primary_resource_id: 'custom-target-type'
+    vars:
+      custom_target_type_name: 'my-custom-target-type'
 parameters:
   - name: 'location'
     type: String
