@@ -75,6 +75,10 @@ var (
 					startDate: newDate(2025, 12, 3),
 					endDate:   newDate(2025, 12, 15),
 				},
+				{
+					startDate: newDate(2026, 4, 19),
+					endDate:   newDate(2026, 4, 26),
+				},
 			},
 		},
 		"hao-nan-li": {
@@ -160,6 +164,10 @@ var (
 				{
 					startDate: newDate(2025, 5, 22),
 					endDate:   newDate(2025, 6, 7),
+				},
+				{
+					startDate: newDate(2026, 4, 13),
+					endDate:   newDate(2026, 4, 19),
 				},
 			},
 		},
