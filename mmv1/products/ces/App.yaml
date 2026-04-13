@@ -395,6 +395,7 @@ properties:
           - name: disableConversationLogging
             type: Boolean
             description: Whether to disable conversation logging for the sessions.
+            default_from_api: true
       - name: redactionConfig
         type: NestedObject
         description: Configuration to instruct how sensitive data should be handled.
