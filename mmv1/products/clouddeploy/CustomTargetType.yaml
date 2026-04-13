@@ -117,7 +117,7 @@ properties:
   - name: 'customActions'
     type: NestedObject
     description: "Configures render and deploy for the `CustomTargetType` using Skaffold custom actions."
-    exactly_one_of:
+    conflicts_with:
       - 'customActions'
       - 'tasks'
     properties:
