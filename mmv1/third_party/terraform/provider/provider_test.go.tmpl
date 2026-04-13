@@ -233,7 +233,8 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 				Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(map[string]interface{}{
 					"credentials": strconv.Quote(credentials),
 				}),
-				// google_provider_config_sdk is not available in 6.10.0, so we cannot verify credentials here.
+				// google_provider_config_sdk is test-specific datasource
+				// not available in the real provider, so we cannot verify credentials here.
 				// The fact that this step succeeds implies the provider accepted the credentials.
 			},
 			{
