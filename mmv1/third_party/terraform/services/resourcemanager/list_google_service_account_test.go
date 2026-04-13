@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-// TestAccServiceAccount_listResource_queryIdentity lists service accounts via the
+// TestAccServiceAccountListResource_queryIdentity lists service accounts via the
 // provider list resource API and asserts a known identity appears in the query
 // results (Terraform 1.14+).
 func TestAccServiceAccountListResource_queryIdentity(t *testing.T) {
