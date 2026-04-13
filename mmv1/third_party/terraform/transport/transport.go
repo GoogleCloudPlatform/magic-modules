@@ -190,53 +190,55 @@ func IsApiNotEnabledError(err error) bool {
 	return false
 }
 
-// ListPages performs a paginated GET request against listURL and processes each item in the
+type ListPagesOptions struct {
+	Config         *Config
+	TempData       *schema.ResourceData
+	ListURL        string
+	BillingProject string
+	UserAgent      string
+	ItemName       string
+	Filter         string
+	Flattener      func(item map[string]interface{}, d *schema.ResourceData, config *Config) error
+	Callback       func(rd *schema.ResourceData) error
+}
+
+// ListPages performs a paginated GET request against ListURL and processes each item in the
 // response. Rate-limited responses (HTTP 429) are retried automatically.
 //
-// On each page the function extracts the array at the JSON key itemName (default "items"),
-// calls flattener to write each element into tempData, then invokes callback for further
+// On each page the function extracts the array at the JSON key ItemName (default "items"),
+// calls Flattener to write each element into TempData, then invokes Callback for further
 // processing of each item.
-func ListPages(
-	config *Config,
-	tempData *schema.ResourceData,
-	listURL string,
-	billingProject string,
-	userAgent string,
-	itemName string,
-	filter string,
-	flattener func(item map[string]interface{}, d *schema.ResourceData, config *Config) error,
-	callback func(rd *schema.ResourceData) error,
-) error {
-	itemKey := itemName
+func ListPages(opt ListPagesOptions) error {
+	itemKey := opt.ItemName
 	if itemKey == "" {
 		itemKey = "items"
 	}
 
 	params := make(map[string]string)
-	if filter != "" {
-		params["filter"] = filter
+	if opt.Filter != "" {
+		params["filter"] = opt.Filter
 	}
 
 	for {
 		// Depending on previous iterations, params might contain a pageToken param
-		url, err := AddQueryParams(listURL, params)
+		url, err := AddQueryParams(opt.ListURL, params)
 		if err != nil {
 			return err
 		}
 
 		headers := make(http.Header)
 		res, err := SendRequest(SendRequestOptions{
-			Config:    config,
+			Config:    opt.Config,
 			Method:    "GET",
-			Project:   billingProject,
+			Project:   opt.BillingProject,
 			RawURL:    url,
-			UserAgent: userAgent,
+			UserAgent: opt.UserAgent,
 			Headers:   headers,
 			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 		})
 		if err != nil {
-			return HandleNotFoundError(err, tempData, itemKey)
+			return HandleNotFoundError(err, opt.TempData, itemKey)
 		}
 
 		if v, ok := res[itemKey].([]interface{}); ok {
@@ -246,11 +248,11 @@ func ListPages(
 					return fmt.Errorf("expected item to be map[string]interface{}, got %T", item)
 				}
 
-				err = flattener(itemMap, tempData, config)
+				err = opt.Flattener(itemMap, opt.TempData, opt.Config)
 				if err != nil {
 					return fmt.Errorf("Error flattening instance: %s", err)
 				}
-				err = callback(tempData)
+				err = opt.Callback(opt.TempData)
 				if err != nil {
 					return err
 				}

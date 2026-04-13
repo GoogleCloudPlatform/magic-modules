@@ -116,15 +116,14 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 		return err
 	}
 
-	return transport_tpg.ListPages(
-		config,
-		resourceData,
-		url,
-		billingProject,
-		userAgent,
-		"accounts",
-		"",
-		flattenGoogleServiceAccountListItem,
-		callback,
-	)
+	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
+		Config:         config,
+		TempData:       resourceData,
+		ListURL:        url,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+		ItemName:       "accounts",
+		Flattener:      flattenGoogleServiceAccountListItem,
+		Callback:       callback,
+	})
 }
