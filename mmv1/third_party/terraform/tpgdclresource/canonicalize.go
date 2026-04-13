@@ -838,16 +838,16 @@ func IsSelfLink(s string) bool {
 	}
 
 	u, err := url.Parse(candidate)
-	if err != nil {
+	if err != nil || u.Host == "" {
 		return false
 	}
 
 	host := strings.ToLower(u.Hostname())
-	if host == "" {
+	if host != "googleapis.com" && !strings.HasSuffix(host, ".googleapis.com") {
 		return false
 	}
 
-	return host == "googleapis.com" || strings.HasSuffix(host, ".googleapis.com")
+	return u.Path != "" && u.Path != "/"
 }
 
 // ValueShouldBeSent returns if a value should be sent as part of the JSON request.
