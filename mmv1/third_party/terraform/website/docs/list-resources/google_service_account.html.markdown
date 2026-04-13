@@ -7,67 +7,46 @@ description: |-
 
 # google_service_account (list)
 
-Use this **list** resource type with the Terraform CLI [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query)
-command and configuration in **`.tfquery.hcl`** files. It enumerates existing
+Lists IAM **service accounts** in a Google Cloud project for use with
+[`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) and
+**`.tfquery.hcl`** files. Results correspond to existing
 [`google_service_account`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account)
-resources in a project.
+managed resources.
 
-~> **Terraform version:** The [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) command, `.tfquery.hcl` configuration, and the [`list`](https://developer.hashicorp.com/terraform/language/block/tfquery/list) block require **Terraform 1.14.0 or later**.
-
-For general list block arguments (`provider`, `include_resource`, `limit`, `count`, `for_each`, etc.),
-see the Terraform language reference for the [`list` block](https://developer.hashicorp.com/terraform/language/block/tfquery/list).
+For how list resources work in this provider, file layout, Terraform version requirements, and
+shared `list` block arguments, refer to the guide
+[Use list resources with terraform query (Google Cloud provider)](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/using_list_resources_with_terraform_query).
 
 ## Example
 
-Place the `list` block in a file named with the `.tfquery.hcl` suffix (for example `service_accounts.tfquery.hcl`).
-You can keep provider configuration in ordinary `.tf` files in the same directory.
-
 ```hcl
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-provider "google" {
-  project = "my-project"
-}
-
 list "google_service_account" "all" {
   provider = google
 
   config {
-    # Optional. If omitted, the provider default project is used.
+    # Optional. Defaults to the provider project when omitted.
     # project = "other-project"
   }
 }
 ```
 
-Run from the directory that contains your `.tfquery.hcl` file:
-
-```shell
-terraform query
-```
+Run `terraform query` from the directory that contains the `.tfquery.hcl` file.
 
 ## Configuration (`config` block)
 
-The following arguments are supported inside the nested `config` block:
-
-* `project` - (Optional) The Google Cloud project ID whose service accounts are listed.
-  If unset, the provider's configured default project is used (same behavior as the managed resource).
+* `project` - (Optional) Project ID to list service accounts from. If unset, the provider's
+  configured default project is used (same idea as the managed resource).
 
 ## Results
 
-Each matching service account is returned as a list result. By default, Terraform returns
-**resource identity** for `google_service_account` (see
+By default each result includes **resource identity** for `google_service_account` (see
 [Resource identity](https://developer.hashicorp.com/terraform/language/resources/identities)):
 
-* `email` - Service account email address (required for identity).
-* `project` - Project ID (optional in identity when it can be inferred).
+* `email` - Service account email (required for identity).
+* `project` - Project ID when applicable.
 
-Set `include_resource = true` on the `list` block to include the **full resource object**
-in each result, with the same attributes as the managed
+With `include_resource = true` on the `list` block, results also include the full resource-style
+attributes documented for the managed
 [`google_service_account` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account#attributes-reference)
-(for example `unique_id`, `name`, `display_name`, `disabled`, `description`, `member`, and `account_id` where present in state).
+(for example `unique_id`, `name`, `display_name`, `disabled`, `description`, `member`, and
+`account_id` where present in state).
