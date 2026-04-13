@@ -39,9 +39,9 @@ func NewGoogleServiceAccountListResource() list.ListResource {
 	return listR
 }
 
-func (listR *GoogleServiceAccountListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
+func (listR *GoogleServiceAccountListResource) List(ctx context.Context, listReq list.ListRequest, stream *list.ListResultsStream) {
 	var data GoogleServiceAccountListModel
-	diags := req.Config.Get(ctx, &data)
+	diags := listReq.Config.Get(ctx, &data)
 	if diags.HasError() {
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
@@ -58,9 +58,9 @@ func (listR *GoogleServiceAccountListResource) List(ctx context.Context, req lis
 
 	stream.Results = func(push func(list.ListResult) bool) {
 		err := ListServiceAccounts(listR.Client, project, func(rd *schema.ResourceData) error {
-			result := req.NewListResult(ctx)
+			result := listReq.NewListResult(ctx)
 
-			if err := listR.SetResult(ctx, req.IncludeResource, &result, rd); err != nil {
+			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd); err != nil {
 				return err
 			}
 
@@ -71,7 +71,7 @@ func (listR *GoogleServiceAccountListResource) List(ctx context.Context, req lis
 		})
 		if err != nil {
 			diags.AddError("API Error", err.Error())
-			result := req.NewListResult(ctx)
+			result := listReq.NewListResult(ctx)
 			result.Diagnostics = diags
 			push(result)
 		}
