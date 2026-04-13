@@ -12,7 +12,7 @@ command and configuration in **`.tfquery.hcl`** files. It enumerates existing
 [`google_service_account`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account)
 resources in a project.
 
-~> **Terraform version:** The [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) command, `.tfquery.hcl` configuration, and the [`list`](https://developer.hashicorp.com/terraform/language/block/tfquery/list) block require **Terraform 1.14.0 or later**. Pin `required_version` in your root module if you depend on this workflow.
+~> **Terraform version:** The [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) command, `.tfquery.hcl` configuration, and the [`list`](https://developer.hashicorp.com/terraform/language/block/tfquery/list) block require **Terraform 1.14.0 or later**.
 
 For general list block arguments (`provider`, `include_resource`, `limit`, `count`, `for_each`, etc.),
 see the Terraform language reference for the [`list` block](https://developer.hashicorp.com/terraform/language/block/tfquery/list).
@@ -24,8 +24,6 @@ You can keep provider configuration in ordinary `.tf` files in the same director
 
 ```hcl
 terraform {
-  required_version = ">= 1.14.0"
-
   required_providers {
     google = {
       source = "hashicorp/google"
@@ -73,16 +71,3 @@ Set `include_resource = true` on the `list` block to include the **full resource
 in each result, with the same attributes as the managed
 [`google_service_account` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account#attributes-reference)
 (for example `unique_id`, `name`, `display_name`, `disabled`, `description`, `member`, and `account_id` where present in state).
-
-## API
-
-Listing uses the IAM API method
-[`projects.serviceAccounts.list`](https://cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts/list).
-
-The caller must have permission to list service accounts in the target project (for example
-`iam.serviceAccounts.list` on the project).
-
-## Timeouts and pagination
-
-The provider requests pages from the API until all accounts are returned (subject to your
-`list` block `limit`, if set). Standard provider HTTP timeouts and retry behavior apply.
