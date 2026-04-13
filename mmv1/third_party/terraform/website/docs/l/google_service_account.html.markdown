@@ -12,6 +12,8 @@ command and configuration in **`.tfquery.hcl`** files. It enumerates existing
 [`google_service_account`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account)
 resources in a project.
 
+~> **Terraform version:** The [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) command, `.tfquery.hcl` configuration, and the [`list`](https://developer.hashicorp.com/terraform/language/block/tfquery/list) block require **Terraform 1.14.0 or later**. Pin `required_version` in your root module if you depend on this workflow.
+
 For general list block arguments (`provider`, `include_resource`, `limit`, `count`, `for_each`, etc.),
 see the Terraform language reference for the [`list` block](https://developer.hashicorp.com/terraform/language/block/tfquery/list).
 
@@ -22,6 +24,8 @@ You can keep provider configuration in ordinary `.tf` files in the same director
 
 ```hcl
 terraform {
+  required_version = ">= 1.14.0"
+
   required_providers {
     google = {
       source = "hashicorp/google"
