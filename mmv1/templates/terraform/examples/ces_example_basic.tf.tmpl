@@ -62,7 +62,7 @@ resource "google_ces_agent" "ces_base_agent" {
     instruction = "You are a helpful assistant for this example."
 
     model_settings {
-        model       = "gemini-2.5-flash"
+        model       = "gemini-2.5-flash-001"
         temperature = 0.5
     }
 
@@ -79,7 +79,7 @@ resource "google_ces_agent" "ces_child_agent" {
     instruction = "You are a helpful assistant for this example."
 
     model_settings {
-        model       = "gemini-2.5-flash"
+        model       = "gemini-2.5-flash-001"
         temperature = 0.5
     }
 
