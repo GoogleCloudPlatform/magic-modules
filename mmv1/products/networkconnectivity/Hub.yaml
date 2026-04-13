@@ -42,7 +42,6 @@ legacy_long_form_project: true
 examples:
   - name: 'network_connectivity_hub_basic'
     primary_resource_id: 'primary'
-    exclude_identity_import: true
     vars:
       resource_name: 'basic'
     test_vars_overrides:
@@ -50,7 +49,6 @@ examples:
       resource_name: '"basic" + randomSuffix'
   - name: 'network_connectivity_hub_with_export_psc'
     primary_resource_id: 'primary'
-    exclude_identity_import: true
     vars:
       resource_name: 'basic'
     test_vars_overrides:
@@ -58,7 +56,6 @@ examples:
       resource_name: '"basic" + randomSuffix'
   - name: 'network_connectivity_hub_mesh_topology'
     primary_resource_id: 'primary'
-    exclude_identity_import: true
     vars:
       resource_name: 'mesh'
     test_vars_overrides:
@@ -66,7 +63,6 @@ examples:
       resource_name: '"mesh" + randomSuffix'
   - name: 'network_connectivity_hub_star_topology'
     primary_resource_id: 'primary'
-    exclude_identity_import: true
     vars:
       resource_name: 'star'
     test_vars_overrides:
@@ -74,7 +70,6 @@ examples:
       resource_name: '"star" + randomSuffix'
   - name: 'network_connectivity_hub_policy_mode'
     primary_resource_id: 'primary'
-    exclude_identity_import: true
     vars:
       resource_name: 'policy'
 

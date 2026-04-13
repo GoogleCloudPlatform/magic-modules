@@ -641,6 +641,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 
 // Compiles files that are shared at the provider level
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
+	log.Printf("Generating common files for %s", ProviderName(t))
 	t.generateResourcesForVersion(products)
 	files := t.getCommonCompileFiles(t.TargetVersionName)
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)

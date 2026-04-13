@@ -140,6 +140,9 @@ Autopilot clusters. See the Cluster API's
 [PrivilegedAdmissionConfig](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters#privilegedadmissionconfig)
 documentation for more details.
 
+* `autopilot_cluster_policy_config` - (Optional)
+Per-cluster configuration of Autopilot cluster policies in GKE clusters. This field can only be configured in non Autopilot clusters. Structure is [documented below](#nested_autopilot_cluster_policy_config).
+
 * `cluster_ipv4_cidr` - (Optional) The IP address range of the Kubernetes pods
 in this cluster in CIDR notation (e.g. `10.96.0.0/14`). Leave blank to have one
 automatically chosen or specify a `/14` block in `10.0.0.0/8`. This field will
@@ -218,6 +221,8 @@ Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https:/
     [documented below](#nested_maintenance_policy).
 
 * `managed_opentelemetry_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the [GKE Managed OpenTelemetry](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/managed-otel-gke) feature. Structure is [documented below](#nested_managed_opentelemetry_config).
+
+* `managed_machine_learning_diagnostics_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the [GKE Managed ML Diagnostics](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/TODO) feature. Structure is [documented below](#nested_managed_ml_diagnostics_config).
 
 * `master_auth` - (Optional) The authentication information for accessing the
 Kubernetes master. Some values in this block are only returned by the API if
@@ -714,6 +719,10 @@ This block also contains several computed attributes, documented below.
 <a name="nested_managed_opentelemetry_config"></a>The `managed_opentelemetry_config` block supports:
 
 *  `scope` - (Required) The scope of the Managed OpenTelemetry pipeline. Supported values include: `SCOPE_UNSPECIFIED`, `NONE`, `COLLECTION_AND_INSTRUMENTATION_COMPONENTS`.
+
+<a name="nested_managed_ml_diagnostics_config"></a>The `managed_machine_learning_diagnostics_config` block supports:
+
+* `enabled` - (Required) Whether or not the managed ML diagnostics feature is enabled. To disable the feature, explicitly set this to `false`.
 
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
@@ -1807,6 +1816,13 @@ registry_hosts {
 
 * `enable_insecure_binding_system_unauthenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:anonymous or system:unauthenticated.
 * `enable_insecure_binding_system_authenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:authenticated.
+
+<a name="nested_autopilot_cluster_policy_config"></a>The `autopilot_cluster_policy_config` block supports:
+
+* `no_system_mutation` - (Optional) Whether to block mutation of resources in system namespaces and non-namespaced system resources.
+* `no_system_impersonation` - (Optional) Whether to block impersonation of system accounts in the cluster.
+* `no_unsafe_webhooks` - (Optional) Whether to block unsafe webhooks in the cluster.
+* `no_standard_node_pools` - (Optional) Whether to block non autopilot managed node pools in the cluster.
 
 
 ## Attributes Reference

@@ -52,7 +52,6 @@ schema_version: 1
 state_upgraders: true
 examples:
   - name: 'bigquery_job_query'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_query'
@@ -65,7 +64,6 @@ examples:
       - 'status.0.state'
   - name: 'bigquery_job_query_continuous'
     exclude_docs: true
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_query_continuous'
@@ -74,7 +72,6 @@ examples:
       - 'status.0.state'
     min_version: beta
   - name: 'bigquery_job_query_table_reference'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_query'
@@ -123,7 +120,6 @@ examples:
  # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_copy'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_copy'
@@ -139,7 +135,6 @@ examples:
       - 'etag'
       - 'status.0.state'
   - name: 'bigquery_job_copy_table_reference'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_copy'
@@ -160,7 +155,6 @@ examples:
  # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_extract'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_extract'
@@ -172,7 +166,6 @@ examples:
       - 'etag'
       - 'status.0.state'
   - name: 'bigquery_job_extract_table_reference'
-    exclude_identity_import: true
     primary_resource_id: 'job'
     vars:
       job_id: 'job_extract'
