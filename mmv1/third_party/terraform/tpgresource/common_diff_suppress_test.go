@@ -290,33 +290,3 @@ func TestEmptyOrDefaultStringSuppress_IAP(t *testing.T) {
 	}
 }
 
-func TestEmptyOrDefaultStringSuppress_IAP(t *testing.T) {
-	suppressor := EmptyOrDefaultStringSuppress(" ")
-
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"API returns space, config is empty": {
-			Old:                " ",
-			New:                "",
-			ExpectDiffSuppress: true,
-		},
-		"Config is empty, API returns space": {
-			Old:                "",
-			New:                " ",
-			ExpectDiffSuppress: true,
-		},
-		"Actual Client ID change (Should NOT suppress)": {
-			Old:                " ",
-			New:                "actual-id",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if suppressor("iap.0.oauth2_client_id", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Errorf("failed case %s: Old='%s', New='%s', expected suppress=%t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
