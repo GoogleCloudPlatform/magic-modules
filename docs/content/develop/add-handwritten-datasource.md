@@ -28,6 +28,7 @@ added to that resource. You can create a new datasource of this type as follows:
     "fmt"
 
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-provider-google/google/registry"
     "github.com/hashicorp/terraform-provider-google/google/tpgresource"
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
    )
@@ -70,6 +71,15 @@ added to that resource. You can create a new datasource of this type as follows:
     }
     return nil
    }
+
+   func init() {
+     registry.Schema{
+       Name:        "google_memcache_instance",
+       ProductName: "memcache",
+       Type:        registry.SchemaTypeDataSource,
+       Schema:      DataSourceMemcacheInstance(),
+     }.Register()
+   }
    ```
 
    Important things to note:
@@ -77,6 +87,7 @@ added to that resource. You can create a new datasource of this type as follows:
    - `tpgresource.DatasourceSchemaFromResourceSchema` ensures that the datasource schema stays in sync with the resource schema.
    - `tpgresource.AddRequiredFieldsToSchema` and `tpgresource.AddOptionalFieldsToSchema` allow "overriding" whether a specific field is optional or required.
    - The Read function for the datasource is a thin wrapper around the Read function for the related resource. This ensures that new fields on the resource are automatically read for the datasource as well.
+   - The init() function adds the data source to the provider when this product is imported.
 
 1. Create a new test file in the same folder. The name of the file should be `data_source_PRODUCT_RESOURCE_test.go`. Here's an example:
 
@@ -158,7 +169,16 @@ added to that resource. You can create a new datasource of this type as follows:
    - If there is `labels` field with type `KeyValueLabels` in the corresponding resource: After calling the resource read method, call the function `tpgresource.SetDataSourceLabels(d)` to make `labels` and `terraform_labels` have all of the labels on the resource.
    - If there is `annotations` field with type `KeyValueAnnotations` in the corresponding resource: After calling the resource read method, call the function `tpgresource.SetDataSourceAnnotations(d)` to make `annotations` have all of the annotations on the resource.
 
-1. Register the datasource to `handwrittenDatasources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
+1. Add the datasource to `handwrittenDatasources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
+   ```go
+   var handwrittenDatasources = map[string]*schema.Resource{
+     // ...
+     "google_memorystore_instance": registry.DataSource("google_memorystore_instance"),
+     "google_memcache_instance":    registry.DataSource("google_memcache_instance"),
+     "google_redis_instance":       registry.DataSource("google_redis_instance"),
+     // ...
+   }
+   ```
 1. [Add documentation](#add-documentation)
 
 For creating a datasource based off an existing resource you can [make use of the
