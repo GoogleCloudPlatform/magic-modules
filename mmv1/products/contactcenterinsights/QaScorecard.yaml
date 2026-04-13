@@ -23,10 +23,10 @@ import_format:
   - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard_id}}
 autogen_status: UWFTY29yZWNhcmQ=
 examples:
-  - name: 'contact_center_insights_qa_scorecard_basic'
-    primary_resource_id: 'default'
+  - name: contact_center_insights_qa_scorecard_basic
+    primary_resource_id: default
     vars:
-      scorecard_id: 'my-scorecard'
+      scorecard_id: qa-scorecard
 parameters:
   - name: location
     type: String
@@ -72,7 +72,6 @@ properties:
     output: true
   - name: source
     type: String
-    default_from_api: true
     description: |-
       Possible values:
       QA_SCORECARD_SOURCE_CUSTOMER_DEFINED

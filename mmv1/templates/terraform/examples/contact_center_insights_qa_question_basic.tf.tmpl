@@ -1,0 +1,31 @@
+resource "google_contact_center_insights_qa_scorecard" "scorecard" {
+  qa_scorecard_id = "%{scorecard_id}"
+  location        = "us-central1"
+  display_name    = "My Scorecard"
+}
+
+resource "time_sleep" "wait_a_few_seconds" {
+  depends_on = [google_contact_center_insights_qa_scorecard.scorecard]
+  create_duration = "60s"
+}
+
+resource "google_contact_center_insights_qa_scorecard_qa_question" "default" {
+  qa_question_id = "%{question_id}"
+  qascorecard    = google_contact_center_insights_qa_scorecard.scorecard.qa_scorecard_id
+  revision       = "latest"
+  location       = "us-central1"
+
+  question_body  = "Did the agent greet the customer?"
+  question_type  = "CUSTOMIZABLE"
+
+  answer_choices {
+    str_value = "Yes"
+    score     = 1.0
+  }
+  answer_choices {
+    str_value = "No"
+    score     = 0.5
+  }
+
+  depends_on = [time_sleep.wait_a_few_seconds]
+}
