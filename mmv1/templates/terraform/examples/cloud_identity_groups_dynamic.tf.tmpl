@@ -1,0 +1,21 @@
+resource "google_cloud_identity_group" "{{$.PrimaryResourceId}}" {
+  display_name         = "{{index $.Vars "id_group"}}"
+  initial_group_config = "EMPTY"
+
+  parent = "customers/{{index $.TestEnvVars "cust_id"}}"
+
+  group_key {
+  	id = "{{index $.Vars "id_group"}}@{{index $.TestEnvVars "org_domain"}}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+
+  dynamic_group_metadata {
+    queries {
+      query         = "user.organizations.exists(org, org.department=='Engineering')"
+      resource_type = "USER"
+    }
+  }
+}
