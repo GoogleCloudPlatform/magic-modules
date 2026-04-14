@@ -66,6 +66,8 @@ examples:
       network_attachment_name: 'my-network-attachment'
       network_name: 'my-network'
       subnetwork_name: 'my-subnetwork'
+    ignore_read_extra:
+      - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
