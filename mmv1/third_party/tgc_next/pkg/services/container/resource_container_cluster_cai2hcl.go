@@ -1518,8 +1518,14 @@ func flattenDatabaseEncryption(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	// Map ALL_OBJECTS_ENCRYPTION_ENABLED to ENCRYPTED to fix validation error.
+	// See: https://github.com/hashicorp/terraform-provider-google/issues/26917
+	state := c["state"]
+	if state == "ALL_OBJECTS_ENCRYPTION_ENABLED" {
+		state = "ENCRYPTED"
+	}
 	transformed := map[string]interface{}{
-		"state":    c["state"],
+		"state":    state,
 		"key_name": c["keyName"],
 	}
 
