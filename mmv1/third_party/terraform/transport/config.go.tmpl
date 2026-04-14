@@ -1465,6 +1465,7 @@ func RemoveBasePathVersion(url string) string {
 // have its own endpoint mechanism such as sweepers, init {{"{{"}}service{{"}}"}}BasePath
 // values to a default. After using this, you should call config.LoadAndValidate.
 func ConfigureBasePaths(c *Config) {
+	c.BasePaths = map[string]string{}
 	// Registered Products
 	for _, p := range registry.ListProducts() {
 		c.BasePaths[p.Name] = p.BaseUrl

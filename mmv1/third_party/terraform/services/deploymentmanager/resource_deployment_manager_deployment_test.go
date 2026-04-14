@@ -404,7 +404,7 @@ func testAccCheckDeploymentManagerDestroyInvalidDeployment(t *testing.T, deploym
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, envvar.GetTestProjectFromEnv(), deploymentName)
+		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.BasePaths["deploymentmanager"], envvar.GetTestProjectFromEnv(), deploymentName)
 		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",

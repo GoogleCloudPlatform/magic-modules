@@ -1134,9 +1134,9 @@ func TestReplaceVars(t *testing.T) {
 		"base path recursive replacement": {
 			Template: "{{CloudRunBasePath}}namespaces/{{project}}/services",
 			Config: &transport_tpg.Config{
-				Project:          "default-project",
-				Region:           "default-region",
-				CloudRunBasePath: "https://{{region}}-run.googleapis.com/",
+				Project:   "default-project",
+				Region:    "default-region",
+				BasePaths: map[string]string{"cloudrun": "https://{{region}}-run.googleapis.com/"},
 			},
 			Expected: "https://default-region-run.googleapis.com/namespaces/default-project/services",
 		},
