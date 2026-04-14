@@ -17,7 +17,7 @@
 	if !ok {
 		if subName, subOk := d.GetOk("destination_pubsub_subscription.0.pubsub_subscription.0.name"); subOk {
 			parts := strings.Split(subName.(string), "/")
-			if len(parts) >= 2 {
+			if len(parts) >= 4 && parts[0] == "projects" && parts[2] == "subscriptions" {
 				destinationProject = parts[1]
 				ok = true
 			}
