@@ -189,8 +189,33 @@ func (listR *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) 
 	return SetResourceIdentityAttributes(rd, attrs)
 }
 
+// ListResultDisplayName returns the first non-empty label from rd for keys in order. Use a
+// single key or several for fallbacks (e.g. display_name then email).
+// it returns an error if none of the keys yield a non-empty string.
+func ListResultDisplayName(rd *schema.ResourceData, keys ...string) (string, error) {
+	if rd == nil {
+		return "", fmt.Errorf("ListResultDisplayName: ResourceData is nil")
+	}
+	if len(keys) == 0 {
+		return "", fmt.Errorf("ListResultDisplayName: no keys provided")
+	}
+	for _, k := range keys {
+		v, ok := rd.GetOk(k)
+		if !ok {
+			continue
+		}
+		if s := fmt.Sprintf("%v", v); s != "" {
+			return s, nil
+		}
+	}
+	return "", fmt.Errorf("ListResultDisplayName: no non-empty value among keys %q", keys)
+}
+
 // SetResult fills list result identity from rd; if includeResource, also full resource state.
-func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResource bool, result *list.ListResult, rd *schema.ResourceData) error {
+// displayNameKeys lists schema attribute names (in priority order) used to set result.DisplayName
+// via ListResultDisplayName when it is still empty; omit or pass no keys to skip. Non-empty keys
+// produce an error if no key yields a non-empty display label.
+func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResource bool, result *list.ListResult, rd *schema.ResourceData, displayNameKeys ...string) error {
 	if err := listR.setResourceIdentity(rd); err != nil {
 		return err
 	}
@@ -211,6 +236,14 @@ func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResourc
 		if err := result.Resource.Set(ctx, *tfTypeResource); err != nil {
 			return errors.New("error setting resource on list result")
 		}
+	}
+
+	if result.DisplayName == "" && len(displayNameKeys) > 0 {
+		s, err := ListResultDisplayName(rd, displayNameKeys...)
+		if err != nil {
+			return err
+		}
+		result.DisplayName = s
 	}
 
 	return nil

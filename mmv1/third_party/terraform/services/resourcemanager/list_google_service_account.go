@@ -58,7 +58,7 @@ func (listR *GoogleServiceAccountListResource) List(ctx context.Context, listReq
 		err := ListServiceAccounts(listR.Client, project, func(rd *schema.ResourceData) error {
 			result := listReq.NewListResult(ctx)
 
-			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd); err != nil {
+			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "display_name", "email"); err != nil {
 				return err
 			}
 
