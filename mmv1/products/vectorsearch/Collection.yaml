@@ -81,6 +81,21 @@ properties:
   - name: displayName
     type: String
     description: User-specified display name of the collection
+  - name: encryptionSpec
+    type: NestedObject
+    description: |-
+      Represents a customer-managed encryption key specification that can be
+      applied to a Vector Search collection.
+    properties:
+      - name: cryptoKeyName
+        type: String
+        required: true
+        description: |-
+          Resource name of the Cloud KMS key used to protect the resource.
+
+          The Cloud KMS key must be in the same region as the resource. It must have
+          the format
+          `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
   - name: labels
     type: KeyValueLabels
     description: Labels as key value pairs.
