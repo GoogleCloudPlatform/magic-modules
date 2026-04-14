@@ -1011,6 +1011,42 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
+			"autopilot_cluster_policy_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration for Autopilot cluster policy.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"no_standard_node_pools": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether standard node pools are disabled.`,
+						},
+						"no_system_impersonation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether system impersonation is disabled.`,
+						},
+						"no_system_mutation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether system mutation is disabled.`,
+						},
+						"no_unsafe_webhooks": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether unsafe webhooks are disabled.`,
+						},
+					},
+				},
+			},
+
 			"authenticator_groups_config": {
 				Type:        schema.TypeList,
 				Optional:    true,

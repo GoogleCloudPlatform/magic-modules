@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	{{ if ne $.Compiler "terraformgoogleconversion-codegen" -}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	{{- end}}
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -116,7 +118,7 @@ func (u *BigqueryDatasetIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
 	}
 
 	policy, err := accessToPolicy(res["access"])
@@ -322,6 +324,7 @@ func (u *BigqueryDatasetIamUpdater) GetMutexKey() string {
 func (u *BigqueryDatasetIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("Bigquery Dataset %s/%s", u.project, u.datasetId)
 }
+{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 
 func init() {
 	registry.Schema{
@@ -343,3 +346,4 @@ func init() {
 		Schema:      tpgiamresource.DataSourceIamPolicy(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater),
 	}.Register()
 }
+{{- end}}
