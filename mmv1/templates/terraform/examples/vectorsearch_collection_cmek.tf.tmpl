@@ -2,10 +2,10 @@ resource "google_vector_search_collection" "{{$.PrimaryResourceId}}" {
   location      = "us-central1"
   collection_id = "{{index $.Vars "collection_id"}}"
 
-  display_name = "My Awesome Collection"
+  display_name = "My Awesome Encrypted Collection"
   description  = "This collection stores important data."
 
-  encryption_spec = {
+  encryption_spec {
     crypto_key_name = google_kms_crypto_key.crypto_key.id
   }
 

@@ -26,6 +26,10 @@ examples:
     primary_resource_id: "example-collection"
     vars:
       collection_id: "example-collection"
+  - name: vectorsearch_collection_cmek
+    primary_resource_id: "example-cmek-collection"
+    vars:
+      collection_id: "example-cmek-collection"
 autogen_async: true
 async:
   operation:
@@ -96,6 +100,7 @@ properties:
           The Cloud KMS key must be in the same region as the resource. It must have
           the format
           `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+    immutable: true
   - name: labels
     type: KeyValueLabels
     description: Labels as key value pairs.
