@@ -1,7 +1,5 @@
 package chronicle_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"fmt"
 	"testing"
@@ -30,7 +28,7 @@ func TestAccChronicleDataTable_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Step 1: Basic creation
 			{
@@ -97,7 +95,6 @@ func TestAccChronicleDataTable_update(t *testing.T) {
 func testAccChronicleDataTable_Config(context map[string]interface{}, description, ttl, username string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_chronicle_data_access_scope" "test_scope_update" {
-  provider             = google-beta
   location             = "us"
   instance             = "%%{chronicle_id}"
   data_access_scope_id = "tf-scope-update-%%{random_suffix}"
@@ -108,7 +105,6 @@ resource "google_chronicle_data_access_scope" "test_scope_update" {
 }
 
 resource "google_chronicle_data_table" "example" {
-  provider         = google-beta
   location         = "us"
   instance         = "%%{chronicle_id}"
   data_table_id    = "tf_test_update_%%{random_suffix}"
@@ -136,5 +132,3 @@ output "data_table_name" {
 }
 `, description, ttl, username), context)
 }
-
-{{- end }}
