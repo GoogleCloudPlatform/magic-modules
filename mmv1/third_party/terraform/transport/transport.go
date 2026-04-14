@@ -166,13 +166,13 @@ func HandleDataSourceNotFoundError(err error, d *schema.ResourceData, resource, 
 		fmt.Sprintf("Error when reading or editing %s: {{err}}", resource), err)
 }
 
-func HandleListResourceNotFoundError(err error, resource string) error {
+func HandleListGoogleApiError(err error, url string) error {
 	if IsGoogleApiErrorWithCode(err, 404) {
-		return fmt.Errorf("list of %s not found", resource)
+		return fmt.Errorf("list at %s not found: %w", url, err)
 	}
 
 	return errwrap.Wrapf(
-		fmt.Sprintf("Error when reading list of %s: {{err}}", resource), err)
+		fmt.Sprintf("Error when reading list at %s: {{err}}", url), err)
 }
 
 func IsGoogleApiErrorWithCode(err error, errCode int) bool {
@@ -247,7 +247,7 @@ func ListPages(opt ListPagesOptions) error {
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 		})
 		if err != nil {
-			return HandleListResourceNotFoundError(err, itemKey)
+			return HandleListGoogleApiError(err, url)
 		}
 
 		if v, ok := res[itemKey].([]interface{}); ok {
