@@ -182,9 +182,7 @@ func (listR *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) 
 	idSchema := listR.SDKv2Resource.Identity.SchemaMap()
 	attrs := make(map[string]interface{}, len(idSchema))
 	for attr := range idSchema {
-		if v, ok := rd.GetOk(attr); ok {
-			attrs[attr] = v
-		}
+		attrs[attr] = rd.Get(attr)
 	}
 	return SetResourceIdentityAttributes(rd, attrs)
 }
