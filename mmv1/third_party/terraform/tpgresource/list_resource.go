@@ -163,22 +163,30 @@ func (listR *ListResourceMetadata) GetLocation(override types.String) string {
 	return listR.Region
 }
 
+func SetResourceIdentityAttributes(d *schema.ResourceData, attrs map[string]interface{}) error {
+	identity, err := d.Identity()
+	if err != nil {
+		return fmt.Errorf("error getting identity: %w", err)
+	}
+	for k, v := range attrs {
+		if err := identity.Set(k, v); err != nil {
+			return fmt.Errorf("error setting identity field %q: %w", k, err)
+		}
+	}
+	return nil
+}
+
 // setResourceIdentity copies identity fields from rd using SDKv2Resource.Identity.SchemaMap().
 // It panics if SDKv2Resource, Identity, or the identity schema is empty (wiring error).
 func (listR *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) error {
 	idSchema := listR.SDKv2Resource.Identity.SchemaMap()
-	identity, err := rd.Identity()
-	if err != nil {
-		return fmt.Errorf("error getting identity: %w", err)
-	}
+	attrs := make(map[string]interface{}, len(idSchema))
 	for attr := range idSchema {
 		if v, ok := rd.GetOk(attr); ok {
-			if err := identity.Set(attr, v); err != nil {
-				return fmt.Errorf("error setting identity field %q: %w", attr, err)
-			}
+			attrs[attr] = v
 		}
 	}
-	return nil
+	return SetResourceIdentityAttributes(rd, attrs)
 }
 
 // SetResult fills list result identity from rd; if includeResource, also full resource state.

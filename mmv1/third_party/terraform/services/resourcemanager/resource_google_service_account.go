@@ -257,18 +257,10 @@ func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error 
 		return fmt.Errorf("Error setting member: %s", err)
 	}
 
-	identity, err := d.Identity()
-	if err != nil {
-		return fmt.Errorf("Error getting identity: %s", err)
-	}
-	if err := identity.Set("email", sa.Email); err != nil {
-		return fmt.Errorf("Error setting email: %s", err)
-	}
-	if err := identity.Set("project", sa.ProjectId); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
-	}
-
-	return nil
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"email":   sa.Email,
+		"project": sa.ProjectId,
+	})
 }
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
@@ -344,18 +336,10 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 	// time to ensure following reads are correct.
 	time.Sleep(time.Second * 5)
 
-	identity, err := d.Identity()
-	if err != nil {
-		return fmt.Errorf("Error getting identity: %s", err)
-	}
-	if err := identity.Set("email", sa.Email); err != nil {
-		return fmt.Errorf("Error setting email: %s", err)
-	}
-	if err := identity.Set("project", sa.ProjectId); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
-	}
-
-	return nil
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"email":   sa.Email,
+		"project": sa.ProjectId,
+	})
 }
 
 func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
