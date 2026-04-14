@@ -3,7 +3,9 @@ package kms
 import (
 	"fmt"
 
+	{{ if ne $.Compiler "terraformgoogleconversion-codegen" -}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	{{- end}}
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -109,6 +111,7 @@ func (u *KmsCryptoKeyIamUpdater) GetMutexKey() string {
 func (u *KmsCryptoKeyIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("KMS CryptoKey %q", u.resourceId)
 }
+{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 
 func init() {
 	registry.Schema{
@@ -136,3 +139,4 @@ func init() {
 		Schema:      tpgiamresource.DataSourceIamPolicy(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater),
 	}.Register()
 }
+{{- end}}
