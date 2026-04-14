@@ -8,7 +8,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
   name          = "test-subnet"
-  region        = "asia-southeast1"
+  region        = "us-west2"
   network       = google_compute_network.default.id
   ip_cidr_range = "10.10.0.0/24"
 }
@@ -55,7 +55,7 @@ resource "google_compute_instance_group_manager" "default" {
   provider           = google-beta
   name               = "{{index $.Vars "backend_name"}}-igm"
   base_instance_name = "backend"
-  zone               = "asia-southeast1-a"
+  zone               = "us-west2-a"
 
   version {
     instance_template = google_compute_instance_template.default.id
