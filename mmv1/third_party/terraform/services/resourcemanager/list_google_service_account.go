@@ -73,7 +73,6 @@ func (listR *GoogleServiceAccountListResource) List(ctx context.Context, listReq
 			result.Diagnostics = diags
 			push(result)
 		}
-		stream.Results = list.ListResultsStreamDiagnostics(diags)
 	}
 }
 
