@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+	neturl "net/url"
 	"sort"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
@@ -9,11 +10,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	"google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func DataSourceGoogleComputeSnapshot() *schema.Resource {
@@ -55,7 +51,7 @@ func dataSourceGoogleComputeSnapshotRead(d *schema.ResourceData, meta interface{
 	}
 
 	if v, ok := d.GetOk("filter"); ok {
-		userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}
@@ -73,17 +69,32 @@ func dataSourceGoogleComputeSnapshotRead(d *schema.ResourceData, meta interface{
 		}
 
 		//handling the pagination locally
-		allSnapshots := make([]*compute.Snapshot,0) 
+		allSnapshots := make([]map[string]interface{}, 0)
 		token := ""
 		for paginate := true; paginate; {
-			snapshots, err := config.NewComputeClient(userAgent).Snapshots.List(project).Filter(v.(string)).PageToken(token).Do()
+			params := neturl.Values{}
+			params.Set("filter", v.(string))
+			params.Set("pageToken", token)
+			params.Set("prettyPrint", "false")
+			url := fmt.Sprintf("%sprojects/%s/global/snapshots?%s", config.ComputeBasePath, project, params.Encode())
+			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    url,
+				UserAgent: userAgent,
+			})
 			if err != nil {
 				return fmt.Errorf("error retrieving list of snapshots: %s", err)
-
 			}
-			allSnapshots = append(allSnapshots, snapshots.Items...)
-
-			token = snapshots.NextPageToken
+			if items, ok := resp["items"].([]interface{}); ok {
+				for _, raw := range items {
+					if snap, ok := raw.(map[string]interface{}); ok {
+						allSnapshots = append(allSnapshots, snap)
+					}
+				}
+			}
+			token, _ = resp["nextPageToken"].(string)
 			paginate = token != ""
 		}
 
@@ -94,7 +105,7 @@ func dataSourceGoogleComputeSnapshotRead(d *schema.ResourceData, meta interface{
 
 		count := len(allSnapshots)
 		if count == 1 || count > 1 && mostRecent {
-			return retrieveSnapshot(d, meta, project, allSnapshots[0].Name)
+			return retrieveSnapshot(d, meta, project, allSnapshots[0]["name"].(string))
 		}
 
 		return fmt.Errorf("your filter has returned %d snapshot(s). Please refine your filter or set most_recent to return exactly one snapshot", len(allSnapshots))
@@ -113,21 +124,23 @@ func retrieveSnapshot(d *schema.ResourceData, meta interface{}, project, name st
 	return tpgresource.SetDataSourceLabels(d)
 }
 
-// ByCreationTimestamp implements sort.Interface for []*Snapshot based on
-// the CreationTimestamp field.
-type ByCreationTimestampOfSnapshot []*compute.Snapshot
+// ByCreationTimestamp implements sort.Interface for []map[string]interface{} based on
+// the creationTimestamp field (RFC 3339 strings are lexicographically comparable).
+type ByCreationTimestampOfSnapshot []map[string]interface{}
 
 func (a ByCreationTimestampOfSnapshot) Len() int      { return len(a) }
 func (a ByCreationTimestampOfSnapshot) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByCreationTimestampOfSnapshot) Less(i, j int) bool {
-	return a[i].CreationTimestamp > a[j].CreationTimestamp
+	ti, _ := a[i]["creationTimestamp"].(string)
+	tj, _ := a[j]["creationTimestamp"].(string)
+	return ti > tj
 }
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_snapshot",
+		Name:        "google_compute_snapshot",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeSnapshot(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeSnapshot(),
 	}.Register()
 }
