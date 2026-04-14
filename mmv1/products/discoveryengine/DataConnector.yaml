@@ -261,7 +261,6 @@ properties:
         description: |
           Whether the action connector is fully configured. Set by the system
           after the action configuration is validated.
-        output: true
       - name: 'createBapConnection'
         type: Boolean
         description: |

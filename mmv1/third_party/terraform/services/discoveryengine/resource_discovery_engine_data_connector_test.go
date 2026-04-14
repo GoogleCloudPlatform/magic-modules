@@ -121,6 +121,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
       auth_type     = "OAUTH"
     }
     create_bap_connection = true
+    is_action_configured = true
   }
   bap_config {
     supported_connector_modes = ["ACTIONS"]
@@ -203,6 +204,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
       client_secret = "unused"
       auth_type     = "OAUTH"
     }
+    is_action_configured = true
     create_bap_connection = true
   }
   bap_config {
