@@ -54,6 +54,13 @@ examples:
       network_name: 'my-network'
     ignore_read_extra:
       - 'deletion_policy'
+  - name: 'datastream_private_connection_force_delete'
+    primary_resource_id: 'default'
+    vars:
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'datastream_private_connection_psc_interface'
     primary_resource_id: 'default'
     test_env_vars:
