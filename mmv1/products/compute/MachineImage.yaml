@@ -58,6 +58,18 @@ examples:
       key_name: '"key" + randomSuffix'
       # for backward compatible
       keyring_name: '"keyring" + randomSuffix'
+  - name: machine_image_resource_manager_tags
+    primary_resource_id: image
+    vars:
+      image_name: my-image
+      vm_name: my-vm
+      tag_key: tagkey
+      tag_value: tagvalue
+      org_id: '123456789'
+    test_vars_overrides:
+      'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
+      'org_id': 'envvar.GetTestOrgFromEnv(t)'
 properties:
   - name: name
     type: String
@@ -125,3 +137,23 @@ properties:
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
         min_version: beta
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    min_version: beta
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload.
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the machine image. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456. The field is ignored when empty.
+          The field is immutable and causes resource replacement when mutated. This field is only
+          set at create time and modifying this field after creation will trigger recreation.
+          To apply tags to an existing resource, see the `google_tags_tag_value` resource.
+        api_name: resourceManagerTags
+        min_version: beta
+        ignore_read: true
