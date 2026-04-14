@@ -138,8 +138,8 @@ func GetFolderIamPolicyByFolderName(folderName, userAgent string, config *transp
 
 	return v1Policy, nil
 }
-
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+
 func init() {
 	registry.Schema{
 		Name:        "google_folder_iam_audit_config",

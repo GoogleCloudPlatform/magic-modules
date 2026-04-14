@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+	{{ if ne $.Compiler "terraformgoogleconversion-codegen" -}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	{{- end}}
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
@@ -190,8 +190,8 @@ func extractSpannerInstanceId(id string) (*SpannerInstanceId, error) {
 		Instance: parts[1],
 	}, nil
 }
-
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+
 func init() {
 	registry.Schema{
 		Name:        "google_spanner_instance_iam_member",

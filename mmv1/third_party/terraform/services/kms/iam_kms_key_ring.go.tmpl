@@ -3,7 +3,7 @@ package kms
 import (
 	"fmt"
 
-	{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+	{{ if ne $.Compiler "terraformgoogleconversion-codegen" -}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	{{- end}}
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
@@ -130,8 +130,8 @@ func kmsToResourceManagerPolicy(p *cloudkms.Policy) (*cloudresourcemanager.Polic
 	}
 	return out, nil
 }
-
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+
 func init() {
 	registry.Schema{
 		Name:        "google_kms_key_ring_iam_member",

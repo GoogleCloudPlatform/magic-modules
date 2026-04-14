@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+	{{ if ne $.Compiler "terraformgoogleconversion-codegen" -}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	{{- end}}
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
@@ -324,8 +324,8 @@ func (u *BigqueryDatasetIamUpdater) GetMutexKey() string {
 func (u *BigqueryDatasetIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("Bigquery Dataset %s/%s", u.project, u.datasetId)
 }
-
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+
 func init() {
 	registry.Schema{
 		Name:        "google_bigquery_dataset_iam_binding",

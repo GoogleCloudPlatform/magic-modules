@@ -94,8 +94,8 @@ func (u *OrganizationIamUpdater) GetMutexKey() string {
 func (u *OrganizationIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("organization %q", u.resourceId)
 }
-
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+
 func init() {
 	registry.Schema{
 		Name:        "google_organization_iam_audit_config",

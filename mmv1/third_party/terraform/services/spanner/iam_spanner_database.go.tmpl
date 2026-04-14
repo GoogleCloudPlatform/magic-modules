@@ -191,8 +191,8 @@ func (s SpannerDatabaseId) parentInstanceUri() string {
 func (s SpannerDatabaseId) databaseUri() string {
 	return fmt.Sprintf("%s/databases/%s", s.parentInstanceUri(), s.Database)
 }
-
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+
 func init() {
 	registry.Schema{
 		Name:        "google_spanner_database_iam_member",

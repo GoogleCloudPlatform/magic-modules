@@ -107,8 +107,8 @@ func CompareProjectName(_, old, new string, _ *schema.ResourceData) bool {
 func getProjectIamPolicyMutexKey(pid string) string {
 	return fmt.Sprintf("iam-project-%s", pid)
 }
-
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+
 func init() {
 	registry.Schema{
 		Name:        "google_project_iam_audit_config",
