@@ -1858,20 +1858,9 @@ func expandGpuDirectConfig(v interface{}) *container.GPUDirectConfig {
 		return nil
 	}
 
-	ls := v.([]interface{})
-	if len(ls) == 0 {
-		return nil
+	return &container.GPUDirectConfig{
+		GpuDirectStrategy: v.(string),
 	}
-
-	cfg := ls[0].(map[string]interface{})
-
-	if v, ok := cfg["gpudirect_strategy"]; ok {
-		return &container.GPUDirectConfig{
-			GpuDirectStrategy: v.(string),
-		}
-	}
-
-	return nil
 }
 
 func expandBootDiskConfig(v interface{}) *container.BootDisk {
