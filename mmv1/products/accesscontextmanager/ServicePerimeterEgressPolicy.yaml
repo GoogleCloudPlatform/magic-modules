@@ -35,12 +35,12 @@ docs:
 id_format: '{{perimeter}}'
 base_url: ''
 self_link: '{{perimeter}}'
-create_url: '{{perimeter}}'
+create_url: '{{perimeter}}?updateMask=status.egressPolicies'
 create_verb: 'PATCH'
 update_verb: 'PATCH'
-update_url: '{{perimeter}}'
-update_mask: true
+update_url: '{{perimeter}}?updateMask=status.egressPolicies'
 delete_verb: 'PATCH'
+delete_url: '{{perimeter}}?updateMask=status.egressPolicies'
 mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter}}'
@@ -58,8 +58,6 @@ async:
   result:
     resource_inside_response: true
 identity:
-  - egressFrom
-  - egressTo
   - title
 nested_query:
   keys:

@@ -172,7 +172,7 @@ func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta
 {{- range $i, $k := $.NestedQuery.Keys }}
   {{- if ne $i 0 }}
   wrapped := map[string]interface{}{
-    "{{ $k }}": res,
+    "{{ index $.NestedQuery.Keys (sub (sub (len $.NestedQuery.Keys) $i) 1) }}": res,
   }
   res = wrapped
   {{- end }}
