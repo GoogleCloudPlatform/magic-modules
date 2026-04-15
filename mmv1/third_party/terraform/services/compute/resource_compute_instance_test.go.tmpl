@@ -3728,14 +3728,10 @@ func TestAccComputeInstance_flexStart(t *testing.T) {
 func TestAccComputeInstance_reservationBound(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	context := map[string]interface{}{
 		"instance_name":    instanceName,
 		"reservation_name": fmt.Sprintf("tf-test-res-%s", acctest.RandString(t, 10)),
-		"fr_name":          fmt.Sprintf("tf-test-fr-%s", acctest.RandString(t, 10)),
-		"start_time":       time.Now().Add(24 * time.Hour).Format(time.RFC3339),
-		"end_time":         time.Now().Add(48 * time.Hour).Format(time.RFC3339),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3744,14 +3740,9 @@ func TestAccComputeInstance_reservationBound(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_reservationBound(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceTerminationAction(&instance, "DELETE"),
-				),
+				Config:      testAccComputeInstance_reservationBound(context),
+				ExpectError: regexp.MustCompile("Error creating instance"),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -11405,27 +11396,6 @@ data "google_compute_image" "my_image" {
   project   = "ubuntu-os-cloud"
 }
 
-resource "google_compute_future_reservation" "foobar" {
-  provider = google-beta
-  name     = "%{fr_name}"
-  zone     = "us-central1-a"
-  planning_status = "SUBMITTED"
-  time_window {
-    start_time = "%{start_time}"
-    end_time   = "%{end_time}"
-  }
-  specific_sku_properties {
-    total_count = "1"
-    instance_properties {
-      machine_type = "n2-standard-2"
-    }
-  }
-  reservation_mode = "CALENDAR"
-  deployment_type = "DENSE"
-  specific_reservation_required = true
-  reservation_name = "%{reservation_name}"
-}
-
 resource "google_compute_instance" "foobar" {
   provider     = google-beta
   name         = "%{instance_name}"
@@ -11454,7 +11424,7 @@ resource "google_compute_instance" "foobar" {
     type = "SPECIFIC_RESERVATION"
     specific_reservation {
       key    = "compute.googleapis.com/reservation-name"
-      values = [google_compute_future_reservation.foobar.reservation_name]
+      values = ["%{reservation_name}"]
     }
   }
 }
