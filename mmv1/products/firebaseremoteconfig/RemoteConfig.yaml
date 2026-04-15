@@ -122,9 +122,9 @@ properties:
             properties:
               - name: conditionalValues
                 type: Map
-                key_name: key
+                key_name: condition_name
                 description: |-
-                  A (condition name, value) map. The condition_name of the highest priority
+                  The condition_name of the highest priority
                   (the one listed first in the RemoteConfig's conditions list) determines
                   the value of this parameter.
                 value_type:
@@ -319,9 +319,9 @@ properties:
       properties:
         - name: conditionalValues
           type: Map
-          key_name: key
+          key_name: condition_name
           description: |-
-            A (condition name, value) map. The condition_name of the highest priority
+            The condition_name of the highest priority
             (the one listed first in the RemoteConfig's conditions list) determines
             the value of this parameter.
           value_type:

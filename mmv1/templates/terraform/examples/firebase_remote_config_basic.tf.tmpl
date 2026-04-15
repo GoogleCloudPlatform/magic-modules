@@ -1,4 +1,5 @@
-resource "google_firebase_remote_config" "{{$.PrimaryResourceId}}" {
+resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}" {
+  name = "projects/{{index $.TestEnvVars "project_id"}}/namespaces/firebase/remoteConfig"
   version {
     description = "Updated via Terraform"
   }
@@ -19,11 +20,11 @@ resource "google_firebase_remote_config" "{{$.PrimaryResourceId}}" {
       experiment_value {
         experiment_id    = "exp_1"
         exposure_percent = 50.5
-        variant_value = [{
+        variant_value {
           no_change  = false
           value      = "variant_val_1"
           variant_id = "variant_1"
-        }]
+        }
       }
       personalization_value {
         personalization_id = "pers_1"
@@ -35,17 +36,17 @@ resource "google_firebase_remote_config" "{{$.PrimaryResourceId}}" {
       }
     }
     conditional_values {
-      key = "ios_en"
+      condition_name = "ios_en"
       value             = "Welcome to the App on iOS!"
       use_in_app_default = false
       experiment_value {
         experiment_id    = "exp_2"
         exposure_percent = 10.0
-        variant_value = [{
+        variant_value {
           no_change  = false
           value      = "variant_val_2"
           variant_id = "variant_2"
-        }]
+        }
       }
       personalization_value {
         personalization_id = "pers_2"
@@ -71,11 +72,11 @@ resource "google_firebase_remote_config" "{{$.PrimaryResourceId}}" {
         experiment_value {
           experiment_id    = "exp_3"
           exposure_percent = 20.0
-          variant_value = [{
+          variant_value {
             no_change  = false
             value      = "variant_val_3"
             variant_id = "variant_3"
-          }]
+          }
         }
         personalization_value {
           personalization_id = "pers_3"
@@ -87,17 +88,17 @@ resource "google_firebase_remote_config" "{{$.PrimaryResourceId}}" {
         }
       }
       conditional_values {
-        key = "ios_en"
+        condition_name = "ios_en"
         value             = "Welcome Group A on iOS!"
         use_in_app_default = false
         experiment_value {
           experiment_id    = "exp_4"
           exposure_percent = 5.0
-          variant_value = [{
+          variant_value {
             no_change  = false
             value      = "variant_val_4"
             variant_id = "variant_4"
-          }]
+          }
         }
         personalization_value {
           personalization_id = "pers_4"
