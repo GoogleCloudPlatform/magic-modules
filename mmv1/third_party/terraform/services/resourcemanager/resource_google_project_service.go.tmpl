@@ -338,6 +338,13 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 	return nil
 }
 
+func setGoogleProjectServiceResourceIdentity(d *schema.ResourceData, project, service string) error {
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"service": service,
+	})
+}
+
 func init() {
 	registry.Schema{
 		Name: "google_project_service",
