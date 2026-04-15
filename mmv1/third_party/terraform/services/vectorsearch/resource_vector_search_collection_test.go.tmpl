@@ -13,10 +13,12 @@ import (
 func TestAccVectorSearchCollection_update(t *testing.T) {
 	t.Parallel()
 
+	runId := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"collection_id": "tf-test-update-" + acctest.RandString(t, 10),
-		"key_ring_id":   "tf-test-update-" + acctest.RandString(t, 10),
-		"crypto_key_id": "tf-test-update-" + acctest.RandString(t, 10),
+		"collection_id": "tf-test-update-" + runId,
+		"key_ring_id":   "tf-test-update-" + runId,
+		"crypto_key_id": "tf-test-update-" + runId,
 	}
 
 	// To store details of the resource to check if it's been replaced
