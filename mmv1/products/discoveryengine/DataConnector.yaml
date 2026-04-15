@@ -114,7 +114,6 @@ properties:
 
       Supported first-party connectors include:
 
-      *   `gcs`
       *   `bigquery`
       *   `gcp_fhir`
       *   `google_mail`
