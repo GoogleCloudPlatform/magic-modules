@@ -44,16 +44,16 @@ resource "google_folder" "my_folder" {
 }
 
 # Wait after folder creation to limit eventual consistency errors.
-resource "time_sleep" "wait_120_seconds" {
+resource "time_sleep" "wait_240_seconds" {
   depends_on = [google_folder.my_folder]
 
-  create_duration = "120s"
+  create_duration = "240s"
 }
 
 data "google_access_approval_folder_service_account" "aa_account" {
   folder_id = google_folder.my_folder.folder_id
 
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, context)
 }
