@@ -138,7 +138,7 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
       }
     `, context)
 }
-c
+
 // TestAccModelArmorTemplate_noTemplateMetadataNoDrift verifies that creating
 // a template without template_metadata does not cause a permadiff on the next
 // plan. Regression test for https://github.com/hashicorp/terraform-provider-google/issues/23565
