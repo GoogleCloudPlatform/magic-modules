@@ -77,7 +77,7 @@ func ParseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaFiel
 
 // This function isn't a test of transport.go; instead, it is used as an alternative
 // to ReplaceVars inside tests.
-func ReplaceVarsForFrameworkTest(prov *transport_tpg.Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+func ReplaceVarsForFrameworkTest(config *transport_tpg.Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string
 
@@ -109,8 +109,16 @@ func ReplaceVarsForFrameworkTest(prov *transport_tpg.Config, rs *terraform.Resou
 			return v
 		}
 
-		// Attempt to draw values from the provider
-		if f := reflect.Indirect(reflect.ValueOf(prov)).FieldByName(m); f.IsValid() {
+		// Attempt to draw values from the provider config
+		// Try the BasePaths map first, then fall back to reflection of fields on the config (for base paths not yet
+		// migrated and other config fields).
+		if pName, found := strings.CutSuffix(m, "BasePath"); found {
+			// the field will look like ComputeBasePath, but the product name will be like compute (just lowercase, no underscores)
+			if v, ok := config.BasePaths[strings.ToLower(pName)]; ok {
+				return v
+			}
+		}
+		if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
 			return f.String()
 		}
 

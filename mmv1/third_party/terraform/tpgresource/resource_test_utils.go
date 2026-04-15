@@ -181,6 +181,14 @@ func ReplaceVarsForTest(config *transport_tpg.Config, rs *terraform.ResourceStat
 		}
 
 		// Attempt to draw values from the provider config
+		// Try the BasePaths map first, then fall back to reflection of fields on the config (for base paths not yet
+		// migrated and other config fields).
+		if pName, found := strings.CutSuffix(m, "BasePath"); found {
+			// the field will look like ComputeBasePath, but the product name will be like compute (just lowercase, no underscores)
+			if v, ok := config.BasePaths[strings.ToLower(pName)]; ok {
+				return v
+			}
+		}
 		if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
 			return f.String()
 		}
