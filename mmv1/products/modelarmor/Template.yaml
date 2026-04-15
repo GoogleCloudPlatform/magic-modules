@@ -270,7 +270,6 @@ properties:
       - name: multiLanguageDetection
         type: NestedObject
         description: Metadata to enable multi language detection via template.
-        custom_flatten: 'templates/terraform/custom_flatten/modelarmor_template_multilanguage_detection.go.tmpl'
         properties:
           - name: enableMultiLanguageDetection
             type: Boolean
