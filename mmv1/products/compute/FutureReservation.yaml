@@ -46,6 +46,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+  constants: 'templates/terraform/constants/future_reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/future_reservation.go.tmpl'
 min_version: beta
 examples:
@@ -60,8 +61,6 @@ examples:
       end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
   - name: 'future_reservation_aggregate_reservation'
     primary_resource_id: 'gce_future_reservation'
     vars:
@@ -73,8 +72,6 @@ examples:
       end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     # Skip in VCR until the test issue is resolved
     # https://github.com/hashicorp/terraform-provider-google/issues/25087
     skip_vcr: true
@@ -109,11 +106,14 @@ parameters:
     required: true
     immutable: true
   - name: 'zone'
-    type: String
+    type: ResourceRef
     description: |
       The zone where the future reservation is located.
     required: true
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
 properties:
   - name: 'creationTimestamp'
     type: Time
@@ -140,10 +140,12 @@ properties:
         description: |
           Start time of the future reservation in RFC3339 format.
         required: true
+        diff_suppress_func: 'futureReservationTimeDiffSuppress'
       - name: 'endTime'
         type: String
         description: |
           End time of the future reservation in RFC3339 format.
+        diff_suppress_func: 'futureReservationTimeDiffSuppress'
       - name: 'duration'
         type: NestedObject
         description: |
