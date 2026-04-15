@@ -150,6 +150,8 @@ resource "google_compute_reservation" "reservation" {
     policy1 = google_compute_resource_policy.placement.self_link
   }
 
+  specific_reservation_required = true
+
   specific_reservation {
     count = 2
     instance_properties {
