@@ -29,6 +29,12 @@ resource "google_project_service" "servicenetworking" {
   depends_on = [google_project_service.compute]
 }
 
+resource "google_project_service" "storage" {
+  project = google_project.project.project_id
+  service = "storage.googleapis.com"
+  depends_on = [google_project_service.servicenetworking]
+}
+
 resource "time_sleep" "wait_300_seconds" {
   create_duration = "300s"
   depends_on = [google_project_service.servicenetworking]
@@ -67,9 +73,11 @@ resource "google_apigee_organization" "apigee_org" {
 }
 
 resource "google_storage_bucket" "analytics_bucket" {
-  name     = "tf-test-apigee-analytics%{random_suffix}"
-  location = "US"
-  project  = google_project.project.project_id
+  name                        = "tf-test-apigee-analytics%{random_suffix}"
+  location                    = "US"
+  project                     = google_project.project.project_id
+  uniform_bucket_level_access = true
+  depends_on                  = [google_project_service.storage]
 }
 
 resource "google_apigee_datastore" "{{$.PrimaryResourceId}}" {
