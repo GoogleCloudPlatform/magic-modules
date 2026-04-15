@@ -149,6 +149,37 @@ func ResourceGoogleProjectService() *schema.Resource {
 }
 
 func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Import with resource identity (e.g. ImportBlockWithResourceIdentity) leaves Id empty; build legacy id project/service.
+	if d.Id() == "" {
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("google_project_service import: %w", err)
+		}
+		serviceV, ok := identity.GetOk("service")
+		if !ok {
+			return nil, fmt.Errorf("import via identity requires identity attribute %q", "service")
+		}
+		serviceStr, ok := serviceV.(string)
+		if !ok || serviceStr == "" {
+			return nil, fmt.Errorf("import via identity requires identity attribute %q to be a non-empty string", "service")
+		}
+		var projectStr string
+		if projectV, ok := identity.GetOk("project"); ok && projectV != nil {
+			if s, ok := projectV.(string); ok {
+				projectStr = s
+			}
+		}
+		if projectStr == "" {
+			config, ok := m.(*transport_tpg.Config)
+			if !ok || config.Project == "" {
+				return nil, fmt.Errorf("import via identity requires identity attribute %q or a default project in the provider configuration", "project")
+			}
+			projectStr = config.Project
+		}
+		projectStr = tpgresource.GetResourceNameFromSelfLink(projectStr)
+		d.SetId(fmt.Sprintf("%s/%s", projectStr, serviceStr))
+	}
+
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid google_project_service id format for import, expecting `{project}/{service}`, found %s", d.Id())

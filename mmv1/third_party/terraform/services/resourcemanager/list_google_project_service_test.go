@@ -52,8 +52,6 @@ func TestAccProjectServiceListResource_queryIdentity(t *testing.T) {
 
 func testAccProjectServiceList_prereq(project, service string) string {
 	return fmt.Sprintf(`
-provider "google" {}
-
 resource "google_project_service" "prereq" {
   project = %q
   service = %q
@@ -63,8 +61,6 @@ resource "google_project_service" "prereq" {
 
 func testAccProjectServiceListQuery(project string) string {
 	return fmt.Sprintf(`
-provider "google" {}
-
 list "google_project_service" "all_in_project" {
   provider = google
 
