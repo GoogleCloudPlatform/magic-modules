@@ -39,6 +39,7 @@ import (
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/certificatemanager/v1"
+	"google.golang.org/api/chromepolicy/v1"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudbuild/v1"
 {{- if ne $.TargetVersionName "ga" }}
@@ -1194,6 +1195,20 @@ func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service
 	clientCloudIdentity.BasePath = cloudidentityClientBasePath
 
 	return clientCloudIdentity
+}
+
+func (c *Config) NewChromePolicyClient(userAgent string) *chromepolicy.Service {
+	chromePolicyClientBasePath := RemoveBasePathVersion(c.ChromePolicyBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud ChromePolicy client for path %s", chromePolicyClientBasePath)
+	clientChromePolicy, err := chromepolicy.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client chrome policy: %s", err)
+		return nil
+	}
+	clientChromePolicy.UserAgent = userAgent
+	clientChromePolicy.BasePath = chromePolicyClientBasePath
+
+	return clientChromePolicy
 }
 
 func (c *Config) BigTableClientFactory(userAgent string) *BigtableClientFactory {

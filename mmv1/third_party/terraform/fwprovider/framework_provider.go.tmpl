@@ -23,6 +23,7 @@ import (
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
     "github.com/hashicorp/terraform-provider-google/google/services/apigee"
+    "github.com/hashicorp/terraform-provider-google/google/services/chromepolicy"
     "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
     "github.com/hashicorp/terraform-provider-google/version"
     {{- if ne $.TargetVersionName "ga" }}
@@ -367,6 +368,7 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
 func (p *FrameworkProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		apigee.NewApigeeKeystoresAliasesKeyCertFileResource,
+		chromepolicy.NewGoogleChromePoliciesResource,
 		storage.NewStorageNotificationResource,
 	}
 }
