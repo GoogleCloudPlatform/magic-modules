@@ -1,0 +1,29 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+    if v == nil {
+        return nil
+    }
+    original := v.(map[string]interface{})
+    if len(original) == 0 {
+        return nil
+    }
+    transformed := make(map[string]interface{})
+    transformed["log_template_operations"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}LogTemplateOperations(original["logTemplateOperations"], d, config)
+    transformed["log_sanitize_operations"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}LogSanitizeOperations(original["logSanitizeOperations"], d, config)
+    transformed["multi_language_detection"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}MultiLanguageDetection(original["multiLanguageDetection"], d, config)
+    transformed["ignore_partial_invocation_failures"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}IgnorePartialInvocationFailures(original["ignorePartialInvocationFailures"], d, config)
+    transformed["custom_prompt_safety_error_code"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}CustomPromptSafetyErrorCode(original["customPromptSafetyErrorCode"], d, config)
+    transformed["custom_prompt_safety_error_message"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}CustomPromptSafetyErrorMessage(original["customPromptSafetyErrorMessage"], d, config)
+    transformed["custom_llm_response_safety_error_code"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}CustomLlmResponseSafetyErrorCode(original["customLlmResponseSafetyErrorCode"], d, config)
+    transformed["custom_llm_response_safety_error_message"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}CustomLlmResponseSafetyErrorMessage(original["customLlmResponseSafetyErrorMessage"], d, config)
+    transformed["enforcement_type"] =
+        flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}EnforcementType(original["enforcementType"], d, config)
+    return []interface{}{transformed}
+}
