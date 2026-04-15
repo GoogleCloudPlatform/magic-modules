@@ -16,7 +16,7 @@ To get more information about Artifact Registry files, see:
 
 * [API documentation](https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.files)
 
-## Example Usage
+## Example Usage - Generic
 
 ```hcl
 data "google_artifact_registry_file" "example" {
@@ -24,6 +24,45 @@ data "google_artifact_registry_file" "example" {
   repository_id = "my-generic-repo"
   file_id       = "my-package:1.0.0:my-artifact.tar.gz"
   output_path   = "${path.module}/tmp/my-artifact.tar.gz"
+}
+```
+
+## Example Usage - Maven (Java)
+
+Maven file IDs mirror the repository path: `<groupId with slashes>/<artifactId>/<version>/<filename>`.
+
+```hcl
+data "google_artifact_registry_file" "maven_jar" {
+  location      = "us-central1"
+  repository_id = "my-maven-repo"
+  file_id       = "com/example/my-library/1.2.3/my-library-1.2.3.jar"
+  output_path   = "${path.module}/tmp/my-library-1.2.3.jar"
+}
+```
+
+## Example Usage - npm
+
+npm file IDs follow the pattern `<package>/<version>/<filename>.tgz`. For scoped packages (e.g. `@myorg/my-package`), include the scope in the path.
+
+```hcl
+data "google_artifact_registry_file" "npm_package" {
+  location      = "us-central1"
+  repository_id = "my-npm-repo"
+  file_id       = "@myorg/my-package/1.0.0/my-package-1.0.0.tgz"
+  output_path   = "${path.module}/tmp/my-package-1.0.0.tgz"
+}
+```
+
+## Example Usage - Python
+
+Python file IDs use the path `<package>/<filename>`, where the filename encodes the version and platform tags as produced by the build tool (e.g. `my_package-1.0.0-py3-none-any.whl` or `my-package-1.0.0.tar.gz`).
+
+```hcl
+data "google_artifact_registry_file" "python_wheel" {
+  location      = "us-central1"
+  repository_id = "my-python-repo"
+  file_id       = "my-package/my_package-1.0.0-py3-none-any.whl"
+  output_path   = "${path.module}/tmp/my_package-1.0.0-py3-none-any.whl"
 }
 ```
 

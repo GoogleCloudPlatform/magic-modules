@@ -1,10 +1,12 @@
 package artifactregistry
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"hash"
 	"io"
 	"net/http"
 	"net/url"
@@ -12,6 +14,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
@@ -22,6 +25,10 @@ import (
 func DataSourceArtifactRegistryFile() *schema.Resource {
 	return &schema.Resource{
 		Read: DataSourceArtifactRegistryFileRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(10 * time.Minute),
+		},
 
 		Schema: map[string]*schema.Schema{
 			"project": {
@@ -96,45 +103,30 @@ func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}
 	outputPath := d.Get("output_path").(string)
 
 	resourceURL := buildFileResourceURL(config.ArtifactRegistryBasePath, project, location, repoID, fileID)
+	timeout := d.Timeout(schema.TimeoutRead)
 
-	// 1. Fetch metadata.
 	metaResp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		RawURL:    resourceURL,
 		UserAgent: userAgent,
+		Timeout:   timeout,
 	})
 	if err != nil {
-		return fmt.Errorf("fetching Artifact Registry file metadata: %w", err)
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, "ArtifactRegistryFile", resourceURL)
 	}
 
 	name, _ := metaResp["name"].(string)
 	createTime, _ := metaResp["createTime"].(string)
 	updateTime, _ := metaResp["updateTime"].(string)
+	sizeBytes := parseSizeBytes(metaResp["sizeBytes"])
+	hashesAttr := parseHashes(metaResp["hashes"])
 
-	var sizeBytes int64
-	switch v := metaResp["sizeBytes"].(type) {
-	case string:
-		sizeBytes, _ = strconv.ParseInt(v, 10, 64)
-	case float64:
-		sizeBytes = int64(v)
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
 
-	hashesAttr := map[string]string{}
-	if rawHashes, ok := metaResp["hashes"].([]interface{}); ok {
-		for _, h := range rawHashes {
-			hm, _ := h.(map[string]interface{})
-			t, _ := hm["type"].(string)
-			val, _ := hm["value"].(string)
-			if t != "" {
-				hashesAttr[t] = val
-			}
-		}
-	}
-
-	// 2. Download bytes via raw HTTP (SendRequest parses JSON, unsuitable for media).
 	downloadURL := resourceURL + ":download?alt=media"
-	req, err := http.NewRequest("GET", downloadURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", downloadURL, nil)
 	if err != nil {
 		return fmt.Errorf("building download request: %w", err)
 	}
@@ -146,30 +138,43 @@ func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		return fmt.Errorf("Artifact Registry file %q not found at %s", fileID, downloadURL)
+	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		return fmt.Errorf("downloading Artifact Registry file: HTTP %d: %s", resp.StatusCode, string(body))
 	}
 
-	// 3. Ensure parent dir exists, write file, compute hashes.
 	if dir := filepath.Dir(outputPath); dir != "" {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("creating output directory %q: %w", dir, err)
 		}
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	out, err := os.OpenFile(outputPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
 	if err != nil {
-		return fmt.Errorf("reading response body: %w", err)
+		return fmt.Errorf("opening %q for write: %w", outputPath, err)
+	}
+	hasher := sha256.New()
+	if _, err := io.Copy(io.MultiWriter(out, hasher), resp.Body); err != nil {
+		out.Close()
+		return fmt.Errorf("streaming response to %q: %w", outputPath, err)
+	}
+	if err := out.Close(); err != nil {
+		return fmt.Errorf("closing %q: %w", outputPath, err)
 	}
 
-	if err := os.WriteFile(outputPath, body, 0o644); err != nil {
-		return fmt.Errorf("writing %q: %w", outputPath, err)
+	hexStr, b64Str := finalizeHashes(hasher)
+
+	if apiSHA, ok := hashesAttr["SHA256"]; ok && apiSHA != "" {
+		if err := verifyAPISHA256(apiSHA, hexStr, b64Str); err != nil {
+			// Remove the corrupt file so a retry doesn't see stale bytes.
+			_ = os.Remove(outputPath)
+			return err
+		}
 	}
 
-	hexStr, b64Str := sha256Hashes(body)
-
-	// 4. Set attributes.
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
@@ -205,7 +210,7 @@ func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}
 
 // buildFileResourceURL constructs the AR file resource URL with fileID properly URL-encoded.
 // AR file IDs may contain slashes and colons (e.g. Maven artifact paths).
-// url.PathEscape encodes slashes but leaves colons unescaped (valid per RFC 3986 path segments).
+// url.PathEscape encodes slashes but leaves colons unescaped.
 // AR API requires colons to be percent-encoded as well, so we encode them explicitly.
 func buildFileResourceURL(base, project, location, repository, fileID string) string {
 	encoded := strings.ReplaceAll(url.PathEscape(fileID), ":", "%3A")
@@ -215,9 +220,53 @@ func buildFileResourceURL(base, project, location, repository, fileID string) st
 	)
 }
 
+func parseSizeBytes(v interface{}) int64 {
+	switch x := v.(type) {
+	case string:
+		n, _ := strconv.ParseInt(x, 10, 64)
+		return n
+	case float64:
+		return int64(x)
+	}
+	return 0
+}
+
+func parseHashes(v interface{}) map[string]string {
+	out := map[string]string{}
+	raw, ok := v.([]interface{})
+	if !ok {
+		return out
+	}
+	for _, h := range raw {
+		hm, _ := h.(map[string]interface{})
+		t, _ := hm["type"].(string)
+		val, _ := hm["value"].(string)
+		if t != "" {
+			out[t] = val
+		}
+	}
+	return out
+}
+
 func sha256Hashes(b []byte) (hexStr, b64Str string) {
 	sum := sha256.Sum256(b)
 	return hex.EncodeToString(sum[:]), base64.StdEncoding.EncodeToString(sum[:])
+}
+
+func finalizeHashes(h hash.Hash) (hexStr, b64Str string) {
+	sum := h.Sum(nil)
+	return hex.EncodeToString(sum), base64.StdEncoding.EncodeToString(sum)
+}
+
+// verifyAPISHA256 compares the API-reported SHA-256 against the locally computed
+// values. AR returns the hash as either lowercase hex or standard base64 depending
+// on the format/endpoint, so accept both.
+func verifyAPISHA256(apiSHA, gotHex, gotB64 string) error {
+	want := strings.TrimSpace(apiSHA)
+	if strings.EqualFold(want, gotHex) || want == gotB64 {
+		return nil
+	}
+	return fmt.Errorf("downloaded file SHA-256 mismatch: API reported %q, got hex=%q base64=%q", want, gotHex, gotB64)
 }
 
 func init() {
