@@ -72,7 +72,7 @@ properties:
           description: |
             The color associated with this condition for display purposes in the Firebase Console.
             Not specifying this value results in the Console picking an arbitrary color to associate with the condition.
-          values:
+          enum_values:
             - BLUE
             - BROWN
             - CYAN
@@ -273,7 +273,7 @@ properties:
                 description: |-
                   The data type for all values of this parameter in the current version of
                   the template.
-                values:
+                enum_values:
                   - STRING
                   - BOOLEAN
                   - NUMBER
@@ -440,7 +440,7 @@ properties:
           description: |-
             The data type for all values of this parameter in the current version of
             the template.
-          values:
+          enum_values:
             - STRING
             - BOOLEAN
             - NUMBER
