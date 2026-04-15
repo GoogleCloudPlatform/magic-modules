@@ -1,0 +1,108 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RemoteConfig'
+description: |
+  Firebase Remote Config template
+min_version: 'ga'
+references:
+  guides:
+    'Firebase Remote Config Overview': 'https://firebase.google.com/docs/remote-config'
+  api: 'https://firebase.google.com/docs/reference/remote-config/rest'
+docs:
+id_format: 'projects/{{project}}/remoteConfig'
+base_url: 'projects/{{project}}/remoteConfig'
+self_link: 'projects/{{project}}/remoteConfig'
+create_verb: 'PUT'
+update_verb: 'PUT'
+exclude_delete: true
+exclude_sweeper: true
+import_format:
+  - 'projects/{{project}}/remoteConfig'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+properties:
+  - name: 'conditions'
+    type: Array
+    description: |
+      A list of conditions in priority order.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: 'Condition name'
+        - name: 'expression'
+          type: String
+          description: 'Condition expression'
+        - name: 'tagColor'
+          type: String
+          description: 'Color tag for display'
+  - name: 'parameters'
+    type: KeyValuePairs
+    description: |
+      Map of parameter keys to their optional default values and optional sub-map of conditional values.
+  - name: 'parameterGroups'
+    type: KeyValuePairs
+    description: |
+      Map of parameter group keys to their grouped parameters.
+  - name: 'version'
+    type: NestedObject
+    description: |
+      The version metadata of the Remote Config template.
+    properties:
+      - name: 'description'
+        type: String
+        description: 'The description of this version.'
+      - name: 'versionNumber'
+        type: String
+
+        description: 'The version number.'
+        output: true
+      - name: 'updateTime'
+        type: String
+        description: 'The update time.'
+        output: true
+      - name: 'updateUser'
+        type: NestedObject
+        description: 'The user who performed the update.'
+        output: true
+        properties:
+          - name: 'email'
+            type: String
+            description: 'Email address.'
+          - name: 'name'
+            type: String
+            description: 'Name of user.'
+      - name: 'updateOrigin'
+        type: String
+        description: 'The origin of the update.'
+        output: true
+      - name: 'updateType'
+        type: String
+        description: 'The update type.'
+        output: true
+      - name: 'rollbackSource'
+        type: String
+        description: 'The rollback source.'
+        output: true
+examples:
+  - name: 'firebase_remote_config_basic'
+    primary_resource_id: 'basic'
+    min_version: 'ga'
+    vars: {}
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
