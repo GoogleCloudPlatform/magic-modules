@@ -44,14 +44,12 @@ func TestAccDataSourceArtifactRegistryFile_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// Step 1: create the repository only, then upload a file via the AR REST API.
 				Config: testAccDataSourceArtifactRegistryFile_repoOnly(repoID, location),
 				Check: resource.ComposeTestCheckFunc(
 					uploadGenericArtifact(t, project, location, repoID, testPackageID, testVersionID, testFileName, []byte(testFileContents)),
 				),
 			},
 			{
-				// Step 2: read it via the data source.
 				Config: testAccDataSourceArtifactRegistryFile_withDataSource(repoID, location, fileID, outputPath),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_artifact_registry_file.test", "output_sha256", expectedSHA),
@@ -91,15 +89,6 @@ data "google_artifact_registry_file" "test" {
 `, location, repoID, fileID, outputPath)
 }
 
-// uploadGenericArtifact uploads a file via the AR generic upload endpoint using
-// the multipart/related upload protocol, with the same authenticated HTTP client
-// the provider uses in tests.
-//
-// The upload endpoint requires:
-//   - URL:  https://artifactregistry.googleapis.com/upload/v1/.../genericArtifacts:create?alt=json&uploadType=multipart
-//   - Body: multipart/related with two parts:
-//     1. JSON metadata: {"packageId":"...","versionId":"...","filename":"..."}
-//     2. Binary media:  application/octet-stream
 func uploadGenericArtifact(t *testing.T, project, location, repoID, pkg, version, filename string, contents []byte) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -112,7 +101,6 @@ func uploadGenericArtifact(t *testing.T, project, location, repoID, pkg, version
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
 
-		// Part 1: JSON metadata.
 		metadataHeader := textproto.MIMEHeader{}
 		metadataHeader.Set("Content-Type", "application/json")
 		metadataHeader.Set("MIME-Version", "1.0")
@@ -125,7 +113,6 @@ func uploadGenericArtifact(t *testing.T, project, location, repoID, pkg, version
 			return fmt.Errorf("writing metadata part: %w", err)
 		}
 
-		// Part 2: binary media.
 		mediaHeader := textproto.MIMEHeader{}
 		mediaHeader.Set("Content-Type", "application/octet-stream")
 		mediaHeader.Set("Content-Transfer-Encoding", "binary")
