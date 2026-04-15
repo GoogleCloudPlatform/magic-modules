@@ -46,7 +46,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/future_reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/future_reservation.go.tmpl'
 min_version: beta
 examples:
@@ -140,12 +139,12 @@ properties:
         description: |
           Start time of the future reservation in RFC3339 format.
         required: true
-        diff_suppress_func: 'futureReservationTimeDiffSuppress'
+        diff_suppress_func: 'tpgresource.Rfc3339TimeDiffSuppress'
       - name: 'endTime'
         type: String
         description: |
           End time of the future reservation in RFC3339 format.
-        diff_suppress_func: 'futureReservationTimeDiffSuppress'
+        diff_suppress_func: 'tpgresource.Rfc3339TimeDiffSuppress'
       - name: 'duration'
         type: NestedObject
         description: |
