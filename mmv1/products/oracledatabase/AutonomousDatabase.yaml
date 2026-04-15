@@ -66,6 +66,8 @@ examples:
       database_name: 'mydatabase'
       endpoint_name: 'myendpoint'
       deletion_protection: 'true'
+      odb_network: 'projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork'
+      odb_subnet: 'projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
     ignore_read_extra:
       - 'deletion_protection'
     test_vars_overrides:
