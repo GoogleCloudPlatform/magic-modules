@@ -3,15 +3,10 @@ package compute
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func DataSourceGoogleComputeVpnGateway() *schema.Resource {
@@ -56,7 +51,7 @@ func DataSourceGoogleComputeVpnGateway() *schema.Resource {
 
 func dataSourceGoogleComputeVpnGatewayRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -74,22 +69,27 @@ func dataSourceGoogleComputeVpnGatewayRead(d *schema.ResourceData, meta interfac
 	name := d.Get("name").(string)
 	id := fmt.Sprintf("projects/%s/regions/%s/targetVpnGateways/%s", project, region, name)
 
-	vpnGatewaysService := compute.NewTargetVpnGatewaysService(config.NewComputeClient(userAgent))
-
-	gateway, err := vpnGatewaysService.Get(project, region, name).Do()
+	url := fmt.Sprintf("%sprojects/%s/regions/%s/targetVpnGateways/%s", config.ComputeBasePath, project, region, name)
+	gateway, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("VPN Gateway Not Found : %s", name), id)
 	}
-	if err := d.Set("network", tpgresource.ConvertSelfLinkToV1(gateway.Network)); err != nil {
+	if err := d.Set("network", tpgresource.ConvertSelfLinkToV1(gateway["network"].(string))); err != nil {
 		return fmt.Errorf("Error setting network: %s", err)
 	}
-	if err := d.Set("region", gateway.Region); err != nil {
+	if err := d.Set("region", gateway["region"]); err != nil {
 		return fmt.Errorf("Error setting region: %s", err)
 	}
-	if err := d.Set("self_link", gateway.SelfLink); err != nil {
+	if err := d.Set("self_link", gateway["selfLink"]); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	if err := d.Set("description", gateway.Description); err != nil {
+	if err := d.Set("description", gateway["description"]); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
@@ -101,9 +101,9 @@ func dataSourceGoogleComputeVpnGatewayRead(d *schema.ResourceData, meta interfac
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_vpn_gateway",
+		Name:        "google_compute_vpn_gateway",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeVpnGateway(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeVpnGateway(),
 	}.Register()
 }
