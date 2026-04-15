@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,35 +38,55 @@ properties:
   - name: 'conditions'
     type: Array
     description: |
-      A list of conditions in priority order.
+      A list of conditions in descending order by priority. The condition names must be unique.
     item_type:
       type: NestedObject
       properties:
         - name: 'name'
           type: String
-          description: 'Condition name'
+          description: 'A non-empty and unique name of this condition.'
+          required: true
         - name: 'expression'
           type: String
-          description: 'Condition expression'
+          description: |
+            The logic of this condition.
+
+            See the documentation regarding [Condition Expressions](https://firebase.google.com/docs/remote-config/condition-reference) for the expected syntax of this field.
+          required: true
         - name: 'tagColor'
-          type: String
-          description: 'Color tag for display'
+          type: Enum
+          description: |
+            The color associated with this condition for display purposes in the Firebase Console.
+            Not specifying this value results in the Console picking an arbitrary color to
+            associate with the condition.
+          values:
+            - BLUE
+            - BROWN
+            - CYAN
+            - DEEP_ORANGE
+            - GREEN
+            - INDIGO
+            - LIME
+            - ORANGE
+            - PINK
+            - PURPLE
+            - TEAL
   - name: 'parameters'
     type: KeyValuePairs
     description: |
-      Map of parameter keys to their optional default values and optional sub-map of conditional values.
+      Map of parameter keys to their optional default values and optional conditional values.
   - name: 'parameterGroups'
     type: KeyValuePairs
     description: |
-      Map of parameter group keys to their grouped parameters.
+      Map of parameter group names to their descriptions and grouped parameters.
   - name: 'version'
     type: NestedObject
     description: |
-      The version metadata of the Remote Config template.
+      Metadata associated with a particular version of a template.
     properties:
       - name: 'description'
         type: String
-        description: 'The description of this version.'
+        description: "A version's description field may be specified in projects.updateRemoteConfig calls."
       - name: 'versionNumber'
         type: String
 
@@ -103,6 +123,5 @@ examples:
   - name: 'firebase_remote_config_basic'
     primary_resource_id: 'basic'
     min_version: 'ga'
-    vars: {}
     test_env_vars:
       project_id: 'PROJECT_NAME'
