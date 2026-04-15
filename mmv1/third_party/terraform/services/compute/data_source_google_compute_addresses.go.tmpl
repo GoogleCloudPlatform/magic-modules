@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -44,6 +45,10 @@ func DataSourceGoogleComputeAddresses() *schema.Resource {
 						},
 						"description": {
 							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"prefix_length": {
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"status": {
@@ -173,13 +178,14 @@ func dataSourceGoogleComputeAddressesRead(context context.Context, d *schema.Res
 
 func generateTfAddress(address *compute.Address) map[string]interface{} {
 	return map[string]interface{}{
-		"name":         address.Name,
-		"address":      address.Address,
-		"address_type": address.AddressType,
-		"description":  address.Description,
-		"region":       regionFromUrl(address.Region),
-		"status":       address.Status,
-		"self_link":    address.SelfLink,
+		"name":           address.Name,
+		"address":        address.Address,
+		"address_type":   address.AddressType,
+		"description":    address.Description,
+		"prefix_length":  address.PrefixLength,
+		"region":         regionFromUrl(address.Region),
+		"status":         address.Status,
+		"self_link":      address.SelfLink,
 {{- if ne $.TargetVersionName "ga" }}
 		"labels":       address.Labels,
 {{- end }}
@@ -204,4 +210,13 @@ func regionFromUrl(url string) string {
 		return parts[count-1]
 	}
 	return ""
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_addresses",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeAddresses(),
+	}.Register()
 }

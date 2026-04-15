@@ -1,0 +1,83 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Boundary'
+description: 'Application management boundary.'
+references:
+  guides:
+    'AppHub': 'https://docs.cloud.google.com/app-hub/docs/'
+  api: 'https://docs.cloud.google.com/app-hub/docs/reference/rest/v1/Boundary'
+
+docs:
+self_link: 'projects/{{project}}/locations/{{location}}/boundary'
+# Singleton resource, point create_url to update_url.
+create_url: 'projects/{{project}}/locations/{{location}}/boundary'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/locations/{{location}}/boundary'
+update_verb: 'PATCH'
+exclude_delete: true
+id_format: 'projects/{{project}}/locations/{{location}}/boundary'
+import_format:
+  - "projects/{{project}}/locations/{{location}}/boundary"
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+parameters:
+  - name: 'location'
+    type: String
+    description: 'The location for the Boundary resource. Must be global.'
+    url_param_only: true
+    immutable: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the boundary.
+      Format: "projects/{project}/locations/{{location}}/boundary"
+    output: true
+  - name: crmNode
+    type: String
+    description: |-
+      Optional. The resource name of the CRM node being attached to the
+      boundary.
+      Format: `projects/{project-number}`
+  - name: createTime
+    type: Time
+    description: 'Create time.'
+    output: true
+  - name: updateTime
+    type: Time
+    description: ' Update time.'
+    output: true
+  - name: type
+    type: Enum
+    description: 'Boundary type.'
+    output: true
+    enum_values:
+      - AUTOMATIC
+      - MANUAL
+      - MANAGED_AUTOMATIC
+
+examples:
+  - name: 'apphub_boundary_basic'
+    primary_resource_id: 'example'
+    test_env_vars:
+      crm_node_project_number: 'PROJECT_NUMBER'
+    exclude_test: true

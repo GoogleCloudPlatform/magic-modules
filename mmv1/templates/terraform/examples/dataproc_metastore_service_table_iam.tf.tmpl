@@ -41,6 +41,7 @@ resource "google_dataproc_cluster" "dp_cluster" {
 
 resource "google_dataproc_job" "hive" {
   region = google_dataproc_cluster.dp_cluster.region
+  wait_for_completion = true
 
   force_delete = true
   placement {

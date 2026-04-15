@@ -265,6 +265,7 @@ steps:
         - $BUILD_ID
         - $PROJECT_ID
         - "23"  # Build step
+        - "true"
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'

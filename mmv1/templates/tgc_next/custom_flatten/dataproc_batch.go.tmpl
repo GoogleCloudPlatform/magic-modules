@@ -1,0 +1,14 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+    if properties, ok :=  v.(map[string]interface{}); ok {
+        propertiesCopy := make(map[string]interface{})
+        for k, v := range properties {
+            // Remove the prefix "spark:" from the properties. Otherwise, terraform apply will fail with the error from API. 
+            modifiedK := strings.TrimPrefix(k, "spark:")
+            propertiesCopy[modifiedK] = v
+        }
+        return propertiesCopy
+    }
+
+
+	return v
+}

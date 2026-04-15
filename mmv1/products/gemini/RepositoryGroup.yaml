@@ -13,6 +13,7 @@
 
 ---
 name: RepositoryGroup
+include_in_tgc_next: true
 description: The resource for managing Repository Group for Gemini Code Assist.
 references:
   api: 'https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes.repositoryGroups'
@@ -67,6 +68,12 @@ iam_policy:
 error_retry_predicates:
   - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
   - 'transport_tpg.IsRepositoryGroupQueueError'
+sweeper:
+  parent:
+    resource_type: 'google_gemini_code_repository_index'
+    child_field: 'code_repository_index'
+    parent_field: 'name'
+    parent_field_extract_name: true
 parameters:
   - name: location
     type: String

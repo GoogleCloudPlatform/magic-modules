@@ -44,6 +44,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+exclude_identity_from_identity_import: true
+ # the identity values aren't used for identity import
 identity:
   - role
   - userByEmail
@@ -75,6 +77,9 @@ examples:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
  # not importable
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     exclude_test: true
   - name: 'bigquery_dataset_access_view'
     primary_resource_id: 'access'
@@ -90,6 +95,11 @@ examples:
       private: 'private'
       public: 'public'
  # not importable
+    test_vars_overrides:
+      # for backward compatible
+      private: '"private" + randomSuffix'
+      # for backward compatible
+      public: '"public" + randomSuffix'
     exclude_test: true
   - name: 'bigquery_dataset_access_authorized_routine'
     primary_resource_id: 'authorized_routine'
@@ -269,6 +279,8 @@ properties:
         required: true
         item_type:
           type: String
+        item_validation:
+          regex: '^[A-Z_]+$'
   - name: 'routine'
     type: NestedObject
     description: |

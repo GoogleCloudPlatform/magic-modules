@@ -1,0 +1,16 @@
+resource "google_iam_workload_identity_pool" "pool" {
+  provider = google-beta
+
+  workload_identity_pool_id = "{{index $.Vars "workload_identity_pool_id"}}"
+  mode                      = "TRUST_DOMAIN"
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "workloadidentity"
+  location = "global"
+  spec {
+    workloadidentity {
+      scope_tenancy_pool = google_iam_workload_identity_pool.pool.name
+    }
+  }
+}

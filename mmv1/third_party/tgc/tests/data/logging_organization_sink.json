@@ -1,0 +1,113 @@
+[
+  {
+    "name": "//logging.googleapis.com/organizations/{{.OrgID}}/sinks/gg-asset-88093-71a3-sink",
+    "asset_type": "logging.googleapis.com/LogSink",
+    "ancestry_path": "organizations/{{.OrgID}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest",
+      "discovery_name": "LogSink",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+      "data": {
+        "destination": "bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/my_dataset",
+        "exclusions": [
+          {
+            "description": "Exclude all GCE instance logs",
+            "disabled": true,
+            "filter": "resource.type = gce_instance",
+            "name": "gg-asset-88093-71a3-exclusion"
+          }
+        ],
+        "name": "gg-asset-88093-71a3-sink"
+      }
+    },
+    "ancestors": [
+      "organizations/{{.OrgID}}"
+    ]
+  },
+  {
+    "name": "//logging.googleapis.com/organizations/{{.OrgID}}/sinks/gg-asset-88093-71a3-sink-with-children",
+    "asset_type": "logging.googleapis.com/LogSink",
+    "ancestry_path": "organizations/{{.OrgID}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest",
+      "discovery_name": "LogSink",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+      "data": {
+        "destination": "bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/my_dataset",
+        "exclusions": [
+          {
+            "description": "Exclude all GCE instance logs",
+            "disabled": true,
+            "filter": "resource.type = gce_instance",
+            "name": "gg-asset-88093-71a3-exclusion"
+          }
+        ],
+        "includeChildren": true,
+        "name": "gg-asset-88093-71a3-sink-with-children"
+      }
+    },
+    "ancestors": [
+      "organizations/{{.OrgID}}"
+    ]
+  },
+  {
+    "name": "//logging.googleapis.com/organizations/{{.OrgID}}/sinks/gg-asset-88093-71a3-sink-with-intercept",
+    "asset_type": "logging.googleapis.com/LogSink",
+    "ancestry_path": "organizations/{{.OrgID}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest",
+      "discovery_name": "LogSink",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+      "data": {
+        "destination": "bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/my_dataset",
+        "exclusions": [
+          {
+            "description": "Exclude all GCE instance logs",
+            "disabled": true,
+            "filter": "resource.type = gce_instance",
+            "name": "gg-asset-88093-71a3-exclusion"
+          }
+        ],
+        "interceptChildren": true,
+        "name": "gg-asset-88093-71a3-sink-with-intercept"
+      }
+    },
+    "ancestors": [
+      "organizations/{{.OrgID}}"
+    ]
+  },
+  {
+    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/my_dataset",
+    "asset_type": "bigquery.googleapis.com/Dataset",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
+      "discovery_name": "Dataset",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "datasetReference": {
+          "datasetId": "my_dataset"
+        },
+        "friendlyName": "",
+        "labels": {
+            "goog-terraform-provisioned": "true"
+        },
+        "location": "US"
+      }
+    },
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/bigquery.dataEditor",
+          "members": [
+            ""
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -380,6 +381,28 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{"YES", "NO"}, true),
 							Description:  `Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: YES, NO. If YES and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If NO (default), then updates are applied in accordance with the group's update policy type.`,
 						},
+
+						{{- if ne $.TargetVersionName `ga` }}
+						"on_repair": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Configuration for VM repairs in the MIG.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"allow_changing_zone": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Default:     "NO",
+										ValidateFunc: validation.StringInSlice([]string{"YES", "NO"}, true),
+										Description:  `Specifies whether the MIG can change a VM's zone during a repair. If "YES", MIG can select a different zone for the VM during a repair. Else if "NO", MIG cannot change a VM's zone during a repair. The default value of allow_changing_zone is "NO".`,
+									},
+								},
+							},
+						},
+						{{- end }}
+
 					},
 				},
 			},
@@ -601,6 +624,23 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
+			"target_size_policy": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: `The policy that specifies how the MIG creates its VMs to achieve the target size.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							Description:  `The mode of target size policy based on which the MIG creates its VMs individually or all at once.`,
+							ValidateFunc: validation.StringInSlice([]string{"BULK", "INDIVIDUAL"}, false),
+						},
+					},
+				},
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -699,6 +739,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
 		StatefulPolicy:              expandStatefulPolicy(d),
 		ResourcePolicies:            expandResourcePolicies(d.Get("resource_policies").([]interface{})),
+		TargetSizePolicy:            expandTargetSizePolicy(d.Get("target_size_policy").([]interface{})),
 		{{- if ne $.TargetVersionName "ga" }}
 		Params:                      expandInstanceGroupManagerParams(d),
 		{{- end }}
@@ -948,6 +989,9 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	}
 	if err = d.Set("resource_policies", flattenResourcePolicies(manager.ResourcePolicies)); err != nil {
 		return fmt.Errorf("Error setting resource_policies in state: %s", err.Error())
+	}
+	if err = d.Set("target_size_policy", flattenTargetSizePolicy(manager.TargetSizePolicy)); err != nil {
+		return fmt.Errorf("Error setting target_size_policy in state: %s", err.Error())
 	}
 
 	// If unset in state set to default value
@@ -1324,6 +1368,16 @@ func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVer
 	return versions
 }
 
+func expandTargetSizePolicy(configured []interface{}) *compute.InstanceGroupManagerTargetSizePolicy {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+	data := configured[0].(map[string]interface{})
+	return &compute.InstanceGroupManagerTargetSizePolicy{
+		Mode: data["mode"].(string),
+	}
+}
+
 func expandResourcePolicies(configured []interface{}) *compute.InstanceGroupManagerResourcePolicies {
 	resourcePolicies := &compute.InstanceGroupManagerResourcePolicies{}
 
@@ -1362,12 +1416,28 @@ func expandInstanceLifecyclePolicy(configured []interface{}) *compute.InstanceGr
 		data := raw.(map[string]interface{})
 		instanceLifecyclePolicy.ForceUpdateOnRepair = data["force_update_on_repair"].(string)
 		instanceLifecyclePolicy.DefaultActionOnFailure = data["default_action_on_failure"].(string)
-{{ if ne $.TargetVersionName `ga` -}}
+
+		{{ if ne $.TargetVersionName `ga` -}}
 		instanceLifecyclePolicy.OnFailedHealthCheck = data["on_failed_health_check"].(string)
-{{- end }}
+		{{- end }}
+
+		{{- if ne $.TargetVersionName `ga` }}
+		instanceLifecyclePolicy.OnRepair = expandOnRepair(data["on_repair"].([]any))
+		{{- end }}
 	}
 	return instanceLifecyclePolicy
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func expandOnRepair(configured []any) *compute.InstanceGroupManagerInstanceLifecyclePolicyOnRepair {
+	onRepair := &compute.InstanceGroupManagerInstanceLifecyclePolicyOnRepair{}
+	for _, raw := range configured {
+		data := raw.(map[string]any)
+		onRepair.AllowChangingZone = data["allow_changing_zone"].(string)
+	}
+	return onRepair
+}
+{{- end }}
 
 func expandStandbyPolicy(d *schema.ResourceData) *compute.InstanceGroupManagerStandbyPolicy {
 	standbyPolicy := &compute.InstanceGroupManagerStandbyPolicy{}
@@ -1563,13 +1633,30 @@ func flattenInstanceLifecyclePolicy(instanceLifecyclePolicy *compute.InstanceGro
 		ilp := map[string]interface{}{}
 		ilp["force_update_on_repair"] = instanceLifecyclePolicy.ForceUpdateOnRepair
 		ilp["default_action_on_failure"] = instanceLifecyclePolicy.DefaultActionOnFailure
-{{ if ne $.TargetVersionName `ga` -}}
+
+		{{ if ne $.TargetVersionName `ga` -}}
 		ilp["on_failed_health_check"] = instanceLifecyclePolicy.OnFailedHealthCheck
-{{- end }}
+		{{- end }}
+
+		{{ if ne $.TargetVersionName `ga` -}}
+		ilp["on_repair"] = flattenOnRepair(instanceLifecyclePolicy.OnRepair)
+		{{- end }}
 		results = append(results, ilp)
 	}
 	return results
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func flattenOnRepair(onRepair *compute.InstanceGroupManagerInstanceLifecyclePolicyOnRepair) []map[string]any {
+	results := []map[string]any{}
+	if onRepair != nil {
+		or := map[string]any{}
+		or["allow_changing_zone"] = onRepair.AllowChangingZone
+		results = append(results, or)
+	}
+	return results
+}
+{{- end }}
 
 func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.InstanceGroupManagerAllInstancesConfig {
 	var properties *compute.InstancePropertiesPatch
@@ -1679,6 +1766,17 @@ func flattenStatusAllInstancesConfig(allInstancesConfig *compute.InstanceGroupMa
 	return results
 }
 
+func flattenTargetSizePolicy(targetSizePolicy *compute.InstanceGroupManagerTargetSizePolicy) []map[string]interface{} {
+	if targetSizePolicy == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"mode": targetSizePolicy.Mode,
+		},
+	}
+}
+
 func flattenResourcePolicies(resourcePolicies *compute.InstanceGroupManagerResourcePolicies) []map[string]interface{} {
 	results := []map[string]interface{}{}
 	if resourcePolicies != nil {
@@ -1710,4 +1808,13 @@ func resourceInstanceGroupManagerStateImporter(d *schema.ResourceData, meta inte
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_group_manager",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeInstanceGroupManager(),
+	}.Register()
 }

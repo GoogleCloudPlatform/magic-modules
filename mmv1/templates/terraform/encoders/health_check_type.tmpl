@@ -96,7 +96,6 @@ if _, ok := d.GetOk("grpc_health_check"); ok {
 	return obj, nil
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 if _, ok := d.GetOk("grpc_tls_health_check"); ok {
 	hc := d.Get("grpc_tls_health_check").([]interface{})[0]
 	ps := hc.(map[string]interface{})["port_specification"]
@@ -110,6 +109,5 @@ if _, ok := d.GetOk("grpc_tls_health_check"); ok {
 	obj["type"] = "GRPC_WITH_TLS"
 	return obj, nil
 }
-{{- end }}
 
 return nil, fmt.Errorf("error in HealthCheck %s: No health check block specified.", d.Get("name").(string))

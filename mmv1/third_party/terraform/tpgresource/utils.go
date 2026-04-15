@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/url"
 	"reflect"
 	"regexp"
@@ -40,9 +41,11 @@ type TerraformResourceData interface {
 	GetOkExists(string) (interface{}, bool)
 	GetOk(string) (interface{}, bool)
 	Get(string) interface{}
+	GetRawConfig() cty.Value
 	Set(string, interface{}) error
 	SetId(string)
 	Id() string
+	Identity() (*schema.IdentityData, error)
 	GetProviderMeta(interface{}) error
 	Timeout(key string) time.Duration
 }
@@ -193,6 +196,11 @@ func IsConflictError(err error) bool {
 	} else if !ok && errwrap.ContainsType(err, &googleapi.Error{}) {
 		e := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
 		if e.Code == 409 || e.Code == 412 {
+			return true
+		}
+	} else if gErr := (*googleapi.Error)(nil); errors.As(err, &gErr) {
+		// For cases where the error is not wrapped by errwrap such in 409 IAM concurrency errors.
+		if gErr.Code == 409 || gErr.Code == 412 {
 			return true
 		}
 	}
@@ -941,4 +949,64 @@ func GetRawConfigAttributeAsString(d *schema.ResourceData, key string) string {
 	}
 
 	return ""
+}
+
+// IamPrincipalIsCaseSensitive returns true if the type of the IAM Principal is case sensitive
+func IamPrincipalIsCaseSensitive(principal string) bool {
+	// allAuthenticatedUsers and allUsers are special identifiers that are case sensitive. See:
+	// https://cloud.google.com/iam/docs/overview#all-authenticated-users
+	return strings.Contains(principal, "allAuthenticatedUsers") || strings.Contains(principal, "allUsers") ||
+		strings.HasPrefix(principal, "principalSet:") || strings.HasPrefix(principal, "principal:") ||
+		strings.HasPrefix(principal, "principalHierarchy:")
+}
+
+// NormalizeIamPrincipalCasing returns the case adjusted value of an IAM Principal
+// this is important as APIs will ignore casing unless it is one of the following
+// member types: principalSet, principal, principalHierarchy
+// members are in <type>:<value> format
+// <type> is case sensitive
+// <value> isn't in most cases
+// so lowercase the value unless IamPrincipalIsCaseSensitive and leave the type alone
+// since Dec '19 members can be prefixed with "deleted:" to indicate the principal
+// has been deleted
+func NormalizeIamPrincipalCasing(principal string) string {
+	var pieces []string
+	if strings.HasPrefix(principal, "deleted:") {
+		pieces = strings.SplitN(principal, ":", 3)
+		if len(pieces) > 2 && !IamPrincipalIsCaseSensitive(strings.TrimPrefix(principal, "deleted:")) {
+			pieces[2] = strings.ToLower(pieces[2])
+		}
+	} else if strings.HasPrefix(principal, "iamMember:") {
+		pieces = strings.SplitN(principal, ":", 3)
+		if len(pieces) > 2 && !IamPrincipalIsCaseSensitive(strings.TrimPrefix(principal, "iamMember:")) {
+			pieces[2] = strings.ToLower(pieces[2])
+		}
+	} else if !IamPrincipalIsCaseSensitive(principal) {
+		pieces = strings.SplitN(principal, ":", 2)
+		if len(pieces) > 1 {
+			pieces[1] = strings.ToLower(pieces[1])
+		}
+	}
+
+	if len(pieces) > 0 {
+		principal = strings.Join(pieces, ":")
+	}
+	return principal
+}
+
+// hash based normalized IP addresses in CIDR notation
+func IpAddrSetHashFunc(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+
+	m := v.(string)
+	log.Printf("[DEBUG] hashing %v", m)
+	_, ipnet, err := net.ParseCIDR(m)
+	if err != nil {
+		//if invalid cidr, hash based on the direct value without standardizing.
+		return Hashcode(m)
+	}
+	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(ipnet.String()), ipnet.String())
+	return Hashcode(ipnet.String())
 }

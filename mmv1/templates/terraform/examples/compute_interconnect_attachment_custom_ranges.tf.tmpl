@@ -10,7 +10,6 @@ resource "google_compute_interconnect_attachment" "{{$.PrimaryResourceId}}" {
   candidate_customer_router_ip_address   = "192.169.0.2/29"
   candidate_cloud_router_ipv6_address    = "748d:2f23:6651:9455:828b:ca81:6fe0:fed1/125"
   candidate_customer_router_ipv6_address = "748d:2f23:6651:9455:828b:ca81:6fe0:fed2/125"
-  provider                               = google-beta
 }
 
 resource "google_compute_router" "foobar" {
@@ -19,11 +18,9 @@ resource "google_compute_router" "foobar" {
   bgp {
     asn = 16550
   }
-  provider = google-beta
 }
 
 resource "google_compute_network" "foobar" {
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
-  provider                = google-beta
 }

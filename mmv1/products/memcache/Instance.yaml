@@ -12,72 +12,85 @@
 # limitations under the License.
 
 ---
-name: 'Instance'
+name: Instance
 description: |
   A Google Cloud Memcache instance.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/memcache/docs/creating-instances'
-  api: 'https://cloud.google.com/memorystore/docs/memcached/reference/rest/v1/projects.locations.instances'
-docs:
-base_url: 'projects/{{project}}/locations/{{region}}/instances'
-self_link: 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
-create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
-update_verb: 'PATCH'
+    Official Documentation: https://cloud.google.com/memcache/docs/creating-instances
+  api: https://cloud.google.com/memorystore/docs/memcached/reference/rest/v1/projects.locations.instances
+base_url: projects/{{project}}/locations/{{region}}/instances
+self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
 update_mask: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_async: true
+update_verb: PATCH
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+autogen_async: true
+include_in_tgc_next: true
 custom_code:
+  pre_delete: templates/terraform/pre_delete/memcache_instance.go.tmpl
 examples:
-  - name: 'memcache_instance_basic'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-      network_name: 'test-network'
-      address_name: 'address'
+  - name: memcache_instance_basic
+    primary_resource_id: instance
+    ignore_read_extra:
+      - deletion_protection
     exclude_test: true
-  - name: 'memcache_instance_basic_test'
-    primary_resource_id: 'instance'
     vars:
-      instance_name: 'test-instance'
-      network_name: 'test-network'
-      address_name: 'address'
+      address_name: address
+      instance_name: test-instance
+      network_name: test-network
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      # for backward compatible
+      address_name: '"address" + randomSuffix'
+  - name: memcache_instance_basic_test
+    primary_resource_id: instance
     exclude_docs: true
+    vars:
+      address_name: address
+      instance_name: test-instance
+      network_name: test-network
+    test_vars_overrides:
+      network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+      # for backward compatible
+      address_name: '"address" + randomSuffix'
+virtual_fields:
+  - name: deletion_protection
+    type: Boolean
+    description: |
+      Whether Terraform will be prevented from destroying the instance.
+      When a `terraform destroy` or `terraform apply` would delete the instance,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the instance will fail.
+      When the field is set to false, deleting the instance is allowed.
+    client_side: true
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: |
       The region of the Memcache instance. If it is not provided, the provider region is used.
-    url_param_only: true
     immutable: true
+    url_param_only: true
     default_from_api: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
+    required: true
     description: |
       The resource name of the instance.
-    url_param_only: true
-    required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'displayName'
+    url_param_only: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
     type: String
     description: |
       A user-visible name for the instance.
     default_from_api: true
-  - name: 'memcacheNodes'
+  - name: memcacheNodes
     type: Array
     description: |
       Additional information about the instance state, if available.
@@ -85,153 +98,150 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'nodeId'
+        - name: nodeId
           type: String
-          description:
-            Identifier of the Memcached node. The node id does not include
-            project or location like the Memcached instance name.
+          description: Identifier of the Memcached node. The node id does not include project or location like the Memcached instance name.
           output: true
-        - name: 'zone'
+        - name: zone
           type: String
           description: Location (GCP Zone) for the Memcached node.
           output: true
-        - name: 'port'
+        - name: port
           type: Integer
           description: The port number of the Memcached server on this node.
           output: true
-        - name: 'host'
+        - name: host
           type: String
-          description:
-            Hostname or IP address of the Memcached node used by the clients to
-            connect to the Memcached server on this node.
+          description: Hostname or IP address of the Memcached node used by the clients to connect to the Memcached server on this node.
           output: true
-        - name: 'state'
+        - name: state
           type: String
           description: Current state of the Memcached node.
           output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'discoveryEndpoint'
+  - name: discoveryEndpoint
     type: String
     description: Endpoint for Discovery API
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Resource labels to represent user-provided metadata.
-  - name: 'memcacheFullVersion'
+  - name: memcacheFullVersion
     type: String
     description: |
       The full version of memcached server running on this instance.
     output: true
-  - name: 'zones'
+  - name: zones
     type: Array
     description: |
       Zones where memcache nodes should be provisioned.  If not
       provided, all zones will be used.
-    is_set: true
     immutable: true
+    is_set: true
     default_from_api: true
     item_type:
       type: String
-  - name: 'authorizedNetwork'
+  - name: authorizedNetwork
     type: String
     description: |
       The full name of the GCE network to connect the instance to.  If not provided,
       'default' will be used.
     immutable: true
     default_from_api: true
-  - name: 'nodeCount'
+  - name: nodeCount
     type: Integer
+    required: true
     description: |
       Number of nodes in the memcache instance.
-    required: true
-  - name: 'memcacheVersion'
+  - name: memcacheVersion
     type: Enum
+    default_value: MEMCACHE_1_5
     description: |
       The major version of Memcached software. If not provided, latest supported version will be used.
       Currently the latest supported major version is MEMCACHE_1_5. The minor version will be automatically
       determined by our system based on the latest supported minor version.
-    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
-    update_verb: 'POST'
-    default_value: "MEMCACHE_1_5"
+    update_verb: POST
+    update_url: projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade
     enum_values:
-      - 'MEMCACHE_1_5'
-      - 'MEMCACHE_1_6_15'
-  - name: 'nodeConfig'
+      - MEMCACHE_1_5
+      - MEMCACHE_1_6_15
+  - name: nodeConfig
     type: NestedObject
+    required: true
     description: |
       Configuration for memcache nodes.
-    required: true
     immutable: true
     properties:
-      - name: 'cpuCount'
+      - name: cpuCount
         type: Integer
+        required: true
         description: |
           Number of CPUs per node.
-        required: true
-      - name: 'memorySizeMb'
+      - name: memorySizeMb
         type: Integer
+        required: true
         description: |
           Memory size in Mebibytes for each memcache node.
-        required: true
-  - name: 'memcacheParameters'
+  - name: memcacheParameters
+    api_name: parameters
     type: NestedObject
     description: |
       User-specified parameters for this memcache instance.
-    api_name: parameters
     immutable: true
     properties:
-      - name: 'id'
+      - name: id
         type: String
         description: |
           This is a unique ID associated with this set of parameters.
         output: true
-      - name: 'params'
+      - name: params
         type: KeyValuePairs
         description: |
           User-defined set of parameters to use in the memcache process.
-  - name: 'maintenancePolicy'
+  - name: maintenancePolicy
     type: NestedObject
     description: |
       Maintenance policy for an instance.
     properties:
-      - name: 'createTime'
+      - name: createTime
         type: String
         description: |
           Output only. The time when the policy was created.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits
         output: true
-      - name: 'updateTime'
+      - name: updateTime
         type: String
         description: |
           Output only. The time when the policy was updated.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-      - name: 'description'
+      - name: description
         type: String
         description: |
           Optional. Description of what this policy is for.
           Create/Update methods return INVALID_ARGUMENT if the
           length is greater than 512.
         validation:
-          function: 'validation.StringLenBetween(0, 512)'
-      - name: 'weeklyMaintenanceWindow'
+          function: validation.StringLenBetween(0, 512)
+      - name: weeklyMaintenanceWindow
         type: Array
+        required: true
         description: |
           Required. Maintenance window that is applied to resources covered by this policy.
           Minimum 1. For the current version, the maximum number of weekly_maintenance_windows
           is expected to be one.
-        required: true
         item_type:
           type: NestedObject
           properties:
-            - name: 'day'
+            - name: day
               type: Enum
+              required: true
               description: |
                 Required. The day of week that maintenance updates occur.
                 - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
@@ -242,77 +252,76 @@ properties:
                 - FRIDAY: Friday
                 - SATURDAY: Saturday
                 - SUNDAY: Sunday
-              required: true
               enum_values:
-                - 'DAY_OF_WEEK_UNSPECIFIED'
-                - 'MONDAY'
-                - 'TUESDAY'
-                - 'WEDNESDAY'
-                - 'THURSDAY'
-                - 'FRIDAY'
-                - 'SATURDAY'
-                - 'SUNDAY'
-            - name: 'duration'
+                - DAY_OF_WEEK_UNSPECIFIED
+                - MONDAY
+                - TUESDAY
+                - WEDNESDAY
+                - THURSDAY
+                - FRIDAY
+                - SATURDAY
+                - SUNDAY
+            - name: duration
               type: String
+              required: true
               description: |
                 Required. The length of the maintenance window, ranging from 3 hours to 8 hours.
                 A duration in seconds with up to nine fractional digits,
                 terminated by 's'. Example: "3.5s".
-              required: true
-            - name: 'startTime'
+            - name: startTime
               type: NestedObject
+              required: true
               description: |
                 Required. Start time of the window in UTC time.
-              required: true
               send_empty_value: true
               allow_empty_object: true
               properties:
-                - name: 'hours'
+                - name: hours
                   type: Integer
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23.
                     An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                   validation:
-                    function: 'validation.IntBetween(0,23)'
-                - name: 'minutes'
+                    function: validation.IntBetween(0,23)
+                - name: minutes
                   type: Integer
                   description: |
                     Minutes of hour of day. Must be from 0 to 59.
                   validation:
-                    function: 'validation.IntBetween(0,59)'
-                - name: 'seconds'
+                    function: validation.IntBetween(0,59)
+                - name: seconds
                   type: Integer
                   description: |
                     Seconds of minutes of the time. Must normally be from 0 to 59.
                     An API may allow the value 60 if it allows leap-seconds.
                   validation:
-                    function: 'validation.IntBetween(0,60)'
-                - name: 'nanos'
+                    function: validation.IntBetween(0,60)
+                - name: nanos
                   type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
                   validation:
-                    function: 'validation.IntBetween(0,999999999)'
-  - name: 'maintenanceSchedule'
+                    function: validation.IntBetween(0,999999999)
+  - name: maintenanceSchedule
     type: NestedObject
     description: Output only. Published maintenance schedule.
     output: true
     properties:
-      - name: 'startTime'
+      - name: startTime
         type: String
         description: |
           Output only. The start time of any upcoming scheduled maintenance for this instance.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-      - name: 'endTime'
+      - name: endTime
         type: String
         description: |
           Output only. The end time of any upcoming scheduled maintenance for this instance.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-      - name: 'scheduleDeadlineTime'
+      - name: scheduleDeadlineTime
         type: String
         description: |
           Output only. The deadline that the maintenance schedule start time
@@ -320,7 +329,7 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-  - name: 'reservedIpRangeId'
+  - name: reservedIpRangeId
     type: Array
     description: |
       Contains the name of allocated IP address ranges associated with

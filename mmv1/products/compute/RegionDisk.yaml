@@ -36,6 +36,7 @@ references:
     'Adding or Resizing Regional Persistent Disks': 'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionDisks'
 docs:
+cai_resource_kind: 'RegionDisk'
 base_url: 'projects/{{project}}/regions/{{region}}/disks'
 has_self_link: true
 immutable: true
@@ -54,40 +55,40 @@ collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     - '{{name}}'
+include_in_tgc_next: true
 custom_code:
+  constants: 'templates/terraform/constants/region_disk.go.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
+  custom_update: 'templates/terraform/custom_update/region_disk_update.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
+  post_import: 'templates/terraform/post_import/disk.go.tmpl'
+  post_read: 'templates/terraform/post_read/disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
 examples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
     vars:
       region_disk_name: 'my-region-disk'
       disk_name: 'my-disk'
       snapshot_name: 'my-snapshot'
   - name: 'region_disk_async'
     primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
     vars:
       region_disk_name: 'primary-region-disk'
       secondary_region_disk_name: 'secondary-region-disk'
   - name: 'region_disk_features'
     primary_resource_id: 'regiondisk'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
     vars:
       region_disk_name: 'my-region-features-disk'
   - name: 'region_disk_hyperdisk_balanced_ha_write_many'
     primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
     vars:
       region_disk_name: 'my-region-hyperdisk'
 parameters:
@@ -139,6 +140,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
         description: |
@@ -146,6 +148,7 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'sha256'
         type: String
         description: |
@@ -370,6 +373,8 @@ properties:
             - 'SEV_SNP_CAPABLE'
             - 'SUSPEND_RESUME_COMPATIBLE'
             - 'TDX_CAPABLE'
+            - 'SEV_LIVE_MIGRATABLE_V2'
+            - 'SNP_SVSM_CAPABLE'
   - name: 'licenses'
     type: Array
     description: Any applicable license URI.
@@ -403,7 +408,7 @@ properties:
       that the disk can handle. Values must be between 10,000 and 120,000.
       For more details, see the Extreme persistent disk [documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=provisionedIops'
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     update_verb: 'PATCH'
   - name: 'provisionedThroughput'
     type: Integer
@@ -411,8 +416,15 @@ properties:
       Indicates how much throughput to provision for the disk. This sets the number of throughput
       mb per second that the disk can handle. Values must be greater than or equal to 1.
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=provisionedThroughput'
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     update_verb: 'PATCH'
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disk restored from a source snapshot should erase Windows specific VSS signature.
+    min_version: 'beta'
+    ignore_read: true
+    default_value: false
 virtual_fields:
   - name: 'create_snapshot_before_destroy'
     type: Boolean

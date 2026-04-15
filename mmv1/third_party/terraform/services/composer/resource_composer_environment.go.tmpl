@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -156,7 +156,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 			// Composer takes <= 1 hr for create/update.
 			Create: schema.DefaultTimeout(120 * time.Minute),
 			Update: schema.DefaultTimeout(120 * time.Minute),
-			Delete: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(120 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -985,7 +985,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Computed:     true,
 							ForceNew:     false,
 							AtLeastOneOf: composerConfigKeys,
-							ValidateFunc: validation.StringInSlice([]string{"ENVIRONMENT_SIZE_SMALL", "ENVIRONMENT_SIZE_MEDIUM", "ENVIRONMENT_SIZE_LARGE"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"ENVIRONMENT_SIZE_SMALL", "ENVIRONMENT_SIZE_MEDIUM", "ENVIRONMENT_SIZE_LARGE", "ENVIRONMENT_SIZE_EXTRA_LARGE"}, false),
 							Description:  `The size of the Cloud Composer environment. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 						},
 						"resilience_mode": {
@@ -1388,9 +1388,9 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				},
 			}
 			if config != nil && config.PrivateEnvironmentConfig != nil {
-				patchObj.Config.PrivateEnvironmentConfig.EnablePrivateEnvironment = config.PrivateEnvironmentConfig.EnablePrivateEnvironment
+				patchObj.Config.PrivateEnvironmentConfig.NetworkingType = config.PrivateEnvironmentConfig.NetworkingType
 			}
-			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.EnablePrivateEnvironment", userAgent, patchObj, d, tfConfig)
+			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.NetworkingType", userAgent, patchObj, d, tfConfig)
 			if err != nil {
 				return err
 			}
@@ -1700,7 +1700,11 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 		transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
 	}
 	if isComposer3(imageVersion) && envCfg.PrivateEnvironmentConfig != nil {
-		transformed["enable_private_environment"] = envCfg.PrivateEnvironmentConfig.EnablePrivateEnvironment
+		if (envCfg.PrivateEnvironmentConfig.NetworkingType == "PRIVATE") {
+			transformed["enable_private_environment"] = true
+		} else {
+			transformed["enable_private_environment"] = false
+		}
 		transformed["enable_private_builds_only"] = envCfg.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
 	}
 	transformed["web_server_network_access_control"] = flattenComposerEnvironmentConfigWebServerNetworkAccessControl(envCfg.WebServerNetworkAccessControl)
@@ -2086,14 +2090,18 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 
 	/*
 		config.enable_private_environment in terraform maps to
-		composer.PrivateEnvironmentConfig.EnablePrivateEnvironment in API.
-		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
+		composer.PrivateEnvironmentConfig.NetworkingType in API.
+		Check image version to avoid overriding NetworkingType in case of other versions.
 	*/
 	imageVersion := d.Get("config.0.software_config.0.image_version").(string)
 	if isComposer3(imageVersion) {
 		transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
 		if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
-			transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
+			if enablePrivateEnvironmentRaw.(bool) {
+				transformed.PrivateEnvironmentConfig.NetworkingType = "PRIVATE"
+			} else {
+				transformed.PrivateEnvironmentConfig.NetworkingType = "PUBLIC"
+			}
 		}
 		if enablePrivateBuildsOnlyRaw, ok := original["enable_private_builds_only"]; ok {
 			transformed.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = enablePrivateBuildsOnlyRaw.(bool)
@@ -2484,7 +2492,7 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	raw := l[0]
 	original := raw.(map[string]interface{})
 	transformed := &composer.PrivateEnvironmentConfig{
-		EnablePrivateEnvironment: true,
+		NetworkingType: "PRIVATE",
 	}
 
 	subBlock := &composer.PrivateClusterConfig{}
@@ -3142,4 +3150,13 @@ func gscBucketNameDiffSuppress(_, old, new string, _ *schema.ResourceData) bool 
     return true
   }
   return false
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_composer_environment",
+		ProductName: "composer",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComposerEnvironment(),
+	}.Register()
 }

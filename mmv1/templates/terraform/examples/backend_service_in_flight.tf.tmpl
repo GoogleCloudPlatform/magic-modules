@@ -1,0 +1,80 @@
+resource "google_compute_network" "custom" {
+  provider              = google-beta
+  name                    = "custom-vpc"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider              = google-beta
+  name          = "custom-subnet"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.custom.id
+}
+
+resource "google_compute_instance_template" "default" {
+  provider              = google-beta
+  name                  = "instance-template"
+  machine_type          = "e2-micro"
+
+  disk {
+    source_image = "debian-cloud/debian-11"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network    = google_compute_network.custom.id
+    subnetwork = google_compute_subnetwork.default.id
+  }
+
+  metadata = {
+    startup-script = <<-EOT
+      #!/bin/bash
+      echo "Hello World from MIG VM" > /var/www/html/index.html
+      apt-get update -y
+      apt-get install -y apache2
+      systemctl start apache2
+    EOT
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "foobar" {
+  provider              = google-beta
+  name               = "instance-group-manager"
+  base_instance_name = "vm"
+  region             = "us-central1"
+
+  version {
+    instance_template = google_compute_instance_template.default.id
+  }
+
+  target_size = 1
+}
+
+resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "backend_service_name"}}"
+  description           = "Hello World 1234"
+  port_name             = "http"
+  protocol              = "TCP"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+
+  backend {
+    group                  = google_compute_region_instance_group_manager.foobar.instance_group
+    balancing_mode         = "IN_FLIGHT"
+    max_in_flight_requests = 1000
+    traffic_duration       = "LONG"
+  }
+
+  health_checks = [google_compute_health_check.default.self_link]
+}
+
+resource "google_compute_health_check" "default" {
+  provider              = google-beta
+  name = "{{index $.Vars "health_check_name"}}"
+
+  http_health_check {
+    port = 80
+  }
+}

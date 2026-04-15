@@ -36,7 +36,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'taxonomy'
   base_url: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
     - '{{taxonomy}}'
@@ -47,7 +46,6 @@ sweeper:
 examples:
   - name: 'data_catalog_taxonomy_basic'
     primary_resource_id: 'basic_taxonomy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_taxonomy%s", context["random_suffix"])'
     vars:
       display_name: 'my_taxonomy'
 parameters:

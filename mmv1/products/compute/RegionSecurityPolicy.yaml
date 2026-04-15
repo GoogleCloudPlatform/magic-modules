@@ -38,8 +38,11 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_security_policy.go.tmpl'
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 sweeper:
   url_substitutions:
     - region: "us-south1"
@@ -467,15 +470,6 @@ properties:
           type: NestedObject
           description: |
             Must be specified if the action is "rate_based_ban" or "throttle". Cannot be specified for any other actions.
-          update_mask_fields:
-            - 'rateLimitOptions.rateLimitThreshold'
-            - 'rateLimitOptions.conformAction'
-            - 'rateLimitOptions.exceedAction'
-            - 'rateLimitOptions.enforceOnKey'
-            - 'rateLimitOptions.enforceOnKeyName'
-            - 'rateLimitOptions.enforceOnKeyConfigs'
-            - 'rateLimitOptions.banThreshold'
-            - 'rateLimitOptions.banDurationSec'
           properties:
             - name: 'rateLimitThreshold'
               type: NestedObject
@@ -609,15 +603,6 @@ properties:
             Example:
             networkMatch: srcIpRanges: - "192.0.2.0/24" - "198.51.100.0/24" userDefinedFields: - name: "ipv4_fragment_offset" values: - "1-0x1fff"
             The above match condition matches packets with a source IP in 192.0.2.0/24 or 198.51.100.0/24 and a user-defined field named "ipv4_fragment_offset" with a value between 1 and 0x1fff inclusive
-          update_mask_fields:
-            - 'network_match.userDefinedFields'
-            - 'network_match.srcIpRanges'
-            - 'network_match.destIpRanges'
-            - 'network_match.ipProtocols'
-            - 'network_match.srcPorts'
-            - 'network_match.destPorts'
-            - 'network_match.srcRegionCodes'
-            - 'network_match.srcAsns'
           properties:
             - name: 'userDefinedFields'
               type: Array

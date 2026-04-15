@@ -57,9 +57,9 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
+include_in_tgc_next: true
 examples:
   - name: 'netapp_backup'
     primary_resource_id: 'test_backup'

@@ -48,18 +48,16 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'topic'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
-tgc_ignore_terraform_encoder: true
+  tgc_ignore_terraform_encoder: true
 error_retry_predicates:
   - 'transport_tpg.PubsubTopicProjectNotReady'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 examples:
   - name: 'pubsub_topic_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
     vars:
       topic_name: 'example-topic'
   - name: 'pubsub_topic_cmek'
@@ -78,6 +76,9 @@ examples:
     vars:
       topic_name: 'example-topic'
       schema_name: 'example'
+    test_vars_overrides:
+      # for backward compatible
+      schema_name: '"example" + randomSuffix'
     test_env_vars:
       project_name: 'PROJECT_NAME'
   - name: 'pubsub_topic_ingestion_kinesis'
@@ -115,6 +116,14 @@ examples:
       topic_name: 'example-topic'
       tag_key: 'tag_key'
       tag_value: 'tag_value'
+  - name: pubsub_topic_ai_inference
+    primary_resource_id: example
+    external_providers: ["time"]
+    vars:
+      topic_name: example-topic
+      service_account_id: example-sa
+    test_env_vars:
+      project_name: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'
@@ -464,12 +473,47 @@ properties:
       order specified.
     item_type:
       type: NestedObject
+      exactly_one_of:
+        - javascript_udf
+        - ai_inference
       properties:
+        - name: aiInference
+          type: NestedObject
+          description: |
+            AI Inference. Specifies the Vertex AI endpoint that inference
+            requests built from the Pub/Sub message data and provided parameters will
+            be sent to.
+          properties:
+            - name: endpoint
+              type: String
+              required: true
+              description: |
+                The endpoint to a Vertex AI model of the form
+                `projects/{project}/locations/{location}/endpoints/{endpoint}` or
+                `projects/{project}/locations/{location}/publishers/{publisher}/models/{model}`.
+                Vertex AI API requests will be sent to this endpoint.
+            - name: unstructuredInference
+              type: NestedObject
+              description: |
+                Configuration for making inferences using arbitrary JSON payloads.
+              properties:
+                - name: parameters
+                  type: KeyValuePairs
+                  description: |
+                    A parameters object to be included in each inference request.
+                    The parameters object is combined with the data field of the Pub/Sub
+                    message to form the inference request.
+            - name: serviceAccountEmail
+              type: String
+              description: |
+                The service account to use to make prediction requests against
+                endpoints.
         - name: javascriptUdf
           type: NestedObject
           description: |
             Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
             each one must have a unique `function_name`.
+          is_missing_in_cai: true
           properties:
             - name: functionName
               type: String

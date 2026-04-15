@@ -111,6 +111,8 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 		return err
 	}
 
+	gh.RemoveLabel(prNumber, "assign-reviewer")
+
 	return nil
 }
 

@@ -1,0 +1,187 @@
+package observability_test
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
+
+	context := map[string]interface{}{
+		"org_id":       envvar.GetTestOrgFromEnv(t),
+		"kms_key_name": acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObservabilityOrganizationSettings_basic(context),
+			},
+			{
+				ResourceName:            "google_observability_organization_settings.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "organization"},
+			},
+			{
+				Config: testAccObservabilityOrganizationSettings_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_observability_organization_settings.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_observability_organization_settings.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "organization"},
+			},
+		},
+	})
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityOrganizationSettings_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_observability_organization_settings" "settings_data" {
+  provider      = "google-beta"
+  organization  = "%{org_id}"
+  location      = "us"
+}
+
+# Add a delay to allow the service account to propagate
+resource "time_sleep" "wait_for_sa_propagation" {
+  create_duration = "90s"
+  depends_on      = [data.google_observability_organization_settings.settings_data]
+}
+
+resource "google_kms_crypto_key_iam_member" "iam" {
+  provider      = "google-beta"
+  crypto_key_id = "%{kms_key_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_observability_organization_settings.settings_data.service_account_id}"
+  depends_on    = [time_sleep.wait_for_sa_propagation]
+}
+
+resource "google_observability_organization_settings" "primary" {
+  provider      = "google-beta"
+  location      = "us"
+  organization  = "%{org_id}"
+  kms_key_name  = "%{kms_key_name}"
+  depends_on    = [google_kms_crypto_key_iam_member.iam]
+}
+`, context)
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityOrganizationSettings_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_observability_organization_settings" "primary" {
+  provider                 = "google-beta"
+  location                 = "us"
+  organization             = "%{org_id}"
+  kms_key_name             = "" # Unset KMS key
+}
+`, context)
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
+
+	context := map[string]interface{}{
+		"org_id": envvar.GetTestOrgFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObservabilityOrganizationSettings_global(context, "us"),
+			},
+			{
+				ResourceName:            "google_observability_organization_settings.primary_global",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "organization"},
+			},
+			{
+				Config: testAccObservabilityOrganizationSettings_globalUpdate(context, "eu"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_observability_organization_settings.primary_global", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_observability_organization_settings.primary_global",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "organization"},
+			},
+		},
+	})
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityOrganizationSettings_global(context map[string]interface{}, defaultLocation string) string {
+	return acctest.Nprintf(fmt.Sprintf(`
+data "google_observability_organization_settings" "settings_data" {
+  provider     = "google-beta"
+  organization = "%%{org_id}"
+  location     = "global"
+}
+
+resource "google_observability_organization_settings" "primary_global" {
+  provider                 = "google-beta"
+  location                 = "global"
+  organization             = "%%{org_id}"
+  default_storage_location = "%s"
+  depends_on = [data.google_observability_organization_settings.settings_data]
+}
+`, defaultLocation), context)
+}
+{{- else }}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccObservabilityOrganizationSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
+	return acctest.Nprintf(fmt.Sprintf(`
+data "google_observability_organization_settings" "settings_data" {
+  provider     = "google-beta"
+  organization = "%%{org_id}"
+  location     = "global"
+}
+
+resource "google_observability_organization_settings" "primary_global" {
+	provider                 = "google-beta"
+  location                 = "global"
+  organization             = "%%{org_id}"
+  default_storage_location = "%s"
+  depends_on = [data.google_observability_organization_settings.settings_data]
+}
+`, defaultLocation), context)
+}
+{{- else }}
+{{- end }}

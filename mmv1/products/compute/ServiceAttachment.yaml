@@ -35,6 +35,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/compute_service_attachment.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
@@ -110,6 +111,9 @@ examples:
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
       name: 'sa'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"sa" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -160,6 +164,13 @@ properties:
         description: |
           The low 64 bits of the PSC service attachment ID.
         output: true
+  - name: 'showNatIps'
+    type: Boolean
+    description: |
+      NOTE: This field is temporarily non-functional due to an underlying API issue.
+      Any value provided here will be ignored until the API issue is resolved, expected around 2026-03.
+      [If true, show NAT IPs of all connected endpoints.]
+    url_param_only: true
   - name: 'connectionPreference'
     type: String
     description: |
@@ -201,12 +212,20 @@ properties:
           description: |
             The number of consumer Network Connectivity Center spokes that the connected Private Service Connect endpoint has propagated to.
           output: true
+        - name: 'natIps'
+          type: Array
+          description: |
+            NOTE: This field is temporarily non-functional due to an underlying API issue.
+            Any value provided here will be ignored until the API issue is resolved, expected around 2026-03.
+            'The nat IPs of the connected endpoint.'
+          output: true
+          item_type:
+            type: String
   - name: 'targetService'
     type: String
     description: |
       The URL of a service serving the endpoint identified by this service attachment.
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/service_attachment_target_service.go.tmpl'
   - name: 'natSubnets'
@@ -280,6 +299,7 @@ properties:
           description: |
             A project that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
+          is_missing_in_cai: true
         - name: 'networkUrl'
           type: String
           # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
@@ -287,12 +307,20 @@ properties:
             The network that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        - name: 'endpointUrl'
+          type: String
+          description: |
+            The endpoint that is allowed to connect to this service attachment.
+            Only one of project_id_or_num, network_url and endpoint_url may be set.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          is_missing_in_cai: true
         - name: 'connectionLimit'
           type: Integer
           description: |
             The number of consumer forwarding rules the consumer project can
             create.
           required: true
+          is_missing_in_cai: true
   - name: 'reconcileConnections'
     type: Boolean
     description: |

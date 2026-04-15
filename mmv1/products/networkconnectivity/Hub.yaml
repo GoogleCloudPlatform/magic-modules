@@ -36,29 +36,46 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 legacy_long_form_project: true
 examples:
   - name: 'network_connectivity_hub_basic'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"basic" + randomSuffix'
   - name: 'network_connectivity_hub_with_export_psc'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"basic" + randomSuffix'
   - name: 'network_connectivity_hub_mesh_topology'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'mesh'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"mesh" + randomSuffix'
   - name: 'network_connectivity_hub_star_topology'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'star'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"star" + randomSuffix'
   - name: 'network_connectivity_hub_policy_mode'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'policy'
 
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"policy" + randomSuffix'
 parameters:
 properties:
   - name: 'name'
@@ -78,7 +95,7 @@ properties:
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
+    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
   - name: 'description'
     type: String
     description: An optional description of the hub.
@@ -112,6 +129,7 @@ properties:
     enum_values:
       - 'MESH'
       - 'STAR'
+      - 'HYBRID_INSPECTION'
     default_from_api: true
   - name: 'policyMode'
     type: Enum

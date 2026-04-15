@@ -34,14 +34,12 @@ timeouts:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/dataform_repository.go.tmpl'
 examples:
   - name: 'dataform_repository'
     primary_resource_id: 'dataform_repository'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       dataform_repository_name: 'dataform_repository'
@@ -57,7 +55,6 @@ examples:
     exclude_import_test: true
   - name: 'dataform_repository_with_cloudsource_repo'
     primary_resource_id: 'dataform_repository'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       git_repository_name: 'my/repository'
@@ -69,6 +66,9 @@ examples:
     # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
+    test_vars_overrides:
+      # for backward compatible
+      git_repository_name: '"my/repository" + randomSuffix'
     exclude_docs: true
     ignore_read_extra:
       - 'deletion_policy'
@@ -84,6 +84,9 @@ examples:
     # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
+    test_vars_overrides:
+      # for backward compatible
+      git_repository_name: '"my/repository" + randomSuffix'
     exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -15,10 +16,11 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl"
 	cai2hclconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai"
 	tfplan2caiconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
 	"github.com/sethvargo/go-retry"
 
 	"go.uber.org/zap"
@@ -26,6 +28,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var (
@@ -33,57 +37,72 @@ var (
 	tmpDir     = os.TempDir()
 )
 
-func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetFields []string) {
+func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResourceType string) {
 	testName := t.Name()
-	stepNumbers, err := getStepNumbers(testName)
+	subTestName := GetSubTestName(testName)
+	if subTestName == "" {
+		t.Skipf("%s: The subtest is unavailable", testName)
+	}
+
+	stepNumbers, err := getStepNumbers(subTestName)
 	if err != nil {
-		t.Fatalf("error preparing the input data: %v", err)
+		t.Fatalf("%s: error preparing the input data: %v", subTestName, err)
 	}
 
 	if len(stepNumbers) == 0 {
-		t.Skipf("test steps are unavailable")
+		t.Skipf("%s: test steps are unavailable", subTestName)
 	}
 
 	// Create a temporary directory for running terraform.
 	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
 	if err != nil {
-		t.Fatalf("error creating a temporary directory for running terraform: %v", err)
+		t.Fatalf("%s: error creating a temporary directory for running terraform: %v", subTestName, err)
 	}
 	defer os.RemoveAll(tfDir)
 
 	logger := zaptest.NewLogger(t)
 
 	for _, stepN := range stepNumbers {
-		subtestName := fmt.Sprintf("step%d", stepN)
-		t.Run(subtestName, func(t *testing.T) {
+		stepName := fmt.Sprintf("step%d", stepN)
+		t.Run(stepName, func(t *testing.T) {
 			retries := 0
+			tName := fmt.Sprintf("%s_%s", subTestName, stepName)
+			var attemptErrors []error
 			flakyAction := func(ctx context.Context) error {
-				testData, err := prepareTestData(testName, stepN, retries)
+				testData, err := prepareTestData(subTestName, stepN, retries)
 				retries++
-				log.Printf("Starting the attempt %d", retries)
+				log.Printf("%s: Starting the attempt %d", tName, retries)
 				if err != nil {
-					return fmt.Errorf("error preparing the input data: %v", err)
+					err = fmt.Errorf("%s: error preparing the input data: %v", tName, err)
+					attemptErrors = append(attemptErrors, err)
+					return err
 				}
 
 				if testData == nil {
-					return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
+					err = retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
+					attemptErrors = append(attemptErrors, err)
+					return err
 				}
 
 				// If the primary resource is specified, only test the primary resource.
 				// Otherwise, test all of the resources in the test.
 				primaryResource := testData.PrimaryResource
 				resourceTestData := testData.ResourceTestData
-				tName := fmt.Sprintf("%s_%s", testName, subtestName)
 				if primaryResource != "" {
-					t.Logf("Test for the primary resource %s begins.", primaryResource)
-					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
+					t.Logf("%s: Test for the primary resource %s begins.", tName, primaryResource)
+					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
 					if err != nil {
+						attemptErrors = append(attemptErrors, err)
 						return err
 					}
 				} else {
-					for _, testData := range resourceTestData {
-						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
+					for address, testData := range resourceTestData {
+						if !strings.HasPrefix(address, primaryResourceType) {
+							continue
+						}
+						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
 						if err != nil {
+							attemptErrors = append(attemptErrors, err)
 							return err
 						}
 					}
@@ -95,13 +114,21 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetF
 			// Note maxAttempts-1 is retries, not attempts.
 			backoffPolicy := retry.WithMaxRetries(maxAttempts-1, retry.NewConstant(50*time.Millisecond))
 
-			t.Log("Starting test with retry logic.")
+			t.Logf("%s: Starting test with retry logic.", tName)
 
 			if err := retry.Do(context.Background(), backoffPolicy, flakyAction); err != nil {
-				if strings.Contains(err.Error(), "test data is unavailable") {
-					t.Skipf("Test skipped because data was unavailable after all retries: %v", err)
+				allUnavailable := len(attemptErrors) > 0
+				for _, e := range attemptErrors {
+					if !strings.Contains(e.Error(), "test data is unavailable") {
+						allUnavailable = false
+						break
+					}
+				}
+
+				if allUnavailable {
+					t.Skipf("%s: Test skipped because data was unavailable after all %d attempts: %v", tName, len(attemptErrors), err)
 				} else {
-					t.Fatalf("Failed after all attempts %d: %v", maxAttempts, err)
+					t.Fatalf("%s: Failed after %d attempts. Last error: %v", tName, len(attemptErrors), err)
 				}
 			}
 		})
@@ -109,16 +136,16 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetF
 }
 
 // Tests a single resource
-func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, ignoredAssetFields []string, logger *zap.Logger, primaryResource bool) error {
+func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, logger *zap.Logger, primaryResource bool) error {
 	resourceType := testData.ResourceType
 	var tfplan2caiSupported, cai2hclSupported bool
 	if _, tfplan2caiSupported = tfplan2caiconverters.ConverterMap[resourceType]; !tfplan2caiSupported {
-		log.Printf("%s is not supported in tfplan2cai conversion.", resourceType)
+		log.Printf("%s: %s is not supported in tfplan2cai conversion.", testName, resourceType)
 	}
 
 	if testData.Cai == nil {
 		log.Printf("SKIP: cai asset is unavailable for resource %s", testData.ResourceAddress)
-		return nil
+		return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 	}
 
 	assets := make([]caiasset.Asset, 0)
@@ -126,21 +153,16 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		assets = append(assets, assetData.CaiAsset)
 		assetType := assetData.CaiAsset.Type
 		if assetType == "" {
-			log.Printf("cai asset is unavailable for %s", assetName)
+			log.Printf("%s: cai asset is unavailable for %s", testName, assetName)
 			return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 		}
 		if _, cai2hclSupported = cai2hclconverters.ConverterMap[assetType]; !cai2hclSupported {
-			log.Printf("%s is not supported in cai2hcl conversion.", assetType)
+			log.Printf("%s: %s is not supported in cai2hcl conversion.", testName, assetType)
 		}
 	}
 
 	if !tfplan2caiSupported && !cai2hclSupported {
-		if primaryResource {
-			return fmt.Errorf("conversion of the primary resource %s is not supported in tgc", testData.ResourceAddress)
-		} else {
-			log.Printf("SKIP: conversion of the resource %s is not supported in tgc.", resourceType)
-			return nil
-		}
+		return fmt.Errorf("conversion of the resource %s is not supported in tgc", testData.ResourceAddress)
 	}
 
 	if !(tfplan2caiSupported && cai2hclSupported) {
@@ -148,7 +170,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		assetFile := fmt.Sprintf("%s.json", testName)
+		assetFile := fmt.Sprintf("%s.json", strings.ReplaceAll(testName, "/", "_"))
 		writeJSONFile(assetFile, assets)
 	}
 
@@ -163,14 +185,15 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		exportTfFile := fmt.Sprintf("%s_export.tf", testName)
+		exportTfFile := fmt.Sprintf("%s_export.tf", strings.ReplaceAll(testName, "/", "_"))
 		err = os.WriteFile(exportTfFile, exportConfigData, 0644)
 		if err != nil {
 			return fmt.Errorf("error writing file %s", exportTfFile)
 		}
 	}
 
-	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, testName)
+	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, strings.ReplaceAll(testName, "/", "_"))
+	defer os.Remove(exportTfFilePath)
 	err = os.WriteFile(exportTfFilePath, exportConfigData, 0644)
 	if err != nil {
 		return fmt.Errorf("error when writing the file %s", exportTfFilePath)
@@ -185,20 +208,32 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("missing hcl after cai2hcl conversion for resource %s", testData.ResourceType)
 	}
 
-	ignoredFieldSet := make(map[string]struct{}, 0)
+	if os.Getenv("WRITE_FILES") != "" {
+		writeJSONFile(fmt.Sprintf("%s_export_attrs", strings.ReplaceAll(testName, "/", "_")), exportResources)
+	}
+
+	ignoredFieldSet := make(map[string]any, 0)
 	for _, f := range ignoredFields {
 		ignoredFieldSet[f] = struct{}{}
 	}
 
 	parsedExportConfig := exportResources[0].Attributes
-	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
+
+	// Get the resource schema to check for default values
+	provider := provider.Provider()
+	var resourceSchema *schema.Resource
+	if res, ok := provider.ResourcesMap[resourceType]; ok {
+		resourceSchema = res
+	}
+
+	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet, resourceSchema)
 
 	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
-		log.Printf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		log.Printf("%s: missing fields in resource %s after cai2hcl conversion:\n%s", testName, testData.ResourceAddress, missingKeys)
 		return retry.RetryableError(fmt.Errorf("missing fields"))
 	}
-	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
+	log.Printf("%s: Step 1 passes for resource %s. All of the fields in raw config are in export config", testName, testData.ResourceAddress)
 
 	// Step 2
 	// Run a terraform plan using export_config.
@@ -208,71 +243,47 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	// Convert the export config to roundtrip assets and then convert the roundtrip assets back to roundtrip config
 	ancestryCache, defaultProject := getAncestryCache(assets)
-	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger, ignoredAssetFields)
+	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {
 		return fmt.Errorf("error when converting the round-trip config: %#v", err)
 	}
 
-	roundtripTfFilePath := fmt.Sprintf("%s_roundtrip.tf", testName)
+	rtTfFile := fmt.Sprintf("%s_roundtrip.tf", strings.ReplaceAll(testName, "/", "_"))
+	roundtripTfFilePath := filepath.Join(tfDir, rtTfFile)
+	defer os.Remove(roundtripTfFilePath)
 	err = os.WriteFile(roundtripTfFilePath, roundtripConfigData, 0644)
 	if err != nil {
 		return fmt.Errorf("error when writing the file %s", roundtripTfFilePath)
 	}
-	if os.Getenv("WRITE_FILES") == "" {
-		defer os.Remove(roundtripTfFilePath)
+	if os.Getenv("WRITE_FILES") != "" {
+		err = os.WriteFile(rtTfFile, roundtripConfigData, 0644)
+		if err != nil {
+			return fmt.Errorf("error writing file %s", rtTfFile)
+		}
 	}
 
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
-		log.Printf("Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData))
-		return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
+		tfFileName := fmt.Sprintf("%s_roundtrip", strings.ReplaceAll(testName, "/", "_"))
+		jsonFileName := fmt.Sprintf("%s_reexport.json", strings.ReplaceAll(testName, "/", "_"))
+
+		reexportAssets, err := tfplan2caiConvert(t, tfFileName, jsonFileName, tfDir, ancestryCache, defaultProject, logger)
+		if err != nil {
+			return fmt.Errorf("error when converting the third round-trip config: %#v", err)
+		}
+
+		if err = compareCaiAssets(reexportAssets, roundtripAssets, ignoredFieldSet); err != nil {
+			log.Printf("%s: Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", testName, string(roundtripConfigData), string(exportConfigData))
+			return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
+		}
 	}
-	log.Printf("Step 2 passes for resource %s. Roundtrip config and export config are identical", testData.ResourceAddress)
+	log.Printf("%s: Step 2 passes for resource %s. Roundtrip config and export config are identical", testName, testData.ResourceAddress)
 
 	// Step 3
 	// Compare most fields between the exported asset and roundtrip asset, except for "data" field for resource
-	assetMap := convertToAssetMap(assets)
-	roundtripAssetMap := convertToAssetMap(roundtripAssets)
-	for assetType, asset := range assetMap {
-		if roundtripAsset, ok := roundtripAssetMap[assetType]; !ok {
-			return fmt.Errorf("roundtrip asset for type %s is missing", assetType)
-		} else {
-			if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
-				return err
-			}
-			if diff := cmp.Diff(
-				asset.Resource,
-				roundtripAsset.Resource,
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "DiscoveryDocumentURI"),
-				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
-				cmp.FilterPath(func(p cmp.Path) bool {
-					return p.Last().String() == ".DiscoveryDocumentURI"
-				}, cmp.Comparer(func(x, y string) bool {
-					parts1 := strings.Split(x, "/")
-					parts2 := strings.Split(y, "/")
-					return len(parts1) == len(parts2)
-				})),
-				cmp.FilterPath(func(p cmp.Path) bool {
-					return p.Last().String() == ".DiscoveryName"
-				}, cmp.Comparer(func(x, y string) bool {
-					xParts := strings.Split(x, "/")
-					yParts := strings.Split(y, "/")
-					return xParts[len(xParts)-1] == yParts[len(yParts)-1]
-				})),
-				cmp.FilterPath(func(p cmp.Path) bool {
-					// Filter if "parent" field in original asset is an empty string
-					// and then ingore comparing
-					if p.Last().String() == ".Parent" {
-						v1, _ := p.Index(-1).Values()
-						return v1.IsZero()
-					}
-					return false
-				}, cmp.Ignore()),
-			); diff != "" {
-				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
-			}
-		}
+	if err = compareCaiAssets(assets, roundtripAssets, ignoredFieldSet); err != nil {
+		return err
 	}
-	log.Printf("Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testData.ResourceAddress)
+	log.Printf("%s: Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testName, testData.ResourceAddress)
 
 	return nil
 }
@@ -304,7 +315,7 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 				}
 			}
 
-			project := utils.ParseFieldValue(asset.Name, "projects")
+			project := tgcresource.ParseFieldValue(asset.Name, "projects")
 			if project != "" {
 				projectKey := fmt.Sprintf("projects/%s", project)
 				if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {
@@ -323,14 +334,62 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
-func compareHCLFields(map1, map2, ignoredFields map[string]struct{}) []string {
+func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *schema.Resource) []string {
 	var missingKeys []string
-	for key := range map1 {
+	for key, val := range map1 {
 		if isIgnored(key, ignoredFields) {
 			continue
 		}
 
+		rVal := reflect.ValueOf(val)
+		if !rVal.IsValid() {
+			continue
+		}
+
+		isRequired := false
+		if resourceSchema != nil {
+			isRequired = getSchemaRequired(resourceSchema, key)
+		}
+
+		if !isRequired && rVal.IsZero() {
+			continue
+		}
+
+		if sVal, ok := val.(string); ok {
+			// TODO: convert to correct type when parsing HCL to fix the edge case where the field type is String and the only values are "false", "00", etc.
+			if !isRequired {
+				if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
+					continue
+				}
+				if iVal, err := strconv.Atoi(sVal); err == nil && iVal == 0 {
+					continue
+				}
+			}
+		}
+
+		if vMap, ok := val.(map[string]any); ok && len(vMap) == 0 {
+			if !isRequired {
+				continue
+			}
+		}
+
 		if _, ok := map2[key]; !ok {
+			// Check if the missing key has a default value in schema and the value in map1 matches it
+			if resourceSchema != nil {
+				defaultValue := getSchemaDefault(resourceSchema, key)
+				// If default value is found, compare it with val
+				if defaultValue != nil {
+					// Handle type conversion for comparison
+					if reflect.DeepEqual(val, defaultValue) {
+						continue
+					}
+				}
+
+				if isDiffSuppressed(key, val, resourceSchema) {
+					continue
+				}
+			}
+
 			missingKeys = append(missingKeys, key)
 		}
 	}
@@ -338,8 +397,113 @@ func compareHCLFields(map1, map2, ignoredFields map[string]struct{}) []string {
 	return missingKeys
 }
 
+// isDiffSuppressed traverses the resource schema using the given key (e.g., "foo.0.bar")
+// to determine if the field or any of its parent containers has a DiffSuppressFunc
+// that evaluates to true for the given value.
+func isDiffSuppressed(key string, val any, resourceSchema *schema.Resource) bool {
+	// Traverse the schema to find the field
+	parts := strings.Split(key, ".")
+	var currentSchema *schema.Schema
+	var currentResource *schema.Resource = resourceSchema
+
+	for i, part := range parts {
+		// Check DiffSuppressFunc on the container schema (Map/List/Set) before diving into it
+		if currentSchema != nil && currentSchema.DiffSuppressFunc != nil {
+			if callDiffSuppress(currentSchema, key, val) {
+				return true
+			}
+		}
+
+		if currentSchema != nil {
+			// We are inside a schema (List/Set/Map)
+			if currentSchema.Type == schema.TypeMap {
+				// Any part is a key. Elem is Schema.
+				if elemSchema, ok := currentSchema.Elem.(*schema.Schema); ok {
+					currentSchema = elemSchema
+					continue
+				}
+				return false // Should not happen for valid TF schema
+			} else if currentSchema.Type == schema.TypeList || currentSchema.Type == schema.TypeSet {
+				if _, err := strconv.Atoi(part); err == nil {
+					if elemRes, ok := currentSchema.Elem.(*schema.Resource); ok {
+						currentResource = elemRes
+						currentSchema = nil
+						continue
+					} else if elemSchema, ok := currentSchema.Elem.(*schema.Schema); ok {
+						currentSchema = elemSchema
+						continue
+					}
+				} else {
+					// Handle implicit index 0 for single blocks which might be flattened without index
+					if elemRes, ok := currentSchema.Elem.(*schema.Resource); ok {
+						if s, ok := elemRes.Schema[part]; ok {
+							currentResource = elemRes
+							currentSchema = s
+							continue
+						}
+					}
+				}
+			}
+
+			return false // Invalid path traversal
+		}
+
+		// Lookup in currentResource
+		if currentResource == nil {
+			return false
+		}
+
+		s, ok := currentResource.Schema[part]
+		if !ok {
+			return false
+		}
+		currentSchema = s
+
+		// If this is the last part, we will check DiffSuppressFunc after the loop
+		_ = i
+	}
+
+	if currentSchema == nil {
+		return false
+	}
+
+	// Check DiffSuppressFunc on the leaf schema
+	if currentSchema.DiffSuppressFunc != nil {
+		if callDiffSuppress(currentSchema, key, val) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// callDiffSuppress safely executes the DiffSuppressFunc for a given schema field.
+// It passes nil for the *schema.ResourceData argument, and uses a deferred recover()
+// to catch any panics that might occur if the custom DiffSuppressFunc attempts to access it.
+func callDiffSuppress(s *schema.Schema, key string, val any) bool {
+	// We populate basic ResourceData. Using nil might be risky if function uses it.
+	// But creating a full valid ResourceData is hard.
+	// We handle panic in case the function assumes 'd' is valid.
+	defer func() {
+		if r := recover(); r != nil {
+			// Ignore panic, return false
+		}
+	}()
+
+	valString := fmt.Sprintf("%v", val)
+	// 'valString' is the value from Config (new).
+	// 'old' is empty string because the field is missing in map2 (Export/State).
+	// The signature is func(k, old, new string, d *ResourceData) bool
+	return s.DiffSuppressFunc(key, "", valString, nil)
+}
+
 // Returns true if the given key should be ignored according to the given set of ignored fields.
-func isIgnored(key string, ignoredFields map[string]struct{}) bool {
+func isIgnored(key string, ignoredFields map[string]any) bool {
+	// Global ignores for write-only fields
+	if strings.HasSuffix(key, "_wo") || strings.HasSuffix(key, "_wo_version") {
+		return true
+	}
+
 	// Check for exact match first.
 	if _, ignored := ignoredFields[key]; ignored {
 		return true
@@ -371,21 +535,48 @@ func isIgnored(key string, ignoredFields map[string]struct{}) bool {
 }
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
-func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger, ignoredAssetFields []string) ([]caiasset.Asset, []byte, error) {
-	fileName := fmt.Sprintf("%s_export", testName)
+func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, []byte, error) {
+	fileName := fmt.Sprintf("%s_export", strings.ReplaceAll(testName, "/", "_"))
+	roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", strings.ReplaceAll(testName, "/", "_"))
 
-	// Run terraform init and terraform apply to generate tfplan.json files
-	terraformWorkflow(t, tfDir, fileName)
-
-	planFile := fmt.Sprintf("%s.tfplan.json", fileName)
-	planfilePath := filepath.Join(tfDir, planFile)
-	jsonPlan, err := os.ReadFile(planfilePath)
+	roundtripAssets, err := tfplan2caiConvert(t, fileName, roundtripAssetFile, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	var roundtripAssetsCopy []caiasset.Asset
+	// Perform the deep copy in case the assets are transformed in cai2hcl
+	err = DeepCopyMap(roundtripAssets, &roundtripAssetsCopy)
+	if err != nil {
+		fmt.Println("Error during deep copy:", err)
+		return nil, nil, err
+	}
+
+	roundtripConfig, err := cai2hcl.Convert(roundtripAssetsCopy, &cai2hcl.Options{
+		ErrorLogger: logger,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return roundtripAssets, roundtripConfig, nil
+}
+
+// Converts tf file to CAI assets
+func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, error) {
+	// Run terraform init and terraform apply to generate tfplan.json files
+	terraformWorkflow(t, tfDir, tfFileName, defaultProject)
+
+	planFile := fmt.Sprintf("%s.tfplan.json", tfFileName)
+	planfilePath := filepath.Join(tfDir, planFile)
+	defer os.Remove(planfilePath)
+	jsonPlan, err := os.ReadFile(planfilePath)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx := context.Background()
-	roundtripAssets, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
+	assets, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
 		ErrorLogger:    logger,
 		Offline:        true,
 		DefaultProject: defaultProject,
@@ -396,98 +587,14 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	})
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	deleteFieldsFromAssets(roundtripAssets, ignoredAssetFields)
 
 	if os.Getenv("WRITE_FILES") != "" {
-		roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", testName)
-		writeJSONFile(roundtripAssetFile, roundtripAssets)
+		writeJSONFile(jsonFileName, assets)
 	}
 
-	roundtripConfig, err := cai2hcl.Convert(roundtripAssets, &cai2hcl.Options{
-		ErrorLogger: logger,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return roundtripAssets, roundtripConfig, nil
-}
-
-// Example:
-//
-//	data := map[string]interface{}{
-//		"database": map[string]interface{}{
-//			"host": "localhost",
-//			"user": "admin",
-//		},
-//	}
-//
-// Path of "host" in "data" is ["database", "host"]
-type Field struct {
-	Path []string
-}
-
-// Deletes fields from the resource data of CAI assets
-func deleteFieldsFromAssets(assets []caiasset.Asset, ignoredResourceDataFields []string) []caiasset.Asset {
-	// The key is the content type, such as "resource"
-	ignoredFieldsMap := make(map[string][]Field, 0)
-	for _, ignoredField := range ignoredResourceDataFields {
-		parts := strings.Split(ignoredField, ".")
-		if len(parts) <= 1 {
-			continue
-		}
-		if parts[0] == "RESOURCE" {
-			if _, ok := ignoredFieldsMap["RESOURCE"]; !ok {
-				ignoredFieldsMap["RESOURCE"] = make([]Field, 0)
-			}
-			f := Field{Path: parts[1:]}
-			ignoredFieldsMap["RESOURCE"] = append(ignoredFieldsMap["RESOURCE"], f)
-		}
-	}
-
-	for _, asset := range assets {
-		if asset.Resource != nil && asset.Resource.Data != nil {
-			data := asset.Resource.Data
-			for _, ignoredField := range ignoredFieldsMap["RESOURCE"] {
-				path := ignoredField.Path
-				deleteMapFieldByPath(data, path)
-			}
-		}
-	}
-	return assets
-}
-
-// Deletes a field from a map by its path.
-// Example:
-//
-//	data := map[string]interface{}{
-//		"database": map[string]interface{}{
-//			"host": "localhost",
-//			"user": "admin",
-//		},
-//	}
-//
-// path := ["database", "host"]
-func deleteMapFieldByPath(data map[string]interface{}, path []string) {
-	i := 0
-	for i < len(path)-1 {
-		k := path[i]
-		if v, ok := data[k]; ok {
-			if data, ok = v.(map[string]interface{}); ok && data != nil {
-				i++
-			} else {
-				break
-			}
-		} else {
-			break
-		}
-	}
-	if i == len(path)-1 {
-		delete(data, path[i])
-	}
+	return assets, nil
 }
 
 // Compares the asset name in export asset and roundtrip asset and ignores "null" in the name
@@ -506,6 +613,55 @@ func compareAssetName(want, got string) error {
 
 		if part != parts2[i] {
 			return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
+		}
+	}
+	return nil
+}
+
+func compareCaiAssets(assets1, assets2 []caiasset.Asset, ignoredFieldSet map[string]any) error {
+	assetMap := convertToAssetMap(assets1)
+	roundtripAssetMap := convertToAssetMap(assets2)
+	for assetType, asset := range assetMap {
+		if roundtripAsset, ok := roundtripAssetMap[assetType]; !ok {
+			return fmt.Errorf("roundtrip asset for type %s is missing", assetType)
+		} else {
+			if _, ok := ignoredFieldSet["ASSETNAME"]; !ok {
+				if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
+					return err
+				}
+			}
+			if diff := cmp.Diff(
+				asset.Resource,
+				roundtripAsset.Resource,
+				// secretmanager.googleapis.com/SecretVersion has secret as parent, not project
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "Parent", "DiscoveryName", "DiscoveryDocumentURI"),
+				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.Last().String() == ".DiscoveryDocumentURI"
+				}, cmp.Comparer(func(x, y string) bool {
+					parts1 := strings.Split(x, "/")
+					parts2 := strings.Split(y, "/")
+					return len(parts1) == len(parts2)
+				})),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.Last().String() == ".DiscoveryName"
+				}, cmp.Comparer(func(x, y string) bool {
+					xParts := strings.Split(x, "/")
+					yParts := strings.Split(y, "/")
+					return xParts[len(xParts)-1] == yParts[len(yParts)-1]
+				})),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					// Filter if "parent" field in original asset is an empty string
+					// and then ingore comparing
+					if p.Last().String() == ".Parent" {
+						v1, _ := p.Index(-1).Values()
+						return v1.IsZero()
+					}
+					return false
+				}, cmp.Ignore()),
+			); diff != "" {
+				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
+			}
 		}
 	}
 	return nil

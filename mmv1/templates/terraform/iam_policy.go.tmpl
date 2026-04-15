@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
-// Copyright (c) HashiCorp, Inc.
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 {{ end }}
 {{$.CodeHeader TemplatePath}}
@@ -22,21 +22,62 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
+{{ if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
+	"{{ $.ImportPath }}/registry"
+{{- end }}
 	"{{ $.ImportPath }}/tpgiamresource"
 	"{{ $.ImportPath }}/tpgresource"
 	transport_tpg "{{ $.ImportPath }}/transport"
 )
 
+var (
+    _ = regexp.Match
+    _ = strings.Trim
+    _ = errwrap.Wrap
+    _ = schema.Noop
+)
+
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+func init() {
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_binding",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamBinding({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_member",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_policy",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamPolicy({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_policy",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMDataSource,
+        Schema: tpgiamresource.DataSourceIamPolicy({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
+    }.Register()
+}
+{{- end }}
+
 var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 {{- range $i, $param := $.IamResourceParams }}
 	"{{ underscore $param }}": {
 		Type:             schema.TypeString,
-{{-   if or (eq $param "project") (eq $param "zone") (eq $param "region") (eq $param "location") }}
+{{-   if or (eq $param "project") (eq $param "zone") (eq $param "region") (and (eq $param "location") (not $.IamPolicy.ParentIsResourceId)) }}
 		Computed: true,
 		Optional: true,
 {{-   else }}
@@ -56,7 +97,7 @@ var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 }
 
 {{- if and $.IamPolicy $.IamPolicy.CustomDiffSuppress }}
-  {{ $.CustomTemplate $.IamPolicy.CustomDiffSuppress true }}
+  {{ customTemplate $ $.IamPolicy.CustomDiffSuppress true }}
 {{- end }}
 
 type {{ $.ResourceName }}IamUpdater struct {
@@ -108,17 +149,11 @@ func {{ $.ResourceName }}IamUpdaterProducer(d tpgresource.TerraformResourceData,
 
 {{/* Set all URL qualifiers in state so that we have consistent storage of needed fields */ -}}
 {{-  range $i, $param := $.IamResourceParams }}
-{{-    if eq $i (sub (len $.IamResourceParams) 1) }}
-{{-      if eq $param "project" }}
-	if err := d.Set("project", u.project); err != nil {
-		return nil, fmt.Errorf("Error setting project: %s", err)
-	}
-{{       else }}
-{{/* Set the last parameter as the long name (unless it is project) */ -}}
+{{-    if and (eq $i (sub (len $.IamResourceParams) 1)) (not $.IamPolicy.ParentIsResourceId) }}
+{{/* Set the last parameter as the long name */ -}}
 	if err := d.Set("{{ $.IamParentResourceName }}", u.GetResourceId()); err != nil {
 		return nil, fmt.Errorf("Error setting {{ $.IamParentResourceName }}: %s", err)
 	}
-{{-      end }}{{/* if eq param "project" */}}
 {{    else }}
 	if err := d.Set("{{ underscore $param }}", u.{{ camelize $param "lower" }}); err != nil {
 		return nil, fmt.Errorf("Error setting {{ underscore $param }}: %s", err)
@@ -158,11 +193,12 @@ func {{ $.ResourceName }}IdParseFunc(d *schema.ResourceData, config *transport_t
 		d:       d,
 		Config:  config,
 	}
-{{  if eq (index $.IamResourceParams (sub (len $.IamResourceParams) 1)) "project" }}
-{{- /* Resource is only identified by project, so only set project */ -}}
-	if err := d.Set("project", u.project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
+{{  if $.IamPolicy.ParentIsResourceId }}
+{{-   range $param := $.IamResourceParams }}
+	if err := d.Set("{{ underscore $param }}", u.{{ camelize $param "lower" }}); err != nil {
+		return fmt.Errorf("Error setting {{ underscore $param }}: %s", err)
 	}
+{{-   end }}
 {{-  else }}
 {{- /* Set resource long name in state, this has all the information that we need to identify it */ -}}
 	if err := d.Set("{{  $.IamParentResourceName }}", u.GetResourceId()); err != nil {
@@ -226,13 +262,13 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 {{- end }}
 	})
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	out := &cloudresourcemanager.Policy{}
 	err = tpgresource.Convert(policy, out)
 	if err != nil {
-		return nil, errwrap.Wrapf("Cannot convert a policy to a resource manager policy: {{"{{"}}err{{"}}"}}", err)
+		return nil, fmt.Errorf("Cannot convert a policy to a resource manager policy: %w", err)
 	}
 
 	return out, nil
@@ -290,7 +326,7 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 {{- end }}
 	})
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
+		return fmt.Errorf("Error setting IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	return nil

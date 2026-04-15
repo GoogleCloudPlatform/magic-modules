@@ -176,6 +176,8 @@ The following arguments are supported:
 
 * `aws_s3_compatible_data_source` - (Optional) An AWS S3 Compatible data source. Structure [documented below](#nested_aws_s3_compatible_data_source).
 
+* `transfer_manifest` - (Optional) Use a manifest file to limit which object are transferred. See [Storage Transfer Service manifest file format](https://cloud.google.com/storage-transfer/docs/manifest). Structure [documented below](#nested_transfer_manifest).
+
 <a name="nested_replication_spec"></a>The `replication_spec` block supports:
 
 * `gcs_data_sink` - (Optional) A Google Cloud Storage data sink. Structure [documented below](#nested_gcs_data_sink).
@@ -229,6 +231,9 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 * `delete_objects_from_source_after_transfer` - (Optional) Whether objects should be deleted from the source after they are transferred to the sink. Note that this option and `delete_objects_unique_in_sink` are mutually exclusive.
 
 * `overwrite_when` - (Optional) When to overwrite objects that already exist in the sink. If not set, overwrite behavior is determined by `overwrite_objects_already_existing_in_sink`. Possible values: ALWAYS, DIFFERENT, NEVER.
+
+* `metadata_options` - (Optional) Specifies the metadata options for running a transfer. Structure [documented below](#nested_metadata_options).
+
 
 <a name="nested_gcs_data_sink"></a>The `gcs_data_sink` block supports:
 
@@ -293,6 +298,10 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 
 * `credentials_secret` - (Optional)  The Resource name of a secret in Secret Manager. AWS credentials must be stored in Secret Manager in JSON format. If credentials_secret is specified, do not specify role_arn or aws_access_key. Format: `projects/{projectNumber}/secrets/{secret_name}`.
 
+<a name="nested_transfer_manifest"></a>The `transfer_manifest` block supports:
+
+* `location` - (Required) The **GCS URI** to the manifest file (CSV or line-delimited). Example: `gs://my-bucket/manifest.csv`
+
 The `aws_access_key` block supports:
 
 * `access_key_id` - (Required) AWS Key ID.
@@ -311,9 +320,9 @@ The `aws_access_key` block supports:
 
 * `path` - (Required) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
 
-* `credentials_secret` - (Optional, (https://terraform.io/docs/providers/google/guides/provider_versions.html)) Full Resource name of a secret in Secret Manager containing [SAS Credentials in JSON form](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#azureblobstoragedata:~:text=begin%20with%20a%20%27/%27.-,credentialsSecret,-string). Service Agent for Storage Transfer must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
+* `credentials_secret` - (Optional, (../guides/provider_versions.html.markdown)) Full Resource name of a secret in Secret Manager containing [SAS Credentials in JSON form](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#azureblobstoragedata:~:text=begin%20with%20a%20%27/%27.-,credentialsSecret,-string). Service Agent for Storage Transfer must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
 
-* `azure_credentials` - (Optional, (https://terraform.io/docs/providers/google/guides/provider_versions.html)) Credentials used to authenticate API requests to Azure block.
+* `azure_credentials` - (Optional, (../guides/provider_versions.html.markdown)) Credentials used to authenticate API requests to Azure block.
 
 * `federated_identity_config` - (Optional) Federated identity config of a user registered Azure application. Structure [documented below](#nested_federated_identity_config).
 
@@ -363,6 +372,26 @@ Each action state may be one of `SUCCEEDED`, and `FAILED`.
 
 * `enable_on_prem_gcs_transfer` - (Optional) For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer.
 Defaults to false.
+
+<a name="nested_metadata_options"></a>The `metadata_options` block supports:
+
+* `symlink` - (Optional) Specifies how symlinks should be handled by the transfer.
+
+* `mode` - (Optional) Specifies how each file's mode attribute should be handled by the transfer.
+
+* `gid` - (Required) Specifies how each file's POSIX group ID (GID) attribute should be handled by the transfer.
+
+* `uid` - (Optional) Specifies how each file's POSIX user ID (UID) attribute should be handled by the transfer.
+
+* `acl` - (Optional) Specifies how each object's ACLs should be preserved for transfers between Google Cloud Storage buckets.
+
+* `storage_class` - (Optional) Specifies the storage class to set on objects being transferred to Google Cloud Storage buckets.
+
+* `temporary_hold` - (Optional) Specifies how each object's temporary hold status should be preserved for transfers between Google Cloud Storage buckets.
+
+* `kms_key` - (Optional) Specifies how each object's Cloud KMS customer-managed encryption key (CMEK) is preserved for transfers between Google Cloud Storage buckets.
+
+* `time_created` - (Optional) Specifies how each object's timeCreated metadata is preserved for transfers.
 
 ## Attributes Reference
 

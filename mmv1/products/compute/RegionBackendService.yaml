@@ -26,6 +26,7 @@ references:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
   api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
 docs:
+cai_resource_kind: 'RegionBackendService'
 base_url: 'projects/{{project}}/regions/{{region}}/backendServices'
 has_self_link: true
 timeouts:
@@ -44,13 +45,14 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
   decoder: 'templates/terraform/decoders/region_backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_region_backend_service.go.tmpl'
 custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
@@ -65,7 +67,6 @@ sweeper:
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-region-service%s", context["random_suffix"])'
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
@@ -131,6 +132,9 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'rbs-health-check'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
   - name: 'region_backend_service_dynamic_backend_count'
     primary_resource_id: 'default'
     vars:
@@ -138,8 +142,21 @@ examples:
       health_check_name: 'health-check'
       instance_group_name: 'instance_group'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
     exclude_test: true
   - name: 'region_backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
@@ -157,6 +174,15 @@ examples:
       subnetwork_name: 'rbs-subnet'
       instance_name: 'rbs-instance'
       neg_name: 'rbs-neg'
+  - name: 'region_backend_service_tls_settings'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'health-check'
+      authentication_name: 'authentication'
+    test_vars_overrides:
+      # for backward compatible
+      authentication_name: '"authentication" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -874,6 +900,7 @@ properties:
         type: String
         description: |
           OAuth2 Client ID for IAP
+        send_empty_value: true
       - name: 'oauth2ClientSecret'
         type: String
         description: |
@@ -909,6 +936,7 @@ properties:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL'
       - 'INTERNAL_MANAGED'
+      - 'INTERNAL_SELF_MANAGED'
   - name: 'localityLbPolicy'
     type: Enum
     description: |
@@ -1021,6 +1049,33 @@ properties:
           required: true
           description: |
             If true, the metric data is not used for load balancing.
+  - name: 'networkPassThroughLbTrafficPolicy'
+    type: NestedObject
+    description: |
+      Configures traffic steering properties of internal passthrough Network Load Balancers.
+    properties:
+      - name: 'zonalAffinity'
+        type: NestedObject
+        description: |
+          When configured, new connections are load balanced across healthy backend endpoints in the local zone.
+        properties:
+          - name: 'spillover'
+            type: Enum
+            description: |
+              This field indicates whether zonal affinity is enabled or not.
+            enum_values:
+              - 'ZONAL_AFFINITY_DISABLED'
+              - 'ZONAL_AFFINITY_SPILL_CROSS_ZONE'
+              - 'ZONAL_AFFINITY_STAY_WITHIN_ZONE'
+            default_value: 'ZONAL_AFFINITY_DISABLED'
+          - name: 'spilloverRatio'
+            type: Double
+            description: |
+              The value of the field must be in [0, 1]. When the ratio of the count of healthy backend endpoints in a zone
+              to the count of backend endpoints in that same zone is equal to or above this threshold, the load balancer
+              distributes new connections to all healthy endpoints in the local zone only. When the ratio of the count
+              of healthy backend endpoints in a zone to the count of backend endpoints in that same zone is below this
+              threshold, the load balancer distributes all new connections to all healthy endpoints across all zones.
   - name: 'outlierDetection'
     type: NestedObject
     description: |
@@ -1289,7 +1344,6 @@ properties:
     type: String
     description: |
       The security policy associated with this backend service.
-    min_version: 'beta'
     update_url: 'projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
@@ -1521,6 +1575,28 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+      - name: 'forwardProxy'
+        type: NestedObject
+        description: |
+          Dynamic Forwarding Proxy configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling dynamic forwarding proxy.
+            immutable: true
+            required: true
+          - name: 'proxyMode'
+            type: Enum
+            min_version: beta
+            description: |
+              Determines the dynamic forwarding proxy mode
+            enum_values:
+              - 'DIRECT_FORWARDING'
+              - 'CLOUD_RUN'
+            required: true
   - name: 'haPolicy'
     type: NestedObject
     description: |
@@ -1540,6 +1616,7 @@ properties:
     properties:
       - name: 'fastIPMove'
         type: Enum
+        is_missing_in_cai: true
         description: |
           Specifies whether fast IP move is enabled, and if so, the mechanism to achieve it.
           Supported values are:
@@ -1567,6 +1644,7 @@ properties:
         properties:
           - name: 'backendGroup'
             type: ResourceRef
+            is_missing_in_cai: true
             description: |
               A fully-qualified URL of the zonal Network Endpoint Group (NEG) that the leader is
               attached to.
@@ -1596,3 +1674,44 @@ properties:
         api_name: resourceManagerTags
         ignore_read: true
         immutable: true
+  - name: 'tlsSettings'
+    type: NestedObject
+    description: |
+      Configuration for Backend Authenticated TLS and mTLS. May only be specified when the backend protocol is SSL, HTTPS or HTTP2.
+    properties:
+      - name: 'sni'
+        type: String
+        description: |
+          Server Name Indication - see RFC3546 section 3.1. If set, the load balancer sends this string as the SNI hostname in the
+          TLS connection to the backend, and requires that this string match a Subject Alternative Name (SAN) in the backend's
+          server certificate. With a Regional Internet NEG backend, if the SNI is specified here, the load balancer uses it
+          regardless of whether the Regional Internet NEG is specified with FQDN or IP address and port.
+      - name: 'subjectAltNames'
+        type: Array
+        description: |
+          A list of Subject Alternative Names (SANs) that the Load Balancer verifies during a TLS handshake with the backend.
+          When the server presents its X.509 certificate to the Load Balancer, the Load Balancer inspects the certificate's SAN field,
+          and requires that at least one SAN match one of the subjectAltNames in the list. This field is limited to 5 entries.
+          When both sni and subjectAltNames are specified, the load balancer matches the backend certificate's SAN only to
+          subjectAltNames.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'dnsName'
+              type: String
+              description: The SAN specified as a DNS Name.
+              exactly_one_of:
+                - tlsSettings.0.uniform_resource_identifier
+                - tlsSettings.0.dns_name
+            - name: 'uniformResourceIdentifier'
+              type: String
+              description: The SAN specified as a URI.
+              exactly_one_of:
+                - tlsSettings.0.uniform_resource_identifier
+                - tlsSettings.0.dns_name
+      - name: 'authenticationConfig'
+        type: String
+        description: |
+          Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
+          Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
+          Can only be specified if authenticationMode is not NONE.

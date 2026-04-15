@@ -38,7 +38,6 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'connection_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
     - '{{connection_id}}'
@@ -53,7 +52,6 @@ sweeper:
 examples:
   - name: 'bigquery_connection_cloud_resource'
     primary_resource_id: 'connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-connection%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       connection_id: 'my-connection'
@@ -66,6 +64,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
+      username: '"user" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -83,6 +83,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
+      username: '"user" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -96,6 +98,9 @@ examples:
     vars:
       connection_id: 'my-connection'
       iam_role_id: 'arn:aws:iam::999999999999:role/omnirole'
+    test_vars_overrides:
+      # for backward compatible
+      iam_role_id: '"arn:aws:iam::999999999999:role/omnirole" + randomSuffix'
     external_providers: ["random", "time"]
   - name: 'bigquery_connection_azure'
     primary_resource_id: 'connection'
@@ -110,12 +115,18 @@ examples:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
       database_role: 'database_role'
+    test_vars_overrides:
+      # for backward compatible
+      database: '"projects/project/instances/instance/databases/database" + randomSuffix'
     external_providers: ["random", "time"]
   - name: 'bigquery_connection_cloudspanner_databoost'
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
+    test_vars_overrides:
+      # for backward compatible
+      database: '"projects/project/instances/instance/databases/database" + randomSuffix'
     external_providers: ["random", "time"]
   - name: 'bigquery_connection_spark'
     primary_resource_id: 'connection'
@@ -135,6 +146,8 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      # for backward compatible
+      username: '"user" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -148,7 +161,7 @@ properties:
       The resource name of the connection in the form of:
       "projects/{project_id}/locations/{location_id}/connections/{connectionId}"
     output: true
-  - name: 'connection_id'
+  - name: 'connectionId'
     type: String
     description: |
       Optional connection id that should be assigned to the created connection.

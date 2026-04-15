@@ -33,25 +33,21 @@ iam_policy:
 examples:
   - name: beyondcorp_security_gateway_application_basic
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
     vars:
       security_gateway_name: default-sg
       application_name: google-sga
   - name: beyondcorp_security_gateway_application_vpc
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
     vars:
       security_gateway_name: default-sg
       application_name: my-vm-service2
   - name: beyondcorp_security_gateway_application_spa_api
     primary_resource_id: example-spa
-    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg-spa-api%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
     vars:
       security_gateway_name: default-sg-spa-api
       application_discovery_name: app-discovery
   - name: beyondcorp_security_gateway_application_spa_proxy
     primary_resource_id: example-spa
-    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg-spa-proxy%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
     vars:
       security_gateway_name: default-sg-spa-proxy
       application_proxy_name: app-proxy
@@ -124,6 +120,7 @@ properties:
         - name: ports
           type: Array
           description: Optional. Ports of the application.
+          required: true
           item_type:
             type: Integer
   - name: upstreams
@@ -147,7 +144,7 @@ properties:
           description: Network to forward traffic to.
           properties:
             - name: name
-              type: string
+              type: String
               description: |-
                 Required. Network name is of the format:
                 `projects/{project}/global/networks/{network}`
@@ -179,13 +176,15 @@ properties:
               type: Array
               description: The configuration for the proxy.
               item_type:
-                type: string
+                type: String
             - name: contextualHeaders
               type: NestedObject
               description: Configuration for the contextual headers.
               properties:
                 - name: userInfo
                   type: NestedObject
+                  send_empty_value: true
+                  allow_empty_object: true
                   description: User info configuration.
                   properties:
                     - name: outputType
@@ -197,6 +196,8 @@ properties:
                         - 'NONE'
                 - name: groupInfo
                   type: NestedObject
+                  send_empty_value: true
+                  allow_empty_object: true
                   description: Group info configuration.
                   properties:
                     - name: outputType
@@ -208,6 +209,8 @@ properties:
                         - 'NONE'
                 - name: deviceInfo
                   type: NestedObject
+                  send_empty_value: true
+                  allow_empty_object: true
                   description: Device info configuration.
                   properties:
                     - name: outputType

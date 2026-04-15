@@ -1,0 +1,358 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+RESOURCES = {
+    "apikeys_key": {
+        "service": "apikeys",
+        "resource": "key",
+        "docs": True,
+        "sweeper": True,
+        "test": True,
+    },
+    "assured_workloads_workload": {
+        "service": "assuredworkloads",
+        "resource": "workload",
+        "docs": True,
+        "sweeper": False,
+        "test": True,
+    },
+    "cloudbuild_worker_pool": {
+        "service": "cloudbuild",
+        "resource": "worker_pool",
+        "docs": False,
+        "sweeper": True,
+        "test": False,
+    },
+    "clouddeploy_delivery_pipeline": {
+        "service": "clouddeploy",
+        "resource": "delivery_pipeline",
+        "docs": True,
+        "sweeper": True,
+        "test": True,
+    },
+    "clouddeploy_target": {
+        "service": "clouddeploy",
+        "resource": "target",
+        "docs": True,
+        "sweeper": True,
+        "test": True,
+    },
+    "container_aws_cluster": {
+        "service": "containeraws",
+        "resource": "cluster",
+        "docs": True,
+        "sweeper": False,
+        "test": True,
+    },
+    "container_aws_node_pool": {
+        "service": "containeraws",
+        "resource": "node_pool",
+        "docs": True,
+        "sweeper": False,
+        "test": True,
+    },
+    "container_azure_client": {
+        "service": "containerazure",
+        "resource": "client",
+        "docs": True,
+        "sweeper": False,
+        "test": True,
+    },
+    "container_azure_cluster": {
+        "service": "containerazure",
+        "resource": "cluster",
+        "docs": True,
+        "sweeper": False,
+        "test": True,
+    },
+    "container_azure_node_pool": {
+        "service": "containerazure",
+        "resource": "node_pool",
+        "docs": True,
+        "sweeper": False,
+        "test": True,
+    },
+    "dataplex_asset": {
+        "service": "dataplex",
+        "resource": "asset",
+        "docs": True,
+        "sweeper": False,
+        "test": True,
+    },
+    "dataplex_lake": {
+        "service": "dataplex",
+        "resource": "lake",
+        "docs": True,
+        "sweeper": True,
+        "test": True,
+    },
+    "dataplex_zone": {
+        "service": "dataplex",
+        "resource": "zone",
+        "docs": True,
+        "sweeper": False,
+        "test": True,
+    },
+    "dataproc_workflow_template": {
+        "service": "dataproc",
+        "resource": "workflow_template",
+        "docs": False,
+        "sweeper": True,
+        "test": False,
+    },
+    "firebaserules_release": {
+        "service": "firebaserules",
+        "resource": "release",
+        "docs": True,
+        "sweeper": True,
+        "test": True,
+    },
+    "firebaserules_ruleset": {
+        "service": "firebaserules",
+        "resource": "ruleset",
+        "docs": True,
+        "sweeper": True,
+        "test": True,
+    },
+    "gke_hub_feature_membership": {
+        "service": "gkehub",
+        "resource": "feature_membership",
+        "docs": False,
+        "sweeper": False,
+        "test": False,
+    },
+    "recaptcha_enterprise_key": {
+        "service": "recaptchaenterprise",
+        "resource": "key",
+        "docs": True,
+        "sweeper": True,
+        "test": True,
+    },
+}
+
+SERVICES = set([v["service"] for k, v in RESOURCES.items()])
+
+filegroup(
+    name = "api",
+    srcs = glob([
+        "api/**/*",
+    ]),
+)
+
+filegroup(
+    name = "overrides",
+    srcs = glob([
+        "overrides/**/*",
+    ]),
+)
+
+filegroup(
+    name = "templates",
+    srcs = glob([
+        "templates/**/*",
+    ]),
+)
+
+genrule(
+    name = "empty_serialization",
+    srcs = [
+        "serialization.go.base",
+    ],
+    outs = ["empty_serialization.go"],
+    cmd = "cp $< $@",
+    visibility = ["//visibility:private"],
+)
+
+genrule(
+    name = "bootstrapped_serialization",
+    srcs = [
+        ":api",
+        ":overrides",
+        ":templates",
+    ],
+    outs = ["serialization.go"],
+    cmd = "$(location :bootstrap_tpgtools) --overrides tpgtools/overrides --path tpgtools/api --templates tpgtools/templates --mode serialization --output $(@D)",
+    tools = [":bootstrap_tpgtools"],
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "bootstrap_tpgtools",
+    srcs = [
+        "documentation.go",
+        "file_utils.go",
+        "id.go",
+        "main.go",
+        "main_helpers.go",
+        "misc_utils.go",
+        "names.go",
+        "override.go",
+        "override_details.go",
+        "product.go",
+        "property.go",
+        "property_helpers.go",
+        "resource.go",
+        "sample.go",
+        "serialization_helpers.go",
+        "strings.go",
+        "type.go",
+        "versions.go",
+        ":empty_serialization",
+    ],
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_golang_glog//:glog",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//dcl",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager/alpha",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager/beta",
+        "@com_github_hashicorp_hcl//hcl/fmtcmd",
+        "@com_github_kylelemons_godebug//pretty",
+        "@com_github_nasa9084_go_openapi//:go-openapi",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_bitbucket_creachadair_stringset//:stringset",
+    ],
+)
+
+go_binary(
+    name = "tpgtools_compiler",
+    srcs = [
+        "documentation.go",
+        "file_utils.go",
+        "id.go",
+        "main.go",
+        "main_helpers.go",
+        "misc_utils.go",
+        "names.go",
+        "override.go",
+        "override_details.go",
+        "product.go",
+        "property.go",
+        "property_helpers.go",
+        "resource.go",
+        "sample.go",
+        "serialization_helpers.go",
+        "strings.go",
+        "type.go",
+        "versions.go",
+        ":bootstrapped_serialization",
+    ],
+    visibility = ["//visibility:private"],
+    deps = [
+               "@com_github_golang_glog//:glog",
+               "@com_github_googlecloudplatform_declarative_resource_client_library//dcl",
+               "@com_github_googlecloudplatform_declarative_resource_client_library//services",
+               "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager",
+               "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager/alpha",
+               "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager/beta",
+               "@com_github_hashicorp_hcl//hcl/fmtcmd",
+               "@com_github_kylelemons_godebug//pretty",
+               "@com_github_nasa9084_go_openapi//:go-openapi",
+               "@in_gopkg_yaml_v2//:yaml_v2",
+               "@org_bitbucket_creachadair_stringset//:stringset",
+           ] + ["@com_github_googlecloudplatform_declarative_resource_client_library//services/google/" + s for s in SERVICES] +
+           ["@com_github_googlecloudplatform_declarative_resource_client_library//services/google/" + s + "/beta" for s in SERVICES],
+)
+
+genrule(
+    name = "tpgtools",
+    srcs = [
+        ":api",
+        ":overrides",
+        ":templates",
+    ],
+    outs = [
+               "terraform-provider-google/google/provider/provider_dcl_resources.go",
+               "terraform-provider-google/google/transport/provider_dcl_client_creation.go",
+           ] + ["terraform-provider-google/google/services/{}/resource_{}.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items()] +
+           ["terraform-provider-google/google/services/{}/resource_{}_sweeper.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items() if v["sweeper"] == True] +
+           ["terraform-provider-google/google/services/{}/resource_{}_generated_test.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items() if v["test"] == True] +
+           ["terraform-provider-google/website/docs/r/{}.html.markdown".format(k) for (k, v) in RESOURCES.items() if v["docs"] == True],
+    cmd = "$(location :tpgtools_compiler) --overrides tpgtools/overrides --path tpgtools/api --templates tpgtools/templates --version ga --output $(RULEDIR)/terraform-provider-google",
+    tools = [":tpgtools_compiler"],
+    visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "tpgtools_beta",
+    srcs = [
+        ":api",
+        ":overrides",
+        ":templates",
+    ],
+    outs = [
+               "terraform-provider-google-beta/google-beta/provider/provider_dcl_resources.go",
+               "terraform-provider-google-beta/google-beta/transport/provider_dcl_client_creation.go",
+           ] + ["terraform-provider-google-beta/google-beta/services/{}/resource_{}.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items()] +
+           ["terraform-provider-google-beta/google-beta/services/{}/resource_{}_sweeper.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items() if v["sweeper"] == True] +
+           ["terraform-provider-google-beta/google-beta/services/{}/resource_{}_generated_test.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items() if v["test"] == True] +
+           ["terraform-provider-google-beta/website/docs/r/{}.html.markdown".format(k) for (k, v) in RESOURCES.items() if v["docs"] == True],
+    cmd = "$(location :tpgtools_compiler) --overrides tpgtools/overrides --path tpgtools/api --templates tpgtools/templates --version beta --output $(RULEDIR)/terraform-provider-google-beta",
+    tools = [":tpgtools_compiler"],
+    visibility = ["//visibility:public"],
+)
+
+# The tpgtools_lib is generated by gazelle but is unused by the other targets
+# in this file, which need to specifically depend on either the initial empty
+# version of serialization.go or the generated version. The `gazelle:exclude`
+# line here makes the target buildable even though it's unused, allowing
+# bazel build //tpgtools/... to succeed.
+#
+# gazelle:exclude serialization.go
+go_library(
+    name = "tpgtools_lib",
+    srcs = [
+        "documentation.go",
+        "empty_serialization.go",
+        "file_utils.go",
+        "id.go",
+        "main.go",
+        "main_helpers.go",
+        "misc_utils.go",
+        "names.go",
+        "override.go",
+        "override_details.go",
+        "product.go",
+        "property.go",
+        "property_helpers.go",
+        "resource.go",
+        "sample.go",
+        "serialization_helpers.go",
+        "strings.go",
+        "type.go",
+        "versions.go",
+    ],
+    importpath = "github.com/GoogleCloudPlatform/magic-modules/tpgtools",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_golang_glog//:glog",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//dcl",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager/alpha",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager/beta",
+        "@com_github_hashicorp_hcl//hcl/fmtcmd",  # keep
+        "@com_github_kylelemons_godebug//pretty",
+        "@com_github_nasa9084_go_openapi//:go-openapi",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_bitbucket_creachadair_stringset//:stringset",
+    ],
+)

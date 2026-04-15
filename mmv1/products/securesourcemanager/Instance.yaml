@@ -13,6 +13,7 @@
 
 ---
 name: 'Instance'
+include_in_tgc_next: true
 kind: 'securesourcemanager#instance'
 description: 'Instances are deployed to an available Google Cloud region and are accessible via their web interface.'
 references:
@@ -47,7 +48,6 @@ iam_policy:
   allowed_iam_role: 'roles/securesourcemanager.instanceManager'
   admin_iam_role: 'roles/securesourcemanager.instanceOwner'
   parent_resource_attribute: 'instance_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
     - '{{instance_id}}'
@@ -56,7 +56,6 @@ custom_code:
 examples:
   - name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       deletion_policy: 'PREVENT'
@@ -69,7 +68,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_cmek'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       kms_key_name: 'my-key'
@@ -84,7 +82,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_trusted_cert'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
     ignore_read_extra:
@@ -93,7 +90,21 @@ examples:
     exclude_docs: true
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+    vars:
+      instance_id: 'my-instance'
+      ca_pool_id: 'ca-pool'
+      root_ca_id: 'root-ca'
+      deletion_policy: 'PREVENT'
+    test_vars_overrides:
+      'deletion_policy': '"DELETE"'
+    oics_vars_overrides:
+      'deletion_policy': '"DELETE"'
+    external_providers: ["time"]
+    ignore_read_extra:
+      - 'update_time'
+      - 'deletion_policy'
+  - name: 'secure_source_manager_instance_private_custom_host'
+    primary_resource_id: 'default'
     vars:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
@@ -109,7 +120,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_backend'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       network_id: 'my-network'
       subnet_id: 'my-subnet'
@@ -133,7 +143,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_endpoint'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       network_id: 'my-network'
       subnet_id: 'my-subnet'
@@ -154,7 +163,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_workforce_identity_federation'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       deletion_policy: 'PREVENT'
@@ -273,6 +281,27 @@ properties:
           'Indicate if it's private instance.'
         required: true
         immutable: true
+      - name: 'customHostConfig'
+        type: NestedObject
+        description: |
+          Custom host configuration for the instance.
+        properties:
+          - name: 'html'
+            type: String
+            description: 'HTML hostname.'
+            required: true
+          - name: 'api'
+            type: String
+            description: 'API hostname.'
+            required: true
+          - name: 'gitHttp'
+            type: String
+            description: 'Git HTTP hostname.'
+            required: true
+          - name: 'gitSsh'
+            type: String
+            description: 'Git SSH hostname.'
+            required: true
       - name: 'caPool'
         type: String
         description: |

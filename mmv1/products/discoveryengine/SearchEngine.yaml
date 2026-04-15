@@ -131,8 +131,32 @@ properties:
         enum_values:
           - 'SEARCH_TIER_STANDARD'
           - 'SEARCH_TIER_ENTERPRISE'
+      - name: 'requiredSubscriptionTier'
+        type: Enum
+        description: |
+          The required subscription tier of this engine.
+
+          They cannot be modified after engine creation. If the required subscription tier is search, user with higher license tier like assist can still access the standalone app associated with this engine.
+        default_from_api: true
+        required: false
+        immutable: true
+        enum_values:
+          - 'SUBSCRIPTION_TIER_UNSPECIFIED'
+          - 'SUBSCRIPTION_TIER_SEARCH'
+          - 'SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT'
+          - 'SUBSCRIPTION_TIER_FRONTLINE_WORKER'
+          - 'SUBSCRIPTION_TIER_AGENTSPACE_STARTER'
+          - 'SUBSCRIPTION_TIER_AGENTSPACE_BUSINESS'
+          - 'SUBSCRIPTION_TIER_ENTERPRISE'
+          - 'SUBSCRIPTION_TIER_ENTERPRISE_EMERGING'
+          - 'SUBSCRIPTION_TIER_EDU'
+          - 'SUBSCRIPTION_TIER_EDU_PRO'
+          - 'SUBSCRIPTION_TIER_EDU_EMERGING'
+          - 'SUBSCRIPTION_TIER_EDU_PRO_EMERGING'
+          - 'SUBSCRIPTION_TIER_FRONTLINE_STARTER'
       - name: 'searchAddOns'
         type: Array
+        default_from_api: true
         description: |
           The add-on that this search engine enables.
         item_type:
@@ -158,7 +182,69 @@ properties:
       This is the application type this engine resource represents.
       The supported values: 'APP_TYPE_UNSPECIFIED', 'APP_TYPE_INTRANET'.
     immutable: true
+  - name: 'disableAnalytics'
+    type: Boolean
+    description: |
+      Whether to disable analytics for searches performed on this engine.
   - name: 'features'
     type: KeyValuePairs
+    default_from_api: true
     description: |
       A map of the feature config for the engine to opt in or opt out of features.
+  - name: 'kmsKeyName'
+    ignore_read: true
+    type: String
+    description: |
+      The KMS key to be used to protect this Engine at creation time.
+
+      Must be set for requests that need to comply with CMEK Org Policy
+      protections.
+
+      If this field is set and processed successfully, the Engine will be
+      protected by the KMS key, as indicated in the cmek_config field.
+  - name: 'knowledgeGraphConfig'
+    type: NestedObject
+    default_from_api: true
+    description: |
+      Configurations for the Knowledge Graph.
+    properties:
+      - name: 'enableCloudKnowledgeGraph'
+        type: Boolean
+        default_from_api: true
+        description: |
+          Whether to enable the Cloud Knowledge Graph for the engine.
+      - name: 'cloudKnowledgeGraphTypes'
+        type: Array
+        default_from_api: true
+        description: |
+          Specify entity types to support.
+        item_type:
+          type: String
+          description: |
+            Specify entity types to support.
+      - name: 'enablePrivateKnowledgeGraph'
+        type: Boolean
+        default_from_api: true
+        description: |
+          Whether to enable the Private Knowledge Graph for the engine.
+      - name: 'featureConfig'
+        type: NestedObject
+        description: |
+          Feature config for the Knowledge Graph.
+        properties:
+          - name: 'disablePrivateKgQueryUnderstanding'
+            type: Boolean
+            description: |
+              Whether to disable the private KG query understanding for the engine.
+          - name: 'disablePrivateKgEnrichment'
+            type: Boolean
+            description: |
+              Whether to disable the private KG enrichment for the engine.
+          - name: 'disablePrivateKgAutoComplete'
+            type: Boolean
+            description: |
+              Whether to disable the private KG auto complete for the engine.
+          - name: 'disablePrivateKgQueryUiChips'
+            type: Boolean
+            description: |
+              Whether to disable the private KG for query UI chips.

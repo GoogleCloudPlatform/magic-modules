@@ -70,6 +70,9 @@ properties:
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     custom_expand: templates/terraform/custom_expand/eventarc_channel_name.go.tmpl
     custom_flatten: templates/terraform/custom_flatten/eventarc_channel_name.go.tmpl
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'User-defined labels for the channel.'
   - name: uid
     type: String
     description: Server assigned unique identifier for the channel. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.

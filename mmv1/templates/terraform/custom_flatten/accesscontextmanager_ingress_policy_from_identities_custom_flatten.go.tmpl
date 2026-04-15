@@ -6,6 +6,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
         log.Printf("[ERROR] Failed to convert ingress from identities config value: %s", err)
         return v
     }
+
+    // Normalize IAM principal casing
+    for i, val := range configValue {
+        configValue[i] = tpgresource.NormalizeIamPrincipalCasing(val)
+    }
+
     sortedConfigValue := append([]string{}, configValue...)
     sort.Strings(sortedConfigValue)
 
@@ -15,6 +21,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
         log.Printf("[ERROR] Failed to convert ingress from identities API value: %s", err)
         return v
     }
+
+    // Normalize IAM principal casing
+    for i, val := range apiValue {
+        apiValue[i] = tpgresource.NormalizeIamPrincipalCasing(val)
+    }
+
     sortedApiValue := append([]string{}, apiValue...)
     sort.Strings(sortedApiValue)
 

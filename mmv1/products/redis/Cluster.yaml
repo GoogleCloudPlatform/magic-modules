@@ -115,9 +115,11 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
+  tgc_ignore_terraform_decoder: true
 sweeper:
   ensure_value:
     field: deletionProtectionEnabled
@@ -127,6 +129,18 @@ sweeper:
     - region: "us-east1"
     - region: "europe-west1"
 examples:
+  - name: 'redis_cluster_ha_with_labels'
+    primary_resource_id: 'cluster-ha-with-labels'
+    vars:
+      cluster_name: 'ha-cluster'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
   - name: 'redis_cluster_ha'
     primary_resource_id: 'cluster-ha'
     vars:
@@ -166,6 +180,8 @@ examples:
     test_vars_overrides:
       'primary_cluster_deletion_protection_enabled': 'false'
       'secondary_cluster_deletion_protection_enabled': 'false'
+      # for backward compatible
+      network_name: '"mynetwork" + randomSuffix'
     oics_vars_overrides:
       'primary_cluster_deletion_protection_enabled': 'false'
       'secondary_cluster_deletion_protection_enabled': 'false'
@@ -211,6 +227,23 @@ examples:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
+  - name: 'redis_cluster_flexible_ca'
+    primary_resource_id: 'test-cluster'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
+        role: "roles/privateca.certificateRequester"
+    vars:
+      cluster_name: 'ca-cluster'
+      policy_name: 'ca-policy'
+      subnet_name: 'ca-subnet'
+      network_name: 'ca-network'
+      ca_pool_name: 'ca-pool'
+      ca_auth_id: 'ca-auth'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
 parameters:
   - name: 'name'
     type: String
@@ -231,6 +264,9 @@ parameters:
     ignore_read: true
     default_from_api: true
 properties:
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Resource labels to represent user provided metadata.
   - name: 'createTime'
     type: Time
     description: |
@@ -354,6 +390,7 @@ properties:
       If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
     required: false
     default_from_api: true
+    is_missing_in_cai: true
     enum_values:
       - 'REDIS_SHARED_CORE_NANO'
       - 'REDIS_HIGHMEM_MEDIUM'
@@ -385,6 +422,7 @@ properties:
       network addresses will be designated to the cluster for client access.
       Currently, only one PscConfig is supported.
     ignore_read: true
+    is_missing_in_cai: true
     item_type:
       type: NestedObject
       properties:
@@ -506,6 +544,7 @@ properties:
     type: NestedObject
     description: Persistence config (RDB, AOF) for the cluster.
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'mode'
         type: Enum
@@ -689,6 +728,23 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
+  - name: 'maintenanceVersion'
+    type: String
+    description: |
+      This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
+      *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
+  - name: 'effectiveMaintenanceVersion'
+    type: String
+    description: |
+      This field represents the actual maintenance version of the cluster.
+    output: true
+  - name: 'availableMaintenanceVersions'
+    type: Array
+    description: |
+     This field is used to determine the available maintenance versions for the self service update.
+    item_type:
+      type: String
+    output: true
   - name: 'crossClusterReplicationConfig'
     type: NestedObject
     description: Cross cluster replication config
@@ -830,3 +886,21 @@ properties:
               description: The certificates that form the CA chain, from leaf to root order
               item_type:
                 type: String
+  - name: 'serverCaMode'
+    type: Enum
+    description: |
+      The serverCaMode for the TLS enabled Redis cluster.
+      If not provided, SERVER_CA_MODE_GOOGLE_MANAGED_PER_INSTANCE_CA will be used as default
+    required: false
+    default_from_api: true
+    enum_values:
+      - SERVER_CA_MODE_GOOGLE_MANAGED_PER_INSTANCE_CA
+      - SERVER_CA_MODE_GOOGLE_MANAGED_SHARED_CA
+      - SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA
+      - SERVER_CA_MODE_UNSPECIFIED
+  - name: 'serverCaPool'
+    type: String
+    description: |
+      The resource name of the server CA pool for an instance with SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA
+      as the server_ca_mode.
+      Format: projects/{project}/locations/{region}/caPools/{caPoolId}

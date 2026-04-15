@@ -19,9 +19,6 @@ func HclWriteBlocks(blocks []*TerraformResourceBlock) ([]byte, error) {
 
 	for _, resourceBlock := range blocks {
 		hclBlock := rootBody.AppendNewBlock("resource", resourceBlock.Labels)
-		resourceBody := hclBlock.Body()
-		resourceBody.SetAttributeRaw("provider", hclwrite.TokensForIdentifier("google-beta"))
-
 		if err := hclWriteBlock(resourceBlock.Value, hclBlock.Body()); err != nil {
 			return nil, err
 		}
@@ -68,9 +65,6 @@ func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 			}
 			fallthrough
 		default:
-			if objValType.FriendlyName() == "string" && objVal.AsString() == "" {
-				continue
-			}
 			body.SetAttributeValue(objKey.AsString(), objVal)
 		}
 	}

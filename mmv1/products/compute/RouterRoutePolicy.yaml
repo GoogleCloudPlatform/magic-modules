@@ -98,7 +98,6 @@ properties:
     description: |
       List of terms (the order in the list is not important, they are evaluated in order of priority).
     required: true
-    immutable: true
     item_type:
       type: NestedObject
       properties:

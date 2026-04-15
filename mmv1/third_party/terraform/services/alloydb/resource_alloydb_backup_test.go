@@ -64,6 +64,10 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 
@@ -100,6 +104,10 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 
   deletion_protection = false
@@ -152,6 +160,10 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 
   deletion_protection = false
@@ -223,6 +235,10 @@ resource "google_alloydb_cluster" "default" {
 	location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 
   deletion_protection = false

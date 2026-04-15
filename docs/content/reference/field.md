@@ -435,6 +435,36 @@ item_type:
         MULTI_LINE_FIELD_DESCRIPTION
 ```
 
+### `min_size`
+Array only. Validates that the array has at least this many items in it.
+
+In many cases, it is better to avoid client-side validation. See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
+
+Example:
+
+```yaml
+- name: 'fieldOne'
+  type: Array
+  item_type:
+    type: String
+  min_size: 1
+```
+
+### `max_size`
+Array only. Validates that the array has at most this many items in it.
+
+In many cases, it is better to avoid client-side validation. See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
+
+Example:
+
+```yaml
+- name: 'fieldOne'
+  type: Array
+  item_type:
+    type: String
+  max_size: 10
+```
+
 ### `item_validation`
 Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
 used to validate individual items in the array. Behaves like [`validation`]({{<ref "#validation" >}}).
@@ -481,7 +511,6 @@ Example: Enum
   item_validation: 
     function: 'customFunction'
 ```
-
 
 ## `NestedObject` properties
 

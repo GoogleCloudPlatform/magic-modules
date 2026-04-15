@@ -19,7 +19,7 @@ func ResourceConverterDataprocCluster() cai.ResourceConverter {
 }
 
 func GetDataprocClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
-	name, err := cai.AssetName(d, config, "//compute.googleapis.com/projects/{{project}}/regions/{{region}}/clusters/{{name}}")
+	name, err := cai.AssetName(d, config, "//dataproc.googleapis.com/projects/{{project}}/regions/{{region}}/clusters/{{name}}")
 	if err != nil {
 		return []cai.Asset{}, err
 	}

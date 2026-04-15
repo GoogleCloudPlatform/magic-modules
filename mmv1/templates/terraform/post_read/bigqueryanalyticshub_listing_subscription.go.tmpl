@@ -1,0 +1,12 @@
+// Set data_exchange_id and listing_id from res["listing"]
+listing := res["listing"].(string)
+parts := strings.Split(listing, "/")
+if len(parts) != 8 {
+	return fmt.Errorf("Listing name %q is not in the expected format projects/*/locations/*/dataExchanges/*/listings/*", listing)
+}
+if err := d.Set("data_exchange_id", parts[5]); err != nil {
+  return fmt.Errorf("Error reading ListingSubscription: %s", err)
+}
+if err := d.Set("listing_id", parts[7]); err != nil {
+  return fmt.Errorf("Error reading ListingSubscription: %s", err)
+}

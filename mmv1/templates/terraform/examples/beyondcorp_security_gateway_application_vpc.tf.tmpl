@@ -11,6 +11,7 @@ resource "google_beyondcorp_security_gateway_application" "{{$.PrimaryResourceId
   application_id = "{{index $.Vars "application_name"}}"
   endpoint_matchers {
     hostname = "my-vm-service.com"
+    ports = [80, 443]
   }
   upstreams {
     egress_policy {

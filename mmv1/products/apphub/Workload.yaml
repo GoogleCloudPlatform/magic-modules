@@ -40,7 +40,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 examples:
   - name: 'apphub_workload_basic'
     primary_resource_id: 'example'
@@ -72,6 +72,23 @@ examples:
       ilb_subnet: 'l7-ilb-subnet'
       instance_template: 'l7-ilb-mig-template'
       mig: 'l7-ilb-mig1'
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"Example Service Full" + randomSuffix'
+      # for backward compatible
+      desc: '"Register service for testing" + randomSuffix'
+      # for backward compatible
+      business_name: '"Alice" + randomSuffix'
+      # for backward compatible
+      business_email: '"alice@google.com" + randomSuffix'
+      # for backward compatible
+      developer_name: '"Bob" + randomSuffix'
+      # for backward compatible
+      developer_email: '"bob@google.com" + randomSuffix'
+      # for backward compatible
+      operator_name: '"Charlie" + randomSuffix'
+      # for backward compatible
+      operator_email: '"charlie@google.com" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
@@ -135,6 +152,52 @@ properties:
         description: "Output only. The location that the underlying compute resource resides
           in if it is zonal (e.g us-west1-a)."
         output: true
+      - name: 'functionalType'
+        type: NestedObject
+        description: "Output only. The functional type of a service or workload."
+        output: true
+        properties:
+          - name: 'type'
+            type: Enum
+            description: "Output only. The functional type of a service or workload."
+            output: true
+            enum_values:
+              - 'TYPE_UNSPECIFIED'
+              - 'AGENT'
+              - 'MCP_SERVER'
+      - name: 'extendedMetadata'
+        type: Array
+        description: "Output only. Additional metadata specific to the resource type."
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: "The key of the extended metadata."
+              output: true
+            - name: 'value'
+              type: NestedObject
+              description: "The value of the extended metadata."
+              output: true
+              properties:
+                - name: 'metadataStruct'
+                  type: String
+                  description: "The metadata contents as a JSON string."
+                  output: true
+                - name: 'extendedMetadataSchema'
+                  type: String
+                  description: "The resource name for the Extended Metadata Schema."
+                  output: true
+      - name: 'identity'
+        type: NestedObject
+        description: "The identity associated with the workload."
+        output: true
+        properties:
+          - name: 'principal'
+            type: String
+            description: "The principal of the identity."
+            output: true
   - name: 'discoveredWorkload'
     type: String
     description: 'Immutable. The resource name of the original discovered workload.'

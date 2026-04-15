@@ -62,16 +62,171 @@ resource "google_network_services_gateway" "foobar" {
 func testAccNetworkServicesGateway_update(gatewayName string) string {
 	return fmt.Sprintf(`
 resource "google_network_services_gateway" "foobar" {
-  name        = "%s"
-  scope       = "default-scope-update"
-  type        = "OPEN_MESH"
-  ports       = [1000]
-  description = "update description"
-  labels      = {
+  name              = "%s"
+  scope             = "default-scope-update"
+  type              = "OPEN_MESH"
+  ports             = [1000]
+  description       = "update description"
+  labels            = {
     foo = "bar"
   }
 }
 `, gatewayName)
+}
+
+func TestAccNetworkServicesGateway_serverTlsPolicy(t *testing.T) {
+	t.Parallel()
+
+	gatewayName := fmt.Sprintf("tf-test-gateway-%s", acctest.RandString(t, 10))
+	serverTlsName := fmt.Sprintf("tf-test-servertls-%s", acctest.RandString(t, 10))
+	serverTlsUpdatedName := fmt.Sprintf("tf-test-servertls-updated-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesGateway_serverTlsPolicy_basic(gatewayName, serverTlsName, serverTlsUpdatedName),
+			},
+			{
+				ResourceName:            "google_network_services_gateway.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkServicesGateway_serverTlsPolicy_updated(gatewayName, serverTlsName, serverTlsUpdatedName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_gateway.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_network_services_gateway.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesGateway_serverTlsPolicy_basic(gatewayName, serverTlsName, serverTlsUpdatedName string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_server_tls_policy" "servertls" {
+  name                   = "%s"
+  labels                 = {
+    foo = "bar"
+  }
+  description            = "my description"
+  location               = "global"
+  allow_open             = "false"
+  server_certificate {
+    certificate_provider_instance {
+        plugin_instance = "google_cloud_private_spiffe"
+      }
+  }
+  mtls_policy {
+    client_validation_ca {
+      grpc_endpoint {
+        target_uri = "unix:mypath"
+      }
+    }
+  }
+}
+
+resource "google_network_security_server_tls_policy" "servertls_updated" {
+  name                   = "%s"
+  labels                 = {
+    foo = "bar"
+  }
+  description            = "my description"
+  location               = "global"
+  allow_open             = "false"
+  server_certificate {
+    certificate_provider_instance {
+        plugin_instance = "google_cloud_private_spiffe"
+      }
+  }
+  mtls_policy {
+    client_validation_ca {
+      grpc_endpoint {
+        target_uri = "unix:mypath"
+      }
+    }
+  }
+}
+
+resource "google_network_services_gateway" "foobar" {
+  name        = "%s"
+  scope       = "default-scope-update"
+  type        = "OPEN_MESH"
+  ports       = [443]
+  description = "my description"
+  server_tls_policy = google_network_security_server_tls_policy.servertls.id
+}
+`, serverTlsName, serverTlsUpdatedName, gatewayName)
+}
+
+func testAccNetworkServicesGateway_serverTlsPolicy_updated(gatewayName, serverTlsName, serverTlsUpdatedName string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_server_tls_policy" "servertls" {
+  name                   = "%s"
+  labels                 = {
+    foo = "bar"
+  }
+  description            = "my description"
+  location               = "global"
+  allow_open             = "false"
+  server_certificate {
+    certificate_provider_instance {
+        plugin_instance = "google_cloud_private_spiffe"
+      }
+  }
+  mtls_policy {
+    client_validation_ca {
+      grpc_endpoint {
+        target_uri = "unix:mypath"
+      }
+    }
+  }
+}
+resource "google_network_security_server_tls_policy" "servertls_updated" {
+  name                   = "%s"
+  labels                 = {
+    foo = "bar"
+  }
+  description            = "my description"
+  location               = "global"
+  allow_open             = "false"
+  server_certificate {
+    certificate_provider_instance {
+        plugin_instance = "google_cloud_private_spiffe"
+      }
+  }
+  mtls_policy {
+    client_validation_ca {
+      grpc_endpoint {
+        target_uri = "unix:mypath"
+      }
+    }
+  }
+}
+
+resource "google_network_services_gateway" "foobar" {
+  name              = "%s"
+  scope             = "default-scope-update"
+  type              = "OPEN_MESH"
+  ports             = [1000]
+  description       = "update description"
+  server_tls_policy = google_network_security_server_tls_policy.servertls_updated.id
+  labels            = {
+    foo = "bar"
+  }
+}
+`, serverTlsName, serverTlsUpdatedName, gatewayName)
 }
 
 func TestAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyWithoutAddresses(t *testing.T) {
@@ -175,6 +330,98 @@ resource "google_network_services_gateway" "default" {
 	return config
 }
 
+func TestAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyMultiplePorts(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesGateway_networkServicesGatewaySWPMultiplePorts(context),
+			},
+			{
+				ResourceName:            "google_network_services_gateway.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesGateway_networkServicesGatewaySWPMultiplePorts(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_certificate_manager_certificate" "default" {
+  name        = "tf-test-my-certificate-%{random_suffix}"
+  location    = "us-central1"
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
+  }
+}
+
+resource "google_compute_network" "default" {
+  name                    = "tf-test-my-network-%{random_suffix}"
+  routing_mode            = "REGIONAL"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "tf-test-my-subnetwork-name-%{random_suffix}"
+  purpose       = "PRIVATE"
+  ip_cidr_range = "10.128.0.0/20"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_subnetwork" "proxyonlysubnet" {
+  name          = "tf-test-my-proxy-only-subnetwork-%{random_suffix}"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  ip_cidr_range = "192.168.0.0/23"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  name        = "tf-test-my-policy-name-%{random_suffix}"
+  location    = "us-central1"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "default" {
+  name                    = "tf-test-my-policyrule-name-%{random_suffix}"
+  location                = "us-central1"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true
+  priority                = 1
+  session_matcher         = "host() == 'example.com'"
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_services_gateway" "default" {
+  name                                 = "tf-test-my-gateway-%{random_suffix}"
+  location                             = "us-central1"
+  addresses                            = ["10.128.0.99"]
+  type                                 = "SECURE_WEB_GATEWAY"
+  ports                                = [443, 500, 502]
+  scope                                = "tf-test-my-default-scope-%{random_suffix}"
+  certificate_urls                     = [google_certificate_manager_certificate.default.id]
+  gateway_security_policy              = google_network_security_gateway_security_policy.default.id
+  network                              = google_compute_network.default.id
+  subnetwork                           = google_compute_subnetwork.default.id
+  delete_swg_autogen_router_on_destroy = true
+  depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
+}
+`, context)
+}
+
 func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 	cmName := fmt.Sprintf("tf-test-gateway-swp-cm-%s", acctest.RandString(t, 10))
 	netName := fmt.Sprintf("tf-test-gateway-swp-net-%s", acctest.RandString(t, 10))
@@ -184,7 +431,6 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 	ruleName := fmt.Sprintf("tf-test-gateway-swp-rule-%s", acctest.RandString(t, 10))
 	gatewayScope := fmt.Sprintf("tf-test-gateway-swp-scope-%s", acctest.RandString(t, 10))
 	gatewayName := fmt.Sprintf("tf-test-gateway-swp-%s", acctest.RandString(t, 10))
-	serverTlsName := fmt.Sprintf("tf-test-gateway-swp-servertls-%s", acctest.RandString(t, 10))
 	// updates
 	newCmName := fmt.Sprintf("tf-test-gateway-swp-newcm-%s", acctest.RandString(t, 10))
 	newPolicyName := fmt.Sprintf("tf-test-gateway-swp-newpolicy-%s", acctest.RandString(t, 10))
@@ -196,7 +442,7 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, serverTlsName, gatewayName, gatewayScope),
+				Config: testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope),
 			},
 			{
 				ResourceName:            "google_network_services_gateway.foobar",
@@ -205,7 +451,7 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 			{
-				Config: testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, serverTlsName, gatewayName, gatewayScope),
+				Config: testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope),
 			},
 			{
 				ResourceName:            "google_network_services_gateway.foobar",
@@ -217,14 +463,14 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 	})
 }
 
-func testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, serverTlsName, gatewayName, gatewayScope string) string {
+func testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
   location    = "us-east1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	  pem_private_key = file("test-fixtures/private-key.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -267,19 +513,6 @@ resource "google_network_security_gateway_security_policy_rule" "default" {
   basic_profile           = "ALLOW"
 }
 
-resource "google_network_security_server_tls_policy" "servertls" {
-  name                   = "%s"
-  labels                 = {
-    foo = "bar"
-  }
-  description            = "my description"
-  location               = "us-east1"
-  allow_open             = "false"
-  mtls_policy {
-    client_validation_mode = "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
-  }
-}
-
 resource "google_network_services_gateway" "foobar" {
   name                                 = "%s"
   location                             = "us-east1"
@@ -295,21 +528,20 @@ resource "google_network_services_gateway" "foobar" {
   delete_swg_autogen_router_on_destroy = true
   envoy_headers                        = "NONE"
   ip_version                           = "IPV4"
-  server_tls_policy                    = google_network_security_server_tls_policy.servertls.id
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
 }
 
-`, cmName, netName, subnetName, pSubnetName, policyName, ruleName, serverTlsName, gatewayName, gatewayScope)
+`, cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope)
 }
 
-func testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, serverTlsName, gatewayName, gatewayScope string) string {
+func testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
   location    = "us-east1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	  pem_private_key = file("test-fixtures/private-key.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -318,7 +550,7 @@ resource "google_certificate_manager_certificate" "newcm" {
   location    = "us-east1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	  pem_private_key = file("test-fixtures/private-key.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -376,19 +608,6 @@ resource "google_network_security_gateway_security_policy_rule" "newrule" {
   basic_profile           = "ALLOW"
 }
 
-resource "google_network_security_server_tls_policy" "servertls" {
-  name                   = "%s"
-  labels                 = {
-    foo = "bar"
-  }
-  description            = "my description"
-  location               = "us-east1"
-  allow_open             = "false"
-  mtls_policy {
-    client_validation_mode = "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
-  }
-}
-
 resource "google_network_services_gateway" "foobar" {
   name                                 = "%s"
   location                             = "us-east1"
@@ -404,11 +623,10 @@ resource "google_network_services_gateway" "foobar" {
   delete_swg_autogen_router_on_destroy = true
   envoy_headers                        = "NONE"
   ip_version                           = "IPV4"
-  server_tls_policy                    = google_network_security_server_tls_policy.servertls.id
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
 }
 
-`, cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, serverTlsName, gatewayName, gatewayScope)
+`, cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope)
 }
 
 func TestAccNetworkServicesGateway_multipleSwpGatewaysDifferentSubnetwork(t *testing.T) {
@@ -458,7 +676,7 @@ resource "google_certificate_manager_certificate" "default" {
   location    = "us-west1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	  pem_private_key = file("test-fixtures/private-key.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -552,7 +770,7 @@ resource "google_certificate_manager_certificate" "default" {
   location    = "us-west1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	  pem_private_key = file("test-fixtures/private-key.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -674,7 +892,7 @@ resource "google_certificate_manager_certificate" "default" {
   location    = "us-west2"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	  pem_private_key = file("test-fixtures/private-key.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -783,7 +1001,7 @@ resource "google_certificate_manager_certificate" "default" {
   location    = "us-west2"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	  pem_private_key = file("test-fixtures/private-key.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -1167,5 +1385,724 @@ resource "google_network_connectivity_policy_based_route" "default" {
     dest_range       = "15.0.0.0/24"
   }
 }
-	`, context)
+  `, context)
+}
+
+func TestAccNetworkServicesGateway_swpListenAllPorts(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"region":        "us-east4",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesGateway_swpAllPortsBasic(context),
+			},
+			{
+				ResourceName:            "google_network_services_gateway.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+			},
+			{
+				Config: testAccNetworkServicesGateway_swpAllPortsUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_gateway.default", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_network_services_gateway.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesGateway_swpAllPortsBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "default" {
+  name                    = "tf-test-gateway-network-%{random_suffix}"
+  routing_mode            = "REGIONAL"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "proxyonlysubnet" {
+  name          = "tf-test-gateway-proxysubnet-%{random_suffix}"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  ip_cidr_range = "192.168.0.0/23"
+  region        = "%{region}"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "tf-test-gateway-subnet-%{random_suffix}"
+  purpose       = "PRIVATE"
+  ip_cidr_range = "10.128.0.0/20"
+  region        = "%{region}"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_address" "swp_ip" {
+  name         = "tf-test-gateway-swp-%{random_suffix}"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+  region       = "%{region}"
+}
+
+resource "google_privateca_ca_pool" "default" {
+  name     = "tf-test-gateway-ca-pool-%{random_suffix}"
+  location = "%{region}"
+  tier     = "DEVOPS"
+
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl     = false
+  }
+
+  issuance_policy {
+    maximum_lifetime = "1209600s"
+    baseline_values {
+      ca_options {
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {}
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+}
+  
+resource "google_privateca_certificate_authority" "default" {
+  pool                                   = google_privateca_ca_pool.default.name
+  certificate_authority_id               = "tf-test-gateway-certificate-authority-%{random_suffix}"
+  location                               = "%{region}"
+  lifetime                               = "86400s"
+  type                                   = "SELF_SIGNED"
+  deletion_protection                    = false
+  skip_grace_period                      = true
+  ignore_active_certificates_on_deletion = true
+
+  config {
+    subject_config {
+      subject {
+        organization = "Test LLC"
+        common_name  = "private-certificate-authority"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign  = true
+        }
+        extended_key_usage {
+          server_auth = false
+        }
+      }
+    }
+  }
+
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+}
+
+resource "google_certificate_manager_certificate" "default" {
+  name     = "tf-test-gateway-certificate-%{random_suffix}"
+  location = "%{region}"
+
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
+  }
+}
+
+resource "google_network_security_tls_inspection_policy" "default" {
+  name     = "tf-test-gateway-tls-insp-policy-%{random_suffix}"
+  location = "%{region}"
+  ca_pool  = google_privateca_ca_pool.default.id
+
+  depends_on = [
+    google_privateca_ca_pool.default,
+    google_privateca_certificate_authority.default
+  ]
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  name                  = "tf-test-gateway-sec-policy-%{random_suffix}"
+  location              = "%{region}"
+  description           = "my description"
+  tls_inspection_policy = google_network_security_tls_inspection_policy.default.id
+
+  depends_on = [
+    google_network_security_tls_inspection_policy.default
+  ]
+}
+
+resource "google_network_security_gateway_security_policy_rule" "default" {
+  name                    = "tf-test-gateway-sec-policy-rule-%{random_suffix}"
+  location                = "%{region}"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true
+  description             = "my description"
+  priority                = 0
+  session_matcher         = "host() == 'example.com'"
+  application_matcher     = "request.method == 'POST'"
+  tls_inspection_enabled  = true
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_services_gateway" "default" {
+  name                                 = "tf-test-gateway-swp-%{random_suffix}"
+  location                             = "%{region}"
+  addresses                            = [google_compute_address.swp_ip.address]
+  type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "NEXT_HOP_ROUTING_MODE"
+  all_ports                            = true
+  description                          = "my description"
+  scope                                = "tf-test-gateway-swp-scope-%{random_suffix}"
+  certificate_urls                     = [google_certificate_manager_certificate.default.id]
+  gateway_security_policy              = google_network_security_gateway_security_policy.default.id
+  network                              = google_compute_network.default.id
+  subnetwork                           = google_compute_subnetwork.default.id
+  delete_swg_autogen_router_on_destroy = true
+  depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
+}
+
+resource "google_compute_route" "default" {
+  name        = "tf-test-gateway-route-%{random_suffix}"
+  dest_range  = "15.0.0.0/24"
+  network     = google_compute_network.default.name
+  next_hop_ip = google_network_services_gateway.default.addresses[0]
+  priority    = 100
+}
+
+resource "google_network_connectivity_policy_based_route" "swproute" {
+  name            = "tf-test-gateway-policy-based-swp-route-%{random_suffix}"
+  description     = "My routing policy"
+  network         = google_compute_network.default.id
+  next_hop_ilb_ip = google_network_services_gateway.default.addresses[0]
+  priority        = 2
+
+  filter {
+    protocol_version = "IPV4"
+    src_range        = "10.0.0.0/24"
+    dest_range       = "15.0.0.0/24"
+  }
+}
+
+resource "google_network_connectivity_policy_based_route" "default" {
+  name                  = "tf-test-gateway-policy-based-route-%{random_suffix}"
+  description           = "My routing policy"
+  network               = google_compute_network.default.id
+  next_hop_other_routes = "DEFAULT_ROUTING"
+  priority              = 1
+
+  filter {
+    protocol_version = "IPV4"
+    src_range        = "10.0.0.0/24"
+    dest_range       = "15.0.0.0/24"
+  }
+}
+`, context)
+}
+
+func testAccNetworkServicesGateway_swpAllPortsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "default" {
+  name                    = "tf-test-gateway-network-%{random_suffix}"
+  routing_mode            = "REGIONAL"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "proxyonlysubnet" {
+  name          = "tf-test-gateway-proxysubnet-%{random_suffix}"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  ip_cidr_range = "192.168.0.0/23"
+  region        = "%{region}"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "tf-test-gateway-subnet-%{random_suffix}"
+  purpose       = "PRIVATE"
+  ip_cidr_range = "10.128.0.0/20"
+  region        = "%{region}"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_address" "swp_ip" {
+  name         = "tf-test-gateway-swp-%{random_suffix}"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+  region       = "%{region}"
+}
+
+resource "google_privateca_ca_pool" "default" {
+  name     = "tf-test-gateway-ca-pool-%{random_suffix}"
+  location = "%{region}"
+  tier     = "DEVOPS"
+
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl     = false
+  }
+
+  issuance_policy {
+    maximum_lifetime = "1209600s"
+    baseline_values {
+      ca_options {
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {}
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+}
+  
+resource "google_privateca_certificate_authority" "default" {
+  pool                                   = google_privateca_ca_pool.default.name
+  certificate_authority_id               = "tf-test-gateway-certificate-authority-%{random_suffix}"
+  location                               = "%{region}"
+  lifetime                               = "86400s"
+  type                                   = "SELF_SIGNED"
+  deletion_protection                    = false
+  skip_grace_period                      = true
+  ignore_active_certificates_on_deletion = true
+
+  config {
+    subject_config {
+      subject {
+        organization = "Test LLC"
+        common_name  = "private-certificate-authority"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign  = true
+        }
+        extended_key_usage {
+          server_auth = false
+        }
+      }
+    }
+  }
+
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+}
+
+resource "google_certificate_manager_certificate" "default" {
+  name     = "tf-test-gateway-certificate-%{random_suffix}"
+  location = "%{region}"
+
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
+  }
+}
+
+resource "google_certificate_manager_certificate" "newcm" {
+  name     = "tf-test-gateway-certificate-new-%{random_suffix}"
+  location = "%{region}"
+
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
+  }
+}
+
+resource "google_network_security_tls_inspection_policy" "default" {
+  name     = "tf-test-gateway-tls-insp-policy-%{random_suffix}"
+  location = "%{region}"
+  ca_pool  = google_privateca_ca_pool.default.id
+
+  depends_on = [
+    google_privateca_ca_pool.default,
+    google_privateca_certificate_authority.default
+  ]
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  name                  = "tf-test-gateway-sec-policy-%{random_suffix}"
+  location              = "%{region}"
+  description           = "my description"
+  tls_inspection_policy = google_network_security_tls_inspection_policy.default.id
+
+  depends_on = [
+    google_network_security_tls_inspection_policy.default
+  ]
+}
+
+resource "google_network_security_gateway_security_policy_rule" "default" {
+  name                    = "tf-test-gateway-sec-policy-rule-%{random_suffix}"
+  location                = "%{region}"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true
+  description             = "my description"
+  priority                = 0
+  session_matcher         = "host() == 'example.com'"
+  application_matcher     = "request.method == 'POST'"
+  tls_inspection_enabled  = true
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_security_gateway_security_policy" "newpolicy" {
+  name                  = "tf-test-gateway-sec-policy-new-%{random_suffix}"
+  location              = "%{region}"
+  description           = "my description"
+  tls_inspection_policy = google_network_security_tls_inspection_policy.default.id
+
+  depends_on = [
+    google_network_security_tls_inspection_policy.default
+  ]
+}
+
+resource "google_network_security_gateway_security_policy_rule" "newrule" {
+  name                    = "tf-test-gateway-sec-policy-rule-new-%{random_suffix}"
+  location                = "%{region}"
+  gateway_security_policy = google_network_security_gateway_security_policy.newpolicy.name
+  enabled                 = true
+  description             = "my description"
+  priority                = 0
+  session_matcher         = "host() == 'example.com'"
+  application_matcher     = "request.method == 'POST'"
+  tls_inspection_enabled  = true
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_services_gateway" "default" {
+  name                                 = "tf-test-gateway-swp-%{random_suffix}"
+  location                             = "%{region}"
+  addresses                            = [google_compute_address.swp_ip.address]
+  type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "NEXT_HOP_ROUTING_MODE"
+  all_ports                             = true
+  description                          = "my updated description"
+  scope                                = "tf-test-gateway-swp-scope-%{random_suffix}"
+  certificate_urls                     = [google_certificate_manager_certificate.newcm.id]
+  gateway_security_policy              = google_network_security_gateway_security_policy.newpolicy.id
+  network                              = google_compute_network.default.id
+  subnetwork                           = google_compute_subnetwork.default.id
+  delete_swg_autogen_router_on_destroy = true
+  depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
+}
+
+resource "google_compute_route" "default" {
+  name        = "tf-test-gateway-route-%{random_suffix}"
+  dest_range  = "15.0.0.0/24"
+  network     = google_compute_network.default.name
+  next_hop_ip = google_network_services_gateway.default.addresses[0]
+  priority    = 100
+}
+
+resource "google_network_connectivity_policy_based_route" "swproute" {
+  name            = "tf-test-gateway-policy-based-swp-route-%{random_suffix}"
+  description     = "My routing policy"
+  network         = google_compute_network.default.id
+  next_hop_ilb_ip = google_network_services_gateway.default.addresses[0]
+  priority        = 2
+
+  filter {
+    protocol_version = "IPV4"
+    src_range        = "10.0.0.0/24"
+    dest_range       = "15.0.0.0/24"
+  }
+}
+
+resource "google_network_connectivity_policy_based_route" "default" {
+  name                  = "tf-test-gateway-policy-based-route-%{random_suffix}"
+  description           = "My routing policy"
+  network               = google_compute_network.default.id
+  next_hop_other_routes = "DEFAULT_ROUTING"
+  priority              = 1
+
+  filter {
+    protocol_version = "IPV4"
+    src_range        = "10.0.0.0/24"
+    dest_range       = "15.0.0.0/24"
+  }
+}
+`, context)
+}
+
+func TestAccNetworkServicesGateway_swpAllPortsReplace(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"region":        "us-east4",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesGateway_swpSelectPortsRecreate(context),
+			},
+			{
+				ResourceName:            "google_network_services_gateway.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+			},
+			{
+				Config: testAccNetworkServicesGateway_swpAllPortsBasic(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_gateway.default", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_network_services_gateway.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+			},
+			{
+				Config: testAccNetworkServicesGateway_swpSelectPortsRecreate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_gateway.default", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_network_services_gateway.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesGateway_swpSelectPortsRecreate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "default" {
+  name                    = "tf-test-gateway-network-%{random_suffix}"
+  routing_mode            = "REGIONAL"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "proxyonlysubnet" {
+  name          = "tf-test-gateway-proxysubnet-%{random_suffix}"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  ip_cidr_range = "192.168.0.0/23"
+  region        = "%{region}"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "tf-test-gateway-subnet-%{random_suffix}"
+  purpose       = "PRIVATE"
+  ip_cidr_range = "10.128.0.0/20"
+  region        = "%{region}"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_address" "swp_ip" {
+  name         = "tf-test-gateway-swp-%{random_suffix}"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+  region       = "%{region}"
+}
+
+resource "google_privateca_ca_pool" "default" {
+  name     = "tf-test-gateway-ca-pool-%{random_suffix}"
+  location = "%{region}"
+  tier     = "DEVOPS"
+
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl     = false
+  }
+
+  issuance_policy {
+    maximum_lifetime = "1209600s"
+    baseline_values {
+      ca_options {
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {}
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+}
+  
+resource "google_privateca_certificate_authority" "default" {
+  pool                                   = google_privateca_ca_pool.default.name
+  certificate_authority_id               = "tf-test-gateway-certificate-authority-%{random_suffix}"
+  location                               = "%{region}"
+  lifetime                               = "86400s"
+  type                                   = "SELF_SIGNED"
+  deletion_protection                    = false
+  skip_grace_period                      = true
+  ignore_active_certificates_on_deletion = true
+
+  config {
+    subject_config {
+      subject {
+        organization = "Test LLC"
+        common_name  = "private-certificate-authority"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign  = true
+        }
+        extended_key_usage {
+          server_auth = false
+        }
+      }
+    }
+  }
+
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+}
+
+resource "google_certificate_manager_certificate" "default" {
+  name     = "tf-test-gateway-certificate-%{random_suffix}"
+  location = "%{region}"
+
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
+  }
+}
+
+resource "google_network_security_tls_inspection_policy" "default" {
+  name     = "tf-test-gateway-tls-insp-policy-%{random_suffix}"
+  location = "%{region}"
+  ca_pool  = google_privateca_ca_pool.default.id
+
+  depends_on = [
+    google_privateca_ca_pool.default,
+    google_privateca_certificate_authority.default
+  ]
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  name                  = "tf-test-gateway-sec-policy-%{random_suffix}"
+  location              = "%{region}"
+  description           = "my description"
+  tls_inspection_policy = google_network_security_tls_inspection_policy.default.id
+
+  depends_on = [
+    google_network_security_tls_inspection_policy.default
+  ]
+}
+
+resource "google_network_security_gateway_security_policy_rule" "default" {
+  name                    = "tf-test-gateway-sec-policy-rule-%{random_suffix}"
+  location                = "%{region}"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true
+  description             = "my description"
+  priority                = 0
+  session_matcher         = "host() == 'example.com'"
+  application_matcher     = "request.method == 'POST'"
+  tls_inspection_enabled  = true
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_services_gateway" "default" {
+  name                                 = "tf-test-gateway-swp-%{random_suffix}"
+  location                             = "%{region}"
+  addresses                            = [google_compute_address.swp_ip.address]
+  type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "NEXT_HOP_ROUTING_MODE"
+  ports                                = [443]
+  description                          = "my description"
+  scope                                = "tf-test-gateway-swp-scope-%{random_suffix}"
+  certificate_urls                     = [google_certificate_manager_certificate.default.id]
+  gateway_security_policy              = google_network_security_gateway_security_policy.default.id
+  network                              = google_compute_network.default.id
+  subnetwork                           = google_compute_subnetwork.default.id
+  delete_swg_autogen_router_on_destroy = true
+  depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
+}
+
+resource "google_compute_route" "default" {
+  name        = "tf-test-gateway-route-%{random_suffix}"
+  dest_range  = "15.0.0.0/24"
+  network     = google_compute_network.default.name
+  next_hop_ip = google_network_services_gateway.default.addresses[0]
+  priority    = 100
+}
+
+resource "google_network_connectivity_policy_based_route" "swproute" {
+  name            = "tf-test-gateway-policy-based-swp-route-%{random_suffix}"
+  description     = "My routing policy"
+  network         = google_compute_network.default.id
+  next_hop_ilb_ip = google_network_services_gateway.default.addresses[0]
+  priority        = 2
+
+  filter {
+    protocol_version = "IPV4"
+    src_range        = "10.0.0.0/24"
+    dest_range       = "15.0.0.0/24"
+  }
+}
+
+resource "google_network_connectivity_policy_based_route" "default" {
+  name                  = "tf-test-gateway-policy-based-route-%{random_suffix}"
+  description           = "My routing policy"
+  network               = google_compute_network.default.id
+  next_hop_other_routes = "DEFAULT_ROUTING"
+  priority              = 1
+
+  filter {
+    protocol_version = "IPV4"
+    src_range        = "10.0.0.0/24"
+    dest_range       = "15.0.0.0/24"
+  }
+}
+`, context)
 }

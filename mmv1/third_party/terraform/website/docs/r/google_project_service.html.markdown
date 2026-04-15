@@ -48,7 +48,7 @@ is used.
 * `disable_on_destroy` - (Optional) If `true`, disable the service when the
 Terraform resource is destroyed. If `false` or unset, the service will be left enabled when
 the Terraform resource is destroyed. It should generally only 
-be `true` or unset in configurations that manage the `google_project` resource itself.
+be `true` in configurations that manage the `google_project` resource itself.
 
 * `disable_dependent_services` - (Optional) If `true`, services that are enabled
 and which depend on this service should also be disabled when this service is
@@ -56,7 +56,7 @@ destroyed. If `false` or unset, an error will be returned if any enabled
 services depend on this service when attempting to destroy it.
 
 * `check_if_service_has_usage_on_destroy` - (Optional)
-[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
+[Beta](../guides/provider_versions.html.markdown)
 If `true`, the usage of the service to be disabled will be checked and an error
 will be returned if the service to be disabled has usage in last 30 days.
 

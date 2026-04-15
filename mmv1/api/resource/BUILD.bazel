@@ -1,0 +1,28 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "resource",
+    srcs = [
+        "custom_code.go",
+        "datasource.go",
+        "docs.go",
+        "examples.go",
+        "iam_policy.go",
+        "nested_query.go",
+        "reference_links.go",
+        "sample.go",
+        "step.go",
+        "sweeper.go",
+        "tgc.go",
+        "validation.go",
+    ],
+    importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//mmv1/api/product",
+        "//mmv1/api/utils",
+        "//mmv1/google",
+        "@com_github_golang_glog//:glog",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+    ],
+)

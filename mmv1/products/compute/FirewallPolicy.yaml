@@ -35,14 +35,15 @@ timeouts:
 import_format:
   - 'locations/global/firewallPolicies/{{name}}'
   - '{{name}}'
+include_in_tgc_next: true
 custom_code:
   post_create: 'templates/terraform/post_create/compute_firewall_policy.go.tmpl'
   post_delete: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
   post_update: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
-include_in_tgc_next_DO_NOT_USE: true
-tgc_hcl_block_name: 'shortName'
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 examples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'

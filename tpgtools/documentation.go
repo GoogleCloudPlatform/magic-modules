@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
+	"path/filepath"
 	"sort"
 	"text/template"
 
@@ -103,7 +104,7 @@ func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resourc
 	}
 
 	tmpl, err := template.New("resource.html.markdown.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/resource.html.markdown.tmpl",
+		filepath.Join(*gPath, "resource.html.markdown.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)

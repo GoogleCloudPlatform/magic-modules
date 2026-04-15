@@ -1,0 +1,62 @@
+{{/*
+ The license inside this block applies to this file
+ Copyright 2024 Google Inc.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+*/ -}}
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return make(map[string]interface{}), nil
+	}
+
+	l := v.(*schema.Set).List()
+
+	req := make(map[string]interface{})
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+
+		original, ok := raw.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("expected a service item to be a map, got %T", raw)
+		}
+
+		serviceName, ok := original["service_name"].(string)
+		if !ok || serviceName == "" {
+			// Skip items without a valid service name
+			continue
+		}
+
+		var apiStates []interface{}
+		if states, ok := original["states"].([]interface{}); ok {
+			for _, stateRaw := range states {
+				state, ok := stateRaw.(map[string]interface{})
+				if !ok {
+					continue
+				}
+
+				apiState := make(map[string]interface{})
+				if s, ok := state["state"].(string); ok {
+					apiState["state"] = s
+				}
+				if et, ok := state["effective_time"].(string); ok {
+					apiState["effectiveTime"] = et
+				}
+				apiStates = append(apiStates, apiState)
+			}
+		}
+
+		req[serviceName] = map[string]interface{}{
+			"states": apiStates,
+		}
+	}
+
+	return req, nil
+}

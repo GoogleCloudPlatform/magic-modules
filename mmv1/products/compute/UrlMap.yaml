@@ -36,8 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
-custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'url_map_bucket_and_service'
     primary_resource_id: 'urlmap'
@@ -47,32 +46,55 @@ examples:
       http_health_check_name: 'health-check'
       backend_bucket_name: 'static-asset-backend-bucket'
       storage_bucket_name: 'static-asset-bucket'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      login_backend_service_name: '"login" + randomSuffix'
   - name: 'url_map_traffic_director_route'
     primary_resource_id: 'urlmap'
     vars:
       url_map_name: 'urlmap'
       home_backend_service_name: 'home'
       health_check_name: 'health-check'
-    tgc_test_ignore_extra:
-      - 'path_matcher.route_rules.url_redirect.https_redirect'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_route_partial'
     primary_resource_id: 'urlmap'
     vars:
       url_map_name: 'urlmap'
       home_backend_service_name: 'home'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_path'
     primary_resource_id: 'urlmap'
     vars:
       url_map_name: 'urlmap'
       home_backend_service_name: 'home'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_path_partial'
     primary_resource_id: 'urlmap'
     vars:
       url_map_name: 'urlmap'
       home_backend_service_name: 'home'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_header_based_routing'
     primary_resource_id: 'urlmap'
     vars:
@@ -81,6 +103,11 @@ examples:
       service_a_backend_service_name: 'service-a'
       service_b_backend_service_name: 'service-b'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      default_backend_service_name: '"default" + randomSuffix'
   - name: 'url_map_parameter_based_routing'
     primary_resource_id: 'urlmap'
     vars:
@@ -89,6 +116,11 @@ examples:
       service_a_backend_service_name: 'service-a'
       service_b_backend_service_name: 'service-b'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      default_backend_service_name: '"default" + randomSuffix'
   - name: 'url_map_default_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -97,6 +129,13 @@ examples:
       home_backend_service_name: 'home'
       mirror_backend_service_name: 'mirror'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      home_backend_service_name: '"home" + randomSuffix'
+      # for backward compatible
+      mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_path_matcher_default_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -105,6 +144,37 @@ examples:
       home_backend_service_name: 'home'
       mirror_backend_service_name: 'mirror'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      home_backend_service_name: '"home" + randomSuffix'
+      # for backward compatible
+      mirror_backend_service_name: '"mirror" + randomSuffix'
+  - name: 'url_map_cache_policy_basic'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'home'
+      health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      backend_service_name: '"home" + randomSuffix'
+  - name: 'url_map_cache_policy_multi_level'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'home'
+      health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_path_rule_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -113,6 +183,13 @@ examples:
       home_backend_service_name: 'home'
       mirror_backend_service_name: 'mirror'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      home_backend_service_name: '"home" + randomSuffix'
+      # for backward compatible
+      mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_route_rule_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -121,24 +198,46 @@ examples:
       home_backend_service_name: 'home'
       mirror_backend_service_name: 'mirror'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      home_backend_service_name: '"home" + randomSuffix'
+      # for backward compatible
+      mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_test_headers'
     primary_resource_id: 'urlmap'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'backend'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
   - name: 'url_map_test_expected_output_url'
     primary_resource_id: 'urlmap'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'backend'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
   - name: 'url_map_test_redirect_response_code'
     primary_resource_id: 'urlmap'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'backend'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
   - name: 'external_http_lb_mig_backend'
     primary_resource_id: 'default'
     vars:
@@ -166,6 +265,9 @@ examples:
       http_health_check_name: 'health-check'
       backend_bucket_name: 'static-asset-backend-bucket'
       storage_bucket_name: 'static-asset-bucket'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
   - name: 'url_map_custom_error_response_policy'
     primary_resource_id: 'urlmap'
     vars:
@@ -174,6 +276,11 @@ examples:
       http_health_check_name: 'health-check'
       storage_bucket_name: 'static-asset-bucket'
       error_backend_bucket_name: 'error-backend-bucket'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
+      # for backward compatible
+      backend_service_name: '"login" + randomSuffix'
   - name: 'url_map_http_filter_configs'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -182,6 +289,9 @@ examples:
       default_backend_service_name: 'default-backend'
       service_a_backend_service_name: 'service-a-backend'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
   - name: 'url_map_http_filter_metadata'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -191,6 +301,9 @@ examples:
       service_a_backend_service_name: 'service-a-backend'
       service_b_backend_service_name: 'service-b-backend'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      url_map_name: '"urlmap" + randomSuffix'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -977,6 +1090,290 @@ properties:
                             backendService as determined by the BackendService's session affinity policy.
                             The value must be between 0 and 1000
                           required: true
+                  - name: 'cachePolicy'
+                    type: NestedObject
+                    min_version: beta
+                    description: |
+                      Specifies the cache policy configuration for matched traffic. Available
+                      only for Global EXTERNAL_MANAGED load balancer schemes. At least one
+                      property must be specified. This policy cannot be specified if any target
+                      backend has Identity-Aware Proxy enabled.
+                    properties:
+                      - name: 'cacheMode'
+                        type: Enum
+                        description: |
+                          Specifies the cache setting for all responses from this route. If not
+                          specified, Cloud CDN uses CACHE_ALL_STATIC mode.
+                        enum_values:
+                          - 'USE_ORIGIN_HEADERS'
+                          - 'FORCE_CACHE_ALL'
+                          - 'CACHE_ALL_STATIC'
+                      - name: 'defaultTtl'
+                        type: NestedObject
+                        description: |
+                          Specifies the default TTL for cached content for responses that do not have
+                          an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
+                          "always revalidate". The value of defaultTtl cannot be set to a value
+                          greater than that of maxTtl. When the cacheMode is set to
+                          FORCE_CACHE_ALL, the defaultTtl will overwrite the TTL set in all
+                          responses. The maximum allowed value is 31,622,400s (1 year). Infrequently
+                          accessed objects may be evicted from the cache before the defined TTL. If
+                          not specified, Cloud CDN uses 3600s (1 hour) for CACHE_ALL_STATIC and
+                          FORCE_CACHE_ALL modes. Cannot be specified when cacheMode is
+                          USE_ORIGIN_HEADERS.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                      - name: 'maxTtl'
+                        type: NestedObject
+                        description: |
+                          Specifies the maximum allowed TTL for cached content. Cache directives that
+                          attempt to set a max-age or s-maxage higher than this, or an Expires header
+                          more than maxTtl seconds in the future will be capped at the value of
+                          maxTtl, as if it were the value of an s-maxage Cache-Control directive.
+                          Headers sent to the client will not be modified. Setting a TTL of "0" means
+                          "always revalidate". The maximum allowed value is 31,622,400s (1 year).
+                          Infrequently accessed objects may be evicted from the cache before the
+                          defined TTL. If not specified, Cloud CDN uses 86400s (1 day) for
+                          CACHE_ALL_STATIC mode. Can be specified only for CACHE_ALL_STATIC cache
+                          mode.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                      - name: 'clientTtl'
+                        type: NestedObject
+                        description: |
+                          Specifies a separate client (e.g. browser client) maximum TTL for cached
+                          content. This is used to clamp the max-age (or Expires) value sent to the
+                          client. With FORCE_CACHE_ALL, the lesser of clientTtl and defaultTtl
+                          is used for the response max-age directive, along with a "public"
+                          directive. For cacheable content in CACHE_ALL_STATIC mode, clientTtl
+                          clamps the max-age from the origin (if specified), or else sets the
+                          response max-age directive to the lesser of the clientTtl and defaultTtl,
+                          and also ensures a "public" cache-control directive is present. The maximum
+                          allowed value is 31,622,400s (1 year). If not specified, Cloud CDN uses
+                          3600s (1 hour) for CACHE_ALL_STATIC mode. Cannot exceed maxTtl.
+                          Cannot be specified when cacheMode is USE_ORIGIN_HEADERS.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                      - name: 'requestCoalescing'
+                        type: Boolean
+                        send_empty_value: true
+                        description: |
+                          If true then Cloud CDN will combine multiple concurrent cache fill
+                          requests into a small number of requests to the origin. If not specified,
+                          Cloud CDN applies request coalescing by default.
+                      - name: 'negativeCaching'
+                        type: Boolean
+                        send_empty_value: true
+                        description: |
+                          Negative caching allows per-status code TTLs to be set, in order to apply
+                          fine-grained caching for common errors or redirects. This can reduce the
+                          load on your origin and improve end-user experience by reducing response
+                          latency. When the cacheMode is set to CACHE_ALL_STATIC or
+                          USE_ORIGIN_HEADERS, negative caching applies to responses with the
+                          specified response code that lack any Cache-Control, Expires, or
+                          Pragma: no-cache directives. When the cacheMode is set to
+                          FORCE_CACHE_ALL, negative caching applies to all responses with the
+                          specified response code, and overrides any caching headers. By default,
+                          Cloud CDN applies the following TTLs to these HTTP status codes:
+                          * 300 (Multiple Choice), 301, 308 (Permanent Redirects): 10m
+                          * 404 (Not Found), 410 (Gone), 451 (Unavailable For Legal Reasons): 120s
+                          * 405 (Method Not Found), 501 (Not Implemented): 60s
+                          These defaults can be overridden in negativeCachingPolicy. If not
+                          specified, Cloud CDN applies negative caching by default.
+                      - name: 'negativeCachingPolicy'
+                        type: Array
+                        send_empty_value: true
+                        description: |
+                          Sets a cache TTL for the specified HTTP status code. negativeCaching
+                          must be enabled to configure negativeCachingPolicy. Omitting the policy
+                          and leaving negativeCaching enabled will use Cloud CDN's default cache
+                          TTLs. Note that when specifying an explicit negativeCachingPolicy, you
+                          should take care to specify a cache TTL for all response codes that you
+                          wish to cache. Cloud CDN will not apply any default negative caching when
+                          a policy exists.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: 'code'
+                              type: Integer
+                              description: |
+                                The HTTP status code to define a TTL against. Only HTTP status codes
+                                300, 301, 302, 307, 308, 404, 405, 410, 421, 451 and 501 can be
+                                specified as values, and you cannot specify a status code more than
+                                once.
+                            - name: 'ttl'
+                              type: NestedObject
+                              description: |
+                                The TTL (in seconds) for which to cache responses with the
+                                corresponding status code. The maximum allowed value is 1800s (30
+                                minutes). Infrequently accessed objects may be evicted from the cache
+                                before the defined TTL.
+                              properties:
+                                - name: 'seconds'
+                                  type: String
+                                  required: true
+                                  description: |
+                                    Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                                - name: 'nanos'
+                                  type: Integer
+                                  ignore_read: true
+                                  description: |
+                                    Span of time that's a fraction of a second at nanosecond resolution.
+                                  validation:
+                                    function: 'validation.IntBetween(0, 0)'
+                      - name: 'cacheBypassRequestHeaderNames'
+                        type: Array
+                        description: |
+                          Bypass the cache when the specified request headers are matched by name,
+                          e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
+                          header names can be specified. The cache is bypassed for all cacheMode
+                          values.
+                        item_type:
+                          type: String
+                      - name: 'serveWhileStale'
+                        type: NestedObject
+                        description: |
+                          Serve existing content from the cache (if available) when revalidating
+                          content with the origin, or when an error is encountered when refreshing
+                          the cache. This setting defines the default "max-stale" duration for any
+                          cached responses that do not specify a max-stale directive. Stale
+                          responses that exceed the TTL configured here will not be served. The
+                          default limit (max-stale) is 86400s (1 day), which will allow stale
+                          content to be served up to this limit beyond the max-age (or s-maxage) of
+                          a cached response. The maximum allowed value is 604800 (1 week). Set this
+                          to zero (0) to disable serve-while-stale.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                      - name: 'cacheKeyPolicy'
+                        type: NestedObject
+                        description: |
+                          The cache key configuration. If not specified, the default behavior depends
+                          on the backend type: for Backend Services, the complete request URI is
+                          used; for Backend Buckets, the request URI is used without the protocol or
+                          host, and only query parameters known to Cloud Storage are included.
+                        properties:
+                          - name: 'includeProtocol'
+                            type: Boolean
+                            send_empty_value: true
+                            description: |
+                              If true, http and https requests will be cached separately. Note: This
+                              setting is only applicable to routes that use a Backend Service. It
+                              does not affect requests served by a Backend Bucket, as the protocol is
+                              never included in a Backend Bucket's cache key. Attempting to set on a
+                              route that points exclusively to Backend Buckets will result in a
+                              configuration error.
+                          - name: 'includeHost'
+                            type: Boolean
+                            send_empty_value: true
+                            description: |
+                              If true, requests to different hosts will be cached separately. Note:
+                              This setting is only applicable to routes that use a Backend Service.
+                              It does not affect requests served by a Backend Bucket, as the host is
+                              never included in a Backend Bucket's cache key. Attempting to set it on
+                              a route that points exclusively to Backend Buckets will result in a
+                              configuration error.
+                          - name: 'includeQueryString'
+                            type: Boolean
+                            send_empty_value: true
+                            description: |
+                              If true, include query string parameters in the cache key according to
+                              includedQueryParameters and excludedQueryParameters. If neither is
+                              set, the entire query string will be included. If false, the query
+                              string will be excluded from the cache key entirely. Note: This field
+                              applies to routes that use backend services. Attempting to set it on a
+                              route that points exclusively to Backend Buckets will result in a
+                              configuration error. For routes that point to a Backend Bucket, use
+                              includedQueryParameters to define which parameters should be part of
+                              the cache key.
+                          - name: 'includedQueryParameters'
+                            type: Array
+                            send_empty_value: true
+                            description: |
+                              Names of query string parameters to include in cache keys. All other
+                              parameters will be excluded. Either specify includedQueryParameters
+                              or excludedQueryParameters, not both. '&' and '=' will be percent
+                              encoded and not treated as delimiters.
+                            item_type:
+                              type: String
+                          - name: 'excludedQueryParameters'
+                            type: Array
+                            send_empty_value: true
+                            description: |
+                              Names of query string parameters to exclude in cache keys. All other
+                              parameters will be included. Either specify excludedQueryParameters
+                              or includedQueryParameters, not both. '&' and '=' will be percent
+                              encoded and not treated as delimiters. Note: This field applies to
+                              routes that use backend services. Attempting to set it on a route that
+                              points exclusively to Backend Buckets will result in a configuration
+                              error. For routes that point to a Backend Bucket, use
+                              includedQueryParameters to define which parameters should be part of
+                              the cache key.
+                            item_type:
+                              type: String
+                          - name: 'includedHeaderNames'
+                            type: Array
+                            send_empty_value: true
+                            description: |
+                              Allows HTTP request headers (by name) to be used in the cache key.
+                            item_type:
+                              type: String
+                          - name: 'includedCookieNames'
+                            type: Array
+                            send_empty_value: true
+                            description: |
+                              Allows HTTP cookies (by name) to be used in the cache key. The
+                              name=value pair will be used in the cache key Cloud CDN generates.
+                              Note: This setting is only applicable to routes that use a Backend
+                              Service. It does not affect requests served by a Backend Bucket.
+                              Attempting to set it on a route that points exclusively to Backend
+                              Buckets will result in a configuration error. Up to 5 cookie names can
+                              be specified.
+                            item_type:
+                              type: String
               - name: 'urlRedirect'
                 type: NestedObject
                 description: |
@@ -1757,6 +2154,290 @@ properties:
                             backendService as determined by the BackendService's session affinity policy.
                             The value must be between 0 and 1000
                           required: true
+                  - name: 'cachePolicy'
+                    type: NestedObject
+                    min_version: beta
+                    description: |
+                      Specifies the cache policy configuration for matched traffic. Available
+                      only for Global EXTERNAL_MANAGED load balancer schemes. At least one
+                      property must be specified. This policy cannot be specified if any target
+                      backend has Identity-Aware Proxy enabled.
+                    properties:
+                      - name: 'cacheMode'
+                        type: Enum
+                        description: |
+                          Specifies the cache setting for all responses from this route. If not
+                          specified, Cloud CDN uses CACHE_ALL_STATIC mode.
+                        enum_values:
+                          - 'USE_ORIGIN_HEADERS'
+                          - 'FORCE_CACHE_ALL'
+                          - 'CACHE_ALL_STATIC'
+                      - name: 'defaultTtl'
+                        type: NestedObject
+                        description: |
+                          Specifies the default TTL for cached content for responses that do not have
+                          an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
+                          "always revalidate". The value of defaultTtl cannot be set to a value
+                          greater than that of maxTtl. When the cacheMode is set to
+                          FORCE_CACHE_ALL, the defaultTtl will overwrite the TTL set in all
+                          responses. The maximum allowed value is 31,622,400s (1 year). Infrequently
+                          accessed objects may be evicted from the cache before the defined TTL. If
+                          not specified, Cloud CDN uses 3600s (1 hour) for CACHE_ALL_STATIC and
+                          FORCE_CACHE_ALL modes. Cannot be specified when cacheMode is
+                          USE_ORIGIN_HEADERS.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                      - name: 'maxTtl'
+                        type: NestedObject
+                        description: |
+                          Specifies the maximum allowed TTL for cached content. Cache directives that
+                          attempt to set a max-age or s-maxage higher than this, or an Expires header
+                          more than maxTtl seconds in the future will be capped at the value of
+                          maxTtl, as if it were the value of an s-maxage Cache-Control directive.
+                          Headers sent to the client will not be modified. Setting a TTL of "0" means
+                          "always revalidate". The maximum allowed value is 31,622,400s (1 year).
+                          Infrequently accessed objects may be evicted from the cache before the
+                          defined TTL. If not specified, Cloud CDN uses 86400s (1 day) for
+                          CACHE_ALL_STATIC mode. Can be specified only for CACHE_ALL_STATIC cache
+                          mode.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                      - name: 'clientTtl'
+                        type: NestedObject
+                        description: |
+                          Specifies a separate client (e.g. browser client) maximum TTL for cached
+                          content. This is used to clamp the max-age (or Expires) value sent to the
+                          client. With FORCE_CACHE_ALL, the lesser of clientTtl and defaultTtl
+                          is used for the response max-age directive, along with a "public"
+                          directive. For cacheable content in CACHE_ALL_STATIC mode, clientTtl
+                          clamps the max-age from the origin (if specified), or else sets the
+                          response max-age directive to the lesser of the clientTtl and defaultTtl,
+                          and also ensures a "public" cache-control directive is present. The maximum
+                          allowed value is 31,622,400s (1 year). If not specified, Cloud CDN uses
+                          3600s (1 hour) for CACHE_ALL_STATIC mode. Cannot exceed maxTtl.
+                          Cannot be specified when cacheMode is USE_ORIGIN_HEADERS.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                      - name: 'requestCoalescing'
+                        type: Boolean
+                        send_empty_value: true
+                        description: |
+                          If true then Cloud CDN will combine multiple concurrent cache fill
+                          requests into a small number of requests to the origin. If not specified,
+                          Cloud CDN applies request coalescing by default.
+                      - name: 'negativeCaching'
+                        type: Boolean
+                        send_empty_value: true
+                        description: |
+                          Negative caching allows per-status code TTLs to be set, in order to apply
+                          fine-grained caching for common errors or redirects. This can reduce the
+                          load on your origin and improve end-user experience by reducing response
+                          latency. When the cacheMode is set to CACHE_ALL_STATIC or
+                          USE_ORIGIN_HEADERS, negative caching applies to responses with the
+                          specified response code that lack any Cache-Control, Expires, or
+                          Pragma: no-cache directives. When the cacheMode is set to
+                          FORCE_CACHE_ALL, negative caching applies to all responses with the
+                          specified response code, and overrides any caching headers. By default,
+                          Cloud CDN applies the following TTLs to these HTTP status codes:
+                          * 300 (Multiple Choice), 301, 308 (Permanent Redirects): 10m
+                          * 404 (Not Found), 410 (Gone), 451 (Unavailable For Legal Reasons): 120s
+                          * 405 (Method Not Found), 501 (Not Implemented): 60s
+                          These defaults can be overridden in negativeCachingPolicy. If not
+                          specified, Cloud CDN applies negative caching by default.
+                      - name: 'negativeCachingPolicy'
+                        type: Array
+                        send_empty_value: true
+                        description: |
+                          Sets a cache TTL for the specified HTTP status code. negativeCaching
+                          must be enabled to configure negativeCachingPolicy. Omitting the policy
+                          and leaving negativeCaching enabled will use Cloud CDN's default cache
+                          TTLs. Note that when specifying an explicit negativeCachingPolicy, you
+                          should take care to specify a cache TTL for all response codes that you
+                          wish to cache. Cloud CDN will not apply any default negative caching when
+                          a policy exists.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: 'code'
+                              type: Integer
+                              description: |
+                                The HTTP status code to define a TTL against. Only HTTP status codes
+                                300, 301, 302, 307, 308, 404, 405, 410, 421, 451 and 501 can be
+                                specified as values, and you cannot specify a status code more than
+                                once.
+                            - name: 'ttl'
+                              type: NestedObject
+                              description: |
+                                The TTL (in seconds) for which to cache responses with the
+                                corresponding status code. The maximum allowed value is 1800s (30
+                                minutes). Infrequently accessed objects may be evicted from the cache
+                                before the defined TTL.
+                              properties:
+                                - name: 'seconds'
+                                  type: String
+                                  required: true
+                                  description: |
+                                    Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                                - name: 'nanos'
+                                  type: Integer
+                                  ignore_read: true
+                                  description: |
+                                    Span of time that's a fraction of a second at nanosecond resolution.
+                                  validation:
+                                    function: 'validation.IntBetween(0, 0)'
+                      - name: 'cacheBypassRequestHeaderNames'
+                        type: Array
+                        description: |
+                          Bypass the cache when the specified request headers are matched by name,
+                          e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
+                          header names can be specified. The cache is bypassed for all cacheMode
+                          values.
+                        item_type:
+                          type: String
+                      - name: 'serveWhileStale'
+                        type: NestedObject
+                        description: |
+                          Serve existing content from the cache (if available) when revalidating
+                          content with the origin, or when an error is encountered when refreshing
+                          the cache. This setting defines the default "max-stale" duration for any
+                          cached responses that do not specify a max-stale directive. Stale
+                          responses that exceed the TTL configured here will not be served. The
+                          default limit (max-stale) is 86400s (1 day), which will allow stale
+                          content to be served up to this limit beyond the max-age (or s-maxage) of
+                          a cached response. The maximum allowed value is 604800 (1 week). Set this
+                          to zero (0) to disable serve-while-stale.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                      - name: 'cacheKeyPolicy'
+                        type: NestedObject
+                        description: |
+                          The cache key configuration. If not specified, the default behavior depends
+                          on the backend type: for Backend Services, the complete request URI is
+                          used; for Backend Buckets, the request URI is used without the protocol or
+                          host, and only query parameters known to Cloud Storage are included.
+                        properties:
+                          - name: 'includeProtocol'
+                            type: Boolean
+                            send_empty_value: true
+                            description: |
+                              If true, http and https requests will be cached separately. Note: This
+                              setting is only applicable to routes that use a Backend Service. It
+                              does not affect requests served by a Backend Bucket, as the protocol is
+                              never included in a Backend Bucket's cache key. Attempting to set on a
+                              route that points exclusively to Backend Buckets will result in a
+                              configuration error.
+                          - name: 'includeHost'
+                            type: Boolean
+                            send_empty_value: true
+                            description: |
+                              If true, requests to different hosts will be cached separately. Note:
+                              This setting is only applicable to routes that use a Backend Service.
+                              It does not affect requests served by a Backend Bucket, as the host is
+                              never included in a Backend Bucket's cache key. Attempting to set it on
+                              a route that points exclusively to Backend Buckets will result in a
+                              configuration error.
+                          - name: 'includeQueryString'
+                            type: Boolean
+                            send_empty_value: true
+                            description: |
+                              If true, include query string parameters in the cache key according to
+                              includedQueryParameters and excludedQueryParameters. If neither is
+                              set, the entire query string will be included. If false, the query
+                              string will be excluded from the cache key entirely. Note: This field
+                              applies to routes that use backend services. Attempting to set it on a
+                              route that points exclusively to Backend Buckets will result in a
+                              configuration error. For routes that point to a Backend Bucket, use
+                              includedQueryParameters to define which parameters should be part of
+                              the cache key.
+                          - name: 'includedQueryParameters'
+                            type: Array
+                            send_empty_value: true
+                            description: |
+                              Names of query string parameters to include in cache keys. All other
+                              parameters will be excluded. Either specify includedQueryParameters
+                              or excludedQueryParameters, not both. '&' and '=' will be percent
+                              encoded and not treated as delimiters.
+                            item_type:
+                              type: String
+                          - name: 'excludedQueryParameters'
+                            type: Array
+                            send_empty_value: true
+                            description: |
+                              Names of query string parameters to exclude in cache keys. All other
+                              parameters will be included. Either specify excludedQueryParameters
+                              or includedQueryParameters, not both. '&' and '=' will be percent
+                              encoded and not treated as delimiters. Note: This field applies to
+                              routes that use backend services. Attempting to set it on a route that
+                              points exclusively to Backend Buckets will result in a configuration
+                              error. For routes that point to a Backend Bucket, use
+                              includedQueryParameters to define which parameters should be part of
+                              the cache key.
+                            item_type:
+                              type: String
+                          - name: 'includedHeaderNames'
+                            type: Array
+                            send_empty_value: true
+                            description: |
+                              Allows HTTP request headers (by name) to be used in the cache key.
+                            item_type:
+                              type: String
+                          - name: 'includedCookieNames'
+                            type: Array
+                            send_empty_value: true
+                            description: |
+                              Allows HTTP cookies (by name) to be used in the cache key. The
+                              name=value pair will be used in the cache key Cloud CDN generates.
+                              Note: This setting is only applicable to routes that use a Backend
+                              Service. It does not affect requests served by a Backend Bucket.
+                              Attempting to set it on a route that points exclusively to Backend
+                              Buckets will result in a configuration error. Up to 5 cookie names can
+                              be specified.
+                            item_type:
+                              type: String
               - name: 'urlRedirect'
                 type: NestedObject
                 description: |
@@ -2363,6 +3044,290 @@ properties:
                         The value must be between 0.0 and 100.0 inclusive.
                       validation:
                         function: 'validation.FloatBetween(0, 100)'
+            - name: 'cachePolicy'
+              type: NestedObject
+              min_version: beta
+              description: |
+                Specifies the cache policy configuration for matched traffic. Available
+                only for Global EXTERNAL_MANAGED load balancer schemes. At least one
+                property must be specified. This policy cannot be specified if any target
+                backend has Identity-Aware Proxy enabled.
+              properties:
+                - name: 'cacheMode'
+                  type: Enum
+                  description: |
+                    Specifies the cache setting for all responses from this route. If not
+                    specified, Cloud CDN uses CACHE_ALL_STATIC mode.
+                  enum_values:
+                    - 'USE_ORIGIN_HEADERS'
+                    - 'FORCE_CACHE_ALL'
+                    - 'CACHE_ALL_STATIC'
+                - name: 'defaultTtl'
+                  type: NestedObject
+                  description: |
+                    Specifies the default TTL for cached content for responses that do not have
+                    an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
+                    "always revalidate". The value of defaultTtl cannot be set to a value
+                    greater than that of maxTtl. When the cacheMode is set to
+                    FORCE_CACHE_ALL, the defaultTtl will overwrite the TTL set in all
+                    responses. The maximum allowed value is 31,622,400s (1 year). Infrequently
+                    accessed objects may be evicted from the cache before the defined TTL. If
+                    not specified, Cloud CDN uses 3600s (1 hour) for CACHE_ALL_STATIC and
+                    FORCE_CACHE_ALL modes. Cannot be specified when cacheMode is
+                    USE_ORIGIN_HEADERS.
+                  properties:
+                    - name: 'seconds'
+                      type: String
+                      required: true
+                      description: |
+                        Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                    - name: 'nanos'
+                      type: Integer
+                      ignore_read: true
+                      description: |
+                        Span of time that's a fraction of a second at nanosecond resolution.
+                      validation:
+                        function: 'validation.IntBetween(0, 0)'
+                - name: 'maxTtl'
+                  type: NestedObject
+                  description: |
+                    Specifies the maximum allowed TTL for cached content. Cache directives that
+                    attempt to set a max-age or s-maxage higher than this, or an Expires header
+                    more than maxTtl seconds in the future will be capped at the value of
+                    maxTtl, as if it were the value of an s-maxage Cache-Control directive.
+                    Headers sent to the client will not be modified. Setting a TTL of "0" means
+                    "always revalidate". The maximum allowed value is 31,622,400s (1 year).
+                    Infrequently accessed objects may be evicted from the cache before the
+                    defined TTL. If not specified, Cloud CDN uses 86400s (1 day) for
+                    CACHE_ALL_STATIC mode. Can be specified only for CACHE_ALL_STATIC cache
+                    mode.
+                  properties:
+                    - name: 'seconds'
+                      type: String
+                      required: true
+                      description: |
+                        Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                    - name: 'nanos'
+                      type: Integer
+                      ignore_read: true
+                      description: |
+                        Span of time that's a fraction of a second at nanosecond resolution.
+                      validation:
+                        function: 'validation.IntBetween(0, 0)'
+                - name: 'clientTtl'
+                  type: NestedObject
+                  description: |
+                    Specifies a separate client (e.g. browser client) maximum TTL for cached
+                    content. This is used to clamp the max-age (or Expires) value sent to the
+                    client. With FORCE_CACHE_ALL, the lesser of clientTtl and defaultTtl
+                    is used for the response max-age directive, along with a "public"
+                    directive. For cacheable content in CACHE_ALL_STATIC mode, clientTtl
+                    clamps the max-age from the origin (if specified), or else sets the
+                    response max-age directive to the lesser of the clientTtl and defaultTtl,
+                    and also ensures a "public" cache-control directive is present. The maximum
+                    allowed value is 31,622,400s (1 year). If not specified, Cloud CDN uses
+                    3600s (1 hour) for CACHE_ALL_STATIC mode. Cannot exceed maxTtl.
+                    Cannot be specified when cacheMode is USE_ORIGIN_HEADERS.
+                  properties:
+                    - name: 'seconds'
+                      type: String
+                      required: true
+                      description: |
+                        Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                    - name: 'nanos'
+                      type: Integer
+                      ignore_read: true
+                      description: |
+                        Span of time that's a fraction of a second at nanosecond resolution.
+                      validation:
+                        function: 'validation.IntBetween(0, 0)'
+                - name: 'requestCoalescing'
+                  type: Boolean
+                  send_empty_value: true
+                  description: |
+                    If true then Cloud CDN will combine multiple concurrent cache fill
+                    requests into a small number of requests to the origin. If not specified,
+                    Cloud CDN applies request coalescing by default.
+                - name: 'negativeCaching'
+                  type: Boolean
+                  send_empty_value: true
+                  description: |
+                    Negative caching allows per-status code TTLs to be set, in order to apply
+                    fine-grained caching for common errors or redirects. This can reduce the
+                    load on your origin and improve end-user experience by reducing response
+                    latency. When the cacheMode is set to CACHE_ALL_STATIC or
+                    USE_ORIGIN_HEADERS, negative caching applies to responses with the
+                    specified response code that lack any Cache-Control, Expires, or
+                    Pragma: no-cache directives. When the cacheMode is set to
+                    FORCE_CACHE_ALL, negative caching applies to all responses with the
+                    specified response code, and overrides any caching headers. By default,
+                    Cloud CDN applies the following TTLs to these HTTP status codes:
+                    * 300 (Multiple Choice), 301, 308 (Permanent Redirects): 10m
+                    * 404 (Not Found), 410 (Gone), 451 (Unavailable For Legal Reasons): 120s
+                    * 405 (Method Not Found), 501 (Not Implemented): 60s
+                    These defaults can be overridden in negativeCachingPolicy. If not
+                    specified, Cloud CDN applies negative caching by default.
+                - name: 'negativeCachingPolicy'
+                  type: Array
+                  send_empty_value: true
+                  description: |
+                    Sets a cache TTL for the specified HTTP status code. negativeCaching
+                    must be enabled to configure negativeCachingPolicy. Omitting the policy
+                    and leaving negativeCaching enabled will use Cloud CDN's default cache
+                    TTLs. Note that when specifying an explicit negativeCachingPolicy, you
+                    should take care to specify a cache TTL for all response codes that you
+                    wish to cache. Cloud CDN will not apply any default negative caching when
+                    a policy exists.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'code'
+                        type: Integer
+                        description: |
+                          The HTTP status code to define a TTL against. Only HTTP status codes
+                          300, 301, 302, 307, 308, 404, 405, 410, 421, 451 and 501 can be
+                          specified as values, and you cannot specify a status code more than
+                          once.
+                      - name: 'ttl'
+                        type: NestedObject
+                        description: |
+                          The TTL (in seconds) for which to cache responses with the
+                          corresponding status code. The maximum allowed value is 1800s (30
+                          minutes). Infrequently accessed objects may be evicted from the cache
+                          before the defined TTL.
+                        properties:
+                          - name: 'seconds'
+                            type: String
+                            required: true
+                            description: |
+                              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                          - name: 'nanos'
+                            type: Integer
+                            ignore_read: true
+                            description: |
+                              Span of time that's a fraction of a second at nanosecond resolution.
+                            validation:
+                              function: 'validation.IntBetween(0, 0)'
+                - name: 'cacheBypassRequestHeaderNames'
+                  type: Array
+                  description: |
+                    Bypass the cache when the specified request headers are matched by name,
+                    e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
+                    header names can be specified. The cache is bypassed for all cacheMode
+                    values.
+                  item_type:
+                    type: String
+                - name: 'serveWhileStale'
+                  type: NestedObject
+                  description: |
+                    Serve existing content from the cache (if available) when revalidating
+                    content with the origin, or when an error is encountered when refreshing
+                    the cache. This setting defines the default "max-stale" duration for any
+                    cached responses that do not specify a max-stale directive. Stale
+                    responses that exceed the TTL configured here will not be served. The
+                    default limit (max-stale) is 86400s (1 day), which will allow stale
+                    content to be served up to this limit beyond the max-age (or s-maxage) of
+                    a cached response. The maximum allowed value is 604800 (1 week). Set this
+                    to zero (0) to disable serve-while-stale.
+                  properties:
+                    - name: 'seconds'
+                      type: String
+                      required: true
+                      description: |
+                        Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                    - name: 'nanos'
+                      type: Integer
+                      ignore_read: true
+                      description: |
+                        Span of time that's a fraction of a second at nanosecond resolution.
+                      validation:
+                        function: 'validation.IntBetween(0, 0)'
+                - name: 'cacheKeyPolicy'
+                  type: NestedObject
+                  description: |
+                    The cache key configuration. If not specified, the default behavior depends
+                    on the backend type: for Backend Services, the complete request URI is
+                    used; for Backend Buckets, the request URI is used without the protocol or
+                    host, and only query parameters known to Cloud Storage are included.
+                  properties:
+                    - name: 'includeProtocol'
+                      type: Boolean
+                      send_empty_value: true
+                      description: |
+                        If true, http and https requests will be cached separately. Note: This
+                        setting is only applicable to routes that use a Backend Service. It
+                        does not affect requests served by a Backend Bucket, as the protocol is
+                        never included in a Backend Bucket's cache key. Attempting to set on a
+                        route that points exclusively to Backend Buckets will result in a
+                        configuration error.
+                    - name: 'includeHost'
+                      type: Boolean
+                      send_empty_value: true
+                      description: |
+                        If true, requests to different hosts will be cached separately. Note:
+                        This setting is only applicable to routes that use a Backend Service.
+                        It does not affect requests served by a Backend Bucket, as the host is
+                        never included in a Backend Bucket's cache key. Attempting to set it on
+                        a route that points exclusively to Backend Buckets will result in a
+                        configuration error.
+                    - name: 'includeQueryString'
+                      type: Boolean
+                      send_empty_value: true
+                      description: |
+                        If true, include query string parameters in the cache key according to
+                        includedQueryParameters and excludedQueryParameters. If neither is
+                        set, the entire query string will be included. If false, the query
+                        string will be excluded from the cache key entirely. Note: This field
+                        applies to routes that use backend services. Attempting to set it on a
+                        route that points exclusively to Backend Buckets will result in a
+                        configuration error. For routes that point to a Backend Bucket, use
+                        includedQueryParameters to define which parameters should be part of
+                        the cache key.
+                    - name: 'includedQueryParameters'
+                      type: Array
+                      send_empty_value: true
+                      description: |
+                        Names of query string parameters to include in cache keys. All other
+                        parameters will be excluded. Either specify includedQueryParameters
+                        or excludedQueryParameters, not both. '&' and '=' will be percent
+                        encoded and not treated as delimiters.
+                      item_type:
+                        type: String
+                    - name: 'excludedQueryParameters'
+                      type: Array
+                      send_empty_value: true
+                      description: |
+                        Names of query string parameters to exclude in cache keys. All other
+                        parameters will be included. Either specify excludedQueryParameters
+                        or includedQueryParameters, not both. '&' and '=' will be percent
+                        encoded and not treated as delimiters. Note: This field applies to
+                        routes that use backend services. Attempting to set it on a route that
+                        points exclusively to Backend Buckets will result in a configuration
+                        error. For routes that point to a Backend Bucket, use
+                        includedQueryParameters to define which parameters should be part of
+                        the cache key.
+                      item_type:
+                        type: String
+                    - name: 'includedHeaderNames'
+                      type: Array
+                      send_empty_value: true
+                      description: |
+                        Allows HTTP request headers (by name) to be used in the cache key.
+                      item_type:
+                        type: String
+                    - name: 'includedCookieNames'
+                      type: Array
+                      send_empty_value: true
+                      description: |
+                        Allows HTTP cookies (by name) to be used in the cache key. The
+                        name=value pair will be used in the cache key Cloud CDN generates.
+                        Note: This setting is only applicable to routes that use a Backend
+                        Service. It does not affect requests served by a Backend Bucket.
+                        Attempting to set it on a route that points exclusively to Backend
+                        Buckets will result in a configuration error. Up to 5 cookie names can
+                        be specified.
+                      item_type:
+                        type: String
   - name: 'defaultCustomErrorResponsePolicy'
     type: NestedObject
     description: |
@@ -2594,6 +3559,7 @@ properties:
           - 'default_route_action.0.request_mirror_policy'
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
         exactly_one_of:
           - 'default_service'
           - 'default_url_redirect'
@@ -2700,6 +3666,7 @@ properties:
           - 'default_route_action.0.request_mirror_policy'
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
         properties:
           - name: 'pathPrefixRewrite'
             type: String
@@ -2737,6 +3704,7 @@ properties:
           - 'default_route_action.0.request_mirror_policy'
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
         properties:
           - name: 'seconds'
             type: String
@@ -2787,6 +3755,7 @@ properties:
           - 'default_route_action.0.request_mirror_policy'
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
         properties:
           - name: 'retryConditions'
             type: Array
@@ -2866,6 +3835,7 @@ properties:
           - 'default_route_action.0.request_mirror_policy'
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
         properties:
           - name: 'backendService'
             type: ResourceRef
@@ -2897,6 +3867,7 @@ properties:
           - 'default_route_action.0.request_mirror_policy'
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
         properties:
           - name: 'allowOrigins'
             type: Array
@@ -3036,6 +4007,7 @@ properties:
           - 'default_route_action.0.request_mirror_policy'
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
         properties:
           - name: 'delay'
             type: NestedObject
@@ -3107,3 +4079,457 @@ properties:
                   - 'default_route_action.0.fault_injection_policy.0.abort.0.percentage'
                 validation:
                   function: 'validation.FloatBetween(0, 100)'
+      - name: 'cachePolicy'
+        type: NestedObject
+        min_version: beta
+        description: |
+          Specifies the cache policy configuration for matched traffic. Available
+          only for Global EXTERNAL_MANAGED load balancer schemes. At least one
+          property must be specified. This policy cannot be specified if any target
+          backend has Identity-Aware Proxy enabled.
+        properties:
+          - name: 'cacheMode'
+            type: Enum
+            description: |
+              Specifies the cache setting for all responses from this route. If not
+              specified, Cloud CDN uses CACHE_ALL_STATIC mode.
+            enum_values:
+              - 'USE_ORIGIN_HEADERS'
+              - 'FORCE_CACHE_ALL'
+              - 'CACHE_ALL_STATIC'
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+          - name: 'defaultTtl'
+            type: NestedObject
+            description: |
+              Specifies the default TTL for cached content for responses that do not have
+              an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
+              "always revalidate". The value of defaultTtl cannot be set to a value
+              greater than that of maxTtl. When the cacheMode is set to
+              FORCE_CACHE_ALL, the defaultTtl will overwrite the TTL set in all
+              responses. The maximum allowed value is 31,622,400s (1 year). Infrequently
+              accessed objects may be evicted from the cache before the defined TTL. If
+              not specified, Cloud CDN uses 3600s (1 hour) for CACHE_ALL_STATIC and
+              FORCE_CACHE_ALL modes. Cannot be specified when cacheMode is
+              USE_ORIGIN_HEADERS.
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            properties:
+              - name: 'seconds'
+                type: String
+                required: true
+                description: |
+                  Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+              - name: 'nanos'
+                type: Integer
+                ignore_read: true
+                description: |
+                  Span of time that's a fraction of a second at nanosecond resolution.
+                validation:
+                  function: 'validation.IntBetween(0, 0)'
+          - name: 'maxTtl'
+            type: NestedObject
+            description: |
+              Specifies the maximum allowed TTL for cached content. Cache directives that
+              attempt to set a max-age or s-maxage higher than this, or an Expires header
+              more than maxTtl seconds in the future will be capped at the value of
+              maxTtl, as if it were the value of an s-maxage Cache-Control directive.
+              Headers sent to the client will not be modified. Setting a TTL of "0" means
+              "always revalidate". The maximum allowed value is 31,622,400s (1 year).
+              Infrequently accessed objects may be evicted from the cache before the
+              defined TTL. If not specified, Cloud CDN uses 86400s (1 day) for
+              CACHE_ALL_STATIC mode. Can be specified only for CACHE_ALL_STATIC cache
+              mode.
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            properties:
+              - name: 'seconds'
+                type: String
+                required: true
+                description: |
+                  Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+              - name: 'nanos'
+                type: Integer
+                ignore_read: true
+                description: |
+                  Span of time that's a fraction of a second at nanosecond resolution.
+                validation:
+                  function: 'validation.IntBetween(0, 0)'
+          - name: 'clientTtl'
+            type: NestedObject
+            description: |
+              Specifies a separate client (e.g. browser client) maximum TTL for cached
+              content. This is used to clamp the max-age (or Expires) value sent to the
+              client. With FORCE_CACHE_ALL, the lesser of clientTtl and defaultTtl
+              is used for the response max-age directive, along with a "public"
+              directive. For cacheable content in CACHE_ALL_STATIC mode, clientTtl
+              clamps the max-age from the origin (if specified), or else sets the
+              response max-age directive to the lesser of the clientTtl and defaultTtl,
+              and also ensures a "public" cache-control directive is present. The maximum
+              allowed value is 31,622,400s (1 year). If not specified, Cloud CDN uses
+              3600s (1 hour) for CACHE_ALL_STATIC mode. Cannot exceed maxTtl.
+              Cannot be specified when cacheMode is USE_ORIGIN_HEADERS.
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            properties:
+              - name: 'seconds'
+                type: String
+                required: true
+                description: |
+                  Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+              - name: 'nanos'
+                type: Integer
+                ignore_read: true
+                description: |
+                  Span of time that's a fraction of a second at nanosecond resolution.
+                validation:
+                  function: 'validation.IntBetween(0, 0)'
+          - name: 'requestCoalescing'
+            type: Boolean
+            send_empty_value: true
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            description: |
+              If true then Cloud CDN will combine multiple concurrent cache fill
+              requests into a small number of requests to the origin. If not specified,
+              Cloud CDN applies request coalescing by default.
+          - name: 'negativeCaching'
+            type: Boolean
+            send_empty_value: true
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            description: |
+              Negative caching allows per-status code TTLs to be set, in order to apply
+              fine-grained caching for common errors or redirects. This can reduce the
+              load on your origin and improve end-user experience by reducing response
+              latency. When the cacheMode is set to CACHE_ALL_STATIC or
+              USE_ORIGIN_HEADERS, negative caching applies to responses with the
+              specified response code that lack any Cache-Control, Expires, or
+              Pragma: no-cache directives. When the cacheMode is set to
+              FORCE_CACHE_ALL, negative caching applies to all responses with the
+              specified response code, and overrides any caching headers. By default,
+              Cloud CDN applies the following TTLs to these HTTP status codes:
+              * 300 (Multiple Choice), 301, 308 (Permanent Redirects): 10m
+              * 404 (Not Found), 410 (Gone), 451 (Unavailable For Legal Reasons): 120s
+              * 405 (Method Not Found), 501 (Not Implemented): 60s
+              These defaults can be overridden in negativeCachingPolicy. If not
+              specified, Cloud CDN applies negative caching by default.
+          - name: 'negativeCachingPolicy'
+            type: Array
+            send_empty_value: true
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            description: |
+              Sets a cache TTL for the specified HTTP status code. negativeCaching
+              must be enabled to configure negativeCachingPolicy. Omitting the policy
+              and leaving negativeCaching enabled will use Cloud CDN's default cache
+              TTLs. Note that when specifying an explicit negativeCachingPolicy, you
+              should take care to specify a cache TTL for all response codes that you
+              wish to cache. Cloud CDN will not apply any default negative caching when
+              a policy exists.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'code'
+                  type: Integer
+                  description: |
+                    The HTTP status code to define a TTL against. Only HTTP status codes
+                    300, 301, 302, 307, 308, 404, 405, 410, 421, 451 and 501 can be
+                    specified as values, and you cannot specify a status code more than
+                    once.
+                - name: 'ttl'
+                  type: NestedObject
+                  description: |
+                    The TTL (in seconds) for which to cache responses with the
+                    corresponding status code. The maximum allowed value is 1800s (30
+                    minutes). Infrequently accessed objects may be evicted from the cache
+                    before the defined TTL.
+                  properties:
+                    - name: 'seconds'
+                      type: String
+                      required: true
+                      description: |
+                        Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                    - name: 'nanos'
+                      type: Integer
+                      ignore_read: true
+                      description: |
+                        Span of time that's a fraction of a second at nanosecond resolution.
+                      validation:
+                        function: 'validation.IntBetween(0, 0)'
+          - name: 'cacheBypassRequestHeaderNames'
+            type: Array
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            description: |
+              Bypass the cache when the specified request headers are matched by name,
+              e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
+              header names can be specified. The cache is bypassed for all cacheMode
+              values.
+            item_type:
+              type: String
+          - name: 'serveWhileStale'
+            type: NestedObject
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            description: |
+              Serve existing content from the cache (if available) when revalidating
+              content with the origin, or when an error is encountered when refreshing
+              the cache. This setting defines the default "max-stale" duration for any
+              cached responses that do not specify a max-stale directive. Stale
+              responses that exceed the TTL configured here will not be served. The
+              default limit (max-stale) is 86400s (1 day), which will allow stale
+              content to be served up to this limit beyond the max-age (or s-maxage) of
+              a cached response. The maximum allowed value is 604800 (1 week). Set this
+              to zero (0) to disable serve-while-stale.
+            properties:
+              - name: 'seconds'
+                type: String
+                required: true
+                description: |
+                  Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+              - name: 'nanos'
+                type: Integer
+                ignore_read: true
+                description: |
+                  Span of time that's a fraction of a second at nanosecond resolution.
+                validation:
+                  function: 'validation.IntBetween(0, 0)'
+          - name: 'cacheKeyPolicy'
+            type: NestedObject
+            at_least_one_of:
+              - 'default_route_action.0.cache_policy.0.cache_mode'
+              - 'default_route_action.0.cache_policy.0.default_ttl'
+              - 'default_route_action.0.cache_policy.0.max_ttl'
+              - 'default_route_action.0.cache_policy.0.client_ttl'
+              - 'default_route_action.0.cache_policy.0.request_coalescing'
+              - 'default_route_action.0.cache_policy.0.negative_caching'
+              - 'default_route_action.0.cache_policy.0.negative_caching_policy'
+              - 'default_route_action.0.cache_policy.0.cache_bypass_request_header_names'
+              - 'default_route_action.0.cache_policy.0.cache_key_policy'
+              - 'default_route_action.0.cache_policy.0.serve_while_stale'
+            description: |
+              The cache key configuration. If not specified, the default behavior depends
+              on the backend type: for Backend Services, the complete request URI is
+              used; for Backend Buckets, the request URI is used without the protocol or
+              host, and only query parameters known to Cloud Storage are included.
+            properties:
+              - name: 'includeProtocol'
+                type: Boolean
+                send_empty_value: true
+                description: |
+                  If true, http and https requests will be cached separately. Note: This
+                  setting is only applicable to routes that use a Backend Service. It
+                  does not affect requests served by a Backend Bucket, as the protocol is
+                  never included in a Backend Bucket's cache key. Attempting to set on a
+                  route that points exclusively to Backend Buckets will result in a
+                  configuration error.
+                at_least_one_of:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_protocol'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_host'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_query_string'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.excluded_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_header_names'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
+              - name: 'includeHost'
+                type: Boolean
+                send_empty_value: true
+                description: |
+                  If true, requests to different hosts will be cached separately. Note:
+                  This setting is only applicable to routes that use a Backend Service.
+                  It does not affect requests served by a Backend Bucket, as the host is
+                  never included in a Backend Bucket's cache key. Attempting to set it on
+                  a route that points exclusively to Backend Buckets will result in a
+                  configuration error.
+                at_least_one_of:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_protocol'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_host'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_query_string'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.excluded_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_header_names'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
+              - name: 'includeQueryString'
+                type: Boolean
+                send_empty_value: true
+                description: |
+                  If true, include query string parameters in the cache key according to
+                  includedQueryParameters and excludedQueryParameters. If neither is
+                  set, the entire query string will be included. If false, the query
+                  string will be excluded from the cache key entirely. Note: This field
+                  applies to routes that use backend services. Attempting to set it on a
+                  route that points exclusively to Backend Buckets will result in a
+                  configuration error. For routes that point to a Backend Bucket, use
+                  includedQueryParameters to define which parameters should be part of
+                  the cache key.
+                at_least_one_of:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_protocol'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_host'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_query_string'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.excluded_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_header_names'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
+              - name: 'includedQueryParameters'
+                type: Array
+                send_empty_value: true
+                description: |
+                  Names of query string parameters to include in cache keys. All other
+                  parameters will be excluded. Either specify includedQueryParameters
+                  or excludedQueryParameters, not both. '&' and '=' will be percent
+                  encoded and not treated as delimiters.
+                conflicts:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.excluded_query_parameters'
+                at_least_one_of:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_protocol'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_host'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_query_string'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.excluded_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_header_names'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
+                item_type:
+                  type: String
+              - name: 'excludedQueryParameters'
+                type: Array
+                send_empty_value: true
+                description: |
+                  Names of query string parameters to exclude in cache keys. All other
+                  parameters will be included. Either specify excludedQueryParameters
+                  or includedQueryParameters, not both. '&' and '=' will be percent
+                  encoded and not treated as delimiters. Note: This field applies to
+                  routes that use backend services. Attempting to set it on a route that
+                  points exclusively to Backend Buckets will result in a configuration
+                  error. For routes that point to a Backend Bucket, use
+                  includedQueryParameters to define which parameters should be part of
+                  the cache key.
+                conflicts:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_query_parameters'
+                at_least_one_of:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_protocol'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_host'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_query_string'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.excluded_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_header_names'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
+                item_type:
+                  type: String
+              - name: 'includedHeaderNames'
+                type: Array
+                send_empty_value: true
+                description: |
+                  Allows HTTP request headers (by name) to be used in the cache key.
+                at_least_one_of:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_protocol'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_host'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_query_string'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.excluded_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_header_names'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
+                item_type:
+                  type: String
+              - name: 'includedCookieNames'
+                type: Array
+                send_empty_value: true
+                description: |
+                  Allows HTTP cookies (by name) to be used in the cache key. The
+                  name=value pair will be used in the cache key Cloud CDN generates.
+                  Note: This setting is only applicable to routes that use a Backend
+                  Service. It does not affect requests served by a Backend Bucket.
+                  Attempting to set it on a route that points exclusively to Backend
+                  Buckets will result in a configuration error. Up to 5 cookie names can
+                  be specified.
+                at_least_one_of:
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_protocol'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_host'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.include_query_string'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.excluded_query_parameters'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_header_names'
+                  - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
+                item_type:
+                  type: String

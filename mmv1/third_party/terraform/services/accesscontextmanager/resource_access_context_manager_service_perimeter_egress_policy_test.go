@@ -2,6 +2,7 @@ package accesscontextmanager_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,9 +17,12 @@ import (
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
 func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testing.T) {
-	// Multiple fine-grained resources
-	acctest.SkipIfVcr(t)
 	org := envvar.GetTestOrgFromEnv(t)
+
+	// Bootstrap a service account to use as egress from identity
+	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
+	serviceAccount := acctest.BootstrapServiceAccount(t, "acm-egress-2", initialServiceAccount)
+
 	//projects := acctest.BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
@@ -29,7 +33,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testin
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_basic(org, policyTitle, perimeterTitle, projectNumber),
+				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_basic(org, policyTitle, perimeterTitle, projectNumber, serviceAccount),
 			},
 			{
 				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitle),
@@ -86,7 +90,7 @@ func testAccCheckAccessContextManagerServicePerimeterEgressPolicyDestroyProducer
 	}
 }
 
-func testAccAccessContextManagerServicePerimeterEgressPolicy_basic(org, policyTitle, perimeterTitleName, projectNumber string) string {
+func testAccAccessContextManagerServicePerimeterEgressPolicy_basic(org, policyTitle, perimeterTitleName, projectNumber, serviceAccount string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -132,6 +136,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 		resources = ["*"]
 		roles = ["roles/bigquery.admin"]
 	}
+	depends_on = [google_access_context_manager_service_perimeter_egress_policy.test-access1]
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "test-access3" {
@@ -142,9 +147,27 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 		}
 		source_restriction = "SOURCE_RESTRICTION_ENABLED"
 	}
+	depends_on = [google_access_context_manager_service_perimeter_egress_policy.test-access2]
 }
 
-`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber)
+resource "google_access_context_manager_service_perimeter_egress_policy" "test-identity1" {
+  perimeter = google_access_context_manager_service_perimeter.test-access.name
+	egress_from {
+		identities = ["serviceAccount:%s"]
+	}
+	egress_to {
+	  operations {
+			service_name = "storage.googleapis.com"
+			method_selectors {
+				method = "*"
+			}
+		}
+	}
+	depends_on = [google_access_context_manager_service_perimeter_egress_policy.test-access3]
+}
+
+`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber, strings.ToUpper(serviceAccount))
+	// Using an uppercase service account to test normalization of IAM principal casing
 }
 
 func testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {

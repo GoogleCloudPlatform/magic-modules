@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -65,13 +66,21 @@ func (u *SpannerDatabaseIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 		return nil, err
 	}
 
-	p, err := u.Config.NewSpannerClient(userAgent).Projects.Instances.Databases.GetIamPolicy(SpannerDatabaseId{
+	call := u.Config.NewSpannerClient(userAgent).Projects.Instances.Databases.GetIamPolicy(SpannerDatabaseId{
 		Project:  u.project,
 		Database: u.database,
 		Instance: u.instance,
 	}.databaseUri(), &spanner.GetIamPolicyRequest{
 		Options: &spanner.GetPolicyOptions{RequestedPolicyVersion: tpgiamresource.IamPolicyVersion},
-	}).Do()
+	})
+	if u.Config.UserProjectOverride {
+		billingProject := u.project
+		if u.Config.BillingProject != "" {
+			billingProject = u.Config.BillingProject
+		}
+		call.Header().Set("X-Goog-User-Project", billingProject)
+	}
+	p, err := call.Do()
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
@@ -102,13 +111,21 @@ func (u *SpannerDatabaseIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 		return err
 	}
 
-	_, err = u.Config.NewSpannerClient(userAgent).Projects.Instances.Databases.SetIamPolicy(SpannerDatabaseId{
+	call := u.Config.NewSpannerClient(userAgent).Projects.Instances.Databases.SetIamPolicy(SpannerDatabaseId{
 		Project:  u.project,
 		Database: u.database,
 		Instance: u.instance,
 	}.databaseUri(), &spanner.SetIamPolicyRequest{
 		Policy: spannerPolicy,
-	}).Do()
+	})
+	if u.Config.UserProjectOverride {
+		billingProject := u.project
+		if u.Config.BillingProject != "" {
+			billingProject = u.Config.BillingProject
+		}
+		call.Header().Set("X-Goog-User-Project", billingProject)
+	}
+	_, err = call.Do()
 
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
@@ -171,4 +188,31 @@ func (s SpannerDatabaseId) parentInstanceUri() string {
 
 func (s SpannerDatabaseId) databaseUri() string {
 	return fmt.Sprintf("%s/databases/%s", s.parentInstanceUri(), s.Database)
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_spanner_database_iam_member",
+		ProductName: "spanner",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(IamSpannerDatabaseSchema, NewSpannerDatabaseIamUpdater, SpannerDatabaseIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_spanner_database_iam_binding",
+		ProductName: "spanner",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(IamSpannerDatabaseSchema, NewSpannerDatabaseIamUpdater, SpannerDatabaseIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_spanner_database_iam_policy",
+		ProductName: "spanner",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(IamSpannerDatabaseSchema, NewSpannerDatabaseIamUpdater, SpannerDatabaseIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_spanner_database_iam_policy",
+		ProductName: "spanner",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(IamSpannerDatabaseSchema, NewSpannerDatabaseIamUpdater),
+	}.Register()
 }

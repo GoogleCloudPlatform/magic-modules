@@ -40,19 +40,20 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'schema'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/pubsub_schema.tmpl'
 examples:
   - name: 'pubsub_schema_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-schema%s", context["random_suffix"])'
     vars:
       schema_name: 'example-schema'
   - name: 'pubsub_schema_protobuf'
     primary_resource_id: 'example'
     vars:
       schema_name: 'example'
+    test_vars_overrides:
+      # for backward compatible
+      schema_name: '"example" + randomSuffix'
     test_env_vars:
       project_name: 'PROJECT_NAME'
 parameters:

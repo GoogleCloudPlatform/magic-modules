@@ -1,0 +1,29 @@
+resource "google_compute_snapshot" "snapshot" {
+  name        = "{{index $.Vars "snapshot_name"}}"
+  zone        = "us-central1-a"
+  source_instant_snapshot = google_compute_instant_snapshot.instant_snapshot.id
+}
+
+resource "google_compute_instant_snapshot" "instant_snapshot" {
+  name        = "{{index $.Vars "instant_snapshot_name"}}"
+  source_disk = google_compute_disk.persistent.self_link
+  zone        = google_compute_disk.persistent.zone
+
+  description = "A test snapshot"
+  labels = {
+	foo = "bar"
+  }
+}
+
+data "google_compute_image" "debian" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "persistent" {
+  name  = "{{index $.Vars "disk_name"}}"
+  image = data.google_compute_image.debian.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}

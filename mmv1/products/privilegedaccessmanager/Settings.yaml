@@ -1,0 +1,263 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Settings'
+api_variant_patterns:
+  - 'folders/{folder}/locations/{location}/settings'
+  - 'organizations/{organization}/locations/{location}/settings'
+  - 'projects/{project}/locations/{location}/settings'
+description: |
+  Settings resource defines the properties, applied directly to the resource or inherited through the hierarchy, to enable consistent, federated use of PAM.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/iam/docs/pam-overview'
+    'Configure Privileged Access Manager settings': 'https://cloud.google.com/iam/docs/pam-configure-settings'
+  api: 'https://cloud.google.com/iam/docs/reference/pam/rest/v1beta/folders.locations/updateSettings'
+docs:
+id_format: '{{parent}}/locations/{{location}}/settings'
+base_url: '{{parent}}/locations/{{location}}/settings'
+self_link: '{{parent}}/locations/{{location}}/settings'
+create_url: '{{parent}}/locations/{{location}}/settings'
+exclude_delete: true
+update_verb: 'PATCH'
+create_verb: 'PATCH'
+update_mask: true
+custom_code:
+  pre_update: 'templates/terraform/pre_update/privileged_access_manager_settings.go.tmpl' # get etag
+  custom_create: 'templates/terraform/custom_create/privileged_access_manager_settings.go.tmpl'
+examples:
+  - name: 'privileged_access_manager_settings_basic'
+    primary_resource_id: 'settings'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    exclude_test: true
+import_format:
+  - '{{%parent}}/locations/{{location}}/settings'
+min_version: 'beta'
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The region of the PAM settings resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'parent'
+    type: String
+    description: |
+      Format: projects/{project-id|project-number} or organizations/{organization-number} or folders/{folder-number}
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the settings resource. Possible formats:
+      projects/{project-id|project-number}/locations/{location}/settings folders/{folder-number}/locations/{location}/settings organizations/{organization-number}/locations/{location}/settings
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      Create timestamp. Uses RFC 3339, where generated output will always be Z-normalized and use 0, 3, 6 or 9 fractional digits. Offsets other than "Z" are also accepted.
+      Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      Update timestamp. Uses RFC 3339, where generated output will always be Z-normalized and use 0, 3, 6 or 9 fractional digits. Offsets other than "Z" are also accepted.
+      Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
+    output: true
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      Fingerprint for optimistic concurrency returned in the response of GetSettings. Must be provided in the requests to UpdateSettings. If the value provided does not match the value known to the server, ABORTED will be thrown, and the client should retry the read-modify-write cycle.
+    output: true
+  - name: 'serviceAccountApproverSettings'
+    type: NestedObject
+    description: |
+      This controls the node-level settings for allowing service accounts as approvers.
+    send_empty_value: true
+    allow_empty_object: true
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        send_empty_value: true
+        description: |
+          Indicates whether service account is allowed to grant approvals.
+  - name: 'emailNotificationSettings'
+    type: NestedObject
+    description: |
+      EmailNotificationSettings defines node-wide email notification preferences for various PAM events.
+    send_empty_value: true
+    allow_empty_object: true
+    properties:
+      - name: 'disableAllNotifications'
+        type: NestedObject
+        allow_empty_object: true
+        send_empty_value: true
+        description: |
+          This option indicates that all email notifications are disabled.
+        exactly_one_of:
+          - 'email_notification_settings.0.disable_all_notifications'
+          - 'email_notification_settings.0.custom_notification_behavior'
+        properties: []
+      - name: 'customNotificationBehavior'
+        type: NestedObject
+        description: |
+          CustomNotificationBehavior provides granular control over email notification delivery. Allows admins to selectively enable/disable notifications for specific events and specific personas.
+        exactly_one_of:
+          - 'email_notification_settings.0.disable_all_notifications'
+          - 'email_notification_settings.0.custom_notification_behavior'
+        properties:
+          - name: 'requesterNotifications'
+            type: NestedObject
+            description: |
+              Email notifications specific to Requesters.
+            properties:
+              - name: 'entitlementAssigned'
+                type: Enum
+                description: |
+                  Notification mode for entitlement assigned.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantActivated'
+                type: Enum
+                description: |
+                  Notification mode for grant activated.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantDenied'
+                type: Enum
+                description: |
+                  Notification mode for grant denied.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantExpired'
+                type: Enum
+                description: |
+                  Notification mode for grant expired.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantEnded'
+                type: Enum
+                description: |
+                  Notification mode for grant ended.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantRevoked'
+                type: Enum
+                description: |
+                  Notification mode for grant revoked.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantExternallyModified'
+                type: Enum
+                description: |
+                  Notification mode for grant externally modified.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantActivationFailed'
+                type: Enum
+                description: |
+                  Notification mode for grant activation failed.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+          - name: 'adminNotifications'
+            type: NestedObject
+            description: |
+              Email notifications specific to Requesters.
+            properties:
+              - name: 'grantActivated'
+                type: Enum
+                description: |
+                  Notification mode for grant activated.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantEnded'
+                type: Enum
+                description: |
+                  Notification mode for grant ended.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantExternallyModified'
+                type: Enum
+                description: |
+                  Notification mode for grant externally modified.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+              - name: 'grantActivationFailed'
+                type: Enum
+                description: |
+                  Notification mode for grant activation failed.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'
+          - name: 'approverNotifications'
+            type: NestedObject
+            description: |
+              Email notifications specific to Approvers.
+            properties:
+              - name: 'pendingApproval'
+                type: Enum
+                description: |
+                  Notification mode for pending approval.
+                default_from_api: true
+                enum_values:
+                  - 'NOTIFICATION_MODE_UNSPECIFIED'
+                  - 'ENABLED'
+                  - 'DISABLED'

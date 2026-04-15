@@ -42,7 +42,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'tag_template'
   base_url: 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}'
     - '{{tag_template}}'
@@ -55,7 +54,6 @@ exclude_sweeper: true
 examples:
   - name: 'data_catalog_tag_template_basic'
     primary_resource_id: 'basic_tag_template'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_template%s", context["random_suffix"])'
     vars:
       tag_template_id: 'my_template'
       force_delete: 'false'
@@ -105,7 +103,6 @@ properties:
     required: true
     key_name: 'field_id'
     value_type:
-      name: field
       type: NestedObject
       properties:
         - name: 'name'

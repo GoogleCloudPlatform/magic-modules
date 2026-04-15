@@ -27,12 +27,13 @@ id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 timeouts:
-  insert_minutes: 40
-  update_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 120
+  update_minutes: 60
+  delete_minutes: 60
 sweeper:
   url_substitutions:
     - location: "us-central1-a"
+    - location: "us-central1-c"
 examples:
 
   - name: lustre_instance_basic
@@ -49,8 +50,8 @@ async:
   operation:
     timeouts:
       insert_minutes: 120
-      update_minutes: 20
-      delete_minutes: 20
+      update_minutes: 60
+      delete_minutes: 60
     base_url: '{{op_id}}'
   actions:
     - create
@@ -61,15 +62,17 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: SW5zdGFuY2U=
+include_in_tgc_next: true
 parameters:
   - name: location
     type: String
+    required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: instanceId
     type: String
+    required: true
     description: |-
       The name of the Managed Lustre instance.
 
@@ -79,56 +82,74 @@ parameters:
       * Must end with a number or a letter.
     immutable: true
     url_param_only: true
-    required: true
 properties:
+  - name: accessRulesOptions
+    type: NestedObject
+    description: |-
+      IP-based access rules for the Managed Lustre instance. These options
+      define the root user squash configuration.
+    properties:
+      - name: accessRules
+        type: Array
+        description: The access rules for the instance.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: ipAddressRanges
+              type: Array
+              required: true
+              description: |-
+                The IP address ranges to which to apply this access rule. Accepts
+                non-overlapping CIDR ranges (e.g., `192.168.1.0/24`) and IP addresses
+                (e.g., `192.168.1.0`).
+              item_type:
+                type: String
+            - name: name
+              type: String
+              required: true
+              description: |-
+                The name of the access rule policy group.
+                Must be 16 characters or less and include only alphanumeric characters
+                or '_'.
+            - name: squashMode
+              type: String
+              required: true
+              description: |-
+                Squash mode for the access rule.
+                Possible values:
+                NO_SQUASH
+                ROOT_SQUASH
+      - name: defaultSquashGid
+        type: Integer
+        description: |-
+          The user squash GID for the default access rule.
+          This user squash GID applies to all root users connecting from clients
+          that are not matched by any of the access rules. If not set, the default
+          is 0 (no GID squash).
+      - name: defaultSquashMode
+        type: String
+        required: true
+        description: |-
+          The squash mode for the default access rule.
+          Possible values:
+          NO_SQUASH
+          ROOT_SQUASH
+      - name: defaultSquashUid
+        type: Integer
+        description: |-
+          The user squash UID for the default access rule.
+          This user squash UID applies to all root users connecting from clients
+          that are not matched by any of the access rules. If not set, the default
+          is 0 (no UID squash).
   - name: capacityGib
     type: String
+    required: true
     description: |-
       The storage capacity of the instance in gibibytes (GiB). Allowed values
-      are from `18000` to `954000`, in increments of 9000.
-    required: true
-  - name: updateTime
-    type: String
-    description: Timestamp when the instance was last updated.
-    output: true
-  - name: gkeSupportEnabled
-    type: Boolean
-    description: |-
-      Indicates whether you want to enable support for GKE clients. By default,
-      GKE clients are not supported.
-  - name: filesystem
-    type: String
-    description: |-
-      The filesystem name for this instance. This name is used by client-side
-      tools, including when mounting the instance. Must be eight characters or
-      less and can only contain letters and numbers.
-    immutable: true
-    required: true
-  - name: network
-    type: String
-    description: |-
-      The full name of the VPC network to which the instance is connected.
-      Must be in the format
-      `projects/{project_id}/global/networks/{network_name}`.
-    immutable: true
-    required: true
-  - name: state
-    type: String
-    description: |-
-      The state of the instance.
-      Possible values:
-      STATE_UNSPECIFIED
-      ACTIVE
-      CREATING
-      DELETING
-      UPGRADING
-      REPAIRING
-      STOPPED
-    output: true
-  - name: mountPoint
-    type: String
-    description: Mount point of the instance in the format `IP_ADDRESS@tcp:/FILESYSTEM`.
-    output: true
+      are from `9000` to `7632000`, depending on the `perUnitStorageThroughput`.
+      See [Performance tiers and maximum storage
+      capacities](https://cloud.google.com/managed-lustre/docs/create-instance#performance-tiers)
+      for specific minimums, maximums, and step sizes for each performance tier.
   - name: createTime
     type: String
     description: Timestamp when the instance was created.
@@ -136,17 +157,299 @@ properties:
   - name: description
     type: String
     description: A user-readable description of the instance.
+  - name: dynamicTierOptions
+    type: NestedObject
+    description: Dynamic tier options for a Managed Lustre instance.
+    immutable: true
+    properties:
+      - name: mode
+        type: String
+        required: true
+        description: |-
+          The dynamic tier mode of the instance.
+          Possible values:
+          DISABLED
+          DEFAULT_CACHE
+        immutable: true
+  - name: filesystem
+    type: String
+    required: true
+    description: |-
+      The filesystem name for this instance. This name is used by client-side
+      tools, including when mounting the instance. Must be eight characters or
+      less and can only contain letters and numbers.
+    immutable: true
+  - name: gkeSupportEnabled
+    type: Boolean
+    description: |-
+      Indicates whether you want to enable support for GKE clients. By default,
+      GKE clients are not supported.
+  - name: kmsKey
+    type: String
+    description: |-
+      The Cloud KMS key name to use for data encryption.
+      If not set, the instance will use Google-managed encryption keys.
+      If set, the instance will use customer-managed encryption keys.
+      The key must be in the same region as the instance.
+      The key format is:
+      projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{key}
+    immutable: true
   - name: labels
     type: KeyValueLabels
     description: Labels as key value pairs.
-  - name: perUnitStorageThroughput
+  - name: maintenancePolicy
+    type: NestedObject
+    description: Defines a maintenance policy for a resource.
+    properties:
+      - name: maintenanceExclusionWindow
+        type: Array
+        description: The exclusion windows for the instance. Currently limited to 1 window.
+        max_size: 1
+        item_type:
+          type: NestedObject
+          properties:
+            - name: endDate
+              type: NestedObject
+              required: true
+              description: |-
+                Represents a whole or partial calendar date, such as a birthday. The time of
+                day and time zone are either specified elsewhere or are insignificant. The
+                date is relative to the Gregorian Calendar. This can represent one of the
+                following:
+
+                * A full date, with non-zero year, month, and day values.
+                * A month and day, with a zero year (for example, an anniversary).
+                * A year on its own, with a zero month and a zero day.
+                * A year and month, with a zero day (for example, a credit card expiration
+                date).
+
+                Related types:
+
+                * google.type.TimeOfDay
+                * google.type.DateTime
+                * google.protobuf.Timestamp
+              properties:
+                - name: day
+                  type: Integer
+                  description: |-
+                    Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+                    to specify a year by itself or a year and month where the day isn't
+                    significant.
+                  default_from_api: true
+                - name: month
+                  type: Integer
+                  description: |-
+                    Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+                    month and day.
+                  default_from_api: true
+                - name: year
+                  type: Integer
+                  description: |-
+                    Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+                    a year.
+                  default_from_api: true
+            - name: startDate
+              type: NestedObject
+              required: true
+              description: |-
+                Represents a whole or partial calendar date, such as a birthday. The time of
+                day and time zone are either specified elsewhere or are insignificant. The
+                date is relative to the Gregorian Calendar. This can represent one of the
+                following:
+
+                * A full date, with non-zero year, month, and day values.
+                * A month and day, with a zero year (for example, an anniversary).
+                * A year on its own, with a zero month and a zero day.
+                * A year and month, with a zero day (for example, a credit card expiration
+                date).
+
+                Related types:
+
+                * google.type.TimeOfDay
+                * google.type.DateTime
+                * google.protobuf.Timestamp
+              properties:
+                - name: day
+                  type: Integer
+                  description: |-
+                    Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+                    to specify a year by itself or a year and month where the day isn't
+                    significant.
+                  default_from_api: true
+                - name: month
+                  type: Integer
+                  description: |-
+                    Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+                    month and day.
+                  default_from_api: true
+                - name: year
+                  type: Integer
+                  description: |-
+                    Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+                    a year.
+                  default_from_api: true
+            - name: time
+              type: NestedObject
+              required: true
+              description: |-
+                Represents a time of day. The date and time zone are either not significant
+                or are specified elsewhere. An API may choose to allow leap seconds. Related
+                types are google.type.Date and `google.protobuf.Timestamp`.
+              properties:
+                - name: hours
+                  type: Integer
+                  description: |-
+                    Hours of a day in 24 hour format. Must be greater than or equal to 0 and
+                    typically must be less than or equal to 23. An API may choose to allow the
+                    value "24:00:00" for scenarios like business closing time.
+                  default_from_api: true
+                - name: minutes
+                  type: Integer
+                  description: |-
+                    Minutes of an hour. Must be greater than or equal to 0 and less than or
+                    equal to 59.
+                  default_from_api: true
+                - name: nanos
+                  type: Integer
+                  description: |-
+                    Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
+                    and less than or equal to 999,999,999.
+                  default_from_api: true
+                - name: seconds
+                  type: Integer
+                  description: |-
+                    Seconds of a minute. Must be greater than or equal to 0 and typically must
+                    be less than or equal to 59. An API may allow the value 60 if it allows
+                    leap-seconds.
+                  default_from_api: true
+      - name: weeklyMaintenanceWindows
+        type: Array
+        required: true
+        description: |-
+          The weekly maintenance windows for the instance. Currently limited to 1
+          window.
+        max_size: 1
+        item_type:
+          type: NestedObject
+          properties:
+            - name: dayOfWeek
+              type: String
+              required: true
+              description: |-
+                Possible values:
+                MONDAY
+                TUESDAY
+                WEDNESDAY
+                THURSDAY
+                FRIDAY
+                SATURDAY
+                SUNDAY
+            - name: startTime
+              type: NestedObject
+              required: true
+              description: |-
+                Represents a time of day. The date and time zone are either not significant
+                or are specified elsewhere. An API may choose to allow leap seconds. Related
+                types are google.type.Date and `google.protobuf.Timestamp`.
+              properties:
+                - name: hours
+                  type: Integer
+                  description: |-
+                    Hours of a day in 24 hour format. Must be greater than or equal to 0 and
+                    typically must be less than or equal to 23. An API may choose to allow the
+                    value "24:00:00" for scenarios like business closing time.
+                  default_from_api: true
+                - name: minutes
+                  type: Integer
+                  description: |-
+                    Minutes of an hour. Must be greater than or equal to 0 and less than or
+                    equal to 59.
+                  default_from_api: true
+                - name: nanos
+                  type: Integer
+                  description: |-
+                    Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
+                    and less than or equal to 999,999,999.
+                  default_from_api: true
+                - name: seconds
+                  type: Integer
+                  description: |-
+                    Seconds of a minute. Must be greater than or equal to 0 and typically must
+                    be less than or equal to 59. An API may allow the value 60 if it allows
+                    leap-seconds.
+                  default_from_api: true
+  - name: mountPoint
     type: String
-    description: |-
-      The throughput of the instance in MB/s/TiB.
-      Valid values are 125, 250, 500, 1000.
-    required: true
-    immutable: true
+    description: Mount point of the instance in the format `IP_ADDRESS@tcp:/FILESYSTEM`.
+    output: true
   - name: name
     type: String
     description: Identifier. The name of the instance.
+    output: true
+  - name: network
+    type: String
+    required: true
+    description: |-
+      The full name of the VPC network to which the instance is connected.
+      Must be in the format
+      `projects/{project_id}/global/networks/{network_name}`.
+    immutable: true
+  - name: perUnitStorageThroughput
+    type: String
+    description: |-
+      The throughput of the instance in MBps per TiB. Valid values are 125, 250,
+      500, 1000.
+      See [Performance tiers and maximum storage
+      capacities](https://cloud.google.com/managed-lustre/docs/create-instance#performance-tiers)
+      for more information.
+
+      If the instance is using the Dynamic tier, this field must not be set or
+      must be set to zero.
+    immutable: true
+  - name: placementPolicy
+    type: String
+    description: |-
+      The placement policy name for the instance in the format of
+      projects/{project}/locations/{location}/resourcePolicies/{resource_policy}
+  - name: state
+    type: String
+    description: |-
+      The state of the instance.
+      Possible values:
+      ACTIVE
+      CREATING
+      DELETING
+      UPGRADING
+      REPAIRING
+      STOPPED
+      UPDATING
+      SUSPENDED
+    output: true
+  - name: stateReason
+    type: String
+    description: The reason why the instance is in a certain state (e.g. SUSPENDED).
+    output: true
+  - name: uid
+    type: String
+    description: |-
+      Unique ID of the resource.
+      This is unrelated to the access rules which allow specifying the root
+      squash uid.
+    output: true
+  - name: upcomingMaintenanceSchedule
+    type: NestedObject
+    description: Represents a scheduled maintenance event.
+    output: true
+    properties:
+      - name: endTime
+        type: String
+        description: The scheduled end time for the maintenance.
+        output: true
+      - name: startTime
+        type: String
+        description: The scheduled start time for the maintenance.
+        output: true
+  - name: updateTime
+    type: String
+    description: Timestamp when the instance was last updated.
     output: true

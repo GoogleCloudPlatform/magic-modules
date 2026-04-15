@@ -1,0 +1,49 @@
+package observability
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+func DataSourceObservabilityOrganizationSettings() *schema.Resource {
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceObservabilityOrganizationSettings().Schema)
+
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "organization")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
+
+	return &schema.Resource{
+		Read:   dataSourceObservabilityOrganizationSettingsRead,
+		Schema: dsSchema,
+	}
+}
+
+func dataSourceObservabilityOrganizationSettingsRead(d *schema.ResourceData, meta interface{}) error {
+	organization := d.Get("organization").(string)
+	location := d.Get("location").(string)
+
+	id := fmt.Sprintf("organizations/%s/locations/%s/settings", organization, location)
+	d.SetId(id)
+
+	err := resourceObservabilityOrganizationSettingsRead(d, meta)
+	if err != nil {
+		return nil
+	}
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_observability_organization_settings",
+		ProductName: "observability",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceObservabilityOrganizationSettings(),
+	}.Register()
+}
+{{- end }}

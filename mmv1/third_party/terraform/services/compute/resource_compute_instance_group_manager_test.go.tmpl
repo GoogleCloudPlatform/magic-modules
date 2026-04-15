@@ -172,9 +172,14 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				Config: testAccInstanceGroupManager_update(template1, target1, description, igm),
 				Check: resource.ComposeTestCheckFunc(
 					       resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "DO_NOTHING"),
-{{- if ne $.TargetVersionName "ga" }}
-                 resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "DO_NOTHING"),
-{{- end }}
+
+					       {{- if ne $.TargetVersionName "ga" }}
+					       resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "DO_NOTHING"),
+					       {{- end }}
+
+					       {{- if ne $.TargetVersionName "ga" }}
+					       resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_repair.0.allow_changing_zone", "NO"),
+					       {{- end }}
 							 ),
 			},
 			{
@@ -187,9 +192,14 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				Config: testAccInstanceGroupManager_update2(template1, target1, target2, template2, description, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
-{{- if ne $.TargetVersionName "ga" }}
-          resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
-{{- end }}
+
+					{{- if ne $.TargetVersionName "ga" }}
+					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
+					{{- end }}
+
+					{{- if ne $.TargetVersionName "ga" }}
+					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_repair.0.allow_changing_zone", "NO"),
+					{{- end }}
 				),
 			},
 			{
@@ -984,9 +994,16 @@ resource "google_compute_instance_group_manager" "igm-update" {
   instance_lifecycle_policy {
     force_update_on_repair = "NO"
     default_action_on_failure = "REPAIR"
-{{- if ne $.TargetVersionName "ga" }}
+
+    {{- if ne $.TargetVersionName "ga" }}
     on_failed_health_check = "REPAIR"
-{{- end }}
+    {{- end }}
+
+    {{- if ne $.TargetVersionName "ga" }}
+    on_repair {
+      allow_changing_zone  = "NO"
+    }
+    {{- end }}
   }
 }
 `, template1, target1, target2, template2, description, igm)
@@ -2137,6 +2154,11 @@ resource "google_compute_instance_template" "igm-basic" {
     network = "default"
   }
 
+  scheduling {
+    automatic_restart   = true
+    on_host_maintenance = "TERMINATE"
+  }
+
   service_account {
     scopes = ["userinfo-email", "compute-ro", "storage-ro"]
   }
@@ -2245,6 +2267,11 @@ resource "google_compute_instance_template" "igm-basic" {
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
+  scheduling {
+    automatic_restart   = true
+    on_host_maintenance = "TERMINATE"
+  }
+
   disk {
     source_image = data.google_compute_image.my_image.self_link
     auto_delete  = true
@@ -2294,6 +2321,11 @@ resource "google_compute_instance_template" "igm-basic" {
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
+  scheduling {
+    automatic_restart   = true
+    on_host_maintenance = "TERMINATE"
+  }
+
   disk {
     source_image = data.google_compute_image.my_image.self_link
     auto_delete  = true
@@ -2327,7 +2359,95 @@ resource "google_compute_instance_group_manager" "igm-workload-policy" {
 }
 
 
-{{ if ne $.TargetVersionName `ga` -}}
+func TestAccInstanceGroupManager_targetSizePolicy(t *testing.T) {
+	t.Parallel()
+
+	templateName := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+	igmName := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceGroupManager_targetSizePolicy(templateName, igmName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-tsp", "target_size_policy.0.mode", "BULK"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-tsp",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+		},
+	})
+}
+
+func testAccInstanceGroupManager_targetSizePolicy(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+  scheduling {
+    instance_termination_action  = "DELETE"
+    provisioning_model = "FLEX_START"
+    on_host_maintenance = "TERMINATE"
+    max_run_duration {
+      seconds = 900
+    }
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-tsp" {
+  description = "Terraform test instance group manager"
+  name        = "%s"
+
+  instance_lifecycle_policy {
+    default_action_on_failure = "DO_NOTHING"
+  }
+
+  version {
+    name              = "primary"
+    instance_template = google_compute_instance_template.igm-basic.self_link
+  }
+
+  base_instance_name = "tf-test-igm-tsp"
+  zone               = "us-central1-c"
+  target_size        = 2
+
+  target_size_policy {
+    mode = "BULK"
+  }
+}
+`, template, igm)
+}
+
+{{- if ne $.TargetVersionName "ga" }}
 func testAccInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2381,4 +2501,5 @@ resource "google_compute_instance_group_manager" "igm-tags" {
 }
 `, template_name, project_id, tag_name, tag_name, igm_name)
 }
+
 {{- end }}

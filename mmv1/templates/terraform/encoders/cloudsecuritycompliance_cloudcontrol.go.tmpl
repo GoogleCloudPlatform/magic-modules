@@ -1,0 +1,19 @@
+// Build the fullname for the CloudControl resource from the provided
+// organization, location and cloud_control_id fields and set it on the
+// API object that will be sent in the request.
+org, ok := d.Get("organization").(string)
+if !ok || org == "" {
+	return nil, fmt.Errorf("organization is required and must be a non-empty string")
+}
+loc, ok := d.Get("location").(string)
+if !ok || loc == "" {
+	return nil, fmt.Errorf("location is required and must be a non-empty string")
+}
+ccid, ok := d.Get("cloud_control_id").(string)
+if !ok || ccid == "" {
+	return nil, fmt.Errorf("cloud_control_id is required and must be a non-empty string")
+}
+// Compose the resource name in the expected API format.
+name := fmt.Sprintf("organizations/%s/locations/%s/cloudControls/%s", org, loc, ccid)
+obj["name"] = name
+return obj, nil

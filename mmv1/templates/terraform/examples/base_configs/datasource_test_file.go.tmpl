@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 // ----------------------------------------------------------------------------
@@ -28,17 +28,25 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 )
 
+var (
+    _ = fmt.Sprintf
+    _ = envvar.TestEnvVar
+    _ = tpgresource.SetLabels
+)
+
 {{ if $.Res.TestExamples }}
 {{ $e := index $.Res.TestExamples 0 }}
 func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
 	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
-	{{- range $varKey, $varVal := $e.TestVarsOverrides }}
+	{{- range $varKey, $varVal := $e.TestContextVars }}
 		"{{$varKey}}": {{$varVal}},
 	{{- end }}
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -62,13 +70,13 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 			{
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
 				Check: resource.ComposeTestCheckFunc(
-					{{- if gt (len ($.Res.IgnoreReadProperties $e)) 0 }}
+					{{- if gt (len ($.Res.IgnoreReadPropertiesLegacy $e)) 0 }}
 						acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 							"data.{{ $e.ResourceType $.Res.TerraformName }}.default",
 							"{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
-							map[string]struct{}{
-								{{- range $prop := $.Res.IgnoreReadProperties $e }}
-								"{{ $prop }}": {},
+							[]string{
+								{{- range $prop := $.Res.IgnoreReadPropertiesLegacy $e }}
+								"{{ $prop }}",
 								{{- end }}
 							},
 						),

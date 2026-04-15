@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -61,6 +62,7 @@ var (
 		"cluster_config.0.gce_cluster_config.0.internal_ip_only",
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config",
 		"cluster_config.0.gce_cluster_config.0.metadata",
+		"cluster_config.0.gce_cluster_config.0.resource_manager_tags",
 		"cluster_config.0.gce_cluster_config.0.reservation_affinity",
 		"cluster_config.0.gce_cluster_config.0.node_group_affinity",
 		"cluster_config.0.gce_cluster_config.0.confidential_instance_config",
@@ -103,6 +105,7 @@ var (
 
 	clusterConfigKeys = []string{
 		"cluster_config.0.cluster_tier",
+		"cluster_config.0.cluster_type",
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
 		"cluster_config.0.gce_cluster_config",
@@ -133,6 +136,8 @@ func diskConfigKeys(configName string) []string {
 		"cluster_config.0." + configName + ".0.disk_config.0.num_local_ssds",
 		"cluster_config.0." + configName + ".0.disk_config.0.boot_disk_size_gb",
 		"cluster_config.0." + configName + ".0.disk_config.0.boot_disk_type",
+		"cluster_config.0." + configName + ".0.disk_config.0.boot_disk_provisioned_iops",
+		"cluster_config.0." + configName + ".0.disk_config.0.boot_disk_provisioned_throughput",
 		"cluster_config.0." + configName + ".0.disk_config.0.local_ssd_interface",
 	}
 }
@@ -562,6 +567,15 @@ func ResourceDataprocCluster() *schema.Resource {
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TIER_UNSPECIFIED", "CLUSTER_TIER_STANDARD", "CLUSTER_TIER_PREMIUM"}, false),
 						},
+						"cluster_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							Description:  `The type of the cluster.`,
+							AtLeastOneOf: clusterConfigKeys,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TYPE_UNSPECIFIED", "STANDARD", "SINGLE_NODE", "ZERO_SCALE"}, false),
+						},
 						"staging_bucket": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -679,6 +693,16 @@ func ResourceDataprocCluster() *schema.Resource {
 										Elem:         &schema.Schema{Type: schema.TypeString},
 										ForceNew:     true,
 										Description:  `A map of the Compute Engine metadata entries to add to all instances`,
+									},
+
+									"resource_manager_tags": {
+										Type:         schema.TypeMap,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Elem:         &schema.Schema{Type: schema.TypeString},
+										ForceNew:     true,
+										Description:  `A map of resource manager tags to add to all instances. Keys must be in the format tagKeys/{tag_key_id} and values in the format tagValues/{tag_value_id}.`,
 									},
 
 									"shielded_instance_config": {
@@ -904,6 +928,22 @@ func ResourceDataprocCluster() *schema.Resource {
 													Default:      "pd-standard",
 												},
 
+												"boot_disk_provisioned_iops": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+													AtLeastOneOf: masterDiskConfigKeys,
+													ForceNew:     true,
+												},
+
+												"boot_disk_provisioned_throughput": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+													AtLeastOneOf: masterDiskConfigKeys,
+													ForceNew:     true,
+												},
+
 												"local_ssd_interface": {
 													Type:         schema.TypeString,
 													Optional:     true,
@@ -933,6 +973,75 @@ func ResourceDataprocCluster() *schema.Resource {
 										Computed:    true,
 										Elem:        &schema.Schema{Type: schema.TypeString},
 										Description: `List of master instance names which have been assigned to the cluster.`,
+									},
+									"instance_flexibility_policy": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										Description: `Instance flexibility Policy allowing a mixture of VM shapes`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+											"cluster_config.0.master_config.0.instance_flexibility_policy",
+										},
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"instance_selection_list": {
+													Type:     schema.TypeList,
+													Computed: true,
+													Optional: true,
+													ForceNew: true,
+													AtLeastOneOf: []string{
+														"cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list",
+													},
+													Description: `List of instance selection options that the group will use when creating new VMs.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"machine_types": {
+																Type:        schema.TypeList,
+																Computed:    true,
+																Optional:    true,
+																ForceNew:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `Full machine-type names, e.g. "n1-standard-16".`,
+															},
+															"rank": {
+																Type:        schema.TypeInt,
+																Computed:    true,
+																Optional:    true,
+																ForceNew:    true,
+																Elem:        &schema.Schema{Type: schema.TypeInt},
+																Description: `Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.`,
+															},
+														},
+													},
+												},
+												"instance_selection_results": {
+													Type:        schema.TypeList,
+													Computed:    true,
+													Description: `A list of instance selection results in the group.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"machine_type": {
+																Type:        schema.TypeString,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `Full machine-type names, e.g. "n1-standard-16".`,
+															},
+															"vm_count": {
+																Type:        schema.TypeInt,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeInt},
+																Description: `Number of VM provisioned with the machine_type.`,
+															},
+														},
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -1049,6 +1158,22 @@ func ResourceDataprocCluster() *schema.Resource {
 													Default:      "pd-standard",
 												},
 
+												"boot_disk_provisioned_iops": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+													AtLeastOneOf: workerDiskConfigKeys,
+													ForceNew:     true,
+												},
+
+												"boot_disk_provisioned_throughput": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+													AtLeastOneOf: workerDiskConfigKeys,
+													ForceNew:     true,
+												},
+
 												"local_ssd_interface": {
 													Type:         schema.TypeString,
 													Optional:     true,
@@ -1095,6 +1220,77 @@ func ResourceDataprocCluster() *schema.Resource {
 											"cluster_config.0.worker_config.0.min_num_instances",
 										},
 										Description: `The minimum number of primary worker instances to create.`,
+									},
+
+									"instance_flexibility_policy": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										Description: `Instance flexibility Policy allowing a mixture of VM shapes`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+											"cluster_config.0.worker_config.0.instance_flexibility_policy",
+										},
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"instance_selection_list": {
+													Type:     schema.TypeList,
+													Computed: true,
+													Optional: true,
+													ForceNew: true,
+													AtLeastOneOf: []string{
+														"cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list",
+													},
+													Description: `List of instance selection options that the group will use when creating new VMs.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"machine_types": {
+																Type:        schema.TypeList,
+																Computed:    true,
+																Optional:    true,
+																ForceNew:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `Full machine-type names, e.g. "n1-standard-16".`,
+															},
+															"rank": {
+																Type:        schema.TypeInt,
+																Computed:    true,
+																Optional:    true,
+																ForceNew:    true,
+																Elem:        &schema.Schema{Type: schema.TypeInt},
+																Description: `Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.`,
+															},
+														},
+													},
+												},
+												"instance_selection_results": {
+													Type:        schema.TypeList,
+													Computed:    true,
+													Description: `A list of instance selection results in the group.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"machine_type": {
+																Type:        schema.TypeString,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `Full machine-type names, e.g. "n1-standard-16".`,
+															},
+															"vm_count": {
+																Type:        schema.TypeInt,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeInt},
+																Description: `Number of VM provisioned with the machine_type.`,
+															},
+														},
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -1179,6 +1375,22 @@ func ResourceDataprocCluster() *schema.Resource {
 													ForceNew:     true,
 													Default:      "pd-standard",
 													Description:  `The disk type of the primary disk attached to each preemptible worker node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
+												},
+
+												"boot_disk_provisioned_iops": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+													AtLeastOneOf: preemptibleWorkerDiskConfigKeys,
+													ForceNew:     true,
+												},
+
+												"boot_disk_provisioned_throughput": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+													AtLeastOneOf: preemptibleWorkerDiskConfigKeys,
+													ForceNew:     true,
 												},
 
 												"local_ssd_interface": {
@@ -1560,7 +1772,7 @@ by Dataproc`,
 							Optional:     true,
 							MaxItems:     1,
 							AtLeastOneOf: clusterConfigKeys,
-							Description:  `The settings for auto deletion cluster schedule.`,
+							Description:  `The settings for auto stop and deletion cluster schedule.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"idle_delete_ttl": {
@@ -1570,6 +1782,8 @@ by Dataproc`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+											"cluster_config.0.lifecycle_config.0.idle_stop_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_stop_time",
 										},
 									},
 									"idle_start_time": {
@@ -1589,6 +1803,35 @@ by Dataproc`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+											"cluster_config.0.lifecycle_config.0.idle_stop_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_stop_time",
+										},
+									},
+									"idle_stop_ttl": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The duration to keep the cluster started while idling (no jobs running). After this TTL, the cluster will be stopped. Valid range: [10m, 14d].`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+											"cluster_config.0.lifecycle_config.0.idle_stop_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_stop_time",
+										},
+									},
+									// the API also has the auto_stop_ttl option in its request, however,
+									// the value is not returned in the response, rather the auto_stop_time
+									// after calculating ttl with the update time is returned, thus, for now
+									// we will only allow auto_stop_time to updated.
+									"auto_stop_time": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										Description:      `The time when cluster will be auto-stopped. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
+										DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
+										AtLeastOneOf: []string{
+											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+											"cluster_config.0.lifecycle_config.0.idle_stop_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_stop_time",
 										},
 									},
 								},
@@ -1726,6 +1969,20 @@ by Dataproc`,
 																			Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
 																			ForceNew:    true,
 																			Default:     "pd-standard",
+																		},
+
+																		"boot_disk_provisioned_iops": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																			ForceNew:    true,
+																		},
+
+																		"boot_disk_provisioned_throughput": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																			ForceNew:    true,
 																		},
 
 																		"local_ssd_interface": {
@@ -2086,6 +2343,10 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 		conf.ClusterTier = v.(string)
 	}
 
+	if v, ok := d.GetOk("cluster_config.0.cluster_type"); ok {
+		conf.ClusterType = v.(string)
+	}
+
 	c, err := expandGceClusterConfig(d, config)
 	if err != nil {
 		return nil, err
@@ -2218,6 +2479,12 @@ func expandNodeGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGroupCo
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
 			}
+			if v, ok := dcfg["boot_disk_provisioned_iops"]; ok {
+				icg.DiskConfig.BootDiskProvisionedIops = int64(v.(int))
+			}
+			if v, ok := dcfg["boot_disk_provisioned_throughput"]; ok {
+				icg.DiskConfig.BootDiskProvisionedThroughput = int64(v.(int))
+			}
 			if v, ok := dcfg["local_ssd_interface"]; ok {
 				icg.DiskConfig.LocalSsdInterface = v.(string)
 			}
@@ -2276,6 +2543,9 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 	}
 	if v, ok := cfg["metadata"]; ok {
 		conf.Metadata = tpgresource.ConvertStringMap(v.(map[string]interface{}))
+	}
+	if v, ok := cfg["resource_manager_tags"]; ok {
+		conf.ResourceManagerTags = tpgresource.ConvertStringMap(v.(map[string]interface{}))
 	}
 	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.shielded_instance_config"); ok {
 		cfgSic := v.([]interface{})[0].(map[string]interface{})
@@ -2448,6 +2718,12 @@ func expandLifecycleConfig(cfg map[string]interface{}) *dataproc.LifecycleConfig
 	if v, ok := cfg["auto_delete_time"]; ok {
 		conf.AutoDeleteTime = v.(string)
 	}
+	if v, ok := cfg["idle_stop_ttl"]; ok {
+		conf.IdleStopTtl = v.(string)
+	}
+	if v, ok := cfg["auto_stop_time"]; ok {
+		conf.AutoStopTime = v.(string)
+	}
 	return conf
 }
 
@@ -2522,6 +2798,12 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 			}
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
+			}
+			if v, ok := dcfg["boot_disk_provisioned_iops"]; ok {
+				icg.DiskConfig.BootDiskProvisionedIops = int64(v.(int))
+			}
+			if v, ok := dcfg["boot_disk_provisioned_throughput"]; ok {
+				icg.DiskConfig.BootDiskProvisionedThroughput = int64(v.(int))
 			}
 			if v, ok := dcfg["local_ssd_interface"]; ok {
 				icg.DiskConfig.LocalSsdInterface = v.(string)
@@ -2614,12 +2896,27 @@ func expandMasterInstanceGroupConfig(cfg map[string]interface{}) *dataproc.Insta
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
 			}
+			if v, ok := dcfg["boot_disk_provisioned_iops"]; ok {
+				icg.DiskConfig.BootDiskProvisionedIops = int64(v.(int))
+			}
+			if v, ok := dcfg["boot_disk_provisioned_throughput"]; ok {
+				icg.DiskConfig.BootDiskProvisionedThroughput = int64(v.(int))
+			}
 			if v, ok := dcfg["local_ssd_interface"]; ok {
 				icg.DiskConfig.LocalSsdInterface = v.(string)
 			}
 		}
 	}
-
+	if ifpc, ok := cfg["instance_flexibility_policy"]; ok {
+		ifps := ifpc.([]interface{})
+		if len(ifps) > 0 {
+			flexibilityPolicy := ifps[0].(map[string]interface{})
+			icg.InstanceFlexibilityPolicy = &dataproc.InstanceFlexibilityPolicy{}
+			if v, ok := flexibilityPolicy["instance_selection_list"]; ok {
+				icg.InstanceFlexibilityPolicy.InstanceSelectionList = expandInstanceSelectionList(v)
+			}
+		}
+	}
 	icg.Accelerators = expandAccelerators(cfg["accelerators"].(*schema.Set).List())
 	return icg
 }
@@ -2658,12 +2955,27 @@ func expandWorkerInstanceGroupConfig(cfg map[string]interface{}) *dataproc.Insta
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
 			}
+			if v, ok := dcfg["boot_disk_provisioned_iops"]; ok {
+				icg.DiskConfig.BootDiskProvisionedIops = int64(v.(int))
+			}
+			if v, ok := dcfg["boot_disk_provisioned_throughput"]; ok {
+				icg.DiskConfig.BootDiskProvisionedThroughput = int64(v.(int))
+			}
 			if v, ok := dcfg["local_ssd_interface"]; ok {
 				icg.DiskConfig.LocalSsdInterface = v.(string)
 			}
 		}
 	}
-
+	if ifpc, ok := cfg["instance_flexibility_policy"]; ok {
+		ifps := ifpc.([]interface{})
+		if len(ifps) > 0 {
+			flexibilityPolicy := ifps[0].(map[string]interface{})
+			icg.InstanceFlexibilityPolicy = &dataproc.InstanceFlexibilityPolicy{}
+			if v, ok := flexibilityPolicy["instance_selection_list"]; ok {
+				icg.InstanceFlexibilityPolicy.InstanceSelectionList = expandInstanceSelectionList(v)
+			}
+		}
+	}
 	icg.Accelerators = expandAccelerators(cfg["accelerators"].(*schema.Set).List())
 	return icg
 }
@@ -2764,6 +3076,28 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		updMask = append(updMask, "config.lifecycle_config.auto_delete_time")
+	}
+
+	if d.HasChange("cluster_config.0.lifecycle_config.0.idle_stop_ttl") {
+		idleStopTtl := d.Get("cluster_config.0.lifecycle_config.0.idle_stop_ttl").(string)
+		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
+			IdleStopTtl: idleStopTtl,
+		}
+
+		updMask = append(updMask, "config.lifecycle_config.idle_stop_ttl")
+	}
+
+	if d.HasChange("cluster_config.0.lifecycle_config.0.auto_stop_time") {
+		desiredStopTime := d.Get("cluster_config.0.lifecycle_config.0.auto_stop_time").(string)
+		if cluster.Config.LifecycleConfig != nil {
+			cluster.Config.LifecycleConfig.AutoStopTime = desiredStopTime
+		} else {
+			cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
+				AutoStopTime: desiredStopTime,
+			}
+		}
+
+		updMask = append(updMask, "config.lifecycle_config.auto_stop_time")
 	}
 
 	if len(updMask) > 0 {
@@ -2984,6 +3318,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("cluster_config.0.staging_bucket").(string),
 		"cluster_tier":              d.Get("cluster_config.0.cluster_tier").(string),
+		"cluster_type":              cfg.ClusterType,
 		"bucket":                    cfg.ConfigBucket,
 		"temp_bucket":               cfg.TempBucket,
 		"gce_cluster_config":        flattenGceClusterConfig(d, cfg.GceClusterConfig),
@@ -3110,6 +3445,8 @@ func flattenLifecycleConfig(d *schema.ResourceData, lc *dataproc.LifecycleConfig
 	data := map[string]interface{}{
 		"idle_delete_ttl":  lc.IdleDeleteTtl,
 		"auto_delete_time": lc.AutoDeleteTime,
+		"idle_stop_ttl":    lc.IdleStopTtl,
+		"auto_stop_time":   lc.AutoStopTime,
 	}
 
 	return []map[string]interface{}{data}
@@ -3242,6 +3579,12 @@ func flattenNodeGroupConfig(icg *dataproc.InstanceGroupConfig) []map[string]inte
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			if icg.DiskConfig.BootDiskProvisionedIops > 0 {
+				disk["boot_disk_provisioned_iops"] = icg.DiskConfig.BootDiskProvisionedIops
+			}
+			if icg.DiskConfig.BootDiskProvisionedThroughput > 0 {
+				disk["boot_disk_provisioned_throughput"] = icg.DiskConfig.BootDiskProvisionedThroughput
+			}
 			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
@@ -3258,11 +3601,12 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 	}
 
 	gceConfig := map[string]interface{}{
-		"tags":             schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
-		"service_account":  gcc.ServiceAccount,
-		"zone":             tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
-		"internal_ip_only": gcc.InternalIpOnly,
-		"metadata":         gcc.Metadata,
+		"tags":                  schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
+		"service_account":       gcc.ServiceAccount,
+		"zone":                  tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
+		"internal_ip_only":      gcc.InternalIpOnly,
+		"metadata":              gcc.Metadata,
+		"resource_manager_tags": gcc.ResourceManagerTags,
 	}
 
 	if gcc.NetworkUri != "" {
@@ -3339,6 +3683,12 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			if icg.DiskConfig.BootDiskProvisionedIops > 0 {
+				disk["boot_disk_provisioned_iops"] = icg.DiskConfig.BootDiskProvisionedIops
+			}
+			if icg.DiskConfig.BootDiskProvisionedThroughput > 0 {
+				disk["boot_disk_provisioned_throughput"] = icg.DiskConfig.BootDiskProvisionedThroughput
+			}
 			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
 		if icg.InstanceFlexibilityPolicy != nil {
@@ -3395,6 +3745,7 @@ func flattenProvisioningModelMix(pmm *dataproc.ProvisioningModelMix) []map[strin
 
 func flattenMasterInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
 	disk := map[string]interface{}{}
+	instanceFlexibilityPolicy := map[string]interface{}{}
 	data := map[string]interface{}{}
 
 	if icg != nil {
@@ -3407,18 +3758,31 @@ func flattenMasterInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			if icg.DiskConfig.BootDiskProvisionedIops > 0 {
+				disk["boot_disk_provisioned_iops"] = icg.DiskConfig.BootDiskProvisionedIops
+			}
+			if icg.DiskConfig.BootDiskProvisionedThroughput > 0 {
+				disk["boot_disk_provisioned_throughput"] = icg.DiskConfig.BootDiskProvisionedThroughput
+			}
 			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
-
+		if icg.InstanceFlexibilityPolicy != nil {
+			if icg.InstanceFlexibilityPolicy.InstanceSelectionList != nil {
+				instanceFlexibilityPolicy["instance_selection_list"] = flattenInstanceSelectionList(icg.InstanceFlexibilityPolicy.InstanceSelectionList)
+				instanceFlexibilityPolicy["instance_selection_results"] = flattenInstanceSelectionResults(icg.InstanceFlexibilityPolicy.InstanceSelectionResults)
+			}
+		}
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
 	}
 
 	data["disk_config"] = []map[string]interface{}{disk}
+	data["instance_flexibility_policy"] = []map[string]interface{}{instanceFlexibilityPolicy}
 	return []map[string]interface{}{data}
 }
 
 func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
 	disk := map[string]interface{}{}
+	instanceFlexibilityPolicy := map[string]interface{}{}
 	data := map[string]interface{}{}
 
 	if icg != nil {
@@ -3432,13 +3796,25 @@ func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			if icg.DiskConfig.BootDiskProvisionedIops > 0 {
+				disk["boot_disk_provisioned_iops"] = icg.DiskConfig.BootDiskProvisionedIops
+			}
+			if icg.DiskConfig.BootDiskProvisionedThroughput > 0 {
+				disk["boot_disk_provisioned_throughput"] = icg.DiskConfig.BootDiskProvisionedThroughput
+			}
 			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
-
+		if icg.InstanceFlexibilityPolicy != nil {
+			if icg.InstanceFlexibilityPolicy.InstanceSelectionList != nil {
+				instanceFlexibilityPolicy["instance_selection_list"] = flattenInstanceSelectionList(icg.InstanceFlexibilityPolicy.InstanceSelectionList)
+				instanceFlexibilityPolicy["instance_selection_results"] = flattenInstanceSelectionResults(icg.InstanceFlexibilityPolicy.InstanceSelectionResults)
+			}
+		}
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
 	}
 
 	data["disk_config"] = []map[string]interface{}{disk}
+	data["instance_flexibility_policy"] = []map[string]interface{}{instanceFlexibilityPolicy}
 	return []map[string]interface{}{data}
 }
 
@@ -3546,4 +3922,13 @@ func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
 		subminor: matches[3],
 		osName:   matches[4],
 	}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_dataproc_cluster",
+		ProductName: "dataproc",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDataprocCluster(),
+	}.Register()
 }

@@ -46,7 +46,6 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'service_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
@@ -54,12 +53,10 @@ custom_code:
 examples:
   - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     vars:
       metastore_service_name: 'metastore-srv'
   - name: 'dataproc_metastore_service_deletion_protection'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     vars:
       metastore_service_name: 'metastore-srv'
       deletion_protection: 'true'
@@ -134,7 +131,7 @@ examples:
   - name: 'dataproc_metastore_service_scheduled_backup'
     primary_resource_id: 'backup'
     vars:
-      metastore_service_name: 'backup'
+      metastore_service_name: 'backup-1'
   - name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
     primary_resource_id: 'test_resource'
     vars:
@@ -420,10 +417,7 @@ properties:
           The key is the auxiliary service name and it must match the regular expression a-z?.
           This means that the first character must be a lowercase letter, and all the following characters must be hyphens, lowercase letters, or digits, except the last character, which cannot be a hyphen.
         key_name: 'key'
-        key_description: |
-          The auxiliary service name
         value_type:
-          name: auxiliaryVersions
           type: NestedObject
           properties:
             - name: 'version'
@@ -522,3 +516,11 @@ properties:
         enum_values:
           - 'LEGACY'
           - 'JSON'
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+    immutable: true
+    ignore_read: true

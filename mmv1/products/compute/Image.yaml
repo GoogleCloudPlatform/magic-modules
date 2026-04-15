@@ -55,13 +55,11 @@ iam_policy:
   allowed_iam_role: 'roles/compute.imageUser'
   parent_resource_attribute: 'image'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 custom_code:
 examples:
   - name: 'image_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-image%s", context["random_suffix"])'
     vars:
       disk_name: 'example-disk'
       image_name: 'example-image'
@@ -75,7 +73,6 @@ examples:
     vars:
       disk_name: 'example-disk'
       image_name: 'example-sl-image'
-      primary_resource_name: 'fmt.Sprintf("tf-test-sl-example-image%s", context["random_suffix"])'
 parameters:
 properties:
   - name: 'archiveSizeBytes'
@@ -146,6 +143,7 @@ properties:
             - 'SUSPEND_RESUME_COMPATIBLE'
             - 'TDX_CAPABLE'
             - 'SEV_LIVE_MIGRATABLE_V2'
+            - 'SNP_SVSM_CAPABLE'
   - name: 'imageEncryptionKey'
     type: NestedObject
     description: |
@@ -249,6 +247,7 @@ properties:
           You must provide either this property or the sourceDisk property
           but not both.
         required: true
+        is_missing_in_cai: true
   - name: 'sourceDisk'
     type: ResourceRef
     description: |

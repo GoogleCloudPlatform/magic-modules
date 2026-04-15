@@ -1,0 +1,23 @@
+{{/*
+This custom expander for InterconnectAttachment encryption checks the attachment type.
+If the type is L2_DEDICATED, it returns nil to prevent sending the encryption field in the API request.
+Otherwise, it returns the provided encryption value.
+*/}}
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+    // v is the value of the 'encryption' field from the Terraform state.
+    // d is the TerraformResourceData, allowing access to other fields like 'type'.
+
+    attachmentType, ok := d.GetOk("type")
+
+    if ok && attachmentType.(string) == "L2_DEDICATED" {
+        // If the attachment type is L2_DEDICATED, do not send the encryption field.
+        // Returning nil will cause the field to be omitted in the API request payload,
+        // assuming the field in the generated Go API client struct is a pointer type (e.g., *string),
+        // which is standard for optional fields.
+        return nil, nil
+    }
+
+    // For all other attachment types, return the configured value of 'encryption'.
+    // Since 'encryption' is an Enum, v is expected to be a string.
+    return v, nil
+}

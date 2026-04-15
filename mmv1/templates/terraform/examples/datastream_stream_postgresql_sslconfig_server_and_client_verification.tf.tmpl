@@ -1,0 +1,69 @@
+data "google_datastream_static_ips" "datastream_ips" {
+  location           = "us-central1"
+}
+
+resource "google_sql_database_instance" "instance" {
+  name             = "{{index $.Vars "database_instance_name"}}"
+  database_version = "POSTGRES_15"
+  region           = "us-central1"
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled = true
+      ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
+      dynamic "authorized_networks" {
+        for_each = data.google_datastream_static_ips.datastream_ips.static_ips
+        iterator = ip
+
+        content {
+          name  = format("datastream-%d", ip.key)
+          value = ip.value
+        }
+      }
+    }
+  }
+
+  deletion_protection  = {{index $.Vars "deletion_protection"}}
+}
+
+resource "google_sql_database" "db" {
+    instance = google_sql_database_instance.instance.name
+    name     = "db"
+}
+
+resource "random_password" "pwd" {
+  length  = 16
+  special = false
+}
+
+resource "google_sql_user" "user" {
+    name = "user"
+    instance = google_sql_database_instance.instance.name
+    password = random_password.pwd.result
+}
+
+resource "google_sql_ssl_cert" "client_cert" {
+  common_name = "client-name"
+  instance    = google_sql_database_instance.instance.name
+}
+
+resource "google_datastream_connection_profile" "{{$.PrimaryResourceId}}" {
+    display_name          = "Connection Profile"
+    location              = "us-central1"
+    connection_profile_id = "{{index $.Vars "connection_profile_id"}}"
+
+    postgresql_profile {
+        hostname = google_sql_database_instance.instance.public_ip_address
+        port     = 5432
+        username = "user"
+        password = random_password.pwd.result
+        database = google_sql_database.db.name
+        ssl_config {
+            server_and_client_verification {
+              client_certificate = google_sql_ssl_cert.client_cert.cert
+              client_key = google_sql_ssl_cert.client_cert.private_key
+              ca_certificate = google_sql_ssl_cert.client_cert.server_ca_cert
+            }
+        }
+    }
+}

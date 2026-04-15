@@ -13,7 +13,7 @@ provider "google" {
 
 
 resource "google_kms_key_ring_import_job" "import-job" {
-  key_ring = "keyring-id-example"
+  key_ring = "projects/{{.Provider.project}}/locations/global/keyRings/keyring-id-example"
   import_job_id = "my-import-job"
 
   import_method = "RSA_OAEP_3072_SHA1_AES_256"

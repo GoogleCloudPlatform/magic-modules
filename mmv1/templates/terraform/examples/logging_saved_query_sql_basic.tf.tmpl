@@ -1,0 +1,20 @@
+resource "google_logging_saved_query" "{{.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "logging_saved_query_name"}}"
+  display_name = "My Saved Query"
+  parent       = "projects/{{index $.TestEnvVars "project"}}"
+  location     = "global"
+  description  = "A saved query"
+  ops_analytics_query {
+    sql_query_text = <<-EOT
+SELECT
+  timestamp, log_name, severity, json_payload, resource, labels
+FROM
+  VIEW
+WHERE
+  timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
+ORDER BY timestamp ASC
+LIMIT 100
+EOT
+  }
+  visibility = "SHARED"
+}

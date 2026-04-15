@@ -1,0 +1,44 @@
+// This file is a transposition of mmv1/templates/terraform/flatten_property_method.go.tmpl
+// Most of the code is copied from there, with the exception of sorting logic.
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  if v == nil {
+    return v
+  }
+  l := v.([]interface{})
+  transformed := make([]map[string]interface{}, 0, len(l))
+  for _, raw := range l {
+    original := raw.(map[string]interface{})
+    if len(original) < 1 {
+      // Do not include empty json objects coming back from the api
+      continue
+    }
+    transformed = append(transformed, map[string]interface{}{
+
+  {{- range $prop := $.ItemType.UserProperties }}
+    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy $prop.WriteOnly) }}
+      "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
+    {{- end }}
+  {{- end }}
+    })
+  }
+
+  configData := []map[string]interface{}{}
+
+  for _, item := range d.Get("aspects").([]interface{}) {
+    configData = append(configData, item.(map[string]interface{}))
+  }
+
+  sorted, err := tpgresource.SortMapsByConfigOrder(configData, transformed, "aspect_key")
+  if err != nil {
+    log.Printf("[ERROR] Could not sort API response value: %s", err)
+    return v
+  }
+
+  return sorted
+}
+
+{{- if $.NestedProperties }}
+    {{- range $prop := $.NestedProperties }}
+      {{ template "flattenPropertyMethod" $prop -}}
+    {{- end }}
+{{- end }}

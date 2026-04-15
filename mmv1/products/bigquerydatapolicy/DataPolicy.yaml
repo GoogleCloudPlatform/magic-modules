@@ -37,7 +37,6 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'data_policy_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
     - '{{data_policy_id}}'
@@ -45,17 +44,21 @@ custom_code:
 examples:
   - name: 'bigquery_datapolicy_data_policy_basic'
     primary_resource_id: 'data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
     vars:
       data_policy_id: 'data_policy'
       taxonomy: 'taxonomy'
+    test_vars_overrides:
+      # for backward compatible
+      taxonomy: '"taxonomy" + randomSuffix'
   - name: 'bigquery_datapolicy_data_policy_routine'
     primary_resource_id: 'data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
     vars:
       data_policy_id: 'data_policy'
       taxonomy: 'taxonomy'
       dataset_id: 'dataset_id'
+    test_vars_overrides:
+      # for backward compatible
+      taxonomy: '"taxonomy" + randomSuffix'
 parameters:
 properties:
   - name: 'name'

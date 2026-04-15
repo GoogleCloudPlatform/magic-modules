@@ -38,12 +38,10 @@ collection_url_key: 'functions'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'cloud_function'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 examples:
   - name: 'cloudfunctions_cloud_function'
     primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-function%s", context["random_suffix"])'
     vars:
       function_name: 'my-function'
       bucket_name: 'cloudfunctions-function-example-bucket'

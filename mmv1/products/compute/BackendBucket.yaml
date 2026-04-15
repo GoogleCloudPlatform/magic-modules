@@ -41,14 +41,13 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/global/backendBuckets/{{name}}'
     - '{{name}}'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/compute_backend_bucket.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'
@@ -56,11 +55,9 @@ custom_code:
 examples:
   - name: 'backend_bucket_basic'
     primary_resource_id: 'image_backend'
-    primary_resource_name: 'fmt.Sprintf("tf-test-image-backend-bucket%s", context["random_suffix"])'
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
   - name: 'backend_bucket_full'
     primary_resource_id: 'image_backend_full'
     vars:
@@ -72,7 +69,6 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
   - name: 'backend_bucket_query_string_whitelist'
     primary_resource_id: 'image_backend'
     vars:
@@ -116,6 +112,7 @@ examples:
       bucket_name: 'global-ilb-bucket'
     exclude_docs: true
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
 properties:
   - name: 'bucketName'
@@ -257,6 +254,7 @@ properties:
     description: |
       The security policy associated with this backend bucket.
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    is_missing_in_cai: true
   - name: 'customResponseHeaders'
     type: Array
     description: |

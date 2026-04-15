@@ -50,6 +50,11 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// already.
 	is403QuotaExceededPerMinuteError,
 
+	// GCE returns a 403 with reason CONCURRENT_OPERATIONS_QUOTA_EXCEEDED
+	// when too many operations are in flight. This is transient and clears
+	// once in-flight operations complete.
+	is403ConcurrentOperationsQuotaError,
+
 	// GCE Networks are considered unready for a brief period when certain
 	// operations are performed on them, and the scope is likely too broad to
 	// apply a mutex. If we attempt an operation w/ an unready network, retry
@@ -176,6 +181,35 @@ func is403QuotaExceededPerMinuteError(err error) (bool, string) {
 		limit := matches[QuotaRegex.SubexpIndex("Limit")]
 		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 403 and error message 'Quota exceeded for quota metric `%s`: %s", metric, err)
 		return true, fmt.Sprintf("Waiting for quota limit %s to refresh", limit)
+	}
+	return false, ""
+}
+
+// GCE returns a 403 when the concurrent operations quota is exceeded.
+// This is a transient error that clears once in-flight operations complete.
+// See https://github.com/hashicorp/terraform-provider-google/issues/9207
+func is403ConcurrentOperationsQuotaError(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code != 403 {
+		return false, ""
+	}
+
+	for _, d := range gerr.Details {
+		data, ok := d.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		dType, ok := data["@type"]
+		if ok && strings.Contains(dType.(string), "ErrorInfo") {
+			if v, ok := data["reason"]; ok && v.(string) == "CONCURRENT_OPERATIONS_QUOTA_EXCEEDED" {
+				log.Printf("[DEBUG] Dismissed an error as retryable based on error code 403 and error reason 'CONCURRENT_OPERATIONS_QUOTA_EXCEEDED': %s", err)
+				return true, "Concurrent operations quota exceeded, retrying"
+			}
+		}
 	}
 	return false, ""
 }
@@ -645,6 +679,26 @@ func IsSiteVerificationRetryableError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 400 && strings.Contains(strings.ToLower(gerr.Body), "verification token could not be found") {
 			return true, "Waiting for verification token to be visible"
+		}
+	}
+	return false, ""
+}
+
+// Retry when waiting for ingestion to create a 1P Dataplex entry corresponding to some other resource.
+func IsDataplex1PEntryIngestedError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 403 && strings.Contains(gerr.Body, "The action is not allowed on the Dataplex managed entry group") {
+			return true, fmt.Sprintf("Retry 403s for Dataplex Ingestion")
+		}
+	}
+	return false, ""
+}
+
+// Retry when waiting for a Dataplex target entry to be ingested.
+func IsDataplex1PEntryNotFoundError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 404 && strings.Contains(gerr.Body, "Entry `") && strings.Contains(gerr.Body, "` does not exist.") && (strings.Contains(gerr.Body, "@dataplex/entries/") || strings.Contains(gerr.Body, "@bigquery/entries/")) {
+			return true, fmt.Sprintf("Retry 404s for Dataplex Entry Ingestion")
 		}
 	}
 	return false, ""

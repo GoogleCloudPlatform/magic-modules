@@ -45,7 +45,6 @@ iam_policy:
   allowed_iam_role: 'roles/apigateway.viewer'
   parent_resource_attribute: 'api'
   base_url: 'projects/{{project}}/locations/global/apis/{{api}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/global/apis/{{api}}'
     - '{{project}}/{{api}}'
@@ -54,13 +53,11 @@ custom_code:
 examples:
   - name: 'apigateway_api_basic'
     primary_resource_id: 'api'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       api_id: 'my-api'
   - name: 'apigateway_api_full'
     primary_resource_id: 'api'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       api_id: 'my-api'

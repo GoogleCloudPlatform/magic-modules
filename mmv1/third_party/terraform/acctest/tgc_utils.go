@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/url"
 	"regexp"
 	"strings"
 	"testing"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 type ResourceMetadata struct {
@@ -21,6 +23,7 @@ type ResourceMetadata struct {
 	ResourceAddress string         `json:"resource_address"`
 	ImportMetadata  ImportMetadata `json:"import_metadata,omitempty"`
 	Service         string         `json:"service"`
+	CaiContentType  string         `json:"cai_content_type,omitempty"`
 }
 
 type ImportMetadata struct {
@@ -53,6 +56,7 @@ var serviceWithProjectNumber = map[string]struct{}{
 	"discoveryengine":       {},
 	"documentai":            {},
 	"healthcare":            {},
+	"iambeta":               {},
 	"iap":                   {},
 	"identityplatform":      {},
 	"logging":               {},
@@ -83,6 +87,14 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 
 		// Process each resource to get CAI asset names and resolve auto IDs
 		for address, metadata := range tgcPayload.ResourceMetadata {
+			// https://cloud.google.com/asset-inventory/docs/reference/rest/v1/feeds#ContentType
+			isIamResource := IsIamResource(metadata.ResourceType)
+			if isIamResource {
+				metadata.CaiContentType = "IAM_POLICY"
+			} else {
+				metadata.CaiContentType = "RESOURCE"
+			}
+
 			// If there is import metadata update our primary resource
 			if metadata.ImportMetadata.Id != "" {
 				tgcPayload.PrimaryResource = address
@@ -94,16 +106,20 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 				continue
 			}
 
-			// Resolve the CAI asset name
-			caiAssetNameFormat := CaiAssetNameFormatCache.Get(metadata.ResourceType)
-			if caiAssetNameFormat == "" || caiAssetNameFormat == "failed_to_populate_metadata_cache" {
-				log.Printf("[DEBUG]TGC Terraform error: unknown CAI asset name format for resource type %s", caiAssetNameFormat)
-
-				apiServiceName := ApiServiceNameCache.Get(metadata.ResourceType)
-				if apiServiceName == "unknown" || apiServiceName == "failed_to_populate_metadata_cache" {
+			// Technically this will always be populated before this point but keeping it here for now so
+			// the implementations are more similar.
+			err := GlobalMetadataCache.Populate()
+			if err != nil {
+				log.Printf("[DEBUG] TGC Terraform error: couldn't populate metadata cache: %v", err)
+				metadata.CaiAssetNames = []string{"failed_to_populate_metadata_cache"}
+			} else {
+				yamlMetadata, ok := GlobalMetadataCache.Get(metadata.ResourceType)
+				if !ok {
 					log.Printf("[DEBUG]TGC Terraform error: unknown resource type %s", metadata.ResourceType)
-					metadata.CaiAssetNames = []string{apiServiceName}
-				} else {
+					metadata.CaiAssetNames = []string{"unknown"}
+				} else if len(yamlMetadata.CaiAssetNameFormats) == 0 {
+					log.Printf("[DEBUG]TGC Terraform error: unknown CAI asset name format for resource type %s", yamlMetadata.Resource)
+
 					var rName string
 					switch metadata.ResourceType {
 					case "google_project":
@@ -116,18 +132,26 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 						rName = strings.Replace(rName, projectId, projectNumber, 1)
 					}
 
-					metadata.CaiAssetNames = []string{fmt.Sprintf("//%s/%s", apiServiceName, rName)}
-				}
-			} else {
-				paramsMap := make(map[string]any, 0)
-				params := extractIdentifiers(caiAssetNameFormat)
-				for _, param := range params {
-					v := rState.Primary.Attributes[param]
-					paramsMap[param] = v
-				}
+					if isIamResource {
+						rName = getIamResourceId(metadata.ResourceType, rName)
+					}
 
-				caiAssetName := replacePlaceholders(caiAssetNameFormat, paramsMap)
-				metadata.CaiAssetNames = []string{caiAssetName}
+					metadata.CaiAssetNames = []string{fmt.Sprintf("//%s/%s", yamlMetadata.ApiServiceName, rName)}
+				} else {
+					caiAssetNameFormat := ""
+					if len(yamlMetadata.CaiAssetNameFormats) == 1 {
+						caiAssetNameFormat = yamlMetadata.CaiAssetNameFormats[0]
+						caiAssetName := formatCaiAssetName(caiAssetNameFormat, rState.Primary.Attributes)
+						if _, ok := serviceWithProjectNumber[metadata.Service]; ok {
+							caiAssetName = strings.Replace(caiAssetName, projectId, projectNumber, 1)
+						}
+						metadata.CaiAssetNames = []string{caiAssetName}
+					} else {
+						if strings.HasPrefix(yamlMetadata.Resource, "google_container_") {
+							metadata.CaiAssetNames = resolveContainerCaiAssetName(yamlMetadata.CaiAssetNameFormats, rState.Primary.ID, rState.Primary.Attributes["location"])
+						}
+					}
+				}
 			}
 
 			log.Printf("[DEBUG] CaiAssetNames %#v", metadata.CaiAssetNames)
@@ -155,6 +179,42 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 	}
 }
 
+// resolveContainerCaiAssetName determines the correct CAI asset name
+// for GKE resources based on whether the resource location is a zone or a region.
+func resolveContainerCaiAssetName(caiAssetNameFormats []string, rName, location string) []string {
+	serviceDomain := getServiceDomain(caiAssetNameFormats[0])
+	if tpgresource.IsZone(location) {
+		rName = strings.Replace(rName, "/locations/", "/zones/", 1)
+	}
+
+	return []string{fmt.Sprintf("//%s/%s", serviceDomain, rName)}
+}
+
+func getServiceDomain(caiAssetName string) string {
+	// caiAssetName format: //container.googleapis.com/projects/...
+	parts := strings.Split(caiAssetName, "/")
+	if len(parts) >= 3 {
+		return parts[2]
+	}
+	return ""
+}
+
+// FormatCaiAssetName constructs a fully qualified Cloud Asset Inventory (CAI) asset name
+// by interpolating values from the provided attributes map into a format template.
+// It extracts required placeholders (e.g., "{{project}}", "{{name}}") from the
+// caiAssetNameFormat string and replaces them with their corresponding values from the map.
+func formatCaiAssetName(caiAssetNameFormat string, attributes map[string]string) string {
+	paramsMap := make(map[string]any, 0)
+	params := extractIdentifiers(caiAssetNameFormat)
+	for _, param := range params {
+		v := attributes[param]
+		paramsMap[param] = v
+	}
+
+	caiAssetName := replacePlaceholders(caiAssetNameFormat, paramsMap)
+	return caiAssetName
+}
+
 // For example, for the url "projects/{{project}}/schemas/{{schema}}",
 // the identifiers are "project", "schema".
 func extractIdentifiers(url string) []string {
@@ -169,13 +229,19 @@ func extractIdentifiers(url string) []string {
 // It replaces all instances of {{key}} in the template with the
 // corresponding value from the parameters map.
 func replacePlaceholders(template string, params map[string]any) string {
-	re := regexp.MustCompile(`\{\{([a-zA-Z0-9_]+)\}\}`)
+	re := regexp.MustCompile("{{([%[:word:]]+)}}")
 
 	result := re.ReplaceAllStringFunc(template, func(match string) string {
 		key := strings.Trim(match, "{}")
 
+		// The % indicates that the name value should be URL-encoded.
+		key, shouldBeEncoded := strings.CutPrefix(key, "%")
 		if value, ok := params[key]; ok {
-			return value.(string)
+			v := value.(string)
+			if !shouldBeEncoded {
+				return v
+			}
+			return url.PathEscape(v)
 		}
 
 		return match
@@ -247,6 +313,11 @@ func determineImportMetadata(steps []resource.TestStep, currentStepIndex int, re
 func extendWithTGCData(t *testing.T, c resource.TestCase) resource.TestCase {
 	var updatedSteps []resource.TestStep
 
+	populateErr := GlobalMetadataCache.Populate()
+	if populateErr != nil {
+		log.Printf("[DEBUG] TGC Terraform error: couldn't populate metadata cache: %v", populateErr)
+	}
+
 	// Process all steps
 	for i, step := range c.Steps {
 		// If this is a non-plan config step, add our TGC check
@@ -287,12 +358,19 @@ func extendWithTGCData(t *testing.T, c resource.TestCase) resource.TestCase {
 					// Determine import metadata if the next step is an import step
 					importMeta := determineImportMetadata(c.Steps, i, res)
 
+					service := "unknown"
+					if populateErr != nil {
+						service = "failed_to_populate_metadata_cache"
+					} else if yamlMetadata, ok := GlobalMetadataCache.Get(resourceType); ok {
+						service = yamlMetadata.ServicePackage
+					}
+
 					// Create metadata for this resource
 					resourceMetadata[res] = ResourceMetadata{
 						ResourceType:    resourceType,
 						ResourceAddress: res,
 						ImportMetadata:  importMeta,
-						Service:         ServicePackageCache.Get(resourceType),
+						Service:         service,
 						// CaiAssetNames will be populated at runtime in the check function
 					}
 				}
@@ -319,4 +397,34 @@ func extendWithTGCData(t *testing.T, c resource.TestCase) resource.TestCase {
 
 	c.Steps = updatedSteps
 	return c
+}
+
+// Gets IAM resource Id by removing the IAM role and member binding information from id
+// id "projects/local-mediator-361721/zones/us-central1-a/instances/tf-test-my-instancev8xqssrek2/roles/compute.osLogin/user:admin@example.com"
+// will become "projects/local-mediator-361721/zones/us-central1-a/instances/tf-test-my-instancev8xqssrek2"
+func getIamResourceId(resourceType, id string) string {
+	parts := strings.Split(id, "/roles/")
+
+	if len(parts) > 0 {
+		return parts[0]
+	}
+
+	return id
+}
+
+var iamSuffixes = []string{
+	"_iam_member",
+	"_iam_policy",
+	"_iam_binding",
+	"_iam_audit_config",
+}
+
+// Checks if a resource is an IAM resource
+func IsIamResource(resourceType string) bool {
+	for _, suffix := range iamSuffixes {
+		if strings.HasSuffix(resourceType, suffix) {
+			return true
+		}
+	}
+	return false
 }

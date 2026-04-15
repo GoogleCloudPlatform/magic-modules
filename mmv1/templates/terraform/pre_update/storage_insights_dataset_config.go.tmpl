@@ -8,6 +8,10 @@ if d.HasChange("retention_period_days") {
 	updateMask = append(updateMask, "retentionPeriodDays")
 }
 
+if d.HasChange("activity_data_retention_period_days") {
+	updateMask = append(updateMask, "activityDataRetentionPeriodDays")
+}
+
 if d.HasChange("description") {
 	updateMask = append(updateMask, "description")
 }

@@ -17,11 +17,6 @@ package converters
 import (
 	"strings"
 
-{{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
-	{{- if gt (len $resources) 1 }}
-	  "github.com/hashicorp/terraform-provider-google/google/services/{{ (index $resources 0).ServiceName }}"
-	{{- end }}
-{{- end }}
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 )
@@ -43,16 +38,26 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 {{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
 	{{- if gt (len $resources) 1 }}
 		case "{{ $resourceType }}":
+		{{- if eq $resourceType "compute.googleapis.com/SslCertificate" }}
+			if strings.Contains(asset.Name, "regions") {
+				converter = ConverterMap[asset.Type]["ComputeRegionSslCertificate"]
+			} else if typeVal, ok := asset.Resource.Data["type"]; ok && typeVal == "MANAGED" {
+				converter = ConverterMap[asset.Type]["ComputeManagedSslCertificate"]
+			} else {
+				converter = ConverterMap[asset.Type]["ComputeSslCertificate"]
+			}
+		{{- else }}
 		{{- range $i, $object := $resources }}
 			{{- if eq $i 0 }}
-			if strings.Contains(asset.Name, "{{$object.IdentityParam}}") {
+			if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
 			{{- else }}
-			} else if strings.Contains(asset.Name, "{{$object.IdentityParam}}") {
+			} else if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
 			{{- end }}
 				converter = ConverterMap[asset.Type]["{{ $object.AliasName }}"]
 			{{- if eq $i (sub (len $resources) 1)}}
 			}
 			{{- end }}
+		{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}

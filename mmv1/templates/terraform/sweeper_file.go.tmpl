@@ -1,5 +1,5 @@
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" -}}
-// Copyright (c) HashiCorp, Inc.
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 {{ end }}
 {{$.CodeHeader TemplatePath}}

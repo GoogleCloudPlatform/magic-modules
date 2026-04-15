@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -179,6 +180,7 @@ func flattenDatasourceGoogleDatabaseInstancesList(fetchedInstances []*sqladmin.D
 		instance["master_instance_name"] = strings.TrimPrefix(rawInstance.MasterInstanceName, project+":")
 		instance["project"] = project
 		instance["self_link"] = rawInstance.SelfLink
+		instance["psc_service_attachment_link"] = rawInstance.PscServiceAttachmentLink
 
 		instances = append(instances, instance)
 	}
@@ -214,4 +216,13 @@ func flattenReplicationClusterForDataSource(replicationCluster *sqladmin.Replica
 		data["dr_replica"] = replicationCluster.DrReplica
 	}
 	return []map[string]interface{}{data}
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_sql_database_instances",
+		ProductName: "sql",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlDatabaseInstances(),
+	}.Register()
 }

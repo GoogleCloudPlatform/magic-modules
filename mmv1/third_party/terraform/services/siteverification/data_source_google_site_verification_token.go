@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package siteverification
 
 import (
@@ -11,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -144,4 +143,13 @@ func expandSiteVerificationTokenIdentifier(v interface{}, d tpgresource.Terrafor
 
 func expandSiteVerificationTokenVerificationMethod(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_site_verification_token",
+		ProductName: "siteverification",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSiteVerificationToken(),
+	}.Register()
 }

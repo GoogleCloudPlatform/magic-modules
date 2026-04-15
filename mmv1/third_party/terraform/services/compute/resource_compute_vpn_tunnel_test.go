@@ -129,6 +129,133 @@ func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 	})
 }
 
+// TestAccComputeVpnTunnel_resourceManagerTags tests the 'resource_manager_tags' block in the google_compute_vpn_tunnel resource.
+func TestAccComputeVpnTunnel_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	suffix := acctest.RandString(t, 10)
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-tunnel-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-tunnel-tagvalue", sharedTagkey, org)
+
+	context := map[string]interface{}{
+		"suffix":       suffix,
+		"tag_key_id":   tagKeyResult["name"],
+		"tag_value_id": tagValueResult["name"],
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeVpnTunnel_resourceManagerTags(context),
+			},
+			{
+				ResourceName:            "google_compute_vpn_tunnel.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"shared_secret", "detailed_status", "params"},
+			},
+		},
+	})
+}
+
+// TestAccComputeVpnTunnel_cipherSuite tests the 'cipher_suite' block in the google_compute_vpn_tunnel resource.
+func TestAccComputeVpnTunnel_cipherSuite(t *testing.T) {
+	t.Parallel()
+
+	// A unique name for the test resources
+	suffix := acctest.RandString(t, 10)
+	// Other necessary resources like network, gateway, etc. would be defined here.
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Test case 1: Basic cipher suite configuration
+				Config: testAccComputeVpnTunnel_basicCipherSuite(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.0.encryption.0", "AES-GCM-16-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.0.encryption.1", "AES-GCM-16-192"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.0.integrity.0", "HMAC-SHA2-256-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.0.integrity.1", "HMAC-SHA1-96"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeVpnTunnel_basicCipherSuite(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "tf-test-network-%[1]s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "tf-test-subnetwork-%[1]s"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_address" "foobar" {
+  name   = "tf-test-%[1]s"
+  region = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_ha_vpn_gateway" "foobar" {
+  name    = "tf-test-%[1]s"
+  network = google_compute_network.foobar.self_link
+  region  = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  name            = "external-gateway-%[1]s"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description     = "An externally managed VPN gateway"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "tf-test-router-%[1]s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_vpn_tunnel" "test_tunnel" {
+  name          = "tf-test-ha-vpn-tunnel-%[1]s"
+  region        = "us-central1"
+  vpn_gateway = google_compute_ha_vpn_gateway.foobar.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0  
+  shared_secret      = "unguessable"
+  router             = google_compute_router.foobar.self_link
+  vpn_gateway_interface           = 0 
+
+  cipher_suite {
+    phase1 {
+      encryption = ["AES-GCM-16-128", "AES-GCM-16-192"]
+    }
+    phase2 {
+      integrity  = ["HMAC-SHA2-256-128", "HMAC-SHA1-96"]
+    }
+  }
+}
+`, suffix)
+}
+
 func testAccComputeVpnTunnel_regionFromGateway(suffix, region string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -418,4 +545,63 @@ resource "google_compute_vpn_tunnel" "foobar" {
   peer_ip            = "8.8.8.8"
 }
 `, suffix)
+}
+
+func testAccComputeVpnTunnel_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "tf-test-%{suffix}"
+  auto_create_subnetworks = "true"
+}
+
+resource "google_compute_address" "foobar" {
+  name   = "tf-test-%{suffix}"
+  region = "us-central1"
+}
+
+resource "google_compute_vpn_gateway" "foobar" {
+  name    = "tf-test-%{suffix}"
+  network = google_compute_network.foobar.self_link
+  region  = google_compute_address.foobar.region
+}
+
+resource "google_compute_forwarding_rule" "foobar_esp" {
+  name        = "tf-test-%{suffix}-esp"
+  region      = google_compute_vpn_gateway.foobar.region
+  ip_protocol = "ESP"
+  ip_address  = google_compute_address.foobar.address
+  target      = google_compute_vpn_gateway.foobar.self_link
+}
+
+resource "google_compute_forwarding_rule" "foobar_udp500" {
+  name        = "tf-test-%{suffix}-udp500"
+  region      = google_compute_forwarding_rule.foobar_esp.region
+  ip_protocol = "UDP"
+  port_range  = "500-500"
+  ip_address  = google_compute_address.foobar.address
+  target      = google_compute_vpn_gateway.foobar.self_link
+}
+
+resource "google_compute_forwarding_rule" "foobar_udp4500" {
+  name        = "tf-test-%{suffix}-udp4500"
+  region      = google_compute_forwarding_rule.foobar_udp500.region
+  ip_protocol = "UDP"
+  port_range  = "4500-4500"
+  ip_address  = google_compute_address.foobar.address
+  target      = google_compute_vpn_gateway.foobar.self_link
+}
+
+resource "google_compute_vpn_tunnel" "foobar" {
+  name               = "tf-test-%{suffix}"
+  region             = google_compute_forwarding_rule.foobar_udp4500.region
+  target_vpn_gateway = google_compute_vpn_gateway.foobar.self_link
+  shared_secret      = "unguessable"
+  peer_ip            = "8.8.8.8"
+  params {
+    resource_manager_tags = {
+      "%{tag_key_id}" = "%{tag_value_id}"
+    }
+  }
+}
+`, context)
 }

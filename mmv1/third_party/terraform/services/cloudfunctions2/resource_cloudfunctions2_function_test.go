@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -75,7 +76,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -117,7 +118,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -155,7 +156,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   description = "function test"
 
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     environment_variables = {
         BUILD_CONFIG_TEST = "build_test"
@@ -184,10 +185,17 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"zip_path":      "./test-fixtures/function-source-eventarc-gcs.zip",
-		"random_suffix": acctest.RandString(t, 10),
+		"project":               envvar.GetTestProjectFromEnv(),
+		"bucket_name_auditlogs": "tf-test-gcf-auditlog-bucket" + randomSuffix,
+		"bucket_name_source":    "tf-test-gcf-source-bucket" + randomSuffix,
+		"function_name":         "tf-test-gcf-function" + randomSuffix,
+		"primary_resource_id":   "terraform-test",
+		"service_account":       "tf-test-gcf-sa" + randomSuffix,
+		"zip_path":              "./test-fixtures/function-source-eventarc-gcs.zip",
+		"random_suffix":         randomSuffix,
 	}
 
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
@@ -221,7 +229,7 @@ func testAccCloudfunctions2function_cloudfunctions2BasicAuditlogsExample_update(
 # https://cloud.google.com/eventarc/docs/path-patterns
 
 resource "google_storage_bucket" "source-bucket" {
-  name     = "tf-test-gcf-source-bucket%{random_suffix}"
+  name     = "%{bucket_name_source}"
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -233,7 +241,7 @@ resource "google_storage_bucket_object" "object" {
 }
 
 resource "google_service_account" "account" {
-  account_id   = "tf-test-gcf-sa%{random_suffix}"
+  account_id   = "%{service_account}"
   display_name = "Test Service Account - used for both the cloud function and eventarc trigger in the test"
 }
 
@@ -241,7 +249,7 @@ resource "google_service_account" "account" {
 # Here we use Audit Logs to monitor the bucket so path patterns can be used in the example of
 # google_cloudfunctions2_function below (Audit Log events have path pattern support)
 resource "google_storage_bucket" "audit-log-bucket" {
-  name     = "tf-test-gcf-auditlog-bucket%{random_suffix}"
+  name     = "%{bucket_name_auditlogs}"
   location = "us-central1"  # The trigger must be in the same location as the bucket
   uniform_bucket_level_access = true
 }
@@ -272,12 +280,12 @@ resource "google_cloudfunctions2_function" "function" {
     google_project_iam_member.event-receiving,
     google_project_iam_member.artifactregistry-reader,
   ]
-  name = "tf-test-gcf-function%{random_suffix}"
+  name = "%{function_name}"
   location = "us-central1"
   description = "a new function"
 
   build_config {
-    runtime     = "nodejs18"
+    runtime     = "nodejs20"
     entry_point = "entryPoint" # Set the entry point in the code
     environment_variables = {
       BUILD_CONFIG_TEST = "build_test"
@@ -391,7 +399,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -434,7 +442,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -475,7 +483,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -538,7 +546,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -618,7 +626,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -639,6 +647,146 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 
 output "binary_authorization_policy_eq" {
   value = google_cloudfunctions2_function.terraform-test2.service_config.0.binary_authorization_policy == "default"
+}
+`, context)
+}
+
+func TestAccCloudfunctions2function_cloudfunctions2DirectvpcExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "us-central1",
+		"zip_path":      "./test-fixtures/function-source.zip",
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_basic(context),
+			},
+			{
+				ResourceName:            "google_cloudfunctions2_function.function",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"build_config.0.source.0.storage_source.0.bucket", "build_config.0.source.0.storage_source.0.object", "labels", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_cloudfunctions2_function.function", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_cloudfunctions2_function.function",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"build_config.0.source.0.storage_source.0.bucket", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+locals {
+  project = "%{project}" # Google Cloud Platform Project ID
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "${local.project}-tf-test-gcf-source%{random_suffix}"  # Every bucket name must be globally unique
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%{zip_path}"  # Add path to the zipped function source code
+}
+
+resource "google_cloudfunctions2_function" "function" {
+  name = "tf-test-function-v2%{random_suffix}"
+  location = "us-central1"
+  description = "a new function"
+
+  build_config {
+    runtime = "nodejs20"
+    entry_point = "helloHttp"  # Set the entry point
+    source {
+    storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count  = 1
+    available_memory    = "256M"
+    timeout_seconds     = 60
+    direct_vpc_network_interface {
+      network = "default"
+      subnetwork = "default"
+      tags = ["tag1", "tag2"]
+    }
+    direct_vpc_egress = "VPC_EGRESS_ALL_TRAFFIC"
+  }
+}
+`, context)
+}
+
+func testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+locals {
+  project = "%{project}" # Google Cloud Platform Project ID
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "${local.project}-tf-test-gcf-source%{random_suffix}"  # Every bucket name must be globally unique
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%{zip_path}"  # Add path to the zipped function source code
+}
+
+resource "google_cloudfunctions2_function" "function" {
+  name = "tf-test-function-v2%{random_suffix}"
+  location = "us-central1"
+  description = "a new function"
+
+  build_config {
+    runtime = "nodejs20"
+    entry_point = "helloHttp"  # Set the entry point
+    source {
+    storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count  = 1
+    available_memory    = "256M"
+    timeout_seconds     = 60
+    direct_vpc_network_interface {
+      network = "default"
+      subnetwork = "default"
+      tags = ["tag3", "tag4"]
+    }
+    direct_vpc_egress = "VPC_EGRESS_PRIVATE_RANGES_ONLY"
+  }
 }
 `, context)
 }

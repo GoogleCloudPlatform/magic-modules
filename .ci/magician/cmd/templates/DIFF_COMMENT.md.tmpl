@@ -47,14 +47,14 @@ The following new resources do not have corresponding service labels:
 {{- range .MissingServiceLabels}}
 - {{.}}{{end}}
 
-If you believe this detection to be incorrect please raise the concern with your reviewer. Googlers: This error is safe to ignore once you've completed go/fix-missing-service-labels.
+If you believe this detection to be incorrect please raise the concern with your reviewer. Googlers: This error is safe to ignore once you've completed [go/fix-missing-service-labels](http://goto.google.com/fix-missing-service-labels).
 An `override-missing-service-label` label can be added to allow merging.
 {{end}}
 
-{{- if gt (len .AddedResources) 1 }}
+{{- if gt (len .MultipleResources) 1 }}
 ## Multiple resources added
 
-This PR adds multiple new resources: {{range $i, $resource := .AddedResources}}{{ if gt $i 0}}, {{end}}`{{$resource}}`{{end}}. This makes review significantly more difficult. Please split it into multiple PRs, one per resource.
+This PR adds multiple new resources: {{range $i, $resource := .MultipleResources}}{{ if gt $i 0}}, {{end}}`{{$resource}}`{{end}}. This makes review significantly more difficult. Please split it into multiple PRs, one per resource.
 An `override-multiple-resources` label can be added to allow merging.
 {{end}}
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -198,6 +199,13 @@ func ResourceDataprocJob() *schema.Resource {
 				},
 			},
 
+			"wait_for_completion": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to true, Terraform will wait for the job to reach a terminal state (DONE, ERROR, CANCELLED, ATTEMPT_FAILURE). Otherwise, Terraform will consider the job 'created' once it is in the RUNNING state.",
+			},
+
 			"pyspark_config":  pySparkSchema,
 			"spark_config":    sparkSchema,
 			"hadoop_config":   hadoopSchema,
@@ -299,8 +307,9 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.SetId(fmt.Sprintf("projects/%s/regions/%s/jobs/%s", project, region, job.Reference.JobId))
 
+	waitForCompletion := d.Get("wait_for_completion").(bool)
 	waitErr := DataprocJobOperationWait(config, region, project, job.Reference.JobId,
-		"Creating Dataproc job", userAgent, d.Timeout(schema.TimeoutCreate))
+		"Creating Dataproc job", userAgent, d.Timeout(schema.TimeoutCreate), waitForCompletion)
 	if waitErr != nil {
 		return waitErr
 	}
@@ -341,6 +350,9 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("effective_labels", job.Labels); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
+	}
+	if err := d.Set("wait_for_completion", d.Get("wait_for_completion")); err != nil {
+		return fmt.Errorf("Error setting wait_for_completion: %s", err)
 	}
 	if err := d.Set("driver_output_resource_uri", job.DriverOutputResourceUri); err != nil {
 		return fmt.Errorf("Error setting driver_output_resource_uri: %s", err)
@@ -430,7 +442,7 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _ = config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Cancel(project, region, jobId, &dataproc.CancelJobRequest{}).Do()
 
 		waitErr := DataprocJobOperationWait(config, region, project, jobId,
-			"Cancelling Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete))
+			"Cancelling Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete), true)
 		if waitErr != nil {
 			return waitErr
 		}
@@ -1345,4 +1357,13 @@ func flattenJobPlacement(jp *dataproc.JobPlacement) []map[string]interface{} {
 			"cluster_uuid": jp.ClusterUuid,
 		},
 	}
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_dataproc_job",
+		ProductName: "dataproc",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDataprocJob(),
+	}.Register()
 }

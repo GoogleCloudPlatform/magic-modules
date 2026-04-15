@@ -1,0 +1,271 @@
+package firebaseailogic_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"regexp"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"google.golang.org/api/googleapi"
+)
+
+var (
+	_ = fmt.Sprintf
+	_ = log.Print
+	_ = strconv.Atoi
+	_ = strings.Trim
+	_ = time.Now
+	_ = resource.TestMain
+	_ = terraform.NewState
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+	_ = transport_tpg.Config{}
+	_ = googleapi.Error{}
+)
+
+func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckFirebaseAILogicPromptTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdateExample(context, "Hello from Version 1"),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.updating",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdateExample(context, "Hello from Updated Version 2"),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.updating",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckFirebaseAILogicPromptTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdateExample(context, "Initial Name", "gemini-1.5-flash", "Hello V1"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_firebase_ai_logic_prompt_template.complex", "display_name", "Initial Name"),
+					resource.TestCheckResourceAttr("google_firebase_ai_logic_prompt_template.complex", "model", "googleai/gemini-1.5-flash"),
+				),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdateExample(context, "Updated Name", "gemini-1.5-flash", "Hello V1"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_firebase_ai_logic_prompt_template.complex", "display_name", "Updated Name"),
+				),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdateExample(context, "Final Name", "gemini-2.0-flash", "Hello V2"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_firebase_ai_logic_prompt_template.complex", "display_name", "Final Name"),
+					resource.TestCheckResourceAttr("google_firebase_ai_logic_prompt_template.complex", "model", "googleai/gemini-2.0-flash"),
+				),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedUpdateError(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckFirebaseAILogicPromptTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context, "Hello V1"),
+			},
+			{
+				Config:      testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context, "Hello V2"),
+				ExpectError: regexp.MustCompile("(?s)Error updating PromptTemplate.*Precondition check failed"),
+			},
+		},
+	})
+}
+
+func testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdateExample(context map[string]interface{}, message string) string {
+	context["template_message"] = message
+	return acctest.Nprintf(`
+resource "google_firebase_ai_logic_prompt_template" "updating" {
+  provider = google-beta
+  project  = "%{project_id}"
+  location = "global"
+  template_id = "tf-test-update-%{random_suffix}"
+  template_string = <<EOF
+---
+model: googleai/gemini-2.0-flash
+---
+%{template_message}
+EOF
+}
+`, context)
+}
+
+func testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdateExample(context map[string]interface{}, displayName, model, message string) string {
+	context["display_name"] = displayName
+	context["model_name"] = model
+	context["template_message"] = message
+	return acctest.Nprintf(`
+resource "google_firebase_ai_logic_prompt_template" "complex" {
+  provider = google-beta
+  project  = "%{project_id}"
+  location = "global"
+  template_id = "tf-test-complex-%{random_suffix}"
+  display_name = "%{display_name}"
+  template_string = <<EOF
+---
+model: googleai/%{model_name}
+---
+%{template_message}
+EOF
+}
+`, context)
+}
+
+func testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context map[string]interface{}, message string) string {
+	context["template_message"] = message
+	return acctest.Nprintf(`
+resource "google_firebase_ai_logic_prompt_template" "locked" {
+  provider = google-beta
+  project  = "%{project_id}"
+  location = "global"
+  template_id = "tf-test-locked-%{random_suffix}"
+  template_string = <<EOF
+---
+model: googleai/gemini-2.0-flash
+---
+%{template_message}
+EOF
+}
+
+resource "google_firebase_ai_logic_prompt_template_lock" "locked_lock" {
+  provider = google-beta
+  project  = google_firebase_ai_logic_prompt_template.locked.project
+  location = google_firebase_ai_logic_prompt_template.locked.location
+  template_id = google_firebase_ai_logic_prompt_template.locked.template_id
+}
+`, context)
+}
+
+func TestAccFirebaseAILogicPromptTemplate_regional(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"location":      "us-central1",
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseAILogicPromptTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirebaseAILogicPromptTemplate_regionalExample(context, "Hello from US-Central1"),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.regional",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+
+func testAccFirebaseAILogicPromptTemplate_regionalExample(context map[string]interface{}, message string) string {
+	context["template_message"] = message
+	return acctest.Nprintf(`
+resource "google_firebase_ai_logic_prompt_template" "regional" {
+  provider = google-beta
+  project  = "%{project_id}"
+  location = "%{location}"
+  template_id = "tf-test-regional-%{random_suffix}"
+  template_string = <<EOF
+---
+model: googleai/gemini-2.0-flash
+---
+%{template_message}
+EOF
+}
+`, context)
+}
+
+{{ end }}

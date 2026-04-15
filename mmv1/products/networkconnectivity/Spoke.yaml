@@ -17,7 +17,7 @@ description: "The NetworkConnectivity Spoke resource"
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
-  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.spokes'
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.spokes'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/spokes'
 self_link: 'projects/{{project}}/locations/{{location}}/spokes/{{name}}'
@@ -48,6 +48,13 @@ examples:
       network_name: 'net'
       hub_name: 'hub1'
       spoke_name: 'spoke1'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"net" + randomSuffix'
+      # for backward compatible
+      hub_name: '"hub1" + randomSuffix'
+      # for backward compatible
+      spoke_name: '"spoke1" + randomSuffix'
   - name: 'network_connectivity_spoke_linked_vpc_network_group'
     primary_resource_id: 'primary'
     vars:
@@ -79,7 +86,12 @@ examples:
       hub_name: 'basic-hub1'
       vpn_tunnel_1_spoke_name: 'vpn-tunnel-1-spoke'
       vpn_tunnel_2_spoke_name: 'vpn-tunnel-2-spoke'
- # Skip due to multiple fine-grained resources
+  # Skip due to multiple fine-grained resources
+    test_vars_overrides:
+      # for backward compatible
+      vpn_tunnel_1_name: '"tunnel1" + randomSuffix'
+      # for backward compatible
+      vpn_tunnel_2_name: '"tunnel2" + randomSuffix'
     skip_vcr: true
   - name: 'network_connectivity_spoke_interconnect_attachment_basic'
     primary_resource_id: 'primary'
@@ -104,12 +116,34 @@ examples:
       spoke_name: "vpc-spoke"
       auto_accept_project_1_name: "foo"
       auto_accept_project_2_name: "bar"
+    test_vars_overrides:
+      # for backward compatible
+      auto_accept_project_1_name: '"foo" + randomSuffix'
+      # for backward compatible
+      auto_accept_project_2_name: '"bar" + randomSuffix'
   - name: 'network_connectivity_spoke_linked_vpc_network_ipv6_support'
     primary_resource_id: 'primary'
     vars:
       network_name: 'net'
       hub_name: 'hub1'
       spoke_name: 'spoke1-ipv6'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"net" + randomSuffix'
+      # for backward compatible
+      hub_name: '"hub1" + randomSuffix'
+  - name: 'network_connectivity_spoke_gateway'
+    primary_resource_id: 'primary'
+    min_version: beta
+    vars:
+      network_name: 'net-spoke'
+      hub_name: 'hub'
+      spoke_name: 'gateway'
+    test_vars_overrides:
+      # for backward compatible
+      hub_name: '"hub" + randomSuffix'
+      # for backward compatible
+      spoke_name: '"gateway" + randomSuffix'
 parameters:
   - name: 'location'
     type: String
@@ -124,6 +158,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
   - name: 'createTime'
     type: String
     description: Output only. The time the spoke was created.
@@ -134,7 +169,7 @@ properties:
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
+    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
   - name: 'description'
     type: String
     description: An optional description of the spoke.
@@ -148,6 +183,7 @@ properties:
   - name: 'group'
     type: String
     description: The name of the group that this spoke is associated with.
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     immutable: true
     default_from_api: true
   - name: 'linkedVpnTunnels'
@@ -158,8 +194,12 @@ properties:
       - linked_router_appliance_instances
       - linked_vpc_network
       - linked_producer_vpc_network
+      - gateway
     update_mask_fields:
       - 'linkedVpnTunnels.includeImportRanges'
+      - 'linkedVpnTunnels.excludeImportRanges'
+      - 'linkedVpnTunnels.includeExportRanges'
+      - 'linkedVpnTunnels.excludeExportRanges'
     properties:
       - name: 'uris'
         type: Array
@@ -176,8 +216,23 @@ properties:
       - name: 'includeImportRanges'
         type: Array
         description: |
-          IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES".
+          Hub routes fully encompassed by include import ranges are included during import from hub.
+          "ALL_IPV4_RANGES" or IPv4 CIDR ranges are allowed.
+        item_type:
+          type: String
+      - name: 'excludeImportRanges'
+        type: Array
+        description: Hub routes overlapped/encompassed by exclude import ranges are excluded during import from hub.
+        item_type:
+          type: String
+      - name: 'includeExportRanges'
+        type: Array
+        description: Dynamic routes fully encompassed by include export ranges are included during export to hub.
+        item_type:
+          type: String
+      - name: 'excludeExportRanges'
+        type: Array
+        description: Dynamic routes overlapped/encompassed by exclude export ranges are excluded during export to hub.
         item_type:
           type: String
   - name: 'linkedInterconnectAttachments'
@@ -188,8 +243,12 @@ properties:
       - linked_router_appliance_instances
       - linked_vpc_network
       - linked_producer_vpc_network
+      - gateway
     update_mask_fields:
       - 'linkedInterconnectAttachments.includeImportRanges'
+      - 'linkedInterconnectAttachments.excludeImportRanges'
+      - 'linkedInterconnectAttachments.includeExportRanges'
+      - 'linkedInterconnectAttachments.excludeExportRanges'
     properties:
       - name: 'uris'
         type: Array
@@ -206,8 +265,23 @@ properties:
       - name: 'includeImportRanges'
         type: Array
         description: |
-          IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES".
+          Hub routes fully encompassed by include import ranges are included during import from hub.
+          "ALL_IPV4_RANGES" or IPv4 CIDR ranges are allowed.
+        item_type:
+          type: String
+      - name: 'excludeImportRanges'
+        type: Array
+        description: Hub routes overlapped/encompassed by exclude import ranges are excluded during import from hub.
+        item_type:
+          type: String
+      - name: 'includeExportRanges'
+        type: Array
+        description: Dynamic routes fully encompassed by include export ranges are included during export to hub.
+        item_type:
+          type: String
+      - name: 'excludeExportRanges'
+        type: Array
+        description: Dynamic routes overlapped/encompassed by exclude export ranges are excluded during export to hub.
         item_type:
           type: String
   - name: 'linkedRouterApplianceInstances'
@@ -218,9 +292,13 @@ properties:
       - linked_vpn_tunnels
       - linked_vpc_network
       - linked_producer_vpc_network
+      - gateway
     update_mask_fields:
       - 'linkedRouterApplianceInstances.instances'
       - 'linkedRouterApplianceInstances.includeImportRanges'
+      - 'linkedRouterApplianceInstances.excludeImportRanges'
+      - 'linkedRouterApplianceInstances.includeExportRanges'
+      - 'linkedRouterApplianceInstances.excludeExportRanges'
     properties:
       - name: 'instances'
         type: Array
@@ -247,8 +325,23 @@ properties:
       - name: 'includeImportRanges'
         type: Array
         description: |
-          IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES".
+          Hub routes fully encompassed by include import ranges are included during import from hub.
+          "ALL_IPV4_RANGES" or IPv4 CIDR ranges are allowed.
+        item_type:
+          type: String
+      - name: 'excludeImportRanges'
+        type: Array
+        description: Hub routes overlapped/encompassed by exclude import ranges are excluded during import from hub.
+        item_type:
+          type: String
+      - name: 'includeExportRanges'
+        type: Array
+        description: Dynamic routes fully encompassed by include export ranges are included during export to hub.
+        item_type:
+          type: String
+      - name: 'excludeExportRanges'
+        type: Array
+        description: Dynamic routes overlapped/encompassed by exclude export ranges are excluded during export to hub.
         item_type:
           type: String
   - name: 'linkedVpcNetwork'
@@ -259,6 +352,7 @@ properties:
       - linked_router_appliance_instances
       - linked_vpn_tunnels
       - linked_producer_vpc_network
+      - gateway
     update_mask_fields:
       - 'linkedVpcNetwork.excludeExportRanges'
       - 'linkedVpcNetwork.includeExportRanges'
@@ -288,6 +382,7 @@ properties:
       - linked_router_appliance_instances
       - linked_vpn_tunnels
       - linked_vpc_network
+      - gateway
     properties:
       - name: network
         type: String
@@ -315,6 +410,47 @@ properties:
         description: IP ranges encompassing the subnets to be excluded from peering.
         item_type:
           type: String
+  - name: gateway
+    type: NestedObject
+    description: This is a gateway that can apply specialized processing to traffic going through it.
+    immutable: true
+    min_version: beta
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_router_appliance_instances
+      - linked_vpn_tunnels
+      - linked_vpc_network
+      - linkedProducerVpcNetwork
+    properties:
+      - name: ipRangeReservations
+        type: Array
+        description: A list of IP ranges that are reserved for this gateway's internal infrastructure.
+        required: true
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: ipRange
+              type: String
+              description: A block of IP address ranges used to allocate supporting infrastructure for this gateway—for example, 10.1.2.0/23. The IP address block must be a /23 range. This IP address block must not overlap with subnets in any spoke or peer network that the gateway can communicate with.
+              required: true
+              immutable: true
+      - name: capacity
+        type: Enum
+        description: the capacity of the gateway spoke, in Gbps.
+        required: true
+        enum_values:
+          - 'CAPACITY_1_GBPS'
+          - 'CAPACITY_10_GBPS'
+          - 'CAPACITY_100_GBPS'
+      - name: routers
+        type: Array
+        description: Set of Cloud Routers that are attached to this NCC-GW
+        min_version: beta
+        item_type:
+          type: String
+          description: Cloud Router that is attached to the NCC-GW
+        output: true
   - name: 'uniqueId'
     type: String
     description: Output only. The Google-generated UUID for the spoke. This value is unique across all spoke resources. If a spoke is deleted and another with the same name is created, the new spoke is assigned a different unique_id.

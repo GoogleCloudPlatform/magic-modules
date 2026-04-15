@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -201,4 +202,13 @@ func flattenKmsCryptoKeyVersionPublicKeyPem(v interface{}, d *schema.ResourceDat
 
 func flattenKmsCryptoKeyVersionPublicKeyAlgorithm(v interface{}, d *schema.ResourceData) interface{} {
 	return v
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_kms_crypto_key_version",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsCryptoKeyVersion(),
+	}.Register()
 }

@@ -36,6 +36,8 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+# excluding identity due to region value inconsistency
+exclude_identity_generation: true
 examples:
   - name: 'network_attachment_basic'
     primary_resource_id: 'default'
@@ -157,12 +159,14 @@ properties:
       imports: 'selfLink'
   - name: 'producerRejectLists'
     type: Array
+    is_missing_in_cai: true
     description: |
       Projects that are not allowed to connect to this network attachment. The project can be specified using its id or number.
     item_type:
       type: String
   - name: 'producerAcceptLists'
     type: Array
+    is_missing_in_cai: true
     description: |
       Projects that are allowed to connect to this network attachment. The project can be specified using its id or number.
     item_type:

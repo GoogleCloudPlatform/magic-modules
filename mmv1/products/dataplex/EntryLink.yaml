@@ -1,0 +1,190 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'EntryLink'
+description: |
+  EntryLink represents a link between two Entries.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataplex/docs'  # Update with specific EntryLink docs when available
+  api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.entryGroups.entryLinks'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks?entryLinkId={{entry_link_id}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
+custom_code:
+  constants: templates/terraform/constants/dataplex_entry_link.go.tmpl
+  decoder: templates/terraform/decoders/dataplex_entry_link.go.tmpl
+  encoder: templates/terraform/encoders/dataplex_entry_link.go.tmpl
+error_retry_predicates:
+  - 'transport_tpg.IsDataplex1PEntryNotFoundError'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+examples:
+  - name: 'dataplex_entry_link_basic'
+    primary_resource_id: 'basic_entry_link'
+    vars:
+      entry_link_name: 'entry_link_basic'
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
+  - name: 'dataplex_entry_link_full'
+    primary_resource_id: 'full_entry_link'
+    vars:
+      entry_link_name: 'my_entry_link_full'
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
+    external_providers: ["time"]
+  - name: 'dataplex_entry_link_with_aspect'
+    primary_resource_id: 'full_entry_link_with_aspect'
+    ignore_read_extra:
+      - 'aspects'
+    vars:
+      entry_link_name: 'my_entry_link_full_with_aspect'
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
+      project_id: 'PROJECT_NAME'
+parameters:
+  - name: 'entryGroupId'
+    type: String
+    description: |
+      The id of the entry group this entry link is in.
+    url_param_only: true
+    immutable: true
+    required: true
+  - name: 'entryLinkId'
+    type: String
+    description: |
+      The id of the entry link to create.
+    url_param_only: true
+    immutable: true
+    required: true
+  - name: location
+    type: String
+    description: The location for the entry.
+    url_param_only: true
+    immutable: true
+    required: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The relative resource name of the Entry Link, of the form:
+      projects/{project_id_or_number}/locations/{location_id}/entryGroups/{entry_group_id}/entryLinks/{entry_link_id}
+    output: true
+    immutable: true
+  - name: 'entryLinkType'
+    type: String
+    description: |
+      Relative resource name of the Entry Link Type used to create this Entry Link. For example:
+      projects/dataplex-types/locations/global/entryLinkTypes/definition
+    immutable: true
+    required: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time when the Entry Link was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time when the Entry Link was last updated.
+    output: true
+  - name: 'entryReferences'
+    type: Array
+    description: |
+      Specifies the Entries referenced in the Entry Link. There should be exactly two entry references.
+    required: true
+    immutable: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            The relative resource name of the referenced Entry, of the form:
+            projects/{project_id_or_number}/locations/{location_id}/entryGroups/{entry_group_id}/entries/{entry_id}
+          immutable: true
+          required: true
+        - name: 'path'
+          type: String
+          description: |
+            The path in the Entry that is referenced in the Entry Link.
+            Empty path denotes that the Entry itself is referenced in the Entry Link.
+          immutable: true
+        - name: 'type'
+          type: Enum
+          description: |
+            The reference type of the Entry.
+          enum_values:
+            - 'SOURCE'
+            - 'TARGET'
+          immutable: true
+  - name: 'aspects'
+    type: Array
+    custom_flatten: 'templates/terraform/custom_flatten/dataplex_entry_link_aspects.go.tmpl'
+    description: |
+      The Aspects attached to the Entry Link.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'aspectKey'
+          type: String
+          immutable: true
+          required: true
+          description: |
+              The map keys of the Aspects which the service should modify.
+              It should be the aspect type reference in the format `{project_number}.{location_id}.{aspect_type_id}`.
+        - name: 'aspect'
+          type: NestedObject
+          required: true
+          properties:
+            - name: 'aspectType'
+              type: String
+              output: true
+              description: |
+                The resource name of the type used to create this Aspect.
+
+            - name: 'path'
+              type: String
+              output: true
+              description: |
+                The path in the entry link under which the aspect is attached.
+
+            - name: 'createTime'
+              type: Time
+              output: true
+              description: |
+                The time when the Aspect was created.
+
+            - name: 'updateTime'
+              type: Time
+              output: true
+              description: |
+                The time when the Aspect was last modified.
+
+            - name: 'data'
+              type: String
+              required: true
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              validation:
+                function: 'validation.StringIsJSON'
+              description: |
+                The content of the aspect in JSON form, according to its aspect type schema. The maximum size of the field is 120KB (encoded as UTF-8).

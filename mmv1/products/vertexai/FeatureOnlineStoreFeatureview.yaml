@@ -51,7 +51,6 @@ custom_code:
 examples:
   - name: 'vertex_ai_featureonlinestore_featureview'
     primary_resource_id: 'featureview'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/featureOnlineStores/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf_test_example_feature_view%s", context["random_suffix"])), fmt.Sprintf("tf_test_example_feature_view%s", context["random_suffix"])'
     vars:
       name: 'example_feature_view'
   - name: 'vertex_ai_featureonlinestore_featureview_feature_registry'
@@ -122,7 +121,15 @@ properties:
         description: |
           Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
           To explicitly set a timezone to the cron tab, apply a prefix in the cron tab: "CRON_TZ=${IANA_TIME_ZONE}" or "TZ=${IANA_TIME_ZONE}".
+        conflicts:
+          - sync_config.0.continuous
         default_from_api: true
+      - name: 'continuous'
+        type: Boolean
+        description: |
+          If true, syncs the FeatureView in a continuous manner to Online Store.
+        conflicts:
+          - sync_config.0.cron
   - name: 'bigQuerySource'
     type: NestedObject
     description: |

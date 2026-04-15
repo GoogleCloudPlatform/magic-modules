@@ -1,0 +1,87 @@
+resource "google_apigee_developer_app" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.Vars "developer_app_name"}}"
+  app_family      = "default"
+  developer_email = google_apigee_developer.developer.email
+  org_id          = google_apigee_organization.apigee_org.id
+  callback_url    = "https://example-call.url"
+  key_expires_in  = "-1"
+  status          = "approved"
+
+  api_products = [
+    google_apigee_api_product.api_product.name
+  ]
+
+  scopes = google_apigee_api_product.api_product.scopes
+
+  attributes {
+    name  = "sample_name"
+    value = "sample_value"
+  }
+}
+
+resource "google_apigee_api_product" "api_product" {
+  name          = "{{index $.Vars "api_product_name"}}"
+  org_id        = google_apigee_organization.apigee_org.id
+  display_name  = "A sample API Product"
+  approval_type = "auto"
+
+  # Not in alphabetical order to test set
+  scopes = [
+    "read:weather",
+    "write:reports",
+    "write:files"
+  ]
+
+  depends_on = [
+    google_apigee_instance.apigee_instance
+  ]
+}
+
+resource "google_apigee_developer" "developer" {
+  email      = "{{index $.Vars "developer_email"}}"
+  first_name = "John"
+  last_name  = "Doe"
+  user_name  = "john.doe"
+  org_id     = google_apigee_organization.apigee_org.id
+
+  depends_on = [
+    google_apigee_instance.apigee_instance
+  ]
+}
+
+resource "google_apigee_instance" "apigee_instance" {
+  name     = "{{index $.Vars "instance_name"}}"
+  location = "us-central1"
+  org_id   = google_apigee_organization.apigee_org.id
+}
+
+resource "google_apigee_organization" "apigee_org" {
+  analytics_region    = "us-central1"
+  project_id          = google_project.project.project_id
+  disable_vpc_peering = true
+
+  depends_on = [
+    google_project_service.apigee
+  ]
+}
+
+resource "google_project_service" "apigee" {
+  project = google_project.project.project_id
+  service = "apigee.googleapis.com"
+
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+
+  depends_on = [google_project.project]
+}
+
+resource "google_project" "project" {
+  project_id      = "{{index $.Vars "project_name"}}"
+  name            = "{{index $.Vars "project_name"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}

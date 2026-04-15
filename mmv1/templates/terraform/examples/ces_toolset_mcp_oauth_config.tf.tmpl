@@ -1,0 +1,45 @@
+resource "google_ces_app" "ces_app_for_toolset" {
+  app_id = "{{index $.Vars "app_id"}}"
+  location = "us"
+  description = "App used as parent for CES Toolset example"
+  display_name = "{{index $.Vars "app_display_name"}}"
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_toolset" "ces_toolset_mcp_oauth_config" {
+  toolset_id = "{{index $.Vars "toolset_id"}}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Basic toolset display name"
+
+  mcp_toolset {
+    server_address = "https://api.example.com/mcp/"
+    tls_config {
+        ca_certs {
+          display_name="example"
+          cert="ZXhhbXBsZQ=="
+        }
+    }
+    service_directory_config {
+      service = "projects/example/locations/us/namespaces/namespace/services/service"
+    }
+    api_authentication {
+        oauth_config {
+            oauth_grant_type = "CLIENT_CREDENTIAL"
+            client_id = "example_client_id"
+            client_secret_version = "projects/fake-project/secrets/fake-secret/versions/version1"
+            token_endpoint = "123"
+            scopes = ["scope1"]
+        }
+    }
+  }
+}

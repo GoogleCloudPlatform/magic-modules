@@ -1,0 +1,164 @@
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+    return fmt.Errorf("Error fetching project for RestoreWorkload: %s", err)
+}
+billingProject := project
+
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+
+deleteInstance := true
+if v, ok := d.GetOkExists("delete_restored_instance"); ok {
+    deleteInstance = v.(bool)
+}
+
+// If the caller asked us to keep the restored resource, exit immediately and only clear state.
+if !deleteInstance {
+    log.Printf("[DEBUG] Skipping deletion of restored resource (deleteRestoredInstance=%v)", deleteInstance)
+    d.SetId("")
+    return nil
+}
+
+// If deleteRestoredInstance is true, delete the actual restored resource from GCP
+if deleteInstance {
+    // Get the gcp_resourcename from target_resource
+    var resourceId string
+    if v, ok := d.GetOk("target_resource"); ok {
+        targetResourceList := v.([]interface{})
+        if len(targetResourceList) > 0 {
+            targetResourceMap := targetResourceList[0].(map[string]interface{})
+            if gcpResourceList, ok := targetResourceMap["gcp_resource"].([]interface{}); ok && len(gcpResourceList) > 0 {
+                gcpResourceMap := gcpResourceList[0].(map[string]interface{})
+                if gcpResourceName, ok := gcpResourceMap["gcp_resourcename"].(string); ok {
+                    resourceId = gcpResourceName
+                }
+            }
+        }
+    }
+
+    if resourceId != "" {
+        log.Printf("[DEBUG] Deleting restored resource: %s", resourceId)
+
+        // Parse the resource ID to determine the resource type
+        // For compute instances: projects/PROJECT/zones/ZONE/instances/INSTANCE_NAME
+        if strings.Contains(resourceId, "/instances/") {
+            // This is a Compute Engine instance - delete it
+            deleteUrl := fmt.Sprintf("https://compute.googleapis.com/compute/v1/%s", resourceId)
+
+            opRes, deleteErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                Config:    config,
+                Method:    "DELETE",
+                Project:   billingProject,
+                RawURL:    deleteUrl,
+                UserAgent: userAgent,
+                Timeout:   d.Timeout(schema.TimeoutDelete),
+                Headers:   make(http.Header),
+            })
+
+            if deleteErr != nil {
+                log.Printf("[WARN] Error deleting restored instance %s: %v", resourceId, deleteErr)
+            } else if opRes != nil {
+                // Wait for the compute LRO to finish by polling the operation
+                if opName, ok := opRes["name"].(string); ok && opName != "" {
+                    // Simple polling loop
+                    timeout := d.Timeout(schema.TimeoutDelete)
+                    pollStart := time.Now()
+                    for {
+                        if time.Since(pollStart) > timeout {
+                            log.Printf("[WARN] Timeout waiting for delete operation %s", opName)
+                            break
+                        }
+
+                        // Get operation status
+                        opUrl := fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/global/operations/%s", billingProject, opName)
+                        pollRes, pollErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                            Config:    config,
+                            Method:    "GET",
+                            Project:   billingProject,
+                            RawURL:    opUrl,
+                            UserAgent: userAgent,
+                            Timeout:   timeout,
+                            Headers:   make(http.Header),
+                        })
+
+                        if pollErr != nil {
+                            log.Printf("[WARN] Error polling operation status: %v", pollErr)
+                            break
+                        }
+
+                        if status, ok := pollRes["status"].(string); ok && status == "DONE" {
+                            log.Printf("[DEBUG] Delete operation %s completed", opName)
+                            break
+                        }
+
+                        time.Sleep(time.Second)
+                    }
+                }
+            }
+        } else if strings.Contains(resourceId, "/disks/") {
+            // This is a Compute Engine disk - delete it
+            deleteUrl := fmt.Sprintf("https://compute.googleapis.com/compute/v1/%s", resourceId)
+
+            deleteOpRes, deleteErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                Config:    config,
+                Method:    "DELETE",
+                Project:   billingProject,
+                RawURL:    deleteUrl,
+                UserAgent: userAgent,
+                Timeout:   d.Timeout(schema.TimeoutDelete),
+                Headers:   make(http.Header),
+            })
+
+            if deleteErr != nil {
+                log.Printf("[WARN] Error deleting restored disk %s: %v", resourceId, deleteErr)
+            } else if deleteOpRes != nil {
+                // Wait for the compute LRO to finish by polling the operation
+                if opName, ok := deleteOpRes["name"].(string); ok && opName != "" {
+                    // Simple polling loop
+                    timeout := d.Timeout(schema.TimeoutDelete)
+                    pollStart := time.Now()
+                    for {
+                        if time.Since(pollStart) > timeout {
+                            log.Printf("[WARN] Timeout waiting for delete operation %s", opName)
+                            break
+                        }
+
+                        // Get operation status
+                        opUrl := fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/global/operations/%s", billingProject, opName)
+                        pollRes, pollErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                            Config:    config,
+                            Method:    "GET",
+                            Project:   billingProject,
+                            RawURL:    opUrl,
+                            UserAgent: userAgent,
+                            Timeout:   timeout,
+                            Headers:   make(http.Header),
+                        })
+
+                        if pollErr != nil {
+                            log.Printf("[WARN] Error polling operation status: %v", pollErr)
+                            break
+                        }
+
+                        if status, ok := pollRes["status"].(string); ok && status == "DONE" {
+                            log.Printf("[DEBUG] Delete operation %s completed", opName)
+                            break
+                        }
+
+                        time.Sleep(time.Second)
+                    }
+                }
+            }
+        }
+    } else {
+        log.Printf("[DEBUG] No resource ID found in target_resource, skipping deletion")
+    }
+}
+
+// Always remove from Terraform state
+d.SetId("")
+
+log.Printf("[DEBUG] Finished deleting RestoreWorkload")
+
+return nil

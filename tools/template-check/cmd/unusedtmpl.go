@@ -149,10 +149,45 @@ func yamlFiles(dir string) ([]string, error) {
 	return allYamlFiles, nil
 }
 
+var (
+	underscoreCap = regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`)
+	underscoreLow = regexp.MustCompile(`([a-z\d])([A-Z])`)
+)
+
+func underscore(source string) string {
+	tmp := underscoreCap.ReplaceAllString(source, "${1}_${2}")
+	tmp = underscoreLow.ReplaceAllString(tmp, "${1}_${2}")
+	tmp = strings.ReplaceAll(tmp, "-", "_")
+	tmp = strings.ReplaceAll(tmp, ".", "_")
+	tmp = strings.ToLower(tmp)
+	return tmp
+}
+
 // findTmpls parsed yaml files to get values ending with .tmpl.
 // It returns a map of tmpl paths where the key is the tmpl path.
 func findTmpls(yamlFiles []string) (map[string]bool, error) {
 	allTmpls := map[string]bool{}
+
+	productNames := map[string]string{}
+	for _, yamlFile := range yamlFiles {
+		if filepath.Base(yamlFile) == "product.yaml" {
+			b, err := os.ReadFile(yamlFile)
+			if err != nil {
+				continue
+			}
+			var m map[any]any
+			if err := yaml.Unmarshal(b, &m); err == nil {
+				for k, v := range m {
+					if keyStr, ok := k.(string); ok && keyStr == "name" {
+						if nameStr, ok := v.(string); ok {
+							productNames[filepath.Dir(yamlFile)] = nameStr
+						}
+					}
+				}
+			}
+		}
+	}
+
 	for _, yamlFile := range yamlFiles {
 		b, err := os.ReadFile(yamlFile)
 		if err != nil {
@@ -162,6 +197,34 @@ func findTmpls(yamlFiles []string) (map[string]bool, error) {
 		if err := yaml.Unmarshal(b, &m); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal yaml file %s: %s", yamlFile, err)
 		}
+
+		var resName string
+		hasStateUpgraders := false
+
+		for k, v := range m {
+			if keyStr, ok := k.(string); ok {
+				if keyStr == "name" {
+					if nameStr, ok := v.(string); ok {
+						resName = nameStr
+					}
+				}
+				if keyStr == "state_upgraders" {
+					if su, ok := v.(bool); ok && su {
+						hasStateUpgraders = true
+					}
+				}
+			}
+		}
+
+		if hasStateUpgraders && resName != "" {
+			productName := productNames[filepath.Dir(yamlFile)]
+			if productName == "" {
+				productName = filepath.Base(filepath.Dir(yamlFile))
+			}
+			tmplName := fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", underscore(productName), underscore(resName))
+			allTmpls[tmplName] = true
+		}
+
 		tr := &tree{
 			tmplPaths: make(map[string]bool),
 		}

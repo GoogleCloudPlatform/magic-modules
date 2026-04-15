@@ -1,0 +1,18 @@
+# Use existing netapp volume
+resource "google_netapp_volume" "test_volume" {
+  name     = "netapp-volume"
+  location = "{{index $.TestEnvVars "region"}}"
+}
+
+# Create a VmwareEngine Datastore, referencing the netapp volume
+resource "google_vmwareengine_datastore" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "resource_name"}}"
+  location    = "{{index $.TestEnvVars "region"}}"
+  description = "example google_file_service.netapp datastore."
+
+  nfs_datastore {
+    google_file_service {
+      netapp_volume = google_netapp_volume.test_volume.id
+    }
+  }
+}

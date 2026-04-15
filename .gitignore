@@ -59,3 +59,11 @@ tpgtools/serialization.go
 # ignore leftover testlogs and cassettes
 .ci/magician/testlogs
 .ci/magician/cassettes
+
+# ignore bazel output files 
+/bazel-*
+/.ijwb/
+MODULE.bazel.lock
+go.work
+go.work.sum
+terraform-provider-google/

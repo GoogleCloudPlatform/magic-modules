@@ -50,39 +50,38 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     - '{{name}}'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/disk.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
+  custom_update: 'templates/terraform/custom_update/disk_update.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
   tgc_encoder: 'templates/tgc_next/encoders/compute_disk.go.tmpl'
+  post_import: 'templates/terraform/post_import/disk.go.tmpl'
+  post_read: 'templates/terraform/post_read/disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
 examples:
   - name: 'disk_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
     vars:
       disk_name: 'test-disk'
   - name: 'disk_async'
     primary_resource_id: 'secondary'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
     vars:
       disk_name: 'async-test-disk'
       secondary_disk_name: 'async-secondary-test-disk'
   - name: 'disk_features'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
     vars:
       disk_name: 'test-disk-features'
 parameters:
@@ -199,6 +198,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
         description: |
@@ -206,6 +206,7 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'sha256'
         type: String
         description: |
@@ -473,7 +474,7 @@ properties:
       allows for an update of IOPS every 4 hours. To update your hyperdisk more frequently, you'll need to manually delete and recreate it
     required: false
     default_from_api: true
-    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=provisionedIops'
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     update_verb: 'PATCH'
   - name: 'provisionedThroughput'
     type: Integer
@@ -482,7 +483,7 @@ properties:
       Note: Updating currently is only supported by hyperdisk skus without the need to delete and recreate the disk, hyperdisk
       allows for an update of Throughput every 4 hours. To update your hyperdisk more frequently, you'll need to manually delete and recreate it
     default_from_api: true
-    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=provisionedThroughput'
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     update_verb: 'PATCH'
   - name: 'asyncPrimaryDisk'
     type: NestedObject
@@ -568,6 +569,13 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'
     update_verb: 'PATCH'
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disk restored from a source snapshot should erase Windows specific VSS signature.
+    min_version: 'beta'
+    ignore_read: true
+    default_value: false
 virtual_fields:
   - name: 'create_snapshot_before_destroy'
     type: Boolean

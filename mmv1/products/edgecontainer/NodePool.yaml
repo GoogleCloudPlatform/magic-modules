@@ -49,12 +49,6 @@ examples:
   # Skip the node-pool test as we only have limited machine resources
   # The node-pool creation is tested in edgecontainer_local_control_plane_node_pool_internal
   # in order to avoid exposing the node location and machine name to public.
-  - name: 'edgecontainer_node_pool'
-    primary_resource_id: 'default'
-    exclude_test: true
-  - name: 'edgecontainer_node_pool_with_cmek'
-    primary_resource_id: 'default'
-    exclude_test: true
   - name: 'edgecontainer_local_control_plane_node_pool'
     primary_resource_id: 'default'
     exclude_test: true

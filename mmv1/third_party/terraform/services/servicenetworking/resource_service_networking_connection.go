@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -16,6 +17,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/servicenetworking/v1"
 )
+
+func isInvalidAuthError(err error) (bool, string) {
+	if strings.Contains(err.Error(), "Request had invalid authentication credentials") {
+		return true, "Waiting for service account propagation"
+	}
+	return false, ""
+}
 
 func ResourceServiceNetworkingConnection() *schema.Resource {
 	return &schema.Resource{
@@ -113,16 +121,24 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 		project = bp
 	}
 
-	createCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Create(parentService, connection)
-	if config.UserProjectOverride {
-		createCall.Header().Add("X-Goog-User-Project", project)
-	}
-	op, err := createCall.Do()
-	if err != nil {
-		return err
-	}
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			createCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Create(parentService, connection)
+			if config.UserProjectOverride {
+				createCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := createCall.Do()
+			if err != nil {
+				return err
+			}
 
-	if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+			return ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate))
+		},
+		Timeout:              d.Timeout(schema.TimeoutCreate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{isInvalidAuthError},
+	})
+
+	if err != nil {
 		if strings.Contains(err.Error(), "Cannot modify allocated ranges in CreateConnection.") && d.Get("update_on_creation_fail").(bool) {
 			patchCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
 			if config.UserProjectOverride {
@@ -431,4 +447,13 @@ func formatParentService(service string) string {
 	} else {
 		return service
 	}
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_service_networking_connection",
+		ProductName: "servicenetworking",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceServiceNetworkingConnection(),
+	}.Register()
 }

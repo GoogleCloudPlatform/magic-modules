@@ -1,0 +1,42 @@
+package artifactregistry_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccDataSourceArtifactRegistryPythonPackages_basic(t *testing.T) {
+	t.Parallel()
+
+	// At the moment there are no public Python packages available in Artifact Registry.
+	// This test is skipped to avoid unnecessary failures.
+	// As soon as there are public packages available, this test can be enabled by removing the skip and adjusting the configuration accordingly.
+	t.Skip("No public Python packages available in Artifact Registry")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceArtifactRegistryPythonPackagesConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_artifact_registry_python_packages.test", "project"),
+					resource.TestCheckResourceAttrSet("data.google_artifact_registry_python_packages.test", "location"),
+					resource.TestCheckResourceAttrSet("data.google_artifact_registry_python_packages.test", "repository_id"),
+					resource.TestCheckResourceAttrSet("data.google_artifact_registry_python_packages.test", "python_packages.0.package_name"),
+					resource.TestCheckResourceAttrSet("data.google_artifact_registry_python_packages.test", "python_packages.0.name"),
+				),
+			},
+		},
+	})
+}
+
+const testAccDataSourceArtifactRegistryPythonPackagesConfig = `
+data "google_artifact_registry_python_packages" "test" {
+  project       = "example-project"
+  location      = "us"
+  repository_id = "example-repo"
+}
+`

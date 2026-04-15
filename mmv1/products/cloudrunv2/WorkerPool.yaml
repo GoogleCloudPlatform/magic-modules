@@ -43,7 +43,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
     - '{{name}}'
@@ -53,7 +52,12 @@ taint_resource_on_failed_create: true
 examples:
   - name: 'cloudrunv2_worker_pool_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
+    vars:
+      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+    ignore_read_extra:
+      - 'deletion_protection'
+  - name: 'cloudrunv2_worker_pool_basic_depends_on'
+    primary_resource_id: 'default'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
@@ -66,7 +70,6 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_sql'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
       secret_id: 'secret-1'
@@ -80,21 +83,18 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_directvpc'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_gpu'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_secret'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
       secret_id: 'secret-1'
@@ -102,14 +102,12 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_multicontainer'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_mount_gcs'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
@@ -118,23 +116,14 @@ examples:
     skip_vcr: true
   - name: 'cloudrunv2_worker_pool_mount_nfs'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
     # Currently failing
     skip_vcr: true
-  - name: 'cloudrunv2_worker_pool_custom_audiences'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
       vpc_access_connector_name: 'wp-connector'
@@ -189,7 +178,7 @@ properties:
     type: KeyValueLabels
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
-      environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
+      environment, state, etc. For more information, visit https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
 
       Cloud Run API v2 does not support labels with  `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 WorkerPool.
@@ -282,6 +271,7 @@ properties:
     description: |
       One or more custom audiences that you want this worker pool to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.
       For more information, see https://cloud.google.com/run/docs/configuring/custom-audiences.
+    deprecation_message: '`custom_audiences` is deprecated since it is not applicable to WorkerPool resource and will be removed in a future major release.'
     item_type:
       type: String
   - name: 'scaling'
@@ -291,6 +281,7 @@ properties:
     default_from_api: true
     properties:
       - name: 'scalingMode'
+        ignore_read: true
         type: Enum
         description: |
           The scaling mode for the worker pool. It defaults to MANUAL.
@@ -324,7 +315,7 @@ properties:
         type: KeyValuePairs
         description: |-
           Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc.
-          For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
+          For more information, visit https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
 
           Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
           All system labels in v1 now have a corresponding field in v2 WorkerPoolRevisionTemplate.
@@ -414,6 +405,13 @@ properties:
                 Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
               item_type:
                 type: String
+            - name: 'dependsOn'
+              type: Array
+              description: |-
+                Names of the containers that must start before this container.
+              immutable: true
+              item_type:
+                type: String
             - name: 'env'
               type: Array
               description: |-
@@ -469,7 +467,7 @@ properties:
                 - name: 'limits'
                   type: KeyValuePairs
                   description: |-
-                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', '6', and '8'. Setting 4 CPU requires at least 2Gi of memory, setting 6 or more CPU requires at least 4Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
             - name: 'volumeMounts'
               type: Array

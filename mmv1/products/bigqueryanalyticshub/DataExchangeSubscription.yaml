@@ -40,7 +40,6 @@ sweeper:
 examples:
   - name: 'bigquery_analyticshub_dataexchange_subscription_basic'
     primary_resource_id: 'subscription'
-    primary_resource_name: 'fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])'
     region_override: 'us'
     ignore_read_extra:
       - 'last_modify_time'
@@ -57,6 +56,11 @@ examples:
       # Variables for the Destination Dataset created by the Subscription
       destination_dataset_id: 'subscribed_dest_dataset'
       destination_dataset_friendly_name: 'Subscribed Destination Dataset'
+    test_vars_overrides:
+      # for backward compatible
+      subscriber_contact_email: '"testuser@example.com" + randomSuffix'
+      # for backward compatible
+      destination_dataset_friendly_name: '"Subscribed Destination Dataset" + randomSuffix'
 virtual_fields:
   - name: 'refresh_policy'
     type: Enum
@@ -207,24 +211,22 @@ properties:
       e.g. projects/123/locations/us/dataExchanges/456/listings/789 -> projects/123/datasets/my_dataset
       For Data Exchange subscriptions, this map may contain multiple entries if the Data Exchange has multiple listings.
     key_name: resource_name
-    key_description: The associated linked resource
     value_type:
-      name: linked_resource
       type: NestedObject
       properties:
         - name: 'listing'
-          type: string
+          type: String
           description: Output only. Listing for which linked resource is created.
           output: true
         - name: 'linkedDataset'
-          type: string
+          type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
           exactly_one_of:
             - 'linkedDataset'
             - 'linkedPubsubSubscription'
         - name: 'linkedPubsubSubscription'
-          type: string
+          type: String
           description: Output only. Name of the Pub/Sub subscription, e.g. projects/subscriberproject/subscriptions/subscriptions/sub_id
           output: true
           exactly_one_of:
@@ -239,11 +241,11 @@ properties:
       type: NestedObject
       properties:
         - name: 'listing'
-          type: string
+          type: String
           description: Output only. Listing for which linked resource is created.
           output: true
         - name: 'linkedDataset'
-          type: string
+          type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
   - name: 'dataExchange'

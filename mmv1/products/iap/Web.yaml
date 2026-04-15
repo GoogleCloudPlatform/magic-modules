@@ -35,12 +35,11 @@ iam_policy:
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   parent_resource_attribute: 'project'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  parent_is_resource_id: true
 custom_code:
 examples:
   - name: 'iap_project'
     primary_resource_id: 'project_service'
-    primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:
       org_id: 'ORG_ID'
     external_providers: ["random", "time"]

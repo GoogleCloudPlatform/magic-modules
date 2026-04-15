@@ -54,8 +54,8 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
 timeouts:
   insert_minutes: 45
-  update_minutes: 20
-  delete_minutes: 20
+  update_minutes: 60
+  delete_minutes: 45
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -64,6 +64,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   pre_update: 'templates/terraform/pre_update/netapp_storagepool.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
@@ -184,6 +185,7 @@ properties:
     type: Boolean
     description: |
       Optional. True if using Independent Scaling of capacity and performance (Hyperdisk). Default is false.
+    default_from_api: true
     immutable: true
   - name: 'totalThroughputMibps'
     type: String
@@ -232,3 +234,51 @@ properties:
     description: |
       Total hot tier data rounded down to the nearest GiB used by the storage pool.
     output: true
+  - name: 'type'
+    type: Enum
+    description: |
+      Type of the storage pool.
+      This field is used to control whether the pool supports FILE based volumes only or UNIFIED (both FILE and BLOCK) volumes.
+      If not specified during creation, it defaults to FILE.
+    enum_values:
+      - 'STORAGE_POOL_TYPE_UNSPECIFIED'
+      - 'FILE'
+      - 'UNIFIED'
+    immutable: true
+    default_from_api: true
+  - name: 'scaleTier'
+    type: Enum
+    description: |
+      The effective scale tier of the storage pool. If `scale_tier` is not
+      specified during creation, this defaults to `SCALE_TIER_STANDARD`.
+    enum_values:
+      - 'SCALE_TIER_UNSPECIFIED'
+      - 'SCALE_TIER_STANDARD'
+      - 'SCALE_TIER_ENTERPRISE'
+    immutable: true
+    min_version: beta
+    default_from_api: true
+    deprecation_message: '`scaleTier` is deprecated and will be removed in a future major release. Use `scaleType` instead.'
+  - name: 'scaleType'
+    type: Enum
+    description: |
+      The scale type of the storage pool. Defaults to `SCALE_TYPE_DEFAULT` if not specified.
+    enum_values:
+      - 'SCALE_TYPE_UNSPECIFIED'
+      - 'SCALE_TYPE_DEFAULT'
+      - 'SCALE_TYPE_SCALEOUT'
+    immutable: true
+    default_from_api: true
+  - name: 'mode'
+    type: Enum
+    description: |
+      Mode of the storage pool.
+      The operational mode of the storage pool. ONTAP mode enables operations
+      via ONTAP Mode APIs, while DEFAULT mode enables operations via NetApp Volumes APIs.
+      If not specified during creation, the mode defaults to DEFAULT.
+    enum_values:
+      - 'MODE_UNSPECIFIED'
+      - 'DEFAULT'
+      - 'ONTAP'
+    immutable: true
+    default_from_api: true

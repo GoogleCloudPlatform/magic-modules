@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package logging
 
 import (
@@ -8,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -227,4 +226,13 @@ func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId("")
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_logging_project_sink",
+		ProductName: "logging",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceLoggingProjectSink(),
+	}.Register()
 }

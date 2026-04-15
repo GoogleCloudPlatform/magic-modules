@@ -162,7 +162,23 @@ properties:
           properties:
             - name: 'profileTable'
               type: NestedObject
-              description: Store all table and column profiles in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery
+              description: |
+                Store all table and column profiles in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery.
+                The system will create a new dataset and table for you if none are are provided. The dataset will be named `sensitive_data_protection_discovery`
+                and table will be named `discovery_profiles`. This table will be placed in the same project as the container project running the scan.
+              properties:
+                - name: 'projectId'
+                  type: String
+                  description: The Google Cloud Platform project ID of the project containing the table. If omitted, the project ID is inferred from the API call.
+                - name: 'datasetId'
+                  type: String
+                  description: Dataset Id of the table
+                - name: 'tableId'
+                  type: String
+                  description: Name of the table
+            - name: 'sampleFindingsTable'
+              type: NestedObject
+              description: Store sample findings in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery
               properties:
                 - name: 'projectId'
                   type: String
@@ -228,7 +244,7 @@ properties:
                 - 'RESOURCE_NAME'
         - name: 'tagResources'
           type: NestedObject
-          description: Publish a message into the Pub/Sub topic.
+          description: Tag the profiled resources with the specified tag values.
           properties:
             - name: 'tagConditions'
               type: Array
@@ -271,6 +287,30 @@ properties:
             - name: 'lowerDataRiskToLow'
               type: Boolean
               description: Whether applying a tag to a resource should lower the risk of the profile for that resource. For example, in conjunction with an [IAM deny policy](https://cloud.google.com/iam/docs/deny-overview), you can deny all principals a permission if a tag value is present, mitigating the risk of the resource. This also lowers the data risk of resources at the lower levels of the resource hierarchy. For example, reducing the data risk of a table data profile also reduces the data risk of the constituent column data profiles.
+        - name: 'publishToDataplexCatalog'
+          type: NestedObject
+          description: Publish a portion of each profile to Dataplex Universal Catalog with the aspect type Sensitive Data Protection Profile.
+          send_empty_value: true
+          allow_empty_object: true
+          properties:
+            # Meant to be an empty object with no properties.
+            []
+        - name: 'publishToChronicle'
+          type: NestedObject
+          description: Publishes generated data profiles to Google Security Operations. For more information, see [Use Sensitive Data Protection data in context-aware analytics](https://cloud.google.com/chronicle/docs/detection/usecase-dlp-high-risk-user-download).
+          send_empty_value: true
+          allow_empty_object: true
+          properties:
+            # Meant to be an empty object with no properties.
+            []
+        - name: 'publishToScc'
+          type: NestedObject
+          description: Publishes findings to Security Command Center for each data profile.
+          send_empty_value: true
+          allow_empty_object: true
+          properties:
+            # Meant to be an empty object with no properties.
+            []
   - name: 'targets'
     type: Array
     description: Target to match against for determining what to scan and how frequently
@@ -321,6 +361,12 @@ properties:
                   type: NestedObject
                   description: The table to scan. Discovery configurations including this can only include one DiscoveryTarget (the DiscoveryTarget with this TableReference).
                   properties:
+                    - name: 'projectId'
+                      type: String
+                      description: |
+                        The Google Cloud project ID of the project containing the table.
+                        If omitted, the project ID is inferred from the parent project.
+                        This field is required if the parent resource is an organization.
                     - name: 'datasetId'
                       type: String
                       description: Dataset ID of the table.
@@ -618,6 +664,36 @@ properties:
                                   - name: 'bucketNameRegex'
                                     type: String
                                     description: 'Regex to test the bucket name against. If empty, all buckets match. Example: "marketing2021" or "(marketing)\d{4}" will both match the bucket gs://marketing2021'
+                    - name: 'includeTags'
+                      type: NestedObject
+                      description: |
+                        For a resource to match the tag filters, the resource must have all of the
+                        provided tags attached. Tags refer to Resource Manager tags bound to the
+                        resource or its ancestors.
+                      properties:
+                        - name: 'tagFilters'
+                          type: Array
+                          description: 'A resource must match ALL of the specified tag filters to be included in the collection.'
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: 'namespacedTagValue'
+                                type: String
+                                description: |
+                                  The namespaced name for the tag value. Must be in the format
+                                  `{parent_id}/{tag_key_short_name}/{short_name}`, for example,
+                                  "123456/environment/prod" for an organization parent, or
+                                  "my-project/environment/prod" for a project parent.
+                                conflicts:
+                                  - targets.cloud_storage_target.filter.collection.include_tags.tag_filters.namespaced_tag_key
+                              - name: 'namespacedTagKey'
+                                type: String
+                                description: |
+                                  The namespaced name for the tag key. Must be in the format
+                                  `{parent_id}/{tag_key_short_name}`, for example, "123456/sensitive" for
+                                  an organization parent, or "my-project/sensitive" for a project parent.
+                                conflicts:
+                                  - targets.cloud_storage_target.filter.collection.include_tags.tag_filters.namespaced_tag_value
                 - name: 'cloudStorageResourceReference'
                   type: NestedObject
                   description: The bucket to scan. Targets including this can only include one target (the target with this bucket). This enables profiling the contents of a single bucket, while the other options allow for easy profiling of many buckets within a project or an organization.

@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,6 +31,7 @@ examples:
       saas_name: example-saas
       cluster_unitkind_name: cluster-unitkind
       app_unitkind_name: app-unitkind
+      release_name: example-release
     test_env_vars:
       project: 'PROJECT_NAME'
     bootstrap_iam:
@@ -64,6 +65,13 @@ properties:
     type: String
     description: The timestamp when the resource was created.
     output: true
+  - name: defaultRelease
+    type: String
+    description: |-
+      A reference to the Release object to use as default for creating new units
+      of this UnitKind.
+      If not specified, a new unit must explicitly reference which release to use
+      for its creation.
   - name: dependencies
     type: Array
     description: |-
@@ -120,7 +128,7 @@ properties:
               required: true
             - name: ignoreForLookup
               type: Boolean
-              description: Tells SaaS Runtime if this mapping should be used during lookup or not
+              description: Tells App Lifecycle Manager if this mapping should be used during lookup or not
             - name: inputVariable
               type: String
               description: Name of the inputVariable on the dependency
@@ -172,7 +180,7 @@ properties:
               required: true
             - name: ignoreForLookup
               type: Boolean
-              description: Tells SaaS Runtime if this mapping should be used during lookup or not
+              description: Tells App Lifecycle Manager if this mapping should be used during lookup or not
             - name: inputVariable
               type: String
               description: Name of the inputVariable on the dependency
@@ -185,7 +193,7 @@ properties:
     type: String
     description: |-
       A reference to the Saas that defines the product (managed service) that
-      the producer wants to manage with SaaS Runtime. Part of the SaaS Runtime
+      the producer wants to manage with App Lifecycle Manager. Part of the App Lifecycle Manager
       common data model. Immutable once set.
     immutable: true
     required: true

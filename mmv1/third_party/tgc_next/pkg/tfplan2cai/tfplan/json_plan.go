@@ -54,3 +54,19 @@ func ReadResourceChanges(data []byte) ([]*tfjson.ResourceChange, error) {
 
 	return plan.ResourceChanges, nil
 }
+
+// ReadResourceChanges returns the list of resource changes from a json plan
+func ReadResourceConfigurations(data []byte) (*tfjson.Config, error) {
+	plan := tfjson.Plan{}
+	err := plan.UnmarshalJSON(data)
+	if err != nil {
+		return nil, fmt.Errorf("reading JSON plan: %w", err)
+	}
+
+	err = plan.Validate()
+	if err != nil {
+		return nil, fmt.Errorf("validating JSON plan: %w", err)
+	}
+
+	return plan.Config, nil
+}

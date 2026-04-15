@@ -14,6 +14,7 @@
 ---
 name: 'SecurityPolicyRule'
 api_resource_type_kind: SecurityPolicy
+api_resource_field: 'rules'
 description: |
   A rule for the SecurityPolicy.
 references:
@@ -51,14 +52,23 @@ examples:
     primary_resource_id: 'policy_rule'
     vars:
       sec_policy_name: 'policyruletest'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policyruletest" + randomSuffix'
   - name: 'security_policy_rule_default_rule'
     primary_resource_id: 'policy_rule'
     vars:
       sec_policy_name: 'policyruletest'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policyruletest" + randomSuffix'
   - name: 'security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
     vars:
       sec_policy_name: 'policywithmultiplerules'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policywithmultiplerules" + randomSuffix'
 parameters:
   - name: 'security_policy'
     type: String
@@ -311,6 +321,7 @@ properties:
     description: |
       Must be specified if the action is "rate_based_ban" or "throttle". Cannot be specified for any other actions.
     update_mask_fields:
+      - 'rateLimitOptions'
       - 'rateLimitOptions.rateLimitThreshold'
       - 'rateLimitOptions.conformAction'
       - 'rateLimitOptions.exceedRedirectOptions'

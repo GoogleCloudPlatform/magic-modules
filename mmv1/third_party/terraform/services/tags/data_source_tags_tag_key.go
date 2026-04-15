@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -46,6 +47,10 @@ func DataSourceGoogleTagsTagKey() *schema.Resource {
 				Computed: true,
 			},
 			"update_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"allowed_values_regex": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -104,6 +109,18 @@ func dataSourceGoogleTagsTagKeyRead(d *schema.ResourceData, meta interface{}) er
 	if err := d.Set("description", tagKeyMatch.Description); err != nil {
 		return fmt.Errorf("Error setting tag key description: %s", err)
 	}
+	if err := d.Set("allowed_values_regex", tagKeyMatch.AllowedValuesRegex); err != nil {
+		return fmt.Errorf("Error setting tag key allowed_values_regex: %s", err)
+	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_tags_tag_key",
+		ProductName: "tags",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleTagsTagKey(),
+	}.Register()
 }

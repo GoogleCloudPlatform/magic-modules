@@ -1,6 +1,8 @@
 package utils
 
-import "reflect"
+import (
+	"reflect"
+)
 
 // IsEmpty checks if a value is meaningfully empty in a recursive way
 func IsEmpty(v interface{}) bool {
@@ -68,4 +70,19 @@ func IsEmpty(v interface{}) bool {
 		// For simple types (int, string, etc.), check if it's a zero value
 		return val.IsZero()
 	}
+}
+
+const (
+	ColorReset = "\033[0m"
+	ColorRed   = "\033[31m"
+)
+
+type ErrTransformer func(error) error
+
+func TransformErrs(fn ErrTransformer, errs []error) (prefixedErrs []error) {
+	for _, err := range errs {
+		prefixedErrs = append(prefixedErrs, fn(err))
+	}
+
+	return prefixedErrs
 }

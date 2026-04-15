@@ -1,5 +1,5 @@
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
-// Copyright (c) HashiCorp, Inc.
+{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 {{ end }}
 // ----------------------------------------------------------------------------
@@ -19,4 +19,15 @@
 // Package {{ lower $.Name }} contains resources, datasources, etc. for the {{ lower $.DisplayName }} service.
 package {{ lower $.Name }}
 
+import (
+    "{{ $.ImportPath }}/registry"
+)
+
 const ProductName = "{{ lower $.Name }}"
+
+func init() {
+    registry.Product{
+        Name: "{{ lower $.Name }}",
+	    BaseUrl: "{{ $.Version.BaseUrl }}",
+    }.Register()
+}

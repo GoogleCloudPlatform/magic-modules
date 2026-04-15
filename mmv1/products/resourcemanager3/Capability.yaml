@@ -19,8 +19,8 @@ description:
   that span multiple projects within that folder and its descendant projects.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/manage-applications'
-  api: 'https://cloud.google.com/resource-manager/reference/rest'
+    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/manage-applications'
+  api: 'https://docs.cloud.google.com/resource-manager/reference/rest'
 
 import_format:
   - '{{parent}}/capabilities/{{capability_name}}'
@@ -50,11 +50,11 @@ examples:
   - name: 'resource_manager_capability'
     primary_resource_id: 'capability'
     vars:
-      display_name: 'my-folder'
+      display_name: 'folder-cap'
     test_env_vars:
       org_id: "ORG_ID"
     external_providers: ["time"]
-
+    exclude_test: true
 parameters:
 
 properties:

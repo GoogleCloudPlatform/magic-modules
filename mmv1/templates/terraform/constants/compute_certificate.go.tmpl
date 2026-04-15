@@ -1,3 +1,8 @@
+import (
+	"crypto/sha256"
+	"encoding/hex"
+)
+
 // sha256DiffSuppress
 // if old is the hex-encoded sha256 sum of new, treat them as equal
 func sha256DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {

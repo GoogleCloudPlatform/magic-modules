@@ -40,7 +40,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'source'
   base_url: 'organizations/{{organization}}/sources/{{source}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'organizations/{{organization}}/sources/{{source}}'
     - '{{source}}'
@@ -51,6 +50,9 @@ examples:
     primary_resource_id: 'custom_source'
     vars:
       source_display_name: 'My Source'
+    test_vars_overrides:
+      # for backward compatible
+      source_display_name: '"My Source" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       # resource can't be destroyed, so checkdestroy fails unnecessarily

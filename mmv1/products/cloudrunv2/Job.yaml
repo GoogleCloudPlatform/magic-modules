@@ -43,7 +43,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
     - '{{name}}'
@@ -53,7 +52,6 @@ taint_resource_on_failed_create: true
 examples:
   - name: 'cloudrunv2_job_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
@@ -66,7 +64,6 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_sql'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
@@ -74,13 +71,14 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
+      secret_id: '"secret" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       vpc_access_connector_name: 'run-vpc'
@@ -90,29 +88,28 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_directvpc'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
+    test_vars_overrides:
+      # for backward compatible
+      secret_id: '"secret" + randomSuffix'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_emptydir'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_run_job'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_job_name: 'cloudrun-job'
@@ -120,14 +117,12 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_multicontainer'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_gpu'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
@@ -175,7 +170,7 @@ properties:
     type: KeyValueLabels
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
-      environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
+      environment, state, etc. For more information, visit https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
 
       Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Job.
@@ -289,7 +284,7 @@ properties:
         type: KeyValuePairs
         description: |-
           Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter,
-          or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or
+          or break down billing charges by team, component, environment, state, etc. For more information, visit https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels or
           https://cloud.google.com/run/docs/configuring/labels.
 
           Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
@@ -404,7 +399,7 @@ properties:
                     - name: 'limits'
                       type: KeyValuePairs
                       description: |-
-                        Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                        Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', '6', and '8'. Setting 4 CPU requires at least 2Gi of memory, setting 6 or more CPU requires at least 4Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                       default_from_api: true
                 - name: 'ports'
                   type: Array
@@ -734,6 +729,8 @@ properties:
                 type: String
                 description: |-
                   VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
+                conflicts:
+                  - template.0.vpc_access.0.network_interfaces
               - name: 'egress'
                 type: Enum
                 description: |-
@@ -746,6 +743,8 @@ properties:
                 type: Array
                 description: |-
                   Direct VPC egress settings. Currently only single network interface is supported.
+                conflicts:
+                  - template.0.vpc_access.0.connector
                 item_type:
                   type: NestedObject
                   properties:

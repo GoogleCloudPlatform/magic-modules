@@ -33,6 +33,8 @@ examples:
     vars:
       bucket_name: 'bucket-name'
     external_providers: ["time"]
+    ignore_read_extra:
+      - 'update_time'
 identity:
   - bucket
   - anywhereCacheId
@@ -49,8 +51,6 @@ async:
   actions:
     - create
     - update
-  operation:
-    full_url: 'selfLink'
   result:
     resource_inside_response: true
 parameters:

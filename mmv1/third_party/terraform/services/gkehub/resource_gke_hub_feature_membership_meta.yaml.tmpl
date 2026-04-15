@@ -1,5 +1,5 @@
 resource: 'google_gke_hub_feature_membership'
-generation_type: 'dcl'
+generation_type: 'handwritten'
 api_service_name: 'gkehub.googleapis.com'
 {{- if ne $.TargetVersionName "ga" }}
 api_version: 'v1beta'
@@ -8,6 +8,13 @@ api_version: 'v1'
 {{- end }}
 api_resource_type_kind: 'Feature'
 fields:
+  - field: 'configmanagement.config_sync.deployment_overrides.containers.container_name'
+  - field: 'configmanagement.config_sync.deployment_overrides.containers.cpu_limit'
+  - field: 'configmanagement.config_sync.deployment_overrides.containers.cpu_request'
+  - field: 'configmanagement.config_sync.deployment_overrides.containers.memory_limit'
+  - field: 'configmanagement.config_sync.deployment_overrides.containers.memory_request'
+  - field: 'configmanagement.config_sync.deployment_overrides.deployment_name'
+  - field: 'configmanagement.config_sync.deployment_overrides.deployment_namespace'
   - field: 'configmanagement.config_sync.enabled'
   - field: 'configmanagement.config_sync.git.gcp_service_account_email'
   - field: 'configmanagement.config_sync.git.https_proxy'

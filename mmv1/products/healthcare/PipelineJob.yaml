@@ -51,6 +51,9 @@ examples:
       backfill_pipeline_name: 'example_backfill_pipeline'
       dataset_name: 'example_dataset'
       mapping_pipeline_name: 'example_mapping_pipeline_job'
+    # Skip in VCR until the test issue is resolved
+    # https://github.com/hashicorp/terraform-provider-google/issues/21294
+    skip_vcr: true
   - name: 'healthcare_pipeline_job_whistle_mapping'
     primary_resource_id: 'example-mapping-pipeline'
     vars:

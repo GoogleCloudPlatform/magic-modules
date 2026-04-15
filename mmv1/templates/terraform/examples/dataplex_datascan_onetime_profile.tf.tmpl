@@ -1,0 +1,20 @@
+resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  data_scan_id = "{{index $.Vars "datascan_name"}}"
+
+  data {
+	  resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
+  }
+
+  execution_spec {
+    trigger {
+      one_time {
+        ttl_after_scan_completion = "120s"
+      }
+    }
+  }
+
+data_profile_spec {}
+
+  project = "{{index $.TestEnvVars "project_name"}}"
+}

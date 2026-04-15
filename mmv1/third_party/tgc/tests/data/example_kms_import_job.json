@@ -1,6 +1,6 @@
 [
     {
-        "name": "//cloudkms.googleapis.com/placeholder-CTVJTU1w",
+        "name": "//cloudkms.googleapis.com/projects/{{.Provider.project}}/locations/global/keyRings/keyring-id-example/importJobs/my-import-job",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "asset_type": "cloudkms.googleapis.com/KeyRingImportJob",
         "resource": {

@@ -262,7 +262,7 @@ func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta inter
   }
 
 {{- if $.CustomCode.PostRead }}
-  {{ $.CustomTemplate $.CustomCode.PostRead false -}}
+  {{ customTemplate $ $.CustomCode.PostRead false -}}
 {{- end }}
   var v interface{}
   var ok bool

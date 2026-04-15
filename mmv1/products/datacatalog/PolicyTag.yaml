@@ -36,11 +36,12 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'policy_tag'
   base_url: '{{%policy_tag}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - '{{%policy_tag}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/extract_taxonomy.go.tmpl'
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 examples:
   - name: 'data_catalog_taxonomies_policy_tag_basic'
     primary_resource_id: 'basic_policy_tag'

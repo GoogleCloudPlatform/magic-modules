@@ -26,12 +26,12 @@ references:
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.notebookRuntimeTemplates'
 base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{name}}'
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
 async:
   type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+  actions: ['create', 'delete']
   result:
     resource_inside_response: true
 iam_policy:
@@ -42,10 +42,10 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
     - '{{runtime_template}}'
+include_in_tgc_next: true
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
     vars:
       runtime_template_name: 'colab-runtime-template'
   - name: 'colab_runtime_template_no_name'
@@ -53,7 +53,6 @@ examples:
     exclude_import_test: true
   - name: 'colab_runtime_template_full'
     primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
     vars:
       runtime_template_name: 'colab-runtime-template'
       network_name: 'colab-test-default'
@@ -70,6 +69,7 @@ properties:
   - name: 'name'
     type: String
     default_from_api: true
+    immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     description: 'The resource name of the Runtime Template'
   - name: 'displayName'
@@ -77,77 +77,82 @@ properties:
     description:
       Required. The display name of the Runtime Template.
     required: true
+    update_mask_fields:
+      - 'displayName'
   - name: description
     type: String
+    immutable: true
     description: 'The description of the Runtime Template.'
   - name: machineSpec
     type: NestedObject
     default_from_api: true
+    immutable: true
     description: |
      'The machine configuration of the runtime.'
     properties:
       - name: 'machineType'
-        type: string
+        type: String
         default_from_api: true
+        immutable: true
         description: |
                 The Compute Engine machine type selected for the runtime.
       - name: 'acceleratorType'
-        type: enum
+        type: String
+        immutable: true
         description: |
                 The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
-        enum_values:
-          - 'NVIDIA_TESLA_V100'
-          - 'NVIDIA_TESLA_T4'
-          - 'NVIDIA_TESLA_A100'
-          - 'NVIDIA_A100_80GB'
-          - 'NVIDIA_L4'
       - name: 'acceleratorCount'
         type: Integer
         default_from_api: true
+        immutable: true
         description: 'The number of accelerators used by the runtime.'
   - name: dataPersistentDiskSpec
+    immutable: true
     default_from_api: true
     type: NestedObject
     description: 'The configuration for the data disk of the runtime.'
     properties:
       - name: 'diskType'
-        type: enum
+        type: String
         description: 'The type of the persistent disk.'
         default_from_api: true
-        enum_values:
-          - 'pd-standard'
-          - 'pd-ssd'
-          - 'pd-balanced'
-          - 'pd-extreme'
+        immutable: true
       - name: 'diskSizeGb'
-        type: int
+        type: String  # Integer
         default_from_api: true
+        immutable: true
         description: |
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
   - name: networkSpec
     type: NestedObject
     default_from_api: true
+    immutable: true
     description: 'The network configuration for the runtime.'
     properties:
       - name: 'enableInternetAccess'
         type: Boolean
+        immutable: true
         description: Enable public internet access for the runtime.
       - name: 'network'
         default_from_api: true
+        immutable: true
         type: String
         description: 'The name of the VPC that this runtime is in.'
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: 'subnetwork'
         type: String
+        immutable: true
         description: 'The name of the subnetwork that this runtime is in.'
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'labels'
     type: KeyValueLabels
     default_from_api: true
+    immutable: true
     description: 'Labels to identify and group the runtime template.'
   - name: idleShutdownConfig
     type: NestedObject
     default_from_api: true
+    immutable: true
     description: 'Notebook Idle Shutdown configuration for the runtime.'
     properties:
       - name: 'idleTimeout'
@@ -157,17 +162,20 @@ properties:
   - name: eucConfig
     type: NestedObject
     default_from_api: true
+    immutable: true
     description: 'EUC configuration of the NotebookRuntimeTemplate.'
     diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'eucDisabled'
         type: Boolean
         default_from_api: true
+        immutable: true
         description: 'Disable end user credential access for the runtime.'
         diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
   - name: shieldedVmConfig
     type: NestedObject
     default_from_api: true
+    immutable: true
     description: 'Runtime Shielded VM spec.'
     diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
@@ -178,12 +186,15 @@ properties:
         diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
   - name: 'networkTags'
     type: Array
+    immutable: true
     item_type:
       type: String
     description: 'Applies the given Compute Engine tags to the runtime.'
   - name: encryptionSpec
     type: NestedObject
     description: 'Customer-managed encryption key spec for the notebook runtime.'
+    update_mask_fields:
+      - 'encryptionSpec.kmsKeyName'
     properties:
       - name: 'kmsKeyName'
         type: String
@@ -192,10 +203,17 @@ properties:
     type: NestedObject
     default_from_api: true
     description: 'The notebook software configuration of the notebook runtime.'
+    update_mask_fields:
+      - 'softwareConfig.env'
+      - 'softwareConfig.postStartupScriptConfig.postStartupScript'
+      - 'softwareConfig.postStartupScriptConfig.postStartupScriptUrl'
+      - 'softwareConfig.postStartupScriptConfig.postStartupScriptBehavior'
+      - 'softwareConfig.colabImage.releaseName'
     properties:
       - name: 'env'
         type: Array
         description: 'Environment variables to be passed to the container.'
+        is_missing_in_cai: true
         item_type:
           type: NestedObject
           properties:
@@ -209,3 +227,30 @@ properties:
                             If a variable cannot be resolved, the reference in the input string will be unchanged.
                             The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
                             references will never be expanded, regardless of whether the variable exists or not.'
+      - name: 'postStartupScriptConfig'
+        type: NestedObject
+        description: 'Post startup script config.'
+        is_missing_in_cai: true
+        properties:
+          - name: 'postStartupScript'
+            type: String
+            description: 'Post startup script to run after runtime is started.'
+          - name: 'postStartupScriptUrl'
+            type: String
+            description: 'Post startup script url to download. Example: https://bucket/script.sh.'
+          - name: 'postStartupScriptBehavior'
+            type: Enum
+            description: 'Post startup script behavior that defines download and execution behavior.'
+            enum_values:
+              - 'RUN_ONCE'
+              - 'RUN_EVERY_START'
+              - 'DOWNLOAD_AND_RUN_EVERY_START'
+      - name: 'colabImage'
+        type: NestedObject
+        description: 'Colab Image Configuration.'
+        default_from_api: true
+        properties:
+          - name: 'releaseName'
+            type: String
+            default_from_api: true
+            description: 'The release name of the NotebookRuntime Colab image, e.g. "py310". If not specified, detault to the latest release.'

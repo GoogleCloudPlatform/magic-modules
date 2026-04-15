@@ -235,6 +235,7 @@ module "project-services" {
     "binaryauthorization.googleapis.com",
     "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
+    "ces.googleapis.com",
     "chronicle.googleapis.com",
     "cloudaicompanion.googleapis.com",
     "cloudapis.googleapis.com",
@@ -248,6 +249,7 @@ module "project-services" {
     "cloudquotas.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudscheduler.googleapis.com",
+    "cloudsecuritycompliance.googleapis.com",
     "cloudtasks.googleapis.com",
     "cloudtrace.googleapis.com",
     "composer.googleapis.com",
@@ -293,6 +295,7 @@ module "project-services" {
     "firebaseremoteconfig.googleapis.com",
     "firebaserules.googleapis.com",
     "firebasestorage.googleapis.com",
+    "firebasevertexai.googleapis.com",
     "firestore.googleapis.com",
     "firestorekeyvisualizer.googleapis.com",
     "gkebackup.googleapis.com",
@@ -327,6 +330,7 @@ module "project-services" {
     "networksecurity.googleapis.com",
     "networkservices.googleapis.com",
     "notebooks.googleapis.com",
+    "observability.googleapis.com",
     "orgpolicy.googleapis.com",
     "osconfig.googleapis.com",
     "oslogin.googleapis.com",
@@ -375,6 +379,7 @@ module "project-services" {
     "tpu.googleapis.com",
     "trafficdirector.googleapis.com",
     "transcoder.googleapis.com",
+    "vectorsearch.googleapis.com",
     "vmwareengine.googleapis.com",
     "vpcaccess.googleapis.com",
     "websecurityscanner.googleapis.com",
@@ -532,6 +537,12 @@ data "google_organization" "org2" {
 resource "google_organization_iam_member" "sa_org2_admin" {
   org_id = data.google_organization.org2.org_id
   role   = "roles/resourcemanager.organizationAdmin"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_org2_folder_admin" {
+  org_id = data.google_organization.org2.org_id
+  role   = "roles/resourcemanager.folderAdmin"
   member = google_service_account.sa.member
 }
 

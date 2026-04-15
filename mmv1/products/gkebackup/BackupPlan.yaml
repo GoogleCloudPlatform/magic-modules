@@ -40,15 +40,14 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
     - '{{name}}'
 custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'gkebackup_backupplan_basic'
     primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-basic-plan%s", context["random_suffix"])'
     vars:
       name: 'basic-plan'
       cluster_name: 'basic-cluster'
@@ -96,7 +95,6 @@ examples:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_nslabels'
     primary_resource_id: 'nslabels'
-    primary_resource_name: 'fmt.Sprintf("tf-test-nslabels-plan%s", context["random_suffix"])'
     vars:
       name: 'nslabels-plan'
       cluster_name: 'nslabels-cluster'
@@ -521,6 +519,11 @@ properties:
     type: Integer
     description: |
       The number of Kubernetes Pods backed up in the last successful Backup created via this BackupPlan.
+    output: true
+  - name: 'protectedNamespaceCount'
+    type: Integer
+    description: |
+      The number of Kubernetes Namespaces backed up in the last successful Backup created via this BackupPlan.
     output: true
   - name: 'state'
     type: String

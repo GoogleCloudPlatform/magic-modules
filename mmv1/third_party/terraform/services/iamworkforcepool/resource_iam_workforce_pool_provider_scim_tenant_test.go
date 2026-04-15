@@ -1,0 +1,157 @@
+package iamworkforcepool_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"hard_delete":   true,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIAMWorkforcePoolWorkforcePoolProviderScimTenantDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_full(context),
+			},
+			{
+				ResourceName:            "google_iam_workforce_pool_provider_scim_tenant.scim_tenant",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"state", "hard_delete"},
+			},
+			{
+				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider_scim_tenant.scim_tenant", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_iam_workforce_pool_provider_scim_tenant.scim_tenant",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"state", "hard_delete"},
+			},
+		},
+	})
+}
+
+func testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_iam_workforce_pool" "pool" {
+  workforce_pool_id = "tf-test-example-pool%{random_suffix}"
+  parent            = "organizations/%{org_id}"
+  location          = "global"
+}
+
+resource "google_iam_workforce_pool_provider" "provider" {
+  workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+  location          = "global"
+  provider_id       = "tf-test-provider-%{random_suffix}"
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri = "https://accounts.thirdparty.com"
+    client_id  = "client-id"
+    client_secret {
+      value {
+        plain_text = "client-secret"
+      }
+    }
+    web_sso_config {
+      response_type             = "CODE"
+      assertion_claims_behavior = "MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS"
+      additional_scopes         = ["groups", "roles"]
+    }
+  }
+  display_name        = "Display name"
+  description         = "A sample OIDC workforce pool provider."
+  disabled            = false
+  attribute_condition = "true"
+}
+
+resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
+  location          = "global"
+  workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+  provider_id       = google_iam_workforce_pool_provider.provider.provider_id
+  scim_tenant_id    = "example-scim-tenant"
+  display_name      = "Example SCIM Tenant"
+  description       = "A basic SCIM tenant for IAM Workforce Pool Provider"
+  claim_mapping       = {
+    "google.subject"  = "user.externalId",
+    "google.group"    = "group.externalId"
+  }
+  hard_delete = "%{hard_delete}"
+  # state, base_uri, purge_time and service_agent are output only, not settable
+}
+
+`, context)
+}
+
+func testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_iam_workforce_pool" "pool" {
+  workforce_pool_id = "tf-test-example-pool%{random_suffix}"
+  parent            = "organizations/%{org_id}"
+  location          = "global"
+}
+
+resource "google_iam_workforce_pool_provider" "provider" {
+  workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+  location          = "global"
+  provider_id       = "tf-test-provider-%{random_suffix}"
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri = "https://accounts.thirdparty.com"
+    client_id  = "client-id"
+    client_secret {
+      value {
+        plain_text = "client-secret"
+      }
+    }
+    web_sso_config {
+      response_type             = "CODE"
+      assertion_claims_behavior = "MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS"
+      additional_scopes         = ["groups", "roles"]
+    }
+  }
+  display_name        = "Display name"
+  description         = "A sample OIDC workforce pool provider."
+  disabled            = false
+  attribute_condition = "true"
+}
+
+resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
+  location          = "global"
+  workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+  provider_id       = google_iam_workforce_pool_provider.provider.provider_id
+  scim_tenant_id    = "example-scim-tenant"
+  display_name      = "Example SCIM Tenant - Updated"
+  description       = "A basic SCIM tenant for IAM Workforce Pool Provider - Updated"
+  claim_mapping       = {
+    "google.subject"  = "user.externalId",
+    "google.group"    = "group.externalId"
+  }
+  hard_delete = "%{hard_delete}"
+  # state, base_uri, purge_time and service_agent are output only, not settable
+}
+`, context)
+}

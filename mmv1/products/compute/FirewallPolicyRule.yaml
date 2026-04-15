@@ -14,6 +14,7 @@
 ---
 name: 'FirewallPolicyRule'
 api_resource_type_kind: FirewallPolicy
+api_resource_field: 'rules'
 kind: 'compute#firewallPolicyRule'
 description: |
   Represents a rule that describes one or more match conditions along with the action to be taken when traffic matches this condition (allow or deny).
@@ -40,6 +41,7 @@ timeouts:
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 custom_code:
+  update_encoder: 'templates/terraform/update_encoder/compute_firewall_policy_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_firewall_policy_rule.go.tmpl'
   post_delete: 'templates/terraform/post_delete/compute_firewall_policy_rule.go.tmpl'
   post_update: 'templates/terraform/post_update/compute_firewall_policy_rule.go.tmpl'
@@ -52,6 +54,9 @@ examples:
       fw_policy: 'fw-policy'
       tag_key: 'tag-key'
       tag_value: 'tag-value'
+    test_vars_overrides:
+      # for backward compatible
+      folder: '"folder" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       service_acct: 'SERVICE_ACCT'
@@ -63,9 +68,29 @@ examples:
       network: 'network'
       tag_key: 'tag-key'
       tag_value: 'tag-value'
+    test_vars_overrides:
+      # for backward compatible
+      folder: '"folder" + randomSuffix'
+      # for backward compatible
+      network: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
     min_version: beta
+  - name: 'firewall_policy_rule_network_context'
+    primary_resource_id: 'primary'
+    vars:
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+      network: 'network'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+    test_vars_overrides:
+      # for backward compatible
+      folder: '"folder" + randomSuffix'
+      # for backward compatible
+      network: '"network" + randomSuffix'
+    test_env_vars:
+      org_id: 'ORG_ID'
   - name: 'firewall_policy_rule_secure_tags'
     primary_resource_id: 'primary'
     vars:
@@ -73,6 +98,9 @@ examples:
       fw_policy: 'fw-policy'
       tag_key: 'tag-key'
       tag_value: 'tag-value'
+    test_vars_overrides:
+      # for backward compatible
+      folder: '"folder" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -131,10 +159,27 @@ properties:
           type: String
       - name: 'srcNetworkScope'
         type: Enum
+        default_from_api: true
         description: |
           Network scope of the traffic source.
         min_version: beta
         enum_values:
+          - 'UNSPECIFIED'
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
+        conflicts:
+          - match.0.src_network_context
+      - name: 'srcNetworkContext'
+        conflicts:
+          - match.0.src_network_scope
+        type: Enum
+        default_from_api: true
+        description: |
+          Network context of the traffic source.
+        enum_values:
+          - 'UNSPECIFIED'
           - 'INTERNET'
           - 'INTRA_VPC'
           - 'NON_INTERNET'
@@ -143,19 +188,35 @@ properties:
         type: Array
         description: |
           Networks of the traffic source. It can be either a full or partial url.
-        min_version: beta
         item_type:
           type: String
       - name: 'destNetworkScope'
         type: Enum
+        default_from_api: true
         description: |
           Network scope of the traffic destination.
         min_version: beta
         enum_values:
+          - 'UNSPECIFIED'
           - 'INTERNET'
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
+        conflicts:
+          - match.0.src_network_context
+      - name: 'destNetworkContext'
+        type: Enum
+        default_from_api: true
+        description: |
+          Network context of the traffic destination.
+        enum_values:
+          - 'UNSPECIFIED'
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
+        conflicts:
+          - match.0.src_network_scope
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true

@@ -29,15 +29,23 @@ update_verb: 'PATCH'
 update_mask: true
 mutex: 'alertPolicy/{{project}}'
 import_format:
-  - '{{project}} {{name}}'
-  - '{{name}}'
+  - 'projects/{{project}}/alertPolicies/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
   constants: 'templates/terraform/constants/monitoring_alert_policy.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccMonitoringAlertPolicy/basic'
+  - name: 'TestAccMonitoringAlertPolicy/forecast'
+  - name: 'TestAccMonitoringAlertPolicy/full'
+  - name: 'TestAccMonitoringAlertPolicy/log'
+  - name: 'TestAccMonitoringAlertPolicy/mql'
+  - name: 'TestAccMonitoringAlertPolicy/promql'
+  - name: 'TestAccMonitoringAlertPolicy/update'
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
@@ -50,30 +58,45 @@ examples:
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_evaluation_missing_data'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_forecast_options'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_promql_condition'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_sql_condition'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
 parameters:
 properties:

@@ -45,6 +45,11 @@ examples:
     vars:
       parent: "projects/104740170505"
       enablement: "ENABLED"
+    test_vars_overrides:
+      # for backward compatible
+      parent: '"projects/104740170505" + randomSuffix'
+      # for backward compatible
+      enablement: '"ENABLED" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'parent'
@@ -67,11 +72,15 @@ properties:
     type: String
     description: |
       The resource container that determines if the quota adjuster is set for this project.
+      Expect this field to be empty currently.
+    deprecation_message: '`effectiveContainer` is deprecated and will be removed in a future major release. Use `inherited_from` instead.'
     output: true
   - name: 'effectiveEnablement'
     type: Enum
     description: |
       Based on the effective container`s setting above, determines Whether this resource container has the quota adjuster enabled.
+      Expect this field to be empty currently.
+    deprecation_message: '`effectiveEnablement` is deprecated and will be removed in a future major release. Use `inherited` instead.'
     output: true
     enum_values:
       - 'DEFAULT'

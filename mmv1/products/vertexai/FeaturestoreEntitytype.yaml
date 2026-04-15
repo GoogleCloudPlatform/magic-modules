@@ -60,7 +60,6 @@ exclude_sweeper: true
 examples:
   - name: 'vertex_ai_featurestore_entitytype'
     primary_resource_id: 'entity'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/featurestores/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("terraform%s", context["random_suffix"])), fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform'
       project: 'vertex-ai'
@@ -70,6 +69,8 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      name: '"terraform" + randomSuffix'
   - name: 'vertex_ai_featurestore_entitytype_with_beta_fields'
     primary_resource_id: 'entity'
     min_version: 'beta'
@@ -82,6 +83,8 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      name: '"terraform2" + randomSuffix'
 parameters:
   - name: 'featurestore'
     type: String

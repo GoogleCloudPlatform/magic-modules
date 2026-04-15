@@ -30,7 +30,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
     - '{{name}}'
@@ -38,7 +37,6 @@ custom_code:
 examples:
   - name: 'clouddeploy_target_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cd-target%s", context["random_suffix"])'
     vars:
       target: 'cd-target'
 parameters:

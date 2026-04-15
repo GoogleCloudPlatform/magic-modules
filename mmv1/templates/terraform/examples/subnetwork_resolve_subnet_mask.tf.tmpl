@@ -1,0 +1,15 @@
+resource "google_compute_subnetwork" "subnetwork-resolve-subnet-mask" {
+
+  name             = "{{index $.Vars "subnetwork_name"}}"
+  region           = "us-west2"
+  ip_cidr_range    = "10.10.0.0/24"
+  purpose          = "PRIVATE"
+  resolve_subnet_mask = "ARP_PRIMARY_RANGE"
+  network          = google_compute_network.custom-test.id
+}
+
+resource "google_compute_network" "custom-test" {
+
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}

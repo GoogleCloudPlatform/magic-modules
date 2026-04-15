@@ -43,7 +43,6 @@ exclude_tgc: true
 examples:
   - name: 'iap_app_engine_service'
     primary_resource_id: 'version'
-    primary_resource_name: 'context["project_id"], "default"'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
