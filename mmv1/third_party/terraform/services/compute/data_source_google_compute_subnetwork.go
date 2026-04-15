@@ -2,16 +2,12 @@ package compute
 
 import (
 	"fmt"
+	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func DataSourceGoogleComputeSubnetwork() *schema.Resource {
@@ -101,7 +97,7 @@ func DataSourceGoogleComputeSubnetwork() *schema.Resource {
 
 func dataSourceGoogleComputeSubnetworkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -112,37 +108,51 @@ func dataSourceGoogleComputeSubnetworkRead(d *schema.ResourceData, meta interfac
 	}
 	id := fmt.Sprintf("projects/%s/regions/%s/subnetworks/%s", project, region, name)
 
-	subnetwork, err := config.NewComputeClient(userAgent).Subnetworks.Get(project, region, name).Do()
+	url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", config.ComputeBasePath, project, region, name)
+	subnetwork, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Subnetwork Not Found : %s", name), id)
 	}
 
-	if err := d.Set("subnetwork_id", subnetwork.Id); err != nil {
-		return fmt.Errorf("Error setting subnetwork_id: %s", err)
+	// REST API returns uint64 id as a JSON string to avoid float64 precision loss.
+	if idStr, ok := subnetwork["id"].(string); ok {
+		subnetworkId, err := strconv.ParseInt(idStr, 10, 64)
+		if err != nil {
+			return fmt.Errorf("Error parsing subnetwork_id: %s", err)
+		}
+		if err := d.Set("subnetwork_id", subnetworkId); err != nil {
+			return fmt.Errorf("Error setting subnetwork_id: %s", err)
+		}
 	}
 
-	if err := d.Set("ip_cidr_range", subnetwork.IpCidrRange); err != nil {
+	if err := d.Set("ip_cidr_range", subnetwork["ipCidrRange"]); err != nil {
 		return fmt.Errorf("Error setting ip_cidr_range: %s", err)
 	}
-	if err := d.Set("external_ipv6_prefix", subnetwork.ExternalIpv6Prefix); err != nil {
+	if err := d.Set("external_ipv6_prefix", subnetwork["externalIpv6Prefix"]); err != nil {
 		return fmt.Errorf("Error setting external_ipv6_prefix: %s", err)
 	}
-	if err := d.Set("internal_ipv6_prefix", subnetwork.InternalIpv6Prefix); err != nil {
+	if err := d.Set("internal_ipv6_prefix", subnetwork["internalIpv6Prefix"]); err != nil {
 		return fmt.Errorf("Error setting internal_ipv6_prefix: %s", err)
 	}
-	if err := d.Set("private_ip_google_access", subnetwork.PrivateIpGoogleAccess); err != nil {
+	if err := d.Set("private_ip_google_access", subnetwork["privateIpGoogleAccess"]); err != nil {
 		return fmt.Errorf("Error setting private_ip_google_access: %s", err)
 	}
-	if err := d.Set("self_link", subnetwork.SelfLink); err != nil {
+	if err := d.Set("self_link", subnetwork["selfLink"]); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	if err := d.Set("description", subnetwork.Description); err != nil {
+	if err := d.Set("description", subnetwork["description"]); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
-	if err := d.Set("gateway_address", subnetwork.GatewayAddress); err != nil {
+	if err := d.Set("gateway_address", subnetwork["gatewayAddress"]); err != nil {
 		return fmt.Errorf("Error setting gateway_address: %s", err)
 	}
-	if err := d.Set("network", subnetwork.Network); err != nil {
+	if err := d.Set("network", subnetwork["network"]); err != nil {
 		return fmt.Errorf("Error setting network: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
@@ -154,13 +164,18 @@ func dataSourceGoogleComputeSubnetworkRead(d *schema.ResourceData, meta interfac
 	if err := d.Set("name", name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("stack_type", subnetwork.StackType); err != nil {
+	if err := d.Set("stack_type", subnetwork["stackType"]); err != nil {
 		return fmt.Errorf("Error setting stack_type: %s", err)
 	}
-	if err := d.Set("ipv6_access_type", subnetwork.Ipv6AccessType); err != nil {
+	if err := d.Set("ipv6_access_type", subnetwork["ipv6AccessType"]); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("secondary_ip_range", flattenSecondaryRanges(subnetwork.SecondaryIpRanges)); err != nil {
+
+	var secondaryRanges []interface{}
+	if v, ok := subnetwork["secondaryIpRanges"].([]interface{}); ok {
+		secondaryRanges = v
+	}
+	if err := d.Set("secondary_ip_range", flattenSecondaryRanges(secondaryRanges)); err != nil {
 		return fmt.Errorf("Error setting secondary_ip_range: %s", err)
 	}
 
@@ -168,12 +183,16 @@ func dataSourceGoogleComputeSubnetworkRead(d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func flattenSecondaryRanges(secondaryRanges []*compute.SubnetworkSecondaryRange) []map[string]interface{} {
+func flattenSecondaryRanges(secondaryRanges []interface{}) []map[string]interface{} {
 	secondaryRangesSchema := make([]map[string]interface{}, 0, len(secondaryRanges))
-	for _, secondaryRange := range secondaryRanges {
+	for _, raw := range secondaryRanges {
+		secondaryRange, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
 		data := map[string]interface{}{
-			"range_name":    secondaryRange.RangeName,
-			"ip_cidr_range": secondaryRange.IpCidrRange,
+			"range_name":    secondaryRange["rangeName"],
+			"ip_cidr_range": secondaryRange["ipCidrRange"],
 		}
 
 		secondaryRangesSchema = append(secondaryRangesSchema, data)
@@ -183,9 +202,9 @@ func flattenSecondaryRanges(secondaryRanges []*compute.SubnetworkSecondaryRange)
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_subnetwork",
+		Name:        "google_compute_subnetwork",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeSubnetwork(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeSubnetwork(),
 	}.Register()
 }
