@@ -23,6 +23,10 @@ import_format:
   - projects/{{project}}/remoteConfig
 exclude_delete: true
 autogen_status: UmVtb3RlQ29uZmln
+references:
+  guides:
+    'Remote Config Introduction': 'https://firebase.google.com/docs/remote-config'
+  api: 'https://firebase.google.com/docs/reference/remote-config/rest/v1/projects/getRemoteConfig'
 examples:
   - name: firebase_remote_config_basic
     primary_resource_id: basic
