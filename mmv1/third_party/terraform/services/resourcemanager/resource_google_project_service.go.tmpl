@@ -149,7 +149,6 @@ func ResourceGoogleProjectService() *schema.Resource {
 }
 
 func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	// Import with resource identity (e.g. ImportBlockWithResourceIdentity) leaves Id empty; build legacy id project/service.
 	if d.Id() == "" {
 		identity, err := d.Identity()
 		if err != nil {
@@ -174,7 +173,6 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 			if !ok || config.Project == "" {
 				return nil, fmt.Errorf("import via identity requires identity attribute %q or a default project in the provider configuration", "project")
 			}
-			projectStr = config.Project
 		}
 		projectStr = tpgresource.GetResourceNameFromSelfLink(projectStr)
 		d.SetId(fmt.Sprintf("%s/%s", projectStr, serviceStr))
@@ -190,7 +188,10 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 	if err := d.Set("service", parts[1]); err != nil {
 		return nil, fmt.Errorf("Error setting service: %s", err)
 	}
-	if err := setGoogleProjectServiceResourceIdentity(d, parts[0], parts[1]); err != nil {
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": parts[0],
+		"service": parts[1],
+	}); err != nil {
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil
@@ -223,7 +224,10 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 		if err := d.Set("service", srv); err != nil {
 			return fmt.Errorf("Error setting service: %s", err)
 		}
-		if err := setGoogleProjectServiceResourceIdentity(d, project, srv); err != nil {
+		if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+			"project": project,
+			"service": srv,
+		}); err != nil {
 			return err
 		}
 		return nil
@@ -288,7 +292,10 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 		if err := d.Set("service", srv); err != nil {
 			return fmt.Errorf("Error setting service: %s", err)
 		}
-		if err := setGoogleProjectServiceResourceIdentity(d, project, srv); err != nil {
+		if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+			"project": project,
+			"service": srv,
+		}); err != nil {
 			return err
 		}
 		return nil
@@ -392,13 +399,6 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, err)
 	}
 	return nil
-}
-
-func setGoogleProjectServiceResourceIdentity(d *schema.ResourceData, project, service string) error {
-	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
-		"project": project,
-		"service": service,
-	})
 }
 
 func init() {
