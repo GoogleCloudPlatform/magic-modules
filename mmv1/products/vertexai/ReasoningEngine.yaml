@@ -64,6 +64,20 @@ examples:
       name: 'reasoning-engine'
     ignore_read_extra:
       - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_image_spec'
+    primary_resource_id: 'reasoning_engine'
+    vars:
+      name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_byoc'
+    skip_func: acctest.SkipTestUntil(t, "2026-05-15")  # requires valid image in Artifact Registry, give time for things to settle
+    skip_vcr: true  # multiple IAM members
+    primary_resource_id: 'reasoning_engine'
+    vars:
+      name: 'reasoning-engine'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_psc_interface'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -72,6 +86,11 @@ examples:
       network_name: 'network'
       network_attachment_name: 'network-attachment'
       subnetwork_name: 'subnetwork'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
+      # for backward compatible
+      subnetwork_name: '"subnetwork" + randomSuffix'
     external_providers: ["time"]
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
@@ -96,11 +115,30 @@ examples:
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+      # for backward compatible
+      secret_name: '"secret" + randomSuffix'
+      # for backward compatible
+      service_account_id: '"sa" + randomSuffix'
     external_providers: ["time"]
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_context_spec'
+    primary_resource_id: 'reasoning_engine'
+    min_version: beta
+    vars:
+      name: 're-ctx-spec'
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_granular_ttl'
+    primary_resource_id: 'reasoning_engine'
+    min_version: beta
+    vars:
+      name: 're-gran-ttl'
     ignore_read_extra:
       - 'deletion_policy'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
+  post_update: 'templates/terraform/post_update/sleep_10s.go.tmpl'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -108,6 +146,13 @@ virtual_fields:
     type: Enum
     enum_values:
       - 'FORCE'
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'reasoning_engine'
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_reasoning_engine.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
 parameters:
   - name: 'region'
     type: String
@@ -129,6 +174,12 @@ properties:
   - name: 'description'
     type: String
     description: The description of the ReasoningEngine.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The labels associated with this ReasoningEngine. You can use these to
+      organize and group your ReasoningEngines.
+
   - name: 'createTime'
     type: String
     description: |-
@@ -353,8 +404,24 @@ properties:
             type: String
             description: |
               Optional. The Cloud Storage URI of the requirements.txtfile
+      - name: 'containerSpec'
+        type: NestedObject
+        conflicts:
+          - 'spec.0.source_code_spec'
+        description: |-
+          Deploy from a container image with a defined entrypoint and commands.
+        properties:
+          - name: 'imageUri'
+            type: String
+            required: true
+            description: |-
+              The Artifact Registry Docker image URI (e.g.,
+              `us-central1-docker.pkg.dev/my-project/my-repo/my-image:tag`) of the
+              container image that is to be run on each worker replica.
       - name: 'sourceCodeSpec'
         type: NestedObject
+        conflicts:
+          - 'spec.0.container_spec'
         description: |-
           Specification for deploying from source code.
         properties:
@@ -370,8 +437,24 @@ properties:
                   The application source code archive, provided as a compressed
                   tarball (.tar.gz) file. A base64-encoded string.
                 ignore_read: true
+          - name: 'imageSpec'
+            type: NestedObject
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - 'spec.0.source_code_spec.0.python_spec'
+            description: |-
+              Configuration for building an image with custom config file.
+            properties:
+              - name: 'buildArgs'
+                type: KeyValuePairs
+                send_empty_value: true
+                description: |
+                  Build arguments to be used. They will be passed through --build-arg flags.
           - name: 'pythonSpec'
             type: NestedObject
+            conflicts:
+              - 'spec.0.source_code_spec.0.image_spec'
             description: |-
               Specification for running a Python application from source.
             properties:
@@ -436,7 +519,6 @@ properties:
           Agent in the project will be used.
       - name: 'identityType'
         type: Enum
-        min_version: 'beta'
         description: |-
           Optional. The identity type to use for the Reasoning Engine.
           If not specified, the `service_account` field will be used if set,
@@ -449,7 +531,74 @@ properties:
           - 'AGENT_IDENTITY'
       - name: 'effectiveIdentity'
         type: String
-        min_version: 'beta'
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
+  - name: 'contextSpec'
+    min_version: 'beta'
+    type: NestedObject
+    description: |-
+      Optional. Configuration for how Agent Engine sub-resources should manage context.
+    properties:
+      - name: 'memoryBankConfig'
+        type: NestedObject
+        description: |-
+          Specification for a Memory Bank, which manages memories for the Agent Engine.
+        properties:
+          - name: 'generationConfig'
+            type: NestedObject
+            description: |-
+              Configuration for how to generate memories for the Memory Bank.
+            properties:
+              - name: 'model'
+                type: String
+                description: |-
+                  The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                required: true
+          - name: 'similaritySearchConfig'
+            type: NestedObject
+            description: |-
+              Configuration for how to perform similarity search on memories.
+            properties:
+              - name: 'embeddingModel'
+                type: String
+                description: |-
+                  The model used to generate embeddings to lookup similar memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                required: true
+          - name: 'ttlConfig'
+            type: NestedObject
+            description: |-
+              Configuration for automatic TTL ("time-to-live") of the memories in the Memory Bank.
+            properties:
+              - name: 'defaultTtl'
+                type: String
+                exactly_one_of:
+                  - defaultTtl
+                  - granularTtlConfig
+                description: |-
+                  The default TTL duration of the memories in the Memory Bank.
+              - name: 'granularTtlConfig'
+                type: NestedObject
+                description: |-
+                  The granular TTL configuration of the memories in the Memory Bank.
+                properties:
+                  - name: 'createTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories uploaded via CreateMemory.
+                  - name: 'generateCreatedTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories newly generated via GenerateMemories.
+                  - name: 'generateUpdatedTtl'
+                    type: String
+                    description: |-
+                      The TTL duration for memories updated via GenerateMemories.
+              - name: 'memoryRevisionDefaultTtl'
+                type: String
+                description: |-
+                  The default TTL duration of the memory revisions in the Memory Bank.
+          - name: 'disableMemoryRevisions'
+            type: Boolean
+            description: |-
+              If true, no memory revisions will be created for any requests to the Memory Bank.

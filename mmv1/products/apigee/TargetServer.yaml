@@ -89,6 +89,7 @@ properties:
     description: |
       Enabling/disabling a TargetServer is useful when TargetServers are used in load balancing configurations, and one or more TargetServers need to taken out of rotation periodically. Defaults to true.
     default_value: true
+    send_empty_value: true
   - name: 'sSLInfo'
     type: NestedObject
     description: Specifies TLS configuration info for this TargetServer. The JSON name is sSLInfo for legacy/backwards compatibility reasons -- Edge originally supported SSL, and the name is still used for TLS configuration.

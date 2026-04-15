@@ -9,7 +9,7 @@ service/accesscontextmanager:
   - google_access_context_manager_.*
 service/aiplatform-agent-engine:
   resources:
-  - google_vertex_ai_reasoning_engine
+  - google_vertex_ai_reasoning_engine.*
 service/aiplatform-colab-enterprise:
   resources:
   - google_colab_.*
@@ -297,6 +297,7 @@ service/compute-router:
 service/compute-security-policy:
   resources:
   - google_compute_network_edge_security_service
+  - google_compute_organization_security_policy.*
   - google_compute_region_security_policy.*
   - google_compute_security_policy.*
   - google_compute_project_cloud_armor_tier
@@ -493,6 +494,7 @@ service/iam-core:
 service/iam-serviceaccount:
   resources:
   - google_project_default_service_accounts
+  - google_organization_service_identity
   - google_project_service_identity
   - google_folder_service_identity
   - google_service_account.*
@@ -581,6 +583,7 @@ service/network-connectivity-center:
   - google_network_connectivity_hub
   - google_network_connectivity_spoke
   - google_network_connectivity_gateway_advertised_route
+  - google_network_connectivity_transport
   - google_network_security_sac_realm
   - google_network_security_sac_attachment
 service/network-security:
@@ -595,7 +598,6 @@ service/network-security-distributed-firewall:
   - google_network_security_security_profile.*
   - google_compute_firewall.*
   - google_compute_network_firewall_policy.*
-  - google_compute_organization_security_policy.*
   - google_compute_region_network_firewall_policy.*
 service/networkconnectivity-private-range:
   resources:
@@ -606,6 +608,16 @@ service/networkconnectivity-serviceautomation:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networkmanagement-insights:
+  resources:
+  - google_network_management_network_monitoring_provider
+service/networksecurity-intercept:
+  resources:
+  - google_network_security_intercept.*
+service/networksecurity-mirroring:
+  resources:
+  - google_network_security_mirroring.*
+  - google_network_security_ull_mirroring.*
 service/networksecurity-mtls:
   resources:
   - google_network_security_backend_authentication_config
@@ -615,10 +627,6 @@ service/networksecurity-swp:
   - google_network_security_gateway_security_policy_rule
   - google_network_security_url_lists
   - google_network_security_tls_inspection_policy
-service/networksecurityintegrations:
-  resources:
-  - google_network_security_mirroring.*
-  - google_network_security_intercept.*
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
@@ -751,6 +759,7 @@ service/sqladmin-cp:
   resources:
   - google_sql_database_instance
   - google_sql_database_instances
+  - google_sql_provision_script
   - google_sql_source_representation_instance
   - google_sql_tiers
 service/sqladmin-dp:
@@ -766,7 +775,6 @@ service/sqladmin-security:
   resources:
   - google_sql_ca_certs
   - google_sql_ssl_cert
-  - google_sql_provision_script
 service/storage:
   team: gcs-terraform-eng
   resources:
@@ -792,6 +800,9 @@ service/websecurityscanner:
 service/workflows:
   resources:
   - google_workflows.*
+service/workloadidentity:
+  resources:
+  - google_workload_identity_.*
 service/workstations:
   resources:
   - google_workstations_.*

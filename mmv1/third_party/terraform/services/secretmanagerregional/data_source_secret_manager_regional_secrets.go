@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -173,4 +174,13 @@ func getDataFromName(v interface{}, part int) string {
 	name := v.(string)
 	split := strings.Split(name, "/")
 	return split[part]
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_secret_manager_regional_secrets",
+		ProductName: "secretmanagerregional",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSecretManagerRegionalRegionalSecrets(),
+	}.Register()
 }

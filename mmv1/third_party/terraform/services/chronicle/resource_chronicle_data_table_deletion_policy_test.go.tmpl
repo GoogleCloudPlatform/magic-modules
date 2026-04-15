@@ -34,9 +34,15 @@ func TestAccChronicleDataTable_DeletionPolicy_DefaultFail(t *testing.T) {
 			},
 			{
 				Config: testAccChronicleDataTable_DefaultDeletion_TableOnly(context),
-				Destroy:     true,
                 ExpectError: regexp.MustCompile("Unable to delete table as table is non empty"),
 			},
+			{
+                Config: testAccChronicleDataTable_DefaultDeletion_RowOnly(context),
+                Check: resource.ComposeTestCheckFunc(
+                    checkResourceDestroyed("google_chronicle_data_table_row.default_fail_row"),
+                    resource.TestCheckResourceAttrSet("google_chronicle_data_table.test_delete_default_fail", "id"),
+                ),
+            },
 		},
 	})
 }
@@ -138,6 +144,25 @@ resource "google_chronicle_data_table_row" "default_fail_row" {
   instance       = "%{instance_id}"
   data_table_id  = "tf_test_def_fail_%{random_suffix}" # Needs to match the created table ID
   values         = ["testuser"]
+}
+`, context)
+}
+
+func testAccChronicleDataTable_DefaultDeletion_RowOnly(context map[string]interface{}) string {
+        return acctest.Nprintf(`
+resource "google_chronicle_data_table" "test_delete_default_fail" {
+  provider       = google-beta
+  location       = "us"
+  instance       = "%{instance_id}"
+  data_table_id  = "tf_test_def_fail_%{random_suffix}"
+  description    = "Test deletion_policy with rows"
+  deletion_policy = "DEFAULT"
+
+  column_info {
+    column_index    = 0
+    original_column = "username"
+    column_type     = "STRING"
+  }
 }
 `, context)
 }

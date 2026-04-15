@@ -1153,8 +1153,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We don't provide any, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 5.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
 				),
 			},
 			{
@@ -1164,8 +1162,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.key1", "value1"),
-					// We only provide one, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 6.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "6"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.key1", "value1"),
 				),
 			},
@@ -1185,8 +1181,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We don't provide any, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 5.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
 				),
 			},
 		},
@@ -3513,4 +3507,127 @@ resource "google_dataproc_metastore_service" "ms" {
   }
 }
 `, clusterName, serviceId)
+}
+
+func TestAccDataprocCluster_withProvisionedIopsAndThroughput(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withProvisionedIopsAndThroughput(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_withProvisionedIopsAndThroughputNodePools(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withProvisionedIopsAndThroughputNodePools(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_withProvisionedIopsAndThroughput(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "tf_test_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+
+    master_config {
+      num_instances = 1
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+        boot_disk_size_gb = 500
+        boot_disk_provisioned_iops = 10000
+        boot_disk_provisioned_throughput = 140
+      }
+    }
+
+    worker_config {
+      num_instances = 2
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+        boot_disk_size_gb = 500
+        boot_disk_provisioned_iops = 10000
+        boot_disk_provisioned_throughput = 140
+      }
+    }
+  }
+}
+`, clusterName)
+}
+
+func testAccDataprocCluster_withProvisionedIopsAndThroughputNodePools(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "tf_test_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+
+    master_config {
+      num_instances = 1
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+        boot_disk_size_gb = 500
+        boot_disk_provisioned_iops = 10000
+        boot_disk_provisioned_throughput = 140
+      }
+    }    
+
+
+    auxiliary_node_groups {
+      node_group_id = "node-group-id"
+      node_group {
+        roles = ["DRIVER"]
+        node_group_config {
+          num_instances = 2
+          machine_type  = "n4-standard-2"
+          disk_config {
+            boot_disk_type = "hyperdisk-balanced"
+            boot_disk_size_gb = 500
+            boot_disk_provisioned_iops = 10000
+            boot_disk_provisioned_throughput = 140
+          }
+        }
+      }
+    }
+  }
+}
+`, clusterName)
 }

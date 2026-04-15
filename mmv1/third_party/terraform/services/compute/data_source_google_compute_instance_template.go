@@ -1,0 +1,146 @@
+package compute
+
+import (
+	"fmt"
+	neturl "net/url"
+	"sort"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func DataSourceGoogleComputeInstanceTemplate() *schema.Resource {
+	// Generate datasource schema from resource
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeInstanceTemplate().Schema)
+
+	dsSchema["filter"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	dsSchema["self_link_unique"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	dsSchema["most_recent"] = &schema.Schema{
+		Type:     schema.TypeBool,
+		Optional: true,
+	}
+
+	// Set 'Optional' schema elements
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "name", "filter", "most_recent", "project", "self_link_unique")
+
+	mutuallyExclusive := []string{"name", "filter", "self_link_unique"}
+	for _, n := range mutuallyExclusive {
+		dsSchema[n].ExactlyOneOf = mutuallyExclusive
+	}
+
+	return &schema.Resource{
+		Read:   datasourceComputeInstanceTemplateRead,
+		Schema: dsSchema,
+	}
+}
+
+func datasourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	if v, ok := d.GetOk("name"); ok {
+		return retrieveInstance(d, meta, project, v.(string))
+	}
+	if v, ok := d.GetOk("filter"); ok {
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		if err != nil {
+			return err
+		}
+
+		params := neturl.Values{}
+		params.Set("filter", v.(string))
+		listUrl := fmt.Sprintf("%sprojects/%s/global/instanceTemplates?%s", config.ComputeBasePath, project, params.Encode())
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    listUrl,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("error retrieving list of instance templates: %s", err)
+		}
+
+		var items []map[string]interface{}
+		if rawItems, ok := res["items"].([]interface{}); ok {
+			for _, rawItem := range rawItems {
+				item, ok := rawItem.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				items = append(items, item)
+			}
+		}
+
+		mostRecent := d.Get("most_recent").(bool)
+		if mostRecent {
+			sort.Sort(ByCreationTimestamp(items))
+		}
+
+		count := len(items)
+		if count == 1 || count > 1 && mostRecent {
+			return retrieveInstance(d, meta, project, items[0]["name"].(string))
+		}
+
+		return fmt.Errorf("your filter has returned %d instance template(s). Please refine your filter or set most_recent to return exactly one instance template", len(items))
+	}
+	if v, ok := d.GetOk("self_link_unique"); ok {
+		return retrieveInstanceFromUniqueId(d, meta, project, v.(string))
+	}
+
+	return fmt.Errorf("one of name, filters or self_link_unique must be set")
+}
+
+func retrieveInstance(d *schema.ResourceData, meta interface{}, project, name string) error {
+	d.SetId("projects/" + project + "/global/instanceTemplates/" + name)
+
+	if err := resourceComputeInstanceTemplateRead(d, meta); err != nil {
+		return err
+	}
+	return tpgresource.SetDataSourceLabels(d)
+}
+
+func retrieveInstanceFromUniqueId(d *schema.ResourceData, meta interface{}, project, self_link_unique string) error {
+	normalId, _ := parseUniqueId(self_link_unique)
+	d.SetId(normalId)
+	d.Set("self_link_unique", self_link_unique)
+
+	if err := resourceComputeInstanceTemplateRead(d, meta); err != nil {
+		return err
+	}
+	return tpgresource.SetDataSourceLabels(d)
+}
+
+// ByCreationTimestamp implements sort.Interface for []map[string]interface{} based on
+// the CreationTimestamp field.
+type ByCreationTimestamp []map[string]interface{}
+
+func (a ByCreationTimestamp) Len() int      { return len(a) }
+func (a ByCreationTimestamp) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByCreationTimestamp) Less(i, j int) bool {
+	ti, _ := a[i]["creationTimestamp"].(string)
+	tj, _ := a[j]["creationTimestamp"].(string)
+	return ti > tj
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_instance_template",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstanceTemplate(),
+	}.Register()
+}

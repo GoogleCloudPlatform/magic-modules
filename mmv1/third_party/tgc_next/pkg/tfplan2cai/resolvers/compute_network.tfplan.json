@@ -165,7 +165,6 @@
                     "import_custom_routes": true,
                     "import_custom_routes_with_public_ip": true,
                     "name": "network-peering-test",
-                    "peer_network": "#######@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",
                     "peer_network_type": "STANDARD",
                     "project": "terraform-dev-haonan",
                     "timeouts": null

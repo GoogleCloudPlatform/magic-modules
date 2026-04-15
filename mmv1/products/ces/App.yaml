@@ -339,6 +339,7 @@ properties:
           type: String
   - name: loggingSettings
     type: NestedObject
+    default_from_api: true
     description: Settings to describe the logging behaviors for the app.
     properties:
       - name: audioRecordingConfig

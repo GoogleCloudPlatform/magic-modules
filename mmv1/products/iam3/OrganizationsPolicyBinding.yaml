@@ -54,6 +54,9 @@ examples:
       pab_policy_id: 'my-pab-policy'
       display_name: 'binding for all principals in the Organization'
       org_binding_id: 'binding-for-all-org-principals'
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"binding for all principals in the Organization" + randomSuffix'
     external_providers: ["time"]
 parameters:
   - name: 'organization'
