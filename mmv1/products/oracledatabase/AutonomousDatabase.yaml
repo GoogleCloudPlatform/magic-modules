@@ -73,6 +73,8 @@ examples:
       deletion_protection: 'false'
       database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
       endpoint_name: 'fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))'
+      odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+      odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
     # Skip in VCR until the test issue is resolved
     # TODO(shuyama): Add GH issue link
     skip_vcr: true
