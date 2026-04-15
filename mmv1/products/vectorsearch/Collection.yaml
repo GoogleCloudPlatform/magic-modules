@@ -90,17 +90,18 @@ properties:
     description: |-
       Represents a customer-managed encryption key specification that can be
       applied to a Vector Search collection.
+    immutable: true
     properties:
       - name: cryptoKeyName
         type: String
         required: true
+        immutable: true
         description: |-
           Resource name of the Cloud KMS key used to protect the resource.
 
           The Cloud KMS key must be in the same region as the resource. It must have
           the format
           `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
-    immutable: true
   - name: labels
     type: KeyValueLabels
     description: Labels as key value pairs.

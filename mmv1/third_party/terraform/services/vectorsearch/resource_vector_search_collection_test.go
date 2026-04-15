@@ -136,7 +136,6 @@ func storeResourceDetails(details *map[string]string, resourceName string) resou
 			return fmt.Errorf("Attribute 'create_time' not found in state for %s", resourceName)
 		}
 		(*details)["create_time"] = val
-		fmt.Printf("[DEBUG] Stored details for %s: ID=%s, CreateTime=%s\n", resourceName, (*details)["id"], (*details)["create_time"])
 		return nil
 	}
 }
@@ -157,13 +156,8 @@ func checkResourceInternallyReplaced(oldDetails *map[string]string, resourceName
 		oldID := (*oldDetails)["id"]
 		oldCreateTime := (*oldDetails)["create_time"]
 
-		fmt.Printf("[DEBUG] Checking replacement for %s: Old ID=%s, New ID=%s, Old CreateTime=%s, New CreateTime=%s\n", resourceName, oldID, newID, oldCreateTime, newCreateTime)
-
 		if newID == oldID && newCreateTime == oldCreateTime {
 			return fmt.Errorf("Resource %s was not internally replaced, ID remained: %s, create_time remained: %s", resourceName, newID, newCreateTime)
-		}
-		if newID != oldID {
-			fmt.Printf("[INFO] Resource %s ID changed from %s to %s\n", resourceName, oldID, newID)
 		}
 		if newCreateTime == oldCreateTime {
 			return fmt.Errorf("Resource %s ID changed from %s to %s, but create_time unexpectedly remained: %s", resourceName, oldID, newID, newCreateTime)
@@ -187,8 +181,6 @@ func checkResourceNotInternallyReplaced(oldDetails *map[string]string, resourceN
 
 		oldID := (*oldDetails)["id"]
 		oldCreateTime := (*oldDetails)["create_time"]
-
-		fmt.Printf("[DEBUG] Checking non-replacement for %s: Old ID=%s, New ID=%s, Old CreateTime=%s, New CreateTime=%s\n", resourceName, oldID, newID, oldCreateTime, newCreateTime)
 
 		if newID != oldID {
 			return fmt.Errorf("Resource %s ID unexpectedly changed from %s to %s", resourceName, oldID, newID)
