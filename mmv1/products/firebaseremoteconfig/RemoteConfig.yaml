@@ -86,7 +86,7 @@ properties:
             - TEAL
   - name: parameterGroups
     type: Map
-    key_name: parameter_group
+    key_name: key
     description: |-
       Map of parameter group names to their descriptions and grouped parameters.
       A group's name is mutable but must be unique among groups in the config.
@@ -110,7 +110,7 @@ properties:
             characters. A description may contain any Unicode characters.
         - name: parameters
           type: Map
-          key_name: parameter
+          key_name: key
           description: |-
             Map of parameter keys to their optional default values and optional
             conditional values for parameters that belong to this group.
@@ -122,7 +122,7 @@ properties:
             properties:
               - name: conditionalValues
                 type: Map
-                key_name: conditional_value
+                key_name: key
                 description: |-
                   A (condition name, value) map. The condition_name of the highest priority
                   (the one listed first in the RemoteConfig's conditions list) determines
@@ -280,7 +280,7 @@ properties:
                   - JSON
   - name: parameters
     type: Map
-    key_name: parameter
+    key_name: key
     description: |-
       Map of parameter keys to their optional default values and optional
       conditional values.
@@ -289,7 +289,7 @@ properties:
       properties:
         - name: conditionalValues
           type: Map
-          key_name: conditional_value
+          key_name: key
           description: |-
             A (condition name, value) map. The condition_name of the highest priority
             (the one listed first in the RemoteConfig's conditions list) determines
