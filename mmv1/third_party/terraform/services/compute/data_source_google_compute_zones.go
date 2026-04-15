@@ -3,6 +3,7 @@ package compute
 import (
 	"fmt"
 	"log"
+	neturl "net/url"
 	"sort"
 	"strings"
 
@@ -12,11 +13,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func DataSourceGoogleComputeZones() *schema.Resource {
@@ -48,7 +44,7 @@ func DataSourceGoogleComputeZones() *schema.Resource {
 
 func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -69,19 +65,48 @@ func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	zones := []string{}
-	err = config.NewComputeClient(userAgent).Zones.List(project).Filter(filter).Pages(config.Context, func(zl *compute.ZoneList) error {
-		for _, zone := range zl.Items {
-			// We have no way to guarantee a specific base path for the region, but the built-in API-level filtering
-			// only lets us query on exact matches, so we do our own filtering here.
-			if strings.HasSuffix(zone.Region, "/"+region) {
-				zones = append(zones, zone.Name)
+	pageToken := ""
+	for {
+		params := neturl.Values{}
+		if filter != "" {
+			params.Set("filter", strings.TrimSpace(filter))
+		}
+		if pageToken != "" {
+			params.Set("pageToken", pageToken)
+		}
+		listURL := fmt.Sprintf("%sprojects/%s/zones", config.ComputeBasePath, project)
+		if len(params) > 0 {
+			listURL = fmt.Sprintf("%s?%s", listURL, params.Encode())
+		}
+		resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    listURL,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return err
+		}
+		if rawItems, ok := resp["items"].([]interface{}); ok {
+			for _, raw := range rawItems {
+				zone, ok := raw.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				zoneRegion, _ := zone["region"].(string)
+				zoneName, _ := zone["name"].(string)
+				// We have no way to guarantee a specific base path for the region, but the built-in API-level filtering
+				// only lets us query on exact matches, so we do our own filtering here.
+				if strings.HasSuffix(zoneRegion, "/"+region) {
+					zones = append(zones, zoneName)
+				}
 			}
 		}
-		return nil
-	})
-
-	if err != nil {
-		return err
+		pageToken, _ = resp["nextPageToken"].(string)
+		if pageToken == "" {
+			break
+		}
 	}
 
 	sort.Strings(zones)
@@ -103,9 +128,9 @@ func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) 
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_zones",
+		Name:        "google_compute_zones",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeZones(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeZones(),
 	}.Register()
 }
