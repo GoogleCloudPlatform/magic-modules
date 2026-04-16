@@ -130,9 +130,57 @@ func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta
     return nil, err
   }
 
-  idx, item, err := resource{{ $.ResourceName }}FindNestedObjectInList(d, meta, items)
+  // Use the old values of identity fields to find the existing object in the
+  // API response. During an update, d.Get() returns the new desired values,
+  // but the API still has the old values. Using d.GetChange() ensures we
+  // search for the object as it currently exists in the API.
+  {{- range $idProp := $.GetIdentity }}
+  old{{ $idProp.TitlelizeProperty }}Raw, _ := d.GetChange("{{ underscore $idProp.Name }}")
+  {{-   if $.IsSettableProperty $idProp }}
+  expectedOld{{ $idProp.TitlelizeProperty }}, err := expandNested{{ $.ResourceName }}{{ $idProp.TitlelizeProperty }}(old{{ $idProp.TitlelizeProperty }}Raw, d, meta.(*transport_tpg.Config))
   if err != nil {
     return nil, err
+  }
+  {{-  else }}
+  expectedOld{{ $idProp.TitlelizeProperty }} := old{{ $idProp.TitlelizeProperty }}Raw
+  {{-  end }}{{/* if $.IsSettableProperty $idProp */}}
+  expectedOldFlattened{{ $idProp.TitlelizeProperty }} := flattenNested{{ $.ResourceName }}{{ $idProp.TitlelizeProperty }}(expectedOld{{ $idProp.TitlelizeProperty }}, d, meta.(*transport_tpg.Config))
+  {{- end }}{{/* range $idProp := $.GetIdentity  */}}
+
+  // Search list for this resource using old identity values.
+  var idx int = -1
+  var item map[string]interface{}
+  for i, itemRaw := range items {
+    if itemRaw == nil {
+      continue
+    }
+    {{- if $.NestedQuery.IsListOfIds }}
+    // List response only contains the ID - construct a response object.
+    currItem := map[string]interface{}{
+      "{{ $.FirstIdentityProp.ApiName }}": itemRaw,
+    }
+    {{- else }}
+    currItem := itemRaw.(map[string]interface{})
+    {{- end }}
+    {{ if $.CustomCode.Decoder }}
+    // Decode list item before comparing.
+    currItem, err = resource{{ $.ResourceName }}Decoder(d, meta, currItem)
+    if err != nil {
+        return nil, err
+    }
+    {{- end }}
+  {{ range $prop := $.GetIdentity }}
+    item{{ $prop.TitlelizeProperty }} := flattenNested{{ $.ResourceName }}{{ $prop.TitlelizeProperty }}(currItem["{{ $prop.ApiName }}"], d, meta.(*transport_tpg.Config))
+    // IsEmptyValue check so that if one is nil and the other is "", that's considered a match
+    if !(tpgresource.IsEmptyValue(reflect.ValueOf(item{{ $prop.TitlelizeProperty }})) && tpgresource.IsEmptyValue(reflect.ValueOf(expectedOldFlattened{{ $prop.TitlelizeProperty }}))) && !reflect.DeepEqual(item{{ $prop.TitlelizeProperty }}, expectedOldFlattened{{ $prop.TitlelizeProperty }}) {
+      log.Printf("[DEBUG] Skipping item with {{ $prop.ApiName }}= %#v, looking for %#v)", item{{ $prop.TitlelizeProperty }}, expectedOldFlattened{{ $prop.TitlelizeProperty }})
+      continue
+    }
+  {{- end }}
+    log.Printf("[DEBUG] Found item for resource %q: %#v)", d.Id(), currItem)
+    idx = i
+    item = currItem
+    break
   }
 
   // Return error if item to update does not exist.

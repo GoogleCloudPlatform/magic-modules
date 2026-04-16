@@ -58,6 +58,8 @@ async:
   result:
     resource_inside_response: true
 identity:
+  - egressFrom
+  - egressTo
   - title
 nested_query:
   keys:
