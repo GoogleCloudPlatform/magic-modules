@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
@@ -38,4 +39,13 @@ func dataSourceApigeeInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	// tpgresource.SetDataSourceLabels(d) here
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_apigee_instance",
+		ProductName: "apigee",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceApigeeInstance(),
+	}.Register()
 }
