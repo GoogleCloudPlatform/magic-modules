@@ -217,7 +217,6 @@ resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test" {
   endpoint_config {
     private_service_connect_config {
       enable_private_service_connect = true
-      project_allowlist              = [data.google_project.project.id]
     }
   }
 }
