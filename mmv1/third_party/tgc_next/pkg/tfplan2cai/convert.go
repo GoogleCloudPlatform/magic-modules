@@ -14,6 +14,8 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/resolvers"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/tfplan"
+	tfjson "github.com/hashicorp/terraform-json"
 )
 
 // Options struct to avoid updating function signatures all along the pipe.
@@ -46,7 +48,7 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 }
 
 // ConvertChanges converts terraform json plan to CAI Assets.
-func ConvertChanges(ctx context.Context, jsonPlan []byte, changes []tfplan.ResourceChange, o *Options) ([]caiasset.Asset, error) {
+func ConvertChanges(ctx context.Context, jsonPlan []byte, changes []*tfjson.ResourceChange, o *Options) ([]caiasset.Asset, error) {
 	if o == nil || o.ErrorLogger == nil {
 		return nil, fmt.Errorf("logger is not initialized")
 	}

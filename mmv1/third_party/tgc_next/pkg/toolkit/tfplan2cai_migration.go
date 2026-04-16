@@ -9,7 +9,8 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/tfplan"
 	legacytfplan2cai "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai"
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/google"
+	legacy "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources"
+	tfjson "github.com/hashicorp/terraform-json"
 )
 
 // IsSupported returns true if the resource is migrated or supported in legacy TGC
@@ -18,20 +19,20 @@ func IsSupported(resource string, migratedResourceMap map[string]bool) bool {
 	if migratedResourceMap[resource] {
 		return true
 	}
-	_, tgcExists := resources.ResourceConverters()[resource]
+	_, tgcExists := legacy.ResourceConverters()[resource]
 	return tgcExists
 }
 
 // Convert converts a Terraform plan to CAI assets.
 // It splits resources into migrated (pkg) and legacy (tfplan2cai) buckets based on the provided map.
 // It uses the appropriate converter for each bucket and merges the results, normalizing legacy assets to the format in TGC pkg.
-func Convert(ctx context.Context, jsonPlan []byte, o *Options, migratedResourceMap map[string]bool) ([]caiasset.Asset, error) {
+func Convert(ctx context.Context, jsonPlan []byte, o *tfplan2cai.Options, migratedResourceMap map[string]bool) ([]caiasset.Asset, error) {
 	changes, err := tfplan.ReadResourceChanges(jsonPlan)
 	if err != nil {
 		return nil, err
 	}
 
-	var migratedChanges, legacyChanges []*tfplan.ResourceChange
+	var migratedChanges, legacyChanges []*tfjson.ResourceChange
 	for _, change := range changes {
 		if migratedResourceMap[change.Type] {
 			migratedChanges = append(migratedChanges, change)
@@ -45,7 +46,18 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options, migratedResourceM
 		return nil, fmt.Errorf("converting migrated resources: %w", err)
 	}
 
-	legacyAssets, err := legacytfplan2cai.ConvertChanges(ctx, legacyChanges, o)
+	legacyOptions := &legacytfplan2cai.Options{
+		ErrorLogger:    o.ErrorLogger,
+		Offline:        o.Offline,
+		DefaultProject: o.DefaultProject,
+		DefaultRegion:  o.DefaultRegion,
+		DefaultZone:    o.DefaultZone,
+		UserAgent:      o.UserAgent,
+		HTTPClient:     o.HTTPClient,
+		AncestryCache:  o.AncestryCache,
+	}
+
+	legacyAssets, err := legacytfplan2cai.ConvertChanges(ctx, legacyChanges, legacyOptions)
 	if err != nil {
 		return nil, fmt.Errorf("converting legacy resources: %w", err)
 	}
