@@ -160,3 +160,7 @@ resource "google_securityposture_posture" "posture_test" {
     			}
     		}
     	}
+	}
+}
+`, context)
+}
