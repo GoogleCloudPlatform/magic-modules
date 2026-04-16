@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -65,9 +65,9 @@ func TestAccFirebaseRemoteConfigRemoteConfig_update(t *testing.T) {
 			{
 				Config: testAccFirebaseRemoteConfigRemoteConfig_empty(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-						PreApply: []plancheck.PlanCheck{
-							plancheck.ExpectResourceAction("google_firebase_remote_config_remote_config.basic", plancheck.ResourceActionUpdate),
-						},
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_firebase_remote_config_remote_config.basic", plancheck.ResourceActionUpdate),
+					},
 				},
 			},
 			{
@@ -84,9 +84,9 @@ func TestAccFirebaseRemoteConfigRemoteConfig_update(t *testing.T) {
 			{
 				Config: testAccFirebaseRemoteConfigRemoteConfig_full(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-						PreApply: []plancheck.PlanCheck{
-							plancheck.ExpectResourceAction("google_firebase_remote_config_remote_config.basic", plancheck.ResourceActionUpdate),
-						},
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_firebase_remote_config_remote_config.basic", plancheck.ResourceActionUpdate),
+					},
 				},
 			},
 			{
