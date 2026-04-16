@@ -17,7 +17,6 @@ description: A RemoteConfig represents a Remote Config template.
 base_url: projects/{{project}}/remoteConfig
 self_link: projects/{{project}}/remoteConfig
 create_url: projects/{{project}}/remoteConfig
-update_mask: true
 create_verb: PUT
 import_format:
   - projects/{{project}}/remoteConfig
@@ -37,7 +36,6 @@ examples:
     primary_resource_id: full
     exclude_docs: true
 custom_code:
-  constants: templates/terraform/constants/firebase_remote_config_remote_config.go.tmpl
   pre_create: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
   pre_update: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
 properties:
@@ -238,7 +236,7 @@ properties:
             - JSON
   - name: version
     type: NestedObject
-    default_from_api: true
+    output: true
     description: |-
       Contains all metadata about a particular version of the Remote Config
       template.
@@ -246,11 +244,6 @@ properties:
       All fields are set at the time the specified Remote Config template was
       written.
     properties:
-      - name: description
-        type: String
-        description: |-
-          The user-provided description of the corresponding Remote Config
-          template
       - name: isLegacy
         type: Boolean
         output: true

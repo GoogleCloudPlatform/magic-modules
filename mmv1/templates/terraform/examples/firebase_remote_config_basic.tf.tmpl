@@ -1,8 +1,4 @@
 resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}" {
-  version {
-    description = "Added ios_en welcome messages"
-  }
-
   conditions {
     name       = "ios_en"
     expression = "device.os == 'ios' && device.country in ['us']"

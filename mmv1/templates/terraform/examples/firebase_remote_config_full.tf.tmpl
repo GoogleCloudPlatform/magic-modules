@@ -1,8 +1,4 @@
 resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}" {
-  version {
-    description = "Description"
-  }
-
   conditions {
     name       = "ios_us"
     expression = "device.os == 'ios' && device.country in ['us']"
