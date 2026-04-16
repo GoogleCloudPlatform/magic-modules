@@ -66,6 +66,9 @@ func TestAccEphemeralServiceAccountKey_upload(t *testing.T) {
 
 	accountID := "b" + acctest.RandString(t, 10)
 	displayName := "Terraform Test Two"
+	project := envvar.GetTestProjectFromEnv()
+	expectedServiceAccountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountID, project)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -80,8 +83,9 @@ func TestAccEphemeralServiceAccountKey_upload(t *testing.T) {
 			{
 				Config: testAccEphemeralServiceAccountKey_upload(accountID, displayName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(acctest.EchoResourceName, "data.service_account_id", expectedServiceAccountEmail),
 					resource.TestCheckResourceAttr(acctest.EchoResourceName, "data.public_key_type", "TYPE_X509_PEM_FILE"),
-					resource.TestCheckResourceAttrSet(acctest.EchoResourceName, "data.private_key"),
+					resource.TestCheckResourceAttrSet(acctest.EchoResourceName, "data.name"),
 				),
 			},
 		},
