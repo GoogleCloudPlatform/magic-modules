@@ -1,12 +1,11 @@
 resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}" {
-  name = "projects/{{index $.TestEnvVars "project_id"}}/namespaces/firebase/remoteConfig"
   version {
-    description = "Updated via Terraform"
+    description = "Added ios_en welcome messages"
   }
 
   conditions {
     name       = "ios_en"
-    expression = "device.os == 'ios' && device.country == 'us'"
+    expression = "device.os == 'ios' && device.country in ['us']"
     tag_color  = "TEAL"
   }
 
@@ -15,47 +14,11 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
     description = "Welcome message"
     value_type  = "STRING"
     default_value {
-      value             = "Welcome to the App!"
-      use_in_app_default = false
-      experiment_value {
-        experiment_id    = "exp_1"
-        exposure_percent = 50.5
-        variant_value {
-          no_change  = false
-          value      = "variant_val_1"
-          variant_id = "variant_1"
-        }
-      }
-      personalization_value {
-        personalization_id = "pers_1"
-      }
-      rollout_value {
-        percent    = 25.0
-        rollout_id = "roll_1"
-        value      = "rollout_val_1"
-      }
+      value              = "Welcome to the App!"
     }
     conditional_values {
-      condition_name = "ios_en"
-      value             = "Welcome to the App on iOS!"
-      use_in_app_default = false
-      experiment_value {
-        experiment_id    = "exp_2"
-        exposure_percent = 10.0
-        variant_value {
-          no_change  = false
-          value      = "variant_val_2"
-          variant_id = "variant_2"
-        }
-      }
-      personalization_value {
-        personalization_id = "pers_2"
-      }
-      rollout_value {
-        percent    = 15.0
-        rollout_id = "roll_2"
-        value      = "rollout_val_2"
-      }
+      condition_name     = "ios_en"
+      value              = "Welcome to the App on iOS!"
     }
   }
 
@@ -68,46 +31,10 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
       value_type  = "STRING"
       default_value {
         value             = "Welcome Group A!"
-        use_in_app_default = false
-        experiment_value {
-          experiment_id    = "exp_3"
-          exposure_percent = 20.0
-          variant_value {
-            no_change  = false
-            value      = "variant_val_3"
-            variant_id = "variant_3"
-          }
-        }
-        personalization_value {
-          personalization_id = "pers_3"
-        }
-        rollout_value {
-          percent    = 5.0
-          rollout_id = "roll_3"
-          value      = "rollout_val_3"
-        }
       }
       conditional_values {
         condition_name = "ios_en"
         value             = "Welcome Group A on iOS!"
-        use_in_app_default = false
-        experiment_value {
-          experiment_id    = "exp_4"
-          exposure_percent = 5.0
-          variant_value {
-            no_change  = false
-            value      = "variant_val_4"
-            variant_id = "variant_4"
-          }
-        }
-        personalization_value {
-          personalization_id = "pers_4"
-        }
-        rollout_value {
-          percent    = 1.0
-          rollout_id = "roll_4"
-          value      = "rollout_val_4"
-        }
       }
     }
   }

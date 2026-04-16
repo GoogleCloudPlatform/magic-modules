@@ -16,7 +16,7 @@ name: RemoteConfig
 description: A RemoteConfig represents a Remote Config template.
 base_url: projects/{{project}}/remoteConfig
 self_link: projects/{{project}}/remoteConfig
-create_url: projects/{{project}}/remoteConfig?updateMask=*
+create_url: projects/{{project}}/remoteConfig
 update_mask: true
 create_verb: PUT
 import_format:
@@ -30,20 +30,24 @@ references:
 examples:
   - name: firebase_remote_config_basic
     primary_resource_id: basic
-    test_env_vars:
-      project_id: PROJECT_NAME
-parameters:
+  - name: firebase_remote_config_empty
+    primary_resource_id: empty
+    exclude_docs: true
+  - name: firebase_remote_config_full
+    primary_resource_id: full
+    exclude_docs: true
+custom_code:
+  pre_create: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
+  pre_update: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
+properties:
   - name: name
     type: String
-    required: true
+    output: true
     description: |-
-      The name of the RemoteConfig to update.
+      The name of the RemoteConfig.
       Format: projects/{project}/namespaces/{namespace}/remoteConfig
       Project is a Firebase project ID or project number.
       Namespace is the namespace ID (e.g.: firebase or firebase-server)
-    immutable: true
-    url_param_only: true
-properties:
   - name: conditions
     type: Array
     description: |-
@@ -60,7 +64,7 @@ properties:
 
             See the documentation regarding
             [Condition
-            Expressions](/docs/remote-config/condition-reference)
+            Expressions](https://firebase.google.com/docs/remote-config/condition-reference)
             for the expected syntax of this field.
           required: true
         - name: name
@@ -127,6 +131,8 @@ properties:
                   The condition_name of the highest priority
                   (the one listed first in the RemoteConfig's conditions list) determines
                   the value of this parameter.
+                  Only one of experiment_value, personalization_value, rollout_value, use_in_app_default, or value
+                  may be specified.
                 value_type:
                   type: NestedObject
                   properties:
@@ -187,6 +193,7 @@ properties:
                           description: The user-specified value to be rolled out.
                     - name: useInAppDefault
                       type: Boolean
+                      default_value: false
                       description: |-
                         If true, the parameter is omitted from the parameter values returned
                         to a client.
@@ -196,17 +203,12 @@ properties:
               - name: defaultValue
                 type: NestedObject
                 description: |-
-                  A RemoteConfigParameterValue resource contains the value that a parameter may
-                  have.
+                  Value to set the parameter to, when none of the named conditions evaluate to true.
+                  Only one of experiment_value, personalization_value, rollout_value, use_in_app_default, or value
+                  may be specified.
                 properties:
                   - name: experimentValue
                     type: NestedObject
-                    exactly_one_of:
-                      - parameter_groups.0.parameters.0.default_value.0.experiment_value
-                      - parameter_groups.0.parameters.0.default_value.0.personalization_value
-                      - parameter_groups.0.parameters.0.default_value.0.rollout_value
-                      - parameter_groups.0.parameters.0.default_value.0.use_in_app_default
-                      - parameter_groups.0.parameters.0.default_value.0.value
                     description: Information related to a parameter value managed by Firebase ABT.
                     properties:
                       - name: experimentId
@@ -239,12 +241,6 @@ properties:
                               description: The variant identifier for the Experiment.
                   - name: personalizationValue
                     type: NestedObject
-                    exactly_one_of:
-                      - parameter_groups.0.parameters.0.default_value.0.experiment_value
-                      - parameter_groups.0.parameters.0.default_value.0.personalization_value
-                      - parameter_groups.0.parameters.0.default_value.0.rollout_value
-                      - parameter_groups.0.parameters.0.default_value.0.use_in_app_default
-                      - parameter_groups.0.parameters.0.default_value.0.value
                     description: Contains the necessary information to fetch a personalized value.
                     properties:
                       - name: personalizationId
@@ -255,12 +251,6 @@ properties:
                           should not be modified.
                   - name: rolloutValue
                     type: NestedObject
-                    exactly_one_of:
-                      - parameter_groups.0.parameters.0.default_value.0.experiment_value
-                      - parameter_groups.0.parameters.0.default_value.0.personalization_value
-                      - parameter_groups.0.parameters.0.default_value.0.rollout_value
-                      - parameter_groups.0.parameters.0.default_value.0.use_in_app_default
-                      - parameter_groups.0.parameters.0.default_value.0.value
                     description: Information related to a Rollout.
                     properties:
                       - name: percent
@@ -274,23 +264,12 @@ properties:
                         description: The user-specified value to be rolled out.
                   - name: useInAppDefault
                     type: Boolean
-                    exactly_one_of:
-                      - parameter_groups.0.parameters.0.default_value.0.experiment_value
-                      - parameter_groups.0.parameters.0.default_value.0.personalization_value
-                      - parameter_groups.0.parameters.0.default_value.0.rollout_value
-                      - parameter_groups.0.parameters.0.default_value.0.use_in_app_default
-                      - parameter_groups.0.parameters.0.default_value.0.value
+                    default_value: false
                     description: |-
                       If true, the parameter is omitted from the parameter values returned
                       to a client.
                   - name: value
                     type: String
-                    exactly_one_of:
-                      - parameter_groups.0.parameters.0.default_value.0.experiment_value
-                      - parameter_groups.0.parameters.0.default_value.0.personalization_value
-                      - parameter_groups.0.parameters.0.default_value.0.rollout_value
-                      - parameter_groups.0.parameters.0.default_value.0.use_in_app_default
-                      - parameter_groups.0.parameters.0.default_value.0.value
                     description: The string value that the parameter is set to.
               - name: description
                 type: String
@@ -324,6 +303,8 @@ properties:
             The condition_name of the highest priority
             (the one listed first in the RemoteConfig's conditions list) determines
             the value of this parameter.
+            Only one of experiment_value, personalization_value, rollout_value, use_in_app_default, or value
+            may be specified.
           value_type:
             type: NestedObject
             properties:
@@ -384,6 +365,7 @@ properties:
                     description: The user-specified value to be rolled out.
               - name: useInAppDefault
                 type: Boolean
+                default_value: false
                 description: |-
                   If true, the parameter is omitted from the parameter values returned
                   to a client.
@@ -393,17 +375,12 @@ properties:
         - name: defaultValue
           type: NestedObject
           description: |-
-            A RemoteConfigParameterValue resource contains the value that a parameter may
-            have.
+            Value to set the parameter to, when none of the named conditions evaluate to true.
+            Only one of experiment_value, personalization_value, rollout_value, use_in_app_default, or value
+            may be specified.
           properties:
             - name: experimentValue
               type: NestedObject
-              exactly_one_of:
-                - parameters.0.default_value.0.experiment_value
-                - parameters.0.default_value.0.personalization_value
-                - parameters.0.default_value.0.rollout_value
-                - parameters.0.default_value.0.use_in_app_default
-                - parameters.0.default_value.0.value
               description: Information related to a parameter value managed by Firebase ABT.
               properties:
                 - name: experimentId
@@ -436,12 +413,6 @@ properties:
                         description: The variant identifier for the Experiment.
             - name: personalizationValue
               type: NestedObject
-              exactly_one_of:
-                - parameters.0.default_value.0.experiment_value
-                - parameters.0.default_value.0.personalization_value
-                - parameters.0.default_value.0.rollout_value
-                - parameters.0.default_value.0.use_in_app_default
-                - parameters.0.default_value.0.value
               description: Contains the necessary information to fetch a personalized value.
               properties:
                 - name: personalizationId
@@ -452,12 +423,6 @@ properties:
                     should not be modified.
             - name: rolloutValue
               type: NestedObject
-              exactly_one_of:
-                - parameters.0.default_value.0.experiment_value
-                - parameters.0.default_value.0.personalization_value
-                - parameters.0.default_value.0.rollout_value
-                - parameters.0.default_value.0.use_in_app_default
-                - parameters.0.default_value.0.value
               description: Information related to a Rollout.
               properties:
                 - name: percent
@@ -471,23 +436,12 @@ properties:
                   description: The user-specified value to be rolled out.
             - name: useInAppDefault
               type: Boolean
-              exactly_one_of:
-                - parameters.0.default_value.0.experiment_value
-                - parameters.0.default_value.0.personalization_value
-                - parameters.0.default_value.0.rollout_value
-                - parameters.0.default_value.0.use_in_app_default
-                - parameters.0.default_value.0.value
+              default_value: false
               description: |-
                 If true, the parameter is omitted from the parameter values returned
                 to a client.
             - name: value
               type: String
-              exactly_one_of:
-                - parameters.0.default_value.0.experiment_value
-                - parameters.0.default_value.0.personalization_value
-                - parameters.0.default_value.0.rollout_value
-                - parameters.0.default_value.0.use_in_app_default
-                - parameters.0.default_value.0.value
               description: The string value that the parameter is set to.
         - name: description
           type: String
