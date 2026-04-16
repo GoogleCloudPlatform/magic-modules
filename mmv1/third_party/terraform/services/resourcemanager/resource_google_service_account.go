@@ -35,6 +35,23 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			resourceServiceAccountCustomDiff,
 		),
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"email": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"email": {
 				Type:        schema.TypeString,
@@ -240,7 +257,11 @@ func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error 
 	if err := d.Set("member", "serviceAccount:"+sa.Email); err != nil {
 		return fmt.Errorf("Error setting member: %s", err)
 	}
-	return nil
+
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"email":   sa.Email,
+		"project": sa.ProjectId,
+	})
 }
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
@@ -316,7 +337,10 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 	// time to ensure following reads are correct.
 	time.Sleep(time.Second * 5)
 
-	return nil
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"email":   sa.Email,
+		"project": sa.ProjectId,
+	})
 }
 
 func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

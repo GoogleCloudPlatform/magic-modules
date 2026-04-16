@@ -83,6 +83,20 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		}
 	}
 
+	var autopilotClusterPolicyConfig *container.ClusterPolicyConfig
+	if v, ok := d.GetOk("autopilot_cluster_policy_config"); ok {
+		l := v.([]interface{})
+		if len(l) > 0 && l[0] != nil {
+			pc := l[0].(map[string]interface{})
+			autopilotClusterPolicyConfig = &container.ClusterPolicyConfig{
+				NoSystemMutation:      pc["no_system_mutation"].(bool),
+				NoSystemImpersonation: pc["no_system_impersonation"].(bool),
+				NoUnsafeWebhooks:      pc["no_unsafe_webhooks"].(bool),
+				NoStandardNodePools:   pc["no_standard_node_pools"].(bool),
+			}
+		}
+	}
+
 	cluster := &container.Cluster{
 		Name:                        clusterName,
 		Location:                    location,
@@ -111,6 +125,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 			Enabled:                   d.Get("enable_autopilot").(bool),
 			WorkloadPolicyConfig:      workloadPolicyConfig,
 			PrivilegedAdmissionConfig: expandPrivilegedAdmissionConfig(d.Get("autopilot_privileged_admission")),
+			ClusterPolicyConfig:       autopilotClusterPolicyConfig,
 			ForceSendFields:           []string{"Enabled"},
 		},
 		ReleaseChannel:       expandReleaseChannel(d.Get("release_channel")),
