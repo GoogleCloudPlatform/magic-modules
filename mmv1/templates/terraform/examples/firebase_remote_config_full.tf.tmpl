@@ -5,32 +5,14 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
 
   conditions {
     name       = "ios_us"
-    expression = "device.os == 'ios' && device.country == 'us'"
+    expression = "device.os == 'ios' && device.country in ['us']"
     tag_color  = "TEAL"
   }
 
   conditions {
     name       = "ios_uk"
-    expression = "device.os == 'ios' && device.country == 'uk'"
+    expression = "device.os == 'ios' && device.country in ['uk']"
     tag_color  = "BLUE"
-  }
-
-  conditions {
-    name       = "tenPercent"
-    expression = "percent <= 10"
-    tag_color  = "BROWN"
-  }
-
-  conditions {
-    name       = "twentyPercent"
-    expression = "percent <= 20"
-    tag_color  = "PINK"
-  }
-
-  conditions {
-    name       = "thirtyPercent"
-    expression = "percent <= 30"
-    tag_color  = "PURPLE"
   }
 
   parameters {
@@ -48,32 +30,6 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
       condition_name     = "ios_uk"
       use_in_app_default = true
     }
-    conditional_values {
-      condition_name = "tenPercent"
-      experiment_value {
-        experiment_id    = "exp_2"
-        exposure_percent = 10.0
-        variant_value {
-          no_change  = false
-          value      = "variant_val_2"
-          variant_id = "variant_2"
-        }
-      }
-    }
-    conditional_values {
-      condition_name = "twentyPercent"
-      personalization_value {
-        personalization_id = "pers_2"
-      }
-    }
-    conditional_values {
-      condition_name = "thirtyPercent"
-      rollout_value {
-        percent    = 15.0
-        rollout_id = "roll_2"
-        value      = "rollout_val_2"
-      }
-    }
   }
 
   parameters {
@@ -82,47 +38,6 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
     value_type  = "STRING"
     default_value {
       use_in_app_default = true
-    }
-  }
-
-  parameters {
-    key = "welcome_message_3"
-    description = "Welcome message"
-    value_type  = "STRING"
-    default_value {
-      experiment_value {
-        experiment_id    = "exp_2"
-        exposure_percent = 10.0
-        variant_value {
-          no_change  = false
-          value      = "variant_val_2"
-          variant_id = "variant_2"
-        }
-      }
-    }
-  }
-
-  parameters {
-    key = "welcome_message_4"
-    description = "Welcome message"
-    value_type  = "STRING"
-    default_value {
-      personalization_value {
-        personalization_id = "pers_2"
-      }
-    }
-  }
-
-  parameters {
-    key = "welcome_message_5"
-    description = "Welcome message"
-    value_type  = "STRING"
-    default_value {
-      rollout_value {
-        percent    = 15.0
-        rollout_id = "roll_2"
-        value      = "rollout_val_2"
-      }
     }
   }
 
@@ -145,32 +60,6 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
         condition_name     = "ios_uk"
         use_in_app_default = true
       }
-      conditional_values {
-        condition_name = "tenPercent"
-        experiment_value {
-          experiment_id    = "exp_2"
-          exposure_percent = 10.0
-          variant_value {
-            no_change  = false
-            value      = "variant_val_2"
-            variant_id = "variant_2"
-          }
-        }
-      }
-      conditional_values {
-        condition_name = "twentyPercent"
-        personalization_value {
-          personalization_id = "pers_2"
-        }
-      }
-      conditional_values {
-        condition_name = "thirtyPercent"
-        rollout_value {
-          percent    = 15.0
-          rollout_id = "roll_2"
-          value      = "rollout_val_2"
-        }
-      }
     }
 
     parameters {
@@ -179,47 +68,6 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
       value_type  = "STRING"
       default_value {
         use_in_app_default = true
-      }
-    }
-
-    parameters {
-      key = "welcome_message_group_3"
-      description = "Welcome message"
-      value_type  = "STRING"
-      default_value {
-        experiment_value {
-          experiment_id    = "exp_2"
-          exposure_percent = 10.0
-          variant_value {
-            no_change  = false
-            value      = "variant_val_2"
-            variant_id = "variant_2"
-          }
-        }
-      }
-    }
-
-    parameters {
-      key = "welcome_message_group_4"
-      description = "Welcome message"
-      value_type  = "STRING"
-      default_value {
-        personalization_value {
-          personalization_id = "pers_2"
-        }
-      }
-    }
-
-    parameters {
-      key = "welcome_message_group_5"
-      description = "Welcome message"
-      value_type  = "STRING"
-      default_value {
-        rollout_value {
-          percent    = 15.0
-          rollout_id = "roll_2"
-          value      = "rollout_val_2"
-        }
       }
     }
   }

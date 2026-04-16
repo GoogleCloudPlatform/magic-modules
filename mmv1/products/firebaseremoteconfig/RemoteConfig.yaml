@@ -37,6 +37,7 @@ examples:
     primary_resource_id: full
     exclude_docs: true
 custom_code:
+  constants: templates/terraform/constants/firebase_remote_config_remote_config.go.tmpl
   pre_create: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
   pre_update: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
 properties:
@@ -131,66 +132,10 @@ properties:
                   The condition_name of the highest priority
                   (the one listed first in the RemoteConfig's conditions list) determines
                   the value of this parameter.
-                  Only one of experiment_value, personalization_value, rollout_value, use_in_app_default, or value
-                  may be specified.
+                  Only one of use_in_app_default or value may be specified.
                 value_type:
                   type: NestedObject
                   properties:
-                    - name: experimentValue
-                      type: NestedObject
-                      description: Information related to a parameter value managed by Firebase ABT.
-                      properties:
-                        - name: experimentId
-                          type: String
-                          description: |-
-                            The identifier that associates a parameter value to an Experiment in
-                            Firebase ABT.
-                        - name: exposurePercent
-                          type: Double
-                          description: |-
-                            Represents the server-side exposure evaluation. This value represents the
-                            fraction of users exposed to the experiment, ranging from 0 (0% exposure)
-                            to 100 (100% exposure), inclusive.
-                        - name: variantValue
-                          type: Array
-                          description: A repeated of variants associated with the Experiment.
-                          item_type:
-                            type: NestedObject
-                            properties:
-                              - name: noChange
-                                type: Boolean
-                                description: |-
-                                  If this boolean is set, then fallback to the next parameter in the
-                                  Template condition chain
-                              - name: value
-                                type: String
-                                description: The user-specified value for this variant. Can be empty string.
-                              - name: variantId
-                                type: String
-                                description: The variant identifier for the Experiment.
-                    - name: personalizationValue
-                      type: NestedObject
-                      description: Contains the necessary information to fetch a personalized value.
-                      properties:
-                        - name: personalizationId
-                          type: String
-                          description: |-
-                            Identifier that represents a personalization definition. This definition is
-                            used to resolve the value at config fetch time. This system-generated value
-                            should not be modified.
-                    - name: rolloutValue
-                      type: NestedObject
-                      description: Information related to a Rollout.
-                      properties:
-                        - name: percent
-                          type: Double
-                          description: The percentage of users that will receive the rollout value.
-                        - name: rolloutId
-                          type: String
-                          description: The identifier that associates a parameter value to a Rollout experiment.
-                        - name: value
-                          type: String
-                          description: The user-specified value to be rolled out.
                     - name: useInAppDefault
                       type: Boolean
                       default_value: false
@@ -204,64 +149,8 @@ properties:
                 type: NestedObject
                 description: |-
                   Value to set the parameter to, when none of the named conditions evaluate to true.
-                  Only one of experiment_value, personalization_value, rollout_value, use_in_app_default, or value
-                  may be specified.
+                  Only one of use_in_app_default or value may be specified.
                 properties:
-                  - name: experimentValue
-                    type: NestedObject
-                    description: Information related to a parameter value managed by Firebase ABT.
-                    properties:
-                      - name: experimentId
-                        type: String
-                        description: |-
-                          The identifier that associates a parameter value to an Experiment in
-                          Firebase ABT.
-                      - name: exposurePercent
-                        type: Double
-                        description: |-
-                          Represents the server-side exposure evaluation. This value represents the
-                          fraction of users exposed to the experiment, ranging from 0 (0% exposure)
-                          to 100 (100% exposure), inclusive.
-                      - name: variantValue
-                        type: Array
-                        description: A repeated of variants associated with the Experiment.
-                        item_type:
-                          type: NestedObject
-                          properties:
-                            - name: noChange
-                              type: Boolean
-                              description: |-
-                                If this boolean is set, then fallback to the next parameter in the
-                                Template condition chain
-                            - name: value
-                              type: String
-                              description: The user-specified value for this variant. Can be empty string.
-                            - name: variantId
-                              type: String
-                              description: The variant identifier for the Experiment.
-                  - name: personalizationValue
-                    type: NestedObject
-                    description: Contains the necessary information to fetch a personalized value.
-                    properties:
-                      - name: personalizationId
-                        type: String
-                        description: |-
-                          Identifier that represents a personalization definition. This definition is
-                          used to resolve the value at config fetch time. This system-generated value
-                          should not be modified.
-                  - name: rolloutValue
-                    type: NestedObject
-                    description: Information related to a Rollout.
-                    properties:
-                      - name: percent
-                        type: Double
-                        description: The percentage of users that will receive the rollout value.
-                      - name: rolloutId
-                        type: String
-                        description: The identifier that associates a parameter value to a Rollout experiment.
-                      - name: value
-                        type: String
-                        description: The user-specified value to be rolled out.
                   - name: useInAppDefault
                     type: Boolean
                     default_value: false
@@ -303,66 +192,10 @@ properties:
             The condition_name of the highest priority
             (the one listed first in the RemoteConfig's conditions list) determines
             the value of this parameter.
-            Only one of experiment_value, personalization_value, rollout_value, use_in_app_default, or value
-            may be specified.
+            Only one of use_in_app_default or value may be specified.
           value_type:
             type: NestedObject
             properties:
-              - name: experimentValue
-                type: NestedObject
-                description: Information related to a parameter value managed by Firebase ABT.
-                properties:
-                  - name: experimentId
-                    type: String
-                    description: |-
-                      The identifier that associates a parameter value to an Experiment in
-                      Firebase ABT.
-                  - name: exposurePercent
-                    type: Double
-                    description: |-
-                      Represents the server-side exposure evaluation. This value represents the
-                      fraction of users exposed to the experiment, ranging from 0 (0% exposure)
-                      to 100 (100% exposure), inclusive.
-                  - name: variantValue
-                    type: Array
-                    description: A repeated of variants associated with the Experiment.
-                    item_type:
-                      type: NestedObject
-                      properties:
-                        - name: noChange
-                          type: Boolean
-                          description: |-
-                            If this boolean is set, then fallback to the next parameter in the
-                            Template condition chain
-                        - name: value
-                          type: String
-                          description: The user-specified value for this variant. Can be empty string.
-                        - name: variantId
-                          type: String
-                          description: The variant identifier for the Experiment.
-              - name: personalizationValue
-                type: NestedObject
-                description: Contains the necessary information to fetch a personalized value.
-                properties:
-                  - name: personalizationId
-                    type: String
-                    description: |-
-                      Identifier that represents a personalization definition. This definition is
-                      used to resolve the value at config fetch time. This system-generated value
-                      should not be modified.
-              - name: rolloutValue
-                type: NestedObject
-                description: Information related to a Rollout.
-                properties:
-                  - name: percent
-                    type: Double
-                    description: The percentage of users that will receive the rollout value.
-                  - name: rolloutId
-                    type: String
-                    description: The identifier that associates a parameter value to a Rollout experiment.
-                  - name: value
-                    type: String
-                    description: The user-specified value to be rolled out.
               - name: useInAppDefault
                 type: Boolean
                 default_value: false
@@ -376,64 +209,8 @@ properties:
           type: NestedObject
           description: |-
             Value to set the parameter to, when none of the named conditions evaluate to true.
-            Only one of experiment_value, personalization_value, rollout_value, use_in_app_default, or value
-            may be specified.
+            Only one of use_in_app_default or value may be specified.
           properties:
-            - name: experimentValue
-              type: NestedObject
-              description: Information related to a parameter value managed by Firebase ABT.
-              properties:
-                - name: experimentId
-                  type: String
-                  description: |-
-                    The identifier that associates a parameter value to an Experiment in
-                    Firebase ABT.
-                - name: exposurePercent
-                  type: Double
-                  description: |-
-                    Represents the server-side exposure evaluation. This value represents the
-                    fraction of users exposed to the experiment, ranging from 0 (0% exposure)
-                    to 100 (100% exposure), inclusive.
-                - name: variantValue
-                  type: Array
-                  description: A repeated of variants associated with the Experiment.
-                  item_type:
-                    type: NestedObject
-                    properties:
-                      - name: noChange
-                        type: Boolean
-                        description: |-
-                          If this boolean is set, then fallback to the next parameter in the
-                          Template condition chain
-                      - name: value
-                        type: String
-                        description: The user-specified value for this variant. Can be empty string.
-                      - name: variantId
-                        type: String
-                        description: The variant identifier for the Experiment.
-            - name: personalizationValue
-              type: NestedObject
-              description: Contains the necessary information to fetch a personalized value.
-              properties:
-                - name: personalizationId
-                  type: String
-                  description: |-
-                    Identifier that represents a personalization definition. This definition is
-                    used to resolve the value at config fetch time. This system-generated value
-                    should not be modified.
-            - name: rolloutValue
-              type: NestedObject
-              description: Information related to a Rollout.
-              properties:
-                - name: percent
-                  type: Double
-                  description: The percentage of users that will receive the rollout value.
-                - name: rolloutId
-                  type: String
-                  description: The identifier that associates a parameter value to a Rollout experiment.
-                - name: value
-                  type: String
-                  description: The user-specified value to be rolled out.
             - name: useInAppDefault
               type: Boolean
               default_value: false
@@ -461,6 +238,7 @@ properties:
             - JSON
   - name: version
     type: NestedObject
+    default_from_api: true
     description: |-
       Contains all metadata about a particular version of the Remote Config
       template.
