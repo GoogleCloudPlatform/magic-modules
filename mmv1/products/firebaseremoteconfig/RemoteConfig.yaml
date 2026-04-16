@@ -29,12 +29,7 @@ references:
 examples:
   - name: firebase_remote_config_basic
     primary_resource_id: basic
-  - name: firebase_remote_config_empty
-    primary_resource_id: empty
-    exclude_docs: true
-  - name: firebase_remote_config_full
-    primary_resource_id: full
-    exclude_docs: true
+    exclude_test: true
 custom_code:
   pre_create: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
   pre_update: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
