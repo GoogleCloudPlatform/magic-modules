@@ -47,16 +47,47 @@ examples:
       unit_name: example-unit
       unitkind_name: vm-unitkind
       upgrade_operation_name: upgrade-unit-operation
-    test_vars_overrides:
-      # for backward compatible
-      actuation_service_account: '"actuator" + randomSuffix'
-      # for backward compatible
-      tenant_project_name: '"tenant" + randomSuffix'
     test_env_vars:
       billing_account: BILLING_ACCT
       org_id: ORG_ID
       project: PROJECT_NAME
       project_number: PROJECT_NUMBER
+    test_vars_overrides:
+      # for backward compatible
+      actuation_service_account: '"actuator" + randomSuffix'
+      # for backward compatible
+      tenant_project_name: '"tenant" + randomSuffix'
+  - name: saas_runtime_unit_operation_with_parent
+    primary_resource_id: child_operation
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    ignore_read_extra:
+      - etag
+      - error_category
+      - state
+      - update_time
+      - conditions
+    vars:
+      actuation_service_account: actuator
+      child_operation_name: upgrade-unit-operation
+      deprovision_operation_name: deprovision-unit-operation
+      parent_operation_name: provision-unit-operation
+      release_name: example-release
+      saas_name: example-saas
+      tenant_name: example-tenant
+      tenant_project_name: tenant
+      unit_name: example-unit
+      unitkind_name: vm-unitkind
+    test_env_vars:
+      billing_account: BILLING_ACCT
+      org_id: ORG_ID
+      project: PROJECT_NAME
+      project_number: PROJECT_NUMBER
+    test_vars_overrides:
+      actuation_service_account: '"actuator" + randomSuffix'
+      tenant_project_name: '"tenant" + randomSuffix'
 virtual_fields:
   - name: wait_for_completion
     type: Boolean
@@ -277,3 +308,6 @@ properties:
       - name: release
         type: String
         description: Reference to the Release object to use for the Unit. (optional).
+  - name: parentUnitOperation
+    type: String
+    description: 'Reference to parent resource: UnitOperation. If an operation needs to create other operations as part of its workflow, each of the child operations should have this field set to the parent. This can be used for tracing. (Optional)'
