@@ -84,7 +84,7 @@ properties:
             - TEAL
   - name: parameterGroups
     type: Map
-    key_name: key
+    key_name: parameter_group_name
     description: |-
       Map of parameter group names to their descriptions and grouped parameters.
       A group's name is mutable but must be unique among groups in the config.
@@ -108,7 +108,7 @@ properties:
             characters. A description may contain any Unicode characters.
         - name: parameters
           type: Map
-          key_name: key
+          key_name: parameter_name
           description: |-
             Map of parameter keys to their optional default values and optional
             conditional values for parameters that belong to this group.
@@ -171,7 +171,7 @@ properties:
                   - JSON
   - name: parameters
     type: Map
-    key_name: key
+    key_name: parameter_name
     description: |-
       Map of parameter keys to their optional default values and optional
       conditional values.

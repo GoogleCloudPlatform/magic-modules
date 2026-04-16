@@ -6,7 +6,7 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
   }
 
   parameters {
-    key = "welcome_message"
+    parameter_name = "welcome_message"
     description = "Welcome message"
     value_type  = "STRING"
     default_value {
@@ -19,10 +19,10 @@ resource "google_firebase_remote_config_remote_config" "{{$.PrimaryResourceId}}"
   }
 
   parameter_groups {
-    key = "group_a"
+    parameter_group_name = "group_a"
     description = "Parameter group A description"
     parameters {
-      key = "welcome_message_group"
+      parameter_name = "welcome_message_group"
       description = "Welcome message for group A"
       value_type  = "STRING"
       default_value {

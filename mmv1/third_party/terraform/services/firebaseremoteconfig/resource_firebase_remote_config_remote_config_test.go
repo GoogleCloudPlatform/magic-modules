@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -63,6 +64,11 @@ func TestAccFirebaseRemoteConfigRemoteConfig_update(t *testing.T) {
 			},
 			{
 				Config: testAccFirebaseRemoteConfigRemoteConfig_empty(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{
+							plancheck.ExpectResourceAction("google_firebase_remote_config_remote_config.basic", plancheck.ResourceActionUpdate),
+						},
+				},
 			},
 			{
 				ResourceName:      "google_firebase_remote_config_remote_config.basic",
@@ -77,6 +83,11 @@ func TestAccFirebaseRemoteConfigRemoteConfig_update(t *testing.T) {
 			},
 			{
 				Config: testAccFirebaseRemoteConfigRemoteConfig_full(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{
+							plancheck.ExpectResourceAction("google_firebase_remote_config_remote_config.basic", plancheck.ResourceActionUpdate),
+						},
+				},
 			},
 			{
 				ResourceName:      "google_firebase_remote_config_remote_config.basic",
@@ -103,7 +114,7 @@ resource "google_firebase_remote_config_remote_config" "basic" {
   }
 
   parameters {
-    key = "welcome_message"
+    parameter_name = "welcome_message"
     description = "Welcome message"
     value_type  = "STRING"
     default_value {
@@ -116,10 +127,10 @@ resource "google_firebase_remote_config_remote_config" "basic" {
   }
 
   parameter_groups {
-    key = "group_a"
+    parameter_group_name = "group_a"
     description = "Parameter group A description"
     parameters {
-      key = "welcome_message_group"
+      parameter_name = "welcome_message_group"
       description = "Welcome message for group A"
       value_type  = "STRING"
       default_value {
@@ -157,7 +168,7 @@ resource "google_firebase_remote_config_remote_config" "basic" {
   }
 
   parameters {
-    key = "welcome_message"
+    parameter_name = "welcome_message"
     description = "Welcome message"
     value_type  = "STRING"
     default_value {
@@ -174,7 +185,7 @@ resource "google_firebase_remote_config_remote_config" "basic" {
   }
 
   parameters {
-    key = "welcome_message_2"
+    parameter_name = "welcome_message_2"
     description = "Welcome message"
     value_type  = "STRING"
     default_value {
@@ -183,11 +194,11 @@ resource "google_firebase_remote_config_remote_config" "basic" {
   }
 
   parameter_groups {
-    key = "group_a"
+    parameter_group_name = "group_a"
     description = "Parameter group A description"
     
     parameters {
-      key = "welcome_message_group"
+      parameter_name = "welcome_message_group"
       description = "Welcome message"
       value_type  = "STRING"
       default_value {
@@ -204,7 +215,7 @@ resource "google_firebase_remote_config_remote_config" "basic" {
     }
 
     parameters {
-      key = "welcome_message_group_2"
+      parameter_name = "welcome_message_group_2"
       description = "Welcome message"
       value_type  = "STRING"
       default_value {
