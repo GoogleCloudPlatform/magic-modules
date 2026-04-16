@@ -72,8 +72,6 @@ examples:
     vars:
       sec_policy_name: 'policywithmultiplerulesandbodyexclude'
       backend_name: 'backendpolicywithmultiplerules'
-    test_vars_overrides:
-      sec_policy_name: '"policywithmultiplerules" + randomSuffix'
 parameters:
   - name: 'security_policy'
     type: String
