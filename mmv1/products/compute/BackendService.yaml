@@ -878,7 +878,6 @@ properties:
     description: |
       Settings for enabling Cloud Identity Aware Proxy.
       If OAuth client is not set, the Google-managed OAuth client is used.
-    default_from_api: true
     send_empty_value: true
     properties:
       - name: 'enabled'
@@ -890,7 +889,9 @@ properties:
         type: String
         description: |
           OAuth2 Client ID for IAP
+        ignore_read: true
         send_empty_value: true
+        write_only: true
       - name: 'oauth2ClientSecret'
         type: String
         description: |
@@ -899,6 +900,7 @@ properties:
         sensitive: true
         send_empty_value: true
         is_missing_in_cai: true
+        write_only: true
       - name: 'oauth2ClientSecretSha256'
         type: String
         description: |
