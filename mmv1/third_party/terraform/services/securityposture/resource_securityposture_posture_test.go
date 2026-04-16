@@ -66,6 +66,26 @@ resource "google_securityposture_posture" "posture_test" {
     		}
     	}
 	}
+    # This policy_set uses a list constraint (gcp.resourceLocations) with allowed_values.
+    # enforce is intentionally omitted here — it is only valid for boolean constraints.
+    # Verifies that the custom expander does NOT send enforce=false to the API for list constraints.
+    policy_sets {
+    	policy_set_id = "location_policy_set"
+    	description = "set of location policies"
+    	policies {
+    		policy_id = "location_policy_1"
+    		constraint {
+    			org_policy_constraint {
+    				canned_constraint_id = "constraints/gcp.resourceLocations"
+    				policy_rules {
+    					values {
+    						allowed_values = ["in:us-locations"]
+    					}
+    				}
+    			}
+    		}
+    	}
+	}
 }
 `, context)
 }
@@ -96,10 +116,10 @@ resource "google_securityposture_posture" "posture_test" {
                             description = "Disable constraint for test"
                             expression = "resource.matchTagId('tagKeys/123', 'tagValues/345')"
 					    }
-    				}						
+    				}
     			}
     		}
-		}		
+    	}
     	policies {
     		policy_id = "policy_2"
     		constraint {
@@ -121,6 +141,22 @@ resource "google_securityposture_posture" "posture_test" {
     		}
 		}
 	}
-}
-`, context)
-}
+    # This policy_set uses a list constraint (gcp.resourceLocations) with allowed_values.
+    # enforce is intentionally omitted here — it is only valid for boolean constraints.
+    # Verifies that the custom expander does NOT send enforce=false to the API for list constraints.
+    policy_sets {
+    	policy_set_id = "location_policy_set"
+    	description = "set of location policies"
+    	policies {
+    		policy_id = "location_policy_1"
+    		constraint {
+    			org_policy_constraint {
+    				canned_constraint_id = "constraints/gcp.resourceLocations"
+    				policy_rules {
+    					values {
+    						allowed_values = ["in:us-locations"]
+    					}
+    				}
+    			}
+    		}
+    	}
