@@ -57,42 +57,51 @@ examples:
     min_version: beta
     vars:
       project_id: quota
+    test_env_vars:
+      org_id: ORG_ID
     test_vars_overrides:
       # for backward compatible
       project_id: '"quota" + randomSuffix'
-    test_env_vars:
-      org_id: ORG_ID
   - name: consumer_quota_override_zero_value
     primary_resource_id: override
     min_version: beta
     exclude_docs: true
     vars:
       project_id: quota
+    test_env_vars:
+      org_id: ORG_ID
     test_vars_overrides:
       # for backward compatible
       project_id: '"quota" + randomSuffix'
-    test_env_vars:
-      org_id: ORG_ID
   - name: region_consumer_quota_override
     primary_resource_id: override
     min_version: beta
     vars:
       project_id: quota
+    test_env_vars:
+      org_id: ORG_ID
     test_vars_overrides:
       # for backward compatible
       project_id: '"quota" + randomSuffix'
-    test_env_vars:
-      org_id: ORG_ID
   - name: consumer_quota_override_custom_dimension
     primary_resource_id: override
     min_version: beta
     vars:
       project_id: quota
+    test_env_vars:
+      org_id: ORG_ID
     test_vars_overrides:
       # for backward compatible
       project_id: '"quota" + randomSuffix'
+  - name: consumer_quota_override_unit
+    primary_resource_id: override
+    min_version: beta
+    vars:
+      project_id: quota
     test_env_vars:
       org_id: ORG_ID
+    test_vars_overrides:
+      project_id: '"quota" + randomSuffix'
 parameters:
   - name: name
     type: String
@@ -150,3 +159,6 @@ properties:
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
     immutable: true
     min_version: beta
+  - name: unit
+    type: String
+    description: 'The limit unit of the limit to which this override applies. An example unit would be: `1/{project}/{region}` Note that `{project}` and `{region}` are not placeholders in this example; the literal characters `{` and `}` occur in the string.'
