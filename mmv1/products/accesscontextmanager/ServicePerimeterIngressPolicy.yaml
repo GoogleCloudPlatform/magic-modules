@@ -59,6 +59,8 @@ async:
   result:
     resource_inside_response: true
 identity:
+  - ingressFrom
+  - ingressTo
   - title
 nested_query:
   keys:
