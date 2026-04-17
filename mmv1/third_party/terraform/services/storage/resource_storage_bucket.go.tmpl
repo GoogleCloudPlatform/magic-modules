@@ -60,6 +60,23 @@ func ResourceStorageBucket() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceStorageBucketStateImporter,
 		},
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 			tpgresource.SetLabelsDiff,
@@ -1181,6 +1198,17 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(res.Id)
 
+	proj := ""
+	if v, ok := d.GetOk("project"); ok {
+		proj = v.(string)
+	}
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name":    d.Get("name").(string),
+		"project": proj,
+	}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -1369,6 +1397,18 @@ func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}
 	if err := d.Set("force_destroy", false); err != nil {
 		return nil, fmt.Errorf("Error setting force_destroy: %s", err)
 	}
+
+	proj := ""
+	if v, ok := d.GetOk("project"); ok {
+		proj = v.(string)
+	}
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name":    d.Get("name").(string),
+		"project": proj,
+	}); err != nil {
+		return nil, err
+	}
+
 	return []*schema.ResourceData{d}, nil
 }
 
@@ -2504,6 +2544,17 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 
 	if err := d.Set("ip_filter", flattenBucketIpFilter(res.IpFilter)); err != nil {
 		return fmt.Errorf("Error setting ip_filter: %s", err)
+	}
+
+	proj := ""
+	if v, ok := d.GetOk("project"); ok {
+		proj = v.(string)
+	}
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name":    bucket,
+		"project": proj,
+	}); err != nil {
+		return err
 	}
 
 	d.SetId(res.Id)
