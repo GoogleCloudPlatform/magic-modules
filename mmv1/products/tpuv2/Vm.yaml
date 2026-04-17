@@ -31,7 +31,7 @@ custom_diff:
   - acceleratorTypeCustomizeDiff
 sweeper:
   url_substitutions:
-    - zone: us-central1-c
+    - zone: us-central1-a
 async:
   operation:
     base_url: '{{op_id}}'

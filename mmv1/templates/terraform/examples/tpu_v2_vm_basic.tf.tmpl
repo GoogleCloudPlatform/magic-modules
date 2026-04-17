@@ -6,7 +6,7 @@ resource "google_tpu_v2_vm" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
   name = "{{index $.Vars "vm_name"}}"
-  zone = "us-central1-c"
+  zone = "us-central1-a"
 
   runtime_version = "tpu-vm-tf-2.13.0"
 }
