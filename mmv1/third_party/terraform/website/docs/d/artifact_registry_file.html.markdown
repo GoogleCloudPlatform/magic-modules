@@ -74,6 +74,7 @@ The following arguments are supported:
 * `repository_id` - (Required) The ID of the repository.
 * `file_id` - (Required) The Artifact Registry file ID. For Generic repositories this is `<package>:<version>:<filename>`; for other formats refer to the file listing in the API. Slashes and other reserved characters are URL-encoded by the provider.
 * `output_path` - (Required) Local filesystem path where the downloaded bytes are written. Parent directories are created if missing.
+* `overwrite` - (Optional) If `true` (default), the file at `output_path` is always downloaded and overwritten on every read. If `false`, the download is skipped when the file already exists at `output_path` and the Artifact Registry-reported hash matches the hash from the previous read — useful for large files that rarely change, to avoid re-downloading on every `plan`/`apply`.
 * `project` - (Optional) The project in which the repository lives. Defaults to the provider project.
 
 ## Attributes Reference
