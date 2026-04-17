@@ -231,6 +231,122 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	return scheduling, nil
 }
 
+func expandScheduling_v2(v interface{}) (map[string]interface{}, error) {
+	if v == nil {
+		return map[string]interface{}{"automaticRestart": true}, nil
+	}
+
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return map[string]interface{}{"automaticRestart": true}, nil
+	}
+
+	if len(ls) > 1 || ls[0] == nil {
+		return nil, fmt.Errorf("expected exactly one scheduling block")
+	}
+
+	original := ls[0].(map[string]interface{})
+	scheduling := map[string]interface{}{}
+
+	if v, ok := original["automatic_restart"]; ok {
+		scheduling["automaticRestart"] = v.(bool)
+	}
+	if v, ok := original["preemptible"]; ok {
+		scheduling["preemptible"] = v.(bool)
+	}
+	if v, ok := original["on_host_maintenance"]; ok {
+		scheduling["onHostMaintenance"] = v.(string)
+	}
+	if v, ok := original["node_affinities"]; ok && v != nil {
+		naSet := v.(*schema.Set).List()
+		nodeAffinities := make([]interface{}, 0, len(naSet))
+		for _, nodeAffRaw := range naSet {
+			if nodeAffRaw == nil {
+				continue
+			}
+			nodeAff := nodeAffRaw.(map[string]interface{})
+			nodeAffinities = append(nodeAffinities, map[string]interface{}{
+				"key":      nodeAff["key"].(string),
+				"operator": nodeAff["operator"].(string),
+				"values":   tpgresource.ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
+			})
+		}
+		scheduling["nodeAffinities"] = nodeAffinities
+	}
+	if v, ok := original["min_node_cpus"]; ok {
+		scheduling["minNodeCpus"] = v.(int)
+	}
+	if v, ok := original["provisioning_model"]; ok {
+		scheduling["provisioningModel"] = v.(string)
+	}
+	if v, ok := original["instance_termination_action"]; ok {
+		scheduling["instanceTerminationAction"] = v.(string)
+	}
+	if v, ok := original["availability_domain"]; ok && v != nil {
+		scheduling["availabilityDomain"] = v.(int)
+	}
+	if v, ok := original["max_run_duration"]; ok {
+		transformedMaxRunDuration, err := expandComputeMaxRunDuration_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformedMaxRunDuration != nil {
+			scheduling["maxRunDuration"] = transformedMaxRunDuration
+		}
+	}
+	if v, ok := original["on_instance_stop_action"]; ok {
+		transformedOnInstanceStopAction, err := expandComputeOnInstanceStopAction_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformedOnInstanceStopAction != nil {
+			scheduling["onInstanceStopAction"] = transformedOnInstanceStopAction
+		}
+	}
+{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := original["host_error_timeout_seconds"]; ok {
+		scheduling["hostErrorTimeoutSeconds"] = v.(int)
+	}
+	if v, ok := original["maintenance_interval"]; ok {
+		scheduling["maintenanceInterval"] = v.(string)
+	}
+	if v, ok := original["graceful_shutdown"]; ok {
+		transformedGracefulShutdown, err := expandGracefulShutdown_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformedGracefulShutdown != nil {
+			scheduling["gracefulShutdown"] = transformedGracefulShutdown
+		}
+	}
+	if v, ok := original["skip_guest_os_shutdown"]; ok {
+		scheduling["skipGuestOsShutdown"] = v.(bool)
+	}
+	if v, ok := original["preemption_notice_duration"]; ok {
+		transformedPreemptionNoticeDuration, err := expandComputePreemptionNoticeDuration_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformedPreemptionNoticeDuration != nil {
+			scheduling["preemptionNoticeDuration"] = transformedPreemptionNoticeDuration
+		}
+	}
+{{- end }}
+	if v, ok := original["local_ssd_recovery_timeout"]; ok {
+		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformedLocalSsdRecoveryTimeout != nil {
+			scheduling["localSsdRecoveryTimeout"] = transformedLocalSsdRecoveryTimeout
+		}
+	}
+	if v, ok := original["termination_time"]; ok {
+		scheduling["terminationTime"] = v.(string)
+	}
+	return scheduling, nil
+}
+
 func expandComputeMaxRunDuration(v interface{}) (*compute.Duration, error) {
 	l := v.([]interface{})
 	duration := compute.Duration{}
@@ -738,6 +854,26 @@ func expandAccessConfigs(configs []interface{}) []*compute.AccessConfig {
 	return acs
 }
 
+func expandAccessConfigs_v2(configs []interface{}) []interface{} {
+	acs := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		ac := map[string]interface{}{
+			"type": "ONE_TO_ONE_NAT",
+		}
+		if raw != nil {
+			data := raw.(map[string]interface{})
+			ac["natIP"] = data["nat_ip"].(string)
+			ac["networkTier"] = data["network_tier"].(string)
+			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
+				ac["setPublicPtr"] = true
+				ac["publicPtrDomainName"] = ptr.(string)
+			}
+		}
+		acs[i] = ac
+	}
+	return acs
+}
+
 func expandIpv6AccessConfigs(configs []interface{}) []*compute.AccessConfig {
 	iacs := make([]*compute.AccessConfig, len(configs))
 	for i, raw := range configs {
@@ -763,6 +899,37 @@ func expandIpv6AccessConfigs(configs []interface{}) []*compute.AccessConfig {
 			}
 			iacs[i].Type = "DIRECT_IPV6" // Currently only type supported
 		}
+	}
+	return iacs
+}
+
+func expandIpv6AccessConfigs_v2(configs []interface{}) []interface{} {
+	iacs := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		iac := map[string]interface{}{
+			"type": "DIRECT_IPV6",
+		}
+		if raw != nil {
+			data := raw.(map[string]interface{})
+			iac["networkTier"] = data["network_tier"].(string)
+			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
+				iac["publicPtrDomainName"] = ptr.(string)
+			}
+			if eip, ok := data["external_ipv6"]; ok && eip != "" {
+				iac["externalIpv6"] = eip.(string)
+			}
+			if eipl, ok := data["external_ipv6_prefix_length"]; ok && eipl != "" {
+				if strVal, ok := eipl.(string); ok {
+					if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+						iac["externalIpv6PrefixLength"] = intVal
+					}
+				}
+			}
+			if name, ok := data["name"]; ok && name != "" {
+				iac["name"] = name.(string)
+			}
+		}
+		iacs[i] = iac
 	}
 	return iacs
 }
@@ -821,6 +988,59 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			MacAddress: macAddress,
 			{{- end }}
 		}
+	}
+	return ifaces, nil
+}
+
+func expandNetworkInterfaces_v2(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]interface{}, error) {
+	configs := d.Get("network_interface").([]interface{})
+	ifaces := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+
+		var networkAttachment = ""
+		network := data["network"].(string)
+		subnetwork := data["subnetwork"].(string)
+		if networkAttachmentObj, ok := data["network_attachment"]; ok {
+			networkAttachment = networkAttachmentObj.(string)
+		}
+		if networkAttachment == "" && network == "" && subnetwork == "" {
+			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
+		}
+
+		nf, err := tpgresource.ParseNetworkFieldValue(network, d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot determine self_link for network %q: %s", network, err)
+		}
+
+		subnetProjectField := fmt.Sprintf("network_interface.%d.subnetwork_project", i)
+		sf, err := tpgresource.ParseSubnetworkFieldValueWithProjectField(subnetwork, subnetProjectField, d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
+		}
+
+		iface := map[string]interface{}{
+			"networkIP":                data["network_ip"].(string),
+			"network":                  nf.RelativeLink(),
+			"networkAttachment":        networkAttachment,
+			"vlan":                     data["vlan"].(int),
+			"subnetwork":               sf.RelativeLink(),
+			"accessConfigs":            expandAccessConfigs_v2(data["access_config"].([]interface{})),
+			"aliasIpRanges":            expandAliasIpRanges_v2(data["alias_ip_range"].([]interface{})),
+			"nicType":                  data["nic_type"].(string),
+			"stackType":                data["stack_type"].(string),
+			"queueCount":               data["queue_count"].(int),
+			"ipv6AccessConfigs":        expandIpv6AccessConfigs_v2(data["ipv6_access_config"].([]interface{})),
+			"ipv6Address":              data["ipv6_address"].(string),
+			"internalIpv6PrefixLength": data["internal_ipv6_prefix_length"].(int),
+			"igmpQuery":                data["igmp_query"].(string),
+		}
+		{{- if ne $.TargetVersionName "ga" }}
+		if macAddressObj, ok := data["mac_address"]; ok && macAddressObj.(string) != "" {
+			iface["macAddress"] = macAddressObj.(string)
+		}
+		{{- end }}
+		ifaces[i] = iface
 	}
 	return ifaces, nil
 }

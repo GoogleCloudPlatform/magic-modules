@@ -3399,6 +3399,86 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 	return disk, nil
 }
 
+func expandAttachedDisk_v2(diskConfig map[string]interface{}, d *schema.ResourceData, meta interface{}) (map[string]interface{}, error) {
+	config := meta.(*transport_tpg.Config)
+
+	s := diskConfig["source"].(string)
+	var sourceLink string
+	if strings.Contains(s, "regions/") {
+		source, err := tpgresource.ParseRegionDiskFieldValue(s, d, config)
+		if err != nil {
+			return nil, err
+		}
+		sourceLink = source.RelativeLink()
+	} else {
+		source, err := tpgresource.ParseDiskFieldValue(s, d, config)
+		if err != nil {
+			return nil, err
+		}
+		sourceLink = source.RelativeLink()
+	}
+
+	disk := map[string]interface{}{
+		"source": sourceLink,
+	}
+
+	if v, ok := diskConfig["mode"]; ok {
+		disk["mode"] = v.(string)
+	}
+	if v, ok := diskConfig["device_name"]; ok {
+		disk["deviceName"] = v.(string)
+	}
+	if v, ok := d.GetOk("boot_disk.0.interface"); ok && v != "" {
+		disk["interface"] = v.(string)
+	}
+
+	var diskEncryptionKey map[string]interface{}
+
+	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
+	if keyOk && keyValue != "" {
+		diskEncryptionKey = map[string]interface{}{
+			"rawKey": keyValue.(string),
+		}
+	}
+
+	keyValue, keyOk = diskConfig["disk_encryption_key_rsa"]
+	if keyOk && keyValue != "" {
+		diskEncryptionKey = map[string]interface{}{
+			"rsaEncryptedKey": keyValue.(string),
+		}
+	}
+
+	kmsValue, kmsOk := diskConfig["kms_key_self_link"]
+	if kmsOk {
+		if keyOk && keyValue != "" && kmsValue != "" {
+			return nil, errors.New("Only one of kms_key_self_link and disk_encryption_key_raw can be set")
+		}
+		if kmsValue != "" {
+			diskEncryptionKey = map[string]interface{}{
+				"kmsKeyName": kmsValue.(string),
+			}
+		}
+	}
+
+	kmsServiceAccount, kmsServiceAccountOk := diskConfig["disk_encryption_service_account"]
+	if kmsServiceAccountOk && kmsServiceAccount != "" {
+		if diskEncryptionKey == nil {
+			diskEncryptionKey = map[string]interface{}{}
+		}
+		diskEncryptionKey["kmsKeyServiceAccount"] = kmsServiceAccount.(string)
+	}
+
+	if diskEncryptionKey != nil {
+		disk["diskEncryptionKey"] = diskEncryptionKey
+	}
+
+	if forceAttach, ok := diskConfig["force_attach"]; ok {
+		disk["forceAttach"] = forceAttach.(bool)
+	}
+
+	return disk, nil
+}
+
 // See comment on expandInstanceTemplateGuestAccelerators regarding why this
 // code is duplicated.
 func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.AcceleratorConfig, error) {
@@ -3423,6 +3503,30 @@ func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config
 		})
 	}
 
+	return guestAccelerators, nil
+}
+
+func expandInstanceGuestAccelerators_v2(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]interface{}, error) {
+	configs, ok := d.GetOk("guest_accelerator")
+	if !ok {
+		return nil, nil
+	}
+	accels := configs.([]interface{})
+	guestAccelerators := make([]interface{}, 0, len(accels))
+	for _, raw := range accels {
+		data := raw.(map[string]interface{})
+		if data["count"].(int) == 0 {
+			continue
+		}
+		at, err := tpgresource.ParseAcceleratorFieldValue(data["type"].(string), d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot parse accelerator type: %v", err)
+		}
+		guestAccelerators = append(guestAccelerators, map[string]interface{}{
+			"acceleratorCount": data["count"].(int),
+			"acceleratorType":  at.RelativeLink(),
+		})
+	}
 	return guestAccelerators, nil
 }
 
@@ -3586,6 +3690,14 @@ func expandParams(d *schema.ResourceData) (*compute.InstanceParams, error) {
 		params.ResourceManagerTags = tpgresource.ExpandStringMap(d, "params.0.resource_manager_tags")
 	}
 
+	return params, nil
+}
+
+func expandParams_v2(d *schema.ResourceData) (map[string]interface{}, error) {
+	params := map[string]interface{}{}
+	if _, ok := d.GetOk("params.0.resource_manager_tags"); ok {
+		params["resourceManagerTags"] = tpgresource.ExpandStringMap(d, "params.0.resource_manager_tags")
+	}
 	return params, nil
 }
 
@@ -3846,6 +3958,29 @@ func expandScratchDisks(d *schema.ResourceData, config *transport_tpg.Config, pr
 		})
 	}
 
+	return scratchDisks, nil
+}
+
+func expandScratchDisks_v2(d *schema.ResourceData, config *transport_tpg.Config, project string) ([]interface{}, error) {
+	diskType, err := readDiskType(config, d, "local-ssd")
+	if err != nil {
+		return nil, fmt.Errorf("Error loading disk type 'local-ssd': %s", err)
+	}
+
+	n := d.Get("scratch_disk.#").(int)
+	scratchDisks := make([]interface{}, 0, n)
+	for i := 0; i < n; i++ {
+		scratchDisks = append(scratchDisks, map[string]interface{}{
+			"autoDelete": true,
+			"type":       "SCRATCH",
+			"deviceName": d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string),
+			"interface":  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
+			"diskSizeGb": d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int),
+			"initializeParams": map[string]interface{}{
+				"diskType": diskType.RelativeLink(),
+			},
+		})
+	}
 	return scratchDisks, nil
 }
 
