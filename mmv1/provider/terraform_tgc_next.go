@@ -176,7 +176,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go",
 		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
 		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
-		"pkg/provider/provider_mmv1_resources.go":        "templates/tgc_next/provider/provider_mmv1_resources.go.tmpl",
+		"pkg/provider/provider_register_services.go":     "templates/tgc_next/provider/provider_register_services.go.tmpl",
 		"pkg/registry/registry.go":                       "third_party/terraform/registry/registry.go",
 
 		// services
