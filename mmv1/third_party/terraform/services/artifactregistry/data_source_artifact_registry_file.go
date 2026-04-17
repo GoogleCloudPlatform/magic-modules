@@ -52,6 +52,11 @@ func DataSourceArtifactRegistryFile() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"overwrite": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -122,6 +127,19 @@ func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}
 	sizeBytes := parseSizeBytes(metaResp["sizeBytes"])
 	hashesAttr := parseHashes(metaResp["hashes"])
 
+	overwrite := d.Get("overwrite").(bool)
+	storedB64 := d.Get("output_base64sha256").(string)
+	arSHA := hashesAttr["SHA256"]
+
+	// Skip download when overwrite=false, the AR-reported hash matches the stored
+	// hash from the previous read, and the file still exists on disk.
+	if !overwrite && storedB64 != "" && arSHA != "" && arSHA == storedB64 {
+		if _, statErr := os.Stat(outputPath); statErr == nil {
+			hexStr := d.Get("output_sha256").(string)
+			return setFileAttributes(d, project, name, location, repoID, fileID, sizeBytes, hashesAttr, createTime, updateTime, hexStr, storedB64)
+		}
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -151,7 +169,6 @@ func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}
 			return fmt.Errorf("creating output directory %q: %w", dir, err)
 		}
 	}
-
 	out, err := os.OpenFile(outputPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
 	if err != nil {
 		return fmt.Errorf("opening %q for write: %w", outputPath, err)
@@ -175,6 +192,10 @@ func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}
 		}
 	}
 
+	return setFileAttributes(d, project, name, location, repoID, fileID, sizeBytes, hashesAttr, createTime, updateTime, hexStr, b64Str)
+}
+
+func setFileAttributes(d *schema.ResourceData, project, name, location, repoID, fileID string, sizeBytes int64, hashesAttr map[string]string, createTime, updateTime, hexStr, b64Str string) error {
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
