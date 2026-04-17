@@ -70,6 +70,11 @@ examples:
     primary_resource_id: 'policy'
     test_env_vars:
       org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_with_body_exclude'
+    min_version: 'beta'
+    primary_resource_id: 'policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'policyId'
     type: String
