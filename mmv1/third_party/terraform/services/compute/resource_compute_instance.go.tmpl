@@ -3961,29 +3961,6 @@ func expandScratchDisks(d *schema.ResourceData, config *transport_tpg.Config, pr
 	return scratchDisks, nil
 }
 
-func expandScratchDisks_v2(d *schema.ResourceData, config *transport_tpg.Config, project string) ([]interface{}, error) {
-	diskType, err := readDiskType(config, d, "local-ssd")
-	if err != nil {
-		return nil, fmt.Errorf("Error loading disk type 'local-ssd': %s", err)
-	}
-
-	n := d.Get("scratch_disk.#").(int)
-	scratchDisks := make([]interface{}, 0, n)
-	for i := 0; i < n; i++ {
-		scratchDisks = append(scratchDisks, map[string]interface{}{
-			"autoDelete": true,
-			"type":       "SCRATCH",
-			"deviceName": d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string),
-			"interface":  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
-			"diskSizeGb": d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int),
-			"initializeParams": map[string]interface{}{
-				"diskType": diskType.RelativeLink(),
-			},
-		})
-	}
-	return scratchDisks, nil
-}
-
 func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 	result := map[string]interface{}{
 		"device_name": disk.DeviceName,
