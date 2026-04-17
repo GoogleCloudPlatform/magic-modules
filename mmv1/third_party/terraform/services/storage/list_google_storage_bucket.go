@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -24,10 +26,16 @@ type GoogleStorageBucketListResource struct {
 }
 
 // GoogleStorageBucketListModel matches [ListResourceMetadata.ListConfigFields] (tfsdk names and types).
-// Project and prefix align with [DataSourceGoogleStorageBuckets] list filtering.
+// Fields map to Cloud Storage JSON API buckets.list query parameters where applicable; see
+// https://cloud.google.com/storage/docs/json_api/v1/buckets/list
 type GoogleStorageBucketListModel struct {
 	Project types.String `tfsdk:"project"`
 	Prefix  types.String `tfsdk:"prefix"`
+
+	MaxResults           types.Int64  `tfsdk:"max_results"`
+	Projection           types.String `tfsdk:"projection"`
+	ReturnPartialSuccess types.Bool   `tfsdk:"return_partial_success"`
+	SoftDeleted          types.Bool   `tfsdk:"soft_deleted"`
 }
 
 func NewGoogleStorageBucketListResource() list.ListResource {
@@ -37,6 +45,10 @@ func NewGoogleStorageBucketListResource() list.ListResource {
 	listR.ListConfigFields = []tpgresource.ListConfigField{
 		{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true},
 		{Name: "prefix", Kind: tpgresource.ListConfigKindString, Optional: true},
+		{Name: "max_results", Kind: tpgresource.ListConfigKindInt64, Optional: true},
+		{Name: "projection", Kind: tpgresource.ListConfigKindString, Optional: true},
+		{Name: "return_partial_success", Kind: tpgresource.ListConfigKindBool, Optional: true},
+		{Name: "soft_deleted", Kind: tpgresource.ListConfigKindBool, Optional: true},
 	}
 	return listR
 }
@@ -63,8 +75,43 @@ func (listR *GoogleStorageBucketListResource) List(ctx context.Context, listReq 
 		prefix = data.Prefix.ValueString()
 	}
 
+	var listOpts storageBucketListOpts
+	listOpts.prefix = prefix
+	if !data.MaxResults.IsNull() && !data.MaxResults.IsUnknown() {
+		n := data.MaxResults.ValueInt64()
+		if n < 0 {
+			diags.AddError(
+				"Invalid list configuration",
+				"max_results must be a non-negative integer.",
+			)
+			stream.Results = list.ListResultsStreamDiagnostics(diags)
+			return
+		}
+		if n > 0 {
+			listOpts.maxResults = n
+		}
+	}
+	if !data.Projection.IsNull() && !data.Projection.IsUnknown() {
+		p := strings.TrimSpace(data.Projection.ValueString())
+		if p != "" && p != "full" && p != "noAcl" {
+			diags.AddError(
+				"Invalid list configuration",
+				`projection must be "full", "noAcl", or unset (API default is noAcl).`,
+			)
+			stream.Results = list.ListResultsStreamDiagnostics(diags)
+			return
+		}
+		listOpts.projection = p
+	}
+	if !data.ReturnPartialSuccess.IsNull() && !data.ReturnPartialSuccess.IsUnknown() {
+		listOpts.returnPartialSuccess = data.ReturnPartialSuccess.ValueBool()
+	}
+	if !data.SoftDeleted.IsNull() && !data.SoftDeleted.IsUnknown() {
+		listOpts.softDeleted = data.SoftDeleted.ValueBool()
+	}
+
 	stream.Results = func(push func(list.ListResult) bool) {
-		err := ListStorageBuckets(listR.Client, project, prefix, func(rd *schema.ResourceData) error {
+		err := ListStorageBuckets(listR.Client, project, listOpts, func(rd *schema.ResourceData) error {
 			result := listReq.NewListResult(ctx)
 
 			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "name"); err != nil {
@@ -97,12 +144,20 @@ func flattenStorageBucketListItem(item map[string]interface{}, d *schema.Resourc
 	if err != nil {
 		return err
 	}
-	d.Set("name", b.Name)
 
 	return setStorageBucket(d, config, &b, b.Name, userAgent)
 }
 
-func ListStorageBuckets(config *transport_tpg.Config, project string, prefix string, callback func(*schema.ResourceData) error) error {
+// storageBucketListOpts carries optional buckets.list query parameters (zero value = omit).
+type storageBucketListOpts struct {
+	prefix                 string
+	maxResults             int64
+	projection             string
+	returnPartialSuccess   bool
+	softDeleted            bool
+}
+
+func ListStorageBuckets(config *transport_tpg.Config, project string, opts storageBucketListOpts, callback func(*schema.ResourceData) error) error {
 	if config == nil {
 		return fmt.Errorf("provider client is not configured")
 	}
@@ -125,8 +180,20 @@ func ListStorageBuckets(config *transport_tpg.Config, project string, prefix str
 	listParams := map[string]string{
 		"project": proj,
 	}
-	if prefix != "" {
-		listParams["prefix"] = prefix
+	if opts.prefix != "" {
+		listParams["prefix"] = opts.prefix
+	}
+	if opts.maxResults > 0 {
+		listParams["maxResults"] = strconv.FormatInt(opts.maxResults, 10)
+	}
+	if opts.projection != "" {
+		listParams["projection"] = opts.projection
+	}
+	if opts.returnPartialSuccess {
+		listParams["returnPartialSuccess"] = "true"
+	}
+	if opts.softDeleted {
+		listParams["softDeleted"] = "true"
 	}
 
 	listURL, err := transport_tpg.AddQueryParams("https://storage.googleapis.com/storage/v1/b", listParams)
