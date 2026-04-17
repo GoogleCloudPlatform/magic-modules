@@ -2538,10 +2538,6 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 		return fmt.Errorf("Error setting ip_filter: %s", err)
 	}
 
-	// List results and other callers use ResourceData.GetOk("name"); identity alone does not populate it.
-	if err := d.Set("name", bucket); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
-	}
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"name":    bucket,
 		"project": d.Get("project").(string),
