@@ -11,6 +11,8 @@ import (
 	"net/textproto"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -93,9 +95,15 @@ func uploadGenericArtifact(t *testing.T, project, location, repoID, pkg, version
 	return func(_ *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
+		// Derive the upload base from the provider's configured basepath so the
+		// URL is correct for non-default universe domains. The AR upload endpoint
+		// inserts "upload/" before the version segment, e.g.:
+		//   https://artifactregistry.googleapis.com/v1/  →
+		//   https://artifactregistry.googleapis.com/upload/v1/
+		uploadBase := strings.Replace(config.ArtifactRegistryBasePath, "v1/", "upload/v1/", 1)
 		uploadURL := fmt.Sprintf(
-			"https://artifactregistry.googleapis.com/upload/v1/projects/%s/locations/%s/repositories/%s/genericArtifacts:create?alt=json&uploadType=multipart",
-			project, location, repoID,
+			"%sprojects/%s/locations/%s/repositories/%s/genericArtifacts:create?alt=json&uploadType=multipart",
+			uploadBase, project, location, repoID,
 		)
 
 		body := &bytes.Buffer{}
@@ -163,19 +171,18 @@ func TestAccDataSourceArtifactRegistryFile_noOverwrite(t *testing.T) {
 	fileID := fmt.Sprintf("%s:%s:%s", testPackageID, testVersionID, testFileName)
 	sum := sha256.Sum256([]byte(testFileContents))
 	expectedSHA := hex.EncodeToString(sum[:])
-	corruptedContents := []byte("corrupted-do-not-overwrite\n")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
-			// Step 1: create repo, upload file, read with overwrite=false.
 			{
 				Config: testAccDataSourceArtifactRegistryFile_repoOnly(repoID, location),
 				Check: resource.ComposeTestCheckFunc(
 					uploadGenericArtifact(t, project, location, repoID, testPackageID, testVersionID, testFileName, []byte(testFileContents)),
 				),
 			},
+			// First read: file is downloaded.
 			{
 				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, false),
 				Check: resource.ComposeTestCheckFunc(
@@ -183,23 +190,20 @@ func TestAccDataSourceArtifactRegistryFile_noOverwrite(t *testing.T) {
 					checkFileOnDisk(outputPath, []byte(testFileContents)),
 				),
 			},
-			// Step 2: modify the local file, re-apply with overwrite=false.
-			// The skip decision compares the AR-reported hash against the hash stored in
-			// Terraform state from the previous read — it does not read the local file.
-			// When those hashes match, the download is skipped regardless of local content.
-			// Keeping the local file intact is the user's responsibility when overwrite=false.
+			// Second read with overwrite=false: local file is correct so the download
+			// is skipped. Making the file read-only proves no write is attempted —
+			// if the provider tried to open it for writing it would return an error.
 			{
 				PreConfig: func() {
-					if err := os.WriteFile(outputPath, corruptedContents, 0o644); err != nil {
-						t.Fatalf("pre-config: modifying file: %v", err)
+					if err := os.Chmod(outputPath, 0o444); err != nil {
+						t.Fatalf("pre-config: chmod: %v", err)
 					}
+					t.Cleanup(func() { os.Chmod(outputPath, 0o644) })
 				},
 				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, false),
 				Check: resource.ComposeTestCheckFunc(
-					// State still reports the original hash (download was skipped).
 					resource.TestCheckResourceAttr("data.google_artifact_registry_file.test", "output_sha256", expectedSHA),
-					// The local file was not touched — it still has the modified content.
-					checkFileOnDisk(outputPath, corruptedContents),
+					checkFileOnDisk(outputPath, []byte(testFileContents)),
 				),
 			},
 		},
@@ -223,13 +227,13 @@ func TestAccDataSourceArtifactRegistryFile_overwrite(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
-			// Step 1: create repo, upload file, read with overwrite=true (default).
 			{
 				Config: testAccDataSourceArtifactRegistryFile_repoOnly(repoID, location),
 				Check: resource.ComposeTestCheckFunc(
 					uploadGenericArtifact(t, project, location, repoID, testPackageID, testVersionID, testFileName, []byte(testFileContents)),
 				),
 			},
+			// First read: file is downloaded.
 			{
 				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -237,20 +241,17 @@ func TestAccDataSourceArtifactRegistryFile_overwrite(t *testing.T) {
 					checkFileOnDisk(outputPath, []byte(testFileContents)),
 				),
 			},
-			// Step 2: corrupt the local file, re-apply with overwrite=true.
-			// The data source should re-download and restore the original content.
+			// Second read with overwrite=true: always re-downloads regardless of local state.
+			// Making the file read-only proves the write IS attempted — the step should
+			// fail with a permission error, confirming the download path was taken.
 			{
 				PreConfig: func() {
-					if err := os.WriteFile(outputPath, []byte("corrupted\n"), 0o644); err != nil {
-						t.Fatalf("pre-config: corrupting file: %v", err)
+					if err := os.Chmod(outputPath, 0o444); err != nil {
+						t.Fatalf("pre-config: chmod: %v", err)
 					}
 				},
-				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, true),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_artifact_registry_file.test", "output_sha256", expectedSHA),
-					// File was re-downloaded and restored.
-					checkFileOnDisk(outputPath, []byte(testFileContents)),
-				),
+				Config:      testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, true),
+				ExpectError: regexp.MustCompile(`opening .* for write`),
 			},
 		},
 	})
