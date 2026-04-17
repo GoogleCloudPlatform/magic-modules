@@ -9,7 +9,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+{{- end}}
 	"github.com/hashicorp/terraform-provider-google/version"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -221,8 +223,10 @@ func Provider() *schema.Provider {
 		},
 {{if ne $.Compiler "terraformgoogleconversion-codegen"}}
 		DataSourcesMap: registry.DatasourceMap(),
-{{- end }}
 		ResourcesMap: registry.ResourceMap(),
+{{- else }}
+		ResourcesMap: ResourceMap(),
+{{- end }}
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -231,6 +235,7 @@ func Provider() *schema.Provider {
 	return provider
 }
 
+{{if ne $.Compiler "terraformgoogleconversion-codegen"}}
 // Compatibility shim for diff-processor.
 func ResourceMap() map[string]*schema.Resource{
 	return registry.ResourceMap()
@@ -240,6 +245,40 @@ func ResourceMap() map[string]*schema.Resource{
 func DatasourceMap() map[string]*schema.Resource{
 	return registry.DatasourceMap()
 }
+{{ else }}
+func ResourceMap() map[string]*schema.Resource {
+	resourceMap, _ := ResourceMapWithErrors()
+	return resourceMap
+}
+
+func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
+	return mergeResourceMaps(
+		handwrittenResources,
+		generatedResources,
+	)
+}
+func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
+	merged := make(map[string]*schema.Resource)
+	duplicates := []string{}
+
+	for _, m := range ms {
+		for k, v := range m {
+			if _, ok := merged[k]; ok {
+				duplicates = append(duplicates, k)
+			}
+
+			merged[k] = v
+		}
+	}
+
+	var err error
+	if len(duplicates) > 0 {
+		err = fmt.Errorf("saw duplicates in mergeResourceMaps: %v", duplicates)
+	}
+
+	return merged, err
+}
+{{- end}}
 
 func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
 	err := transport_tpg.HandleSDKDefaults(d)
