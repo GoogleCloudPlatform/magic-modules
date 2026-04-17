@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeSnapshot_encryption(t *testing.T) {
@@ -200,6 +201,61 @@ resource "google_compute_disk" "persistent" {
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-a"
+}
+`, context)
+}
+
+func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	suffix := acctest.RandString(t, 10)
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagKey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-snapshots-tagvalue", sharedTagKey, org)
+
+	context := map[string]interface{}{
+		"random_suffix": suffix,
+		"tag_key_id":    tagKeyResult["name"],
+		"tag_value_id":  tagValueResult["name"],
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_resourceManagerTags(context),
+			},
+		},
+	})
+}
+
+func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "tf-test-disk-%{random_suffix}"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name        = "tf-test-snapshot-%{random_suffix}"
+  source_disk = google_compute_disk.foobar.name
+  zone        = "us-central1-a"
+  params {
+    resource_manager_tags = {
+      "%{tag_key_id}" = "%{tag_value_id}"
+    }
+  }
 }
 `, context)
 }
