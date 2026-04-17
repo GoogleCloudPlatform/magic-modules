@@ -183,19 +183,22 @@ func TestAccDataSourceArtifactRegistryFile_noOverwrite(t *testing.T) {
 					checkFileOnDisk(outputPath, []byte(testFileContents)),
 				),
 			},
-			// Step 2: corrupt the local file, re-apply with overwrite=false.
-			// The data source should skip re-downloading since the AR hash hasn't changed.
+			// Step 2: modify the local file, re-apply with overwrite=false.
+			// The skip decision compares the AR-reported hash against the hash stored in
+			// Terraform state from the previous read — it does not read the local file.
+			// When those hashes match, the download is skipped regardless of local content.
+			// Keeping the local file intact is the user's responsibility when overwrite=false.
 			{
 				PreConfig: func() {
 					if err := os.WriteFile(outputPath, corruptedContents, 0o644); err != nil {
-						t.Fatalf("pre-config: corrupting file: %v", err)
+						t.Fatalf("pre-config: modifying file: %v", err)
 					}
 				},
 				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, false),
 				Check: resource.ComposeTestCheckFunc(
-					// State still reports the original hash (no re-download).
+					// State still reports the original hash (download was skipped).
 					resource.TestCheckResourceAttr("data.google_artifact_registry_file.test", "output_sha256", expectedSHA),
-					// The file on disk was NOT overwritten.
+					// The local file was not touched — it still has the modified content.
 					checkFileOnDisk(outputPath, corruptedContents),
 				),
 			},
