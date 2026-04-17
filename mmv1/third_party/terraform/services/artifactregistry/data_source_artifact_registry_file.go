@@ -128,15 +128,17 @@ func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}
 	hashesAttr := parseHashes(metaResp["hashes"])
 
 	overwrite := d.Get("overwrite").(bool)
+	storedHex := d.Get("output_sha256").(string)
 	storedB64 := d.Get("output_base64sha256").(string)
-	arSHA := hashesAttr["SHA256"]
+	arSHA := strings.TrimSpace(hashesAttr["SHA256"])
 
-	// Skip download when overwrite=false, the AR-reported hash matches the stored
+	// Skip download when overwrite=false, the AR-reported SHA256 matches the
 	// hash from the previous read, and the file still exists on disk.
-	if !overwrite && storedB64 != "" && arSHA != "" && arSHA == storedB64 {
+	// AR may return the hash as either hex or base64, so check both.
+	if !overwrite && arSHA != "" && (storedB64 != "" || storedHex != "") &&
+		(arSHA == storedB64 || strings.EqualFold(arSHA, storedHex)) {
 		if _, statErr := os.Stat(outputPath); statErr == nil {
-			hexStr := d.Get("output_sha256").(string)
-			return setFileAttributes(d, project, name, location, repoID, fileID, sizeBytes, hashesAttr, createTime, updateTime, hexStr, storedB64)
+			return setFileAttributes(d, project, name, location, repoID, fileID, sizeBytes, hashesAttr, createTime, updateTime, storedHex, storedB64)
 		}
 	}
 
