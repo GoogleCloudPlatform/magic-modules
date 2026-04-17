@@ -151,6 +151,126 @@ func uploadGenericArtifact(t *testing.T, project, location, repoID, pkg, version
 	}
 }
 
+func TestAccDataSourceArtifactRegistryFile_noOverwrite(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	location := envvar.GetTestRegionFromEnv()
+	repoID := fmt.Sprintf("tf-test-file-no-ow-%s", acctest.RandString(t, 10))
+	outputPath := filepath.Join(t.TempDir(), "downloaded.txt")
+
+	fileID := fmt.Sprintf("%s:%s:%s", testPackageID, testVersionID, testFileName)
+	sum := sha256.Sum256([]byte(testFileContents))
+	expectedSHA := hex.EncodeToString(sum[:])
+	corruptedContents := []byte("corrupted-do-not-overwrite\n")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: create repo, upload file, read with overwrite=false.
+			{
+				Config: testAccDataSourceArtifactRegistryFile_repoOnly(repoID, location),
+				Check: resource.ComposeTestCheckFunc(
+					uploadGenericArtifact(t, project, location, repoID, testPackageID, testVersionID, testFileName, []byte(testFileContents)),
+				),
+			},
+			{
+				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_artifact_registry_file.test", "output_sha256", expectedSHA),
+					checkFileOnDisk(outputPath, []byte(testFileContents)),
+				),
+			},
+			// Step 2: corrupt the local file, re-apply with overwrite=false.
+			// The data source should skip re-downloading since the AR hash hasn't changed.
+			{
+				PreConfig: func() {
+					if err := os.WriteFile(outputPath, corruptedContents, 0o644); err != nil {
+						t.Fatalf("pre-config: corrupting file: %v", err)
+					}
+				},
+				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, false),
+				Check: resource.ComposeTestCheckFunc(
+					// State still reports the original hash (no re-download).
+					resource.TestCheckResourceAttr("data.google_artifact_registry_file.test", "output_sha256", expectedSHA),
+					// The file on disk was NOT overwritten.
+					checkFileOnDisk(outputPath, corruptedContents),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceArtifactRegistryFile_overwrite(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	location := envvar.GetTestRegionFromEnv()
+	repoID := fmt.Sprintf("tf-test-file-ow-%s", acctest.RandString(t, 10))
+	outputPath := filepath.Join(t.TempDir(), "downloaded.txt")
+
+	fileID := fmt.Sprintf("%s:%s:%s", testPackageID, testVersionID, testFileName)
+	sum := sha256.Sum256([]byte(testFileContents))
+	expectedSHA := hex.EncodeToString(sum[:])
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: create repo, upload file, read with overwrite=true (default).
+			{
+				Config: testAccDataSourceArtifactRegistryFile_repoOnly(repoID, location),
+				Check: resource.ComposeTestCheckFunc(
+					uploadGenericArtifact(t, project, location, repoID, testPackageID, testVersionID, testFileName, []byte(testFileContents)),
+				),
+			},
+			{
+				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_artifact_registry_file.test", "output_sha256", expectedSHA),
+					checkFileOnDisk(outputPath, []byte(testFileContents)),
+				),
+			},
+			// Step 2: corrupt the local file, re-apply with overwrite=true.
+			// The data source should re-download and restore the original content.
+			{
+				PreConfig: func() {
+					if err := os.WriteFile(outputPath, []byte("corrupted\n"), 0o644); err != nil {
+						t.Fatalf("pre-config: corrupting file: %v", err)
+					}
+				},
+				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_artifact_registry_file.test", "output_sha256", expectedSHA),
+					// File was re-downloaded and restored.
+					checkFileOnDisk(outputPath, []byte(testFileContents)),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath string, overwrite bool) string {
+	return fmt.Sprintf(`
+resource "google_artifact_registry_repository" "test" {
+  location      = "%s"
+  repository_id = "%s"
+  format        = "GENERIC"
+}
+
+data "google_artifact_registry_file" "test" {
+  location      = google_artifact_registry_repository.test.location
+  repository_id = google_artifact_registry_repository.test.repository_id
+  file_id       = "%s"
+  output_path   = "%s"
+  overwrite     = %t
+}
+`, location, repoID, fileID, outputPath, overwrite)
+}
+
 func checkFileOnDisk(path string, want []byte) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		got, err := os.ReadFile(path)
