@@ -12,6 +12,11 @@ Artifact Registry formats (Generic, Maven, npm, Python, Apt, Yum, Go). For
 Docker/OCI images, use
 [`google_artifact_registry_docker_image`](./artifact_registry_docker_image.html.markdown).
 
+~> **Note:** This data source downloads the file on every Terraform read
+(i.e. every `plan` and `apply`). For large files this can add significant
+time to each run. Use `overwrite = false` to skip the download when the
+local file already matches the remote — see the `overwrite` argument below.
+
 To get more information about Artifact Registry files, see:
 
 * [API documentation](https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.files)
