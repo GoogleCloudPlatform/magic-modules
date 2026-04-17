@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	storagapi "google.golang.org/api/storage/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -84,8 +85,21 @@ func (listR *GoogleStorageBucketListResource) List(ctx context.Context, listReq 
 	}
 }
 
-// ListStorageBuckets lists buckets in a project (optional prefix), then loads each bucket with
-// Buckets.Get and setStorageBucket — same read path as [dataSourceGoogleStorageBucketRead].
+func flattenStorageBucketListItem(item map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+	var b storagapi.Bucket
+	if err := tpgresource.Convert(item, &b); err != nil {
+		return fmt.Errorf("converting bucket list item: %w", err)
+	}
+	if b.Name == "" {
+		return fmt.Errorf("bucket list item missing name")
+	}
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+	return setStorageBucket(d, config, &b, b.Name, userAgent)
+}
+
 func ListStorageBuckets(config *transport_tpg.Config, project string, prefix string, callback func(*schema.ResourceData) error) error {
 	if config == nil {
 		return fmt.Errorf("provider client is not configured")
@@ -103,11 +117,16 @@ func ListStorageBuckets(config *transport_tpg.Config, project string, prefix str
 		return fmt.Errorf("error resolving project: %w", err)
 	}
 
-	params := map[string]string{
+	listParams := map[string]string{
 		"project": proj,
 	}
 	if prefix != "" {
-		params["prefix"] = prefix
+		listParams["prefix"] = prefix
+	}
+
+	listURL, err := transport_tpg.AddQueryParams("https://storage.googleapis.com/storage/v1/b", listParams)
+	if err != nil {
+		return err
 	}
 
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -115,63 +134,19 @@ func ListStorageBuckets(config *transport_tpg.Config, project string, prefix str
 		return err
 	}
 
-	for {
-		baseURL := "https://storage.googleapis.com/storage/v1/b"
-		url, err := transport_tpg.AddQueryParams(baseURL, params)
-		if err != nil {
-			return err
-		}
-
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			RawURL:    url,
-			UserAgent: userAgent,
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
-				transport_tpg.Is429RetryableQuotaError,
-			},
-		})
-		if err != nil {
-			return err
-		}
-
-		rawItems, ok := res["items"].([]interface{})
-		if ok {
-			for _, raw := range rawItems {
-				item, ok := raw.(map[string]interface{})
-				if !ok {
-					return fmt.Errorf("expected bucket item map, got %T", raw)
-				}
-				name, ok := item["name"].(string)
-				if !ok || name == "" {
-					return fmt.Errorf("bucket list item missing name")
-				}
-
-				if err := d.Set("name", name); err != nil {
-					return fmt.Errorf("error setting name on temporary resource data: %w", err)
-				}
-
-				bucketRes, err := config.NewStorageClient(userAgent).Buckets.Get(name).Do()
-				if err != nil {
-					return err
-				}
-
-				if err := setStorageBucket(d, config, bucketRes, name, userAgent); err != nil {
-					return err
-				}
-
-				if err := callback(d); err != nil {
-					return err
-				}
-			}
-		}
-
-		nextTok, ok := res["nextPageToken"].(string)
-		if !ok || nextTok == "" {
-			break
-		}
-		params["pageToken"] = nextTok
+	billingProject := ""
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil && bp != "" {
+		billingProject = bp
 	}
 
-	return nil
+	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
+		Config:         config,
+		TempData:       d,
+		ListURL:        listURL,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+		ItemName:       "items",
+		Flattener:      flattenStorageBucketListItem,
+		Callback:       callback,
+	})
 }
