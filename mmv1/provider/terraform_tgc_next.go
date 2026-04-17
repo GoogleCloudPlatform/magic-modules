@@ -160,6 +160,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
 		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
 		"pkg/provider/provider_mmv1_resources.go":        "templates/tgc_next/provider/provider_mmv1_resources.go.tmpl",
+		"pkg/registry/registry.go":                       "third_party/terraform/registry/registry.go",
 
 		// services
 		"pkg/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
