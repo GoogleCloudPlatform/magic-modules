@@ -75,7 +75,7 @@ resource "google_vertex_ai_pipeline_job" "primary" {
 
   network = google_compute_network.vpc_net.id
 
-  psc_interface_config {
+  psc_interface_config = {
     network_attachment = google_compute_network_attachment.net_attachment.id
   }
 
