@@ -306,6 +306,7 @@ properties:
               - name: count
                 type: String
                 required: true
+                diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
                 description: Number of login node instances to create.
               - name: enableOsLogin
                 type: Boolean
@@ -441,6 +442,7 @@ properties:
                     alphanumeric, and at most 63 characters).
                 - name: maxDynamicNodeCount
                   type: String
+                  diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
                   description: |-
                     Controls how many additional nodes a cluster can bring online to handle
                     workloads. Set this value to enable dynamic node creation and limit the
@@ -449,6 +451,7 @@ properties:
                     on static nodes.
                 - name: staticNodeCount
                   type: String
+                  diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
                   description: |-
                     Number of nodes to be statically created for this nodeset. The cluster will
                     attempt to ensure that at least this many nodes exist at all times.
