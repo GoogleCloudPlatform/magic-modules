@@ -128,17 +128,16 @@ func DataSourceArtifactRegistryFileRead(d *schema.ResourceData, meta interface{}
 	hashesAttr := parseHashes(metaResp["hashes"])
 
 	overwrite := d.Get("overwrite").(bool)
-	storedHex := d.Get("output_sha256").(string)
-	storedB64 := d.Get("output_base64sha256").(string)
 	arSHA := strings.TrimSpace(hashesAttr["SHA256"])
 
-	// Skip download when overwrite=false, the AR-reported SHA256 matches the
-	// hash from the previous read, and the file still exists on disk.
-	// AR may return the hash as either hex or base64, so check both.
-	if !overwrite && arSHA != "" && (storedB64 != "" || storedHex != "") &&
-		(arSHA == storedB64 || strings.EqualFold(arSHA, storedHex)) {
-		if _, statErr := os.Stat(outputPath); statErr == nil {
-			return setFileAttributes(d, project, name, location, repoID, fileID, sizeBytes, hashesAttr, createTime, updateTime, storedHex, storedB64)
+	// Skip download when overwrite=false, the local file exists, and its
+	// SHA-256 matches what AR reports.
+	// AR may return the hash as hex or base64, so check both.
+	if !overwrite && arSHA != "" {
+		if localHex, localB64, err := hashLocalFile(outputPath); err == nil {
+			if arSHA == localB64 || strings.EqualFold(arSHA, localHex) {
+				return setFileAttributes(d, project, name, location, repoID, fileID, sizeBytes, hashesAttr, createTime, updateTime, localHex, localB64)
+			}
 		}
 	}
 
@@ -274,6 +273,22 @@ func parseHashes(v interface{}) map[string]string {
 func sha256Hashes(b []byte) (hexStr, b64Str string) {
 	sum := sha256.Sum256(b)
 	return hex.EncodeToString(sum[:]), base64.StdEncoding.EncodeToString(sum[:])
+}
+
+// hashLocalFile opens outputPath, streams it through SHA-256, and returns the
+// hex and base64 digests. Returns an error if the file does not exist.
+func hashLocalFile(outputPath string) (hexStr, b64Str string, err error) {
+	f, err := os.Open(outputPath)
+	if err != nil {
+		return "", "", err
+	}
+	defer f.Close()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", "", err
+	}
+	hexStr, b64Str = finalizeHashes(h)
+	return hexStr, b64Str, nil
 }
 
 func finalizeHashes(h hash.Hash) (hexStr, b64Str string) {

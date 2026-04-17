@@ -182,7 +182,6 @@ func TestAccDataSourceArtifactRegistryFile_noOverwrite(t *testing.T) {
 					uploadGenericArtifact(t, project, location, repoID, testPackageID, testVersionID, testFileName, []byte(testFileContents)),
 				),
 			},
-			// First read: file is downloaded.
 			{
 				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, false),
 				Check: resource.ComposeTestCheckFunc(
@@ -190,7 +189,7 @@ func TestAccDataSourceArtifactRegistryFile_noOverwrite(t *testing.T) {
 					checkFileOnDisk(outputPath, []byte(testFileContents)),
 				),
 			},
-			// Second read with overwrite=false: local file is correct so the download
+			// read with overwrite=false: local file is correct so the download
 			// is skipped. Making the file read-only proves no write is attempted —
 			// if the provider tried to open it for writing it would return an error.
 			{
@@ -233,7 +232,6 @@ func TestAccDataSourceArtifactRegistryFile_overwrite(t *testing.T) {
 					uploadGenericArtifact(t, project, location, repoID, testPackageID, testVersionID, testFileName, []byte(testFileContents)),
 				),
 			},
-			// First read: file is downloaded.
 			{
 				Config: testAccDataSourceArtifactRegistryFile_withOverwrite(repoID, location, fileID, outputPath, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -241,7 +239,7 @@ func TestAccDataSourceArtifactRegistryFile_overwrite(t *testing.T) {
 					checkFileOnDisk(outputPath, []byte(testFileContents)),
 				),
 			},
-			// Second read with overwrite=true: always re-downloads regardless of local state.
+			// read with overwrite=true: always re-downloads regardless of local state.
 			// Making the file read-only proves the write IS attempted — the step should
 			// fail with a permission error, confirming the download path was taken.
 			{
