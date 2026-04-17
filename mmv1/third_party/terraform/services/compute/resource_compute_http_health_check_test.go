@@ -3,22 +3,17 @@ package compute_test
 import (
 	"fmt"
 	"testing"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeHttpHealthCheck_update(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HttpHealthCheck
+	var healthCheck map[string]any
 
 	hhckName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
@@ -53,7 +48,7 @@ func TestAccComputeHttpHealthCheck_update(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeHttpHealthCheckExists(t *testing.T, n string, healthCheck *compute.HttpHealthCheck) resource.TestCheckFunc {
+func testAccCheckComputeHttpHealthCheckExists(t *testing.T, n string, healthCheck *map[string]any) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -66,40 +61,50 @@ func testAccCheckComputeHttpHealthCheckExists(t *testing.T, n string, healthChec
 
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := config.NewComputeClient(config.UserAgent).HttpHealthChecks.Get(
-			config.Project, rs.Primary.Attributes["name"]).Do()
+		url := fmt.Sprintf("%sprojects/%s/global/httpHealthChecks/%s",
+			config.ComputeBasePath, config.Project, rs.Primary.Attributes["name"])
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		if found.Name != rs.Primary.Attributes["name"] {
+		if found["name"].(string) != rs.Primary.Attributes["name"] {
 			return fmt.Errorf("HttpHealthCheck not found")
 		}
 
-		*healthCheck = *found
+		*healthCheck = found
 
 		return nil
 	}
 }
 
-func testAccCheckComputeHttpHealthCheckRequestPath(path string, healthCheck *compute.HttpHealthCheck) resource.TestCheckFunc {
+func testAccCheckComputeHttpHealthCheckRequestPath(path string, healthCheck *map[string]any) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if healthCheck.RequestPath != path {
-			return fmt.Errorf("RequestPath doesn't match: expected %s, got %s", path, healthCheck.RequestPath)
+		if (*healthCheck)["requestPath"].(string) != path {
+			return fmt.Errorf("RequestPath doesn't match: expected %s, got %s", path, (*healthCheck)["requestPath"].(string))
 		}
 
 		return nil
 	}
 }
 
-func testAccCheckComputeHttpHealthCheckThresholds(healthy, unhealthy int64, healthCheck *compute.HttpHealthCheck) resource.TestCheckFunc {
+func testAccCheckComputeHttpHealthCheckThresholds(healthy, unhealthy int64, healthCheck *map[string]any) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if healthCheck.HealthyThreshold != healthy {
-			return fmt.Errorf("HealthyThreshold doesn't match: expected %d, got %d", healthy, healthCheck.HealthyThreshold)
+		healthyThreshold := int64((*healthCheck)["healthyThreshold"].(float64))
+		unhealthyThreshold := int64((*healthCheck)["unhealthyThreshold"].(float64))
+
+		if healthyThreshold != healthy {
+			return fmt.Errorf("HealthyThreshold doesn't match: expected %d, got %d", healthy, healthyThreshold)
 		}
 
-		if healthCheck.UnhealthyThreshold != unhealthy {
-			return fmt.Errorf("UnhealthyThreshold doesn't match: expected %d, got %d", unhealthy, healthCheck.UnhealthyThreshold)
+		if unhealthyThreshold != unhealthy {
+			return fmt.Errorf("UnhealthyThreshold doesn't match: expected %d, got %d", unhealthy, unhealthyThreshold)
 		}
 
 		return nil
