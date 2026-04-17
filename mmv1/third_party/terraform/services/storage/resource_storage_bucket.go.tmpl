@@ -1198,13 +1198,9 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(res.Id)
 
-	proj := ""
-	if v, ok := d.GetOk("project"); ok {
-		proj = v.(string)
-	}
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"name":    d.Get("name").(string),
-		"project": proj,
+		"project": d.Get("project").(string),
 	}); err != nil {
 		return err
 	}
@@ -1398,13 +1394,9 @@ func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}
 		return nil, fmt.Errorf("Error setting force_destroy: %s", err)
 	}
 
-	proj := ""
-	if v, ok := d.GetOk("project"); ok {
-		proj = v.(string)
-	}
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"name":    d.Get("name").(string),
-		"project": proj,
+		"project": d.Get("project").(string),
 	}); err != nil {
 		return nil, err
 	}
@@ -2546,17 +2538,13 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 		return fmt.Errorf("Error setting ip_filter: %s", err)
 	}
 
-	proj := ""
-	if v, ok := d.GetOk("project"); ok {
-		proj = v.(string)
-	}
 	// List results and other callers use ResourceData.GetOk("name"); identity alone does not populate it.
 	if err := d.Set("name", bucket); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"name":    bucket,
-		"project": proj,
+		"project": d.Get("project").(string),
 	}); err != nil {
 		return err
 	}
