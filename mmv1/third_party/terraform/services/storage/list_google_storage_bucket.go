@@ -97,6 +97,8 @@ func flattenStorageBucketListItem(item map[string]interface{}, d *schema.Resourc
 	if err != nil {
 		return err
 	}
+	d.Set("name", b.Name)
+
 	return setStorageBucket(d, config, &b, b.Name, userAgent)
 }
 
@@ -115,6 +117,9 @@ func ListStorageBuckets(config *transport_tpg.Config, project string, prefix str
 	proj, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("error resolving project: %w", err)
+	}
+	if err := d.Set("project", proj); err != nil {
+		return fmt.Errorf("error setting project on temporary resource data: %w", err)
 	}
 
 	listParams := map[string]string{
