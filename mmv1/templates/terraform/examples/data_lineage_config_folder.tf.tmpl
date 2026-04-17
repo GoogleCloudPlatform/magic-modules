@@ -1,0 +1,15 @@
+resource "google_data_lineage_config" "{{$.PrimaryResourceId}}" {
+  parent = "folders/{{index $.Vars "folder"}}"
+  location = "global"
+
+  ingestion {
+    rule {
+      integration_selector {
+        integration = "DATAPROC"
+      }
+      lineage_enablement {
+        enabled = true
+      }
+    }
+  }
+}

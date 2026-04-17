@@ -44,11 +44,20 @@ custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/datalineage_config.go.tmpl'
 
 examples:
-  - name: 'data_lineage_config_basic'
-    config_path: 'templates/terraform/examples/data_lineage_config_basic.tf.tmpl'
+  - name: 'data_lineage_config_project'
     primary_resource_id: 'default'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'data_lineage_config_folder'
+    primary_resource_id: 'default'
+    vars:
+      folder: 'integration'
+    exclude_test: true
+  - name: 'data_lineage_config_organization'
+    primary_resource_id: 'default'
+    test_env_vars:
+      organization: 'ORG_ID'
+    exclude_test: true
 
 parameters:
   - name: 'parent'
@@ -112,7 +121,6 @@ properties:
                     Integration to which the rule applies.
                   required: true
                   enum_values:
-                    - 'INTEGRATION_UNSPECIFIED'
                     - 'DATAPROC'
                     - 'LOOKER_CORE'
             - name: 'lineageEnablement'
