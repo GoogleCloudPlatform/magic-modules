@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -859,6 +860,159 @@ func flattenEnableDisplay(displayDevice *compute.DisplayDevice) interface{} {
 	}
 
 	return displayDevice.EnableDisplay
+}
+
+// structToMapJSON converts a typed value (e.g. a *compute.X) into a
+// map[string]interface{} keyed by the JSON field names. It is used as a
+// bridge during the migration from typed helpers to map-based helpers that
+// will be sent via transport_tpg.SendRequest.
+func structToMapJSON(item interface{}) (map[string]interface{}, error) {
+	if item == nil {
+		return nil, nil
+	}
+	b, err := json.Marshal(item)
+	if err != nil {
+		return nil, err
+	}
+	if string(b) == "null" {
+		return nil, nil
+	}
+	var m map[string]interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// mapToStructJSON converts a map (or any JSON-marshalable value) into the
+// provided typed destination via a JSON round-trip.
+func mapToStructJSON(src interface{}, dst interface{}) error {
+	if src == nil {
+		return nil
+	}
+	b, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, dst)
+}
+
+// The *V2 helpers below are additive map-based counterparts of the typed
+// helpers above. They are introduced for the gradual migration to
+// transport_tpg.SendRequest-based REST calls. They do not replace the
+// existing typed helpers; callers should migrate incrementally.
+
+func resourceInstanceTagsV2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	v := d.Get("tags")
+	if v == nil {
+		return nil
+	}
+	vs, ok := v.(*schema.Set)
+	if !ok {
+		return nil
+	}
+	items := make([]string, vs.Len())
+	for i, x := range vs.List() {
+		items[i] = x.(string)
+	}
+	return map[string]interface{}{
+		"items":       items,
+		"fingerprint": d.Get("tags_fingerprint").(string),
+	}
+}
+
+func expandShieldedVmConfigsV2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("shielded_instance_config"); !ok {
+		return nil
+	}
+	prefix := "shielded_instance_config.0"
+	return map[string]interface{}{
+		"enableSecureBoot":          d.Get(prefix + ".enable_secure_boot").(bool),
+		"enableVtpm":                d.Get(prefix + ".enable_vtpm").(bool),
+		"enableIntegrityMonitoring": d.Get(prefix + ".enable_integrity_monitoring").(bool),
+	}
+}
+
+func flattenShieldedVmConfigV2(shieldedVmConfig map[string]interface{}) []map[string]bool {
+	if shieldedVmConfig == nil {
+		return nil
+	}
+	getBool := func(k string) bool { v, _ := shieldedVmConfig[k].(bool); return v }
+	return []map[string]bool{{"{{"}}
+		"enable_secure_boot":          getBool("enableSecureBoot"),
+		"enable_vtpm":                 getBool("enableVtpm"),
+		"enable_integrity_monitoring": getBool("enableIntegrityMonitoring"),
+	{{"}}"}}
+}
+
+func expandConfidentialInstanceConfigV2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("confidential_instance_config"); !ok {
+		return nil
+	}
+	prefix := "confidential_instance_config.0"
+	return map[string]interface{}{
+		"enableConfidentialCompute": d.Get(prefix + ".enable_confidential_compute").(bool),
+		"confidentialInstanceType":  d.Get(prefix + ".confidential_instance_type").(string),
+	}
+}
+
+func flattenConfidentialInstanceConfigV2(confidentialInstanceConfig map[string]interface{}) []map[string]interface{} {
+	if confidentialInstanceConfig == nil {
+		return nil
+	}
+	return []map[string]interface{}{{"{{"}}
+		"enable_confidential_compute": confidentialInstanceConfig["enableConfidentialCompute"],
+		"confidential_instance_type":  confidentialInstanceConfig["confidentialInstanceType"],
+	{{"}}"}}
+}
+
+func expandAdvancedMachineFeaturesV2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("advanced_machine_features"); !ok {
+		return nil
+	}
+	prefix := "advanced_machine_features.0"
+	return map[string]interface{}{
+		"enableNestedVirtualization": d.Get(prefix + ".enable_nested_virtualization").(bool),
+		"threadsPerCore":             int64(d.Get(prefix + ".threads_per_core").(int)),
+		"turboMode":                  d.Get(prefix + ".turbo_mode").(string),
+		"visibleCoreCount":           int64(d.Get(prefix + ".visible_core_count").(int)),
+		"performanceMonitoringUnit":  d.Get(prefix + ".performance_monitoring_unit").(string),
+		"enableUefiNetworking":       d.Get(prefix + ".enable_uefi_networking").(bool),
+	}
+}
+
+func flattenAdvancedMachineFeaturesV2(advancedMachineFeatures map[string]interface{}) []map[string]interface{} {
+	if advancedMachineFeatures == nil {
+		return nil
+	}
+	return []map[string]interface{}{{"{{"}}
+		"enable_nested_virtualization": advancedMachineFeatures["enableNestedVirtualization"],
+		"threads_per_core":             advancedMachineFeatures["threadsPerCore"],
+		"turbo_mode":                   advancedMachineFeatures["turboMode"],
+		"visible_core_count":           advancedMachineFeatures["visibleCoreCount"],
+		"performance_monitoring_unit":  advancedMachineFeatures["performanceMonitoringUnit"],
+		"enable_uefi_networking":       advancedMachineFeatures["enableUefiNetworking"],
+	{{"}}"}}
+}
+
+func expandDisplayDeviceV2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("enable_display"); !ok {
+		return nil
+	}
+	return map[string]interface{}{
+		"enableDisplay": d.Get("enable_display").(bool),
+	}
+}
+
+func flattenEnableDisplayV2(displayDevice map[string]interface{}) interface{} {
+	if displayDevice == nil {
+		return nil
+	}
+	v, ok := displayDevice["enableDisplay"].(bool)
+	if !ok {
+		return nil
+	}
+	return v
 }
 
 // Node affinity updates require a reboot
