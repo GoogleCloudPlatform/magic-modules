@@ -96,11 +96,17 @@ examples:
     vars:
       neg_name: 'ip-port-neg'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
   - name: 'region_network_endpoint_group_internet_fqdn_port'
     primary_resource_id: 'region_network_endpoint_group_internet_fqdn_port'
     vars:
       neg_name: 'ip-port-neg'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
   - name: 'region_network_endpoint_group_portmap'
     primary_resource_id: 'region_network_endpoint_group_portmap'
     min_version: 'beta'
@@ -108,6 +114,11 @@ examples:
       network_name: 'network'
       subnetwork_name: 'subnetwork'
       neg_name: 'portmap-neg'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
+      # for backward compatible
+      subnetwork_name: '"subnetwork" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef

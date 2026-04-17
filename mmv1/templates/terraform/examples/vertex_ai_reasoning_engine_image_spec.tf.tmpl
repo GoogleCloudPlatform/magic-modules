@@ -1,0 +1,17 @@
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "name"}}"
+  description  = "Deployed with BYOC Dockerfile through Terraform"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/agent_src.tar.gz")
+      }
+
+      image_spec {
+        build_args = {}
+      }
+    }
+  }
+}

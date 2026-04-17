@@ -52,11 +52,14 @@ iam_policy:
     - '{{workload_identity_pool_id}}'
   allowed_iam_role: 'roles/iam.workloadIdentityPoolViewer'
   iam_conditions_request_type: 'REQUEST_BODY'
-  min_version: beta
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  post_create: 'templates/terraform/post_create/iam_workload_identity_pool.go.tmpl'
+  post_read: 'templates/terraform/post_read/iam_workload_identity_pool.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/iam_workload_identity_pool.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/iam_workload_identity_pool.go.tmpl'
 examples:
   - name: 'iam_workload_identity_pool_basic'
     primary_resource_id: 'example'
@@ -66,17 +69,18 @@ examples:
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
   - name: 'iam_workload_identity_pool_full_trust_domain_mode'
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
+    test_env_vars:
+      project: 'PROJECT_NUMBER'
   - name: 'iam_workload_identity_pool_full_trust_domain_mode_with_default_shared_ca'
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
+    test_env_vars:
+      project: 'PROJECT_NUMBER'
 parameters:
 properties:
   - name: 'workloadIdentityPoolId'
@@ -154,7 +158,7 @@ properties:
 
           * `spiffe://<trust-domain>/ns/<kubernetes-namespace>/sa/<kubernetes-service-account>`
           * `spiffe://<trust-domain>/resources/<resource-scope>/<resource-name>`
-    min_version: beta
+    default_from_api: true
     enum_values:
       - 'FEDERATION_ONLY'
       - 'TRUST_DOMAIN'
@@ -165,7 +169,6 @@ properties:
       Represents configuration for generating mutual TLS (mTLS) certificates for the identities
       within this pool. Defines the Certificate Authority (CA) pool resources and configurations
       required for issuance and rotation of mTLS workload certificates.
-    min_version: beta
     properties:
       - name: 'caPools'
         type: KeyValuePairs
@@ -237,7 +240,6 @@ properties:
       domain will recognize and accept certificates issued by entities within the trusted domains.
       Note that a trust domain automatically trusts itself, eliminating the need for explicit
       configuration.
-    min_version: beta
     properties:
       - name: 'additionalTrustBundles'
         type: Map
@@ -275,3 +277,31 @@ properties:
                       PEM certificate of the PKI used for validation. Must only contain one ca
                       certificate(either root or intermediate cert).
                     required: true
+            - name: 'trustDefaultSharedCa'
+              type: Boolean
+              description: |
+                If set to True, the trust bundle will include the private ca managed identity regional root
+                public certificates.
+
+
+                ~> **Note** `trust_default_shared_ca` is only supported for managed identity trust domain
+                resource.
+  - name: 'attestationRules'
+    is_missing_in_cai: true
+    type: Array
+    description: |
+      Defines which workloads can receive an identity within a pool. When an AttestationRule is
+      defined under a managed identity, matching workloads may receive that identity. A maximum of
+      50 AttestationRules can be set.
+    update_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}:setAttestationRules'
+    update_verb: 'POST'
+    is_set: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'googleCloudResource'
+          type: String
+          description: |
+            A single workload operating on Google Cloud. For example:
+            `//run.googleapis.com/projects/123/type/Service/*`.
+          required: true

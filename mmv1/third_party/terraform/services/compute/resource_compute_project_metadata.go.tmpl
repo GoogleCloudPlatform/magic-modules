@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -149,7 +150,9 @@ func resourceComputeProjectMetadataSet(projectID, userAgent string, config *tran
 			return fmt.Errorf("Error loading project '%s': %s", projectID, err)
 		}
 
-		md.Fingerprint = project.CommonInstanceMetadata.Fingerprint
+		if project.CommonInstanceMetadata != nil {
+			md.Fingerprint = project.CommonInstanceMetadata.Fingerprint
+		}
 		op, err := config.NewComputeClient(userAgent).Projects.SetCommonInstanceMetadata(projectID, md).Do()
 		if err != nil {
 			return fmt.Errorf("SetCommonInstanceMetadata failed: %s", err)
@@ -161,4 +164,13 @@ func resourceComputeProjectMetadataSet(projectID, userAgent string, config *tran
 
 	err := transport_tpg.MetadataRetryWrapper(createMD)
 	return err
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_project_metadata",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeProjectMetadata(),
+	}.Register()
 }

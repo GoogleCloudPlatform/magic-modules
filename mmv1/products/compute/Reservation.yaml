@@ -45,11 +45,16 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
+cai_resource_kind: 'Reservation'
 custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/reservation.go.tmpl'
   constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
   pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
   post_read: templates/terraform/post_read/compute_reservetion.go.tmpl
+# excluding identity due to zone value inconsistency
+exclude_identity_generation: true
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"

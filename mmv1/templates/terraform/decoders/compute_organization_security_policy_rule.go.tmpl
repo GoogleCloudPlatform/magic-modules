@@ -1,0 +1,9 @@
+if preconfiguredWafConfigRaw, ok := res["preconfiguredWafConfig"]; ok && preconfiguredWafConfigRaw != nil {
+	if preconfiguredWafConfig, ok := preconfiguredWafConfigRaw.(map[string]interface{}); ok {
+		exclusionsRaw, found := preconfiguredWafConfig["exclusions"]
+		if !found || exclusionsRaw == nil || tpgresource.IsEmptyValue(reflect.ValueOf(exclusionsRaw)) {
+			delete(res, "preconfiguredWafConfig")
+		}
+	}
+}
+return res, nil

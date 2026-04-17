@@ -45,7 +45,7 @@ resource "google_dataproc_cluster" "mycluster" {
   cluster_config {
     staging_bucket = "dataproc-staging-bucket"
 
-    cluster_tier = "CLUSTER_TIER_STANDARD"
+    engine = "DEFAULT"
 
     master_config {
       num_instances = 1
@@ -345,6 +345,8 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
 * `cluster_tier` - (Optional) The tier of the cluster.
 
+* `engine` - (Optional) The cluster engine.
+
 * `gce_cluster_config` (Optional) Common config settings for resources of Google Compute Engine cluster
    instances, applicable to all instances in the cluster. Structure [defined below](#nested_gce_cluster_config).
 
@@ -540,6 +542,10 @@ cluster_config {
 	computed value if not set (currently 500GB). Note: If SSDs are not
 	attached, it also contains the HDFS data blocks and Hadoop working directories.
 
+	* `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.
+
+	* `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.
+
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each master cluster node. Defaults to 0.
 
@@ -621,6 +627,10 @@ cluster_config {
     computed value if not set (currently 500GB). Note: If SSDs are not
 	attached, it also contains the HDFS data blocks and Hadoop working directories.
 
+    * `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.
+
+    * `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.
+
     * `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each worker cluster node. Defaults to 0.
 
@@ -699,6 +709,10 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
     in GB. The smallest allowed disk size is 10GB. GCP will default to a predetermined
     computed value if not set (currently 500GB). Note: If SSDs are not
 	attached, it also contains the HDFS data blocks and Hadoop working directories.
+
+	* `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.
+
+	* `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.
 
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each preemptible worker node. Defaults to 0.
@@ -956,6 +970,10 @@ auxiliary_node_groups{
          computed value if not set (currently 500GB). Note: If SSDs are not
          attached, it also contains the HDFS data blocks and Hadoop working directories.
          
+      * `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.
+
+      * `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.
+
       * `num_local_ssds` - (Optional) The amount of local SSD disks that will be attached to each master cluster node. 
          Defaults to 0.
 

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -438,4 +439,13 @@ func enableAnalyticsBackwardsChangeDiffSuppress(k, old, new string, d *schema.Re
 		return true
 	}
 	return false
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_logging_project_bucket_config",
+		ProductName: "logging",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceLoggingProjectBucketConfig(),
+	}.Register()
 }

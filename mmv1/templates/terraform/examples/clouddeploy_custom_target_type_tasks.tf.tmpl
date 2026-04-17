@@ -1,0 +1,18 @@
+resource "google_clouddeploy_custom_target_type" "{{$.PrimaryResourceId}}" {
+  location    = "us-central1"
+  name        = "{{index $.Vars "custom_target_type_name"}}"
+  description = "My custom target type"
+
+  tasks {
+    render {
+      container {
+        image = "gcr.io/my-project/my-render-image"
+      }
+    }
+    deploy {
+      container {
+        image = "gcr.io/my-project/my-deploy-image"
+      }
+    }
+  }
+}

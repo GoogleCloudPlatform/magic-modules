@@ -5,6 +5,8 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
   display_name = "autonomousDatabase displayname"
   database = "{{index $.Vars "database_name"}}"
   admin_password = "123Abpassword"
+  odb_network = "{{index $.Vars "odb_network"}}"
+  odb_subnet = "{{index $.Vars "odb_subnet"}}"
   network = data.google_compute_network.default.id
   cidr = "10.5.0.0/24"
   labels = {

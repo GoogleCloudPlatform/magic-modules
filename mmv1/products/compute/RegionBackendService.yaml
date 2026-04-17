@@ -26,6 +26,7 @@ references:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
   api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
 docs:
+cai_resource_kind: 'RegionBackendService'
 base_url: 'projects/{{project}}/regions/{{region}}/backendServices'
 has_self_link: true
 timeouts:
@@ -45,11 +46,13 @@ iam_policy:
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
   decoder: 'templates/terraform/decoders/region_backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_region_backend_service.go.tmpl'
 custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
@@ -129,6 +132,9 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'rbs-health-check'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
   - name: 'region_backend_service_dynamic_backend_count'
     primary_resource_id: 'default'
     vars:
@@ -136,6 +142,9 @@ examples:
       health_check_name: 'health-check'
       instance_group_name: 'instance_group'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
     exclude_test: true
   - name: 'region_backend_service_dynamic_forwarding'
     primary_resource_id: 'default'
@@ -171,6 +180,9 @@ examples:
       region_backend_service_name: 'region-service'
       health_check_name: 'health-check'
       authentication_name: 'authentication'
+    test_vars_overrides:
+      # for backward compatible
+      authentication_name: '"authentication" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -889,6 +901,7 @@ properties:
         description: |
           OAuth2 Client ID for IAP
         send_empty_value: true
+        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
       - name: 'oauth2ClientSecret'
         type: String
         description: |
@@ -1604,6 +1617,7 @@ properties:
     properties:
       - name: 'fastIPMove'
         type: Enum
+        is_missing_in_cai: true
         description: |
           Specifies whether fast IP move is enabled, and if so, the mechanism to achieve it.
           Supported values are:
@@ -1631,6 +1645,7 @@ properties:
         properties:
           - name: 'backendGroup'
             type: ResourceRef
+            is_missing_in_cai: true
             description: |
               A fully-qualified URL of the zonal Network Endpoint Group (NEG) that the leader is
               attached to.

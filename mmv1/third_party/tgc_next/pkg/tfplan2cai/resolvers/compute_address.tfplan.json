@@ -1,0 +1,351 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.7.2",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_address.internal_with_subnet_and_address",
+          "mode": "managed",
+          "type": "google_compute_address",
+          "name": "internal_with_subnet_and_address",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "address": "10.0.42.42",
+            "address_type": "INTERNAL",
+            "description": null,
+            "effective_labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "ip_version": null,
+            "ipv6_endpoint_type": null,
+            "labels": null,
+            "name": "my-internal-address",
+            "network": null,
+            "project": "terraform-dev-haonan",
+            "region": "us-central1",
+            "terraform_labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "timeouts": null
+          },
+          "sensitive_values": {
+            "effective_labels": {},
+            "terraform_labels": {},
+            "users": []
+          }
+        },
+        {
+          "address": "google_compute_network.default",
+          "mode": "managed",
+          "type": "google_compute_network",
+          "name": "default",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "auto_create_subnetworks": false,
+            "delete_default_routes_on_create": false,
+            "description": null,
+            "enable_ula_internal_ipv6": true,
+            "name": "tf-test-network-test",
+            "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL",
+            "network_profile": null,
+            "params": [],
+            "project": "terraform-dev-haonan",
+            "timeouts": null
+          },
+          "sensitive_values": {
+            "params": []
+          }
+        },
+        {
+          "address": "google_compute_subnetwork.default",
+          "mode": "managed",
+          "type": "google_compute_subnetwork",
+          "name": "default",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "description": null,
+            "ip_cidr_range": "10.0.0.0/16",
+            "ip_collection": null,
+            "ipv6_access_type": "INTERNAL",
+            "log_config": [],
+            "name": "subnetwork-test",
+            "params": [],
+            "project": "terraform-dev-haonan",
+            "region": "us-east1",
+            "reserved_internal_range": null,
+            "role": null,
+            "send_secondary_ip_range_if_empty": null,
+            "stack_type": "IPV4_IPV6",
+            "timeouts": null
+          },
+          "sensitive_values": {
+            "log_config": [],
+            "params": [],
+            "secondary_ip_range": []
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "google_compute_address.internal_with_subnet_and_address",
+      "mode": "managed",
+      "type": "google_compute_address",
+      "name": "internal_with_subnet_and_address",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "address": "10.0.42.42",
+          "address_type": "INTERNAL",
+          "description": null,
+          "effective_labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "ip_version": null,
+          "ipv6_endpoint_type": null,
+          "labels": null,
+          "name": "my-internal-address",
+          "network": null,
+          "project": "terraform-dev-haonan",
+          "region": "us-central1",
+          "terraform_labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "timeouts": null
+        },
+        "after_unknown": {
+          "creation_timestamp": true,
+          "effective_labels": {},
+          "id": true,
+          "label_fingerprint": true,
+          "network_tier": true,
+          "prefix_length": true,
+          "purpose": true,
+          "self_link": true,
+          "subnetwork": true,
+          "terraform_labels": {},
+          "users": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "effective_labels": {},
+          "terraform_labels": {},
+          "users": []
+        }
+      }
+    },
+    {
+      "address": "google_compute_network.default",
+      "mode": "managed",
+      "type": "google_compute_network",
+      "name": "default",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "auto_create_subnetworks": false,
+          "delete_default_routes_on_create": false,
+          "description": null,
+          "enable_ula_internal_ipv6": true,
+          "name": "tf-test-network-test",
+          "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL",
+          "network_profile": null,
+          "params": [],
+          "project": "terraform-dev-haonan",
+          "timeouts": null
+        },
+        "after_unknown": {
+          "bgp_always_compare_med": true,
+          "bgp_best_path_selection_mode": true,
+          "bgp_inter_region_cost": true,
+          "gateway_ipv4": true,
+          "id": true,
+          "internal_ipv6_range": true,
+          "mtu": true,
+          "network_id": true,
+          "numeric_id": true,
+          "params": [],
+          "routing_mode": true,
+          "self_link": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "params": []
+        }
+      }
+    },
+    {
+      "address": "google_compute_subnetwork.default",
+      "mode": "managed",
+      "type": "google_compute_subnetwork",
+      "name": "default",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "description": null,
+          "ip_cidr_range": "10.0.0.0/16",
+          "ip_collection": null,
+          "ipv6_access_type": "INTERNAL",
+          "log_config": [],
+          "name": "subnetwork-test",
+          "params": [],
+          "project": "terraform-dev-haonan",
+          "region": "us-east1",
+          "reserved_internal_range": null,
+          "role": null,
+          "send_secondary_ip_range_if_empty": null,
+          "stack_type": "IPV4_IPV6",
+          "timeouts": null
+        },
+        "after_unknown": {
+          "creation_timestamp": true,
+          "external_ipv6_prefix": true,
+          "fingerprint": true,
+          "gateway_address": true,
+          "id": true,
+          "internal_ipv6_prefix": true,
+          "ipv6_cidr_range": true,
+          "ipv6_gce_endpoint": true,
+          "log_config": [],
+          "network": true,
+          "params": [],
+          "private_ip_google_access": true,
+          "private_ipv6_google_access": true,
+          "purpose": true,
+          "secondary_ip_range": true,
+          "self_link": true,
+          "state": true,
+          "subnetwork_id": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "log_config": [],
+          "params": [],
+          "secondary_ip_range": []
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "google": {
+        "name": "google",
+        "full_name": "registry.terraform.io/hashicorp/google"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_address.internal_with_subnet_and_address",
+          "mode": "managed",
+          "type": "google_compute_address",
+          "name": "internal_with_subnet_and_address",
+          "provider_config_key": "google",
+          "expressions": {
+            "address": {
+              "constant_value": "10.0.42.42"
+            },
+            "address_type": {
+              "constant_value": "INTERNAL"
+            },
+            "name": {
+              "constant_value": "my-internal-address"
+            },
+            "region": {
+              "constant_value": "us-central1"
+            },
+            "subnetwork": {
+              "references": [
+                "google_compute_subnetwork.default.id",
+                "google_compute_subnetwork.default"
+              ]
+            }
+          },
+          "schema_version": 0
+        },
+        {
+          "address": "google_compute_network.default",
+          "mode": "managed",
+          "type": "google_compute_network",
+          "name": "default",
+          "provider_config_key": "google",
+          "expressions": {
+            "auto_create_subnetworks": {
+              "constant_value": false
+            },
+            "enable_ula_internal_ipv6": {
+              "constant_value": true
+            },
+            "name": {
+              "constant_value": "tf-test-network-test"
+            }
+          },
+          "schema_version": 0
+        },
+        {
+          "address": "google_compute_subnetwork.default",
+          "mode": "managed",
+          "type": "google_compute_subnetwork",
+          "name": "default",
+          "provider_config_key": "google",
+          "expressions": {
+            "ip_cidr_range": {
+              "constant_value": "10.0.0.0/16"
+            },
+            "ipv6_access_type": {
+              "constant_value": "INTERNAL"
+            },
+            "name": {
+              "constant_value": "subnetwork-test"
+            },
+            "network": {
+              "references": [
+                "google_compute_network.default.self_link",
+                "google_compute_network.default"
+              ]
+            },
+            "region": {
+              "constant_value": "us-east1"
+            },
+            "stack_type": {
+              "constant_value": "IPV4_IPV6"
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  },
+  "relevant_attributes": [
+    {
+      "resource": "google_compute_network.default",
+      "attribute": [
+        "self_link"
+      ]
+    },
+    {
+      "resource": "google_compute_subnetwork.default",
+      "attribute": [
+        "id"
+      ]
+    }
+  ],
+  "timestamp": "2025-08-26T23:10:57Z",
+  "errored": false
+}

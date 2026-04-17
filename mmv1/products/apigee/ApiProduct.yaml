@@ -82,7 +82,7 @@ properties:
     required: true
     immutable: true
     validation:
-      regex: '^[a-z][a-z0-9._\-$ %]*$'
+      regex: '^[a-zA-Z][a-zA-Z0-9._\-$ %]*$'
 
   - name: "displayName"
     type: String

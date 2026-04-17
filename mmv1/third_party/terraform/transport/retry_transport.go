@@ -132,13 +132,13 @@ Retry:
 
 		retryErr := t.checkForRetryableError(resp, respErr)
 		if retryErr == nil {
-			if attempts > 0 {
+			if attempts > 1 {
 				log.Printf("[DEBUG] Retry Transport: Stopping retries, last request was successful")
 			}
 			break Retry
 		}
 		if !retryErr.Retryable {
-			if attempts > 0 {
+			if attempts > 1 {
 				log.Printf("[DEBUG] Retry Transport: Stopping retries, last request failed with non-retryable error: %s", retryErr.Err)
 			}
 			break Retry
@@ -147,7 +147,7 @@ Retry:
 		log.Printf("[DEBUG] Retry Transport: Waiting %s before trying request again", backoff)
 		select {
 		case <-ctx.Done():
-			if attempts > 0 {
+			if attempts > 1 {
 				log.Printf("[DEBUG] Retry Transport: Stopping retries, context done: %v", ctx.Err())
 			}
 			break Retry
@@ -161,7 +161,7 @@ Retry:
 			continue
 		}
 	}
-	if attempts > 0 {
+	if attempts > 1 {
 		log.Printf("[DEBUG] Retry Transport: Returning after %d attempts", attempts)
 	}
 

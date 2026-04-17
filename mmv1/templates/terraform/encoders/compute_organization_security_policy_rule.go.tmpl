@@ -1,0 +1,9 @@
+if d.HasChange("preconfigured_waf_config") {
+	old, new := d.GetChange("preconfigured_waf_config")
+	if oldVal := reflect.ValueOf(old); oldVal.IsValid() && !tpgresource.IsEmptyValue(oldVal) {
+		if newVal := reflect.ValueOf(new); !newVal.IsValid() || tpgresource.IsEmptyValue(newVal) {
+			obj["preconfiguredWafConfig"] = map[string]interface{}{}
+		}
+	}
+}
+return obj, nil

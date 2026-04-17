@@ -24,16 +24,14 @@ import_format:
 update_verb: PATCH
 update_mask: true
 
-min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.dataTables.dataTableRows'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataTables.dataTableRows'
 examples:
   - name: 'chronicle_data_table_row_basic'
     config_path: 'templates/terraform/examples/chronicle_data_table_row_basic.tf.tmpl'
     primary_resource_id: 'example_row'
-    min_version: 'beta'
     test_env_vars:
       instance_id: 'CHRONICLE_ID'
     vars:

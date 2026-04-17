@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -626,4 +627,13 @@ func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoBasicConstraints(v interfac
 
 func expandApigeeKeystoreAliasesPkcsCertsInfoCertInfoSerialNumber(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_apigee_keystores_aliases_pkcs12",
+		ProductName: "apigee",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceApigeeKeystoresAliasesPkcs12(),
+	}.Register()
 }

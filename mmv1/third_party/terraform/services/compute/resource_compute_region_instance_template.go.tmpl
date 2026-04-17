@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -773,8 +774,7 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							Computed:     true,
 							ForceNew:     true,
 							AtLeastOneOf: schedulingInstTemplateKeys,
- 						ValidateFunc: validation.StringInSlice([]string{"", "STANDARD", "SPOT", "FLEX_START", "RESERVATION_BOUND"}, false),
-							Description:  `Describes the desired provisioning model for the instance. For STANDARD, resources are provisioned immediately. For SPOT, resources are offered at a discount compared to standard pricing but may be preempted. For FLEX_START, resources are offered at a discount with flexible start times. For RESERVATION_BOUND, the instance is bound to a specific reservation and will only consume capacity from that reservation.`,
+							Description:  `Whether the instance is spot. If this is set as SPOT.`,
 						},
 						"instance_termination_action": {
 							Type:         schema.TypeString,
@@ -1723,4 +1723,13 @@ func resourceComputeRegionInstanceTemplateImportState(d *schema.ResourceData, me
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_region_instance_template",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeRegionInstanceTemplate(),
+	}.Register()
 }

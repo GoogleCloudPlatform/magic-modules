@@ -144,6 +144,8 @@ properties:
     type: NestedObject
     description: |
       Configuration for private cluster.
+    update_mask_fields:
+      - 'privateClusterConfig.allowedProjects'
     properties:
       - name: 'enablePrivateEndpoint'
         type: Boolean
