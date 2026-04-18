@@ -162,7 +162,8 @@ examples:
     test_vars_overrides:
       username: '"user" + randomSuffix'
     ignore_read_extra:
-      # password removed
+      # username and password are not returned by the API
+      - 'configuration.0.authentication.0.username_password.0.username'
       - 'configuration.0.authentication.0.username_password.0.password'
     external_providers: ["random", "time"]
     # Random provider
