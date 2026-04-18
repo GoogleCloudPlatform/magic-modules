@@ -689,7 +689,7 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `Sandbox configuration for this node.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
-							"sandbox_type": {
+							"type": {
 								Type:         schema.TypeString,
 								Required:     true,
 								Description:  `Type of the sandbox to use for the node (e.g. 'gvisor')`,
@@ -2374,6 +2374,7 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"storage_pools":                      c["storagePools"],
 		"min_cpu_platform":                   c["minCpuPlatform"],
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
+		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
 		"taint":                              flattenEffectiveTaints(c["taints"]),
 		"workload_metadata_config":           flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
 		"confidential_nodes":                 flattenConfidentialNodes(c["confidentialNodes"]),
@@ -2650,6 +2651,25 @@ func flattenGcfsConfig(v interface{}) []map[string]interface{} {
 	return []map[string]interface{}{transformed}
 }
 
+func flattenSandboxConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{}
+	if val, ok := c["type"]; ok && val != nil {
+		transformed["type"] = val
+	} else if val, ok := c["sandboxType"]; ok && val != nil {
+		transformed["type"] = val
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
 func flattenGvnic(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return nil
@@ -2892,6 +2912,23 @@ func flattenNodePoolAutoConfigNodeKubeletConfig(v interface{}) []map[string]inte
 	transformed := map[string]interface{}{}
 	if c != nil {
 		transformed["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(c)
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenNodePoolAutoConfigLinuxNodeConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"cgroup_mode":                c["cgroupMode"],
+		"node_kernel_module_loading": flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
 	}
 
 	return []map[string]interface{}{transformed}

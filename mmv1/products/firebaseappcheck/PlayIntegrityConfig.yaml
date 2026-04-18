@@ -43,6 +43,9 @@ examples:
     min_version: 'beta'
     vars:
       package_name: 'package.name.playintegrity'
+    test_vars_overrides:
+      # for backward compatible
+      package_name: '"package.name.playintegrity" + randomSuffix'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     # Need the time_sleep resource
@@ -59,6 +62,8 @@ examples:
     test_vars_overrides:
       'token_ttl': '"7200s"'
     # Need the time_sleep resource
+      # for backward compatible
+      package_name: '"package.name.playintegrity" + randomSuffix'
     external_providers: ["random", "time"]
 parameters:
   - name: 'app_id'

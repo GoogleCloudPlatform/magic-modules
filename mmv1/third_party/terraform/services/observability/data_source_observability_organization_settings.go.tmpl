@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
@@ -35,5 +36,14 @@ func dataSourceObservabilityOrganizationSettingsRead(d *schema.ResourceData, met
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_observability_organization_settings",
+		ProductName: "observability",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceObservabilityOrganizationSettings(),
+	}.Register()
 }
 {{- end }}

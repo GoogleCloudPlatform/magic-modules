@@ -36,6 +36,7 @@ references:
     'Adding or Resizing Regional Persistent Disks': 'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionDisks'
 docs:
+cai_resource_kind: 'RegionDisk'
 base_url: 'projects/{{project}}/regions/{{region}}/disks'
 has_self_link: true
 immutable: true
@@ -57,10 +58,12 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     - '{{name}}'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_disk.go.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
+  custom_update: 'templates/terraform/custom_update/region_disk_update.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
   post_import: 'templates/terraform/post_import/disk.go.tmpl'
@@ -137,6 +140,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
         description: |
@@ -144,6 +148,7 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'sha256'
         type: String
         description: |
@@ -368,6 +373,8 @@ properties:
             - 'SEV_SNP_CAPABLE'
             - 'SUSPEND_RESUME_COMPATIBLE'
             - 'TDX_CAPABLE'
+            - 'SEV_LIVE_MIGRATABLE_V2'
+            - 'SNP_SVSM_CAPABLE'
   - name: 'licenses'
     type: Array
     description: Any applicable license URI.
@@ -401,7 +408,7 @@ properties:
       that the disk can handle. Values must be between 10,000 and 120,000.
       For more details, see the Extreme persistent disk [documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=provisionedIops'
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     update_verb: 'PATCH'
   - name: 'provisionedThroughput'
     type: Integer
@@ -409,7 +416,7 @@ properties:
       Indicates how much throughput to provision for the disk. This sets the number of throughput
       mb per second that the disk can handle. Values must be greater than or equal to 1.
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=provisionedThroughput'
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     update_verb: 'PATCH'
   - name: 'eraseWindowsVssSignature'
     type: Boolean

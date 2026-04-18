@@ -18,7 +18,7 @@ type ReferenceLinks struct {
 	// guides containing
 	//    name: The title of the link
 	//    value: The URL to navigate on click
-	Guides map[string]string
+	Guides map[string]string `yaml:"guides,omitempty"`
 
 	// the url of the API guider
 	Api string

@@ -47,15 +47,20 @@ examples:
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
+    test_vars_overrides:
+      # for backward compatible
+      description: '"example data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_subscription_multiregion'
     primary_resource_id: 'subscription'
-    min_version: beta
     exclude_test: true
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example listing multiregion subscription'
+    test_vars_overrides:
+      # for backward compatible
+      description: '"example listing multiregion subscription" + randomSuffix'
 parameters:
   - name: 'dataExchangeId'
     type: String
@@ -119,7 +124,6 @@ properties:
       - name: 'replicaLocations'
         is_set: true
         type: Array
-        min_version: 'beta'
         set_hash_func: 'tpgresource.CaseInsensitiveHash'
         description: |
           List of regions where the subscriber wants dataset replicas.

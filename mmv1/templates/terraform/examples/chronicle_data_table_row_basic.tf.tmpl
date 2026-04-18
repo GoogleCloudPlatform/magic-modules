@@ -1,0 +1,49 @@
+resource "google_chronicle_data_table" "example_dt" {
+  location       = "us"
+  instance = "{{index $.TestEnvVars "instance_id"}}"
+  data_table_id  = "{{index $.Vars "data_table_id"}}"
+  description    = "Sample DataTable for DataTableRow test"
+  column_info {
+    column_index    = 0
+    original_column = "username"
+    column_type     = "STRING"
+  }
+  column_info {
+    column_index    = 1
+    original_column = "ip_address"
+    column_type     = "CIDR"
+  }
+}
+
+resource "google_chronicle_data_table_row" "example_row" {
+  location       = "us"
+  instance       = "{{index $.TestEnvVars "instance_id"}}"
+  data_table_id  = google_chronicle_data_table.example_dt.data_table_id
+  values         = ["testuser", "192.168.1.1/32"]
+  row_time_to_live = "48h"
+}
+
+output "data_table_row_name" {
+  description = "The resource name of the data table row."
+  value = google_chronicle_data_table_row.example_row.name
+}
+
+output "data_table_row_id_part" {
+  description = "The last segment of the row ID."
+  value = google_chronicle_data_table_row.example_row.data_table_row
+}
+
+output "data_table_row_values" {
+  description = "The values in the row."
+  value = google_chronicle_data_table_row.example_row.values
+}
+
+output "data_table_row_ttl" {
+  description = "The time to live for the row."
+  value = google_chronicle_data_table_row.example_row.row_time_to_live
+}
+
+output "data_table_row_create_time" {
+  description = "The creation time of the row."
+  value = google_chronicle_data_table_row.example_row.create_time
+}

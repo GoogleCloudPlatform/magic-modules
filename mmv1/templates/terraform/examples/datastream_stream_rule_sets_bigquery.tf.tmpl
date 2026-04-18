@@ -2,7 +2,7 @@ data "google_project" "project" {
 }
 
 resource "google_datastream_stream" "stream" {
-    stream_id = "{{index .Vars "stream_id"}}"
+    stream_id = "{{index $.Vars "stream_id"}}"
     location = "us-central1"
     display_name = "BigQuery Stream with Rules"
 

@@ -1,0 +1,261 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: NativeDashboard
+description: A configuration for a native dashboard within a Google SecOps (Chronicle) instance.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.nativeDashboards'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}'
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards
+id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}'
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}
+
+update_mask: true
+update_verb: PATCH
+
+min_version: 'beta'
+examples:
+  - name: chronicle_nativedashboard_basic
+    primary_resource_id: my_basic_dashboard
+    min_version: 'beta'
+    ignore_read_extra:
+      - "last_viewed_time"
+    vars:
+      dashboard_name: 'dashboard'
+      dashboard_description: 'dashboard_description'
+    test_vars_overrides:
+      # for backward compatible
+      dashboard_name: '"dashboard" + randomSuffix'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+
+autogen_status: TmF0aXZlRGFzaGJvYXJk
+parameters:
+  - name: location
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: The location of the Chronicle instance.
+  - name: instance
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: The ID of the Chronicle instance.
+
+properties:
+  - name: name
+    type: String
+    output: true
+    description: The full resource name of the dashboard.
+
+  - name: dashboardId
+    type: String
+    output: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: The unique ID of the Dashboard.
+
+  - name: access
+    type: String
+    description: |-
+      The access level of the dashboard.
+      Possible values:
+      DASHBOARD_PRIVATE
+      DASHBOARD_PUBLIC
+
+  - name: createTime
+    type: String
+    output: true
+    description: The creation time of the dashboard.
+
+  - name: createUserId
+    type: String
+    output: true
+    description: The ID of the user who created the dashboard.
+
+  - name: dashboardUserData
+    type: NestedObject
+    flatten_object: true
+    default_from_api: true
+    description: User-specific data and preferences for the dashboard.
+    properties:
+      - name: isPinned
+        type: Boolean
+        description: Whether the dashboard is pinned by the user.
+      - name: lastViewedTime
+        type: String
+        output: true
+        description: The time when this dashboard was last viewed.
+
+  - name: definition
+    type: NestedObject
+    flatten_object: true
+    description: |-
+      The definition of the dashboard including filters, layout, and chart
+      configurations.
+    properties:
+      - name: charts
+        type: Array
+        default_from_api: true
+        description: A list of charts included in the dashboard definition.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: chartLayout
+              type: NestedObject
+              description: The visual layout parameters of this chart within the dashboard.
+              properties:
+                - name: startX
+                  type: Integer
+                  send_empty_value: true
+                  description: The starting X coordinate.
+                - name: spanX
+                  type: Integer
+                  required: true
+                  description: The number of columns the chart spans.
+                - name: startY
+                  type: Integer
+                  send_empty_value: true
+                  description: The starting Y coordinate.
+                - name: spanY
+                  type: Integer
+                  required: true
+                  description: The number of rows the chart spans.
+            - name: dashboardChart
+              type: String
+              description: The resource name of the associated DashboardChart.
+            - name: filtersIds
+              type: Array
+              item_type:
+                type: String
+              description: List of dashboard filter IDs applied to this chart.
+
+      - name: filters
+        type: Array
+        description: Global filters defined for the dashboard.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: chartIds
+              type: Array
+              item_type:
+                type: String
+              description: The IDs of charts that this filter applies to.
+            - name: dataSource
+              type: String
+              description: |-
+                The data source for the filter.
+                Possible values:
+                UDM, ENTITY, INGESTION_METRICS, RULE_DETECTIONS, RULESETS, GLOBAL,
+                IOC_MATCHES, RULES, SOAR_CASES, SOAR_PLAYBOOKS, SOAR_CASE_HISTORY,
+                DATA_TABLE, INVESTIGATION, INVESTIGATION_FEEDBACK
+            - name: displayName
+              type: String
+              description: The display name of the filter.
+            - name: fieldPath
+              type: String
+              send_empty_value: true
+              description: The UDM field path being filtered.
+            - name: filterOperatorAndFieldValues
+              type: Array
+              description: The specific operator and value set for the filter.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: fieldValues
+                    type: Array
+                    item_type:
+                      type: String
+                    description: |-
+                      The values for the modifier. All operators should have a single
+                      value other than 'IN' and 'BETWEEN'.
+                  - name: filterOperator
+                    type: Enum
+                    enum_values:
+                      - 'EQUAL'
+                      - 'NOT_EQUAL'
+                      - 'IN'
+                      - 'GREATER_THAN'
+                      - 'GREATER_THAN_OR_EQUAL_TO'
+                      - 'LESS_THAN'
+                      - 'LESS_THAN_OR_EQUAL_TO'
+                      - 'BETWEEN'
+                      - 'PAST'
+                      - 'IS_NULL'
+                      - 'IS_NOT_NULL'
+                      - 'STARTS_WITH'
+                      - 'ENDS_WITH'
+                      - 'DOES_NOT_STARTS_WITH'
+                      - 'DOES_NOT_ENDS_WITH'
+                      - 'NOT_IN'
+                      - 'CONTAINS'
+                      - 'DOES_NOT_CONTAIN'
+                    description: The operator to apply to the field.
+            - name: id
+              type: String
+              description: The unique ID of the filter.
+            - name: isMandatory
+              type: Boolean
+              default_value: false
+              description: Whether the filter is mandatory for the dashboard consumer.
+            - name: isStandardTimeRangeFilter
+              type: Boolean
+              description: Whether the filter is a standard time range filter.
+            - name: isStandardTimeRangeFilterEnabled
+              type: Boolean
+              description: Whether the standard time range filter is currently enabled.
+
+      - name: fingerprint
+        type: String
+        output: true
+        description: The server-generated fingerprint of the dashboard definition.
+
+  - name: description
+    type: String
+    description: A description of the dashboard.
+
+  - name: displayName
+    type: String
+    required: true
+    description: The display name/title of the dashboard visible to users.
+
+  - name: etag
+    type: String
+    output: true
+    description: |-
+      Server-computed checksum for optimistic concurrency control,
+      sent on update and delete requests.
+
+  - name: type
+    type: String
+    description: |-
+      The type of dashboard.
+      Possible values:
+      CURATED, PRIVATE, PUBLIC, CUSTOM, MARKETPLACE
+
+  - name: updateTime
+    type: String
+    output: true
+    description: The time when the dashboard was last edited.
+
+  - name: updateUserId
+    type: String
+    output: true
+    description: The ID of the user who last edited the dashboard.

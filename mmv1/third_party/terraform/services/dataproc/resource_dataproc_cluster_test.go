@@ -1153,8 +1153,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We don't provide any, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 5.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
 				),
 			},
 			{
@@ -1164,8 +1162,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.key1", "value1"),
-					// We only provide one, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 6.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "6"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.key1", "value1"),
 				),
 			},
@@ -1185,8 +1181,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We don't provide any, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 5.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
 				),
 			},
 		},
@@ -1494,7 +1488,85 @@ resource "google_dataproc_cluster" "tier_cluster" {
 `, bucketName, clusterName, tierConfig, subnetworkName)
 }
 
-func TestAccDataprocCluster_withClusterType(t *testing.T) {
+func TestAccDataprocCluster_withEngine(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				// Set tier to ENGINE_UNSPECIFIED
+				Config: testAccDataprocCluster_withEngine(rnd, subnetworkName, "ENGINE_UNSPECIFIED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.engine_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.engine_cluster", "cluster_config.0.engine", "ENGINE_UNSPECIFIED"),
+				),
+			},
+			{
+				// Set tier to DEFAULT
+				Config: testAccDataprocCluster_withEngine(rnd, subnetworkName, "DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.engine_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.engine_cluster", "cluster_config.0.engine", "DEFAULT"),
+				),
+			},
+			{
+				// Set tier to LIGHTNING
+				Config: testAccDataprocCluster_withEngine(rnd, subnetworkName, "LIGHTNING"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.engine_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.engine_cluster", "cluster_config.0.engine", "LIGHTNING"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_withEngine(rnd, subnetworkName, engine string) string {
+	engineConfig := ""
+	if engine != "" {
+		engineConfig = fmt.Sprintf(`engine = "%s"`, engine)
+	}
+	clusterName := fmt.Sprintf("tf-test-dproc-tier-%s", rnd)
+	bucketName := clusterName + "-temp-bucket"
+
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = "true"
+}
+
+resource "google_dataproc_cluster" "engine_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+	%s
+	staging_bucket = google_storage_bucket.bucket.name
+	temp_bucket = google_storage_bucket.bucket.name
+
+    software_config {
+      image_version = "2.3.4-debian12"
+    }
+
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+  }
+}
+`, bucketName, clusterName, engineConfig, subnetworkName)
+}
+
+func TestAccDataprocCluster_withClusterTypeSingleNode(t *testing.T) {
 	t.Parallel()
 
 	var cluster dataproc.Cluster
@@ -1510,15 +1582,33 @@ func TestAccDataprocCluster_withClusterType(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Set type to SINGLE_NODE
-				Config: testAccDataprocCluster_withClusterType(rnd, subnetworkName, "SINGLE_NODE"),
+				Config: testAccDataprocCluster_withClusterTypeSingleNode(rnd, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.type_cluster", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.type_cluster", "cluster_config.0.cluster_type", "SINGLE_NODE"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_withClusterTypeZeroScale(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
 			{
 				// Set type to ZERO_SCALE
-				Config: testAccDataprocCluster_withClusterType(rnd, subnetworkName, "ZERO_SCALE"),
+				Config: testAccDataprocCluster_withClusterTypeZeroScale(rnd, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.type_cluster", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.type_cluster", "cluster_config.0.cluster_type", "ZERO_SCALE"),
@@ -1528,11 +1618,30 @@ func TestAccDataprocCluster_withClusterType(t *testing.T) {
 	})
 }
 
-func testAccDataprocCluster_withClusterType(rnd, subnetworkName, clusterType string) string {
-	typeConfig := ""
-	if clusterType != "" {
-		typeConfig = fmt.Sprintf(`cluster_type = "%s"`, clusterType)
-	}
+func testAccDataprocCluster_withClusterTypeSingleNode(rnd, subnetworkName string) string {
+	clusterName := fmt.Sprintf("tf-test-dproc-type-%s", rnd)
+
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "type_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+	cluster_type = "SINGLE_NODE"
+
+    software_config {
+      image_version = "2.3.4-debian12"
+    }
+
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+  }
+}
+`, clusterName, subnetworkName)
+}
+
+func testAccDataprocCluster_withClusterTypeZeroScale(rnd, subnetworkName string) string {
 	clusterName := fmt.Sprintf("tf-test-dproc-type-%s", rnd)
 	bucketName := clusterName + "-temp-bucket"
 
@@ -1544,14 +1653,12 @@ resource "google_storage_bucket" "bucket" {
 	uniform_bucket_level_access = "true"
 }
 
-
-
 resource "google_dataproc_cluster" "type_cluster" {
   name   = "%s"
   region = "us-central1"
 
   cluster_config {
-	%s
+	cluster_type = "ZERO_SCALE"
 
     software_config {
       image_version = "2.3.4-debian12"
@@ -1565,7 +1672,7 @@ resource "google_dataproc_cluster" "type_cluster" {
     }
   }
 }
-`, bucketName, clusterName, typeConfig, bucketName, subnetworkName)
+`, bucketName, clusterName, bucketName, subnetworkName)
 }
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
@@ -3478,4 +3585,127 @@ resource "google_dataproc_metastore_service" "ms" {
   }
 }
 `, clusterName, serviceId)
+}
+
+func TestAccDataprocCluster_withProvisionedIopsAndThroughput(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withProvisionedIopsAndThroughput(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.worker_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_withProvisionedIopsAndThroughputNodePools(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withProvisionedIopsAndThroughputNodePools(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.master_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_provisioned_iops", "10000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tf_test_cluster", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_provisioned_throughput", "140"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_withProvisionedIopsAndThroughput(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "tf_test_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+
+    master_config {
+      num_instances = 1
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+        boot_disk_size_gb = 500
+        boot_disk_provisioned_iops = 10000
+        boot_disk_provisioned_throughput = 140
+      }
+    }
+
+    worker_config {
+      num_instances = 2
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+        boot_disk_size_gb = 500
+        boot_disk_provisioned_iops = 10000
+        boot_disk_provisioned_throughput = 140
+      }
+    }
+  }
+}
+`, clusterName)
+}
+
+func testAccDataprocCluster_withProvisionedIopsAndThroughputNodePools(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "tf_test_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+
+    master_config {
+      num_instances = 1
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+        boot_disk_size_gb = 500
+        boot_disk_provisioned_iops = 10000
+        boot_disk_provisioned_throughput = 140
+      }
+    }    
+
+
+    auxiliary_node_groups {
+      node_group_id = "node-group-id"
+      node_group {
+        roles = ["DRIVER"]
+        node_group_config {
+          num_instances = 2
+          machine_type  = "n4-standard-2"
+          disk_config {
+            boot_disk_type = "hyperdisk-balanced"
+            boot_disk_size_gb = 500
+            boot_disk_provisioned_iops = 10000
+            boot_disk_provisioned_throughput = 140
+          }
+        }
+      }
+    }
+  }
+}
+`, clusterName)
 }

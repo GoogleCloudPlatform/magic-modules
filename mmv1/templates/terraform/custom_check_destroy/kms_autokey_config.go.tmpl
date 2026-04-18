@@ -16,7 +16,11 @@ if err != nil {
   return nil
 }
 
-if v := res["key_project"]; v != nil {
+if v := res["keyProject"]; v != nil {
+	return fmt.Errorf("AutokeyConfig still exists at %s", url)
+}
+
+if v := res["keyProjectResolutionMode"]; v != nil {
 	return fmt.Errorf("AutokeyConfig still exists at %s", url)
 }
 

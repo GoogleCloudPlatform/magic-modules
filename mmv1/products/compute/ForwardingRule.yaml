@@ -42,6 +42,10 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeForwardingRule_allowGlobalAccessUpdate_Internal'
+    skip: 'Test data issue'
 custom_code:
   constants: 'templates/terraform/constants/compute_forwarding_rule.go.tmpl'
   pre_create: 'templates/terraform/pre_create/compute_forwarding_rule.go.tmpl'
@@ -137,6 +141,9 @@ examples:
       forwarding_rule_name: 'l3-forwarding-rule'
       service_name: 'service'
       health_check_name: 'health-check'
+    test_vars_overrides:
+      # for backward compatible
+      service_name: '"service" + randomSuffix'
   - name: 'forwarding_rule_internallb'
     primary_resource_id: 'default'
     vars:
@@ -680,6 +687,7 @@ properties:
       - 'IPV6'
   - name: ipCollection
     type: String
+    is_missing_in_cai: true
     diff_suppress_func: 'IpCollectionDiffSuppress'
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP

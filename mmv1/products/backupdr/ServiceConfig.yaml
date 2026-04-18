@@ -41,6 +41,9 @@ examples:
     exclude_import_test: true
     vars:
       resource_type: 'compute.googleapis.com/Instance'
+    test_vars_overrides:
+      # for backward compatible
+      resource_type: '"compute.googleapis.com/Instance" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
 
