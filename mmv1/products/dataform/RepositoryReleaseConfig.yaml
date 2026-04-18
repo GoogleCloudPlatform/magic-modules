@@ -36,6 +36,20 @@ examples:
       git_repository_name: my/repository
       release_name: my_release
       secret_name: my_secret
+    test_vars_overrides:
+      # for backward compatible
+      git_repository_name: '"my/repository" + randomSuffix'
+  - name: dataform_repository_release_config_disabled
+    primary_resource_id: release
+    min_version: beta
+    vars:
+      data: secret-data
+      dataform_repository_name: dataform_repository
+      git_repository_name: my/repository
+      release_name: my_release
+      secret_name: my_secret
+    test_vars_overrides:
+      git_repository_name: '"my/repository" + randomSuffix'
 parameters:
   - name: region
     type: String
@@ -146,3 +160,6 @@ properties:
               description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
               output: true
               min_version: beta
+  - name: disabled
+    type: Boolean
+    description: Disables automatic creation of compilation results.

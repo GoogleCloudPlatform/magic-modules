@@ -53,6 +53,8 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
   pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
   post_read: templates/terraform/post_read/compute_reservetion.go.tmpl
+# excluding identity due to zone value inconsistency
+exclude_identity_generation: true
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"

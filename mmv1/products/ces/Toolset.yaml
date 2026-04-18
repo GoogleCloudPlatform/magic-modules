@@ -35,6 +35,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_openapi_oauth_config"
     primary_resource_id: "ces_toolset_openapi_oauth_config"
     vars:
@@ -42,6 +47,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_openapi_service_agent_id_token_auth_config"
     primary_resource_id: "ces_toolset_openapi_service_agent_id_token_auth_config"
     vars:
@@ -49,6 +59,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_openapi_api_key_config"
     primary_resource_id: "ces_toolset_openapi_api_key_config"
     vars:
@@ -56,6 +71,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_bearer_token_config"
     primary_resource_id: "ces_toolset_bearer_token_config"
     vars:
@@ -63,6 +83,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_mcp_service_account_auth_config"
     primary_resource_id: "ces_toolset_mcp_service_account_auth_config"
     test_env_vars:
@@ -72,6 +97,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_mcp_oauth_config"
     primary_resource_id: "ces_toolset_mcp_oauth_config"
     vars:
@@ -79,6 +109,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_mcp_service_agent_id_token_auth_config"
     primary_resource_id: "ces_toolset_mcp_service_agent_id_token_auth_config"
     vars:
@@ -86,6 +121,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_mcp_api_key_config"
     primary_resource_id: "ces_toolset_mcp_api_key_config"
     vars:
@@ -93,6 +133,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
   - name: "ces_toolset_mcp_bearer_token_config"
     primary_resource_id: "ces_toolset_mcp_bearer_token_config"
     vars:
@@ -100,6 +145,11 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
 autogen_async: true
 autogen_status: VG9vbHNldA==
 parameters:

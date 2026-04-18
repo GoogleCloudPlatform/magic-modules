@@ -50,6 +50,9 @@ examples:
     vars:
       internal_range_name: 'basic'
       network_name: 'internal-ranges'
+    test_vars_overrides:
+      # for backward compatible
+      internal_range_name: '"basic" + randomSuffix'
   - name: 'network_connectivity_internal_ranges_automatic_reservation'
     primary_resource_id: 'default'
     vars:
@@ -71,6 +74,9 @@ examples:
       internal_range_name: 'migration'
       network_name: 'internal-ranges'
       source_subnet_name: 'source-subnet'
+    test_vars_overrides:
+      # for backward compatible
+      internal_range_name: '"migration" + randomSuffix'
   - name: 'network_connectivity_internal_ranges_allocation_algoritms'
     primary_resource_id: 'default'
     vars:

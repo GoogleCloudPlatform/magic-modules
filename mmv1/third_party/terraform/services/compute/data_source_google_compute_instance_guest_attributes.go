@@ -1,0 +1,170 @@
+package compute
+
+import (
+	"fmt"
+	neturl "net/url"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleComputeInstanceGuestAttributes() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceGoogleComputeInstanceGuestAttributesRead,
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"zone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"query_path": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"variable_key"},
+			},
+
+			"variable_key": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"query_path"},
+			},
+
+			"variable_value": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"query_value": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"namespace": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func dataSourceGoogleComputeInstanceGuestAttributesRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+	project, zone, name, err := tpgresource.GetZonalResourcePropertiesFromSelfLinkOrSchema(d, config)
+	if err != nil {
+		return err
+	}
+
+	//Check if instance exists
+	id := fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, name)
+	instanceUrl := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, name)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    instanceUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Instance %s", name), id)
+	}
+
+	// You can either query based on variable_key, query_path or just get the first value
+	guestAttrsUrl := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/getGuestAttributes", config.ComputeBasePath, project, zone, name)
+	if d.Get("query_path").(string) != "" {
+		guestAttrsUrl = fmt.Sprintf("%s?queryPath=%s", guestAttrsUrl, neturl.QueryEscape(d.Get("query_path").(string)))
+	} else if d.Get("variable_key").(string) != "" {
+		guestAttrsUrl = fmt.Sprintf("%s?variableKey=%s", guestAttrsUrl, neturl.QueryEscape(d.Get("variable_key").(string)))
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    guestAttrsUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return nil
+	}
+
+	// Set query results
+	if err := d.Set("variable_value", res["variableValue"]); err != nil {
+		return fmt.Errorf("Error variable_value: %s", err)
+	}
+	if err := d.Set("query_value", flattenQueryValues(res["queryValue"])); err != nil {
+		return fmt.Errorf("Error query_value: %s", err)
+	}
+
+	d.SetId(fmt.Sprint(res["selfLink"]))
+	return nil
+}
+
+func flattenQueryValues(queryValue interface{}) []map[string]interface{} {
+	if queryValue == nil {
+		return nil
+	}
+	qvMap, ok := queryValue.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	rawItems, ok := qvMap["items"].([]interface{})
+	if !ok {
+		return nil
+	}
+	queryValueItems := make([]map[string]interface{}, 0)
+	for _, rawItem := range rawItems {
+		item, ok := rawItem.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		queryValueItems = append(queryValueItems, map[string]interface{}{
+			"key":       item["key"],
+			"namespace": item["namespace"],
+			"value":     item["value"],
+		})
+	}
+	return queryValueItems
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_instance_guest_attributes",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstanceGuestAttributes(),
+	}.Register()
+}

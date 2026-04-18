@@ -1,6 +1,6 @@
 resource "google_sql_database_instance" "instance" {
     name                = "{{index $.Vars "sql_server_name"}}"
-    database_version    = "SQLSERVER_2019_STANDARD"
+    database_version    = "SQLSERVER_2022_STANDARD"
     region              = "us-central1"
     root_password       = "{{index $.Vars "sql_server_root_password"}}"
     deletion_protection = {{index $.Vars "deletion_protection"}}

@@ -51,7 +51,7 @@ examples:
       topic_name: 'recognition-result-notification'
   - name: 'dialogflow_conversation_profile_beta_bidi'
     primary_resource_id: 'bidi_profile'
-    version: beta
+    min_version: beta
     vars:
       profile_name: 'dialogflow-profile-bidi'
       app_id: 'app-id'

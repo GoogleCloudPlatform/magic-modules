@@ -44,6 +44,9 @@ examples:
       note_name: 'attestation-note'
       attestor: 'attestor'
     # Occurrence requires custom logic for signing payloads.
+    test_vars_overrides:
+      # for backward compatible
+      attestor: '"attestor" + randomSuffix'
     exclude_test: true
 parameters:
 properties:

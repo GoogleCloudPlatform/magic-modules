@@ -59,6 +59,9 @@ examples:
       endpoint_group_id: 'endpoint-group'
       security_profile_name: 'sec-profile'
       security_profile_group_name: 'sec-profile-group'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'network_security_security_profile_group_intercept'
@@ -70,6 +73,9 @@ examples:
       endpoint_group_id: 'endpoint-group'
       security_profile_name: 'sec-profile'
       security_profile_group_name: 'sec-profile-group'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'network_security_security_profile_group_url_filtering'

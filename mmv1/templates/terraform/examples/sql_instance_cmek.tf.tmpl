@@ -52,7 +52,7 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name                = "{{index $.Vars "sqlserver_instance_cmek"}}"
   provider            = google-beta
   region              = "us-central1"
-  database_version    = "SQLSERVER_2019_STANDARD"
+  database_version    = "SQLSERVER_2022_STANDARD"
   root_password       = "INSERT-PASSWORD-HERE "
   encryption_key_name = google_kms_crypto_key.key.id
   settings {
