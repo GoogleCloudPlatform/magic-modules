@@ -521,3 +521,62 @@ func TestGetRegionFromRegionSelfLink(t *testing.T) {
 		})
 	}
 }
+
+func TestBigtableClientFactoryPropagatesEndpoints(t *testing.T) {
+	cfg := &transport_tpg.Config{
+		UniverseDomain:   "apis-tpczero.goog",
+		BigtableBasePath: "https://bigtableadmin.apis-tpczero.goog/v2/",
+	}
+
+	factory := cfg.BigTableClientFactory("test-agent")
+
+	if factory.UniverseDomain != "apis-tpczero.goog" {
+		t.Errorf("Expected UniverseDomain 'apis-tpczero.goog', got '%s'", factory.UniverseDomain)
+	}
+
+	expectedPath := "https://bigtableadmin.apis-tpczero.goog/"
+	if factory.AdminBasePath != expectedPath {
+		t.Errorf("Expected AdminBasePath '%s', got '%s'", expectedPath, factory.AdminBasePath)
+	}
+	if factory.BasePath != expectedPath {
+		t.Errorf("Expected BasePath '%s', got '%s'", expectedPath, factory.BasePath)
+	}
+}
+
+func TestBigtableClientFactoryPropagatesRequestReason(t *testing.T) {
+	expectedReason := "test-request-reason"
+	cfg := &transport_tpg.Config{
+		RequestReason: expectedReason,
+	}
+
+	factory := cfg.BigTableClientFactory("test-agent")
+
+	if factory.RequestReason != expectedReason {
+		t.Errorf("Expected RequestReason '%s', got '%s'", expectedReason, factory.RequestReason)
+	}
+}
+
+func TestBigtableClientFactoryPropagatesRequestReasonFromEnv(t *testing.T) {
+	expectedReason := "env-request-reason"
+	t.Setenv("CLOUDSDK_CORE_REQUEST_REASON", expectedReason)
+
+	// Create empty schema.ResourceData using the SDK Provider schema
+	emptyConfigMap := map[string]interface{}{}
+	d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
+
+	err := transport_tpg.HandleSDKDefaults(d)
+	if err != nil {
+		t.Fatalf("error: %v", err)
+	}
+
+	cfg := &transport_tpg.Config{}
+	if v, ok := d.GetOk("request_reason"); ok {
+		cfg.RequestReason = v.(string)
+	}
+
+	factory := cfg.BigTableClientFactory("test-agent")
+
+	if factory.RequestReason != expectedReason {
+		t.Errorf("Expected RequestReason '%s' from env, got '%s'", expectedReason, factory.RequestReason)
+	}
+}

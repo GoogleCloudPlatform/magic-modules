@@ -1198,11 +1198,15 @@ func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service
 
 func (c *Config) BigTableClientFactory(userAgent string) *BigtableClientFactory {
 	bigtableClientFactory := &BigtableClientFactory{
+		BasePath:            RemoveBasePathVersion(c.BigtableBasePath),
+		AdminBasePath:       RemoveBasePathVersion(c.BigtableBasePath),
+		UniverseDomain:      c.UniverseDomain,
 		UserAgent:           userAgent,
 		TokenSource:         c.TokenSource,
 		gRPCLoggingOptions:  c.gRPCLoggingOptions,
 		BillingProject:      c.BillingProject,
 		UserProjectOverride: c.UserProjectOverride,
+		RequestReason:       c.RequestReason,
 	}
 
 	return bigtableClientFactory
@@ -1493,6 +1497,7 @@ func ConfigureBasePaths(c *Config) {
 	c.IamCredentialsBasePath = DefaultBasePaths[IamCredentialsBasePathKey]
 	c.ResourceManagerV3BasePath = DefaultBasePaths[ResourceManagerV3BasePathKey]
 	c.IAMBasePath = DefaultBasePaths[IAMBasePathKey]
+	c.BigQueryBasePath = DefaultBasePaths[BigQueryBasePathKey]
 	c.TagsLocationBasePath = DefaultBasePaths[TagsLocationBasePathKey]
 
 	// DCL
