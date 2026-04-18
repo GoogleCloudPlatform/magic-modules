@@ -21,7 +21,7 @@ func (p Product) Register() {
 	products.Lock()
 	defer products.Unlock()
 	if _, ok := products.m[p.Name]; ok {
-		log.Printf("Duplicate registration attempt for product %q", p.Name)
+		log.Fatalf("Duplicate registration attempt for product %q", p.Name)
 	}
 	products.m[p.Name] = p
 }
@@ -70,12 +70,12 @@ func (s Schema) Register() {
 	defer products.Unlock()
 	if s.Type.IsDataSource() {
 		if _, ok := schemas.d[s.Name]; ok {
-			log.Printf("Duplicate registration attempt for data source %q", s.Name)
+			log.Fatalf("Duplicate registration attempt for data source %q", s.Name)
 		}
 		schemas.d[s.Name] = s
 	} else {
 		if _, ok := schemas.r[s.Name]; ok {
-			log.Printf("Duplicate registration attempt for resource %q", s.Name)
+			log.Fatalf("Duplicate registration attempt for resource %q", s.Name)
 		}
 		schemas.r[s.Name] = s
 	}
@@ -105,6 +105,14 @@ func Resource(name string) *schema.Resource {
 	return r.Schema
 }
 
+func ResourceMap() map[string]*schema.Resource {
+	ret := map[string]*schema.Resource{}
+	for k, v := range schemas.r {
+		ret[k] = v.Schema
+	}
+	return ret
+}
+
 // DataSource returns the Terraform schema for the requested data source. The function panics
 // if the requested data source is not registered. This function is called during provider
 // intitialization when the absence of a data source is an unrecoverable error.
@@ -116,4 +124,12 @@ func DataSource(name string) *schema.Resource {
 		log.Fatalf("No data source schema for %q registered", name)
 	}
 	return d.Schema
+}
+
+func DatasourceMap() map[string]*schema.Resource {
+	ret := map[string]*schema.Resource{}
+	for k, v := range schemas.d {
+		ret[k] = v.Schema
+	}
+	return ret
 }

@@ -1,5 +1,4 @@
 package dataform_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -18,7 +17,7 @@ func TestAccDataformTeamFolder_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataformTeamFolderDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -46,7 +45,6 @@ func TestAccDataformTeamFolder_update(t *testing.T) {
 func testAccDataformTeamFolder_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataform_team_folder" "dataform_team_folder_basic" {
-  provider = google-beta
   region = "us-central1"
   display_name = "Basic TeamFolder-%{random_suffix}"
 }
@@ -56,10 +54,8 @@ resource "google_dataform_team_folder" "dataform_team_folder_basic" {
 func testAccDataformTeamFolder_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataform_team_folder" "dataform_team_folder_basic" {
-  provider = google-beta
   region = "us-central1"
   display_name = "Basic TeamFolder Update-%{random_suffix}"
 }
 `, context)
 }
-{{- end }}

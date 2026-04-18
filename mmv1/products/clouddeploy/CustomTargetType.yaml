@@ -67,6 +67,10 @@ examples:
     primary_resource_id: 'custom-target-type'
     vars:
       custom_target_type_name: 'my-custom-target-type'
+  - name: 'clouddeploy_custom_target_type_tasks'
+    primary_resource_id: 'custom-target-type'
+    vars:
+      custom_target_type_name: 'my-custom-target-type'
 parameters:
   - name: 'location'
     type: String
@@ -113,6 +117,8 @@ properties:
   - name: 'customActions'
     type: NestedObject
     description: "Configures render and deploy for the `CustomTargetType` using Skaffold custom actions."
+    conflicts:
+      - 'tasks'
     properties:
       - name: 'renderAction'
         type: String
@@ -183,3 +189,60 @@ properties:
                 - name: 'ref'
                   type: String
                   description: "Branch or tag to use when cloning the repository."
+  - name: 'tasks'
+    type: NestedObject
+    description: "Configures render and deploy for the `CustomTargetType` using tasks."
+    conflicts:
+      - 'customActions'
+    properties:
+      - name: 'render'
+        type: NestedObject
+        description: "The task responsible for render operations. If not provided then Cloud Deploy will perform its default rendering operation."
+        properties:
+          - name: 'container'
+            type: NestedObject
+            description: "This task is represented by a container that is executed in the Cloud Build execution environment."
+            properties:
+              - name: 'image'
+                type: String
+                description: "Image is the container image to use."
+                required: true
+              - name: 'command'
+                type: Array
+                description: "Command is the container entrypoint to use. This overrides the default entrypoint defined in the container image."
+                item_type:
+                  type: String
+              - name: 'args'
+                type: Array
+                description: "Args is the container arguments to use. This overrides the default arguments defined in the container image."
+                item_type:
+                  type: String
+              - name: 'env'
+                type: KeyValuePairs
+                description: "Environment variables that are set in the container."
+      - name: 'deploy'
+        type: NestedObject
+        description: "The task responsible for deploy operations."
+        required: true
+        properties:
+          - name: 'container'
+            type: NestedObject
+            description: "This task is represented by a container that is executed in the Cloud Build execution environment."
+            properties:
+              - name: 'image'
+                type: String
+                description: "Image is the container image to use."
+                required: true
+              - name: 'command'
+                type: Array
+                description: "Command is the container entrypoint to use. This overrides the default entrypoint defined in the container image."
+                item_type:
+                  type: String
+              - name: 'args'
+                type: Array
+                description: "Args is the container arguments to use. This overrides the default arguments defined in the container image."
+                item_type:
+                  type: String
+              - name: 'env'
+                type: KeyValuePairs
+                description: "Environment variables that are set in the container."

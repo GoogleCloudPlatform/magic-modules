@@ -1,7 +1,5 @@
 package chronicle_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"fmt"
 	"regexp"
@@ -23,7 +21,7 @@ func TestAccChronicleDataTable_DeletionPolicy_DefaultFail(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccChronicleDataTable_DefaultDeletion(context),
@@ -33,16 +31,16 @@ func TestAccChronicleDataTable_DeletionPolicy_DefaultFail(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccChronicleDataTable_DefaultDeletion_TableOnly(context),
-                ExpectError: regexp.MustCompile("Unable to delete table as table is non empty"),
+				Config:      testAccChronicleDataTable_DefaultDeletion_TableOnly(context),
+				ExpectError: regexp.MustCompile("Unable to delete table as table is non empty"),
 			},
 			{
-                Config: testAccChronicleDataTable_DefaultDeletion_RowOnly(context),
-                Check: resource.ComposeTestCheckFunc(
-                    checkResourceDestroyed("google_chronicle_data_table_row.default_fail_row"),
-                    resource.TestCheckResourceAttrSet("google_chronicle_data_table.test_delete_default_fail", "id"),
-                ),
-            },
+				Config: testAccChronicleDataTable_DefaultDeletion_RowOnly(context),
+				Check: resource.ComposeTestCheckFunc(
+					checkResourceDestroyed("google_chronicle_data_table_row.default_fail_row"),
+					resource.TestCheckResourceAttrSet("google_chronicle_data_table.test_delete_default_fail", "id"),
+				),
+			},
 		},
 	})
 }
@@ -57,7 +55,7 @@ func TestAccChronicleDataTable_DeletionPolicy_Force(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Step 1: Create table and a row, with Deletion policy FORCE.
 			{
@@ -83,7 +81,6 @@ func TestAccChronicleDataTable_DeletionPolicy_Force(t *testing.T) {
 func testAccChronicleDataTable_DefaultDeletion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_table" "test_delete_default_fail" {
-  provider       = google-beta
   location       = "us"
   instance       = "%{instance_id}"
   data_table_id  = "tf_test_def_fail_%{random_suffix}"
@@ -98,7 +95,6 @@ resource "google_chronicle_data_table" "test_delete_default_fail" {
 }
 
 resource "google_chronicle_data_table_row" "default_fail_row" {
-  provider       = google-beta
   location       = google_chronicle_data_table.test_delete_default_fail.location
   instance       = google_chronicle_data_table.test_delete_default_fail.instance
   data_table_id  = google_chronicle_data_table.test_delete_default_fail.data_table_id
@@ -111,7 +107,6 @@ resource "google_chronicle_data_table_row" "default_fail_row" {
 func testAccChronicleDataTable_ForceDeletion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_table" "test_delete_force" {
-  provider         = google-beta
   location         = "us"
   instance         = "%{instance_id}"
   data_table_id    = "tf_test_force_%{random_suffix}"
@@ -126,7 +121,6 @@ resource "google_chronicle_data_table" "test_delete_force" {
 }
 
 resource "google_chronicle_data_table_row" "force_row" {
-  provider      = google-beta
   location      = google_chronicle_data_table.test_delete_force.location
   instance      = google_chronicle_data_table.test_delete_force.instance
   data_table_id = google_chronicle_data_table.test_delete_force.data_table_id
@@ -139,7 +133,6 @@ resource "google_chronicle_data_table_row" "force_row" {
 func testAccChronicleDataTable_DefaultDeletion_TableOnly(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_table_row" "default_fail_row" {
-  provider       = google-beta
   location       = "us" # Assuming 'us'
   instance       = "%{instance_id}"
   data_table_id  = "tf_test_def_fail_%{random_suffix}" # Needs to match the created table ID
@@ -149,9 +142,8 @@ resource "google_chronicle_data_table_row" "default_fail_row" {
 }
 
 func testAccChronicleDataTable_DefaultDeletion_RowOnly(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_chronicle_data_table" "test_delete_default_fail" {
-  provider       = google-beta
   location       = "us"
   instance       = "%{instance_id}"
   data_table_id  = "tf_test_def_fail_%{random_suffix}"
@@ -171,7 +163,6 @@ resource "google_chronicle_data_table" "test_delete_default_fail" {
 func testAccChronicleDataTable_ForceDeletion_TableOnly(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_table_row" "force_row" {
-  provider      = google-beta
   location      = "us" # Assuming 'us'
   instance      = "%{instance_id}"
   data_table_id = "tf_test_force_%{random_suffix}" # Needs to match the created table ID
@@ -190,5 +181,3 @@ func checkResourceDestroyed(name string) resource.TestCheckFunc {
 		return nil
 	}
 }
-
-{{- end }}
