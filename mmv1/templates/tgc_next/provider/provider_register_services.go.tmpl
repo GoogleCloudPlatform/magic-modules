@@ -1,0 +1,9 @@
+package provider
+
+import (
+	{{- range $object := $.ResourcesForVersion }}
+	_ "github.com/hashicorp/terraform-provider-google/google/services/{{ $object.ServiceName }}"
+	{{- end }}
+	_ "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/container"
+	_ "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
+)
