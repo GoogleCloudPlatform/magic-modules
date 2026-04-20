@@ -38,7 +38,7 @@ async:
 custom_code:
 legacy_long_form_project: true
 iam_policy:
-  parent_resource_attribute: 'name'
+  parent_resource_attribute: 'hub'
   method_name_separator: ':'
   fetch_iam_policy_verb: 'GET'
   import_format:
