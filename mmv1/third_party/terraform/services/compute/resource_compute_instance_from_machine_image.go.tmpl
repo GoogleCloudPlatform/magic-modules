@@ -2,6 +2,7 @@ package compute
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -136,15 +137,9 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		return err
 	}
 
-	// Get the zone
 	z, err := tpgresource.GetZone(d, config)
 	if err != nil {
 		return err
-	}
-	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := config.NewComputeClient(userAgent).Zones.Get(project, z).Do()
-	if err != nil {
-		return fmt.Errorf("Error loading zone '%s': %s", z, err)
 	}
 
 	instance, err := expandComputeInstance(project, d, config)
@@ -180,12 +175,19 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	tmp := strings.Split(src, "projects/")
 	mi_project := strings.Split(tmp[len(tmp)-1], "/")[0]
 
-	mi, err := config.NewComputeClient(userAgent).MachineImages.Get(mi_project, tpl.Name).Do()
+	miURL := fmt.Sprintf("%sprojects/%s/global/machineImages/%s", config.ComputeBasePath, mi_project, tpl.Name)
+	miRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   mi_project,
+		RawURL:    miURL,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return err
 	}
 
-	instance.Disks, err = adjustInstanceFromMachineImageDisks(d, config, mi, zone, project)
+	instance.Disks, err = adjustInstanceFromMachineImageDisks(d, config, miRes, project)
 	if err != nil {
 		return err
 	}
@@ -193,7 +195,15 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
 	// However, we want the values to be read from the machine image instead.
 	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
-		instance.Scheduling = mi.SourceInstanceProperties.Scheduling
+		if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
+			if schedulingRaw, ok := srcProps["scheduling"]; ok {
+				schedBytes, _ := json.Marshal(schedulingRaw)
+				var sched compute.Scheduling
+				if jsonErr := json.Unmarshal(schedBytes, &sched); jsonErr == nil {
+					instance.Scheduling = &sched
+				}
+			}
+		}
 	}
 
 	// Force send all top-level fields that have been set in case they're overridden to zero values.
@@ -217,7 +227,23 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
+	instanceBytes, err := json.Marshal(instance)
+	if err != nil {
+		return fmt.Errorf("Error marshaling instance: %s", err)
+	}
+	var instanceBody map[string]interface{}
+	if err = json.Unmarshal(instanceBytes, &instanceBody); err != nil {
+		return fmt.Errorf("Error processing instance body: %s", err)
+	}
+	insertURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, project, z)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    insertURL,
+		UserAgent: userAgent,
+		Body:      instanceBody,
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
@@ -226,12 +252,12 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instance.Name))
 
 	// Wait for the operation to complete
-	waitErr := ComputeOperationWaitTime(config, op, project,
+	err = ComputeOperationWaitTime(config, res, project,
 		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
-	if waitErr != nil {
+	if err != nil {
 		// The resource didn't actually create
 		d.SetId("")
-		return waitErr
+		return err
 	}
 
 	return resourceComputeInstanceRead(d, meta)
@@ -239,8 +265,16 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 // Instances have disks spread across multiple schema properties. This function
 // ensures that overriding one of these properties does not override the others.
-func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transport_tpg.Config, mi *compute.MachineImage, zone *compute.Zone, project string) ([]*compute.AttachedDisk, error) {
+func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transport_tpg.Config, miRes map[string]interface{}, project string) ([]*compute.AttachedDisk, error) {
 	disks := []*compute.AttachedDisk{}
+
+	var miDisks []interface{}
+	if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
+		if diskList, ok := srcProps["disks"].([]interface{}); ok {
+			miDisks = diskList
+		}
+	}
+
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
 		bootDisk, err := expandBootDisk(d, config, project)
 		if err != nil {
@@ -249,12 +283,19 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 		disks = append(disks, bootDisk)
 	} else {
 		// boot disk was not overridden, so use the one from the machine image
-		for _, disk := range mi.SourceInstanceProperties.Disks {
-			if disk.Boot {
+		for _, rawDisk := range miDisks {
+			disk, ok := rawDisk.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if isBoot, _ := disk["boot"].(bool); isBoot {
+				autoDelete, _ := disk["autoDelete"].(bool)
+				diskType, _ := disk["type"].(string)
+				deviceName, _ := disk["deviceName"].(string)
 				newdisk := &compute.AttachedDisk{
-					AutoDelete: disk.AutoDelete,
-					Type:       disk.Type,
-					DeviceName: disk.DeviceName,
+					AutoDelete: autoDelete,
+					Type:       diskType,
+					DeviceName: deviceName,
 				}
 				disks = append(disks, newdisk)
 				break
@@ -270,12 +311,19 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 		disks = append(disks, scratchDisks...)
 	} else {
 		// scratch disks were not overridden, so use the ones from the machine image
-		for _, disk := range mi.SourceInstanceProperties.Disks {
-			if disk.Type == "SCRATCH" {
+		for _, rawDisk := range miDisks {
+			disk, ok := rawDisk.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			diskType, _ := disk["type"].(string)
+			if diskType == "SCRATCH" {
+				autoDelete, _ := disk["autoDelete"].(bool)
+				deviceName, _ := disk["deviceName"].(string)
 				newdisk := &compute.AttachedDisk{
-					AutoDelete: disk.AutoDelete,
-					Type:       disk.Type,
-					DeviceName: disk.DeviceName,
+					AutoDelete: autoDelete,
+					Type:       "SCRATCH",
+					DeviceName: deviceName,
 				}
 				disks = append(disks, newdisk)
 			}
@@ -295,12 +343,20 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 		}
 	} else {
 		// attached disks were not overridden, so use the ones from the machine image
-		for _, disk := range mi.SourceInstanceProperties.Disks {
-			if !disk.Boot && disk.Type != "SCRATCH" {
+		for _, rawDisk := range miDisks {
+			disk, ok := rawDisk.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			isBoot, _ := disk["boot"].(bool)
+			diskType, _ := disk["type"].(string)
+			if !isBoot && diskType != "SCRATCH" {
+				autoDelete, _ := disk["autoDelete"].(bool)
+				deviceName, _ := disk["deviceName"].(string)
 				newdisk := &compute.AttachedDisk{
-					AutoDelete: disk.AutoDelete,
-					Type:       disk.Type,
-					DeviceName: disk.DeviceName,
+					AutoDelete: autoDelete,
+					Type:       diskType,
+					DeviceName: deviceName,
 				}
 				disks = append(disks, newdisk)
 			}
