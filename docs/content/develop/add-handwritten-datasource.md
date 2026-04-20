@@ -169,16 +169,6 @@ added to that resource. You can create a new datasource of this type as follows:
    - If there is `labels` field with type `KeyValueLabels` in the corresponding resource: After calling the resource read method, call the function `tpgresource.SetDataSourceLabels(d)` to make `labels` and `terraform_labels` have all of the labels on the resource.
    - If there is `annotations` field with type `KeyValueAnnotations` in the corresponding resource: After calling the resource read method, call the function `tpgresource.SetDataSourceAnnotations(d)` to make `annotations` have all of the annotations on the resource.
 
-1. Add the datasource to `handwrittenDatasources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
-   ```go
-   var handwrittenDatasources = map[string]*schema.Resource{
-     // ...
-     "google_memorystore_instance": registry.DataSource("google_memorystore_instance"),
-     "google_memcache_instance":    registry.DataSource("google_memcache_instance"),
-     "google_redis_instance":       registry.DataSource("google_redis_instance"),
-     // ...
-   }
-   ```
 1. [Add documentation](#add-documentation)
 
 For creating a datasource based off an existing resource you can [make use of the
