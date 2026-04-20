@@ -1670,6 +1670,8 @@ linux_node_config {
 
 * `swap_config` - (Optional) Swap configuration for the node. Structure is [documented below](#nested_swap_config).
 
+* `accurate_time_config` - (Optional) Accurate time configuration for the node. Structure is [documented below](#nested_accurate_time_config).
+
 <a name="nested_swap_config"></a>The `swap_config` block supports:
 
 * `enabled` - (Optional) Enables or disables swap for the node pool.
@@ -1701,6 +1703,10 @@ linux_node_config {
 <a name="nested_encryption_config"></a>The `encryption_config` block supports:
 
 * `disabled` - (Optional) If true, swap space will not be encrypted. Defaults to false (encrypted).
+
+<a name="nested_accurate_time_config"></a>The `accurate_time_config` block supports:
+
+* `enable_ptp_kvm_time_sync` - (Optional) Whether to enable accurate time synchronization with PTP-KVM.
 
 <a name="nested_hugepages_config"></a>The `hugepages_config` block supports:
 
@@ -1757,7 +1763,8 @@ linux_node_config {
   * `enabled` (Required) - Whether writable cgroups are enabled.
 
 * `registry_hosts` (Optional) - Defines containerd registry host configuration. Each `registry_hosts` entry represents a `hosts.toml` file. See [customize containerd configuration in GKE nodes](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/customize-containerd-configuration#registryHosts) for more detail. Example:
-  ```hcl
+
+f```hcl
 registry_hosts {
   server = "REGISTRY_SERVER_FQDN"
   hosts {
