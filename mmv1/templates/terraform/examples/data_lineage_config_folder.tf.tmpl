@@ -1,5 +1,5 @@
 resource "google_data_lineage_config" "{{$.PrimaryResourceId}}" {
-  parent = "folders/{{index $.Vars "folder"}}"
+  parent = google_folder.integration.name
   location = "global"
 
   ingestion {
@@ -12,4 +12,10 @@ resource "google_data_lineage_config" "{{$.PrimaryResourceId}}" {
       }
     }
   }
+}
+
+resource "google_folder" "integration" {
+  display_name = "{{index $.Vars "folder_name"}}"
+  parent       = "organizations/{{index $.TestEnvVars "organization"}}"
+  deletion_protection = false
 }

@@ -51,13 +51,16 @@ examples:
   - name: 'data_lineage_config_folder'
     primary_resource_id: 'default'
     vars:
-      folder: 'integration'
-    exclude_test: true
+      folder_name: 'Integration'
+    test_env_vars:
+      organization: 'ORG_ID'
+    test_vars_overrides:
+      # for backward compatible
+      folder_name: '"Integration" + randomSuffix'
   - name: 'data_lineage_config_organization'
     primary_resource_id: 'default'
     test_env_vars:
       organization: 'ORG_ID'
-    exclude_test: true
 
 parameters:
   - name: 'parent'
