@@ -91,9 +91,10 @@ func TestAccStorageBucket_importBlockWithResourceIdentity(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:       "google_storage_bucket.bucket",
-				ImportState:        true,
-				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+				ResourceName:    "google_storage_bucket.bucket",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				// terraform_labels causes a non-empty plan due to ImportStateVerifyIgnore not being permitted with ImportBlockWithResourceIdentity
 				ExpectNonEmptyPlan: true,
 			},
 		},
