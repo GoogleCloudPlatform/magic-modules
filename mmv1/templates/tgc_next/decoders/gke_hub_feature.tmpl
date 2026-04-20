@@ -1,0 +1,8 @@
+if spec, ok := res["spec"].(map[string]interface{}); ok {
+	if clusterupgrade, ok := spec["clusterupgrade"].(map[string]interface{}); ok {
+		if _, ok := clusterupgrade["upstreamFleets"]; !ok {
+			clusterupgrade["upstreamFleets"] = []interface{}{}
+		}
+	}
+}
+return res, hclData, nil
