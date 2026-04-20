@@ -36,7 +36,7 @@ func NewGoogleDnsRecordSetListResource() list.ListResource {
 	listR.SDKv2Resource = ResourceDnsRecordSet()
 	listR.ListConfigFields = []tpgresource.ListConfigField{
 		{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true},
-		{Name: "managed_zone", Kind: tpgresource.ListConfigKindString, Required: true},
+		{Name: "managed_zone", Kind: tpgresource.ListConfigKindString, Optional: false},
 		{Name: "name", Kind: tpgresource.ListConfigKindString, Optional: true},
 		{Name: "type", Kind: tpgresource.ListConfigKindString, Optional: true},
 	}
