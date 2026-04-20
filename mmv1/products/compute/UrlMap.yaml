@@ -153,7 +153,6 @@ examples:
       mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_cache_policy_basic'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'home'
@@ -165,7 +164,6 @@ examples:
       backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_cache_policy_multi_level'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'home'
@@ -1092,7 +1090,6 @@ properties:
                           required: true
                   - name: 'cachePolicy'
                     type: NestedObject
-                    min_version: beta
                     description: |
                       Specifies the cache policy configuration for matched traffic. Available
                       only for Global EXTERNAL_MANAGED load balancer schemes. At least one
@@ -2156,7 +2153,6 @@ properties:
                           required: true
                   - name: 'cachePolicy'
                     type: NestedObject
-                    min_version: beta
                     description: |
                       Specifies the cache policy configuration for matched traffic. Available
                       only for Global EXTERNAL_MANAGED load balancer schemes. At least one
@@ -3046,7 +3042,6 @@ properties:
                         function: 'validation.FloatBetween(0, 100)'
             - name: 'cachePolicy'
               type: NestedObject
-              min_version: beta
               description: |
                 Specifies the cache policy configuration for matched traffic. Available
                 only for Global EXTERNAL_MANAGED load balancer schemes. At least one
@@ -4081,7 +4076,6 @@ properties:
                   function: 'validation.FloatBetween(0, 100)'
       - name: 'cachePolicy'
         type: NestedObject
-        min_version: beta
         description: |
           Specifies the cache policy configuration for matched traffic. Available
           only for Global EXTERNAL_MANAGED load balancer schemes. At least one
