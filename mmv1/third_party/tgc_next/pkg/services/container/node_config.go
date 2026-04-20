@@ -1027,6 +1027,36 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
+							"swap_config": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `Parameters that can be configured on Linux nodes.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"enabled": {
+											Type:        schema.TypeBool,
+											Optional:    true,
+											Description: `Whether or not swap is enabled`,
+										},
+										"boot_disk_profile": {
+											Type:        schema.TypeList,
+											Optional:    true,
+											MaxItems:    1,
+											Description: `Swap disk profile for boot disk`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"swap_size_gib": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Description: `Swap size in GiB`,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1967,7 +1997,54 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		linuxNodeConfig.NodeKernelModuleLoading = expandNodeKernelModuleLoading(v)
 	}
 
+	if v, ok := cfg["swap_config"]; ok {
+		linuxNodeConfig.SwapConfig = expandSwapConfig(v)
+	}
+
 	return linuxNodeConfig
+}
+
+func expandSwapConfig(v interface{}) *container.SwapConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.SwapConfig{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	swapConfig := &container.SwapConfig{}
+	if v, ok := cfg["enabled"]; ok {
+		swapConfig.Enabled = v.(bool)
+	}
+	if v, ok := cfg["boot_disk_profile"]; ok {
+		swapConfig.BootDiskProfile = expandBootDiskProfile(v)
+	}
+	return swapConfig
+}
+
+func expandBootDiskProfile(v interface{}) *container.BootDiskProfile {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.BootDiskProfile{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	bdp := &container.BootDiskProfile{}
+	if v, ok := cfg["swap_size_gib"]; ok {
+		bdp.SwapSizeGib = int64(v.(int))
+	}
+	return bdp
 }
 
 func expandWindowsNodeConfig(v interface{}) *container.WindowsNodeConfig {
@@ -3016,8 +3093,30 @@ func flattenLinuxNodeConfig(v interface{}) []map[string]interface{} {
 		"transparent_hugepage_enabled": c["transparentHugepageEnabled"],
 		"transparent_hugepage_defrag":  c["transparentHugepageDefrag"],
 		"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
+		"swap_config":                  flattenSwapConfig(c["swapConfig"]),
 	}
 
+	return []map[string]interface{}{transformed}
+}
+
+func flattenSwapConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"enabled": c["enabled"],
+	}
+	if bdp, ok := c["bootDiskProfile"].(map[string]interface{}); ok {
+		transformed["boot_disk_profile"] = []map[string]interface{}{
+			{
+				"swap_size_gib": bdp["swapSizeGib"],
+			},
+		}
+	}
 	return []map[string]interface{}{transformed}
 }
 
