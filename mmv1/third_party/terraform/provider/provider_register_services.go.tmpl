@@ -1,0 +1,22 @@
+package provider
+
+import (
+	// Register services with at least one Magic Modules resource by importing them.
+	{{- range $service := $.GetMmv1ServicesInVersion $.Products }}
+	_ "github.com/hashicorp/terraform-provider-google/google/services/{{ $service }}"
+	{{- end }}
+	_ "github.com/hashicorp/terraform-provider-google/google/services/apikeys"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/assuredworkloads"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudbuild"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/clouddeploy"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containeraws"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containeraws"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containerazure"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containerazure"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dataflow"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dataplex"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dataproc"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/firebaserules"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/gkehub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/recaptchaenterprise"
+)
