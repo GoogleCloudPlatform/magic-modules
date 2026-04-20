@@ -299,7 +299,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     loc := tpgresource.LocationFromId(urlFormatted)
 
-    basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+    basePath, err := transport_tpg.ResourceBasePath(config.BasePaths["{{ lower $.ProductMetadata.Name }}"], config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
     if err != nil {
         return fmt.Errorf("Error qualifying Create base path for {{ $.Name -}}: %s", err)
     }
@@ -571,7 +571,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         }
         loc := tpgresource.LocationFromId(urlFormatted)
 
-        basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+        basePath := transport_tpg.ResourceBasePath(config.BasePaths["{{ lower $.ProductMetadata.Name }}"], config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
         if err != nil {
             return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
         }
@@ -679,7 +679,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
     loc := tpgresource.LocationFromId(urlFormatted)
 
-    basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+    basePath, err := transport_tpg.ResourceBasePath(config.BasePaths["{{ lower $.ProductMetadata.Name }}"], config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
     if err != nil {
         return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
     }
@@ -965,7 +965,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{- if $.ProductMetadata.Version.RepEnabled }}
     loc := tpgresource.LocationFromId(d.Id())
 
-    basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+    basePath, err := transport_tpg.ResourceBasePath(config.BasePaths["{{ lower $.ProductMetadata.Name }}"], config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
     if err != nil {
         return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
     }
@@ -1075,7 +1075,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{- if $.ProductMetadata.Version.RepEnabled }}
         loc := tpgresource.LocationFromId(d.Id())
 
-        basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+        basePath, err := transport_tpg.ResourceBasePath(config.BasePaths["{{ lower $.ProductMetadata.Name }}"], config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
         if err != nil {
             return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
         }
@@ -1169,7 +1169,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{- if $.ProductMetadata.Version.RepEnabled }}
         loc := tpgresource.LocationFromId(d.Id())
 
-        basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+        basePath, err := transport_tpg.ResourceBasePath(config.BasePaths["{{ lower $.ProductMetadata.Name }}"], config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
         if err != nil {
             return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
         }
@@ -1306,7 +1306,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{- if $.ProductMetadata.Version.RepEnabled }}
     loc := tpgresource.LocationFromId(d.Id())
 
-    basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
+    basePath, err := transport_tpg.ResourceBasePath(config.BasePaths["{{ lower $.ProductMetadata.Name }}"], config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
     if err != nil {
         return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
     }

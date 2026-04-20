@@ -266,7 +266,6 @@ type Config struct {
 
 	BasePaths map[string]string
 	{{ range $product := $.Products }}
-	{{ $product.Name }}BasePath string
 	{{- if ne $product.Version.RepUrl "" }}
 	{{ $product.Name }}RepBasePath string
 	{{- end -}}
@@ -330,7 +329,7 @@ var DefaultBasePaths = map[string]string{
 // product support
 var DefaultRepStatus = map[string]bool{
 {{- range $product := $.Products }}
-	{{ $product.Name }}BasePathKey : {{ $product.RepByDefault }},
+	"{{ $product.Name }}": {{ $product.RepByDefault }},
 {{- end }}
 }
 
