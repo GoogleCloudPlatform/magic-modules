@@ -150,11 +150,11 @@ func flattenStorageBucketListItem(item map[string]interface{}, d *schema.Resourc
 
 // storageBucketListOpts carries optional buckets.list query parameters (zero value = omit).
 type storageBucketListOpts struct {
-	prefix                 string
-	maxResults             int64
-	projection             string
-	returnPartialSuccess   bool
-	softDeleted            bool
+	prefix               string
+	maxResults           int64
+	projection           string
+	returnPartialSuccess bool
+	softDeleted          bool
 }
 
 func ListStorageBuckets(config *transport_tpg.Config, project string, opts storageBucketListOpts, callback func(*schema.ResourceData) error) error {

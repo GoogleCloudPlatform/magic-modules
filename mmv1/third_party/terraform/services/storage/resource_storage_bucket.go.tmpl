@@ -1376,17 +1376,51 @@ func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}
 	// importing a bucket that is in a different project than the provider default.
 	// ParseImportID can't be used because having no project will cause an error but it
 	// is a valid state as the project_id will be retrieved in READ
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) == 1 {
-		if err := d.Set("name", parts[0]); err != nil {
+	//
+	// Plannable import with identity (Terraform 1.12+) passes an empty import id; identity
+	// attributes are populated on ResourceData before this importer runs.
+	if d.Id() == "" {
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("importing google_storage_bucket: %w", err)
+		}
+		nameVal, ok := identity.GetOk("name")
+		if !ok {
+			return nil, fmt.Errorf("importing google_storage_bucket: missing required identity attribute \"name\"")
+		}
+		bucketName, ok := nameVal.(string)
+		if !ok || bucketName == "" {
+			return nil, fmt.Errorf("importing google_storage_bucket: identity attribute \"name\" must be a non-empty string")
+		}
+		if err := d.Set("name", bucketName); err != nil {
 			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
-	} else if len(parts) > 1 {
-		if err := d.Set("project", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error setting project: %s", err)
+		var importID string
+		if projVal, ok := identity.GetOk("project"); ok {
+			if project, ok := projVal.(string); ok && project != "" {
+				if err := d.Set("project", project); err != nil {
+					return nil, fmt.Errorf("Error setting project: %s", err)
+				}
+				importID = project + "/" + bucketName
+			}
 		}
-		if err := d.Set("name", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error setting name: %s", err)
+		if importID == "" {
+			importID = bucketName
+		}
+		d.SetId(importID)
+	} else {
+		parts := strings.Split(d.Id(), "/")
+		if len(parts) == 1 {
+			if err := d.Set("name", parts[0]); err != nil {
+				return nil, fmt.Errorf("Error setting name: %s", err)
+			}
+		} else if len(parts) > 1 {
+			if err := d.Set("project", parts[0]); err != nil {
+				return nil, fmt.Errorf("Error setting project: %s", err)
+			}
+			if err := d.Set("name", parts[1]); err != nil {
+				return nil, fmt.Errorf("Error setting name: %s", err)
+			}
 		}
 	}
 
@@ -2428,6 +2462,10 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 		if err := d.Set("project", projectName); err != nil {
 			return fmt.Errorf("Error setting project: %s", err)
 		}
+	}
+
+	if err := d.Set("name", bucket); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 
 	// Update the bucket ID according to the resource ID
