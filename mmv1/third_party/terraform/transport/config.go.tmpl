@@ -304,6 +304,9 @@ const TagsLocationBasePathKey = "TagsLocation"
 
 // Generated product base paths
 var DefaultBasePaths = map[string]string{
+{{- range $product := $.Products }}
+	"{{ $product.Name }}": "{{ $product.Version.BaseUrl }}",
+{{- end }}
 	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
 	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
 	IAMBasePathKey : "https://iam.googleapis.com/v1/",
