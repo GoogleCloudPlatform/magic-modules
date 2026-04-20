@@ -119,7 +119,7 @@ custom_code:
 virtual_fields:
   - name: 'deletion_policy'
     description: |
-      Optional. The deletion policy for the reasoning engine. 
+      Optional. The deletion policy for the reasoning engine.
       Setting this to FORCE allows the reasoning engine to be deleted regardless of child undeleted resources.
 
       When a 'terraform destroy' or 'terraform apply' would delete the resource,

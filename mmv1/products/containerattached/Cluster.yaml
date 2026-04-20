@@ -64,7 +64,7 @@ examples:
 virtual_fields:
   - name: 'deletion_policy'
     description: |
-      Policy to determine what flags to send on delete. 
+      Policy to determine what flags to send on delete.
 
       When a 'terraform destroy' or 'terraform apply' would delete the resource,
       the command will fail if this field is set to "PREVENT" in Terraform state.

@@ -87,8 +87,8 @@ virtual_fields:
   - name: 'deletion_policy'
     type: Enum
     description: |
-      Policy to control how the repository and its child resources are deleted. 
-      When set to `FORCE`, any child resources of this repository will also be deleted. 
+      Policy to control how the repository and its child resources are deleted.
+      When set to `FORCE`, any child resources of this repository will also be deleted.
 
       When a 'terraform destroy' or 'terraform apply' would delete the resource,
       the command will fail if this field is set to "PREVENT" in Terraform state.
