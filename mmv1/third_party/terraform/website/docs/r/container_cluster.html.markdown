@@ -1763,8 +1763,7 @@ linux_node_config {
   * `enabled` (Required) - Whether writable cgroups are enabled.
 
 * `registry_hosts` (Optional) - Defines containerd registry host configuration. Each `registry_hosts` entry represents a `hosts.toml` file. See [customize containerd configuration in GKE nodes](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/customize-containerd-configuration#registryHosts) for more detail. Example:
-
-f```hcl
+```hcl
 registry_hosts {
   server = "REGISTRY_SERVER_FQDN"
   hosts {
@@ -1796,7 +1795,7 @@ registry_hosts {
     }
   }
 }
-  ```
+```
 
 <a name="nested_vertical_pod_autoscaling"></a>The `vertical_pod_autoscaling` block supports:
 
