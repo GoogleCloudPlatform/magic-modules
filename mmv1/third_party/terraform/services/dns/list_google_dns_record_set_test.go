@@ -1,0 +1,69 @@
+package resourcemanager_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccDNSRecordSetListResource_queryIdentity(t *testing.T) {
+	t.Parallel()
+
+	zoneName := "dnszone-test-" + acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	recordName := fmt.Sprintf("test-record.%s.hashicorptest.com", zoneName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSRecordSet_Basic(zoneName, "127.0.0.10", 300),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "project", project),
+					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "managed_zone", zoneName),
+					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "name", recordName),
+					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "type", "A"),
+				),
+			},
+			{
+				Query:  true,
+				Config: testAccDNSRecordSetListQuery(project, zoneName),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity("google_dns_record_set.all_in_zone", map[string]knownvalue.Check{
+						"project":      knownvalue.StringExact(project),
+						"managed_zone": knownvalue.StringExact(zoneName),
+						"name":         knownvalue.StringExact(recordName),
+						"type":         knownvalue.StringExact("A"),
+					}),
+					querycheck.ExpectLengthAtLeast("google_dns_record_set.all_in_zone", 1),
+				},
+			},
+		},
+	})
+}
+
+func testAccDNSRecordSetListQuery(project, managedZone string) string {
+	return fmt.Sprintf(`
+provider "google" {}
+
+list "google_dns_record_set" "all_in_zone" {
+  provider = google
+
+  config {
+    project = %q
+    managed_zone = %q
+  }
+}
+`, project, managedZone)
+}
