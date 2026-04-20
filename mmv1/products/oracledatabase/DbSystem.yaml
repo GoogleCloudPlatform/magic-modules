@@ -55,6 +55,7 @@ examples:
       db_system_id: 'my-instance'
       database_id: 'mydb'
       db_unique_name: 'db'
+      pluggable_database_id:  'mypdb'
       odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
       odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
       deletion_protection: 'true'
@@ -69,6 +70,7 @@ examples:
       # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
       db_system_id: 'fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))'
       database_id: 'fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))'
+      pluggable_database_id:  'fmt.Sprintf("ofake-tf-test-mypdb-%s", acctest.RandString(t, 10))'
       db_unique_name: 'fmt.Sprintf("db%s", acctest.RandString(t, 10))'
       odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
@@ -274,6 +276,14 @@ properties:
                   FAILED_ENABLING
                   FAILED_DISABLING
                 output: true
+              - name: pluggableDatabaseId
+                type: String
+                description:  The ID of the pluggable database associated with Database. The ID must be unique within the project and location.
+                default_from_api: true
+              - name: pluggableDatabaseName
+                type: String
+                description:  The pluggable dataabse associated with the Database. The name must begin with an alphabetic character and can contain a maximum of thirty alphanumeric characters.
+                default_from_api: true
               - name: properties
                 type: NestedObject
                 description: The properties of a Database.

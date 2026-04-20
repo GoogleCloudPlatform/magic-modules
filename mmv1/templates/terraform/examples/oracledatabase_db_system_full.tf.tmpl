@@ -25,6 +25,8 @@ resource "google_oracle_database_db_system" "{{$.PrimaryResourceId}}"{
                 admin_password = "ABcde_1#2345"
                 tde_wallet_password = "ABcde_1#2345"
                 database_id = "{{index $.Vars "database_id"}}"
+                pluggable_database_id = "{{index $.Vars "pluggable_database_id"}}"
+                pluggable_database_name = "mypdb"
             }
             is_unified_auditing_enabled = "true"
         }
