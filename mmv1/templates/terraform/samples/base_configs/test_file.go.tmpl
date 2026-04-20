@@ -194,7 +194,7 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		}
 
 		loc := tpgresource.LocationFromId(urlFormatted)
-		basePath, err := transport_tpg.ResourceBasePath(config.{{$.Res.ProductMetadata.Name}}BasePath, config.{{$.Res.ProductMetadata.Name}}RepBasePath, "{{$.Res.ProductMetadata.Name}}", config, loc)
+		basePath, err := transport_tpg.ResourceBasePath(config.BasePaths["{{ lower $.Res.ProductMetadata.Name }}"], config.{{$.Res.ProductMetadata.Name}}RepBasePath, "{{$.Res.ProductMetadata.Name}}", config, loc)
 		if err != nil {
 			return err
 		}
