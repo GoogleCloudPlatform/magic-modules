@@ -18,4 +18,5 @@ var generatedListResources = []func() list.ListResource{}
 var handwrittenListResources = []func() list.ListResource{
 	listResourceFunc(resourcemanager.NewGoogleServiceAccountListResource()),
 	listResourceFunc(storage.NewGoogleStorageBucketListResource()),
+	listResourceFunc(resourcemanager.NewGoogleProjectServiceListResource()),
 }

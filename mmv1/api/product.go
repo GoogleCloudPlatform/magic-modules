@@ -80,6 +80,10 @@ type Product struct {
 
 	// ImportPath contains the prefix used for importing packages in generated files.
 	ImportPath string `yaml:"-"`
+
+	// RepByDefault is if this product should default to REP endpoints if
+	// available. Changing this requires REP to be supported in *ALL* regions
+	RepByDefault bool `yaml:"rep_by_default,omitempty"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {
