@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 	"time"
@@ -2625,6 +2626,86 @@ resource "google_compute_instance_from_template" "foobar" {
 		subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
 		igmp_query = "%{igmp_query}"
 	}
+}
+`, context)
+}
+
+func TestAccComputeInstanceFromTemplate_EnableVpcScopedDns(t *testing.T) {
+{{- if eq $.TargetVersionName "ga" }}
+	t.Skip("enable_vpc_scoped_dns is only available in beta")
+{{- end }}
+	t.Parallel()
+	acctest.SkipIfVcr(t)
+	if os.Getenv("TF_ACC_ENABLE_VPC_SCOPED_DNS") == "" {
+		t.Skip("Skipping test as it requires an allow-listed project. Set TF_ACC_ENABLE_VPC_SCOPED_DNS to run.")
+	}
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
+	context := map[string]interface{}{
+		"suffix":                  suffix,
+		"network_attachment_name": fmt.Sprintf("tf-test-na-%s", suffix),
+		"region":                  envRegion,
+		"network_name":            acctest.BootstrapSharedTestNetwork(t, "instance-from-tpl"),
+		"subnetwork_name":         acctest.BootstrapSubnet(t, "instance-from-tpl-sub", acctest.BootstrapSharedTestNetwork(t, "instance-from-tpl")),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromTemplate_enableVpcScopedDns(context),
+			},
+		},
+	})
+}
+
+func testAccComputeInstanceFromTemplate_enableVpcScopedDns(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+	name = "%{network_attachment_name}"
+    region = "%{region}"
+    connection_preference = "ACCEPT_AUTOMATIC"
+
+    subnetworks = [
+        "%{subnetwork_name}"
+    ]
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "tf-test-template-%{suffix}"
+  machine_type = "e2-medium"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_instance_from_template" "foobar" {
+  name                     = "tf-test-instance-%{suffix}"
+  source_instance_template = google_compute_instance_template.foobar.self_link
+  zone                     = "%{region}-a"
+
+  network_interface {
+    network = "default"
+  }
+
+  network_interface {
+    network_attachment    = google_compute_network_attachment.test_network_attachment.self_link
+    enable_vpc_scoped_dns = true
+  }
 }
 `, context)
 }

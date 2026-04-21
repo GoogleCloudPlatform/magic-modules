@@ -3,6 +3,7 @@ package compute_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -1442,4 +1443,89 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 
 {{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" }}
+func TestAccComputeInstanceFromMachineImage_EnableVpcScopedDns(t *testing.T) {
+	t.Parallel()
+	acctest.SkipIfVcr(t)
+	if os.Getenv("TF_ACC_ENABLE_VPC_SCOPED_DNS") == "" {
+		t.Skip("Skipping test as it requires an allow-listed project. Set TF_ACC_ENABLE_VPC_SCOPED_DNS to run.")
+	}
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
+	context := map[string]interface{}{
+		"suffix":                  suffix,
+		"network_attachment_name": fmt.Sprintf("tf-test-na-%s", suffix),
+		"region":                  envRegion,
+		"network_name":            acctest.BootstrapSharedTestNetwork(t, "instance-from-mi"),
+		"subnetwork_name":         acctest.BootstrapSubnet(t, "instance-from-mi-sub", acctest.BootstrapSharedTestNetwork(t, "instance-from-mi")),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_enableVpcScopedDns(context),
+			},
+		},
+	})
+}
+
+func testAccComputeInstanceFromMachineImage_enableVpcScopedDns(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-12"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+	name = "%{network_attachment_name}"
+    region = "%{region}"
+    connection_preference = "ACCEPT_AUTOMATIC"
+
+    subnetworks = [
+        "%{subnetwork_name}"
+    ]
+}
+
+resource "google_compute_instance" "vm" {
+  name         = "tf-test-vm-%{suffix}"
+  machine_type = "e2-medium"
+  zone         = "%{region}-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_machine_image" "foobar" {
+  name            = "tf-test-image-%{suffix}"
+  source_instance = google_compute_instance.vm.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  name                 = "tf-test-instance-%{suffix}"
+  zone                 = "%{region}-a"
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  network_interface {
+    network = "default"
+  }
+
+  network_interface {
+    network_attachment    = google_compute_network_attachment.test_network_attachment.self_link
+    enable_vpc_scoped_dns = true
+  }
+}
+`, context)
+}
 {{- end }}

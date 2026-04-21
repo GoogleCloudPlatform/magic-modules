@@ -4,6 +4,7 @@ package compute_test
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
 	"regexp"
 	"strings"
@@ -5131,3 +5132,89 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 {{- end }}
+
+func TestAccComputeRegionInstanceTemplate_EnableVpcScopedDns(t *testing.T) {
+{{- if eq $.TargetVersionName "ga" }}
+	t.Skip("enable_vpc_scoped_dns is only available in beta")
+{{- end }}
+	t.Parallel()
+	acctest.SkipIfVcr(t)
+	if os.Getenv("TF_ACC_ENABLE_VPC_SCOPED_DNS") == "" {
+		t.Skip("Skipping test as it requires an allow-listed project. Set TF_ACC_ENABLE_VPC_SCOPED_DNS to run.")
+	}
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
+	context := map[string]interface{}{
+		"suffix":                  suffix,
+		"network_attachment_name": fmt.Sprintf("tf-test-na-%s", suffix),
+		"region":                  envRegion,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_enableVpcScopedDns(context),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_template.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionInstanceTemplate_enableVpcScopedDns(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network" "test-network"{
+	name = "tf-test-network-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test-subnetwork" {
+	name          = "tf-test-compute-subnet-%{suffix}"
+	ip_cidr_range = "10.0.0.0/16"
+	region        = "%{region}"
+	network       = google_compute_network.test-network.id
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+	name = "%{network_attachment_name}"
+    region = "%{region}"
+    connection_preference = "ACCEPT_AUTOMATIC"
+
+    subnetworks = [
+        google_compute_subnetwork.test-subnetwork.self_link
+    ]
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name         = "tf-test-instance-template-%{suffix}"
+  machine_type = "e2-medium"
+  region       = "%{region}"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  network_interface {
+    network_attachment    = google_compute_network_attachment.test_network_attachment.self_link
+    enable_vpc_scoped_dns = true
+  }
+}
+`, context)
+}

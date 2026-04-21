@@ -544,6 +544,12 @@ properties:
             projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
           resource: 'networkAttachment'
           imports: 'selfLink'
+        - name: 'enableVpcScopedDns'
+          type: Boolean
+          description: |
+            If set to true, enables DNS resolution over this PSC interface. Valid only with network_attachment.
+            Note: This is currently in restricted preview and requires project allow-listing.
+          min_version: 'beta'
   - name: 'scheduling'
     type: NestedObject
     description: Sets the scheduling options for this instance.
