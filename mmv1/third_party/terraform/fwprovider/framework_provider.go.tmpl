@@ -21,6 +21,7 @@ import (
     "github.com/hashicorp/terraform-provider-google/google/fwvalidators"
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
+    "github.com/hashicorp/terraform-provider-google/google/registry"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
     "github.com/hashicorp/terraform-provider-google/google/services/apigee"
     "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
@@ -179,15 +180,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "prefer_regional_endpoints": schema.BoolAttribute{
                 Optional: true,
             },
-            // Generated Products
-            {{- range $product := $.Products }}
-            "{{ underscore $product.Name }}_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            {{- end }}
 
             // Handwritten Products / Versioned / Atypical Entries
             "cloud_billing_custom_endpoint": &schema.StringAttribute{
@@ -321,6 +313,14 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
         },
     }
+	for _, p := range registry.ListProducts() {
+        resp.Schema.Attributes[p.CustomEndpointField] = &schema.StringAttribute{
+            Optional:     true,
+            Validators: []validator.String{
+                transport_tpg.CustomEndpointValidator(),
+            },
+        }
+	}
 }
 
 // Configure prepares the metadata/'meta' required for data sources and resources to function.
