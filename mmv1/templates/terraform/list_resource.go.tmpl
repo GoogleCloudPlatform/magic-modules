@@ -106,13 +106,7 @@ func (listR *{{ $.ResourceName -}}ListResource) List(ctx context.Context, listRe
 			func(rd *schema.ResourceData) error {
 				result := listReq.NewListResult(ctx)
 
-				if n, ok := rd.GetOk("name"); ok {
-					if s, ok := n.(string); ok {
-						result.DisplayName = s
-					}
-				}
-
-				if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd); err != nil {
+				if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd{{- range $k := $.ListResultDisplayNameKeyStrings }}, "{{ $k }}"{{- end }}); err != nil {
 					return err
 				}
 
