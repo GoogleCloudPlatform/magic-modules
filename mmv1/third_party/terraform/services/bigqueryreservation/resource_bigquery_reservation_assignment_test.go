@@ -20,7 +20,7 @@ func TestAccBigQueryReservationAssignment_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryReservationAssignment_basic(context),
+				Config: testAccBigQueryReservationAssignment_basic(t, context),
 			},
 			{
 				ResourceName:      "google_bigquery_reservation_assignment.primary",
@@ -31,7 +31,7 @@ func TestAccBigQueryReservationAssignment_basic(t *testing.T) {
 	})
 }
 
-func testAccBigQueryReservationAssignment_basic(context map[string]interface{}) string {
+func testAccBigQueryReservationAssignment_basic(t *testing.T, context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_reservation" "basic" {
   name            = "tf-test-res-%{random_suffix}"
@@ -48,8 +48,8 @@ resource "google_bigquery_reservation_assignment" "primary" {
   reservation = google_bigquery_reservation.basic.id
 }
 `, map[string]interface{}{
-		"random_suffix":  context["random_suffix"],
-		"project_id":     envvar.GetTestProjectFromEnv(),
-		"service_account": envvar.GetTestServiceAccountFromEnv(),
+		"random_suffix":   context["random_suffix"],
+		"project_id":      envvar.GetTestProjectFromEnv(),
+		"service_account": envvar.GetTestServiceAccountFromEnv(t),
 	})
 }
