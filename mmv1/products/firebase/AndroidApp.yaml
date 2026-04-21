@@ -47,6 +47,8 @@ async:
 identity:
   - appId
   - name
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/firebase_app_deletion_policy.tmpl'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
