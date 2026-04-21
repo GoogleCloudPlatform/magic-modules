@@ -188,15 +188,6 @@ func Provider() *schema.Provider {
 				Optional: true,
 			},
 
-			// Generated Products
-			{{- range $product := $.Products }}
-			"{{ underscore $product.Name }}_custom_endpoint": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
-			},
-			{{- end }}
-
 			// Handwritten Products / Versioned / Atypical Entries
 			transport_tpg.CloudBillingCustomEndpointEntryKey:           transport_tpg.CloudBillingCustomEndpointEntry,
 			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
@@ -234,6 +225,14 @@ func Provider() *schema.Provider {
 		DataSourcesMap: registry.DatasourceMap(),
 {{- end }}
 		ResourcesMap: registry.ResourceMap(),
+	}
+
+	for _, p := range registry.ListProducts() {
+		provider.Schema[p.CustomEndpointField] = &schema.Schema{
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: transport_tpg.ValidateCustomEndpoint,
+		}
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
