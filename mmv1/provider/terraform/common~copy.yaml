@@ -83,7 +83,6 @@
 <%
   Dir["third_party/terraform/transport/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
-    next if fname == "cloud_clients.go"
 -%>
 '<%= dir -%>/transport/<%= fname -%>': 'third_party/terraform/transport/<%= fname -%>'
 <% end -%>
