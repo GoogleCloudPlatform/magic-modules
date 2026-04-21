@@ -41,32 +41,26 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
 		ItemName:       "{{ $.ResourceListKey }}",
-		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config, _ ...string) error {
+		// Merge one list item into rd via Resource{{ $.ResourceName }}Flatten, then SetId. Do not set identity
+		// or list-scope parameters on rd here; list result identity is applied in the List() stream callback (SetResult).
+		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 {{- if $.ExcludeRead }}
 			return fmt.Errorf("list resource for {{ $.Name }} requires read support (Resource{{ $.ResourceName }}Flatten is not generated when exclude_read is set)")
 {{- else }}
-			meta := interface{}(config)
 			headers := make(http.Header)
-{{- range $scope := $.ListScopeProperties }}
-			if {{ $scope.CamelizeProperty }} != "" {
-				if err := d.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
-					return fmt.Errorf("error setting {{ underscore $scope.Name }} on list item temporary resource data: %w", err)
-				}
-			}
-{{- end }}
 {{- if $.HasProject }}
-			itemProject, err := tpgresource.GetProject(d, config)
-			if err != nil {
-				return fmt.Errorf("error fetching project for {{ $.Name }}: %w", err)
+{{- range $scope := $.ListScopeProperties }}
+{{- if eq $scope.Name "project" }}
+			if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ $scope.CamelizeProperty }}, userAgent, billingProject, url, headers); err != nil {
+				return err
 			}
 {{- end }}
-			readURL, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
-			if err != nil {
+{{- end }}
+{{- else }}
+			if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
-			if err := Resource{{ $.ResourceName }}Flatten(d, meta, res, config, {{- if $.HasProject }}itemProject,{{ end }} userAgent, billingProject, readURL, headers); err != nil {
-				return err
-			}
+{{- end }}
 			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
 			if err != nil {
 				return fmt.Errorf("Error constructing id: %s", err)
