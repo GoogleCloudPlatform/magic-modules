@@ -560,6 +560,12 @@ properties:
                 which can be either null, a number, a string, a boolean, a struct,
                 or a list of values. The provided default value must be compatible
                 with the defined 'type' and other schema constraints.
+              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+              send_empty_value: true
+              validation:
+                function: validation.StringIsJSON
+              custom_expand: templates/terraform/custom_expand/json_value.tmpl
+              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: additionalProperties
               type: String
               description: |-
