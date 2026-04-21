@@ -229,7 +229,7 @@ resource "google_ces_app" "ces_app_basic" {
   client_certificate_settings {
     tls_certificate = file("test-fixtures/cert.pem")
     private_key = google_secret_manager_secret_version.fake_secret_version.name
-    passphrase = "fakepassphrase"
+    passphrase = google_secret_manager_secret_version.fake_secret_version.name
   }
 
 
