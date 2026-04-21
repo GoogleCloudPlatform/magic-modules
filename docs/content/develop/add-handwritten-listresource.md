@@ -2,10 +2,6 @@
 title: "Add a list resource"
 summary: "List resources let users run terraform query against existing Google Cloud resources of a given managed type."
 weight: 65
-aliases:
-  - /docs/how-to/add-handwritten-listresource
-  - /how-to/add-handwritten-listresource
-  - /develop/add-handwritten-listresource
 ---
 
 # Add a handwritten list resource
