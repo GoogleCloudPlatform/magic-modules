@@ -208,7 +208,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 Optional: true,
                 Computed: true,
     {{- if $.DeletionPolicyCustomDocs}}
-                Description: `This field uses a custom implementation please refer to documentation for specifics`,
+                Description: `This field uses a custom implementation please refer to documentation under /hashicorp/terraform-provider-google-beta/website/docs/r/{{ underscore $.ResourceName}}.html.markdown for specifics`,
     {{else}}
                 Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
 When a 'terraform destroy' or 'terraform apply' would delete the instance,
