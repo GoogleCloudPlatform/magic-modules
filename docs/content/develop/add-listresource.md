@@ -38,6 +38,23 @@ Add the file under the appropriate service folder in [`magic-modules/mmv1/third_
 Skeleton for `List` (the method on your list resource type): it reads config, then delegates paging to `List<…>`, whose callback receives a fully populated `ResourceData` per row and calls `SetResult`. This mirrors [`list_google_service_account.go`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/services/resourcemanager/list_google_service_account.go):
 
 ```go
+import (
+	"context"
+	"errors"
+	"fmt"
+	"regexp"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"google.golang.org/api/iam/v1"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
 type GoogleExampleListResource struct {
 	tpgresource.ListResourceMetadata
 }
@@ -87,8 +104,6 @@ func (listR *GoogleExampleListResource) List(ctx context.Context, listReq list.L
 	}
 }
 ```
-
-Add the usual imports (`context`, `errors`, `list`, `schema`, `tpgresource`, etc.). The `ListExamples` name is illustrative—implement `List<YourApiCollection>` in the same file as in the following section.
 
 Important: `SetResult` expects `ResourceData` consistent with `SDKv2Resource` (same schema and identity).
 
