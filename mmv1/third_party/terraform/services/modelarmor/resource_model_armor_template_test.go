@@ -43,10 +43,7 @@ resource "google_model_armor_template" "template-basic" {
   location    = "%{location}"
   template_id = "%{templateId}"
   filter_config {
-  
-  }
-  template_metadata {
-  
+
   }
 }`, context)
 }
