@@ -549,10 +549,6 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string
 			if di.Name() == "gha-branch-renaming.png" || di.Name() == "clock-timings-of-branch-making-and-usage.png" {
 				return nil
 			}
-			// Handwritten in the provider; do not copy from third_party (see getCompileFilesInFolder for .tmpl).
-			if di.Name() == "cloud_clients.go" {
-				return nil
-			}
 
 			fname := strings.TrimPrefix(path, "third_party/terraform/")
 			target := fname
@@ -665,10 +661,6 @@ func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[str
 			return err
 		}
 		if !di.IsDir() && strings.HasSuffix(di.Name(), ".tmpl") {
-			// Provider maintains google/transport/cloud_clients.go by hand while phasing out generated clients.
-			if di.Name() == "cloud_clients.go.tmpl" {
-				return nil
-			}
 			fname := strings.TrimPrefix(path, "third_party/terraform/")
 			fname = strings.TrimSuffix(fname, ".tmpl")
 			target := fname
