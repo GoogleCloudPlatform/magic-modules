@@ -4649,6 +4649,7 @@ resource "google_container_cluster" "cluster" {
   deletion_protection = false
   network             = "%s"
   subnetwork          = "%s"
+  initial_node_count  = 1
 
   node_config {
     machine_type = "a4-highgpu-8g"
