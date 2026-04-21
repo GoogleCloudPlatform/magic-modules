@@ -101,6 +101,30 @@ func ResourceDnsRecordSet() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 		),
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"managed_zone": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"type": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
 				Type:             schema.TypeString,
@@ -483,6 +507,14 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
+	}
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":      project,
+		"managed_zone": zone,
+		"name":         rrset.Name,
+		"type":         rrset.Type,
+	}); err != nil {
+		return fmt.Errorf("Error setting resource identity: %s", err)
 	}
 
 	return nil

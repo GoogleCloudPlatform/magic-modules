@@ -1,4 +1,4 @@
-package resourcemanager_test
+package dns_test
 
 import (
 	"fmt"
@@ -16,9 +16,10 @@ import (
 func TestAccDNSRecordSetListResource_queryIdentity(t *testing.T) {
 	t.Parallel()
 
-	zoneName := "dnszone-test-" + acctest.RandString(t, 10)
+	zoneName := "list-dnszone-test-" + acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
-	recordName := fmt.Sprintf("test-record.%s.hashicorptest.com", zoneName)
+	t.Logf("Using project %s for testing", project)
+	recordName := fmt.Sprintf("test-record.%s.hashicorptest.com.", zoneName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
@@ -28,7 +29,7 @@ func TestAccDNSRecordSetListResource_queryIdentity(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSRecordSet_Basic(zoneName, "127.0.0.10", 300),
+				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "project", project),
 					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "managed_zone", zoneName),
