@@ -1,0 +1,165 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ServiceConnectionMap'
+description: |
+  Manage Service Connection Maps.
+references:
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.serviceConnectionMaps'
+base_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionMaps'
+self_link: 'projects/{{project}}/locations/{{location}}/serviceConnectionMaps/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionMaps?serviceConnectionMapId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/serviceConnectionMaps/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    resource_inside_response: false
+
+examples:
+  - name: 'network_connectivity_service_connection_map_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-service-connection-map'
+      service_class_name: 'my-basic-service-class'
+      service_attachment_name: 'my-service-attachment'
+      network_name: 'my-network'
+      producer_subnetwork_name: 'my-subnetwork'
+      nat_subnetwork_name: 'my-nat-subnetwork'
+      producer_forwarding_rule_name: 'my-forwarding-rule'
+      producer_service_name: 'my-service'
+      producer_health_check_name: 'my-health-check'
+    test_vars_overrides:
+      'service_class_name': '"google-cloud-filestore"'
+
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      The name of a ServiceConnectionMap.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the ServiceConnectionMap.
+    url_param_only: true
+    required: true
+    immutable: true
+
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+    output: true
+  - name: 'serviceClass'
+    type: String
+    description: |
+      The service class identifier for which this ServiceConnectionMap is for.
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: |
+      Free-text description of the resource.
+  - name: 'serviceClassUri'
+    type: String
+    description: |
+      The service class URI for which this ServiceConnectionMap is for.
+    output: true
+  - name: 'infrastructure'
+    type: String
+    description: |
+      The type of underlying resources used to create the connection.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      User-defined labels.
+  - name: 'producerPscConfigs'
+    type: Array
+    description: |
+      The PSC configurations on producer side.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'serviceAttachmentUri'
+          type: String
+          description: |
+            The resource path of a service attachment.
+  - name: 'consumerPscConfigs'
+    type: Array
+    description: |
+      Allow the producer to specify which consumers can connect to it.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'project'
+          type: String
+          description: |
+            The consumer project number or id.
+        - name: 'network'
+          type: String
+          description: |
+            The consumer network.
+        - name: 'disableGlobalAccess'
+          type: Boolean
+          description: |
+            Whether to disable global access for the consumer.
+        - name: 'state'
+          type: Enum
+          description: |
+            The state of the consumer PSC connection.
+          output: true
+          enum_values:
+            - 'STATE_UNSPECIFIED'
+            - 'ACTIVE'
+            - 'CREATING'
+            - 'DELETING'
+            - 'FAILED'
+        - name: 'producerInstanceId'
+          type: String
+          description: |
+            The producer instance id.
+          output: true
+        - name: 'serviceAttachmentIpAddressMap'
+          type: KeyValuePairs
+          description: |
+            Map of IP addresses keyed by service attachment.
+          output: true
+        - name: 'consumerInstanceProject'
+          type: String
+          description: |
+            The consumer instance project.
