@@ -1523,6 +1523,14 @@ if res == nil {
     return nil
 }
 {{ end }}
+{{- /* url_param_only fields are omitted from GettableProperties; decoder/API may still place them on res (e.g. name from metadata). Copy into ResourceData before the gettable-property loop. */ -}}
+{{- range $id := $.IdentityProperties }}
+	if v, ok := res["{{ $id.ApiName }}"]; ok && v != nil {
+		if err := d.Set("{{ underscore $id.Name }}", v); err != nil {
+			return fmt.Errorf("Error setting {{ underscore $id.Name }}: %s", err)
+		}
+	}
+{{- end }}
 {{ range $prop := $.GettableProperties }}
 {{if $prop.FlattenObject -}}
 // Terraform must set the top level schema field, but since this object contains collapsed properties
