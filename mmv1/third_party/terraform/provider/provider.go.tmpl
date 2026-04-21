@@ -321,8 +321,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// at client creation. Since we use a shared client for requests we must
 	// rewrite the endpoints to be mtls endpoints for the scenario where
 	// mtls is enabled.
-	config.IsMtls = isMtls()
-	if config.IsMtls {
+	if isMtls() {
 		// if mtls is enabled switch all default endpoints to use the mtls endpoint
 		for key, bp := range transport_tpg.DefaultBasePaths {
 			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
