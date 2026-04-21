@@ -78,7 +78,7 @@ func (listR *GoogleBigQueryTableListResource) List(ctx context.Context, listReq 
 	}
 }
 
-func flattenGoogleBigQueryTableListItem(res map[string]interface{}, d *schema.ResourceData, _ *transport_tpg.Config) error {
+func flattenGoogleBigQueryTableListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 	tableRef, ok := res["tableReference"].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("missing tableReference in BigQuery tables list response")
@@ -99,30 +99,23 @@ func flattenGoogleBigQueryTableListItem(res map[string]interface{}, d *schema.Re
 		datasetID = v
 	}
 
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("error setting project: %w", err)
-	}
-	if err := d.Set("dataset_id", datasetID); err != nil {
-		return fmt.Errorf("error setting dataset_id: %w", err)
-	}
-	if err := d.Set("table_id", tableID); err != nil {
-		return fmt.Errorf("error setting table_id: %w", err)
-	}
-
-	if labels, ok := res["labels"].(map[string]interface{}); ok {
-		if err := d.Set("labels", labels); err != nil {
-			return fmt.Errorf("error setting labels: %w", err)
+	labels := make(map[string]string)
+	if rawLabels, ok := res["labels"].(map[string]interface{}); ok {
+		for key, value := range rawLabels {
+			stringValue, ok := value.(string)
+			if !ok {
+				return fmt.Errorf("unexpected label value type for %q", key)
+			}
+			labels[key] = stringValue
 		}
 	}
 
-	if tableType, ok := res["type"].(string); ok && tableType != "" {
-		if err := d.Set("type", tableType); err != nil {
-			return fmt.Errorf("error setting type: %w", err)
-		}
+	tableType := ""
+	if value, ok := res["type"].(string); ok {
+		tableType = value
 	}
 
-	d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", project, datasetID, tableID))
-	return nil
+	return populateBigQueryTableCommonResourceData(d, config, project, datasetID, tableID, tableType, labels)
 }
 
 func ListBigQueryTables(config *transport_tpg.Config, project, datasetID string, callback func(rd *schema.ResourceData) error) error {
