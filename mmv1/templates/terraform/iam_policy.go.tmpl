@@ -56,7 +56,7 @@ func init() {
         Name: "{{ $.TerraformName }}_iam_member",
         ProductName: "{{ $.ProductMetadata.Name }}",
         Type: registry.SchemaTypeIAMResource,
-        Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
+        Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc, tpgiamresource.IamWithResourceIdentity({{ $.ResourceName }}IamResourceIdentityParser){{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
     }.Register()
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_policy",
