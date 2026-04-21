@@ -34,18 +34,17 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		return err
 	}
 
-	return transport_tpg.ListPages(
-		config,
-		resourceData,
-		url,
-		billingProject,
-		userAgent,
-		"{{ $.ResourceListKey }}",
-		"",
-		func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
+		Config:         config,
+		TempData:       resourceData,
+		ListURL:        url,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+		ItemName:       "{{ $.ResourceListKey }}",
+		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 {{ template "listResourceListPagesFlattener" $ }}
 		},
-		callback,
-	)
+		Callback: callback,
+	})
 }
 {{ end }}
