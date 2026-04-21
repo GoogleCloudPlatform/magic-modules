@@ -374,9 +374,10 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		if repo.Name == "terraform-provider-google-beta" {
 			// Run REP default diff (beta and GA share defaults)
 			serviceDiffs, err := computeRepDefaultDiffs(diffProcessorPath, rnr)
+			fmt.Println("computing REP default diffs: ", serviceDiffs)
 			if err != nil {
-				fmt.Println("Error running missing test detector: ", err)
-				errors[repo.Title] = append(errors[repo.Title], "The REP diff detector failed to run.")
+				fmt.Println("Error running REP default diff detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The REP default diff detector failed to run.")
 			}
 
 			data.RepDefaultChanges = serviceDiffs
