@@ -74,6 +74,9 @@ func TestAccBigQueryTable_importBlockWithResourceIdentity(t *testing.T) {
 				ImportState:     true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
+			{
+				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
+			},
 		},
 	})
 }

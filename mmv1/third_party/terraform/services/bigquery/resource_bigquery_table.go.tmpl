@@ -2146,9 +2146,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
 	}
 
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
-	}
 	if err := d.Set("description", res.Description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
@@ -2160,15 +2157,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("max_staleness", res.MaxStaleness); err != nil {
 		return fmt.Errorf("Error setting max_staleness: %s", err)
-	}
-	if err := tpgresource.SetLabels(res.Labels, d, "labels"); err != nil {
-		return fmt.Errorf("Error setting labels: %s", err)
-	}
-	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
-		return fmt.Errorf("Error setting terraform_labels: %s", err)
-	}
-	if err := d.Set("effective_labels", res.Labels); err != nil {
-		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	if err := d.Set("creation_time", res.CreationTime); err != nil {
 		return fmt.Errorf("Error setting creation_time: %s", err)
@@ -2185,12 +2173,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("num_bytes", res.NumBytes); err != nil {
 		return fmt.Errorf("Error setting num_bytes: %s", err)
 	}
-	if err := d.Set("table_id", res.TableReference.TableId); err != nil {
-		return fmt.Errorf("Error setting table_id: %s", err)
-	}
-	if err := d.Set("dataset_id", res.TableReference.DatasetId); err != nil {
-		return fmt.Errorf("Error setting dataset_id: %s", err)
-	}
 	if err := d.Set("num_long_term_bytes", res.NumLongTermBytes); err != nil {
 		return fmt.Errorf("Error setting num_long_term_bytes: %s", err)
 	}
@@ -2200,8 +2182,8 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("self_link", res.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	if err := d.Set("type", res.Type); err != nil {
-		return fmt.Errorf("Error setting type: %s", err)
+	if err := populateBigQueryTableCommonResourceData(d, config, project, res.TableReference.DatasetId, res.TableReference.TableId, res.Type, res.Labels); err != nil {
+		return err
 	}
 
 	// determine whether the deprecated require_partition_filter field is used
@@ -2383,10 +2365,51 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	return nil
+}
+
+func populateBigQueryTableCommonResourceData(d *schema.ResourceData, config *transport_tpg.Config, project, datasetID, tableID, tableType string, labels map[string]string) error {
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("dataset_id", datasetID); err != nil {
+		return fmt.Errorf("Error setting dataset_id: %s", err)
+	}
+	if err := d.Set("table_id", tableID); err != nil {
+		return fmt.Errorf("Error setting table_id: %s", err)
+	}
+	if err := tpgresource.SetLabels(labels, d, "labels"); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	terraformLabels := make(map[string]string)
+	if config != nil {
+		for key, value := range config.DefaultLabels {
+			terraformLabels[key] = value
+		}
+	}
+	if configuredLabels, ok := d.GetOk("labels"); ok {
+		for key, value := range configuredLabels.(map[string]interface{}) {
+			terraformLabels[key] = value.(string)
+		}
+	}
+	if _, hasAttributionLabel := labels[transport_tpg.AttributionKey]; hasAttributionLabel {
+		terraformLabels[transport_tpg.AttributionKey] = transport_tpg.AttributionValue
+	}
+	if err := d.Set("terraform_labels", terraformLabels); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
+	}
+	if err := d.Set("type", tableType); err != nil {
+		return fmt.Errorf("Error setting type: %s", err)
+	}
+	d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", project, datasetID, tableID))
+
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"project":    project,
-		"dataset_id": d.Get("dataset_id"),
-		"table_id":   d.Get("table_id"),
+		"dataset_id": datasetID,
+		"table_id":   tableID,
 	}); err != nil {
 		return err
 	}
