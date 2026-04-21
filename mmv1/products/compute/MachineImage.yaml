@@ -65,11 +65,9 @@ examples:
       vm_name: my-vm
       tag_key: tagkey
       tag_value: tagvalue
-      org_id: '123456789'
     test_vars_overrides:
       'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
       'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
-      'org_id': 'envvar.GetTestOrgFromEnv(t)'
 properties:
   - name: name
     type: String

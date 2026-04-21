@@ -1,9 +1,15 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
 resource "google_tags_tag_key" "tag_key1" {
-  parent     = "organizations/{{index $.Vars "org_id"}}"
+  provider   = google-beta
+  parent     = "projects/${data.google_project.project.number}"
   short_name = "{{index $.Vars "tag_key"}}"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
+  provider   = google-beta
   parent     = google_tags_tag_key.tag_key1.id
   short_name = "{{index $.Vars "tag_value"}}"
 }
