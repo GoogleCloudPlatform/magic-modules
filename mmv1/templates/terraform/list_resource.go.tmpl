@@ -29,8 +29,8 @@ import (
 	"strings"
 {{- end }}
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
-	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -39,59 +39,56 @@ import (
 	transport_tpg "{{ $.ImportPath }}/transport"
 )
 
-var _ tpgresource.ListResourceWithRawV5Schemas = &{{ $.ResourceName -}}ListResource{}
+var _ list.ListResource = &{{ $.ResourceName -}}ListResource{}
 
 type {{ $.ResourceName -}}ListResource struct {
 	tpgresource.ListResourceMetadata
 }
 
 func New{{ $.ResourceName -}}ListResource() list.ListResource {
-	r := &{{ $.ResourceName -}}ListResource{}
-	r.TypeName = "{{ $.TerraformName }}"
-	r.ResourceSchema = Resource{{ $.ResourceName -}}()
-	r.IdentityAttributes = []string{
-{{- range $identity := $.IdentityProperties }}
-		"{{ underscore $identity.Name }}",
-{{- end }}
-	}
-	return r
-}
-
-func (r *{{ $.ResourceName -}}ListResource) ListResourceConfigSchema(ctx context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
-	resp.Schema = listschema.Schema{
-		Attributes: map[string]listschema.Attribute{
+	listR := &{{ $.ResourceName -}}ListResource{}
+	listR.TypeName = "{{ $.TerraformName }}"
+	listR.SDKv2Resource = Resource{{ $.ResourceName -}}()
+	listR.ListConfigFields = []tpgresource.ListConfigField{
 {{- range $scope := $.ListScopeProperties }}
-			"{{ underscore $scope.Name }}": listschema.StringAttribute{
-				Optional: true,
-			},
+		{Name: "{{ underscore $scope.Name }}", Kind: tpgresource.ListConfigKindString, Optional: true},
 {{- end }}
-		},
 	}
+	return listR
 }
 
+// {{ $.ResourceName }}ListModel matches ListResourceMetadata.ListConfigFields (tfsdk names and types).
 type {{ $.ResourceName -}}ListModel struct {
 {{- range $scope := $.ListScopeProperties }}
 	{{ $scope.TitlelizeProperty }} types.String `tfsdk:"{{ underscore $scope.Name }}"`
 {{- end }}
 }
 
-func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
+func (listR *{{ $.ResourceName -}}ListResource) List(ctx context.Context, listReq list.ListRequest, stream *list.ListResultsStream) {
 	var data {{ $.ResourceName -}}ListModel
-	diags := req.Config.Get(ctx, &data)
+	diags := listReq.Config.Get(ctx, &data)
 	if diags.HasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+	if listR.Client == nil {
+		diags = append(diags, diag.NewErrorDiagnostic(
+			"Provider not configured",
+			"The Google provider client is not available; ensure the provider is configured (e.g. credentials and default project).",
+		))
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
 
 {{- range $scope := $.ListScopeProperties }}
 {{- if eq $scope.Name "project" }}
-	{{ $scope.CamelizeProperty }} := r.GetProject(data.{{ $scope.TitlelizeProperty }})
+	{{ $scope.CamelizeProperty }} := listR.GetProject(data.{{ $scope.TitlelizeProperty }})
 {{- else if eq $scope.Name "region" }}
-	{{ $scope.CamelizeProperty }} := r.GetRegion(data.{{ $scope.TitlelizeProperty }})
+	{{ $scope.CamelizeProperty }} := listR.GetRegion(data.{{ $scope.TitlelizeProperty }})
 {{- else if eq $scope.Name "zone" }}
-	{{ $scope.CamelizeProperty }} := r.GetZone(data.{{ $scope.TitlelizeProperty }})
+	{{ $scope.CamelizeProperty }} := listR.GetZone(data.{{ $scope.TitlelizeProperty }})
 {{- else if eq $scope.Name "location" }}
-	{{ $scope.CamelizeProperty }} := r.GetLocation(data.{{ $scope.TitlelizeProperty }})
+	{{ $scope.CamelizeProperty }} := listR.GetLocation(data.{{ $scope.TitlelizeProperty }})
 {{- else }}
 	var {{ $scope.CamelizeProperty }} string
 	if !data.{{ $scope.TitlelizeProperty }}.IsNull() && !data.{{ $scope.TitlelizeProperty }}.IsUnknown() {
@@ -102,12 +99,12 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 
 	stream.Results = func(push func(list.ListResult) bool) {
 		err := List{{ $.ResourceName }}s(
-			r.Client,
+			listR.Client,
 {{- range $scope := $.ListScopeProperties }}
 			{{ $scope.CamelizeProperty }},
 {{- end }}
 			func(rd *schema.ResourceData) error {
-				result := req.NewListResult(ctx)
+				result := listReq.NewListResult(ctx)
 
 				if n, ok := rd.GetOk("name"); ok {
 					if s, ok := n.(string); ok {
@@ -115,7 +112,7 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 					}
 				}
 
-				if err := r.SetResult(ctx, req.IncludeResource, &result, rd); err != nil {
+				if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd); err != nil {
 					return err
 				}
 
@@ -127,11 +124,10 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 		)
 		if err != nil {
 			diags.AddError("API Error", err.Error())
-			result := req.NewListResult(ctx)
+			result := listReq.NewListResult(ctx)
 			result.Diagnostics = diags
 			push(result)
 		}
-		stream.Results = list.ListResultsStreamDiagnostics(diags)
 	}
 }
 
