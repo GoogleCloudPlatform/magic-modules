@@ -155,6 +155,10 @@ fields:
     api_field: 'properties.networkInterfaces.nicType'
   - api_field: 'networkInterfaces.networkAttachment'
     field: 'network_interface.network_attachment'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'networkInterfaces.enableVpcScopedDns'
+    field: 'network_interface.enable_vpc_scoped_dns'
+{{- end }}
   - api_field: 'networkInterfaces.parentNicName'
     field: 'network_interface.parent_nic_name'
   - api_field: 'networkInterfaces.vlan'
