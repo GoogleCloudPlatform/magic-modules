@@ -4,7 +4,7 @@ summary: "List resources let users run terraform query against existing Google C
 weight: 65
 ---
 
-# Add a handwritten list resource
+# Add a list resource
 
 List resources plug into Terraform’s plugin-framework [list-resource API](https://developer.hashicorp.com/terraform/plugin/framework/list-resources) so users can run [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) and use **`.tfquery.hcl`** files against resources that already exist in Google Cloud. Each list resource is tied to exactly one **managed resource** type: results expose that type’s [resource identity](https://developer.hashicorp.com/terraform/language/resources/identities), and optionally full state when `include_resource` is set on the `list` block.
 
