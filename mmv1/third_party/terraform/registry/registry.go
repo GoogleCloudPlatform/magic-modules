@@ -2,6 +2,9 @@ package registry
 
 import (
 	"log"
+	"maps"
+	"slices"
+	"strings"
 	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -30,6 +33,14 @@ func (p Product) Register() {
 		log.Fatalf("Duplicate registration attempt for product %q", p.Name)
 	}
 	products.m[p.Name] = p
+}
+
+func ListProducts() []Product {
+	l := slices.Collect(maps.Values(products.m))
+	slices.SortFunc(l, func(a, b Product) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+	return l
 }
 
 type registeredProducts struct {
