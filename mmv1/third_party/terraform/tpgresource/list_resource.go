@@ -154,7 +154,8 @@ func (listR *ListResourceMetadata) GetZone(override types.String) string {
 	return listR.Zone
 }
 
-// GetLocation: list config override, else provider default region.
+// GetLocation returns the location from the list block override if set and non-empty,
+// otherwise the provider-level region (typical default for regional APIs).
 func (listR *ListResourceMetadata) GetLocation(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
@@ -247,51 +248,6 @@ func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResourc
 	}
 
 	return nil
-}
-
-// ResolveProject returns the project from override if it is set and non-empty,
-// otherwise falls back to the provider-level default.
-func (r *ListResourceMetadata) GetProject(override types.String) string {
-	if !override.IsNull() && !override.IsUnknown() {
-		if v := override.ValueString(); v != "" {
-			return v
-		}
-	}
-	return r.ProjectId
-}
-
-// ResolveRegion returns the region from override if it is set and non-empty,
-// otherwise falls back to the provider-level default.
-func (r *ListResourceMetadata) GetRegion(override types.String) string {
-	if !override.IsNull() && !override.IsUnknown() {
-		if v := override.ValueString(); v != "" {
-			return v
-		}
-	}
-	return r.Region
-}
-
-// ResolveZone returns the zone from override if it is set and non-empty,
-// otherwise falls back to the provider-level default.
-func (r *ListResourceMetadata) GetZone(override types.String) string {
-	if !override.IsNull() && !override.IsUnknown() {
-		if v := override.ValueString(); v != "" {
-			return v
-		}
-	}
-	return r.Zone
-}
-
-// GetLocation returns the location from the list block override if set and non-empty,
-// otherwise falls back to the provider-level region (typical default for regional APIs).
-// Used by MM-generated list resources together with GetProject/GetRegion/GetZone + SetIdentityFields above.
-func (r *ListResourceMetadata) GetLocation(override types.String) string {
-	if !override.IsNull() && !override.IsUnknown() {
-		if v := override.ValueString(); v != "" {
-			return v
-		}
-	}
-	return r.Region
 }
 
 func SetIdentityFields(ctx context.Context, result *list.ListResult, rd *schema.ResourceData, fields map[string]string) error {
