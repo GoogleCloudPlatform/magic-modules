@@ -154,8 +154,7 @@ func (listR *ListResourceMetadata) GetZone(override types.String) string {
 	return listR.Zone
 }
 
-// GetLocation returns the location from the list block override if set and non-empty,
-// otherwise the provider-level region (typical default for regional APIs).
+// GetLocation: list config override, else provider default region.
 func (listR *ListResourceMetadata) GetLocation(override types.String) string {
 	if !override.IsNull() && !override.IsUnknown() {
 		if v := override.ValueString(); v != "" {
@@ -247,25 +246,5 @@ func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResourc
 		result.DisplayName = s
 	}
 
-	return nil
-}
-
-func SetIdentityFields(ctx context.Context, result *list.ListResult, rd *schema.ResourceData, fields map[string]string) error {
-	identity, err := rd.Identity()
-	if err != nil {
-		return fmt.Errorf("error getting identity: %s", err)
-	}
-	for k, v := range fields {
-		if err := identity.Set(k, v); err != nil {
-			return fmt.Errorf("error setting identity field %q: %s", k, err)
-		}
-	}
-	tfTypeIdentity, err := rd.TfTypeIdentityState()
-	if err != nil {
-		return err
-	}
-	if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
-		return errors.New("error setting identity")
-	}
 	return nil
 }
