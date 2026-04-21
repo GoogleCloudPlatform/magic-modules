@@ -23,11 +23,16 @@ import (
     "{{ $.ImportPath }}/registry"
 )
 
-const ProductName = "{{ lower $.Name }}"
+var Product = registry.Product{
+    Name: "{{ lower $.Name }}",
+    BaseUrl: "{{ $.Version.BaseUrl }}",
+    {{- if $.Version.RepUrl }}
+    RepUrl: "{{ $.Version.RepUrl }}",
+    {{- end }}
+    CustomEndpointField: "{{ underscore $.Name }}_custom_endpoint",
+    CustomEndpointEnvVar: "GOOGLE_{{ upper (underscore $.Name) }}_CUSTOM_ENDPOINT",
+}
 
 func init() {
-    registry.Product{
-        Name: "{{ lower $.Name }}",
-	    BaseUrl: "{{ $.Version.BaseUrl }}",
-    }.Register()
+    Product.Register()
 }
