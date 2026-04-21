@@ -163,7 +163,6 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			templateData.GenerateFile(targetFilePath, "templates/terraform/list_resource.go.tmpl", object, true,
 				"templates/terraform/list_resource.go.tmpl",
 				"templates/terraform/list_resource_method.go.tmpl",
-				"templates/terraform/list_resource_list_pages_flattener.go.tmpl",
 			)
 		}
 	}

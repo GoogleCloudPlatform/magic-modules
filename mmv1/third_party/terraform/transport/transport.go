@@ -207,7 +207,8 @@ type ListPagesOptions struct {
 	UserAgent      string
 	ItemName       string
 	Filter         string
-	Flattener      func(item map[string]interface{}, d *schema.ResourceData, config *Config) error
+	// Flattener maps one list JSON object onto TempData; optional trailing args reserved for callers.
+	Flattener func(item map[string]interface{}, d *schema.ResourceData, config *Config, args ...string) error
 	Callback       func(rd *schema.ResourceData) error
 }
 
