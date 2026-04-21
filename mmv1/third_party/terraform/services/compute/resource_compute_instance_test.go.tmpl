@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	{{- end }}
 	"fmt"
+	"os"
 	{{- if ne $.TargetVersionName "ga" }}
 	"google.golang.org/api/googleapi"
 	{{- end }}
@@ -661,8 +662,7 @@ func TestAccComputeInstance_ipv6OnlyMacAddress(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{		
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
         Steps: []resource.TestStep{
             {
                 Config: testAccComputeInstance_ipv6OnlyMacAddressConfig(instanceName, networkName, subnetworkName),
@@ -2321,8 +2321,7 @@ func TestAccComputeInstance_subnet_xpn(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
@@ -5186,6 +5185,70 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_EnableVpcScopedDns(t *testing.T) {
+{{- if eq $.TargetVersionName "ga" }}
+	t.Skip("enable_vpc_scoped_dns is only available in beta")
+{{- end }}
+	t.Parallel()
+	acctest.SkipIfVcr(t)
+	if os.Getenv("TF_ACC_ENABLE_VPC_SCOPED_DNS") == "" {
+		t.Skip("Skipping test as it requires an allow-listed project. Set TF_ACC_ENABLE_VPC_SCOPED_DNS to run.")
+	}
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
+	context := map[string]interface{}{
+		"suffix":                  suffix,
+		"network_attachment_name": fmt.Sprintf("tf-test-na-%s", suffix),
+		"region":                  envRegion,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_enableVpcScopedDns(context),
+			},
+			{
+				ResourceName:            "google_compute_instance.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"allow_stopping_for_update"},
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_EnableVpcScopedDnsError(t *testing.T) {
+{{- if eq $.TargetVersionName "ga" }}
+	t.Skip("enable_vpc_scoped_dns is only available in beta")
+{{- end }}
+	t.Parallel()
+	acctest.SkipIfVcr(t)
+	if os.Getenv("TF_ACC_ENABLE_VPC_SCOPED_DNS") == "" {
+		t.Skip("Skipping test as it requires an allow-listed project. Set TF_ACC_ENABLE_VPC_SCOPED_DNS to run.")
+	}
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
+	context := map[string]interface{}{
+		"suffix": suffix,
+		"region": envRegion,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeInstance_enableVpcScopedDnsError(context),
+				ExpectError: regexp.MustCompile("enable_vpc_scoped_dns can only be set when network_attachment is provided"),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 	t.Parallel()
 	suffix := acctest.RandString(t, 10)
@@ -5327,8 +5390,7 @@ func TestAccComputeInstance_guestOsFeatures(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_guestOsFeatures(context_1),
 				Check: resource.ComposeTestCheckFunc(
@@ -12663,8 +12725,7 @@ func TestAccComputeInstance_bootDisk_storagePoolSpecified(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, storagePoolNameLong, envvar.GetTestZoneFromEnv()),
 			},
@@ -12685,8 +12746,7 @@ func TestAccComputeInstance_bootDisk_storagePoolSpecified_nameOnly(t *testing.T)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, "tf-bootstrap-storage-pool-hyperdisk-balanced-basic-2", envvar.GetTestZoneFromEnv()),
 			},
@@ -12738,8 +12798,7 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
 	diskName2 := fmt.Sprintf("tf-test-disk2-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_bootAndAttachedDisk_interface(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), "c3-standard-22", "NVME", false),
 				Check: resource.ComposeTestCheckFunc(
@@ -13452,6 +13511,84 @@ resource "google_compute_instance" "foobar" {
 }
 
 data "google_compute_default_service_account" "default" {
+}
+`, context)
+}
+
+func testAccComputeInstance_enableVpcScopedDns(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network" "test-network"{
+	name = "tf-test-network-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test-subnetwork" {
+	name          = "tf-test-compute-subnet-%{suffix}"
+	ip_cidr_range = "10.0.0.0/16"
+	region        = "%{region}"
+	network       = google_compute_network.test-network.id
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+	name = "%{network_attachment_name}"
+    region = "%{region}"
+    connection_preference = "ACCEPT_AUTOMATIC"
+
+    subnetworks = [
+        google_compute_subnetwork.test-subnetwork.self_link
+    ]
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "tf-test-instance-%{suffix}"
+  machine_type = "e2-medium"
+  zone         = "%{region}-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.id
+		}
+	}
+
+	network_interface {
+		network = "default"
+	}
+
+	network_interface {
+		network_attachment    = google_compute_network_attachment.test_network_attachment.self_link
+        enable_vpc_scoped_dns = true
+	}
+}
+`, context)
+}
+
+func testAccComputeInstance_enableVpcScopedDnsError(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "tf-test-instance-%{suffix}"
+  machine_type = "e2-medium"
+  zone         = "%{region}-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.id
+		}
+	}
+
+	network_interface {
+		network               = "default"
+        enable_vpc_scoped_dns = true
+	}
 }
 `, context)
 }
