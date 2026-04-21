@@ -84,6 +84,7 @@ are marked [Attributes as Blocks](/docs/configuration/attr-as-blocks.html):
 * `scratch_disk`
 * `network_interface.alias_ip_range`
 * `network_interface.access_config`
+* `network_interface.enable_vpc_scoped_dns` - (Optional) [Beta](../guides/provider_versions.html.markdown) If set to true, enables DNS resolution over this PSC interface. Valid only with `network_attachment`. Note: This is currently in restricted preview and requires project allow-listing.
 
 ## Attributes Reference
 

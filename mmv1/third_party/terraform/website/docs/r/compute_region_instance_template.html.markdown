@@ -566,6 +566,8 @@ The following arguments are supported:
 
 * `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
 
+* `enable_vpc_scoped_dns` - (Optional) [Beta](../guides/provider_versions.html.markdown) If set to true, enables DNS resolution over this PSC interface. Valid only with `network_attachment`. Note: This is currently in restricted preview and requires project allow-listing.
+
 * `vlan` - (Optional) VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.
 
 * `igmp_query` - (Optional) Indicates whether igmp query is enabled on the network interface or not. If enabled, also indicates the version of IGMP supported.
