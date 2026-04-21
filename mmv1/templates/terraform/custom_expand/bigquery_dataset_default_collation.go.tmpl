@@ -1,0 +1,9 @@
+func expandBigQueryDatasetDefaultCollation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if rd, ok := d.(*schema.ResourceData); ok {
+		conf := rd.GetRawConfig()
+		if !conf.IsNull() && conf.GetAttr("default_collation").IsKnown() && !conf.GetAttr("default_collation").IsNull() {
+			return conf.GetAttr("default_collation").AsString(), nil
+		}
+	}
+	return v, nil
+}

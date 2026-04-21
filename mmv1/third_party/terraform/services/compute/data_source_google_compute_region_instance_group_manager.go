@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -60,4 +61,13 @@ func dataSourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, met
 		return errors.New("Regional Instance Manager Group not found")
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_region_instance_group_manager",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRegionInstanceGroupManager(),
+	}.Register()
 }

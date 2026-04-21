@@ -1,0 +1,22 @@
+# This is an example of a Chronicle feed using the post_create hook to fetch the secret.
+# Valid for source type: HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE.
+
+resource "google_chronicle_feed" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  location     = "us"
+  instance     = "{{index $.TestEnvVars "chronicle_id"}}"
+  display_name = "{{index $.Vars "resource_name"}}"
+
+  details {
+    feed_source_type = "HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE"
+    log_type         = "projects/{{index $.TestEnvVars "project_name"}}/locations/us/instances/{{index $.TestEnvVars "chronicle_id"}}/logTypes/GCP_CLOUDAUDIT"
+    https_push_amazon_kinesis_firehose_settings {
+        split_delimiter = "\n"
+    }
+  }
+}
+
+output "feed_secret" {
+  value     = google_chronicle_feed.{{$.PrimaryResourceId}}.secret
+  sensitive = true
+}

@@ -65,6 +65,11 @@ examples:
       ip2_network2_name: 'ip2-net2'
       forwarding_rule1_network2_name: 'fwd1-net2'
       forwarding_rule2_network2_name: 'fwd2-net2'
+    test_vars_overrides:
+      # for backward compatible
+      network1_name: '"net1" + randomSuffix'
+      # for backward compatible
+      network2_name: '"network2" + randomSuffix'
   - name: 'memorystore_instance_desired_user_and_auto_created_endpoints'
     primary_resource_id: 'instance-user-auto-conn'
     vars:
@@ -78,6 +83,13 @@ examples:
       ip2_network2_name: 'ip2-net2'
       forwarding_rule1_network2_name: 'fwd1-net2'
       forwarding_rule2_network2_name: 'fwd2-net2'
+    test_vars_overrides:
+      # for backward compatible
+      network1_name: '"net1" + randomSuffix'
+      # for backward compatible
+      policy_name: '"scpolicy" + randomSuffix'
+      # for backward compatible
+      network2_name: '"network2" + randomSuffix'
 parameters:
   - name: 'name'
     type: String

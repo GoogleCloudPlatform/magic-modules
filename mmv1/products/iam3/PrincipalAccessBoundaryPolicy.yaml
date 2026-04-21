@@ -53,6 +53,9 @@ examples:
     vars:
       display_name: 'PAB policy for Organization'
       pab_id: 'pab-policy-for-org'
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"PAB policy for Organization" + randomSuffix'
   - name: 'iam_organizations_policy_binding'
     primary_resource_id: 'my-pab-policy'
     external_providers: ["time"]
@@ -63,6 +66,9 @@ examples:
       display_name: 'Binding for all principals in the Organization'
       org_binding_id: 'binding-for-all-org-principals'
     # This example is already used as a test in OrganizationsPolicyBinding
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"Binding for all principals in the Organization" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'organization'

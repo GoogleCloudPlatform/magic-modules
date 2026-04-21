@@ -49,9 +49,8 @@ parameters:
     type: String
     required: true
     description: |-
-      ID of the cluster to create. Must conform to
-      [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
-      alphanumeric, and at most 63 characters).
+      ID of the cluster to create. Must start with a lowercase letter,
+      use only lowercase letters and numbers, and be at most 10 characters long.
     immutable: true
     url_param_only: true
 properties:
@@ -748,6 +747,8 @@ examples:
   - name: hypercomputecluster_cluster_basic
     primary_resource_id: 'cluster'
     vars:
-      cluster_id: 'my-cluster'
+      cluster_id: 'mycluster1'
+      network_id: 'cluster-net1'
     test_vars_overrides:
       cluster_id: 'fmt.Sprintf("tf%s", acctest.RandString(t, 8))'
+      network_id: 'fmt.Sprintf("cluster-net1-%s", acctest.RandString(t,10))'

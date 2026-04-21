@@ -1693,7 +1693,7 @@ resource "google_composer_environment" "test" {
     }
 
     software_config {
-      image_version = "composer-2.16.6-airflow-2.10.5"
+      image_version = "composer-2.16.7-airflow-2.10.5"
     }
   }
   depends_on = [google_project_iam_member.composer-worker]
