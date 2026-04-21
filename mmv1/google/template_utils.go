@@ -20,6 +20,7 @@ import (
 	"io/fs"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"text/template"
@@ -83,8 +84,9 @@ func (t functionsData) templateFunctions() template.FuncMap {
 		"sub":            subtract,
 		"plus":           plus,
 		"firstSentence":  FirstSentence,
-		"trimTemplate":   t.trimTemplate,
-		"customTemplate": t.customTemplate,
+		"trimTemplate":    t.trimTemplate,
+		"customTemplate":  t.customTemplate,
+		"existsInBaseUrl": t.existsInBaseUrl,
 	}
 }
 
@@ -129,6 +131,17 @@ func (t *functionsData) trimTemplate(templatePath string, e any) (string, error)
 		rs = strings.TrimSuffix(rs, "\n")
 	}
 	return fmt.Sprintf("%s\n", rs), nil
+}
+
+// existsInBaseUrl reports whether urlTemplate contains a ReplaceVars-style token {{key}}.
+func (t *functionsData) existsInBaseUrl(urlTemplate string, key string) bool {
+	re := regexp.MustCompile(`\{\{(\w+)\}\}`)
+	for _, match := range re.FindAllStringSubmatch(urlTemplate, -1) {
+		if len(match) > 1 && match[1] == key {
+			return true
+		}
+	}
+	return false
 }
 
 func (t functionsData) customTemplate(e any, templatePath string, appendNewline bool) (string, error) {

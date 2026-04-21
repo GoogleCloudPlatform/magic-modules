@@ -282,6 +282,16 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
+// GenerateQueryTestFile emits a Terraform query-mode acceptance test for list resources (generate_list_resource).
+func (td *TemplateData) GenerateQueryTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/query_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/sweeper_file.go.tmpl"
 	templates := []string{

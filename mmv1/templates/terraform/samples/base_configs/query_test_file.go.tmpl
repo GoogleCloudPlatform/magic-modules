@@ -1,0 +1,123 @@
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}_test
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	"{{ $.ImportPath }}/acctest"
+	"{{ $.ImportPath }}/envvar"
+	"{{ $.ImportPath }}/tpgresource"
+)
+
+var (
+	_ = fmt.Sprintf
+	_ = strings.Trim
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+)
+
+{{ $example := $.FirstTestExample }}
+func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
+	t.Parallel()
+
+	{{- if $example.SkipVcr }}
+	acctest.SkipIfVcr(t)
+	{{- end }}
+
+	{{- if $example.BootstrapIam }}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	{{- range $iam := $example.BootstrapIam }}
+		{
+			Member: "{{$iam.Member}}",
+			Role:   "{{$iam.Role}}",
+		},
+	{{- end}}
+	})
+	{{- end }}
+
+	context := map[string]interface{}{
+	{{- template "EnvVarContext" dict "TestEnvVars" $example.TestEnvVars "HasNewLine" false}}
+	{{- range $varKey, $varVal := $example.TestContextVars }}
+		"{{$varKey}}": {{$varVal}},
+	{{- end }}
+	{{- range $varKey, $varVal := $example.TestVarsOverrides }}
+		"{{$varKey}}": {{$varVal}},
+	{{- end }}
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+{{- if $.VersionedProvider $example.MinVersion }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+{{- else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+	{{- if $example.ExternalProviders }}
+		ExternalProviders: map[string]resource.ExternalProvider{
+		{{- range $provider := $example.ExternalProviders }}
+			"{{$provider}}": {},
+		{{- end }}
+		},
+	{{- end }}
+{{- end }}
+{{- if not $.ExcludeDelete }}
+		CheckDestroy: testAccCheck{{ $.ResourceName }}DestroyProducer(t),
+{{- end }}
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}(context),
+			},
+{{- if not $example.ExcludeImportTest }}
+			{
+				ResourceName:      "{{ $example.ResourceType $.TerraformName }}.{{ $example.PrimaryResourceId }}",
+				ImportState:       true,
+				ImportStateVerify: true,
+		{{- if $.IgnoreReadPropertiesToStringLegacy $example }}
+				ImportStateVerifyIgnore: {{ $.IgnoreReadPropertiesToStringLegacy $example }},
+		{{- end }}
+			},
+		{{- if not $.ExcludeIdentityGeneration }}
+			{
+				ResourceName:       "{{ $.TerraformName }}.{{ $example.PrimaryResourceId }}",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+		{{- end }}
+{{- end }}
+			{
+				Query:  true,
+				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLengthAtLeast("{{ $example.ResourceType $.TerraformName }}.list_query", 1),
+				},
+			},
+		},
+	})
+}
+
+func testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}ListQuery(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+list "{{ $example.ResourceType $.TerraformName }}" "list_query" {
+    provider = {{ if $.VersionedProvider $example.MinVersion }}google-beta{{ else }}google{{ end }}
+    config {
+{{- range $scope := $.ListScopeProperties }}
+        {{ underscore $scope.Name }} = %({{ underscore $scope.Name }})
+{{- end }}
+    }
+}
+`, context)
+}

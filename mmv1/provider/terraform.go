@@ -113,6 +113,9 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			t.GenerateSingularDataSourceTests(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
+			if object.GenerateListResource {
+				t.GenerateListResourceQueryTest(object, *templateData, outputFolder)
+			}
 		}
 	}
 
@@ -257,6 +260,38 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateTestFile(targetFilePath, object)
+}
+
+// GenerateListResourceQueryTest emits resource_*_generated_query_test.go for resources with
+// generate_list_resource when at least one example is eligible for tests (same rules as legacy generated tests).
+func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateData TemplateData, outputFolder string) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples == nil {
+		return
+	}
+
+	eligibleExample := false
+	for _, example := range object.Examples {
+		if !example.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+				eligibleExample = true
+				break
+			}
+		}
+	}
+	if !eligibleExample {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_query_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateQueryTestFile(targetFilePath, object)
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
