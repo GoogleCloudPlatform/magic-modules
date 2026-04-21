@@ -539,7 +539,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
-	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-rep-default-change-test", breakingState, targetURL, commitSha); err != nil {
+	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-rep-default-change-test", repDefaultState, targetURL, commitSha); err != nil {
 		fmt.Printf("Error posting terraform-provider-rep-default-change-test build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
 		errors["Other"] = append(errors["Other"], "Failed to update rep-default-change status check with state: "+repDefaultState)
 	}
