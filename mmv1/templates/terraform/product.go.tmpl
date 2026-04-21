@@ -23,7 +23,7 @@ import (
     "{{ $.ImportPath }}/registry"
 )
 
-var product = registry.Product{
+var Product = registry.Product{
     Name: "{{ lower $.Name }}",
     BaseUrl: "{{ $.Version.BaseUrl }}",
     {{- if $.Version.RepUrl }}
@@ -34,5 +34,5 @@ var product = registry.Product{
 }
 
 func init() {
-    product.Register()
+    Product.Register()
 }
