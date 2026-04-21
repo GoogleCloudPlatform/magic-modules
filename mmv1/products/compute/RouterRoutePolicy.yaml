@@ -104,7 +104,7 @@ properties:
         - name: 'priority'
           type: Integer
           description: |
-            The evaluation priority for this term, which must be between 0 (inclusive) and 231 (exclusive), and unique within the list.
+            The evaluation priority for this term, which must be between 0 (inclusive) and 2^31 (exclusive), and unique within the list.
           required: true
         - name: 'match'
           type: NestedObject
