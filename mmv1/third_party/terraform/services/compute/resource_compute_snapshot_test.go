@@ -208,16 +208,10 @@ resource "google_compute_disk" "persistent" {
 func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
-	org := envvar.GetTestOrgFromEnv(t)
-	suffix := acctest.RandString(t, 10)
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagKey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-snapshots-tagvalue", sharedTagKey, org)
-
+	pid := envvar.GetTestProjectFromEnv()
 	context := map[string]interface{}{
-		"random_suffix": suffix,
-		"tag_key_id":    tagKeyResult["name"],
-		"tag_value_id":  tagValueResult["name"],
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    pid,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -234,6 +228,16 @@ func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 
 func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_tags_tag_key" "tag_key" {
+  parent     = "projects/%{project_id}"
+  short_name = "tf-test-key-%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = "tagKeys/${google_tags_tag_key.tag_key.name}"
+  short_name = "tf-test-value-%{random_suffix}"
+}
+
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -253,7 +257,7 @@ resource "google_compute_snapshot" "foobar" {
   zone        = "us-central1-a"
   params {
     resource_manager_tags = {
-      "%{tag_key_id}" = "%{tag_value_id}"
+      "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
     }
   }
 }
