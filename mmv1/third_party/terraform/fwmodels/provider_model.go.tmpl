@@ -65,7 +65,7 @@ type ProviderModel struct {
 {{- if ne $.TargetVersionName "ga" }}
 	RuntimeconfigCustomEndpoint types.String `tfsdk:"runtimeconfig_custom_endpoint"`
 {{- end }}
-	CoreBillingCustomEndpoint   types.String `tfsdk:"cloud_billing_custom_endpoint"`
+	CoreBillingCustomEndpoint   types.String `tfsdk:"core_billing_custom_endpoint"`
 	BillingCustomEndpoint       types.String `tfsdk:"billing_custom_endpoint"`
 }
 
