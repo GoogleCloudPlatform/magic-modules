@@ -33,6 +33,9 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	_ "embed"
+
+	"google.golang.org/api/option"
+	"google.golang.org/api/sheets/v4"
 )
 
 var (
@@ -48,6 +51,8 @@ const (
 
 var ctftRequiredEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN",
+	"SA_CREDENTIALS",
+	"SPREADSHEET_ID",
 }
 
 type testFailureRateLabel int64
@@ -130,7 +135,12 @@ var createTestFailureTicketCmd = &cobra.Command{
 		}
 		date := now.In(loc)
 
-		return execCreateTestFailureTicket(date, gh, gcs)
+		shepherd, err := getReleaseShepherd(context.Background(), env["SA_CREDENTIALS"], env["SPREADSHEET_ID"], date)
+		if err != nil {
+			return fmt.Errorf("failed to get release shepherd: %w", err)
+		}
+
+		return execCreateTestFailureTicket(date, gh, gcs, shepherd)
 	},
 }
 
@@ -142,7 +152,7 @@ func listCTFTRequiredEnvironmentVariables() string {
 	return result
 }
 
-func execCreateTestFailureTicket(now time.Time, gh *github.Client, gcs CloudstorageClient) error {
+func execCreateTestFailureTicket(now time.Time, gh *github.Client, gcs CloudstorageClient, shepherd string) error {
 	ctx := context.Background()
 
 	gaTestFailuresMap := make(map[string][]bool)
@@ -182,7 +192,7 @@ func execCreateTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 	// Create tickets
 	for _, testFailure := range testFailuresToday {
 		if shouldCreateTicket(testFailure, existTestNames, closedTestNames) {
-			err := createTicket(ctx, gh, testFailure)
+			err := createTicket(ctx, gh, testFailure, shepherd)
 			if err != nil {
 				return fmt.Errorf("error creating test failure ticket: %w", err)
 			}
@@ -463,7 +473,7 @@ func computeTicketLabels(testFailure *testFailure) ([]string, error) {
 	return ticketLabels, nil
 }
 
-func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailure) error {
+func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailure, shepherd string) error {
 	issueTitle := fmt.Sprintf("Failing test(s): %s", testFailure.TestName)
 	issueBody, err := formatIssueBody(*testFailure)
 	if err != nil {
@@ -482,6 +492,10 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		// Milestone: Near-Term Goals
 		// https://github.com/hashicorp/terraform-provider-google/milestone/11
 		Milestone: github.Int(11),
+	}
+
+	if IsTerraformTeamOwned(testFailure) && shepherd != "" {
+		issueRquest.Assignee = github.String(shepherd)
 	}
 
 	_, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
@@ -566,6 +580,100 @@ func storeErrorMessage(pVersion provider.Version, gcs CloudstorageClient, errorM
 	// compute object view path
 	link := fmt.Sprintf("https://storage.cloud.google.com/%s/%s", nightlyDataBucket, objectName)
 	return link, nil
+}
+
+// parseDate parses a date string in supported formats.
+func parseDate(s string) (time.Time, error) {
+	if t, err := time.Parse("2006-01-02", s); err == nil {
+		return t, nil
+	}
+	if t, err := time.Parse("1/2/2006", s); err == nil {
+		return t, nil
+	}
+	return time.Time{}, fmt.Errorf("could not parse date %s", s)
+}
+
+// getReleaseShepherd retrieves the current release shepherd's GitHub username from a Google Sheet.
+func getReleaseShepherd(ctx context.Context, credentialsJSON string, spreadsheetId string, now time.Time) (string, error) {
+	srv, err := sheets.NewService(ctx, option.WithCredentialsJSON([]byte(credentialsJSON)))
+	if err != nil {
+		return "", fmt.Errorf("unable to retrieve Sheets client: %w", err)
+	}
+
+	schedResp, err := srv.Spreadsheets.Values.Get(spreadsheetId, "Rotation Schedule!A:C").Do()
+	if err != nil {
+		return "", fmt.Errorf("unable to retrieve schedule: %w", err)
+	}
+
+	if len(schedResp.Values) == 0 {
+		return "", fmt.Errorf("no schedule data found")
+	}
+
+	// Look ahead to next week's rotation if it's the weekend.
+	if day := now.Weekday(); day == time.Friday {
+		now = now.AddDate(0, 0, 3)
+	} else if day == time.Saturday {
+		now = now.AddDate(0, 0, 2)
+	} else if day == time.Sunday {
+		now = now.AddDate(0, 0, 1)
+	}
+
+	var currentEmail string
+
+	// Find the latest date in the schedule that is before or equal to now.
+	for i := 1; i < len(schedResp.Values); i++ {
+		row := schedResp.Values[i]
+		if len(row) < 3 {
+			continue
+		}
+
+		dateStr := fmt.Sprintf("%v", row[0])
+		email := fmt.Sprintf("%v", row[2])
+
+		rowDate, err := parseDate(dateStr)
+		if err != nil {
+			fmt.Printf("Warning: unparsable date at row %d: %v\n", i+1, err)
+			continue
+		}
+
+		if rowDate.Before(now) || rowDate.Equal(now) {
+			currentEmail = email
+		} else {
+			break
+		}
+	}
+
+	if currentEmail == "" {
+		return "", fmt.Errorf("could not determine current rotation person")
+	}
+
+	partResp, err := srv.Spreadsheets.Values.Get(spreadsheetId, "Rotation Participants!A:C").Do()
+	if err != nil {
+		return "", fmt.Errorf("unable to retrieve participants data: %w", err)
+	}
+
+	var githubUsername string
+	// Look up GitHub username for the determined email.
+	for i := 1; i < len(partResp.Values); i++ {
+		row := partResp.Values[i]
+		if len(row) < 3 {
+			continue
+		}
+
+		username := fmt.Sprintf("%v", row[1])
+		email := fmt.Sprintf("%v", row[2])
+
+		if email == currentEmail {
+			githubUsername = username
+			break
+		}
+	}
+
+	if githubUsername == "" {
+		return "", fmt.Errorf("could not find GitHub username for email %s", currentEmail)
+	}
+
+	return githubUsername, nil
 }
 
 func init() {
