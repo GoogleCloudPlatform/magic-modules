@@ -66,20 +66,71 @@ d.SetId(id)
 
 if d.Get("skip_wait").(bool) {
 	// When skip_wait is true, don't wait for the LRO to complete.
-	// Resource registration completes quickly and the target site name is
-	// available immediately in the initial POST response. The 480-minute
-	// wait is for background indexing which we intentionally skip.
-	responseMap, ok := res["response"].(map[string]interface{})
-	if !ok {
-		d.SetId("")
-		return fmt.Errorf("Error creating TargetSite: initial POST response did not contain operation result")
+	// The 480-minute wait is for background indexing which we intentionally skip.
+	// For unverified domains the API returns done=true synchronously and the
+	// target site name is available directly in the POST response.
+	// For verified domains the API returns a bare operation with no response
+	// until full indexing completes. In that case we find the target site via
+	// a List call — the site is registered immediately after the POST returns.
+	var targetSiteName string
+
+	if responseMap, ok := res["response"].(map[string]interface{}); ok {
+		// Fast path: synchronous response (unverified domains).
+		targetSiteName, _ = responseMap["name"].(string)
 	}
-	name, ok := responseMap["name"].(string)
-	if !ok || name == "" {
-		d.SetId("")
-		return fmt.Errorf("Error creating TargetSite: could not read resource name from operation response")
+
+	if targetSiteName == "" {
+		// Slow path: verified domain — find the newly created site via List.
+		listURL, err := tpgresource.ReplaceVars(d, config, "{{`{{DiscoveryEngineBasePath}}`}}projects/{{`{{project}}`}}/locations/{{`{{location}}`}}/collections/default_collection/dataStores/{{`{{data_store_id}}`}}/siteSearchEngine/targetSites")
+		if err != nil {
+			return fmt.Errorf("Error constructing list URL for TargetSite: %s", err)
+		}
+		providedPattern := d.Get("provided_uri_pattern").(string)
+
+		err = transport_tpg.PollingWaitTime(
+			func() (map[string]interface{}, error) {
+				return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   billingProject,
+					RawURL:    listURL,
+					UserAgent: userAgent,
+					Headers:   headers,
+				})
+			},
+			func(resp map[string]interface{}, respErr error) transport_tpg.PollResult {
+				if respErr != nil {
+					return transport_tpg.ErrorPollResult(respErr)
+				}
+				targetSites, ok := resp["targetSites"].([]interface{})
+				if !ok {
+					return transport_tpg.PendingStatusPollResult("targetSites not yet available")
+				}
+				for _, site := range targetSites {
+					siteMap, ok := site.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					if siteMap["generatedUriPattern"] == providedPattern {
+						if name, ok := siteMap["name"].(string); ok && name != "" {
+							targetSiteName = name
+							return transport_tpg.SuccessPollResult()
+						}
+					}
+				}
+				return transport_tpg.PendingStatusPollResult("target site not yet in list")
+			},
+			"Creating TargetSite",
+			30*time.Second,
+			1,
+		)
+		if err != nil {
+			d.SetId("")
+			return fmt.Errorf("Error creating TargetSite: could not find newly created site with pattern %q in list response: %s", providedPattern, err)
+		}
 	}
-	if err := d.Set("name", flattenDiscoveryEngineTargetSiteName(name, d, config)); err != nil {
+
+	if err := d.Set("name", flattenDiscoveryEngineTargetSiteName(targetSiteName, d, config)); err != nil {
 		return err
 	}
 } else {
