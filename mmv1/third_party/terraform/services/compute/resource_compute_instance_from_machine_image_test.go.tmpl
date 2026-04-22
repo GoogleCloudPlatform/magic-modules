@@ -374,6 +374,54 @@ func TestAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeInstanceFromMachineImage_VSSWindows(t *testing.T) {
+  t.Parallel()
+
+  var instance compute.Instance
+
+  context_1 := map[string]interface{}{
+    "instance1_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "image_name":           fmt.Sprintf("tf-test-image-%s", acctest.RandString(t, 10)),
+    "instance2_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "vss_flag":             true,
+    "guest_flush":          true,
+  }
+  context_2 := map[string]interface{}{
+    "instance1_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "image_name":           fmt.Sprintf("tf-test-image-%s", acctest.RandString(t, 10)),
+    "instance2_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "vss_flag":             false,
+    "guest_flush":          false,
+  }
+  
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "time": {},
+    },
+    CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeInstanceFromMachineImage_VSSWindows(context_1),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckComputeInstanceExists(
+            t, "google_compute_instance_from_machine_image.foobar", &instance),
+        ),
+      },
+      {
+        Config: testAccComputeInstanceFromMachineImage_VSSWindows(context_2),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckComputeInstanceExists(
+            t, "google_compute_instance_from_machine_image.foobar", &instance),
+        ),
+      },
+    },
+  })
+}
+{{- end }}
+
 func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -1440,6 +1488,74 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 `, context)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInstanceFromMachineImage_VSSWindows(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+
+  family  = "windows-2025"
+  project = "windows-cloud"
+}
+
+// Takes about 3 minutes for vm to be fully ready
+resource "google_compute_instance" "initialvm" {
+  provider     = google-beta
+
+  name         = "%{instance1_name}"
+  machine_type = "e2-standard-2"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+       type = "pd-ssd"
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+}
+
+// Need to wait for initialvm to be fully ready otherwise snapshot with guest_flush = true will fail.
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
+  depends_on = [google_compute_instance.initialvm]
+}
+
+resource "google_compute_machine_image" "foobar" {
+  provider = google-beta
+
+  name            = "%{image_name}"
+  source_instance = google_compute_instance.initialvm.self_link
+  guest_flush     = "%{guest_flush}"
+  depends_on = [ time_sleep.wait_240_seconds ]
+
+  // guest_flush is not a property of machine_image and therefore always ends up as false in the state.
+  // To properly test erase_windows_vss_signature = true, guest_flush would need to be true.
+  // However, after apply, a plan will always show a diff because guest_flush is false in state.
+  // We therefore need to ignore this field; otherwise, the test fails
+  lifecycle {
+    ignore_changes = [guest_flush]
+  }
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  provider = google-beta
+
+  name         = "%{instance2_name}"
+  zone         = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  erase_windows_vss_signature = %{vss_flag}
+
+}
+`, context)
+}
+{{- end }}
 {{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
 {{- end }}
