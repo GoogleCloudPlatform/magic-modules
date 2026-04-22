@@ -70,8 +70,12 @@ examples:
     primary_resource_id: 'policy_rule_one'
     min_version: 'beta'
     vars:
-      sec_policy_name: 'policywithmultiplerulesandbodyexclude'
-      backend_name: 'backendpolicywithmultiplerules'
+      sec_policy_name: 'policyruletest'
+      backend_name: 'backendpolicy'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policyruletest" + randomSuffix'
+      backend_name: '"backendpolicy" + randomSuffix'
 parameters:
   - name: 'security_policy'
     type: String
