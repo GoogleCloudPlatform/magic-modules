@@ -150,4 +150,3 @@ properties:
           - "48KB"
           - "64KB"
         min_version: "beta"
-        
