@@ -398,7 +398,6 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             }
             filter = "example_field: ANY(\"specific_example\")"
         }
-        max_results = 5
     }
 }
 `, context)
@@ -494,7 +493,6 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             }
             filter = "example_field: ANY(\"specific_example\")"
         }
-        max_results = 5
     }
 }
 `, context)
