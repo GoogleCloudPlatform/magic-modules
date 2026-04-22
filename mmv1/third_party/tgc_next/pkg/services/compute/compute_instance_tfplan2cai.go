@@ -326,7 +326,11 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.guest_os_features"); ok {
-		disk.GuestOsFeatures = expandComputeInstanceGuestOsFeatures(v)
+		var typedGuestOsFeatures []*compute.GuestOsFeature
+		if gofBytes, err := json.Marshal(expandComputeInstanceGuestOsFeatures(v)); err == nil {
+			json.Unmarshal(gofBytes, &typedGuestOsFeatures)
+		}
+		disk.GuestOsFeatures = typedGuestOsFeatures
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
