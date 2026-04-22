@@ -101,6 +101,7 @@ examples:
       network_name: 'wbi-test-default'
       reservation_name: 'wbi-reservation'
       key_name: 'my-crypto-key'
+      resource_policy_name: 'wbi-policy'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
