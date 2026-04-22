@@ -51,12 +51,11 @@ examples:
   - name: 'data_lineage_config_folder'
     primary_resource_id: 'default'
     vars:
-      folder_name: 'Integration'
+      folder_name: 'config-test'
     test_env_vars:
       organization: 'ORG_ID'
-    test_vars_overrides:
-      # for backward compatible
-      folder_name: '"Integration" + randomSuffix'
+      service_account: 'SERVICE_ACCT'
+    external_providers: ["time"]
   - name: 'data_lineage_config_organization'
     primary_resource_id: 'default'
     test_env_vars:
