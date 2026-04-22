@@ -212,7 +212,7 @@ properties:
             * Confluence: `Content`, `Space`
         - name: 'keyPropertyMappings'
           type: KeyValuePairs
-          diff_suppress_func: 'DataConnectorEntitiesFieldsDiffSuppress'
+          diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
           default_from_api: true
           description: |
             Attributes for indexing.
@@ -235,7 +235,7 @@ properties:
         - name: 'params'
           type: String
           description: 'The parameters for the entity to facilitate data ingestion.'
-          diff_suppress_func: 'DataConnectorEntitiesFieldsDiffSuppress'
+          diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
           custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
           custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
           state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
@@ -379,6 +379,19 @@ properties:
                 description: |
                   The host of the destination, for example
                   `https://example.atlassian.net`.
+              - name: 'port'
+                type: Integer
+                description: |
+                  Target port number accepted by the destination.
+        - name: 'params'
+          type: String
+          description: 'Additional parameters for this destination config in structured json format.'
+          diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          validation:
+            function: 'validation.StringIsJSON'
   - name: 'staticIpAddresses'
     type: Array
     description: |
