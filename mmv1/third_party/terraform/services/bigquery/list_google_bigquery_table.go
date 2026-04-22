@@ -16,6 +16,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"google.golang.org/api/bigquery/v2"
 )
 
 type GoogleBigQueryTableListResource struct {
@@ -79,43 +80,21 @@ func (listR *GoogleBigQueryTableListResource) List(ctx context.Context, listReq 
 }
 
 func flattenGoogleBigQueryTableListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
-	tableRef, ok := res["tableReference"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("missing tableReference in BigQuery tables list response")
+	var table bigquery.Table
+	if err := tpgresource.Convert(res, &table); err != nil {
+		return fmt.Errorf("error converting BigQuery tables list response: %w", err)
 	}
 
-	tableID, ok := tableRef["tableId"].(string)
-	if !ok || tableID == "" {
+	if table.TableReference == nil || table.TableReference.TableId == "" {
 		return fmt.Errorf("missing tableReference.tableId in BigQuery tables list response")
 	}
 
 	project := d.Get("project").(string)
-	datasetID := d.Get("dataset_id").(string)
-
-	if v, ok := tableRef["projectId"].(string); ok && v != "" {
-		project = v
-	}
-	if v, ok := tableRef["datasetId"].(string); ok && v != "" {
-		datasetID = v
+	if table.TableReference.ProjectId != "" {
+		project = table.TableReference.ProjectId
 	}
 
-	labels := make(map[string]string)
-	if rawLabels, ok := res["labels"].(map[string]interface{}); ok {
-		for key, value := range rawLabels {
-			stringValue, ok := value.(string)
-			if !ok {
-				return fmt.Errorf("unexpected label value type for %q", key)
-			}
-			labels[key] = stringValue
-		}
-	}
-
-	tableType := ""
-	if value, ok := res["type"].(string); ok {
-		tableType = value
-	}
-
-	return populateBigQueryTableCommonResourceData(d, config, project, datasetID, tableID, tableType, labels)
+	return ResourceBigQueryTableFlatten(d, config, project, &table)
 }
 
 func ListBigQueryTables(config *transport_tpg.Config, project, datasetID string, callback func(rd *schema.ResourceData) error) error {

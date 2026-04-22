@@ -2146,11 +2146,41 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
 	}
 
-	return ResourceBigQueryTableFlatten(d, config, userAgent, project, res)
+	if err := ResourceBigQueryTableFlatten(d, config, project, res); err != nil {
+		return err
+	}
+
+	// TODO: Update when the Get API fields for TableReplicationInfo are available in the client library.
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables/{{"{{"}}table_id{{"}}"}}")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[INFO] Reading BigQuery table through API: %s", url)
+
+	getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return err
+	}
+
+	if v, ok := getRes["tableReplicationInfo"]; ok {
+		tableReplicationInfo := flattenTableReplicationInfo(v.(map[string]interface{}))
+
+		if err := d.Set("table_replication_info", tableReplicationInfo); err != nil {
+			return fmt.Errorf("Error setting table replication info: %s", err)
+		}
+	}
+
+	return nil
 }
 
 
-func ResourceBigQueryTableFlatten(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project string, res *bigquery.Table) error {
+func ResourceBigQueryTableFlatten(d *schema.ResourceData, config *transport_tpg.Config, project string, res *bigquery.Table) error {
 	if err := d.Set("description", res.Description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
@@ -2334,32 +2364,6 @@ func ResourceBigQueryTableFlatten(d *schema.ResourceData, config *transport_tpg.
 
 	if err := d.Set("resource_tags", res.ResourceTags); err != nil {
 		return fmt.Errorf("Error setting resource tags: %s", err)
-	}
-
-	// TODO: Update when the Get API fields for TableReplicationInfo are available in the client library.
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables/{{"{{"}}table_id{{"}}"}}")
-	if err != nil {
-		return err
-	}
-
-	log.Printf("[INFO] Reading BigQuery table through API: %s", url)
-
-	getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
-	if err != nil {
-		return err
-	}
-
-	if v, ok := getRes["tableReplicationInfo"]; ok {
-		tableReplicationInfo := flattenTableReplicationInfo(v.(map[string]interface{}))
-
-		if err := d.Set("table_replication_info", tableReplicationInfo); err != nil {
-			return fmt.Errorf("Error setting table replication info: %s", err)
-		}
 	}
 
 	if res.ExternalCatalogTableOptions != nil {
