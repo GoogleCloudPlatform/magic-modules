@@ -14,6 +14,7 @@
 ---
 name: 'ApiGateway'
 display_name: 'API Gateway'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://apigateway.googleapis.com/v1beta/'

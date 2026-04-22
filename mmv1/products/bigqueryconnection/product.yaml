@@ -15,6 +15,7 @@
 name: 'BigqueryConnection'
 legacy_name: 'bigquery'
 display_name: 'BigQuery Connection'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://bigqueryconnection.googleapis.com/v1/'

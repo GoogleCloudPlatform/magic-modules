@@ -14,6 +14,7 @@
 ---
 name: 'Privateca'
 display_name: 'Certificate Authority Service'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://privateca.googleapis.com/v1/'

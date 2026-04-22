@@ -13,6 +13,7 @@
 ---
 name: 'Iap'
 display_name: 'Identity-Aware Proxy'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://iap.googleapis.com/v1/'

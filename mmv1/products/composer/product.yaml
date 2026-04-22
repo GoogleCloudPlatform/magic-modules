@@ -14,6 +14,7 @@
 ---
 name: 'Composer'
 display_name: 'Cloud Composer'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://composer.googleapis.com/v1/'

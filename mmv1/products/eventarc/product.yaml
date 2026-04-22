@@ -16,6 +16,7 @@ name: Eventarc
 display_name: Eventarc
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+deletion_policy_opt_in: true
 versions:
   - base_url: https://eventarc.googleapis.com/v1/
     name: ga

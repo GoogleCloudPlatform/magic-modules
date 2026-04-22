@@ -15,6 +15,7 @@
 name: 'BigqueryReservation'
 legacy_name: 'bigquery'
 display_name: 'BigQuery Reservation'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://bigqueryreservation.googleapis.com/v1/'

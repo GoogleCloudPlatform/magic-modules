@@ -14,6 +14,7 @@
 ---
 name: 'Gkeonprem'
 display_name: 'Anthos On-Prem'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://gkeonprem.googleapis.com/v1/'

@@ -15,6 +15,7 @@
 name: 'SQL'
 display_name: 'Cloud SQL'
 client_name: 'SqlAdmin'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://sqladmin.googleapis.com/sql/v1beta4/'

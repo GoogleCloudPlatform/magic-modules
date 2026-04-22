@@ -14,6 +14,7 @@
 ---
 name: 'Biglake'
 display_name: 'Biglake'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://biglake.googleapis.com/v1/'

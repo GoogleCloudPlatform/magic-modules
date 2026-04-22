@@ -14,6 +14,7 @@
 ---
 name: 'Storage'
 display_name: 'Cloud Storage'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://storage.googleapis.com/storage/v1/'

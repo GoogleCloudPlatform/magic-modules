@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
@@ -18,6 +19,9 @@ func ResourceLoggingFolderSink() *schema.Resource {
 		Delete: resourceLoggingFolderSinkDelete,
 		Update: resourceLoggingFolderSinkUpdate,
 		Schema: resourceLoggingSinkSchema(),
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 		Importer: &schema.ResourceImporter{
 			State: resourceLoggingSinkImportState("folder"),
 		},
@@ -93,11 +97,21 @@ func resourceLoggingFolderSinkRead(d *schema.ResourceData, meta interface{}) err
 	if err := d.Set("intercept_children", sink.InterceptChildren); err != nil {
 		return fmt.Errorf("Error setting intercept_children: %s", err)
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+	//UDP default read end
 
 	return nil
 }
 
 func resourceLoggingFolderSinkUpdate(d *schema.ResourceData, meta interface{}) error {
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingFolderSink) {
+		return ResourceLoggingFolderSink().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -117,6 +131,13 @@ func resourceLoggingFolderSinkUpdate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceLoggingFolderSinkDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

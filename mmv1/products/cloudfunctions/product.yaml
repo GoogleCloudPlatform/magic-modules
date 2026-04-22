@@ -15,6 +15,7 @@
 name: 'CloudFunctions'
 legacy_name: 'cloudfunctions'
 display_name: 'Cloud Functions'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://cloudfunctions.googleapis.com/v1/'

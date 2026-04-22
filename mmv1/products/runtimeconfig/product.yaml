@@ -15,6 +15,7 @@
 name: 'RuntimeConfig'
 legacy_name: 'runtimeconfig'
 display_name: 'Runtime Configurator'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://runtimeconfig.googleapis.com/v1beta1/'

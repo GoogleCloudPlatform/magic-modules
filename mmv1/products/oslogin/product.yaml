@@ -14,6 +14,7 @@
 ---
 name: 'OSLogin'
 display_name: 'OS Login'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://oslogin.googleapis.com/v1/'

@@ -16,6 +16,7 @@ name: BigqueryDatapolicyv2
 display_name: BigQuery Data Policy V2
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+deletion_policy_opt_in: true
 versions:
   - base_url: https://bigquerydatapolicy.googleapis.com/v2/
     name: ga

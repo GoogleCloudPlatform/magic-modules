@@ -16,6 +16,7 @@ name: SaasRuntime
 display_name: App Lifecycle Manager (SaaS Runtime)
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+deletion_policy_opt_in: true
 versions:
   - name: "beta"
     base_url: https://saasservicemgmt.googleapis.com/v1beta1/

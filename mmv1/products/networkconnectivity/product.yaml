@@ -14,6 +14,7 @@
 ---
 name: 'NetworkConnectivity'
 display_name: 'Network Connectivity'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://networkconnectivity.googleapis.com/v1/'

@@ -14,6 +14,7 @@
 ---
 name: 'Cloudbuildv2'
 display_name: 'Cloud Build v2'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://cloudbuild.googleapis.com/v2/'

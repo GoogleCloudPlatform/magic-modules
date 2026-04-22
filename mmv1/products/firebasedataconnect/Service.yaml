@@ -61,6 +61,8 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: U2VydmljZQ==
+deletion_policy_default: "DEFAULT"
+deletion_policy_custom_docs: true
 parameters:
   - name: location
     type: String
@@ -130,12 +132,20 @@ properties:
 virtual_fields:
   - name: deletion_policy
     type: String
-    default_value: DEFAULT
     description: |-
       The deletion policy for the database. Setting the field to FORCE allows the
       Service to be deleted even if a Schema or Connector is present. By default,
       the Service deletion will only succeed when no Schema or Connectors are
       present.
-      Possible values: DEFAULT, FORCE
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+      Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
+    #excluded from generation due to Universal Deletion Policy
+    exclude: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/firebasedataconnect_service.go.tmpl

@@ -14,6 +14,7 @@
 ---
 name: 'DocumentAI'
 display_name: 'Document AI'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://{{location}}-documentai.googleapis.com/v1/'

@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -20,6 +21,7 @@ func ResourceApigeeKeystoresAliasesPkcs12() *schema.Resource {
 	return &schema.Resource{
 		Create: ResourceApigeeKeystoresAliasesPkcs12Create,
 		Read:   ResourceApigeeKeystoresAliasesPkcs12Read,
+		Update: ResourceApigeeKeystoresAliasesPkcs12Update,
 		Delete: ResourceApigeeKeystoresAliasesPkcs12Delete,
 
 		Importer: &schema.ResourceImporter{
@@ -30,6 +32,10 @@ func ResourceApigeeKeystoresAliasesPkcs12() *schema.Resource {
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"alias": {
@@ -156,6 +162,9 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 				Computed:    true,
 				Description: `Optional.Type of Alias`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -254,11 +263,31 @@ func ResourceApigeeKeystoresAliasesPkcs12Read(d *schema.ResourceData, meta inter
 	if err := d.Set("type", flattenApigeeKeystoreAliasesPkcsType(res["type"], d, config)); err != nil {
 		return fmt.Errorf("Error reading KeystoreAliasesPkcs: %s", err)
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+	//UDP default read end
 
 	return nil
 }
 
+// UDP update start
+func ResourceApigeeKeystoresAliasesPkcs12Update(d *schema.ResourceData, meta interface{}) error {
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return ResourceApigeeKeystoresAliasesPkcs12Read(d, meta)
+}
+
+//UDP update end
+
 func ResourceApigeeKeystoresAliasesPkcs12Delete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

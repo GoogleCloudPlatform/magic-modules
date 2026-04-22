@@ -20,6 +20,7 @@ func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleServiceNetworkingPeeredDNSDomainCreate,
 		Read:   resourceGoogleServiceNetworkingPeeredDNSDomainRead,
+		Update: resourceGoogleServiceNetworkingPeeredDNSDomainUpdate,
 		Delete: resourceGoogleServiceNetworkingPeeredDNSDomainDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -34,6 +35,7 @@ func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -73,6 +75,9 @@ func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -212,11 +217,31 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, 
 	if err := d.Set("parent", parent); err != nil {
 		return fmt.Errorf("Error setting parent: %s", err)
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+	//UDP default read end
 
 	return nil
 }
 
+// UDP update start
+func resourceGoogleServiceNetworkingPeeredDNSDomainUpdate(d *schema.ResourceData, meta interface{}) error {
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceGoogleServiceNetworkingPeeredDNSDomainRead(d, meta)
+}
+
+//UDP update end
+
 func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

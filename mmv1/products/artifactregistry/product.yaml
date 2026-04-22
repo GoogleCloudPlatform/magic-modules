@@ -14,6 +14,7 @@
 ---
 name: 'ArtifactRegistry'
 display_name: 'Artifact Registry'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://artifactregistry.googleapis.com/v1/'

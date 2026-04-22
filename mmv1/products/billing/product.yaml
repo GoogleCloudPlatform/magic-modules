@@ -15,6 +15,7 @@
 name: 'CoreBilling'
 legacy_name: 'billing'
 display_name: 'Cloud Billing'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://cloudbilling.googleapis.com/v1/'

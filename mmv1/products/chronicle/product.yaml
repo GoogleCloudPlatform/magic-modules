@@ -16,6 +16,7 @@ name: Chronicle
 display_name: Chronicle
 scopes:
  - https://www.googleapis.com/auth/cloud-platform
+deletion_policy_opt_in: true
 versions:
  - name: ga
    base_url: https://{{location}}-chronicle.googleapis.com/v1/

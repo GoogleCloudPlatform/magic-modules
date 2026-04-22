@@ -16,6 +16,7 @@ name: 'ContactCenterInsights'
 display_name: 'Contact Center AI Insights'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
+deletion_policy_opt_in: true
 versions:
   - base_url: 'https://contactcenterinsights.googleapis.com/v1/'
     name: 'ga'

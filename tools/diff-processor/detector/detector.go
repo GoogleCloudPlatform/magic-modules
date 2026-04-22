@@ -62,6 +62,13 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 				// Skip the project field.
 				continue
 			}
+			if field == "deletion_policy" {
+				//Skip tests for deletion policy.
+				//With the addition of the universal policy, these don't need to be detected on a resource basis.
+				//
+				//To-Do: don't skip if `deletion_policy_exclude` is flagged
+				continue
+			}
 			// Ignore condition fields on iam resources because we always generate them whether or not
 			// they're supported.
 			// Longer-term fix tracked at https://github.com/hashicorp/terraform-provider-google/issues/18412

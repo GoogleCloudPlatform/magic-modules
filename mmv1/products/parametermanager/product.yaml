@@ -14,6 +14,7 @@
 ---
 name: 'ParameterManager'
 display_name: 'Parameter Manager'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://parametermanager.googleapis.com/v1/'

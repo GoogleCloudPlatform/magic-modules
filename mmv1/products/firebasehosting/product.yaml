@@ -14,6 +14,7 @@
 ---
 name: 'FirebaseHosting'
 display_name: 'Firebase Hosting'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://firebasehosting.googleapis.com/v1beta1/'

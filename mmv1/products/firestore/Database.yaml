@@ -49,6 +49,8 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/firestore_database.go.tmpl'
+# TODO: remove this default in the 8.0.0 major release
+deletion_policy_default: "ABANDON"
 examples:
   - name: 'firestore_default_database'
     primary_resource_id: 'database'
@@ -177,19 +179,6 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
-virtual_fields:
-  - name: 'deletion_policy'
-    description: |
-      Deletion behavior for this database.
-      If the deletion policy is `ABANDON`, the database will be removed from Terraform state but not deleted from Google Cloud upon destruction.
-      If the deletion policy is `DELETE`, the database will both be removed from Terraform state and deleted from Google Cloud upon destruction.
-      The default value is `ABANDON`.
-      See also `delete_protection`.
-    type: String
-    default_value: "ABANDON"
-    # `deletion_policy` is deprecated and will be removed in a future major release.
-    # Once that release happens, you should use `delete_protection_state` instead.
-    # For now though, setting this field is necessary if you wish for your Firestore databases to be deleted upon `terraform destroy`.
 parameters:
 properties:
   - name: 'name'

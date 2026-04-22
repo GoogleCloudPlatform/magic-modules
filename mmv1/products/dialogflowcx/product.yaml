@@ -14,6 +14,7 @@
 ---
 name: 'DialogflowCX'
 display_name: 'Dialogflow CX'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://{{location}}-dialogflow.googleapis.com/v3/'

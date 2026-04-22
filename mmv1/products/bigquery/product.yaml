@@ -15,6 +15,7 @@
 name: 'BigQuery'
 legacy_name: 'bigquery'
 display_name: 'BigQuery'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://bigquery.googleapis.com/bigquery/v2/'

@@ -14,6 +14,7 @@
 ---
 name: 'Integrations'
 display_name: 'Application Integration'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://integrations.googleapis.com/v1/'

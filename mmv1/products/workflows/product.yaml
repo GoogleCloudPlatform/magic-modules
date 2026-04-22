@@ -14,6 +14,7 @@
 ---
 name: 'Workflows'
 display_name: 'Workflows'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://workflows.googleapis.com/v1/'

@@ -14,6 +14,7 @@
 ---
 name: 'IntegrationConnectors'
 display_name: 'Integration Connectors'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://connectors.googleapis.com/v1/'

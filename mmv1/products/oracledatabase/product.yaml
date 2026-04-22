@@ -13,6 +13,7 @@
 ---
 name: 'OracleDatabase'
 display_name: 'Oracle Database'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://oracledatabase.googleapis.com/v1/'

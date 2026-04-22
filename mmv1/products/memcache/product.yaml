@@ -14,6 +14,7 @@
 ---
 name: 'Memcache'
 display_name: 'Memcache'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://memcache.googleapis.com/v1beta2/'

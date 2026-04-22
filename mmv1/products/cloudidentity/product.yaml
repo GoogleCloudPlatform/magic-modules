@@ -14,6 +14,7 @@
 ---
 name: 'CloudIdentity'
 display_name: 'Cloud Identity'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://cloudidentity.googleapis.com/v1/'

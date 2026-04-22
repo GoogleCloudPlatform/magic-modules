@@ -14,6 +14,7 @@
 ---
 name: 'GKEBackup'
 display_name: 'Backup for GKE'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://gkebackup.googleapis.com/v1/'
