@@ -34,6 +34,7 @@ import (
 
 	_ "embed"
 
+	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 )
@@ -52,6 +53,7 @@ const (
 var ctftRequiredEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN",
 	"SPREADSHEET_ID",
+	"GCB_TICKET_CREATION_SERVICE_ACCOUNT",
 }
 
 type testFailureRateLabel int64
@@ -134,7 +136,7 @@ var createTestFailureTicketCmd = &cobra.Command{
 		}
 		date := now.In(loc)
 
-		shepherd, err := getReleaseShepherd(context.Background(), env["SPREADSHEET_ID"], date)
+		shepherd, err := getReleaseShepherd(context.Background(), env["SPREADSHEET_ID"], env["GCB_TICKET_CREATION_SERVICE_ACCOUNT"], date)
 		if err != nil {
 			return fmt.Errorf("failed to get release shepherd: %w", err)
 		}
@@ -597,8 +599,16 @@ func parseDate(s string) (time.Time, error) {
 }
 
 // getReleaseShepherd retrieves the current release shepherd's GitHub username from a Google Sheet.
-func getReleaseShepherd(ctx context.Context, spreadsheetId string, now time.Time) (string, error) {
-	srv, err := sheets.NewService(ctx, option.WithScopes("https://www.googleapis.com/auth/cloud-platform"))
+func getReleaseShepherd(ctx context.Context, spreadsheetId string, sa string, now time.Time) (string, error) {
+	ts, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
+		TargetPrincipal: sa,
+		Scopes:          []string{sheets.SpreadsheetsReadonlyScope},
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to create impersonated token source: %w", err)
+	}
+	// Initialize the Sheets service using the impersonated token source
+	srv, err := sheets.NewService(ctx, option.WithTokenSource(ts))
 	if err != nil {
 		return "", fmt.Errorf("unable to retrieve Sheets client: %w", err)
 	}

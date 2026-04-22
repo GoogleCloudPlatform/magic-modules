@@ -3,7 +3,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: create-test-failure-ticket
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN", "SPREADSHEET_ID"]
+      secretEnv: ["GITHUB_TOKEN", "SPREADSHEET_ID", "GCB_TICKET_CREATION_SERVICE_ACCOUNT"]
       args:
         - 'create-test-failure-ticket'
     # - name: 'gcr.io/graphite-docker-images/go-plus'
@@ -25,3 +25,6 @@ availableSecrets:
       env: GITHUB_TOKEN
     - versionName: projects/673497134629/secrets/release-shepherd-spreadsheet-id/versions/latest
       env: SPREADSHEET_ID
+    - versionName: projects/673497134629/secrets/gcb-ticket-creation-service-account/versions/latest
+      env: GCB_TICKET_CREATION_SERVICE_ACCOUNT
+      
