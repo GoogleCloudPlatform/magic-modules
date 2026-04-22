@@ -153,9 +153,6 @@ virtual_fields:
       When set to "DELETE", deleting the resource is permitted.
     type: String
     exclude: true
-    type: Enum
-    enum_values:
-      - 'FORCE'
 iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
