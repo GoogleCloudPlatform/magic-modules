@@ -2298,10 +2298,11 @@ func ResourceBigQueryTableFlatten(d *schema.ResourceData, config *transport_tpg.
 			_, viewPresent := d.GetOk("view")
 			_, materializedViewPresent := d.GetOk("materialized_view")
 			managePolicyTags := !viewPresent && !materializedViewPresent
-			configSchema, err = expandSchema(v, managePolicyTags)
+			parsedConfigSchema, err := expandSchema(v, managePolicyTags)
 			if err != nil {
 				return err
 			}
+			configSchema = parsedConfigSchema
 		}
 
 		schemaFiltered := res.Schema
