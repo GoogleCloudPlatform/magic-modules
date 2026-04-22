@@ -497,10 +497,14 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		issueRquest.Assignee = github.String(shepherd)
 	}
 
-	_, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
-	if err != nil {
-		return fmt.Errorf("error creating issue: %w", err)
-	}
+	fmt.Printf("Issue Title: %s\n", *issueRquest.Title)
+	fmt.Printf("release shepherd: %s\n", shepherd)
+	fmt.Printf("ticket labels: %s\n", ticketLabels)
+
+	// _, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
+	// if err != nil {
+	// 	return fmt.Errorf("error creating issue: %w", err)
+	// }
 	return nil
 }
 
