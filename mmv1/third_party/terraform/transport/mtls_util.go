@@ -1,4 +1,4 @@
-package provider
+package transport
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 // the mode the user is in and throw away the client they give us back.
 func isMtls() bool {
 	regularEndpoint := "https://mockservice.googleapis.com/v1/"
-	mtlsEndpoint := getMtlsEndpoint(regularEndpoint)
+	mtlsEndpoint := GetMtlsEndpoint(regularEndpoint)
 	_, endpoint, err := transport.NewHTTPClient(context.Background(),
 		internaloption.WithDefaultEndpoint(regularEndpoint),
 		internaloption.WithDefaultMTLSEndpoint(mtlsEndpoint),

@@ -243,6 +243,7 @@ type Config struct {
 	Region                                    string
 	BillingProject                            string
 	Zone                                      string
+	isMtls                                    bool
 	UniverseDomain                            string
 	Scopes                                    []string
 	BatchingConfig                            *BatchingConfig
@@ -263,6 +264,7 @@ type Config struct {
 
 	TokenSource oauth2.TokenSource
 
+	CustomEndpoints map[string]string
 	{{ range $product := $.Products }}
 	{{ $product.Name }}BasePath string
 	{{- if ne $product.Version.RepUrl "" }}
@@ -1586,36 +1588,4 @@ func GetUniverseDomainFromMeta(meta interface{}) string {
 		return "googleapis.com"
 	}
 	return config.UniverseDomain
-}
-
-// Returns the base path for a resource taking into account the following rules:
-// Overridden path takes precedence over everything
-// Regional endpoint should be returned if preferred
-// Global endpoint should be returned if preferred
-// If no preferences, return the product default based on DefaultRepStatus map
-func ResourceBasePath(basePath, repPath, basePathKey string, config *Config, location string) (string, error) {
-	var path string
-	// Set the default to the product-level default
-	if DefaultRepStatus[basePathKey] {
-		path = repPath
-	} else {
-		path = basePath
-	}
-    // If product default has been overridden, use override
-    if basePath != DefaultBasePaths[basePathKey] {
-        path = basePath
-    } else if config.PreferRegionalEndpoints {
-    	// If user has specified a preference, switch to that
-        path = repPath
-    } else if config.PreferGlobalEndpoints {
-    	// If user has specified a preference, switch to that
-        path = basePath
-    }
-		if strings.Contains(path, "{{"{{"}}location{{"}}"}}") && location == "" {
-			log.Printf("[WARN] Found base path with location but no location provided: %s", path)
-			return path, fmt.Errorf("failed to find location for a resource with a regionalized endpoint %s", path)
-		}
-    // Still try to replace location even if it may not exist, this allows
-    // for products that only support REP on their base_url
-    return strings.ReplaceAll(path, "{{"{{"}}location{{"}}"}}", location), nil
 }

@@ -329,14 +329,27 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		})
 	}
 
+	for _, p := range registry.ListProducts() {
+		customEndpoint := ""
+		if v := d.Get(p.CustomEndpointField); v != "" {
+			customEndpoint = v
+		} else if v = MultiEnvSearch([]string{p.CustomEndpointEnvVar}); v != "" {
+			customEndpoint = v
+		}
+		if customEndpoint != "" {
+			config.CustomEndpoints[p.CustomEndpointField] = customEndpoint
+		}
+	}
+
 	// The mtls service client gives the type of endpoint (mtls/regular)
 	// at client creation. Since we use a shared client for requests we must
 	// rewrite the endpoints to be mtls endpoints for the scenario where
 	// mtls is enabled.
-	if isMtls() {
+	config.IsMtls = isMtls()
+	if config.IsMtls {
 		// if mtls is enabled switch all default endpoints to use the mtls endpoint
 		for key, bp := range transport_tpg.DefaultBasePaths {
-			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
+			transport_tpg.DefaultBasePaths[key] = GetMtlsEndpoint(bp)
 		}
 	}
 	
