@@ -41,8 +41,10 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
 		ItemName:       "{{ $.ResourceListKey }}",
-		// Merge one list item into rd via Resource{{ $.ResourceName }}Flatten, then SetId. Do not set identity
-		// or list-scope parameters on rd here; list result identity is applied in the List() stream callback (SetResult).
+		// Merge one list item into rd via Resource{{ $.ResourceName }}Flatten, then SetId. list-scope
+		// parameters stay on temp resource data only. After Flatten (custom decoder may add keys, e.g. name from
+		// metadata), copy url_param/identity from res to rd for TypeInt and display name (int/string coerce).
+		// List() SetResult then reads rd for list result identity/DisplayName.
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 {{- if $.ExcludeRead }}
 			return fmt.Errorf("list resource for {{ $.Name }} requires read support (Resource{{ $.ResourceName }}Flatten is not generated when exclude_read is set)")
@@ -60,6 +62,35 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 			if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
+{{- end }}
+{{- /* after decoder inside Flatten: res keys match d.Set for identity fields */ -}}
+{{- range $id := $.IdentityProperties }}
+{{- if $id.ApiName }}
+			if v, ok := res["{{ $id.ApiName }}"]; ok && v != nil {
+	{{- if eq $id.Type "Integer" }}
+				var vv interface{}
+				switch t := v.(type) {
+				case int:
+					vv = t
+				case string:
+					i, serr := strconv.Atoi(t)
+					if serr != nil {
+						return fmt.Errorf("Error coercing {{ underscore $id.Name }}: %s", serr)
+					}
+					vv = i
+				default:
+					return fmt.Errorf("Error coercing {{ underscore $id.Name }}: need int or string, got %T", v)
+				}
+				if err := d.Set("{{ underscore $id.Name }}", vv); err != nil {
+					return fmt.Errorf("Error setting {{ underscore $id.Name }}: %s", err)
+				}
+	{{- else }}
+				if err := d.Set("{{ underscore $id.Name }}", v); err != nil {
+					return fmt.Errorf("Error setting {{ underscore $id.Name }}: %s", err)
+				}
+	{{- end }}
+			}
+{{- end }}
 {{- end }}
 			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
 			if err != nil {
