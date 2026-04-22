@@ -13,9 +13,12 @@ import (
 func TestAccDataplexDatascanDataplexDatascanFullQuality_update(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
 		"project_name":  envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"datascan_name": "tf-test-dataquality-full" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -78,7 +81,7 @@ resource "google_bigquery_table" "tf_test_table" {
     ]
   EOF
 }
-  
+
 resource "google_dataplex_datascan" "full_quality" {
   location = "us-central1"
   display_name = "Full Datascan Quality"
