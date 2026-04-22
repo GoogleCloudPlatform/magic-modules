@@ -36,7 +36,7 @@ resource "google_compute_security_policy" "default" {
 
 resource "google_compute_instance_template" "default" {
   provider     = google-beta
-  name         = "{{index $.Vars "backend_name"}}-tpl"
+  name         = "{{index $.Vars "backend_name"}}"
   machine_type = "e2-micro"
 
   disk {
@@ -53,7 +53,7 @@ resource "google_compute_instance_template" "default" {
 
 resource "google_compute_instance_group_manager" "default" {
   provider           = google-beta
-  name               = "{{index $.Vars "backend_name"}}-igm"
+  name               = "{{index $.Vars "backend_name"}}"
   base_instance_name = "backend"
   zone               = "us-west2-a"
 
