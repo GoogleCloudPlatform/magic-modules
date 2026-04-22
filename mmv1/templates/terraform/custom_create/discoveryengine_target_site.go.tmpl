@@ -66,51 +66,20 @@ d.SetId(id)
 
 if d.Get("skip_wait").(bool) {
 	// When skip_wait is true, don't wait for the LRO to complete.
-	// The indexing operation response is not yet available, so we find the
-	// newly created target site via a List call matching provided_uri_pattern.
-	listURL, err := tpgresource.ReplaceVars(d, config, "{{`{{DiscoveryEngineBasePath}}`}}projects/{{`{{project}}`}}/locations/{{`{{location}}`}}/collections/default_collection/dataStores/{{`{{data_store_id}}`}}/siteSearchEngine/targetSites")
-	if err != nil {
-		return fmt.Errorf("Error constructing list URL for TargetSite: %s", err)
-	}
-
-	listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    listURL,
-		UserAgent: userAgent,
-		Headers:   headers,
-	})
-	if err != nil {
-		return fmt.Errorf("Error listing TargetSites after creation: %s", err)
-	}
-
-	providedPattern := d.Get("provided_uri_pattern").(string)
-	targetSites, ok := listRes["targetSites"].([]interface{})
+	// Resource registration completes quickly and the target site name is
+	// available immediately in the initial POST response. The 480-minute
+	// wait is for background indexing which we intentionally skip.
+	responseMap, ok := res["response"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("Error parsing targetSites list response")
+		d.SetId("")
+		return fmt.Errorf("Error creating TargetSite: initial POST response did not contain operation result")
 	}
-
-	var foundName string
-	for _, site := range targetSites {
-		siteMap, ok := site.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		// Match by providedUriPattern
-		if siteMap["providedUriPattern"] == providedPattern {
-			if name, ok := siteMap["name"].(string); ok {
-				foundName = name
-				break
-			}
-		}
+	name, ok := responseMap["name"].(string)
+	if !ok || name == "" {
+		d.SetId("")
+		return fmt.Errorf("Error creating TargetSite: could not read resource name from operation response")
 	}
-
-	if foundName == "" {
-		return fmt.Errorf("Error finding newly created TargetSite with provided_uri_pattern %q in list response", providedPattern)
-	}
-
-	if err := d.Set("name", flattenDiscoveryEngineTargetSiteName(foundName, d, config)); err != nil {
+	if err := d.Set("name", flattenDiscoveryEngineTargetSiteName(name, d, config)); err != nil {
 		return err
 	}
 } else {
