@@ -327,7 +327,7 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   model_settings {
-    model       = "gemini-2.0-flash"
+    model       = "gemini-3.0-flash-001"
     temperature = 1.0
   }
 
