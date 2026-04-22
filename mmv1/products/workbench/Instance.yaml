@@ -662,4 +662,3 @@ properties:
     type: Boolean
     description: |
       Optional. If true, deletion protection will be enabled for this Workbench Instance.
-    immutable: true

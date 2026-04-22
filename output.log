@@ -1,0 +1,22 @@
+2026-04-22T18:10:21.212Z [INFO]  Terraform version: 1.5.7
+2026-04-22T18:10:21.212Z [DEBUG] using github.com/hashicorp/go-tfe v1.26.0
+2026-04-22T18:10:21.212Z [DEBUG] using github.com/hashicorp/hcl/v2 v2.16.2
+2026-04-22T18:10:21.212Z [DEBUG] using github.com/hashicorp/terraform-svchost v0.1.0
+2026-04-22T18:10:21.212Z [DEBUG] using github.com/zclconf/go-cty v1.12.2
+2026-04-22T18:10:21.212Z [INFO]  Go runtime version: go1.20.7
+2026-04-22T18:10:21.212Z [INFO]  CLI args: []string{"terraform", "apply"}
+2026-04-22T18:10:21.212Z [DEBUG] Attempting to open CLI config file: /usr/local/google/home/bcreddy/tf-dev-override.tfrc
+2026-04-22T18:10:21.212Z [INFO]  Loading CLI configuration from /usr/local/google/home/bcreddy/tf-dev-override.tfrc
+2026-04-22T18:10:21.212Z [DEBUG] Not reading CLI config directory because config location is overridden by environment variable
+2026-04-22T18:10:21.212Z [DEBUG] Explicit provider installation configuration is set
+2026-04-22T18:10:21.213Z [INFO]  CLI command args: []string{"apply"}
+2026-04-22T18:10:21.213Z [DEBUG] New state was assigned lineage "47436ed3-668d-1e1b-8ec4-659061dcdc4f"
+2026-04-22T18:10:21.213Z [DEBUG] Provider registry.terraform.io/hashicorp/google-beta is overridden by dev_overrides
+2026-04-22T18:10:21.213Z [DEBUG] Provider registry.terraform.io/hashicorp/google is overridden by dev_overrides
+2026-04-22T18:10:21.213Z [DEBUG] Provider registry.terraform.io/hashicorp/google is overridden to load from /usr/local/google/home/bcreddy/go/bin
+2026-04-22T18:10:21.213Z [DEBUG] Provider registry.terraform.io/hashicorp/google-beta is overridden to load from /usr/local/google/home/bcreddy/go/bin
+2026-04-22T18:10:21.213Z [DEBUG] checking for provisioner in "."
+2026-04-22T18:10:21.213Z [DEBUG] checking for provisioner in "/usr/local/google/home/bcreddy/bin"
+2026-04-22T18:10:21.213Z [DEBUG] Provider registry.terraform.io/hashicorp/google is overridden by dev_overrides
+2026-04-22T18:10:21.213Z [DEBUG] Provider registry.terraform.io/hashicorp/google-beta is overridden by dev_overrides
+2026-04-22T18:10:21.214Z [INFO]  backend/local: starting Apply operation
