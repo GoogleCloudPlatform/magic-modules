@@ -2,11 +2,9 @@ package compute
 
 import (
 	"fmt"
-	neturl "net/url"
 	"sort"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
-	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -57,31 +55,35 @@ func dataSourceGoogleComputeSnapshotRead(d *schema.ResourceData, meta interface{
 			return err
 		}
 
-		projectGetCall := rmClient.NewClient(config, userAgent).Projects.Get(project)
-
+		billingProject := ""
 		if config.UserProjectOverride {
-			billingProject := project
-
-			// err == nil indicates that the billing_project value was found
+			billingProject = project
 			if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 				billingProject = bp
 			}
-			projectGetCall.Header().Add("X-Goog-User-Project", billingProject)
 		}
 
-		//handling the pagination locally
+		baseURL, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/snapshots")
+		if err != nil {
+			return err
+		}
+
 		allSnapshots := make([]map[string]interface{}, 0)
 		token := ""
 		for paginate := true; paginate; {
-			params := neturl.Values{}
-			params.Set("filter", v.(string))
-			params.Set("pageToken", token)
-			params.Set("prettyPrint", "false")
-			url := fmt.Sprintf("%sprojects/%s/global/snapshots?%s", config.ComputeBasePath, project, params.Encode())
+			queryParams := map[string]string{
+				"filter":      v.(string),
+				"pageToken":   token,
+				"prettyPrint": "false",
+			}
+			url, err := transport_tpg.AddQueryParams(baseURL, queryParams)
+			if err != nil {
+				return err
+			}
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",
-				Project:   project,
+				Project:   billingProject,
 				RawURL:    url,
 				UserAgent: userAgent,
 			})
