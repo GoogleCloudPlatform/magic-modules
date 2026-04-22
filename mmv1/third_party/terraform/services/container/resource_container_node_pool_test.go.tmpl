@@ -4659,7 +4659,7 @@ resource "google_container_cluster" "cluster" {
 		count = 8
    }
 
-   gpudirect_strategy = “rdma”
+   gpudirect_strategy = "rdma"
   }
 }
 
@@ -4676,7 +4676,7 @@ resource "google_container_node_pool" "np_with_gpudirect" {
 		count = 8
    }
 
-   gpudirect_strategy = “rdma”
+   gpudirect_strategy = "rdma"
   }
 }
 `, cluster, networkName, subnetworkName, np)
