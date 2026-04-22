@@ -15,11 +15,17 @@ func RemoveTerraformAttributionLabel(raw interface{}) interface{} {
 
 	if labels, ok := raw.(map[string]string); ok {
 		delete(labels, "goog-terraform-provisioned")
+		if len(labels) == 0 {
+			return nil
+		}
 		return labels
 	}
 
 	if labels, ok := raw.(map[string]interface{}); ok {
 		delete(labels, "goog-terraform-provisioned")
+		if len(labels) == 0 {
+			return nil
+		}
 		return labels
 	}
 
