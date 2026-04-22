@@ -51,7 +51,6 @@ const (
 
 var ctftRequiredEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN",
-	"SA_CREDENTIALS",
 	"SPREADSHEET_ID",
 }
 
@@ -135,7 +134,7 @@ var createTestFailureTicketCmd = &cobra.Command{
 		}
 		date := now.In(loc)
 
-		shepherd, err := getReleaseShepherd(context.Background(), env["SA_CREDENTIALS"], env["SPREADSHEET_ID"], date)
+		shepherd, err := getReleaseShepherd(context.Background(), env["SPREADSHEET_ID"], date)
 		if err != nil {
 			return fmt.Errorf("failed to get release shepherd: %w", err)
 		}
@@ -594,8 +593,8 @@ func parseDate(s string) (time.Time, error) {
 }
 
 // getReleaseShepherd retrieves the current release shepherd's GitHub username from a Google Sheet.
-func getReleaseShepherd(ctx context.Context, credentialsJSON string, spreadsheetId string, now time.Time) (string, error) {
-	srv, err := sheets.NewService(ctx, option.WithCredentialsJSON([]byte(credentialsJSON)))
+func getReleaseShepherd(ctx context.Context, spreadsheetId string, now time.Time) (string, error) {
+	srv, err := sheets.NewService(ctx, option.WithScopes(sheets.SpreadsheetsReadonlyScope))
 	if err != nil {
 		return "", fmt.Errorf("unable to retrieve Sheets client: %w", err)
 	}
