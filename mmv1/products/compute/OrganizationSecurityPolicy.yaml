@@ -123,7 +123,7 @@ properties:
         properties:
           - name: 'contentTypes'
             type: Array
-            item_type: 
+            item_type:
               type: String
             description: 'A list of content types to be parsed as JSON.'
       - name: 'logLevel'
@@ -134,7 +134,7 @@ properties:
           - 'VERBOSE'
       - name: 'userIpRequestHeaders'
         type: Array
-        item_type: 
+        item_type:
           type: String
         description: 'An optional list of case-insensitive request header names to use for resolving the client source IP address.'
         is_set: true
@@ -150,3 +150,4 @@ properties:
           - "48KB"
           - "64KB"
         min_version: "beta"
+        
