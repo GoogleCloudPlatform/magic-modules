@@ -56,31 +56,26 @@ func dataSourceGoogleComputeSnapshotRead(d *schema.ResourceData, meta interface{
 			return err
 		}
 
-		projectGetCall := config.NewResourceManagerClient(userAgent).Projects.Get(project)
-
+		billingProject := project
 		if config.UserProjectOverride {
-			billingProject := project
-
-			// err == nil indicates that the billing_project value was found
 			if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 				billingProject = bp
 			}
-			projectGetCall.Header().Add("X-Goog-User-Project", billingProject)
 		}
 
-		//handling the pagination locally
 		allSnapshots := make([]map[string]interface{}, 0)
 		token := ""
 		for paginate := true; paginate; {
 			params := neturl.Values{}
 			params.Set("filter", v.(string))
-			params.Set("pageToken", token)
-			params.Set("prettyPrint", "false")
+			if token != "" {
+				params.Set("pageToken", token)
+			}
 			url := fmt.Sprintf("%sprojects/%s/global/snapshots?%s", config.ComputeBasePath, project, params.Encode())
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",
-				Project:   project,
+				Project:   billingProject,
 				RawURL:    url,
 				UserAgent: userAgent,
 			})
