@@ -12,7 +12,12 @@ resource "google_data_lineage_config" "{{$.PrimaryResourceId}}" {
       }
     }
   }
-  depends_on = [google_folder_iam_member.datalineage_admin]
+  depends_on = [time_sleep.wait_for_folder_iam]
+}
+
+resource "time_sleep" "wait_for_folder_iam" {
+  depends_on      = [google_folder_iam_member.datalineage_admin]
+  create_duration = "60s"
 }
 
 resource "google_folder" "integration" {
