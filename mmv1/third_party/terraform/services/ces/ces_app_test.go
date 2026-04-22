@@ -271,7 +271,7 @@ resource "google_ces_app" "ces_app_basic" {
 
   language_settings {
     default_language_code    = "en-ES"
-    supported_language_codes = ["en-US", "fr-FR"]
+    supported_language_codes = ["en-US", "fr-FR", "es-ES"]
     enable_multilingual_support = false
     fallback_action          = "escalate"
   }
