@@ -1189,3 +1189,370 @@ resource "google_dataplex_datascan" "reusable_rules_catalog_based" {
 }
 `, context)
 }
+
+func TestAccDataplexDatascan_dataplexDatascanDataQualityTemplateReference_update(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"datascan_name": "tf-test-dataquality-template-" + randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckDataplexDatascanDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataplexDatascan_dataplexDatascanDataQualityTemplateReference_full(context),
+			},
+			{
+				ResourceName:            "google_dataplex_datascan.data_quality_template_reference",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"data_scan_id", "labels", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccDataplexDatascan_dataplexDatascanDataQualityTemplateReference_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataplex_datascan.data_quality_template_reference", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("google_dataplex_datascan.data_quality_template_reference", "data_quality_spec.0.rules.0.template_reference.0.name", "google_dataplex_entry.test_entry_2", "name"),
+				),
+			},
+			{
+				ResourceName:            "google_dataplex_datascan.data_quality_template_reference",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"data_scan_id", "labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDataplexDatascan_dataplexDatascanDataQualityTemplateReference_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  project_id = "%{project_name}"
+}
+
+resource "google_service_account" "sa" {
+  account_id   = "tf-test-sa-%{random_suffix}"
+  display_name = "DataScan Service Account"
+  project      = data.google_project.project.project_id
+}
+
+resource "google_service_account_iam_member" "dataplex_sa_impersonate" {
+  service_account_id = google_service_account.sa.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-dataplex.iam.gserviceaccount.com"
+}
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [google_service_account_iam_member.dataplex_sa_impersonate]
+  create_duration = "120s"
+}
+
+
+resource "google_project_iam_member" "sa_bq_data_viewer" {
+  project = data.google_project.project.project_id
+  role    = "roles/bigquery.dataViewer"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_project_iam_member" "sa_bq_job_user" {
+  project = data.google_project.project.project_id
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_dataplex_entry_group" "test_group" {
+  location       = "us-central1"
+  entry_group_id = "test-group-%{random_suffix}"
+  project        = data.google_project.project.project_id
+}
+
+resource "google_dataplex_entry" "test_entry" {
+  location       = "us-central1"
+  entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
+  entry_id       = "test-entry-%{random_suffix}"
+  entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
+  project        = data.google_project.project.number
+  aspects {
+    aspect_key = "655216118709.global.data-quality-rule-template"
+    aspect {
+      data = jsonencode({
+        dimension = "VALIDITY"
+        sqlCollection = [
+          {
+            query = "SELECT * FROM $${data()} WHERE $${column()} IS NOT NULL"
+          }
+        ]
+      })
+    }
+  }
+}
+
+resource "google_dataplex_entry" "test_entry_2" {
+  location       = "us-central1"
+  entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
+  entry_id       = "test-entry-2-%{random_suffix}"
+  entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
+  project        = data.google_project.project.number
+  aspects {
+    aspect_key = "655216118709.global.data-quality-rule-template"
+    aspect {
+      data = jsonencode({
+        dimension = "VALIDITY"
+        sqlCollection = [
+          {
+            query = "SELECT * FROM $${data()} WHERE LENGTH($${column()}) > 0"
+          }
+        ]
+      })
+    }
+  }
+}
+
+resource "google_bigquery_dataset" "tf_test_dataset" {
+  dataset_id = "tf_test_dataset_id_%{random_suffix}"
+  default_table_expiration_ms = 3600000
+  location   = "us-central1"
+  project    = data.google_project.project.project_id
+
+  depends_on = [
+    google_service_account_iam_member.dataplex_sa_impersonate,
+    google_project_iam_member.sa_bq_data_viewer,
+    google_project_iam_member.sa_bq_job_user
+  ]
+}
+
+resource "google_bigquery_table" "tf_test_table" {
+  dataset_id          = google_bigquery_dataset.tf_test_dataset.dataset_id
+  table_id            = "tf_test_table_id_%{random_suffix}"
+  deletion_protection = false
+  project             = data.google_project.project.project_id
+  schema              = <<EOF
+    [
+    {
+      "name": "name",
+      "type": "STRING",
+      "mode": "NULLABLE"
+    }
+    ]
+  EOF
+}
+
+
+resource "google_dataplex_datascan" "data_quality_template_reference" {
+  location = "us-central1"
+  display_name = "Data Quality Template Reference"
+  data_scan_id = "%{datascan_name}"
+
+  data {
+    resource = "//bigquery.googleapis.com/projects/${data.google_project.project.project_id}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table.table_id}"
+  }
+
+  execution_spec {
+    trigger {
+      on_demand {}
+    }
+  }
+
+  execution_identity {
+    service_account {
+      email = google_service_account.sa.email
+    }
+  }
+
+  data_quality_spec {
+    rules {
+      column = "name"
+      dimension = "VALIDITY"
+      template_reference {
+        name = google_dataplex_entry.test_entry.name
+        values {
+          name = "min_length"
+          value = "10"
+        }
+      }
+    }
+  }
+
+
+  project = data.google_project.project.project_id
+
+  depends_on = [
+    google_bigquery_table.tf_test_table,
+    time_sleep.wait_120_seconds
+  ]
+}
+`, context)
+}
+
+func testAccDataplexDatascan_dataplexDatascanDataQualityTemplateReference_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  project_id = "%{project_name}"
+}
+
+resource "google_service_account" "sa" {
+  account_id   = "tf-test-sa-%{random_suffix}"
+  display_name = "DataScan Service Account"
+  project      = data.google_project.project.project_id
+}
+
+resource "google_service_account_iam_member" "dataplex_sa_impersonate" {
+  service_account_id = google_service_account.sa.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-dataplex.iam.gserviceaccount.com"
+}
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [google_service_account_iam_member.dataplex_sa_impersonate]
+  create_duration = "120s"
+}
+
+
+resource "google_project_iam_member" "sa_bq_data_viewer" {
+  project = data.google_project.project.project_id
+  role    = "roles/bigquery.dataViewer"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_project_iam_member" "sa_bq_job_user" {
+  project = data.google_project.project.project_id
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_dataplex_entry_group" "test_group" {
+  location       = "us-central1"
+  entry_group_id = "test-group-%{random_suffix}"
+  project        = data.google_project.project.project_id
+}
+
+resource "google_dataplex_entry" "test_entry" {
+  location       = "us-central1"
+  entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
+  entry_id       = "test-entry-%{random_suffix}"
+  entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
+  project        = data.google_project.project.number
+  aspects {
+    aspect_key = "655216118709.global.data-quality-rule-template"
+    aspect {
+      data = jsonencode({
+        dimension = "VALIDITY"
+        sqlCollection = [
+          {
+            query = "SELECT * FROM $${data()} WHERE $${column()} IS NOT NULL"
+          }
+        ]
+      })
+    }
+  }
+}
+
+resource "google_dataplex_entry" "test_entry_2" {
+  location       = "us-central1"
+  entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
+  entry_id       = "test-entry-2-%{random_suffix}"
+  entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
+  project        = data.google_project.project.number
+  aspects {
+    aspect_key = "655216118709.global.data-quality-rule-template"
+    aspect {
+      data = jsonencode({
+        dimension = "VALIDITY"
+        sqlCollection = [
+          {
+            query = "SELECT * FROM $${data()} WHERE LENGTH($${column()}) > 0"
+          }
+        ]
+      })
+    }
+  }
+}
+
+resource "google_bigquery_dataset" "tf_test_dataset" {
+  dataset_id = "tf_test_dataset_id_%{random_suffix}"
+  default_table_expiration_ms = 3600000
+  location   = "us-central1"
+  project    = data.google_project.project.project_id
+
+  depends_on = [
+    google_service_account_iam_member.dataplex_sa_impersonate,
+    google_project_iam_member.sa_bq_data_viewer,
+    google_project_iam_member.sa_bq_job_user
+  ]
+}
+
+resource "google_bigquery_table" "tf_test_table" {
+  dataset_id          = google_bigquery_dataset.tf_test_dataset.dataset_id
+  table_id            = "tf_test_table_id_%{random_suffix}"
+  deletion_protection = false
+  project             = data.google_project.project.project_id
+  schema              = <<EOF
+    [
+    {
+      "name": "name",
+      "type": "STRING",
+      "mode": "NULLABLE"
+    }
+    ]
+  EOF
+}
+
+
+resource "google_dataplex_datascan" "data_quality_template_reference" {
+  location = "us-central1"
+  display_name = "Data Quality Template Reference Updated"
+  data_scan_id = "%{datascan_name}"
+
+  data {
+    resource = "//bigquery.googleapis.com/projects/${data.google_project.project.project_id}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table.table_id}"
+  }
+
+  execution_spec {
+    trigger {
+      on_demand {}
+    }
+  }
+
+  execution_identity {
+    service_account {
+      email = google_service_account.sa.email
+    }
+  }
+
+  data_quality_spec {
+    rules {
+      column = "name"
+      dimension = "VALIDITY"
+      template_reference {
+        name = google_dataplex_entry.test_entry_2.name
+        values {
+          name = "min_length"
+          value = "10"
+        }
+      }
+    }
+  }
+
+
+  project = data.google_project.project.project_id
+
+  depends_on = [
+    google_bigquery_table.tf_test_table,
+    time_sleep.wait_120_seconds
+  ]
+}
+`, context)
+}
