@@ -2146,6 +2146,11 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
 	}
 
+	return ResourceBigQueryTableFlatten(d, config, userAgent, project, res)
+}
+
+
+func ResourceBigQueryTableFlatten(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project string, res *bigquery.Table) error {
 	if err := d.Set("description", res.Description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
