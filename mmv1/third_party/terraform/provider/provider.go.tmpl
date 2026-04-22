@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -340,10 +341,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		}
 	}
 
-	// The mtls service client gives the type of endpoint (mtls/regular)
-	// at client creation. Since we use a shared client for requests we must
-	// rewrite the endpoints to be mtls endpoints for the scenario where
-	// mtls is enabled.
+	// Detect whether this is running in an mTLS context.
 	config.IsMtls = transport_tpg.IsMtls()
 	
 	// Set the universe domain to the configured value, if any
@@ -408,6 +406,22 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	{{- end }}
 
 	// Legacy logic for non-registered products
+	// The mtls service client gives the type of endpoint (mtls/regular)
+	// at client creation. Since we use a shared client for requests we must
+	// rewrite the endpoints to be mtls endpoints for the scenario where
+	// mtls is enabled.
+	if config.IsMtls {
+		// if mtls is enabled switch all default endpoints to use the mtls endpoint
+		for key, bp := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = transport_tpg.GetMtlsEndpoint(bp)
+		}
+	}
+	// Replace hostname by the universe_domain field.
+	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
+		for key, basePath := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(basePath, "googleapis.com", config.UniverseDomain)
+		}
+	}
 	err = transport_tpg.SetEndpointDefaults(d)
 	if err != nil {
 		return nil, diag.FromErr(err)
