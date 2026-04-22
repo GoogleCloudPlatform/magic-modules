@@ -47,9 +47,6 @@ type ProviderModel struct {
 	DataflowCustomEndpoint          types.String `tfsdk:"dataflow_custom_endpoint"`
 	IamCredentialsCustomEndpoint    types.String `tfsdk:"iam_credentials_custom_endpoint"`
 	ResourceManagerV3CustomEndpoint types.String `tfsdk:"resource_manager_v3_custom_endpoint"`
-{{- if ne $.TargetVersionName "ga" }}
-	RuntimeconfigCustomEndpoint     types.String `tfsdk:"runtimeconfig_custom_endpoint"`
-{{- end }}
 	IAMCustomEndpoint               types.String `tfsdk:"iam_custom_endpoint"`
 	TagsLocationCustomEndpoint      types.String `tfsdk:"tags_location_custom_endpoint"`
 
@@ -62,11 +59,14 @@ type ProviderModel struct {
 	AssuredWorkloadsCustomEndpoint     types.String `tfsdk:"assured_workloads_custom_endpoint"`
 	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
 	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
+	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
 
 	// Tombstoned
-	BillingCustomEndpoint              types.String `tfsdk:"billing_custom_endpoint"`
-	CloudBillingCustomEndpoint         types.String `tfsdk:"cloud_billing_custom_endpoint"`
-	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
+{{- if ne $.TargetVersionName "ga" }}
+	RuntimeconfigCustomEndpoint types.String `tfsdk:"runtimeconfig_custom_endpoint"`
+{{- end }}
+	CoreBillingCustomEndpoint   types.String `tfsdk:"cloud_billing_custom_endpoint"`
+	BillingCustomEndpoint       types.String `tfsdk:"billing_custom_endpoint"`
 }
 
 type ProviderBatching struct {
