@@ -598,7 +598,7 @@ func parseDate(s string) (time.Time, error) {
 
 // getReleaseShepherd retrieves the current release shepherd's GitHub username from a Google Sheet.
 func getReleaseShepherd(ctx context.Context, spreadsheetId string, now time.Time) (string, error) {
-	srv, err := sheets.NewService(ctx, option.WithScopes(sheets.SpreadsheetsReadonlyScope))
+	srv, err := sheets.NewService(ctx, option.WithScopes("https://www.googleapis.com/auth/cloud-platform"))
 	if err != nil {
 		return "", fmt.Errorf("unable to retrieve Sheets client: %w", err)
 	}
