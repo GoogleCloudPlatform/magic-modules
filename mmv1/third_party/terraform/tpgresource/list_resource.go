@@ -168,11 +168,11 @@ func SetResourceIdentityAttributes(d *schema.ResourceData, attrs map[string]inte
 	identity, err := d.Identity()
 	if err != nil || identity == nil {
 		log.Printf("[DEBUG] SetResourceIdentityAttributes: skipping, identity unavailable: %v", err)
-		return nil
-	}
-	for k, v := range attrs {
-		if err := identity.Set(k, v); err != nil {
-			return fmt.Errorf("error setting identity field %q: %w", k, err)
+	} else {
+		for k, v := range attrs {
+			if err := identity.Set(k, v); err != nil {
+				return fmt.Errorf("error setting identity field %q: %w", k, err)
+			}
 		}
 	}
 	return nil
