@@ -401,9 +401,9 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 
 	// Registered products
 	{{- range $product := $.Products }}
-	config.{{ $product.Name }}BasePath = transport_tpg.BaseUrl(registry.GetProduct("{{ $product.Name }}"), &config)
+	config.{{ $product.Name }}BasePath = transport_tpg.BaseUrl(registry.GetProduct("{{ lower $product.Name }}"), &config)
 	{{- if $product.Version.RepEnabled }}
-	config.{{ $product.Name }}RepBasePath = registry.GetProduct("{{ $product.Name }}").RepUrl
+	config.{{ $product.Name }}RepBasePath = registry.GetProduct("{{ lower $product.Name }}").RepUrl
 	{{- end -}}
 	{{- end }}
 
