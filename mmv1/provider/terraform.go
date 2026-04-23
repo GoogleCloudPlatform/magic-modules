@@ -265,8 +265,6 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	templateData.GenerateTestFile(targetFilePath, object)
 }
 
-// GenerateListResourceQueryTest emits resource_*_generated_query_test.go for resources with
-// generate_list_resource when at least one example is eligible for tests (same rules as legacy generated tests).
 func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateData TemplateData, outputFolder string) {
 	if object.Samples != nil && object.Examples != nil {
 		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
@@ -1106,8 +1104,6 @@ type GeneratedListResourceRegistration struct {
 	NewFunc string // e.g. "NewCloudRunServiceListResource"
 }
 
-// GetGeneratedListResourcesInVersion returns list-resource registrations for all products
-// in the same order as list_resource_*.go generation (version, exclude, generate_list_resource).
 func (t Terraform) GetGeneratedListResourcesInVersion(products []*api.Product) []GeneratedListResourceRegistration {
 	var out []GeneratedListResourceRegistration
 	for _, productDefinition := range products {
@@ -1130,7 +1126,6 @@ func (t Terraform) GetGeneratedListResourcesInVersion(products []*api.Product) [
 	return out
 }
 
-// GetListResourceImportPackages returns sorted unique service import paths for generated list resources.
 func (t Terraform) GetListResourceImportPackages(products []*api.Product) []string {
 	reg := t.GetGeneratedListResourcesInVersion(products)
 	seen := make(map[string]struct{}, len(reg))

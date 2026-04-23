@@ -717,10 +717,6 @@ func (r Resource) IdentityProperties() []*Type {
 	return props
 }
 
-// ListScopeProperties returns the subset of IdentityProperties whose identifier
-// appears in the collection URL (product base_url + resource base_url). These are
-// the scoping parameters a practitioner must supply for a list call — not the
-// resource's own identifier like "name".
 func (r Resource) ListScopeProperties() []*Type {
 	scope := r.ExtractIdentifiers(r.CollectionUrl())
 	return google.Select(r.IdentityProperties(), func(p *Type) bool {
@@ -728,10 +724,6 @@ func (r Resource) ListScopeProperties() []*Type {
 	})
 }
 
-// ListResultDisplayNameKeyStrings returns Terraform attribute names passed to
-// tpgresource.ListResourceMetadata.SetResult as displayNameKeys, in priority order:
-// a root "display_name" property (if present), then the terminal identifier from
-// IdFormat (e.g. "name", "disk_id", "instance_id").
 func (r Resource) ListResultDisplayNameKeyStrings() []string {
 	var keys []string
 	for _, p := range r.RootProperties() {

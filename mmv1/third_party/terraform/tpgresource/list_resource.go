@@ -213,7 +213,8 @@ func ListResultDisplayName(rd *schema.ResourceData, keys ...string) (string, err
 
 // SetResult fills list result identity from rd; if includeResource, also full resource state.
 // displayNameKeys lists schema attribute names (in priority order) used to set result.DisplayName
-// via ListResultDisplayName when it is still empty; omit or pass no keys to skip.
+// via ListResultDisplayName when it is still empty; omit or pass no keys to skip. Non-empty keys
+// produce an error if no key yields a non-empty display label.
 func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResource bool, result *list.ListResult, rd *schema.ResourceData, displayNameKeys ...string) error {
 	if err := listR.setResourceIdentity(rd); err != nil {
 		return err
