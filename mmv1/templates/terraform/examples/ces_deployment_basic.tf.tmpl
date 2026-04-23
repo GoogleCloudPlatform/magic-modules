@@ -23,6 +23,9 @@ resource "google_ces_deployment" "{{$.PrimaryResourceId}}" {
             modality = "CHAT_AND_VOICE"
             theme = "DARK"
             web_widget_title = "temp_webwidget_title"
+            security_settings {
+                enable_public_access = true
+            }
         }
     }
 }
