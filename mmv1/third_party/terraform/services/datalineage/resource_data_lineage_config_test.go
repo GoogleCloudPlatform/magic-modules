@@ -87,7 +87,7 @@ resource "google_data_lineage_config" "default" {
         integration = "DATAPROC"
       }
       lineage_enablement {
-        enabled = true
+        enabled = false
       }
     }
   }

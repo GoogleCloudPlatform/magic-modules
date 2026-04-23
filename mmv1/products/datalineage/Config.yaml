@@ -51,12 +51,10 @@ examples:
   - name: 'data_lineage_config_folder'
     primary_resource_id: 'default'
     vars:
-      folder_name: 'Integration'
+      folder_name: 'integration-folder'
     test_env_vars:
       organization: 'ORG_ID'
-    test_vars_overrides:
-      # for backward compatible
-      folder_name: '"Integration" + randomSuffix'
+    external_providers: ["time"]
   - name: 'data_lineage_config_organization'
     primary_resource_id: 'default'
     test_env_vars:
@@ -99,8 +97,6 @@ properties:
     description: |
       Defines how Lineage should be ingested for this resource.
     required: true
-    send_empty_value: true
-    allow_empty_object: true
     properties:
       - name: 'rule'
         type: Array
