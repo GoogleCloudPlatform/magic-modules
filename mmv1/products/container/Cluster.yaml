@@ -95,6 +95,8 @@ properties:
           description: 'The selected network policy provider.'
           is_missing_in_cai: true
 tgc_tests:
+  - name: TestAccContainerCluster_withDatabaseEncryption
+    skip: Bug in the API, https://github.com/hashicorp/terraform-provider-google/issues/26882
   - name: TestAccContainerCluster_withSandboxConfigType
     skip: Need to fix the testing framework to handle the order of array items (map) node_config.taint
   - name: TestAccContainerCluster_withLoggingConfig

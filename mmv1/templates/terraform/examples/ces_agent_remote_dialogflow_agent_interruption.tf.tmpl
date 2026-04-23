@@ -23,7 +23,7 @@ resource "google_ces_agent" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "agent_display_name"}}"
 
   model_settings {
-    model       = "gemini-1.5-flash"
+    model       = "gemini-2.5-flash-001"
     temperature = 0.5
   }
 

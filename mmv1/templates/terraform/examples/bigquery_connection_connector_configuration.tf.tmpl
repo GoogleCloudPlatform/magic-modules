@@ -1,0 +1,74 @@
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "alloydb-cluster-${local.name_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "alloydb-cluster-password"
+  }
+
+  deletion_protection = false
+
+  lifecycle {
+    ignore_changes = [initial_user]
+  }
+}
+
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "alloydb-instance-${local.name_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  depends_on = [google_service_networking_connection.vpc_connection]
+}
+
+resource "google_compute_network" "default" {
+  name = "alloydb-network-${local.name_suffix}"
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          = "alloydb-ip-${local.name_suffix}"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+
+locals {
+  name_suffix = "{{index $.Vars "connection_id"}}"
+}
+
+resource "google_bigquery_connection" "{{$.PrimaryResourceId}}" {
+  connection_id = "{{index $.Vars "connection_id"}}"
+  location      = "us-central1"
+  friendly_name = "alloydb connection"
+  description   = "AlloyDB connection using connector configuration"
+
+  configuration {
+    connector_id = "google-alloydb"
+    asset {
+      database              = "postgres"
+      google_cloud_resource = "//alloydb.googleapis.com/${google_alloydb_instance.default.id}"
+    }
+    authentication {
+      username_password {
+        username = "{{index $.Vars "username"}}"
+        password {
+          plaintext = "{{index $.Vars "password"}}"
+        }
+      }
+    }
+  }
+}
