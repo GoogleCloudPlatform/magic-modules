@@ -329,6 +329,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		})
 	}
 
+	config.CustomEndpoints = map[string]string{}
 	for _, p := range registry.ListProducts() {
 		customEndpoint := ""
 		if v := d.Get(p.CustomEndpointField).(string); v != "" {
