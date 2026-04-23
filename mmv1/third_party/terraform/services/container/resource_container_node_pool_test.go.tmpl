@@ -4652,7 +4652,7 @@ resource "google_container_cluster" "cluster" {
   initial_node_count  = 1
 
   node_config {
-    machine_type = "a4-highgpu-8g"
+    machine_type = "a3-ultragpu-8g"
 
     guest_accelerator {
 		type  = "nvidia-h200-141gb"
@@ -4669,7 +4669,7 @@ resource "google_container_node_pool" "np_with_gpudirect" {
   cluster  = google_container_cluster.cluster.name
 
   node_config {
-    machine_type = "a4-highgpu-8g"
+    machine_type = "a3-ultragpu-8"
 
     guest_accelerator {
 		type  = "nvidia-h200-141gb"
