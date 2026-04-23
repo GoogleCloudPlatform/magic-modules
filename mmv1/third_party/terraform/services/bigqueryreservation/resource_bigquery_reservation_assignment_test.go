@@ -37,6 +37,7 @@ resource "google_bigquery_reservation" "basic" {
   name            = "tf-test-res-%{random_suffix}"
   location        = "us-central1"
   slot_capacity   = 100
+  edition         = "ENTERPRISE"
   ignore_idle_slots = false
 }
 
@@ -45,7 +46,7 @@ resource "google_bigquery_reservation_assignment" "primary" {
   job_type    = "QUERY"
   principal   = "principal://iam.googleapis.com/projects/-/serviceAccounts/%{service_account}"
   location    = "us-central1"
-  reservation = google_bigquery_reservation.basic.id
+  reservation = google_bigquery_reservation.basic.name
 }
 `, map[string]interface{}{
 		"random_suffix":   context["random_suffix"],
