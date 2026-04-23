@@ -50,19 +50,9 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 			return fmt.Errorf("list resource for {{ $.Name }} requires read support (Resource{{ $.ResourceName }}Flatten is not generated when exclude_read is set)")
 {{- else }}
 			headers := make(http.Header)
-{{- if $.HasProject }}
-{{- range $scope := $.ListScopeProperties }}
-{{- if eq $scope.Name "project" }}
-			if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ $scope.CamelizeProperty }}, userAgent, billingProject, url, headers); err != nil {
+if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
-{{- end }}
-{{- end }}
-{{- else }}
-			if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, userAgent, billingProject, url, headers); err != nil {
-				return err
-			}
-{{- end }}
 {{- /* after decoder inside Flatten: res keys match d.Set for identity fields */ -}}
 {{- range $id := $.IdentityProperties }}
 {{- if $id.ApiName }}
