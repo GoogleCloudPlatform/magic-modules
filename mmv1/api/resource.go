@@ -1346,13 +1346,6 @@ func (r Resource) HasZone() bool {
 	return found && strings.Contains(r.BaseUrl, "{{zone}}")
 }
 
-// HasLocation is true when URLs use a {{location}} segment (e.g. Cloud Run, Cloud Functions).
-func (r Resource) HasLocation() bool {
-	return strings.Contains(r.BaseUrl, "{{location}}") ||
-		strings.Contains(r.CreateUrl, "{{location}}") ||
-		strings.Contains(r.SelfLinkUri(), "{{location}}")
-}
-
 // resource functions needed for template that previously existed in terraform.go
 // but due to how files are being inherited here it was easier to put in here
 // taken wholesale from tpgtools
