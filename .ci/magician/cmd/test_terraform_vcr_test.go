@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"magician/github"
 	"magician/provider"
 	"magician/vcr"
 )
@@ -578,4 +579,43 @@ func TestRecordReplay(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAppendVCRResultToDiffComment_Exists(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+		pullRequestComments: []github.PullRequestComment{
+			{
+				ID:   456,
+				Body: "## Diff report\nsome diffs",
+			},
+		},
+	}
+
+	err := appendVCRResultToDiffComment("123", "VCR Results", gh)
+
+	assert.NoError(t, err)
+	assert.Len(t, gh.calledMethods["UpdateComment"], 1)
+	assert.Equal(t, "123", gh.calledMethods["UpdateComment"][0][0])
+	assert.Contains(t, gh.calledMethods["UpdateComment"][0][1].(string), "VCR Results")
+	assert.Equal(t, 456, gh.calledMethods["UpdateComment"][0][2])
+}
+
+func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+		pullRequestComments: []github.PullRequestComment{
+			{
+				ID:   456,
+				Body: "Some other comment",
+			},
+		},
+	}
+
+	err := appendVCRResultToDiffComment("123", "VCR Results", gh)
+
+	assert.NoError(t, err)
+	assert.Len(t, gh.calledMethods["PostComment"], 1)
+	assert.Equal(t, "123", gh.calledMethods["PostComment"][0][0])
+	assert.Equal(t, "VCR Results", gh.calledMethods["PostComment"][0][1])
 }

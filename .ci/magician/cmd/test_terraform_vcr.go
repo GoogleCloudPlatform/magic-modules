@@ -260,8 +260,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
-	if err := gh.PostComment(prNumber, comment); err != nil {
-		return fmt.Errorf("error posting comment: %w", err)
+	if err := appendVCRResultToDiffComment(prNumber, comment, gh); err != nil {
+		return fmt.Errorf("error appending comment: %w", err)
 	}
 	if len(replayingResult.FailedTests) > 0 {
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
@@ -341,8 +341,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
-		if err := gh.PostComment(prNumber, recordReplayComment); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
+		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, gh); err != nil {
+			return fmt.Errorf("error appending comment: %w", err)
 		}
 	}
 
@@ -497,8 +497,8 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 		comment := color("red", fmt.Sprintf("The provider crashed while running the VCR tests in %s mode\n", mode.Upper()))
 		comment += fmt.Sprintf(`Please fix it to complete your PR.
 View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			return true, fmt.Errorf("error posting comment: %v", err)
+		if err := appendVCRResultToDiffComment(prNumber, comment, gh); err != nil {
+			return true, fmt.Errorf("error appending comment: %v", err)
 		}
 		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
 			return true, fmt.Errorf("error posting failure status: %v", err)
@@ -506,6 +506,30 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 		return true, nil
 	}
 	return false, nil
+}
+
+func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClient) error {
+	comments, err := gh.GetPullRequestComments(prNumber)
+	if err != nil {
+		return fmt.Errorf("error getting PR comments: %w", err)
+	}
+
+	var diffComment *github.PullRequestComment
+	for _, c := range comments {
+		if strings.Contains(c.Body, "## Diff report") || strings.Contains(c.Body, "Hi there, I'm the Modular magician") {
+			diffComment = &c
+			break
+		}
+	}
+
+	if diffComment != nil {
+		newBody := diffComment.Body + "\n\n" + content
+		return gh.UpdateComment(prNumber, newBody, diffComment.ID)
+	}
+
+	// Fallback to posting a new comment if diff report not found
+	_, err = gh.PostComment(prNumber, content)
+	return err
 }
 
 func init() {

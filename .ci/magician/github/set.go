@@ -43,24 +43,24 @@ func (c *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha st
 	return nil
 }
 
-// PostComment adds a comment to a pull request
-func (c *Client) PostComment(prNumber, comment string) error {
+// PostComment adds a comment to a pull request and returns the comment ID
+func (c *Client) PostComment(prNumber, comment string) (int, error) {
 	num, err := strconv.Atoi(prNumber)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	issueComment := &gh.IssueComment{
 		Body: gh.Ptr(comment),
 	}
 
-	_, _, err = c.gh.Issues.CreateComment(c.ctx, defaultOwner, defaultRepo, num, issueComment)
+	respComment, _, err := c.gh.Issues.CreateComment(c.ctx, defaultOwner, defaultRepo, num, issueComment)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	fmt.Printf("Successfully posted comment to pull request %s\n", prNumber)
-	return nil
+	return int(respComment.GetID()), nil
 }
 
 // UpdateComment updates an existing comment

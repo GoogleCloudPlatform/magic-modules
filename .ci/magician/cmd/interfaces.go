@@ -32,7 +32,7 @@ type GithubClient interface {
 	GetTeamMembers(organization, team string) ([]github.User, error)
 	MergePullRequest(owner, repo, prNumber, commitSha string) error
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
-	PostComment(prNumber, comment string) error
+	PostComment(prNumber, comment string) (int, error)
 	UpdateComment(prNumber, comment string, id int) error
 	RequestPullRequestReviewers(prNumber string, reviewers []string) error
 	RemovePullRequestReviewers(prNumber string, reviewers []string) error

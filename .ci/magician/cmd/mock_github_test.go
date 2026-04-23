@@ -85,9 +85,9 @@ func (m *mockGithub) RemovePullRequestReviewers(prNumber string, reviewers []str
 	return nil
 }
 
-func (m *mockGithub) PostComment(prNumber string, comment string) error {
+func (m *mockGithub) PostComment(prNumber string, comment string) (int, error) {
 	m.calledMethods["PostComment"] = append(m.calledMethods["PostComment"], []any{prNumber, comment})
-	return nil
+	return 0, nil
 }
 
 func (m *mockGithub) UpdateComment(prNumber, comment string, id int) error {
