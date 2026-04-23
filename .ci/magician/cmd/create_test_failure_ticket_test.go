@@ -284,7 +284,7 @@ func TestComputeTicketRouting(t *testing.T) {
 					provider.GA: testFailure100,
 				},
 			},
-			expectLabels:   []string{"size/xs", "test-failure", "test-failure-100", "service/terraform", "forward/review"},
+			expectLabels:   []string{"size/xs", "test-failure", "test-failure-100", "service/terraform", "test/review"},
 			expectAssignee: true,
 		},
 	}
