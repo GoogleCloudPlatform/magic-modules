@@ -35,6 +35,7 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 custom_code:
   constants: "templates/terraform/constants/discoveryengine_data_connector.go.tmpl"
+  pre_delete: "templates/terraform/pre_delete/discoveryengine_data_connector.go.tmpl"
 state_upgraders: true
 schema_version: 1
 timeouts:
@@ -58,6 +59,16 @@ examples:
     primary_resource_id: 'jira-with-actions'
     vars:
       collection_id: 'collection-id'
+
+virtual_fields:
+  - name: 'detach_stores_on_destroy'
+    description: |
+      If set to `true`, Terraform will detach the associated Data Stores from any Search Engine before deleting the Data Connector.
+      This addresses a circular dependency issue where deleting the Data Connector fails if its stores are in use.
+      Defaults to `false`.
+    type: Boolean
+    default_value: false
+
 parameters:
   - name: 'location'
     type: String
