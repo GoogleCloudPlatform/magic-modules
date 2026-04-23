@@ -240,10 +240,15 @@ resource "google_tags_tag_value" "tag_value" {
 
 data "google_client_openid_userinfo" "me" {}
 
+locals {
+  member_type = endswith(data.google_client_openid_userinfo.me.email, "iam.gserviceaccount.com") ? "serviceAccount" : "user"
+  iam_member  = "${local.member_type}:${data.google_client_openid_userinfo.me.email}"
+}
+
 resource "google_tags_tag_value_iam_member" "value_user" {
   tag_value = google_tags_tag_value.tag_value.name
   role      = "roles/resourcemanager.tagUser"
-  member    = "serviceAccount:${data.google_client_openid_userinfo.me.email}"
+  member    = local.iam_member
 }
 
 data "google_compute_image" "my_image" {
