@@ -93,7 +93,7 @@ func (d *GoogleFirebaseAdminSdkConfigDataSource) Configure(ctx context.Context, 
 		return
 	}
 
-	p, ok := req.ProviderData.(*transport_tpg.Config)
+	config, ok := req.ProviderData.(*transport_tpg.Config)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -102,11 +102,11 @@ func (d *GoogleFirebaseAdminSdkConfigDataSource) Configure(ctx context.Context, 
 		return
 	}
 
-	d.client = p.NewFirebaseClient(ctx, p.UserAgent)
+	d.client = NewClient(ctx, config, config.UserAgent)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	d.providerConfig = p
+	d.providerConfig = config
 }
 
 func (d *GoogleFirebaseAdminSdkConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
