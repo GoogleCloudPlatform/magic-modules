@@ -6,8 +6,6 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 	callback func(*schema.ResourceData) error,
 ) error {
 	resourceData := Resource{{ $.ResourceName }}().Data(&terraform.InstanceState{})
-	// ReplaceVars expands {{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}} (product base_url) and base_url using resourceData.
-	// Set every resolved list scope parameter on resourceData before building the list URL.
 {{- range $scope := $.ListScopeProperties }}
 	if {{ $scope.CamelizeProperty }} != "" {
 		if err := resourceData.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
@@ -41,10 +39,6 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
 		ItemName:       "{{ $.ResourceListKey }}",
-		// Merge one list item into rd via Resource{{ $.ResourceName }}Flatten, then SetId. list-scope
-		// parameters stay on temp resource data only. After Flatten (custom decoder may add keys, e.g. name from
-		// metadata), copy url_param/identity from res to rd for TypeInt and display name (int/string coerce).
-		// List() SetResult then reads rd for list result identity/DisplayName.
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 {{- if $.ExcludeRead }}
 			return fmt.Errorf("list resource for {{ $.Name }} requires read support (Resource{{ $.ResourceName }}Flatten is not generated when exclude_read is set)")
