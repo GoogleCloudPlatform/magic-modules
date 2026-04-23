@@ -525,7 +525,7 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
 	if len(result.BuildFailures) > 0 {
 		comment := color("red", fmt.Sprintf("The provider failed to build during VCR tests in %s mode\n", mode.Upper()))
-		comment += "The following packages failed to build:\n"
+		comment += "\nThe following packages failed to build:\n"
 		for _, pkg := range result.BuildFailures {
 			comment += fmt.Sprintf("- `%s`\n", pkg)
 		}
