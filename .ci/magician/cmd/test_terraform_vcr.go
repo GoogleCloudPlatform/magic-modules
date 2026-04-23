@@ -519,7 +519,7 @@ func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClie
 	var diffComment *github.PullRequestComment
 
 	// Try to find by ID from file
-	if idStr, err := rnr.ReadFile("diff_comment_id.txt"); err == nil {
+	if idStr, err := rnr.ReadFile("/workspace/diff_comment_id.txt"); err == nil {
 		if id, err := strconv.Atoi(strings.TrimSpace(idStr)); err == nil {
 			for _, c := range comments {
 				if c.ID == id {

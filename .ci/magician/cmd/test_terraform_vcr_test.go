@@ -613,7 +613,7 @@ func TestAppendVCRResultToDiffComment_UseFileID(t *testing.T) {
 	}
 	rnr := &mockRunner{
 		fileContents: map[string]string{
-			"diff_comment_id.txt": "456",
+			"/workspace/diff_comment_id.txt": "456",
 		},
 	}
 
