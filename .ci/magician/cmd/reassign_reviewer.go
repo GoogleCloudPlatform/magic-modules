@@ -91,7 +91,7 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 
 	if currentReviewer == "" {
 		fmt.Println("No reviewer comment found, creating one")
-		err := gh.PostComment(prNumber, comment)
+		_, err := gh.PostComment(prNumber, comment)
 		if err != nil {
 			return err
 		}
