@@ -441,10 +441,6 @@ properties:
               type: Integer
               description: |
                 The GB capacity of a persistent home directory. Defaults to '200'.
-            - name: 'maxSizeGb'
-              type: Integer
-              description: |
-                The maximum GB capacity of a persistent home directory.
             - name: 'sourceSnapshot'
               type: String
               description: |
