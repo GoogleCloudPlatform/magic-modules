@@ -191,7 +191,7 @@ func (listR *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) 
 
 // ListResultDisplayName returns the first non-empty label from rd for keys in order. Use a
 // single key or several for fallbacks (e.g. display_name then email).
-// it returns an error if none of the keys yield a non-empty string.
+// It returns an error if none of the keys yield a non-empty string.
 func ListResultDisplayName(rd *schema.ResourceData, keys ...string) (string, error) {
 	if rd == nil {
 		return "", fmt.Errorf("ListResultDisplayName: ResourceData is nil")
@@ -200,12 +200,10 @@ func ListResultDisplayName(rd *schema.ResourceData, keys ...string) (string, err
 		return "", fmt.Errorf("ListResultDisplayName: no keys provided")
 	}
 	for _, k := range keys {
-		v, ok := rd.GetOk(k)
-		if !ok {
-			continue
-		}
-		if s := fmt.Sprintf("%v", v); s != "" {
-			return s, nil
+		if v, ok := rd.GetOk(k); ok {
+			if s := fmt.Sprintf("%v", v); s != "" {
+				return s, nil
+			}
 		}
 	}
 	return "", fmt.Errorf("ListResultDisplayName: no non-empty value among keys %q", keys)
@@ -213,8 +211,7 @@ func ListResultDisplayName(rd *schema.ResourceData, keys ...string) (string, err
 
 // SetResult fills list result identity from rd; if includeResource, also full resource state.
 // displayNameKeys lists schema attribute names (in priority order) used to set result.DisplayName
-// via ListResultDisplayName when it is still empty; omit or pass no keys to skip. Non-empty keys
-// produce an error if no key yields a non-empty display label.
+// via ListResultDisplayName when it is still empty; omit or pass no keys to skip.
 func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResource bool, result *list.ListResult, rd *schema.ResourceData, displayNameKeys ...string) error {
 	if err := listR.setResourceIdentity(rd); err != nil {
 		return err
