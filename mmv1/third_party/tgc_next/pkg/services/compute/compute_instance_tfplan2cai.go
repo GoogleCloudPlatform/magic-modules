@@ -528,10 +528,10 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 			"aliasIpRanges":            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
 			"nicType":                  data["nic_type"].(string),
 			"stackType":                data["stack_type"].(string),
-			"queueCount":               int64(data["queue_count"].(int)),
+			"queueCount":               strconv.FormatInt(int64(data["queue_count"].(int)), 10),
 			"ipv6AccessConfigs":        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
 			"ipv6Address":              data["ipv6_address"].(string),
-			"internalIpv6PrefixLength": int64(data["internal_ipv6_prefix_length"].(int)),
+			"internalIpv6PrefixLength": strconv.FormatInt(int64(data["internal_ipv6_prefix_length"].(int)), 10),
 		}
 
 		ifaceBytes, err := json.Marshal(ifaceMap)
@@ -601,7 +601,7 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 	}
 
 	if v, ok := original["min_node_cpus"]; ok {
-		schedulingMap["minNodeCpus"] = int64(v.(int))
+		schedulingMap["minNodeCpus"] = strconv.FormatInt(int64(v.(int)), 10)
 	}
 	if v, ok := original["provisioning_model"]; ok {
 		schedulingMap["provisioningModel"] = v.(string)
@@ -610,7 +610,7 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		schedulingMap["instanceTerminationAction"] = v.(string)
 	}
 	if v, ok := original["availability_domain"]; ok && v != nil {
-		schedulingMap["availabilityDomain"] = int64(v.(int))
+		schedulingMap["availabilityDomain"] = strconv.FormatInt(int64(v.(int)), 10)
 	}
 	if v, ok := original["max_run_duration"]; ok {
 		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
