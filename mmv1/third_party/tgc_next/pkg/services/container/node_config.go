@@ -1,6 +1,7 @@
 package container
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -1054,6 +1055,36 @@ func schemaNodeConfig() *schema.Schema {
 												},
 											},
 										},
+										"dedicated_local_ssd_profile": {
+											Type:        schema.TypeList,
+											Optional:    true,
+											MaxItems:    1,
+											Description: `Swap disk profile for dedicated local SSD`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"disk_count": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Description: `Disk count`,
+													},
+												},
+											},
+										},
+										"ephemeral_local_ssd_profile": {
+											Type:        schema.TypeList,
+											Optional:    true,
+											MaxItems:    1,
+											Description: `Swap disk profile for ephemeral local SSD`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"swap_size_gib": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Description: `Swap size in GiB`,
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -2024,7 +2055,53 @@ func expandSwapConfig(v interface{}) *container.SwapConfig {
 	if v, ok := cfg["boot_disk_profile"]; ok {
 		swapConfig.BootDiskProfile = expandBootDiskProfile(v)
 	}
+	if v, ok := cfg["dedicated_local_ssd_profile"]; ok {
+		swapConfig.DedicatedLocalSsdProfile = expandDedicatedLocalSsdProfile(v)
+	}
+	if v, ok := cfg["ephemeral_local_ssd_profile"]; ok {
+		swapConfig.EphemeralLocalSsdProfile = expandEphemeralLocalSsdProfile(v)
+	}
 	return swapConfig
+}
+
+func expandEphemeralLocalSsdProfile(v interface{}) *container.EphemeralLocalSsdProfile {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.EphemeralLocalSsdProfile{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	profile := &container.EphemeralLocalSsdProfile{}
+	if v, ok := cfg["swap_size_gib"]; ok {
+		profile.SwapSizeGib = int64(v.(int))
+	}
+	return profile
+}
+
+func expandDedicatedLocalSsdProfile(v interface{}) *container.DedicatedLocalSsdProfile {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.DedicatedLocalSsdProfile{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	profile := &container.DedicatedLocalSsdProfile{}
+	if v, ok := cfg["disk_count"]; ok {
+		profile.DiskCount = int64(v.(int))
+	}
+	return profile
 }
 
 func expandBootDiskProfile(v interface{}) *container.BootDiskProfile {
@@ -3114,6 +3191,32 @@ func flattenSwapConfig(v interface{}) []map[string]interface{} {
 		transformed["boot_disk_profile"] = []map[string]interface{}{
 			{
 				"swap_size_gib": bdp["swapSizeGib"],
+			},
+		}
+	}
+	if dlsp, ok := c["dedicatedLocalSsdProfile"].(map[string]interface{}); ok {
+		diskCount := dlsp["diskCount"]
+		if strCount, ok := diskCount.(string); ok {
+			if intCount, err := strconv.Atoi(strCount); err == nil {
+				diskCount = intCount
+			}
+		}
+		transformed["dedicated_local_ssd_profile"] = []map[string]interface{}{
+			{
+				"disk_count": diskCount,
+			},
+		}
+	}
+	if elsp, ok := c["ephemeralLocalSsdProfile"].(map[string]interface{}); ok {
+		swapSizeGib := elsp["swapSizeGib"]
+		if strSize, ok := swapSizeGib.(string); ok {
+			if intSize, err := strconv.Atoi(strSize); err == nil {
+				swapSizeGib = intSize
+			}
+		}
+		transformed["ephemeral_local_ssd_profile"] = []map[string]interface{}{
+			{
+				"swap_size_gib": swapSizeGib,
 			},
 		}
 	}

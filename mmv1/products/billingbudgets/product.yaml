@@ -12,7 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'Billing'
+name: 'BillingBudgets'
+legacy_name: 'billing'
 display_name: 'Cloud Billing'
 versions:
   - name: 'ga'
