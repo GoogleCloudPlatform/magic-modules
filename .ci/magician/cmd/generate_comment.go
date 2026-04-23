@@ -525,7 +525,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		return fmt.Errorf("error posting comment to PR %d: %w", prNumber, err)
 	}
 
-	if err := rnr.WriteFile("diff_comment_id.txt", strconv.Itoa(commentId)); err != nil {
+	if err := rnr.WriteFile("/workspace/diff_comment_id.txt", strconv.Itoa(commentId)); err != nil {
 		fmt.Printf("Warning: failed to save comment ID to file: %v\n", err)
 	}
 	return nil
