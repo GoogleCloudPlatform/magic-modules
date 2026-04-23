@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func listResourceFunc(lr list.ListResource) func() list.ListResource {
@@ -16,5 +17,6 @@ var generatedListResources = []func() list.ListResource{}
 
 var handwrittenListResources = []func() list.ListResource{
 	listResourceFunc(resourcemanager.NewGoogleServiceAccountListResource()),
+	listResourceFunc(storage.NewGoogleStorageBucketListResource()),
 	listResourceFunc(resourcemanager.NewGoogleProjectServiceListResource()),
 }

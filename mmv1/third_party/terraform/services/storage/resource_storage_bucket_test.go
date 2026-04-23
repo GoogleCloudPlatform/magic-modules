@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -60,6 +61,41 @@ func TestAccStorageBucket_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+// TestAccStorageBucket_importBlockWithResourceIdentity exercises plannable import using the resource identity block (Terraform 1.12+).
+func TestAccStorageBucket_importBlockWithResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	project := envvar.GetTestProjectFromEnv()
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "name", bucketName),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "project", project),
+				),
+			},
+			{
+				ResourceName:    "google_storage_bucket.bucket",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				// terraform_labels causes a non-empty plan due to ImportStateVerifyIgnore not being permitted with ImportBlockWithResourceIdentity
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

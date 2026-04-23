@@ -60,6 +60,23 @@ func ResourceStorageBucket() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceStorageBucketStateImporter,
 		},
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 			tpgresource.SetLabelsDiff,
@@ -1181,6 +1198,13 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(res.Id)
 
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name":    d.Get("name").(string),
+		"project": d.Get("project").(string),
+	}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -1352,23 +1376,65 @@ func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}
 	// importing a bucket that is in a different project than the provider default.
 	// ParseImportID can't be used because having no project will cause an error but it
 	// is a valid state as the project_id will be retrieved in READ
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) == 1 {
-		if err := d.Set("name", parts[0]); err != nil {
+	//
+	// Plannable import with identity (Terraform 1.12+) passes an empty import id; identity
+	// attributes are populated on ResourceData before this importer runs.
+	if d.Id() == "" {
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("importing google_storage_bucket: %w", err)
+		}
+		nameVal, ok := identity.GetOk("name")
+		if !ok {
+			return nil, fmt.Errorf("importing google_storage_bucket: missing required identity attribute \"name\"")
+		}
+		bucketName, ok := nameVal.(string)
+		if !ok || bucketName == "" {
+			return nil, fmt.Errorf("importing google_storage_bucket: identity attribute \"name\" must be a non-empty string")
+		}
+		if err := d.Set("name", bucketName); err != nil {
 			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
-	} else if len(parts) > 1 {
-		if err := d.Set("project", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error setting project: %s", err)
+		var importID string
+		if projVal, ok := identity.GetOk("project"); ok {
+			if project, ok := projVal.(string); ok && project != "" {
+				if err := d.Set("project", project); err != nil {
+					return nil, fmt.Errorf("Error setting project: %s", err)
+				}
+				importID = project + "/" + bucketName
+			}
 		}
-		if err := d.Set("name", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error setting name: %s", err)
+		if importID == "" {
+			importID = bucketName
+		}
+		d.SetId(importID)
+	} else {
+		parts := strings.Split(d.Id(), "/")
+		if len(parts) == 1 {
+			if err := d.Set("name", parts[0]); err != nil {
+				return nil, fmt.Errorf("Error setting name: %s", err)
+			}
+		} else if len(parts) > 1 {
+			if err := d.Set("project", parts[0]); err != nil {
+				return nil, fmt.Errorf("Error setting project: %s", err)
+			}
+			if err := d.Set("name", parts[1]); err != nil {
+				return nil, fmt.Errorf("Error setting name: %s", err)
+			}
 		}
 	}
 
 	if err := d.Set("force_destroy", false); err != nil {
 		return nil, fmt.Errorf("Error setting force_destroy: %s", err)
 	}
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name":    d.Get("name").(string),
+		"project": d.Get("project").(string),
+	}); err != nil {
+		return nil, err
+	}
+
 	return []*schema.ResourceData{d}, nil
 }
 
@@ -2398,6 +2464,10 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 		}
 	}
 
+	if err := d.Set("name", bucket); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+
 	// Update the bucket ID according to the resource ID
 	if err := d.Set("self_link", res.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
@@ -2504,6 +2574,13 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 
 	if err := d.Set("ip_filter", flattenBucketIpFilter(res.IpFilter)); err != nil {
 		return fmt.Errorf("Error setting ip_filter: %s", err)
+	}
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name":    bucket,
+		"project": d.Get("project").(string),
+	}); err != nil {
+		return err
 	}
 
 	d.SetId(res.Id)
