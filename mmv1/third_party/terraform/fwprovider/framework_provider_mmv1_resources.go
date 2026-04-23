@@ -3,6 +3,7 @@ package fwprovider
 import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
@@ -15,6 +16,7 @@ func listResourceFunc(lr list.ListResource) func() list.ListResource {
 var generatedListResources = []func() list.ListResource{}
 
 var handwrittenListResources = []func() list.ListResource{
+	listResourceFunc(compute.NewGoogleComputeInstanceListResource()),
 	listResourceFunc(resourcemanager.NewGoogleServiceAccountListResource()),
 	listResourceFunc(resourcemanager.NewGoogleProjectServiceListResource()),
 }
