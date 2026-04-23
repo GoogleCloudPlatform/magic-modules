@@ -48,6 +48,14 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	{{- range $varKey, $varVal := $example.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
 	{{- end }}
+	{{- range $scope := $.ListScopeProperties }}
+		{{- $n := underscore $scope.Name }}
+		{{- if or (eq $n "region") (eq $n "location") }}
+		"{{$n}}": envvar.GetTestRegionFromEnv(),
+		{{- else if eq $n "zone" }}
+		"zone": envvar.GetTestZoneFromEnv(),
+		{{- end }}
+	{{- end }}
 		"random_suffix": randomSuffix,
 	}
 
@@ -92,7 +100,7 @@ list "{{ $example.ResourceType $.TerraformName }}" "list_query" {
     provider = {{ if $.VersionedProvider $example.MinVersion }}google-beta{{ else }}google{{ end }}
     config {
 {{- range $scope := $.ListScopeProperties }}
-        {{ underscore $scope.Name }} = %({{ underscore $scope.Name }})
+        {{ underscore $scope.Name }} = "%{{"{"}}{{ underscore $scope.Name }}{{"}"}}"
 {{- end }}
     }
 }
