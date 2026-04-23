@@ -20,9 +20,9 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 	}
 
 	billingProject := ""
-	if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-		billingProject = parts[1]
-	}
+{{- if $.HasProject }}
+	billingProject = project
+{{- end }}
 	if bp, err := tpgresource.GetBillingProject(resourceData, config); err == nil {
 		billingProject = bp
 	}
@@ -38,13 +38,10 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		ListURL:        url,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
-		ItemName:       "{{ $.ResourceListKey }}",
+		ItemName:       "{{ $.CollectionUrlKey }}",
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
-{{- if $.ExcludeRead }}
-			return fmt.Errorf("list resource for {{ $.Name }} requires read support (Resource{{ $.ResourceName }}Flatten is not generated when exclude_read is set)")
-{{- else }}
 			headers := make(http.Header)
-if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
+			if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
 {{- /* url_param_only identity fields (e.g. name) are not GettableProperties, so the flattener does not Set them. Copy from res → d here so SetId/ListResultDisplayName can find them. Integer ids sometimes arrive as strings and need coercion. */ -}}
@@ -72,7 +69,6 @@ if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ if $.HasPr
 			}
 			d.SetId(id)
 			return nil
-{{- end }}
 		},
 		Callback: callback,
 	})
