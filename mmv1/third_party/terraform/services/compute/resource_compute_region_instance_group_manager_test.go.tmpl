@@ -2758,7 +2758,7 @@ resource "google_compute_region_instance_group_manager" "rigm-tags" {
   description        = "Terraform test instance group manager."
   name               = "%s"
   base_instance_name = "tf-rigm-tags-test"
-  region             = "us-east5"
+  region             = "us-central1"
   target_size        = 0
 
   version {
@@ -2921,8 +2921,8 @@ resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
   }
 
   base_instance_name = "tf-test-igm-no-tp"
-  region               = "us-east5"
-  target_size        = 2
+  region             = "us-east5"
+  target_size        = 8
 
   resource_policies {
     workload_policy = google_compute_resource_policy.workload_policy.self_link
@@ -3005,8 +3005,8 @@ resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
   }
 
   base_instance_name = "tf-test-igm-no-tp"
-  region               = "us-east5"
-  target_size        = 2
+  region             = "us-east5"
+  target_size        = 8
 
   resource_policies {
     workload_policy = google_compute_resource_policy.workload_policy_error.self_link
@@ -3099,7 +3099,7 @@ resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
   }
 
   base_instance_name = "tf-test-igm-no-tp"
-  region               = "us-east5"
+  region             = "us-east5"
   target_size        = 0
 
   resource_policies {
@@ -3170,7 +3170,7 @@ resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
   }
 
   base_instance_name = "tf-test-igm-no-tp"
-  region               = "us-east5"
+  region             = "us-east5"
   target_size        = 0
 }
 `, suffix, suffix)
