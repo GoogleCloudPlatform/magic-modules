@@ -581,26 +581,6 @@ func TestRecordReplay(t *testing.T) {
 	}
 }
 
-func TestAppendVCRResultToDiffComment_Exists(t *testing.T) {
-	gh := &mockGithub{
-		calledMethods: make(map[string][][]any),
-		pullRequestComments: []github.PullRequestComment{
-			{
-				ID:   456,
-				Body: "## Diff report\nsome diffs",
-			},
-		},
-	}
-
-	err := appendVCRResultToDiffComment("123", "VCR Results", gh)
-
-	assert.NoError(t, err)
-	assert.Len(t, gh.calledMethods["UpdateComment"], 1)
-	assert.Equal(t, "123", gh.calledMethods["UpdateComment"][0][0])
-	assert.Contains(t, gh.calledMethods["UpdateComment"][0][1].(string), "VCR Results")
-	assert.Equal(t, 456, gh.calledMethods["UpdateComment"][0][2])
-}
-
 func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
@@ -612,10 +592,36 @@ func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
 		},
 	}
 
-	err := appendVCRResultToDiffComment("123", "VCR Results", gh)
+	rnr := &mockRunner{}
+	err := appendVCRResultToDiffComment("123", "VCR Results", gh, rnr)
 
 	assert.NoError(t, err)
 	assert.Len(t, gh.calledMethods["PostComment"], 1)
 	assert.Equal(t, "123", gh.calledMethods["PostComment"][0][0])
 	assert.Equal(t, "VCR Results", gh.calledMethods["PostComment"][0][1])
+}
+
+func TestAppendVCRResultToDiffComment_UseFileID(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+		pullRequestComments: []github.PullRequestComment{
+			{
+				ID:   456,
+				Body: "Some comment",
+			},
+		},
+	}
+	rnr := &mockRunner{
+		fileContents: map[string]string{
+			"diff_comment_id.txt": "456",
+		},
+	}
+
+	err := appendVCRResultToDiffComment("123", "VCR Results", gh, rnr)
+
+	assert.NoError(t, err)
+	assert.Len(t, gh.calledMethods["UpdateComment"], 1)
+	assert.Equal(t, "123", gh.calledMethods["UpdateComment"][0][0])
+	assert.Contains(t, gh.calledMethods["UpdateComment"][0][1].(string), "VCR Results")
+	assert.Equal(t, 456, gh.calledMethods["UpdateComment"][0][2])
 }

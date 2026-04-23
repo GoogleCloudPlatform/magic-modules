@@ -10,6 +10,8 @@ import (
 	"strings"
 	"text/template"
 
+	"strconv"
+
 	"github.com/spf13/cobra"
 
 	"magician/exec"
@@ -231,7 +233,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
-	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh); err != nil {
+	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling panics: %w", err)
 	} else if hasPanics {
 		return nil
@@ -260,7 +262,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
-	if err := appendVCRResultToDiffComment(prNumber, comment, gh); err != nil {
+	if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
 		return fmt.Errorf("error appending comment: %w", err)
 	}
 	if len(replayingResult.FailedTests) > 0 {
@@ -291,7 +293,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
-		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh); err != nil {
+		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
 			return nil
@@ -341,7 +343,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
-		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, gh); err != nil {
+		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, gh, rnr); err != nil {
 			return fmt.Errorf("error appending comment: %w", err)
 		}
 	}
@@ -492,12 +494,12 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 	return result, testDirs, replayingErr
 }
 
-func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
+func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.Panics) > 0 {
 		comment := color("red", fmt.Sprintf("The provider crashed while running the VCR tests in %s mode\n", mode.Upper()))
 		comment += fmt.Sprintf(`Please fix it to complete your PR.
 View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
-		if err := appendVCRResultToDiffComment(prNumber, comment, gh); err != nil {
+		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
 		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
@@ -508,17 +510,23 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 	return false, nil
 }
 
-func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClient) error {
+func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClient, rnr ExecRunner) error {
 	comments, err := gh.GetPullRequestComments(prNumber)
 	if err != nil {
 		return fmt.Errorf("error getting PR comments: %w", err)
 	}
 
 	var diffComment *github.PullRequestComment
-	for _, c := range comments {
-		if strings.Contains(c.Body, "## Diff report") || strings.Contains(c.Body, "Hi there, I'm the Modular magician") {
-			diffComment = &c
-			break
+
+	// Try to find by ID from file
+	if idStr, err := rnr.ReadFile("diff_comment_id.txt"); err == nil {
+		if id, err := strconv.Atoi(strings.TrimSpace(idStr)); err == nil {
+			for _, c := range comments {
+				if c.ID == id {
+					diffComment = &c
+					break
+				}
+			}
 		}
 	}
 
