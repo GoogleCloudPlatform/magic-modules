@@ -15,7 +15,7 @@ import (
 func TestAccBillingProjectInfo_update(t *testing.T) {
 	t.Parallel()
 
-	projectId := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "tf-test-test" + acctest.RandString(t, 10)
 	orgId := envvar.GetTestOrgFromEnv(t)
 	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 
