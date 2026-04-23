@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicemanagement"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -278,7 +279,7 @@ EOF
 func testAccCheckEndpointExistsByName(t *testing.T, serviceId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		service, err := NewClient(config, config.UserAgent).Services.GetConfig(
+		service, err := servicemanagement.NewClient(config, config.UserAgent).Services.GetConfig(
 			fmt.Sprintf("%s.endpoints.%s.cloud.goog", serviceId, config.Project)).Do()
 		if err != nil {
 			return err
@@ -304,7 +305,7 @@ func testAccCheckEndpointServiceDestroyProducer(t *testing.T) func(s *terraform.
 			}
 
 			serviceName := rs.Primary.Attributes["service_name"]
-			service, err := NewClient(config, config.UserAgent).Services.GetConfig(serviceName).Do()
+			service, err := servicemanagement.NewClient(config, config.UserAgent).Services.GetConfig(serviceName).Do()
 			if err != nil {
 				// ServiceManagement returns 403 if service doesn't exist.
 				if !transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
