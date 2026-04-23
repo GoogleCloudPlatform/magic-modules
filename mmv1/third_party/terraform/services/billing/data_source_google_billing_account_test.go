@@ -1,4 +1,4 @@
-package cloudbilling_test
+package billing_test
 
 import (
 	"fmt"

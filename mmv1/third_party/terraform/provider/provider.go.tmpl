@@ -177,6 +177,7 @@ func Provider() *schema.Provider {
 			},
 
 			// Handwritten Products / Versioned / Atypical Entries
+			transport_tpg.CloudBillingCustomEndpointEntryKey:           transport_tpg.CloudBillingCustomEndpointEntry,
 			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
 			transport_tpg.IamCredentialsCustomEndpointEntryKey:         transport_tpg.IamCredentialsCustomEndpointEntry,
 			transport_tpg.ResourceManagerV3CustomEndpointEntryKey:      transport_tpg.ResourceManagerV3CustomEndpointEntry,
@@ -200,20 +201,6 @@ func Provider() *schema.Provider {
 				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
 			},
 			{{- end }}
-
-			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/27037
-			"core_billing_custom_endpoint": &schema.Schema{
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
-			},
-
-			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/27038
-			"billing_custom_endpoint": &schema.Schema{
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
-			},
 		},
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -414,6 +401,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
+	config.CloudBillingBasePath = d.Get(transport_tpg.CloudBillingCustomEndpointEntryKey).(string)
 	config.DataflowBasePath = d.Get(transport_tpg.DataflowCustomEndpointEntryKey).(string)
 	config.IamCredentialsBasePath = d.Get(transport_tpg.IamCredentialsCustomEndpointEntryKey).(string)
 	config.ResourceManagerV3BasePath = d.Get(transport_tpg.ResourceManagerV3CustomEndpointEntryKey).(string)

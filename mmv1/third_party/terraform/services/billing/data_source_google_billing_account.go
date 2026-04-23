@@ -1,4 +1,4 @@
-package cloudbilling
+package billing
 
 import (
 	"fmt"

@@ -270,6 +270,7 @@ type Config struct {
 	{{- end -}}
 	{{- end }}
 
+	CloudBillingBasePath string
 	DataflowBasePath string
 	IamCredentialsBasePath string
 	ResourceManagerV3BasePath string
@@ -295,6 +296,7 @@ type Config struct {
 {{- range $product := $.Products }}
 const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
 {{- end }}
+const CloudBillingBasePathKey = "CloudBilling"
 const DataflowBasePathKey = "Dataflow"
 const IAMBasePathKey = "IAM"
 const IamCredentialsBasePathKey = "IamCredentials"
@@ -308,6 +310,7 @@ var DefaultBasePaths = map[string]string{
 {{- range $product := $.Products }}
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
+	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
 	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
 	IAMBasePathKey : "https://iam.googleapis.com/v1/",
 	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
@@ -415,6 +418,12 @@ func SetEndpointDefaults(d *schema.ResourceData) error {
 		}, DefaultBasePaths[{{ $product.Name }}BasePathKey]))
 	}
 	{{- end }}
+
+	if d.Get(CloudBillingCustomEndpointEntryKey) == "" {
+		d.Set(CloudBillingCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[CloudBillingBasePathKey]))
+	}
 
 	if d.Get(DataflowCustomEndpointEntryKey) == "" {
 		d.Set(DataflowCustomEndpointEntryKey, MultiEnvDefault([]string{
@@ -1494,6 +1503,7 @@ func ConfigureBasePaths(c *Config) {
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
+	c.CloudBillingBasePath = DefaultBasePaths[CloudBillingBasePathKey]
 	c.DataflowBasePath = DefaultBasePaths[DataflowBasePathKey]
 	c.IamCredentialsBasePath = DefaultBasePaths[IamCredentialsBasePathKey]
 	c.ResourceManagerV3BasePath = DefaultBasePaths[ResourceManagerV3BasePathKey]

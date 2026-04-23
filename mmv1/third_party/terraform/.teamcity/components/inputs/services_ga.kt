@@ -136,10 +136,10 @@ var ServicesListGa = mapOf(
         "displayName" to "Bigtable",
         "path" to "./google/services/bigtable"
     ),
-    "billingbudgets" to mapOf(
-        "name" to "billingbudgets",
-        "displayName" to "Billingbudgets",
-        "path" to "./google/services/billingbudgets"
+    "billing" to mapOf(
+        "name" to "billing",
+        "displayName" to "Billing",
+        "path" to "./google/services/billing"
     ),
     "binaryauthorization" to mapOf(
         "name" to "binaryauthorization",
@@ -286,10 +286,10 @@ var ServicesListGa = mapOf(
         "displayName" to "Containerazure",
         "path" to "./google/services/containerazure"
     ),
-    "cloudbilling" to mapOf(
-        "name" to "cloudbilling",
-        "displayName" to "Cloudbilling",
-        "path" to "./google/services/cloudbilling"
+    "corebilling" to mapOf(
+        "name" to "corebilling",
+        "displayName" to "Corebilling",
+        "path" to "./google/services/corebilling"
     ),
     "databasemigrationservice" to mapOf(
         "name" to "databasemigrationservice",

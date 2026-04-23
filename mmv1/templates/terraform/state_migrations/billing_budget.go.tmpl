@@ -1,4 +1,4 @@
-func resourceBillingBudgetsBudgetResourceV0() *schema.Resource {
+func resourceBillingBudgetResourceV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"amount": {
@@ -241,7 +241,7 @@ billingAccounts/{billingAccountId}/budgets/{budgetId}.`,
 	}
 }
 
-func ResourceBillingBudgetsBudgetUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func ResourceBillingBudgetUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
 	rawState["name"] = tpgresource.GetResourceNameFromSelfLink(rawState["name"].(string))

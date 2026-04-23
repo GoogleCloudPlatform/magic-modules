@@ -12,11 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'CloudBilling'
-legacy_name: 'billing'
+name: 'Billing'
 display_name: 'Cloud Billing'
 versions:
   - name: 'ga'
-    base_url: 'https://cloudbilling.googleapis.com/v1/'
+    base_url: 'https://billingbudgets.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
