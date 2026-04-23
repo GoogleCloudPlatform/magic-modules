@@ -733,7 +733,7 @@ func collectResult(output string) Result {
 	buildFailuresMatches := buildFailedExpression.FindAllStringSubmatch(output, -1)
 	for _, submatches := range buildFailuresMatches {
 		if len(submatches) == 2 {
-			results["BUILD_FAILURE"] = append(results["BUILD_FAILURE"], submatches[1])
+			results["BUILD_FAILURE"] = append(results["BUILD_FAILURE"], filepath.Base(submatches[1]))
 		}
 	}
 	sort.Strings(results["BUILD_FAILURE"])

@@ -56,7 +56,7 @@ func TestCollectResults(t *testing.T) {
 `,
 			expected: Result{
 				PassedTests:   []string{"TestAccServiceTwoResourceOne"},
-				BuildFailures: []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/corebilling"},
+				BuildFailures: []string{"corebilling"},
 			},
 		},
 		{
@@ -70,7 +70,7 @@ stderr:
 go: downloading ...
 `,
 			expected: Result{
-				BuildFailures: []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/corebilling"},
+				BuildFailures: []string{"corebilling"},
 			},
 		},
 	} {
