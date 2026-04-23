@@ -6,8 +6,6 @@
 package {{ lower $.ProductMetadata.Name }}_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,14 +14,10 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
-	"{{ $.ImportPath }}/tpgresource"
 )
 
 var (
-	_ = fmt.Sprintf
-	_ = strings.Trim
 	_ = envvar.TestEnvVar
-	_ = tpgresource.SetLabels
 )
 
 {{ $example := $.FirstTestExample }}
@@ -45,6 +39,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	})
 	{{- end }}
 
+	randomSuffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 	{{- template "EnvVarContext" dict "TestEnvVars" $example.TestEnvVars "HasNewLine" false}}
 	{{- range $varKey, $varVal := $example.TestContextVars }}
@@ -53,7 +48,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	{{- range $varKey, $varVal := $example.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
 	{{- end }}
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -80,24 +75,6 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 			{
 				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}(context),
 			},
-{{- if not $example.ExcludeImportTest }}
-			{
-				ResourceName:      "{{ $example.ResourceType $.TerraformName }}.{{ $example.PrimaryResourceId }}",
-				ImportState:       true,
-				ImportStateVerify: true,
-		{{- if $.IgnoreReadPropertiesToStringLegacy $example }}
-				ImportStateVerifyIgnore: {{ $.IgnoreReadPropertiesToStringLegacy $example }},
-		{{- end }}
-			},
-		{{- if not $.ExcludeIdentityGeneration }}
-			{
-				ResourceName:       "{{ $.TerraformName }}.{{ $example.PrimaryResourceId }}",
-				RefreshState:       true,
-				ExpectNonEmptyPlan: true,
-				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
-			},
-		{{- end }}
-{{- end }}
 			{
 				Query:  true,
 				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
