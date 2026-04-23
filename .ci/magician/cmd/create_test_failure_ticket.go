@@ -398,23 +398,26 @@ func failingTestNamesFromActiveIssues(ctx context.Context, gh *github.Client) ([
 }
 
 func failingTestNamesFromClosedIssuesToday(ctx context.Context, gh *github.Client, date time.Time) ([]string, error) {
-	lastday := date.AddDate(0, 0, -1)
-	opts := &github.IssueListByRepoOptions{
-		State:       "closed",
-		Labels:      []string{"test-failure"},
-		Since:       lastday,
-		ListOptions: github.ListOptions{PerPage: 100},
-	}
-	issues, err := ListIssuesWithOpts(ctx, gh, opts)
-	if err != nil {
-		return nil, err
-	}
-	tests, err := testNamesFromIssues(issues)
-	if err != nil {
-		return nil, err
-	}
+	var result []string
+	return result, nil
 
-	return tests, nil
+	// lastday := date.AddDate(0, 0, -1)
+	// opts := &github.IssueListByRepoOptions{
+	// 	State:       "closed",
+	// 	Labels:      []string{"test-failure"},
+	// 	Since:       lastday,
+	// 	ListOptions: github.ListOptions{PerPage: 100},
+	// }
+	// issues, err := ListIssuesWithOpts(ctx, gh, opts)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// tests, err := testNamesFromIssues(issues)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// return tests, nil
 }
 
 func ListIssuesWithOpts(ctx context.Context, gh *github.Client, opts *github.IssueListByRepoOptions) ([]*github.Issue, error) {
@@ -498,12 +501,17 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 	// Only assign to shepherd if it's a terraform team owned ticket
 	if IsTerraformTeamOwned(testFailure) && shepherd != "" {
 		issueRquest.Assignee = github.String(shepherd)
+		fmt.Printf("release shepherd assinged: %s\n", *issueRquest.Assignee)
 	}
 
-	_, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
-	if err != nil {
-		return fmt.Errorf("error creating issue: %w", err)
-	}
+	fmt.Printf("Issue Title: %s\n", *issueRquest.Title)
+	fmt.Printf("release shepherd: %s\n", shepherd)
+	fmt.Printf("ticket labels: %s\n", ticketLabels)
+
+	// _, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
+	// if err != nil {
+	// 	return fmt.Errorf("error creating issue: %w", err)
+	// }
 	return nil
 }
 
