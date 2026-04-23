@@ -29,9 +29,10 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 				Config: testAccModelArmorTemplate_basic_config(basicContext),
 			},
 			{
-				ResourceName:      "google_model_armor_template.template-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_model_armor_template.template-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"template_metadata"},
 			},
 		},
 	})
@@ -43,6 +44,9 @@ resource "google_model_armor_template" "template-basic" {
   location    = "%{location}"
   template_id = "%{templateId}"
   filter_config {
+
+  }
+  template_metadata {
 
   }
 }`, context)

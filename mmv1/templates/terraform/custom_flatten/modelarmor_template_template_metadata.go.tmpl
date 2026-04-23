@@ -4,6 +4,14 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     }
     original := v.(map[string]interface{})
     if len(original) == 0 {
+        // Return an empty object when the user's config contains an empty
+        // template_metadata {} block so that Terraform does not detect drift.
+        // During import d has no prior state, so GetOk returns false and we
+        // return nil; the import test accounts for this via
+        // ImportStateVerifyIgnore.
+        if _, ok := d.GetOk("template_metadata"); ok {
+            return []interface{}{make(map[string]interface{})}
+        }
         return nil
     }
     transformed := make(map[string]interface{})
