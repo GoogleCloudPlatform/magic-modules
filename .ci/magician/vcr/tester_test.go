@@ -59,6 +59,20 @@ func TestCollectResults(t *testing.T) {
 				BuildFailures: []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/corebilling"},
 			},
 		},
+		{
+			name: "build failure in middle",
+			output: `Error replaying tests:
+error running go: exit status 1
+stdout:
+FAIL	github.com/hashicorp/terraform-provider-google-beta/google-beta/services/corebilling [build failed]
+FAIL
+stderr:
+go: downloading ...
+`,
+			expected: Result{
+				BuildFailures: []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/corebilling"},
+			},
+		},
 	} {
 		if diff := cmp.Diff(test.expected, collectResult(test.output)); diff != "" {
 			t.Errorf("collectResult(%q) got unexpected diff (-want +got):\n%s", test.output, diff)
