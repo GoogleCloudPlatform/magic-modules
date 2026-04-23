@@ -1109,16 +1109,7 @@ func (t Terraform) GetGeneratedListResourcesInVersion(products []*api.Product) [
 	var out []GeneratedListResourceRegistration
 	for _, productDefinition := range products {
 		for _, object := range productDefinition.Objects {
-			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(t.TargetVersionName)) {
-				continue
-			}
-			if object.IsExcluded() {
-				continue
-			}
-			if !object.GenerateListResource {
-				continue
-			}
-			if object.ExcludeIdentityGeneration {
+			if object.NotInVersion(productDefinition.VersionObjOrClosest(t.TargetVersionName)) || object.IsExcluded() || !object.GenerateListResource {
 				continue
 			}
 			out = append(out, GeneratedListResourceRegistration{
