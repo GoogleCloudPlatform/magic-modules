@@ -1,4 +1,4 @@
-package corebilling_test
+package cloudbilling_test
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckCoreBillingProjectInfoDestroyProducer(t),
+		CheckDestroy:             testAccCheckCloudBillingProjectInfoDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingProjectInfo_basic(projectId, orgId, billingAccount),
