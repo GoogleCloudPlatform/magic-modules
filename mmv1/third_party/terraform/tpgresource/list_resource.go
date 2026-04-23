@@ -191,7 +191,7 @@ func (listR *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) 
 
 // ListResultDisplayName returns the first non-empty label from rd for keys in order. Use a
 // single key or several for fallbacks (e.g. display_name then email).
-// It returns an error if none of the keys yield a non-empty string.
+// it returns an error if none of the keys yield a non-empty string.
 func ListResultDisplayName(rd *schema.ResourceData, keys ...string) (string, error) {
 	if rd == nil {
 		return "", fmt.Errorf("ListResultDisplayName: ResourceData is nil")
@@ -200,10 +200,12 @@ func ListResultDisplayName(rd *schema.ResourceData, keys ...string) (string, err
 		return "", fmt.Errorf("ListResultDisplayName: no keys provided")
 	}
 	for _, k := range keys {
-		if v, ok := rd.GetOk(k); ok {
-			if s := fmt.Sprintf("%v", v); s != "" {
-				return s, nil
-			}
+		v, ok := rd.GetOk(k)
+		if !ok {
+			continue
+		}
+		if s := fmt.Sprintf("%v", v); s != "" {
+			return s, nil
 		}
 	}
 	return "", fmt.Errorf("ListResultDisplayName: no non-empty value among keys %q", keys)
