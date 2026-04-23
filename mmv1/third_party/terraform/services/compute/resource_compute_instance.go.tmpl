@@ -2396,7 +2396,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
 
-	return nil
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"zone":    zone,
+		"name":    instance.Name,
+	})
 }
 
 func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -3694,6 +3698,13 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
     {{- end }}
 	
 	d.SetId(id)
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": d.Get("project"),
+		"zone":    d.Get("zone"),
+		"name":    d.Get("name"),
+	}); err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
