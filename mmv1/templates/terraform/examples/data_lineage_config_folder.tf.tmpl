@@ -29,8 +29,5 @@ resource "google_folder" "integration" {
 resource "google_folder_iam_member" "datalineage_admin" {
   folder = google_folder.integration.folder_id
   role   = "roles/datalineage.admin"
-  member = "serviceAccount:${data.google_client_openid_userinfo.me.email}"
-}
-
-data "google_client_openid_userinfo" "me" {
+  member = "serviceAccount:{{index $.TestEnvVars "service_account"}}"
 }
