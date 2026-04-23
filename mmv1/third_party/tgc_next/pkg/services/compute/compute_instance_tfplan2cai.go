@@ -1,8 +1,10 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"google.golang.org/api/compute/v1"
@@ -153,34 +155,48 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}
 
 	// Create the instance information
-	return &compute.Instance{
-		CanIpForward:               d.Get("can_ip_forward").(bool),
-		Description:                d.Get("description").(string),
-		Disks:                      disks,
-		MachineType:                machineTypeUrl,
-		Metadata:                   metadata,
-		Name:                       d.Get("name").(string),
-		Zone:                       d.Get("zone").(string),
-		NetworkInterfaces:          networkInterfaces,
-		NetworkPerformanceConfig:   networkPerformanceConfig,
-		Tags:                       resourceInstanceTags(d),
-		Params:                     params,
-		Labels:                     tpgresource.ExpandLabels(d),
-		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
-		GuestAccelerators:          accels,
-		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
-		Scheduling:                 scheduling,
-		DeletionProtection:         d.Get("deletion_protection").(bool),
-		Hostname:                   d.Get("hostname").(string),
-		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
-		DisplayDevice:              expandDisplayDevice(d),
-		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
-		ReservationAffinity:        reservationAffinity,
-		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
-	}, nil
+	instanceMap := map[string]interface{}{
+		"canIpForward":               d.Get("can_ip_forward").(bool),
+		"description":                d.Get("description").(string),
+		"machineType":                machineTypeUrl,
+		"name":                       d.Get("name").(string),
+		"zone":                       d.Get("zone").(string),
+		"networkInterfaces":          networkInterfaces,
+		"networkPerformanceConfig":   networkPerformanceConfig,
+		"tags":                       resourceInstanceTags(d),
+		"labels":                     tpgresource.ExpandLabels(d),
+		"serviceAccounts":            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		"minCpuPlatform":             d.Get("min_cpu_platform").(string),
+		"scheduling":                 scheduling,
+		"deletionProtection":         d.Get("deletion_protection").(bool),
+		"hostname":                   d.Get("hostname").(string),
+		"confidentialInstanceConfig": expandConfidentialInstanceConfig(d),
+		"advancedMachineFeatures":    expandAdvancedMachineFeatures(d),
+		"shieldedInstanceConfig":     expandShieldedVmConfigs(d),
+		"displayDevice":              expandDisplayDevice(d),
+		"reservationAffinity":        reservationAffinity,
+		"keyRevocationActionType":    d.Get("key_revocation_action_type").(string),
+		"instanceEncryptionKey":      expandComputeInstanceEncryptionKey(d),
+		"metadata":                   metadata,
+	}
+
+	instanceBytes, err := json.Marshal(instanceMap)
+	if err != nil {
+		return nil, err
+	}
+
+	var instance compute.Instance
+	if err := json.Unmarshal(instanceBytes, &instance); err != nil {
+		return nil, err
+	}
+
+	// Re-assign typed slices/structs
+	instance.Disks = disks
+	instance.GuestAccelerators = accels
+	instance.Params = params
+	instance.ForceSendFields = []string{"CanIpForward", "DeletionProtection"}
+
+	return &instance, nil
 }
 
 func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
@@ -311,7 +327,11 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.guest_os_features"); ok {
-		disk.GuestOsFeatures = expandComputeInstanceGuestOsFeatures(v)
+		var typedGuestOsFeatures []*compute.GuestOsFeature
+		if gofBytes, err := json.Marshal(expandComputeInstanceGuestOsFeatures(v)); err == nil {
+			json.Unmarshal(gofBytes, &typedGuestOsFeatures)
+		}
+		disk.GuestOsFeatures = typedGuestOsFeatures
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
@@ -501,19 +521,29 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
 
-		ifaces[i] = &compute.NetworkInterface{
-			NetworkIP:                data["network_ip"].(string),
-			Network:                  network,
-			Subnetwork:               subnetwork,
-			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
-			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
-			NicType:                  data["nic_type"].(string),
-			StackType:                data["stack_type"].(string),
-			QueueCount:               int64(data["queue_count"].(int)),
-			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
-			Ipv6Address:              data["ipv6_address"].(string),
-			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+		ifaceMap := map[string]interface{}{
+			"networkIP":                data["network_ip"].(string),
+			"network":                  network,
+			"subnetwork":               subnetwork,
+			"accessConfigs":            expandAccessConfigs(data["access_config"].([]interface{})),
+			"aliasIpRanges":            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			"nicType":                  data["nic_type"].(string),
+			"stackType":                data["stack_type"].(string),
+			"queueCount":               int64(data["queue_count"].(int)),
+			"ipv6AccessConfigs":        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			"ipv6Address":              data["ipv6_address"].(string),
+			"internalIpv6PrefixLength": int64(data["internal_ipv6_prefix_length"].(int)),
 		}
+
+		ifaceBytes, err := json.Marshal(ifaceMap)
+		if err != nil {
+			return nil, err
+		}
+		var iface compute.NetworkInterface
+		if err := json.Unmarshal(ifaceBytes, &iface); err != nil {
+			return nil, err
+		}
+		ifaces[i] = &iface
 	}
 	return ifaces, nil
 }
@@ -539,63 +569,56 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 	}
 
 	original := ls[0].(map[string]interface{})
-	scheduling := &compute.Scheduling{
-		ForceSendFields: make([]string, 0, 4),
-	}
+	schedulingMap := make(map[string]interface{})
 
 	if v, ok := original["automatic_restart"]; ok {
-		scheduling.AutomaticRestart = googleapi.Bool(v.(bool))
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "AutomaticRestart")
+		schedulingMap["automaticRestart"] = v.(bool)
 	}
 
 	if v, ok := original["preemptible"]; ok {
-		scheduling.Preemptible = v.(bool)
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "Preemptible")
+		schedulingMap["preemptible"] = v.(bool)
 	}
 
 	if v, ok := original["on_host_maintenance"]; ok {
-		scheduling.OnHostMaintenance = v.(string)
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnHostMaintenance")
+		schedulingMap["onHostMaintenance"] = v.(string)
 	}
 
 	if v, ok := original["node_affinities"]; ok && v != nil {
 		naSet := v.(*schema.Set).List()
-		scheduling.NodeAffinities = make([]*compute.SchedulingNodeAffinity, 0)
+		var nodeAffinities []interface{}
 		for _, nodeAffRaw := range naSet {
 			if nodeAffRaw == nil {
 				continue
 			}
 			nodeAff := nodeAffRaw.(map[string]interface{})
-			transformed := &compute.SchedulingNodeAffinity{
-				Key:      nodeAff["key"].(string),
-				Operator: nodeAff["operator"].(string),
-				Values:   tpgresource.ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
+			transformed := map[string]interface{}{
+				"key":      nodeAff["key"].(string),
+				"operator": nodeAff["operator"].(string),
+				"values":   tpgresource.ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
 			}
-			scheduling.NodeAffinities = append(scheduling.NodeAffinities, transformed)
+			nodeAffinities = append(nodeAffinities, transformed)
 		}
+		schedulingMap["nodeAffinities"] = nodeAffinities
 	}
 
 	if v, ok := original["min_node_cpus"]; ok {
-		scheduling.MinNodeCpus = int64(v.(int))
+		schedulingMap["minNodeCpus"] = int64(v.(int))
 	}
 	if v, ok := original["provisioning_model"]; ok {
-		scheduling.ProvisioningModel = v.(string)
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "ProvisioningModel")
+		schedulingMap["provisioningModel"] = v.(string)
 	}
 	if v, ok := original["instance_termination_action"]; ok {
-		scheduling.InstanceTerminationAction = v.(string)
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "InstanceTerminationAction")
+		schedulingMap["instanceTerminationAction"] = v.(string)
 	}
 	if v, ok := original["availability_domain"]; ok && v != nil {
-		scheduling.AvailabilityDomain = int64(v.(int))
+		schedulingMap["availabilityDomain"] = int64(v.(int))
 	}
 	if v, ok := original["max_run_duration"]; ok {
 		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.MaxRunDuration = transformedMaxRunDuration
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
+		schedulingMap["maxRunDuration"] = transformedMaxRunDuration
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
@@ -603,8 +626,7 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		if err != nil {
 			return nil, err
 		}
-		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
+		schedulingMap["onInstanceStopAction"] = transformedOnInstanceStopAction
 	}
 
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
@@ -612,11 +634,21 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		if err != nil {
 			return nil, err
 		}
-		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
+		schedulingMap["localSsdRecoveryTimeout"] = transformedLocalSsdRecoveryTimeout
 	}
 	if v, ok := original["termination_time"]; ok {
-		scheduling.TerminationTime = v.(string)
+		schedulingMap["terminationTime"] = v.(string)
 	}
+
+	schedulingBytes, err := json.Marshal(schedulingMap)
+	if err != nil {
+		return nil, err
+	}
+	var sched compute.Scheduling
+	if err := json.Unmarshal(schedulingBytes, &sched); err != nil {
+		return nil, err
+	}
+	scheduling := &sched
+	scheduling.ForceSendFields = []string{"AutomaticRestart", "Preemptible"}
 	return scheduling, nil
 }

@@ -9,6 +9,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -145,28 +146,42 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}
 
 	// Create the instance information
-	return &compute.Instance{
-		CanIpForward:            d.Get("can_ip_forward").(bool),
-		Description:             d.Get("description").(string),
-		Disks:                   disks,
-		MachineType:             machineTypeUrl,
-		Metadata:                metadata,
-		Name:                    d.Get("name").(string),
-		Zone:                    d.Get("zone").(string),
-		NetworkInterfaces:       networkInterfaces,
-		Tags:                    resourceInstanceTags(d),
-		Labels:                  tpgresource.ExpandLabels(d),
-		ServiceAccounts:         expandServiceAccounts(d.Get("service_account").([]interface{})),
-		GuestAccelerators:       accels,
-		MinCpuPlatform:          d.Get("min_cpu_platform").(string),
-		Scheduling:              scheduling,
-		DeletionProtection:      d.Get("deletion_protection").(bool),
-		Hostname:                d.Get("hostname").(string),
-		ForceSendFields:         []string{"CanIpForward", "DeletionProtection"},
-		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
-		DisplayDevice:           expandDisplayDevice(d),
-		AdvancedMachineFeatures: expandAdvancedMachineFeatures(d),
-	}, nil
+	instanceMap := map[string]interface{}{
+		"canIpForward":               d.Get("can_ip_forward").(bool),
+		"description":                d.Get("description").(string),
+		"machineType":                machineTypeUrl,
+		"name":                       d.Get("name").(string),
+		"zone":                       d.Get("zone").(string),
+		"networkInterfaces":          networkInterfaces,
+		"tags":                       resourceInstanceTags(d),
+		"labels":                     tpgresource.ExpandLabels(d),
+		"serviceAccounts":            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		"minCpuPlatform":             d.Get("min_cpu_platform").(string),
+		"scheduling":                 scheduling,
+		"deletionProtection":         d.Get("deletion_protection").(bool),
+		"hostname":                   d.Get("hostname").(string),
+		"shieldedInstanceConfig":     expandShieldedVmConfigs(d),
+		"displayDevice":              expandDisplayDevice(d),
+		"advancedMachineFeatures":    expandAdvancedMachineFeatures(d),
+		"metadata":                   metadata,
+	}
+
+	instanceBytes, err := json.Marshal(instanceMap)
+	if err != nil {
+		return nil, err
+	}
+
+	var instance compute.Instance
+	if err := json.Unmarshal(instanceBytes, &instance); err != nil {
+		return nil, err
+	}
+
+	// Re-assign typed slices/structs that are not handled by map
+	instance.Disks = disks
+	instance.GuestAccelerators = accels
+	instance.ForceSendFields = []string{"CanIpForward", "DeletionProtection"}
+
+	return &instance, nil
 }
 
 func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
