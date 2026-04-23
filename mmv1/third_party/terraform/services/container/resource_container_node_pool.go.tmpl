@@ -202,9 +202,7 @@ func ResourceContainerNodePool() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			resourceNodeConfigEmptyGuestAccelerator,
-			{{ if ne $.TargetVersionName `ga` }}
 			nodePoolAcceleratorNetworkProfileCustomizeDiff,
-			{{- end }}
 		),
 
 		UseJSONNumber: true,
@@ -1507,9 +1505,7 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfigs),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfigs),
 			"subnetwork":                      c.Subnetwork,
-			{{ if ne $.TargetVersionName `ga` }}
 			"accelerator_network_profile": 	   c.AcceleratorNetworkProfile,
-			{{- end }}
 		})
 	}
 	return result
@@ -1624,11 +1620,9 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 			nnc.NetworkPerformanceConfig.TotalEgressBandwidthTier = total_egress_bandwidth_tier.(string)
 		}
 	}
-	{{ if ne $.TargetVersionName `ga` }}
 	if v, ok := networkNodeConfig["accelerator_network_profile"]; ok {
 		nnc.AcceleratorNetworkProfile = v.(string)
 	}
-	{{- end }}
 
 	// Allow user to set the top-level node-pool subnetwork via network_config.subnetwork
 	if v, ok := networkNodeConfig["subnetwork"]; ok {
@@ -2049,7 +2043,6 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` }}
 func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
 	log.Printf("[DEBUG] ANP CustomizeDiff: Running...")
 
@@ -2131,7 +2124,6 @@ func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sch
 
 	return nil
 }
-{{- end }}
 
 func init() {
 	registry.Schema{

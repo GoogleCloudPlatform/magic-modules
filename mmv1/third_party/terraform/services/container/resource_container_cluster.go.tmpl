@@ -242,9 +242,7 @@ func ResourceContainerCluster() *schema.Resource {
 			containerClusterEnableK8sBetaApisCustomizeDiff,
 			containerClusterNodeVersionCustomizeDiff,
 			tpgresource.SetDiffForLabelsWithCustomizedName("resource_labels"),
-			{{ if ne $.TargetVersionName `ga` }}
 			clusterAcceleratorNetworkProfileCustomizeDiff,
-			{{- end }}
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -8974,7 +8972,6 @@ func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformReso
 	return nil
 }
 
-{{ if ne $.TargetVersionName `ga` }}
 func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
 	// 1. SKIP ON CREATE
 	if diff.Id() == "" {
@@ -9123,7 +9120,6 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 
 	return nil
 }
-{{- end }}
 
 func init() {
 	registry.Schema{
