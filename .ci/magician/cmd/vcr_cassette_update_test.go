@@ -433,3 +433,31 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 		})
 	}
 }
+
+func TestExecVCRCassetteUpdate_BuildFailure(t *testing.T) {
+	rnr := &mockRunner{
+		calledMethods: make(map[string][]ParameterList),
+		cwd:           "/mock/dir/magic-modules/.ci/magician",
+		dirStack:      list.New(),
+		cmdResults: map[string]string{
+			"gopath/src/github.com/hashicorp/terraform-provider-google-beta go [test  -p 16 -parallel 32 -v -run=TestAcc -timeout 360m -ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc -vet=off] map[ACCTEST_PARALLELISM:32 GOOGLE_APPLICATION_CREDENTIALS:/mock/dir/magic-modules/.ci/magician/sa_key.json GOOGLE_CREDENTIALS:sa_key GOOGLE_TEST_DIRECTORY: SA_KEY:sa_key TF_ACC:1 TF_ACC_REFRESH_AFTER_APPLY:1 TF_LOG:DEBUG TF_LOG_CORE:WARN TF_LOG_PATH_MASK:/mock/dir/magic-modules/.ci/magician/testlogs/replaying/beta/%s.log TF_LOG_SDK_FRAMEWORK:INFO TF_SCHEMA_PANIC_ON_ERROR:1 VCR_MODE:REPLAYING VCR_PATH:/mock/dir/magic-modules/.ci/magician/cassettes/beta]": "FAIL\tgithub.com/hashicorp/terraform-provider-google-beta/google-beta/services/corebilling [build failed]",
+		},
+	}
+
+	ctlr := source.NewController("gopath", "hashicorp", "token", rnr)
+	vt, err := vcr.NewTester(map[string]string{
+		"SA_KEY": "sa_key",
+	}, "ci-vcr-cassettes", "", rnr, false)
+	if err != nil {
+		t.Fatalf("Failed to create new tester: %v", err)
+	}
+
+	err = execVCRCassetteUpdate("buildID", "2024-07-08", rnr, ctlr, vt)
+	if err == nil {
+		t.Fatalf("execVCRCassetteUpdate expected to return error on build failure, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "provider failed to build during VCR tests in REPLAYING mode") {
+		t.Errorf("Unexpected error message: %v", err)
+	}
+}

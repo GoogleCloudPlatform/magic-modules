@@ -49,6 +49,16 @@ func TestCollectResults(t *testing.T) {
 				FailedSubtests: []string{"TestAccServiceOneResourceTwo__test_two"},
 			},
 		},
+		{
+			name: "build failure",
+			output: `FAIL	github.com/hashicorp/terraform-provider-google-beta/google-beta/services/corebilling [build failed]
+--- PASS: TestAccServiceTwoResourceOne (100.00s)
+`,
+			expected: Result{
+				PassedTests:   []string{"TestAccServiceTwoResourceOne"},
+				BuildFailures: []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/corebilling"},
+			},
+		},
 	} {
 		if diff := cmp.Diff(test.expected, collectResult(test.output)); diff != "" {
 			t.Errorf("collectResult(%q) got unexpected diff (-want +got):\n%s", test.output, diff)

@@ -24,6 +24,7 @@ type Result struct {
 	SkippedSubtests []string
 	FailedSubtests  []string
 	Panics          []string
+	BuildFailures   []string
 }
 
 type Mode int
@@ -81,6 +82,8 @@ var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (Test
 var subtestResultsExpression = regexp.MustCompile(`(?m:^    --- (PASS|FAIL|SKIP): (TestAcc\w+)/(\w+))`)
 
 var testPanicExpression = regexp.MustCompile(`(?m:^panic: .*)`)
+
+var buildFailedExpression = regexp.MustCompile(`(?m:^FAIL\s+(\S+)\s+\[build failed\])`)
 
 var safeToLog = map[string]bool{
 	"ACCTEST_PARALLELISM":                        true,
@@ -726,6 +729,16 @@ func collectResult(output string) Result {
 	results := make(map[string][]string, 4)
 	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
 	sort.Strings(results["PANIC"])
+
+	buildFailuresMatches := buildFailedExpression.FindAllStringSubmatch(output, -1)
+	var buildFailures []string
+	for _, submatches := range buildFailuresMatches {
+		if len(submatches) == 2 {
+			buildFailures = append(buildFailures, submatches[1])
+		}
+	}
+	sort.Strings(buildFailures)
+
 	subtestResults := make(map[string][]string, 3)
 	for _, kind := range []string{"FAIL", "PASS", "SKIP"} {
 		for test := range resultSets[kind] {
@@ -745,5 +758,6 @@ func collectResult(output string) Result {
 		PassedSubtests:  subtestResults["PASS"],
 		SkippedSubtests: subtestResults["SKIP"],
 		Panics:          results["PANIC"],
+		BuildFailures:   buildFailures,
 	}
 }

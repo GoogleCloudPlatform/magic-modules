@@ -237,6 +237,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return nil
 	}
 
+	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh); err != nil {
+		return fmt.Errorf("error handling build failures: %w", err)
+	} else if hasBuildFailures {
+		return nil
+	}
+
 	var servicesArr []string
 	for s := range services {
 		servicesArr = append(servicesArr, s)
@@ -294,6 +300,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
+			return nil
+		}
+
+		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh); err != nil {
+			return fmt.Errorf("error handling build failures: %w", err)
+		} else if hasBuildFailures {
 			return nil
 		}
 
@@ -397,10 +409,11 @@ func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string
 
 func subtestResult(original vcr.Result) vcr.Result {
 	return vcr.Result{
-		PassedTests:  excludeCompoundTests(original.PassedTests, original.PassedSubtests),
-		FailedTests:  excludeCompoundTests(original.FailedTests, original.FailedSubtests),
-		SkippedTests: excludeCompoundTests(original.SkippedTests, original.SkippedSubtests),
-		Panics:       original.Panics,
+		PassedTests:   excludeCompoundTests(original.PassedTests, original.PassedSubtests),
+		FailedTests:   excludeCompoundTests(original.FailedTests, original.FailedSubtests),
+		SkippedTests:  excludeCompoundTests(original.SkippedTests, original.SkippedSubtests),
+		Panics:        original.Panics,
+		BuildFailures: original.BuildFailures,
 	}
 }
 
@@ -496,6 +509,26 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 	if len(result.Panics) > 0 {
 		comment := color("red", fmt.Sprintf("The provider crashed while running the VCR tests in %s mode\n", mode.Upper()))
 		comment += fmt.Sprintf(`Please fix it to complete your PR.
+View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
+		if err := gh.PostComment(prNumber, comment); err != nil {
+			return true, fmt.Errorf("error posting comment: %v", err)
+		}
+		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
+			return true, fmt.Errorf("error posting failure status: %v", err)
+		}
+		return true, nil
+	}
+	return false, nil
+}
+
+func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
+	if len(result.BuildFailures) > 0 {
+		comment := color("red", fmt.Sprintf("The provider failed to build during VCR tests in %s mode\n", mode.Upper()))
+		comment += "The following packages failed to build:\n"
+		for _, pkg := range result.BuildFailures {
+			comment += fmt.Sprintf("- `%s`\n", pkg)
+		}
+		comment += fmt.Sprintf(`Please fix the compilation errors to complete your PR.
 View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
 		if err := gh.PostComment(prNumber, comment); err != nil {
 			return true, fmt.Errorf("error posting comment: %v", err)
