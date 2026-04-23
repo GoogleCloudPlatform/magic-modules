@@ -498,6 +498,7 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 		result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
 		result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)
 		result.Panics = append(result.Panics, serviceResult.Panics...)
+		result.BuildFailures = append(result.BuildFailures, serviceResult.BuildFailures...)
 	} else {
 		fmt.Println("runReplaying: no impacted services")
 	}
