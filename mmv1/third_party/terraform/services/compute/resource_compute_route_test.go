@@ -102,7 +102,7 @@ resource "google_compute_route" "acc_route_with_resource_manager_tags" {
 func testAccComputeRoute_defaultInternetGateway(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_route" "foobar" {
-  name             = "tf-test-route-test-%s"
+  name             = "route-test-%s"
   dest_range       = "0.0.0.0/0"
   network          = "default"
   next_hop_gateway = "default-internet-gateway"
@@ -135,7 +135,7 @@ resource "google_compute_instance" "foo" {
 }
 
 resource "google_compute_route" "foobar" {
-  name                   = "tf-test-route-test-%s"
+  name                   = "route-test-%s"
   dest_range             = "0.0.0.0/0"
   network                = "default"
   next_hop_instance      = google_compute_instance.foo.name

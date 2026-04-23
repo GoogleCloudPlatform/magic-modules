@@ -1,7 +1,5 @@
 package compute_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -129,5 +127,3 @@ resource "google_compute_rollout_plan" "complex" {
 }
 `, context["random_suffix"])
 }
-
-{{- end }}

@@ -309,7 +309,6 @@ func testAccDialogflowCXTool_full_bearer_token(context map[string]interface{}) s
 	`, context)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccDialogflowCXTool_dialogflowcxToolConnectorExample_update(t *testing.T) {
 	t.Parallel()
 
@@ -551,4 +550,3 @@ data "google_project" "test_project" {
 }
 `, context)
 }
-{{- end }}

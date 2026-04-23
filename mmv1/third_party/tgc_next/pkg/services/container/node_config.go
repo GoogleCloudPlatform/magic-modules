@@ -1,7 +1,6 @@
 package container
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -1028,66 +1027,6 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
-							"swap_config": {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: `Parameters that can be configured on Linux nodes.`,
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										"enabled": {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Description: `Whether or not swap is enabled`,
-										},
-										"boot_disk_profile": {
-											Type:        schema.TypeList,
-											Optional:    true,
-											MaxItems:    1,
-											Description: `Swap disk profile for boot disk`,
-											Elem: &schema.Resource{
-												Schema: map[string]*schema.Schema{
-													"swap_size_gib": {
-														Type:        schema.TypeInt,
-														Optional:    true,
-														Description: `Swap size in GiB`,
-													},
-												},
-											},
-										},
-										"dedicated_local_ssd_profile": {
-											Type:        schema.TypeList,
-											Optional:    true,
-											MaxItems:    1,
-											Description: `Swap disk profile for dedicated local SSD`,
-											Elem: &schema.Resource{
-												Schema: map[string]*schema.Schema{
-													"disk_count": {
-														Type:        schema.TypeInt,
-														Optional:    true,
-														Description: `Disk count`,
-													},
-												},
-											},
-										},
-										"ephemeral_local_ssd_profile": {
-											Type:        schema.TypeList,
-											Optional:    true,
-											MaxItems:    1,
-											Description: `Swap disk profile for ephemeral local SSD`,
-											Elem: &schema.Resource{
-												Schema: map[string]*schema.Schema{
-													"swap_size_gib": {
-														Type:        schema.TypeInt,
-														Optional:    true,
-														Description: `Swap size in GiB`,
-													},
-												},
-											},
-										},
-									},
-								},
-							},
 						},
 					},
 				},
@@ -2028,100 +1967,7 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		linuxNodeConfig.NodeKernelModuleLoading = expandNodeKernelModuleLoading(v)
 	}
 
-	if v, ok := cfg["swap_config"]; ok {
-		linuxNodeConfig.SwapConfig = expandSwapConfig(v)
-	}
-
 	return linuxNodeConfig
-}
-
-func expandSwapConfig(v interface{}) *container.SwapConfig {
-	if v == nil {
-		return nil
-	}
-	ls := v.([]interface{})
-	if len(ls) == 0 {
-		return nil
-	}
-	if ls[0] == nil {
-		return &container.SwapConfig{}
-	}
-	cfg := ls[0].(map[string]interface{})
-
-	swapConfig := &container.SwapConfig{}
-	if v, ok := cfg["enabled"]; ok {
-		swapConfig.Enabled = v.(bool)
-	}
-	if v, ok := cfg["boot_disk_profile"]; ok {
-		swapConfig.BootDiskProfile = expandBootDiskProfile(v)
-	}
-	if v, ok := cfg["dedicated_local_ssd_profile"]; ok {
-		swapConfig.DedicatedLocalSsdProfile = expandDedicatedLocalSsdProfile(v)
-	}
-	if v, ok := cfg["ephemeral_local_ssd_profile"]; ok {
-		swapConfig.EphemeralLocalSsdProfile = expandEphemeralLocalSsdProfile(v)
-	}
-	return swapConfig
-}
-
-func expandEphemeralLocalSsdProfile(v interface{}) *container.EphemeralLocalSsdProfile {
-	if v == nil {
-		return nil
-	}
-	ls := v.([]interface{})
-	if len(ls) == 0 {
-		return nil
-	}
-	if ls[0] == nil {
-		return &container.EphemeralLocalSsdProfile{}
-	}
-	cfg := ls[0].(map[string]interface{})
-
-	profile := &container.EphemeralLocalSsdProfile{}
-	if v, ok := cfg["swap_size_gib"]; ok {
-		profile.SwapSizeGib = int64(v.(int))
-	}
-	return profile
-}
-
-func expandDedicatedLocalSsdProfile(v interface{}) *container.DedicatedLocalSsdProfile {
-	if v == nil {
-		return nil
-	}
-	ls := v.([]interface{})
-	if len(ls) == 0 {
-		return nil
-	}
-	if ls[0] == nil {
-		return &container.DedicatedLocalSsdProfile{}
-	}
-	cfg := ls[0].(map[string]interface{})
-
-	profile := &container.DedicatedLocalSsdProfile{}
-	if v, ok := cfg["disk_count"]; ok {
-		profile.DiskCount = int64(v.(int))
-	}
-	return profile
-}
-
-func expandBootDiskProfile(v interface{}) *container.BootDiskProfile {
-	if v == nil {
-		return nil
-	}
-	ls := v.([]interface{})
-	if len(ls) == 0 {
-		return nil
-	}
-	if ls[0] == nil {
-		return &container.BootDiskProfile{}
-	}
-	cfg := ls[0].(map[string]interface{})
-
-	bdp := &container.BootDiskProfile{}
-	if v, ok := cfg["swap_size_gib"]; ok {
-		bdp.SwapSizeGib = int64(v.(int))
-	}
-	return bdp
 }
 
 func expandWindowsNodeConfig(v interface{}) *container.WindowsNodeConfig {
@@ -3170,56 +3016,8 @@ func flattenLinuxNodeConfig(v interface{}) []map[string]interface{} {
 		"transparent_hugepage_enabled": c["transparentHugepageEnabled"],
 		"transparent_hugepage_defrag":  c["transparentHugepageDefrag"],
 		"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
-		"swap_config":                  flattenSwapConfig(c["swapConfig"]),
 	}
 
-	return []map[string]interface{}{transformed}
-}
-
-func flattenSwapConfig(v interface{}) []map[string]interface{} {
-	if v == nil {
-		return nil
-	}
-	c, ok := v.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
-	}
-	if bdp, ok := c["bootDiskProfile"].(map[string]interface{}); ok {
-		transformed["boot_disk_profile"] = []map[string]interface{}{
-			{
-				"swap_size_gib": bdp["swapSizeGib"],
-			},
-		}
-	}
-	if dlsp, ok := c["dedicatedLocalSsdProfile"].(map[string]interface{}); ok {
-		diskCount := dlsp["diskCount"]
-		if strCount, ok := diskCount.(string); ok {
-			if intCount, err := strconv.Atoi(strCount); err == nil {
-				diskCount = intCount
-			}
-		}
-		transformed["dedicated_local_ssd_profile"] = []map[string]interface{}{
-			{
-				"disk_count": diskCount,
-			},
-		}
-	}
-	if elsp, ok := c["ephemeralLocalSsdProfile"].(map[string]interface{}); ok {
-		swapSizeGib := elsp["swapSizeGib"]
-		if strSize, ok := swapSizeGib.(string); ok {
-			if intSize, err := strconv.Atoi(strSize); err == nil {
-				swapSizeGib = intSize
-			}
-		}
-		transformed["ephemeral_local_ssd_profile"] = []map[string]interface{}{
-			{
-				"swap_size_gib": swapSizeGib,
-			},
-		}
-	}
 	return []map[string]interface{}{transformed}
 }
 

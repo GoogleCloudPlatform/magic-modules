@@ -421,7 +421,6 @@ properties:
               enum_values:
                 - 'DELETE'
                 - 'RETAIN'
-              default_from_api: true
             - name: 'sourceSnapshot'
               type: String
               description: |

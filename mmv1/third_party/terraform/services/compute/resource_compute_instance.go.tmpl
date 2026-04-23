@@ -1671,15 +1671,6 @@ be from 0 to 999,999,999 inclusive.`,
 					},
 				},
 			},
-			{{- if ne $.TargetVersionName `ga` }}
-			"erase_windows_vss_signature": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				ForceNew:	 true,
-				Default:     false,
-				Description: `Specifies whether the disks restored from source snapshots or source machine image should erase Windows specific VSS signature.`,
-			},
-			{{- end }}
 		},
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
@@ -1859,9 +1850,6 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
 		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
-		{{- if ne $.TargetVersionName `ga` }}
-		EraseWindowsVssSignature:   d.Get("erase_windows_vss_signature").(bool),
-		{{- end }}
 	}, nil
 }
 
@@ -2332,16 +2320,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)); err != nil {
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
-
-    {{- if ne $.TargetVersionName `ga` }}
-	// If not forced to false, upgrading to a new provider version and subsequently changing a vm property
-    // will trigger replacement when erase_windows_vss_signature = null in state is changed to false as part of a refresh
-    if _, ok := d.GetOkExists("erase_windows_vss_signature"); !ok {
-        if err := d.Set("erase_windows_vss_signature", false); err != nil {
-            return fmt.Errorf("Error setting erase_windows_vss_signature: %s", err)
-        }
-    }
-    {{- end }}
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
 
@@ -3595,15 +3573,6 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
-
-    {{- if ne $.TargetVersionName `ga` }}
-	// erase_windows_vss_signature is not a property of a vm so force to false on import.
-    // If not set, value is null in state and will cause replacement if a vm property is subsequently updated (eg. machine_type).
-    if err := d.Set("erase_windows_vss_signature", false); err != nil {
-        return nil, fmt.Errorf("Error setting erase_windows_vss_signature: %s", err)
-    }
-    {{- end }}
-	
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil

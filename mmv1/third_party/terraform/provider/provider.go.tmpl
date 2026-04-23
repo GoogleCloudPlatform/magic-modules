@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/version"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -18,6 +16,18 @@ import (
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
+
+	// The mtls service client gives the type of endpoint (mtls/regular)
+	// at client creation. Since we use a shared client for requests we must
+	// rewrite the endpoints to be mtls endpoints for the scenario where
+	// mtls is enabled.
+	if isMtls() {
+		// if mtls is enabled switch all default endpoints to use the mtls endpoint
+		for key, bp := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
+		}
+	}
+
 	provider := &schema.Provider{
 		// See: https://developer.hashicorp.com/terraform/plugin/framework/migrating/mux
 		// "The schema and configuration handling must exactly match between all underlying providers of the mux server"
@@ -166,15 +176,14 @@ func Provider() *schema.Provider {
 				Optional: true,
 			},
 
-			"prefer_global_endpoints": {
-				Type:     schema.TypeBool,
-				Optional: true,
+			// Generated Products
+			{{- range $product := $.Products }}
+			"{{ underscore $product.Name }}_custom_endpoint": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
 			},
-
-			"prefer_regional_endpoints": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
+			{{- end }}
 
 			// Handwritten Products / Versioned / Atypical Entries
 			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
@@ -223,17 +232,9 @@ func Provider() *schema.Provider {
 			},
 		},
 {{if ne $.Compiler "terraformgoogleconversion-codegen"}}
-		DataSourcesMap: registry.DatasourceMap(),
+		DataSourcesMap: DatasourceMap(),
 {{- end }}
-		ResourcesMap: registry.ResourceMap(),
-	}
-
-	for _, p := range registry.ListProducts() {
-		provider.Schema[p.CustomEndpointField] = &schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: transport_tpg.ValidateCustomEndpoint,
-		}
+		ResourcesMap: ResourceMap(),
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -241,15 +242,40 @@ func Provider() *schema.Provider {
 	}
 	return provider
 }
-
-// Compatibility shim for diff-processor.
-func ResourceMap() map[string]*schema.Resource{
-	return registry.ResourceMap()
+{{ if ne $.Compiler "terraformgoogleconversion-codegen"}}
+func DatasourceMap() map[string]*schema.Resource {
+	datasourceMap, _ := DatasourceMapWithErrors()
+	return datasourceMap
 }
 
-// Compatibility shim for diff-processor.
-func DatasourceMap() map[string]*schema.Resource{
-	return registry.DatasourceMap()
+func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
+	return mergeResourceMaps(
+		handwrittenDatasources,
+		generatedIAMDatasources,
+		handwrittenIAMDatasources,
+	)
+}
+{{- end }}
+
+func ResourceMap() map[string]*schema.Resource {
+	resourceMap, _ := ResourceMapWithErrors()
+	return resourceMap
+}
+
+func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
+{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+	return mergeResourceMaps(
+		generatedResources,
+		handwrittenResources,
+		handwrittenIAMResources,
+		dclResources,
+	)
+{{- else }}
+	return mergeResourceMaps(
+		handwrittenResources,
+		generatedResources,
+	)
+{{- end }}
 }
 
 func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
@@ -328,17 +354,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 			"GOOGLE_OAUTH_ACCESS_TOKEN",
 		})
 	}
-
-	// The mtls service client gives the type of endpoint (mtls/regular)
-	// at client creation. Since we use a shared client for requests we must
-	// rewrite the endpoints to be mtls endpoints for the scenario where
-	// mtls is enabled.
-	if isMtls() {
-		// if mtls is enabled switch all default endpoints to use the mtls endpoint
-		for key, bp := range transport_tpg.DefaultBasePaths {
-			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
-		}
-	}
 	
 	// Set the universe domain to the configured value, if any
 	if v, ok := d.GetOk("universe_domain"); ok {
@@ -408,9 +423,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// Generated products
 	{{- range $product := $.Products }}
 	config.{{ $product.Name }}BasePath = d.Get("{{ underscore $product.Name }}_custom_endpoint").(string)
-	{{- if $product.Version.RepEnabled }}
-	config.{{ $product.Name }}RepBasePath = "{{ $product.Version.RepUrl }}"
-	{{- end -}}
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
@@ -447,13 +459,27 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(fmt.Errorf("Universe domain mismatch: Universe domain '%s' was found in credentials without a corresponding 'universe_domain' provider configuration set. Please set 'universe_domain' to '%s' or use different credentials.", config.UniverseDomain, config.UniverseDomain))
 	}
 
-	// Verify that prefer global and regional configurations are not in conflict
-	if d.Get("prefer_global_endpoints").(bool) && d.Get("prefer_regional_endpoints").(bool) {
-		return nil, diag.FromErr(errors.New("Found conflict between prefer_global_endpoints and prefer_regional_endpoints, only one of these may be set at a time."))
-	} else {
-		config.PreferGlobalEndpoints = d.Get("prefer_global_endpoints").(bool)
-		config.PreferRegionalEndpoints = d.Get("prefer_regional_endpoints").(bool)
+	return &config, nil
+}
+
+func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
+	merged := make(map[string]*schema.Resource)
+	duplicates := []string{}
+
+	for _, m := range ms {
+		for k, v := range m {
+			if _, ok := merged[k]; ok {
+				duplicates = append(duplicates, k)
+			}
+
+			merged[k] = v
+		}
 	}
 
-	return &config, nil
+	var err error
+	if len(duplicates) > 0 {
+		err = fmt.Errorf("saw duplicates in mergeResourceMaps: %v", duplicates)
+	}
+
+	return merged, err
 }

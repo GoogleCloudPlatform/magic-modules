@@ -236,7 +236,6 @@ module "project-services" {
     "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
     "ces.googleapis.com",
-    "chromepolicy.googleapis.com",
     "chronicle.googleapis.com",
     "cloudaicompanion.googleapis.com",
     "cloudapis.googleapis.com",
@@ -391,7 +390,7 @@ module "project-services" {
 }
 
 resource "google_project_service_identity" "bigtable_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -399,7 +398,7 @@ resource "google_project_service_identity" "bigtable_sa" {
 }
 
 resource "google_project_service_identity" "secretmanager_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -407,7 +406,7 @@ resource "google_project_service_identity" "secretmanager_sa" {
 }
 
 resource "google_project_service_identity" "sqladmin_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -415,7 +414,7 @@ resource "google_project_service_identity" "sqladmin_sa" {
 }
 
 resource "google_project_service_identity" "osconfig_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -423,7 +422,7 @@ resource "google_project_service_identity" "osconfig_sa" {
 }
 
 resource "google_project_service_identity" "progressiverollout_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -431,7 +430,7 @@ resource "google_project_service_identity" "progressiverollout_sa" {
 }
 
 resource "google_project_service_identity" "parametermanager_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id
@@ -439,7 +438,7 @@ resource "google_project_service_identity" "parametermanager_sa" {
 }
 
 resource "google_project_service_identity" "dlp_sa" {
-  provider   = google-beta
+  provider = google-beta
   depends_on = [module.project-services]
 
   project = google_project.proj.project_id

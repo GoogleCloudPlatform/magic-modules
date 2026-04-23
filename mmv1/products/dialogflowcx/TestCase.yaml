@@ -35,13 +35,15 @@ custom_code:
   pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
-  constants: 'templates/terraform/constants/dialogflowcx_test_case_session_parameters_diff_suppress.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_test_case_full'
     primary_resource_id: 'basic_test_case'
     vars:
       agent_name: 'dialogflowcx-agent'
+    # Skip in VCR until the test issue is resolved
+    # https://github.com/hashicorp/terraform-provider-google/issues/21532
+    skip_vcr: true
 parameters:
   - name: 'parent'
     type: String
@@ -192,7 +194,6 @@ properties:
               description: |
                 The session parameters available to the bot at this point.
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-              diff_suppress_func: 'dialogflowcxTestCaseSessionParametersDiffSuppress'
               custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
               custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
               validation:

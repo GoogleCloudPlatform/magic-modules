@@ -254,6 +254,10 @@ properties:
     description: "The automated backup config for a instance."
     custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_automated_backup_config.go.tmpl'
     custom_expand: 'templates/terraform/custom_expand/memorystore_instance_automated_backup_config.go.tmpl'
+    send_empty_value: true
+    update_id: 'automatedBackupConfig'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=automatedBackupConfig'
+    update_verb: 'PATCH'
     properties:
       - name: 'fixedFrequencySchedule'
         type: NestedObject
@@ -291,6 +295,9 @@ properties:
       is 0 replicas. "
     default_from_api: true
     send_empty_value: true
+    update_id: 'replicaCount'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=replicaCount'
+    update_verb: 'PATCH'
   - name: 'authorizationMode'
     type: String
     description:
@@ -309,6 +316,9 @@ properties:
     type: Integer
     description: "Required. Number of shards for the instance. "
     required: true
+    update_id: 'shardCount'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=shardCount'
+    update_verb: 'PATCH'
   - name: 'discoveryEndpoints'
     type: Array
     description:
@@ -346,10 +356,16 @@ properties:
       "Optional. Machine type for individual nodes of the instance.
       \n Possible values:\n SHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
     default_from_api: true
+    update_id: 'nodeType'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=nodeType'
+    update_verb: 'PATCH'
   - name: 'persistenceConfig'
     type: NestedObject
     description: "Represents persistence configuration for a instance. "
     default_from_api: true
+    update_id: 'persistenceConfig'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=persistenceConfig'
+    update_verb: 'PATCH'
     properties:
       - name: 'mode'
         type: Enum
@@ -389,6 +405,9 @@ properties:
   - name: 'maintenancePolicy'
     type: NestedObject
     description: Maintenance policy for a cluster
+    update_id: 'maintenancePolicy'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=maintenancePolicy'
+    update_verb: 'PATCH'
     properties:
       - name: 'createTime'
         type: String
@@ -510,6 +529,9 @@ properties:
     description: |
       This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
       *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
+    update_id: 'maintenanceVersion'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=maintenanceVersion'
+    update_verb: 'PATCH'
   - name: 'effectiveMaintenanceVersion'
     type: String
     description: |
@@ -526,9 +548,15 @@ properties:
     type: String
     description: "Optional. Engine version of the instance."
     default_from_api: true
+    update_id: 'engineVersion'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=engineVersion'
+    update_verb: 'PATCH'
   - name: 'engineConfigs'
     type: KeyValuePairs
     description: "Optional. User-provided engine configurations for the instance. "
+    update_id: 'engineConfigs'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=engineConfigs'
+    update_verb: 'PATCH'
   - name: 'nodeConfig'
     type: NestedObject
     description: "Represents configuration for nodes of the instance. "
@@ -563,6 +591,9 @@ properties:
     type: Boolean
     description: "Optional. If set to true deletion of the instance will fail. "
     default_value: true
+    update_id: 'deletionProtectionEnabled'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=deletionProtectionEnabled'
+    update_verb: 'PATCH'
   - name: 'endpoints'
     type: Array
     description: "Endpoints for the instance."
@@ -633,6 +664,9 @@ properties:
     type: NestedObject
     description: Cross instance replication config
     default_from_api: true
+    update_id: 'crossInstanceReplicationConfig'
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=crossInstanceReplicationConfig'
+    update_verb: 'PATCH'
     properties:
       - name: 'instanceRole'
         type: Enum

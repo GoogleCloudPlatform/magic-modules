@@ -891,7 +891,6 @@ properties:
         description: |
           OAuth2 Client ID for IAP
         send_empty_value: true
-        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
       - name: 'oauth2ClientSecret'
         type: String
         description: |

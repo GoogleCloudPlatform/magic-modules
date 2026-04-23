@@ -108,15 +108,6 @@ examples:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
-  - name: 'cloudrunv2_job_emptydir_disk'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
   - name: 'cloudrunv2_job_run_job'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -648,7 +639,6 @@ properties:
                       default_value: "MEMORY"
                       enum_values:
                         - 'MEMORY'
-                        - 'DISK'
                     - name: 'sizeLimit'
                       type: String
                       description: |-

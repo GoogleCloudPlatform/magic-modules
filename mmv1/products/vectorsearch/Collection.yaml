@@ -26,10 +26,6 @@ examples:
     primary_resource_id: "example-collection"
     vars:
       collection_id: "example-collection"
-  - name: vectorsearch_collection_cmek
-    primary_resource_id: "example-cmek-collection"
-    vars:
-      collection_id: "example-cmek-collection"
 autogen_async: true
 async:
   operation:
@@ -85,23 +81,6 @@ properties:
   - name: displayName
     type: String
     description: User-specified display name of the collection
-  - name: encryptionSpec
-    type: NestedObject
-    description: |-
-      Represents a customer-managed encryption key specification that can be
-      applied to a Vector Search collection.
-    immutable: true
-    properties:
-      - name: cryptoKeyName
-        type: String
-        required: true
-        immutable: true
-        description: |-
-          Resource name of the Cloud KMS key used to protect the resource.
-
-          The Cloud KMS key must be in the same region as the resource. It must have
-          the format
-          `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
   - name: labels
     type: KeyValueLabels
     description: Labels as key value pairs.

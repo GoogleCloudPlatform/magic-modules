@@ -311,12 +311,6 @@ properties:
         include_empty_value_in_cai: true  # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true
-      - name: 'trackClientAddress'
-        type: Boolean
-        description: 'Track client address for an instance. If not set, default value is "off".'
-        include_empty_value_in_cai: true  # Default value is false in CAI asset
-        send_empty_value: true
-        default_from_api: true
       - name: 'assistiveExperiencesEnabled'
         type: Boolean
         description: 'Whether assistive experiences are enabled for this AlloyDB instance.'

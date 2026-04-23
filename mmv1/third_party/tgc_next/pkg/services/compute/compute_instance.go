@@ -3,7 +3,6 @@ package compute
 import (
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
@@ -12,15 +11,6 @@ import (
 
 	"google.golang.org/api/compute/v1"
 )
-
-func init() {
-	registry.Schema{
-		Name:        "google_compute_instance",
-		ProductName: "compute",
-		Type:        registry.SchemaTypeResource,
-		Schema:      ResourceComputeInstance(),
-	}.Register()
-}
 
 // ComputeInstanceAssetType is the CAI asset type name for compute instance.
 const ComputeInstanceAssetType string = "compute.googleapis.com/Instance"

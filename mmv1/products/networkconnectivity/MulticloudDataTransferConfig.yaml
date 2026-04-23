@@ -47,8 +47,6 @@ parameters:
     url_param_only: true
     description: |
       The location of the multicloud data transfer config.
-
-properties:
   - name: 'name'
     type: String
     required: true
@@ -56,6 +54,8 @@ properties:
     url_param_only: true
     description: |
       The name of the MulticloudDataTransferConfig resource.
+
+properties:
   - name: 'createTime'
     type: Time
     output: true

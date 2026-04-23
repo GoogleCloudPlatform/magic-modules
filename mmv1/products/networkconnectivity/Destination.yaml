@@ -56,8 +56,6 @@ parameters:
     url_param_only: true
     description: |
       The location of the destination.
-
-properties:
   - name: 'name'
     type: String
     required: true
@@ -65,6 +63,8 @@ properties:
     url_param_only: true
     description: |
       The name of the destination.
+
+properties:
   - name: 'createTime'
     type: Time
     output: true

@@ -378,7 +378,6 @@ properties:
                     The allowed number of adjacent intervals that will be used for verification to avoid clock skew.
   - name: 'multiTenant'
     type: NestedObject
-    default_from_api: true
     description: |
       Configuration related to multi-tenant functionality.
     custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_multi_tenant.go.tmpl'
