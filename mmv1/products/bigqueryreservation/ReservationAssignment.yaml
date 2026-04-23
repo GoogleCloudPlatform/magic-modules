@@ -55,7 +55,7 @@ examples:
       reservation_name: 'example-reservation'
     test_env_vars:
       project: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCOUNT'
+      service_account: 'SERVICE_ACCT'
     exclude_docs: true
 parameters:
   - name: 'location'
