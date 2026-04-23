@@ -128,7 +128,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 	}
 
 	if v, ok := original["min_node_cpus"]; ok {
-		scheduling["minNodeCpus"] = strconv.FormatInt(int64(v.(int)), 10)
+		scheduling["minNodeCpus"] = int64(v.(int))
 	}
 	if v, ok := original["provisioning_model"]; ok {
 		scheduling["provisioningModel"] = v.(string)
@@ -137,7 +137,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 		scheduling["instanceTerminationAction"] = v.(string)
 	}
 	if v, ok := original["availability_domain"]; ok && v != nil {
-		scheduling["availabilityDomain"] = strconv.FormatInt(int64(v.(int)), 10)
+		scheduling["availabilityDomain"] = int64(v.(int))
 	}
 	if v, ok := original["max_run_duration"]; ok {
 		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
@@ -156,7 +156,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	if v, ok := original["host_error_timeout_seconds"]; ok {
-		scheduling["hostErrorTimeoutSeconds"] = strconv.FormatInt(int64(v.(int)), 10)
+		scheduling["hostErrorTimeoutSeconds"] = int64(v.(int))
 	}
 
 	if v, ok := original["maintenance_interval"]; ok {
@@ -615,7 +615,7 @@ func expandIpv6AccessConfigs(configs []interface{}) []interface{} {
 			if eipl, ok := data["external_ipv6_prefix_length"]; ok && eipl != "" {
 				if strVal, ok := eipl.(string); ok {
 					if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-						iac["externalIpv6PrefixLength"] = strconv.FormatInt(intVal, 10)
+						iac["externalIpv6PrefixLength"] = intVal
 					}
 				}
 			}
@@ -668,16 +668,16 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			"networkIP":         data["network_ip"].(string),
 			"network":           nf.RelativeLink(),
 			"networkAttachment": networkAttachment,
-			"vlan":              strconv.Itoa(data["vlan"].(int)),
+			"vlan":              int64(data["vlan"].(int)),
 			"subnetwork":        sf.RelativeLink(),
 			"accessConfigs":     expandAccessConfigs(data["access_config"].([]interface{})),
 			"aliasIpRanges":     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
 			"nicType":           data["nic_type"].(string),
 			"stackType":         data["stack_type"].(string),
-			"queueCount":        strconv.Itoa(data["queue_count"].(int)),
+			"queueCount":        int64(data["queue_count"].(int)),
 			"ipv6AccessConfigs": expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
 			"ipv6Address":       data["ipv6_address"].(string),
-			"internalIpv6PrefixLength": strconv.Itoa(data["internal_ipv6_prefix_length"].(int)),
+			"internalIpv6PrefixLength": int64(data["internal_ipv6_prefix_length"].(int)),
 			"igmpQuery":         data["igmp_query"].(string),
 			{{- if ne $.TargetVersionName "ga" }}
 			"macAddress": macAddress,
@@ -788,9 +788,9 @@ func expandAdvancedMachineFeatures(d tpgresource.TerraformResourceData) map[stri
 	prefix := "advanced_machine_features.0"
 	return map[string]interface{}{
 		"enableNestedVirtualization": d.Get(prefix + ".enable_nested_virtualization").(bool),
-		"threadsPerCore":             strconv.FormatInt(int64(d.Get(prefix+".threads_per_core").(int)), 10),
+		"threadsPerCore":             int64(d.Get(prefix + ".threads_per_core").(int)),
 		"turboMode":                  d.Get(prefix + ".turbo_mode").(string),
-		"visibleCoreCount":           strconv.FormatInt(int64(d.Get(prefix+".visible_core_count").(int)), 10),
+		"visibleCoreCount":           int64(d.Get(prefix + ".visible_core_count").(int)),
 		"performanceMonitoringUnit":  d.Get(prefix + ".performance_monitoring_unit").(string),
 		"enableUefiNetworking":       d.Get(prefix + ".enable_uefi_networking").(bool),
 	}
