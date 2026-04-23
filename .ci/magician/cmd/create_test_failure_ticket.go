@@ -398,26 +398,23 @@ func failingTestNamesFromActiveIssues(ctx context.Context, gh *github.Client) ([
 }
 
 func failingTestNamesFromClosedIssuesToday(ctx context.Context, gh *github.Client, date time.Time) ([]string, error) {
-	var result []string
-	return result, nil
+	lastday := date.AddDate(0, 0, -1)
+	opts := &github.IssueListByRepoOptions{
+		State:       "closed",
+		Labels:      []string{"test-failure"},
+		Since:       lastday,
+		ListOptions: github.ListOptions{PerPage: 100},
+	}
+	issues, err := ListIssuesWithOpts(ctx, gh, opts)
+	if err != nil {
+		return nil, err
+	}
+	tests, err := testNamesFromIssues(issues)
+	if err != nil {
+		return nil, err
+	}
 
-	// lastday := date.AddDate(0, 0, -1)
-	// opts := &github.IssueListByRepoOptions{
-	// 	State:       "closed",
-	// 	Labels:      []string{"test-failure"},
-	// 	Since:       lastday,
-	// 	ListOptions: github.ListOptions{PerPage: 100},
-	// }
-	// issues, err := ListIssuesWithOpts(ctx, gh, opts)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// tests, err := testNamesFromIssues(issues)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// return tests, nil
+	return tests, nil
 }
 
 func ListIssuesWithOpts(ctx context.Context, gh *github.Client, opts *github.IssueListByRepoOptions) ([]*github.Issue, error) {
