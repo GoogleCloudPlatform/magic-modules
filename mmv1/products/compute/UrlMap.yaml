@@ -37,6 +37,9 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeUrlMap_cachePolicyMultiLevelUpdate'
+    skip: 'Index mismatch in path_matcher due to test framework limitation'
 examples:
   - name: 'url_map_bucket_and_service'
     primary_resource_id: 'urlmap'
