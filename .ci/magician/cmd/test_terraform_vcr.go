@@ -529,7 +529,9 @@ func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha st
 		for _, pkg := range result.BuildFailures {
 			comment += fmt.Sprintf("- `%s`\n", pkg)
 		}
-		comment += fmt.Sprintf(`Please fix the compilation errors to complete your PR.
+		comment += fmt.Sprintf(`
+Please fix the compilation errors to complete your PR.
+
 View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
 		if err := gh.PostComment(prNumber, comment); err != nil {
 			return true, fmt.Errorf("error posting comment: %v", err)
