@@ -495,18 +495,15 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		Milestone: github.Int(11),
 	}
 
+	// Only assign to shepherd if it's a terraform team owned ticket
 	if IsTerraformTeamOwned(testFailure) && shepherd != "" {
 		issueRquest.Assignee = github.String(shepherd)
 	}
 
-	fmt.Printf("Issue Title: %s\n", *issueRquest.Title)
-	fmt.Printf("release shepherd: %s\n", shepherd)
-	fmt.Printf("ticket labels: %s\n", ticketLabels)
-
-	// _, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
-	// if err != nil {
-	// 	return fmt.Errorf("error creating issue: %w", err)
-	// }
+	_, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
+	if err != nil {
+		return fmt.Errorf("error creating issue: %w", err)
+	}
 	return nil
 }
 

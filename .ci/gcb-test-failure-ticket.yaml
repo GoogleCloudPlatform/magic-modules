@@ -6,13 +6,13 @@ steps:
       secretEnv: ["GITHUB_TOKEN", "SPREADSHEET_ID", "GCB_TICKET_CREATION_SERVICE_ACCOUNT"]
       args:
         - 'create-test-failure-ticket'
-    # - name: 'gcr.io/graphite-docker-images/go-plus'
-    #   id: manage-test-failure-ticket
-    #   entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-    #   secretEnv: ["GITHUB_TOKEN"]
-    #   waitFor: ["create-test-failure-ticket"]
-    #   args:
-    #     - 'manage-test-failure-ticket'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: manage-test-failure-ticket
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["create-test-failure-ticket"]
+      args:
+        - 'manage-test-failure-ticket'
 
 timeout: 3600s
 options:
