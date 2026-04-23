@@ -47,32 +47,22 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
-{{- /* after decoder inside Flatten: res keys match d.Set for identity fields */ -}}
+{{- /* url_param_only identity fields (e.g. name) are not GettableProperties, so the flattener does not Set them. Copy from res → d here so SetId/ListResultDisplayName can find them. Integer ids sometimes arrive as strings and need coercion. */ -}}
 {{- range $id := $.IdentityProperties }}
 {{- if $id.ApiName }}
 			if v, ok := res["{{ $id.ApiName }}"]; ok && v != nil {
 	{{- if eq $id.Type "Integer" }}
-				var vv interface{}
-				switch t := v.(type) {
-				case int:
-					vv = t
-				case string:
-					i, serr := strconv.Atoi(t)
-					if serr != nil {
-						return fmt.Errorf("Error coercing {{ underscore $id.Name }}: %s", serr)
+				if s, ok := v.(string); ok {
+					i, err := strconv.Atoi(s)
+					if err != nil {
+						return fmt.Errorf("Error coercing {{ underscore $id.Name }}: %s", err)
 					}
-					vv = i
-				default:
-					return fmt.Errorf("Error coercing {{ underscore $id.Name }}: need int or string, got %T", v)
+					v = i
 				}
-				if err := d.Set("{{ underscore $id.Name }}", vv); err != nil {
-					return fmt.Errorf("Error setting {{ underscore $id.Name }}: %s", err)
-				}
-	{{- else }}
+	{{- end }}
 				if err := d.Set("{{ underscore $id.Name }}", v); err != nil {
 					return fmt.Errorf("Error setting {{ underscore $id.Name }}: %s", err)
 				}
-	{{- end }}
 			}
 {{- end }}
 {{- end }}
