@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
+// trigger tests
+
 func TestAccBillingProjectInfo_update(t *testing.T) {
 	t.Parallel()
 
