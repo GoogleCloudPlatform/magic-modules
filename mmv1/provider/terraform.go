@@ -165,7 +165,7 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			if object.ExcludeRead {
 				log.Fatalf("generate_list_resource requires read support; remove exclude_read from resource %q or disable generate_list_resource", object.Name)
 			}
-			targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_resource_%s.go", t.ResourceGoFilename(object)))
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s.go", t.ResourceGoFilename(object)))
 			templateData.GenerateFile(targetFilePath, "templates/terraform/list_resource.go.tmpl", object, true,
 				"templates/terraform/list_resource.go.tmpl",
 				"templates/terraform/list_resource_method.go.tmpl",
@@ -291,7 +291,7 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_query_test.go", t.ResourceGoFilename(object)))
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateQueryTestFile(targetFilePath, object)
 }
 
