@@ -22,6 +22,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networkAttachments'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/networkAttachments'
+supports_request_id: true
 update_verb: 'PATCH'
 timeouts:
   insert_minutes: 20

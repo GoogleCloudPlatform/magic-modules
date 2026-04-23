@@ -24,6 +24,7 @@ references:
 docs:
 id_format: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
 base_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}'
+supports_request_id: true
 self_link: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
 create_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addAssociation'
 delete_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'

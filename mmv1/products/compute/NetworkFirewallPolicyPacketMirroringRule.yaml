@@ -25,6 +25,7 @@ references:
 docs:
 id_format: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/packetMirroringRules/{{priority}}'
 base_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}'
+supports_request_id: true
 self_link: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getPacketMirroringRule?priority={{priority}}'
 create_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addPacketMirroringRule'
 update_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/patchPacketMirroringRule?priority={{priority}}'

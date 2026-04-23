@@ -28,6 +28,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRules'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/forwardingRules'
+supports_request_id: true
 has_self_link: true
 immutable: true
 timeouts:

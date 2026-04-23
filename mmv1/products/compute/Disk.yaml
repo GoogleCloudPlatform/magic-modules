@@ -36,6 +36,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/v1/disks'
 docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/disks'
+supports_request_id: true
 has_self_link: true
 immutable: true
 timeouts:

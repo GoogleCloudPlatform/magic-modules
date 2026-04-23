@@ -22,6 +22,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/routers'
+supports_request_id: true
 has_self_link: true
 # Since Terraform has separate resources for router, router interface, and
 # router peer, calling PUT on the router will delete the interface and peer.

@@ -27,6 +27,7 @@ description: |
 exclude: true
 docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers'
+supports_request_id: true
 has_self_link: true
 timeouts:
   insert_minutes: 20

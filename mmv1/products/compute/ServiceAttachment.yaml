@@ -22,6 +22,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/beta/serviceAttachments'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/serviceAttachments'
+supports_request_id: true
 has_self_link: true
 update_verb: 'PATCH'
 timeouts:

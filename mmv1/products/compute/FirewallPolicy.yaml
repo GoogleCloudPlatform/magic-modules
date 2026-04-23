@@ -25,6 +25,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies'
 docs:
 base_url: 'locations/global/firewallPolicies'
+supports_request_id: true
 self_link: 'locations/global/firewallPolicies/{{name}}'
 create_url: 'locations/global/firewallPolicies?parentId={{parent}}'
 update_verb: 'PATCH'

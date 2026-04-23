@@ -26,6 +26,7 @@ references:
 docs:
 id_format: '{{project}}/{{region}}/{{router}}/{{name}}'
 base_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
+supports_request_id: true
 self_link: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
 create_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
 create_verb: 'PATCH'
