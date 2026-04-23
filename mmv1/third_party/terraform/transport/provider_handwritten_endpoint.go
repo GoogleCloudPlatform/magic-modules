@@ -9,13 +9,6 @@ import (
 // files. Collect handwritten ones here. If any of these are modified, be sure
 // to update the provider_reference docs page.
 
-var CloudBillingCustomEndpointEntryKey = "cloud_billing_custom_endpoint"
-var CloudBillingCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-
 var DataflowCustomEndpointEntryKey = "dataflow_custom_endpoint"
 var DataflowCustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
@@ -67,32 +60,37 @@ var ContainerAzureCustomEndpointEntry = &schema.Schema{
 }
 var ApikeysEndpointEntryKey = "apikeys_custom_endpoint"
 var ApikeysEndpointEntry = &schema.Schema{
-	Type:     schema.TypeString,
-	Optional: true,
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: ValidateCustomEndpoint,
 }
 
 var AssuredWorkloadsEndpointEntryKey = "assured_workloads_custom_endpoint"
 var AssuredWorkloadsEndpointEntry = &schema.Schema{
-	Type:     schema.TypeString,
-	Optional: true,
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: ValidateCustomEndpoint,
 }
 
 var CloudResourceManagerEndpointEntryKey = "cloud_resource_manager_custom_endpoint"
 var CloudResourceManagerEndpointEntry = &schema.Schema{
-	Type:     schema.TypeString,
-	Optional: true,
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: ValidateCustomEndpoint,
 }
 
 var FirebaserulesEndpointEntryKey = "firebaserules_custom_endpoint"
 var FirebaserulesEndpointEntry = &schema.Schema{
-	Type:     schema.TypeString,
-	Optional: true,
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: ValidateCustomEndpoint,
 }
 
 var RecaptchaEnterpriseEndpointEntryKey = "recaptcha_enterprise_custom_endpoint"
 var RecaptchaEnterpriseEndpointEntry = &schema.Schema{
-	Type:     schema.TypeString,
-	Optional: true,
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: ValidateCustomEndpoint,
 }
 
 func ValidateCustomEndpoint(v interface{}, k string) (ws []string, errors []error) {

@@ -75,6 +75,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 		templateFS:                 templateFS,
 	}
 
+	t.Product.ImportPath = ImportPathFromVersion(versionName)
 	for _, r := range t.Product.Objects {
 		r.ImportPath = ImportPathFromVersion(versionName)
 	}
@@ -83,6 +84,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 }
 
 func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+	tgc.GenerateProduct(outputFolder)
 	for _, object := range tgc.Product.Objects {
 		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
@@ -149,6 +151,21 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	templateData.GenerateTGCNextTestFile(targetFilePath, object)
 }
 
+// GenerateProduct creates the product.go file for a given service directory.
+// This will be used to seed the directory and add a package-level comment
+// specific to the product.
+func (tgc *TerraformGoogleConversionNext) GenerateProduct(outputFolder string) {
+	targetFolder := path.Join(outputFolder, "pkg", "services", tgc.Product.ApiName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+
+	targetFilePath := path.Join(targetFolder, "product.go")
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
+	templateData.GenerateProductFile(targetFilePath, *tgc.Product)
+	tgc.replaceImportPath(targetFolder, "product.go")
+}
+
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	tgc.generateResourcesForVersion(products)
 
@@ -159,7 +176,8 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go",
 		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
 		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
-		"pkg/provider/provider_mmv1_resources.go":        "templates/tgc_next/provider/provider_mmv1_resources.go.tmpl",
+		"pkg/provider/provider_register_services.go":     "templates/tgc_next/provider/provider_register_services.go.tmpl",
+		"pkg/registry/registry.go":                       "third_party/terraform/registry/registry.go",
 
 		// services
 		"pkg/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",

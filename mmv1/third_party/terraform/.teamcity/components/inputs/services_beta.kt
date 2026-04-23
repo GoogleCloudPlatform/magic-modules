@@ -136,10 +136,10 @@ var ServicesListBeta = mapOf(
         "displayName" to "Bigtable",
         "path" to "./google-beta/services/bigtable"
     ),
-    "billing" to mapOf(
-        "name" to "billing",
-        "displayName" to "Billing",
-        "path" to "./google-beta/services/billing"
+    "billingbudgets" to mapOf(
+        "name" to "billingbudgets",
+        "displayName" to "Billingbudgets",
+        "path" to "./google-beta/services/billingbudgets"
     ),
     "binaryauthorization" to mapOf(
         "name" to "binaryauthorization",
@@ -286,10 +286,10 @@ var ServicesListBeta = mapOf(
         "displayName" to "Containerazure",
         "path" to "./google-beta/services/containerazure"
     ),
-    "corebilling" to mapOf(
-        "name" to "corebilling",
-        "displayName" to "Corebilling",
-        "path" to "./google-beta/services/corebilling"
+    "cloudbilling" to mapOf(
+        "name" to "cloudbilling",
+        "displayName" to "Cloudbilling",
+        "path" to "./google-beta/services/cloudbilling"
     ),
     "databasemigrationservice" to mapOf(
         "name" to "databasemigrationservice",
@@ -456,6 +456,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Firebasehosting",
         "path" to "./google-beta/services/firebasehosting"
     ),
+    "firebaseremoteconfig" to mapOf(
+        "name" to "firebaseremoteconfig",
+        "displayName" to "Firebaseremoteconfig",
+        "path" to "./google-beta/services/firebaseremoteconfig"
+    ),
     "firebaserules" to mapOf(
         "name" to "firebaserules",
         "displayName" to "Firebaserules",
@@ -504,7 +509,7 @@ var ServicesListBeta = mapOf(
     "hypercomputecluster" to mapOf(
         "name" to "hypercomputecluster",
         "displayName" to "ClusterDirector",
-        "path" to "./google/services/hypercomputecluster"
+        "path" to "./google-beta/services/hypercomputecluster"
     ),
     "iam2" to mapOf(
         "name" to "iam2",
@@ -674,7 +679,7 @@ var ServicesListBeta = mapOf(
     "parallelstore" to mapOf(
         "name" to "parallelstore",
         "displayName" to "Parallelstore",
-        "path" to "./google/services/parallelstore"
+        "path" to "./google-beta/services/parallelstore"
     ),
     "parametermanager" to mapOf(
         "name" to "parametermanager",

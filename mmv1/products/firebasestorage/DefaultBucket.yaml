@@ -1,0 +1,72 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: "DefaultBucket"
+description: |
+  A resource that manages the creation of the default Google Cloud Storage bucket
+  for a Firebase project.
+min_version: "beta"
+references:
+  guides:
+    "Official Documentation": "https://firebase.google.com/docs/storage/"
+  api: "https://firebase.google.com/docs/reference/rest/storage/rest/v1alpha/projects.defaultBucket"
+docs:
+base_url: "projects/{{project}}/defaultBucket"
+self_link: "projects/{{project}}/defaultBucket"
+create_url: "projects/{{project}}/defaultBucket"
+delete_url: "projects/{{project}}/defaultBucket"
+# Does not support update operation. There is nothing to update.
+immutable: true
+import_format:
+  - "projects/{{project}}/defaultBucket"
+  - "{{project}}"
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+examples:
+  - name: "firebasestorage_default_bucket_basic"
+    primary_resource_id: "default"
+    min_version: "beta"
+    test_env_vars:
+      project_id: "PROJECT_NAME"
+properties:
+  - name: "name"
+    type: String
+    description: |
+      The resource name of the default bucket, in the format:
+      projects/PROJECT_IDENTIFIER/defaultBucket
+    min_version: "beta"
+    output: true
+  - name: "bucket"
+    type: NestedObject
+    description: |
+      The resource name of the underlying Google Cloud Storage bucket.
+    min_version: "beta"
+    output: true
+    properties:
+      - name: "name"
+        type: String
+        description: |
+          The resource name of the bucket in the format
+          projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
+        min_version: "beta"
+        output: true
+  - name: "location"
+    type: String
+    description: |
+      The ID of the location where the default Google Cloud Storage bucket will be created.
+    min_version: "beta"
+    immutable: true
+    required: true
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
