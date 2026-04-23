@@ -265,9 +265,11 @@ type Config struct {
 
 	{{ range $product := $.Products }}
 	{{ $product.Name }}BasePath string
+	{{- if ne $product.Version.RepUrl "" }}
+	{{ $product.Name }}RepBasePath string
+	{{- end -}}
 	{{- end }}
 
-	CloudBillingBasePath string
 	DataflowBasePath string
 	IamCredentialsBasePath string
 	ResourceManagerV3BasePath string
@@ -285,12 +287,14 @@ type Config struct {
 
 	RequestBatcherServiceUsage *RequestBatcher
 	RequestBatcherIam          *RequestBatcher
+
+	PreferGlobalEndpoints bool
+	PreferRegionalEndpoints bool
 }
 
 {{- range $product := $.Products }}
 const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
 {{- end }}
-const CloudBillingBasePathKey = "CloudBilling"
 const DataflowBasePathKey = "Dataflow"
 const IAMBasePathKey = "IAM"
 const IamCredentialsBasePathKey = "IamCredentials"
@@ -304,7 +308,6 @@ var DefaultBasePaths = map[string]string{
 {{- range $product := $.Products }}
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
-	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
 	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
 	IAMBasePathKey : "https://iam.googleapis.com/v1/",
 	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
@@ -322,6 +325,15 @@ var DefaultBasePaths = map[string]string{
 	CloudResourceManagerEndpointEntryKey: "https://cloudresourcemanager.googleapis.com/",
 	FirebaserulesEndpointEntryKey: "https://firebaserules.googleapis.com/v1/",
 	RecaptchaEnterpriseEndpointEntryKey: "https://recaptchaenterprise.googleapis.com/v1/",
+}
+
+// Contains the REP status for each generated product. This allows us to track
+// default REP enablement across versions and have a central place to look up
+// product support
+var DefaultRepStatus = map[string]bool{
+{{- range $product := $.Products }}
+	{{ $product.Name }}BasePathKey : {{ $product.RepByDefault }},
+{{- end }}
 }
 
 var DefaultClientScopes = []string{
@@ -403,12 +415,6 @@ func SetEndpointDefaults(d *schema.ResourceData) error {
 		}, DefaultBasePaths[{{ $product.Name }}BasePathKey]))
 	}
 	{{- end }}
-
-	if d.Get(CloudBillingCustomEndpointEntryKey) == "" {
-		d.Set(CloudBillingCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[CloudBillingBasePathKey]))
-	}
 
 	if d.Get(DataflowCustomEndpointEntryKey) == "" {
 		d.Set(DataflowCustomEndpointEntryKey, MultiEnvDefault([]string{
@@ -1488,7 +1494,6 @@ func ConfigureBasePaths(c *Config) {
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
-	c.CloudBillingBasePath = DefaultBasePaths[CloudBillingBasePathKey]
 	c.DataflowBasePath = DefaultBasePaths[DataflowBasePathKey]
 	c.IamCredentialsBasePath = DefaultBasePaths[IamCredentialsBasePathKey]
 	c.ResourceManagerV3BasePath = DefaultBasePaths[ResourceManagerV3BasePathKey]
@@ -1581,4 +1586,36 @@ func GetUniverseDomainFromMeta(meta interface{}) string {
 		return "googleapis.com"
 	}
 	return config.UniverseDomain
+}
+
+// Returns the base path for a resource taking into account the following rules:
+// Overridden path takes precedence over everything
+// Regional endpoint should be returned if preferred
+// Global endpoint should be returned if preferred
+// If no preferences, return the product default based on DefaultRepStatus map
+func ResourceBasePath(basePath, repPath, basePathKey string, config *Config, location string) (string, error) {
+	var path string
+	// Set the default to the product-level default
+	if DefaultRepStatus[basePathKey] {
+		path = repPath
+	} else {
+		path = basePath
+	}
+    // If product default has been overridden, use override
+    if basePath != DefaultBasePaths[basePathKey] {
+        path = basePath
+    } else if config.PreferRegionalEndpoints {
+    	// If user has specified a preference, switch to that
+        path = repPath
+    } else if config.PreferGlobalEndpoints {
+    	// If user has specified a preference, switch to that
+        path = basePath
+    }
+		if strings.Contains(path, "{{"{{"}}location{{"}}"}}") && location == "" {
+			log.Printf("[WARN] Found base path with location but no location provided: %s", path)
+			return path, fmt.Errorf("failed to find location for a resource with a regionalized endpoint %s", path)
+		}
+    // Still try to replace location even if it may not exist, this allows
+    // for products that only support REP on their base_url
+    return strings.ReplaceAll(path, "{{"{{"}}location{{"}}"}}", location), nil
 }

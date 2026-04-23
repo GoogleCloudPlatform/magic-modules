@@ -203,6 +203,8 @@ func findResources(doc *openapi3.T) map[string]*resource {
 		}
 		if name, op := buildOperation(key, pathValue.Patch, "Update"); op != nil {
 			getDefault(name).update = op
+		} else if name, op := buildOperation(key, pathValue.Put, "Update"); op != nil {
+			getDefault(name).update = op
 		}
 	}
 
@@ -293,6 +295,11 @@ func buildSingleton(resourceName string, in *resource, root *openapi3.T) api.Res
 	resourcePath := in.update.path
 
 	op := root.Paths.Find(resourcePath).Patch
+	verb := "PATCH"
+	if op == nil {
+		op = root.Paths.Find(resourcePath).Put
+		verb = "PUT"
+	}
 	parsedObjects := parseOpenApi(resourcePath, resourceName, op)
 
 	parameters := parsedObjects[0].([]*api.Type)
@@ -308,9 +315,9 @@ func buildSingleton(resourceName string, in *resource, root *openapi3.T) api.Res
 	resource.SelfLink = selfLink
 	resource.CreateUrl = fmt.Sprintf("%s=?updateMask=*", baseUrl)
 
-	resource.CreateVerb = "PATCH"
+	resource.CreateVerb = verb
 
-	resource.UpdateVerb = "PATCH"
+	resource.UpdateVerb = verb
 	resource.UpdateMask = true
 	if in.update.async {
 		resource.AutogenAsync = true
