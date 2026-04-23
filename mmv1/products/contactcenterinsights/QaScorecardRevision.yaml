@@ -14,12 +14,13 @@
 ---
 name: QaScorecardRevision
 description: Description
-base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qascorecard}}/revisions
+base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions
 immutable: true
-self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qascorecard}}/revisions/{{qa_scorecard_revision_id}}
-create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qascorecard}}/revisions?qaScorecardRevisionId={{qa_scorecard_revision_id}}
+self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{qa_scorecard_revision_id}}
+create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions?qaScorecardRevisionId={{qa_scorecard_revision_id}}
+exclude_delete: true
 import_format:
-  - projects/{{project}}/locations/{{location}}/qaScorecards/{{qascorecard}}/revisions/{{qa_scorecard_revision_id}}
+  - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{qa_scorecard_revision_id}}
 autogen_status: UWFTY29yZWNhcmRSZXZpc2lvbg==
 examples:
   - name: contact_center_insights_qa_scorecard_revision_basic
@@ -34,7 +35,7 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-  - name: qascorecard
+  - name: qaScorecard
     type: String
     required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
@@ -42,16 +43,17 @@ parameters:
     url_param_only: true
   - name: qaScorecardRevisionId
     type: String
-    required: true
+    required: false
     description: |-
       A unique ID for the new QaScorecardRevision. This ID will become the final
-      component of the QaScorecardRevision's resource name. If no ID is
-      specified, a server-generated ID will be used.
-
-      This value should be 4-64 characters and must match the regular
-      expression `^[a-z0-9-]{4,64}$`. Valid characters are `a-z-`.
+      component of the QaScorecardRevision's resource name.
+      
+      If no ID is specified this resource will get the latest revision on the given scorecard.
     immutable: true
     url_param_only: true
+    default_from_api: true
+custom_code:
+  pre_create: 'templates/terraform/pre_create/contact_center_insights_qa_scorecard_revision.go.tmpl'
 properties:
   - name: alternateIds
     type: Array
@@ -75,6 +77,7 @@ properties:
     description: |-
       A QaScorecard represents a collection of questions to be scored during
       analysis.
+    output: true
     properties:
       - name: createTime
         type: String

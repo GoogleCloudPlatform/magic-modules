@@ -12,24 +12,21 @@
 # limitations under the License.
 
 ---
-name: QaScorecardQaQuestion
+name: QaQuestion
 description: Description
-base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qascorecard}}/revisions/{{revision}}/qaQuestions
-self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qascorecard}}/revisions/{{revision}}/qaQuestions/{{qa_question_id}}
-create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qascorecard}}/revisions/{{revision}}/qaQuestions?qaQuestionId={{qa_question_id}}
+base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions
+self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions
 update_mask: true
 update_verb: PATCH
 import_format:
-  - projects/{{project}}/locations/{{location}}/qaScorecards/{{qascorecard}}/revisions/{{revision}}/qaQuestions/{{qa_question_id}}
+  - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions/{{name}}
 autogen_status: UWFRdWVzdGlvbg==
 examples:
   - name: contact_center_insights_qa_question_basic
-    external_providers:
-      - time
     primary_resource_id: default
     vars:
       scorecard_id: qa-scorecard
-      question_id: qa-question
       revision_id: qa-revision
 parameters:
   - name: location
@@ -38,28 +35,17 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-  - name: qascorecard
+  - name: qaScorecard
     type: String
     required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
   - name: revision
+
     type: String
     required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-    immutable: true
-    url_param_only: true
-  - name: qaQuestionId
-    type: String
-    required: true
-    description: |-
-      A unique ID for the new question. This ID will become the final
-      component of the question's resource name. If no ID is specified, a
-      server-generated ID will be used.
-
-      This value should be 4-64 characters and must match the regular
-      expression `^[a-z0-9-]{4,64}$`. Valid characters are `a-z-`.
     immutable: true
     url_param_only: true
 properties:
@@ -123,6 +109,7 @@ properties:
       Format:
       projects/{project}/locations/{location}/qaScorecards/{qa_scorecard}/revisions/{revision}/qaQuestions/{qa_question}
     output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: order
     type: Integer
     description: Defines the order of the question within its parent scorecard revision.
