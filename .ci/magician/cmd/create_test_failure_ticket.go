@@ -439,7 +439,8 @@ func ListIssuesWithOpts(ctx context.Context, gh *github.Client, opts *github.Iss
 	return allIssues, nil
 }
 
-func computeTicketLabels(testFailure *testFailure) ([]string, error) {
+// computeTicketRouting determines labels and whether to assign the ticket to the shepherd.
+func computeTicketRouting(testFailure *testFailure) ([]string, bool, error) {
 	failureRatelabel := testFailure.FailureRateLabels[provider.GA].String()
 
 	if testFailure.FailureRateLabels[provider.Beta] > testFailure.FailureRateLabels[provider.GA] {
@@ -457,24 +458,28 @@ func computeTicketLabels(testFailure *testFailure) ([]string, error) {
 		labels = append(labels, "crash")
 	}
 
+	shouldAssign := false
+
 	if IsTerraformTeamOwned(testFailure) {
-		// Apply terraform team label for team owned ticket
+		// Team-owned failures go to terraform team and shepherd.
 		labels = append(labels, "service/terraform")
+		shouldAssign = true
 	} else {
 		// Apply service labels to forward test failure ticket automatically
 		regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 		if err != nil {
-			return nil, fmt.Errorf("error building regex labels: %w", err)
+			return nil, false, fmt.Errorf("error building regex labels: %w", err)
 		}
 		labels = append(labels, labeler.ComputeLabels([]string{testFailure.AffectedResource}, regexpLabels)...)
 
-		// Apply terraform team label if no service labels applied
+		// Fallback to terraform team and shepherd if no service label found. Also apply review label.
 		if len(labels) == 0 {
-			labels = append(labels, "service/terraform")
+			labels = append(labels, "service/terraform", "forward/review")
+			shouldAssign = true
 		}
 	}
 	ticketLabels = append(ticketLabels, labels...)
-	return ticketLabels, nil
+	return ticketLabels, shouldAssign, nil
 }
 
 func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailure, shepherd string) error {
@@ -484,7 +489,7 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		return fmt.Errorf("error formatting issue body: %w", err)
 	}
 
-	ticketLabels, err := computeTicketLabels(testFailure)
+	ticketLabels, shouldAssign, err := computeTicketRouting(testFailure)
 	if err != nil {
 		return fmt.Errorf("error getting ticket labels: %w", err)
 	}
@@ -498,8 +503,8 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		Milestone: github.Int(11),
 	}
 
-	// Only assign to shepherd if it's a terraform team owned ticket
-	if IsTerraformTeamOwned(testFailure) && shepherd != "" {
+	// Only assign to shepherd if it's a terraform team owned ticket or for forward/review tickets
+	if shouldAssign && shepherd != "" {
 		issueRquest.Assignee = github.String(shepherd)
 		fmt.Printf("release shepherd assinged: %s\n", *issueRquest.Assignee)
 	}
