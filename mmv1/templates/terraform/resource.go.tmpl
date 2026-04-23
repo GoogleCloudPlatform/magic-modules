@@ -368,6 +368,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutCreate),
         Headers: headers,
+        SendRequestId: {{ $.HasSupportsRequestId }},
 {{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
@@ -1361,6 +1362,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutDelete),
         Headers: headers,
+        SendRequestId: {{ $.HasSupportsRequestId }},
         {{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorRetryPredicates "," -}}{{"}"}},
         {{- end }}
