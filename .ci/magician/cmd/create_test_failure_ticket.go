@@ -471,7 +471,7 @@ func computeTicketRouting(testFailure *testFailure) ([]string, bool, error) {
 
 		// Fallback to terraform team and shepherd if no service label found. Also apply review label.
 		if len(labels) == 0 {
-			labels = append(labels, "service/terraform", "forward/review")
+			labels = append(labels, "service/terraform", "test/review")
 			shouldAssign = true
 		}
 	}
@@ -500,7 +500,7 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		Milestone: github.Int(11),
 	}
 
-	// Only assign to shepherd if it's a terraform team owned ticket or for forward/review tickets
+	// Only assign to shepherd if it's a terraform team owned ticket or for test/review tickets
 	if shouldAssign && shepherd != "" {
 		issueRquest.Assignee = github.String(shepherd)
 	}
