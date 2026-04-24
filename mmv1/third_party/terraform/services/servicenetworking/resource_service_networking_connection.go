@@ -231,10 +231,13 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error setting peering: %s", err)
 	}
 
-	ranges := connection.ReservedPeeringRanges
-	if err := d.Set("reserved_peering_ranges", ranges); err != nil {
+	// removed the intermediate `ranges` variable — it was a
+	// leftover from when sort.Strings() lived here. The DiffSuppressFunc
+	// already handles ordering, so we write the API response directly to state.
+	if err := d.Set("reserved_peering_ranges", connection.ReservedPeeringRanges); err != nil {
 		return fmt.Errorf("Error setting reserved_peering_ranges: %s", err)
 	}
+
 	return nil
 }
 
@@ -438,7 +441,6 @@ func RetrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *transp
 
 	// return the network name formatting unique to this API
 	return fmt.Sprintf("projects/%v/global/networks/%v", project.ProjectNumber, networkName), nil
-
 }
 
 const parentServicePattern = "^services/.+$"
