@@ -68,36 +68,11 @@ func (listR *GoogleProjectServiceListResource) List(ctx context.Context, listReq
 		billingProject = bp
 	}
 
-	// Service Usage's Services.List endpoint is eventually consistent across
-	// replicas, and paginated calls can also span replicas, so a single read
-	// may occasionally miss recently-enabled services. Call the endpoint
-	// directly (bypassing the request batcher) multiple times, spaced apart in
-	// time, and union the results so we're unlikely to miss a service that
-	// only a subset of replicas know about yet.
-	const (
-		maxAttempts  = 12
-		sleepBetween = 5 * time.Second
-	)
-	servicesList := make(map[string]struct{})
-	for i := 0; i < maxAttempts; i++ {
-		if i > 0 {
-			select {
-			case <-ctx.Done():
-				diags.AddError("Context Error", ctx.Err().Error())
-				stream.Results = list.ListResultsStreamDiagnostics(diags)
-				return
-			case <-time.After(sleepBetween):
-			}
-		}
-		page, err := ListCurrentlyEnabledServices(project, billingProject, userAgent, listR.Client, time.Minute)
-		if err != nil {
-			diags.AddError("API Error", err.Error())
-			stream.Results = list.ListResultsStreamDiagnostics(diags)
-			return
-		}
-		for s := range page {
-			servicesList[s] = struct{}{}
-		}
+	servicesList, err := ListCurrentlyEnabledServices(project, billingProject, userAgent, listR.Client, 10*time.Minute)
+	if err != nil {
+		diags.AddError("API Error", err.Error())
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
 	}
 
 	stream.Results = func(push func(list.ListResult) bool) {
