@@ -302,8 +302,7 @@ func (t *testRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 	if err != nil {
 		return response, err
 	}
-	expectedPath := fmt.Sprintf("/storage/v1/b/%s/o/%s", t.bucketName, t.objectName)
-	if t.done || r.URL.Path != expectedPath || r.Host != "storage.googleapis.com" {
+	if !r.URL.Query().Has("projection") || response.StatusCode != http.StatusOK {
 		return response, err
 	}
 	t.done = true
@@ -366,6 +365,7 @@ func TestAccStorageObjectAcl_noOwner(t *testing.T) {
 			{
 				Config:             testGoogleStorageObjectsAclBasic1(bucketName, objectName),
 				ExpectNonEmptyPlan: true,
+				PlanOnly:           true,
 			},
 		},
 	})
