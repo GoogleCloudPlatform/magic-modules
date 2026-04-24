@@ -64,6 +64,18 @@ resource "google_ces_evaluation" "ces_evaluation_full" {
         }
       }
       steps {
+        expectation {
+          note = "Expect toolset tool call"
+          tool_call {
+            id = "tool-call-id-2"
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
+              tool_id = "dummy-tool"
+            }
+          }
+        }
+      }
+      steps {
         user_input {
           event {
             event = "my-event"
