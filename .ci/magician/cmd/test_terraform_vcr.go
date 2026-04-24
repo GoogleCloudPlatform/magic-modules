@@ -71,6 +71,7 @@ type postReplay struct {
 }
 
 type recordReplay struct {
+	AttemptedTests                []string
 	RecordingResult               vcr.Result
 	ReplayingAfterRecordingResult vcr.Result
 	HasTerminatedTests            bool
@@ -329,6 +330,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
 		recordReplayData := recordReplay{
+			AttemptedTests:                replayingResult.FailedTests,
 			RecordingResult:               subtestResult(recordingResult),
 			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
@@ -550,6 +552,14 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 		"add":          func(i, j int) int { return i + j },
 		"color":        color,
 		"compoundTest": compoundTest,
+		"contains": func(slice []string, item string) bool {
+			for _, s := range slice {
+				if s == item {
+					return true
+				}
+			}
+			return false
+		},
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
 	if err != nil {

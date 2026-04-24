@@ -14,46 +14,45 @@
 {{end}}
 {{end}}
 
-#### Tests analytics
-Total tests: {{add (add (len .ReplayingResult.PassedTests) (len .ReplayingResult.SkippedTests)) (len .ReplayingResult.FailedTests) }}
-Passed tests: {{len .ReplayingResult.PassedTests}}
-Skipped tests: {{len .ReplayingResult.SkippedTests}}
-Affected tests: {{len .ReplayingResult.FailedTests}}
+## Test report
+
+#### Analytics
+| Total Tests | Passed | Skipped | Affected |
+| :--- | :--- | :--- | :--- |
+| {{add (add (len .ReplayingResult.PassedTests) (len .ReplayingResult.SkippedTests)) (len .ReplayingResult.FailedTests) }} | {{len .ReplayingResult.PassedTests}} | {{len .ReplayingResult.SkippedTests}} | {{len .ReplayingResult.FailedTests}} |
 
 <details>
-<summary>Click here to see the affected service packages</summary>
-<blockquote>
+<summary><b>Affected Service Packages</b></summary>
+
 {{if .RunFullVCR}}
-All service packages are affected
+* All service packages are affected
 {{else if gt (len .AffectedServices) 0}}
-<ul>
-{{range .AffectedServices}}{{. | printf "<li>%s</li>\n"}}{{end}}
-</ul>
+{{range .AffectedServices}}{{. | printf "* %s\n"}}{{end}}
 {{else}}
-None
+* None
 {{end}}
-</blockquote>
 </details>
 
-{{ if gt (len .ReplayingResult.FailedTests) 0 -}}
+[Learn how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)
+
+---
+
+**Step 1: Replaying Mode**
+
+{{ if gt (len .ReplayingResult.FailedTests) 0 }}
 #### Action taken
 <details>
-<summary>Found {{len .ReplayingResult.FailedTests}} affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests
-</summary>
-<blockquote>
-<ul>
-{{range .ReplayingResult.FailedTests}}{{. | printf "<li>%s</li>\n"}}{{end}}
-</ul>
-</blockquote>
-</details>
+<summary>Found {{len .ReplayingResult.FailedTests}} affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary>
 
-[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)
-{{ else -}}
-{{- if .ReplayingErr -}}
-{{color "red" "Errors occurred during REPLAYING mode. Please fix them to complete your PR."}}
-{{- else -}}
-{{color "green" "All tests passed!"}}
-{{- end}}
+{{range .ReplayingResult.FailedTests}}{{. | printf "* %s\n"}}{{end}}
+</details>
+{{ else }}
+{{ if .ReplayingErr }}
+> [!CAUTION]
+> {{color "red" "Errors occurred during REPLAYING mode. Please fix them to complete your PR."}}
+{{ else }}
+{{color "green" "**All tests passed in Replaying mode! No Recording was needed.**"}}
+{{ end }}
+{{ end }}
 
 View the [build log](https://storage.cloud.google.com/{{.LogBucket}}/{{.Version}}/refs/heads/{{.Head}}/artifacts/{{.BuildID}}/build-log/replaying_test.log)
-{{- end}}
