@@ -75,6 +75,11 @@ examples:
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
+  - name: 'workstation_config_hyperdisk_source_snapshot'
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
   - name: 'workstation_config_persistent_directories'
     primary_resource_id: 'default'
     vars:
