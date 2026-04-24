@@ -1088,6 +1088,21 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
+							"accurate_time_config": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `The settings for the accurate time configuration.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"enable_ptp_kvm_time_sync": {
+											Type:        schema.TypeBool,
+											Optional:    true,
+											Description: `Whether to enable accurate time synchronization with PTP-KVM.`,
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -3171,8 +3186,23 @@ func flattenLinuxNodeConfig(v interface{}) []map[string]interface{} {
 		"transparent_hugepage_defrag":  c["transparentHugepageDefrag"],
 		"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
 		"swap_config":                  flattenSwapConfig(c["swapConfig"]),
+		"accurate_time_config":         flattenAccurateTimeConfig(c["accurateTimeConfig"]),
 	}
 
+	return []map[string]interface{}{transformed}
+}
+
+func flattenAccurateTimeConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"enable_ptp_kvm_time_sync": c["enablePtpKvmTimeSync"],
+	}
 	return []map[string]interface{}{transformed}
 }
 
