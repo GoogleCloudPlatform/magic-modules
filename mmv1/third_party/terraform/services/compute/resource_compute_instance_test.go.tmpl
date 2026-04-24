@@ -25,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 {{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
@@ -390,6 +391,39 @@ func TestAccComputeInstance_basic5(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccComputeInstance_importBlockWithResourceIdentity(t *testing.T) {
+    t.Parallel()
+
+    project := envvar.GetTestProjectFromEnv()
+    zone := "us-central1-a"
+    instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+    acctest.VcrTest(t, resource.TestCase{
+        TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+            tfversion.SkipBelow(tfversion.Version1_12_0),
+        },
+        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+        CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+        Steps: []resource.TestStep{
+            {
+				Config: testAccComputeInstance_identityImportBasic(instanceName),
+                Check: resource.ComposeTestCheckFunc(
+                    resource.TestCheckResourceAttr("google_compute_instance.foobar", "project", project),
+                    resource.TestCheckResourceAttr("google_compute_instance.foobar", "zone", zone),
+                    resource.TestCheckResourceAttr("google_compute_instance.foobar", "name", instanceName),
+                ),
+            },
+            {
+                ResourceName:       "google_compute_instance.foobar",
+                RefreshState:       true,
+                ExpectNonEmptyPlan: true,
+                ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+            },
+        },
+    })
 }
 
 func TestAccComputeInstance_metadataGceContainerDeclaration(t *testing.T) {
@@ -6431,6 +6465,31 @@ resource "google_compute_instance" "foobar" {
 
   metadata = {
     foo = "bar"
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_identityImportBasic(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
   }
 }
 `, instance)
