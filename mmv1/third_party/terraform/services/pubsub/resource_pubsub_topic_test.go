@@ -111,7 +111,8 @@ func TestAccPubsubTopic_schema(t *testing.T) {
 }
 
 func TestAccPubsubTopic_migration(t *testing.T) {
-	acctest.SkipIfVcr(t)
+	// comment out to trigger tests
+	// acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
@@ -344,7 +345,7 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 func TestAccPubsubTopic_tags(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-1-%s", acctest.RandString(t, 10))
 	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "pubsub-topic-tagkey", nil)
 	context := map[string]interface{}{
 		"topic":    topic,
