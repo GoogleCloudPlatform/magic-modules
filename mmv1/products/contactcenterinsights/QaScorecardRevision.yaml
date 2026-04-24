@@ -47,7 +47,6 @@ parameters:
     description: |-
       A unique ID for the new QaScorecardRevision. This ID will become the final
       component of the QaScorecardRevision's resource name.
-      
       If no ID is specified this resource will get the latest revision on the given scorecard.
     immutable: true
     url_param_only: true
