@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -168,6 +169,81 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-i
 
 `, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber, strings.ToUpper(serviceAccount))
 	// Using an uppercase service account to test normalization of IAM principal casing
+}
+
+func testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest(t *testing.T) {
+	org := envvar.GetTestOrgFromEnv(t)
+	policyTitle := acctest.RandString(t, 10)
+	perimeterTitle := "perimeter"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step1(org, policyTitle, perimeterTitle),
+			},
+			{
+				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitle),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(
+							"google_access_context_manager_service_perimeter_egress_policy.test-access1",
+							plancheck.ResourceActionUpdate,
+						),
+					},
+				},
+			},
+			{
+				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitle),
+				Check:  testAccCheckAccessContextManagerServicePerimeterEgressPolicyDestroyProducer(t),
+			},
+		},
+	})
+}
+
+func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step1(org, policyTitle, perimeterTitleName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "test-access1" {
+  perimeter = google_access_context_manager_service_perimeter.test-access.name
+  title     = "egress policy update test"
+  egress_from {
+    identity_type = "ANY_USER_ACCOUNT"
+  }
+  egress_to {
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+}
+`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
+}
+
+func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitleName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "test-access1" {
+  perimeter = google_access_context_manager_service_perimeter.test-access.name
+  title     = "egress policy update test"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+  }
+  egress_to {
+    operations {
+      service_name = "bigquery.googleapis.com"
+      method_selectors {
+        method = "BigQueryStorage.ReadRows"
+      }
+    }
+  }
+}
+`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
 func testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
