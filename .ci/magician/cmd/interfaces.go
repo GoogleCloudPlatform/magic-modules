@@ -23,6 +23,7 @@ import (
 
 type GithubClient interface {
 	GetPullRequest(prNumber string) (github.PullRequest, error)
+	GetPullRequestAuthor(prNumber string) (string, error)
 	GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error)
 	GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error)
 	GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error)

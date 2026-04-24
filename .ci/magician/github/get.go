@@ -70,6 +70,15 @@ func (c *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 	return convertGHPullRequest(pr), nil
 }
 
+// GetPullRequestAuthor fetches the author of a pull request
+func (c *Client) GetPullRequestAuthor(prNumber string) (string, error) {
+	pr, err := c.GetPullRequest(prNumber)
+	if err != nil {
+		return "", err
+	}
+	return pr.User.Login, nil
+}
+
 // GetPullRequests fetches multiple pull requests
 func (c *Client) GetPullRequests(state, base, sort, direction string) ([]PullRequest, error) {
 	opts := &gh.PullRequestListOptions{

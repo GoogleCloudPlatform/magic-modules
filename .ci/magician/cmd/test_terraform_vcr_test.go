@@ -609,6 +609,13 @@ func TestAppendVCRResultToDiffComment_Exists(t *testing.T) {
 func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
+		pullRequest: github.PullRequest{
+			User: github.User{Login: "author1"},
+		},
+		requestedReviewers: []github.User{
+			{Login: "reviewer1"},
+			{Login: "reviewer2"},
+		},
 		pullRequestComments: []github.PullRequestComment{
 			{
 				ID:   456,
@@ -628,6 +635,13 @@ func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
 func TestAppendVCRResultToDiffComment_UseFileID(t *testing.T) {
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
+		pullRequest: github.PullRequest{
+			User: github.User{Login: "author1"},
+		},
+		requestedReviewers: []github.User{
+			{Login: "reviewer1"},
+			{Login: "reviewer2"},
+		},
 		pullRequestComments: []github.PullRequestComment{
 			{
 				ID:   456,
