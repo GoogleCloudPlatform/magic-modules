@@ -243,6 +243,7 @@ type Config struct {
 	Region                                    string
 	BillingProject                            string
 	Zone                                      string
+	IsMtls                                    bool
 	UniverseDomain                            string
 	Scopes                                    []string
 	BatchingConfig                            *BatchingConfig
@@ -263,6 +264,7 @@ type Config struct {
 
 	TokenSource oauth2.TokenSource
 
+	CustomEndpoints map[string]string
 	{{ range $product := $.Products }}
 	{{ $product.Name }}BasePath string
 	{{- if ne $product.Version.RepUrl "" }}
@@ -270,7 +272,6 @@ type Config struct {
 	{{- end -}}
 	{{- end }}
 
-	CloudBillingBasePath string
 	DataflowBasePath string
 	IamCredentialsBasePath string
 	ResourceManagerV3BasePath string
@@ -296,7 +297,6 @@ type Config struct {
 {{- range $product := $.Products }}
 const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
 {{- end }}
-const CloudBillingBasePathKey = "CloudBilling"
 const DataflowBasePathKey = "Dataflow"
 const IAMBasePathKey = "IAM"
 const IamCredentialsBasePathKey = "IamCredentials"
@@ -310,7 +310,6 @@ var DefaultBasePaths = map[string]string{
 {{- range $product := $.Products }}
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
-	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
 	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
 	IAMBasePathKey : "https://iam.googleapis.com/v1/",
 	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
@@ -409,22 +408,8 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 	return nil
 }
 
+// Legacy logic for non-registered products.
 func SetEndpointDefaults(d *schema.ResourceData) error {
-	// Generated Products
-	{{- range $product := $.Products }}
-	if d.Get("{{ underscore $product.Name }}_custom_endpoint") == "" {
-		d.Set("{{ underscore $product.Name }}_custom_endpoint", MultiEnvDefault([]string{
-			"GOOGLE_{{ upper (underscore $product.Name) }}_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[{{ $product.Name }}BasePathKey]))
-	}
-	{{- end }}
-
-	if d.Get(CloudBillingCustomEndpointEntryKey) == "" {
-		d.Set(CloudBillingCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[CloudBillingBasePathKey]))
-	}
-
 	if d.Get(DataflowCustomEndpointEntryKey) == "" {
 		d.Set(DataflowCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_DATAFLOW_CUSTOM_ENDPOINT",
@@ -1503,7 +1488,6 @@ func ConfigureBasePaths(c *Config) {
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
-	c.CloudBillingBasePath = DefaultBasePaths[CloudBillingBasePathKey]
 	c.DataflowBasePath = DefaultBasePaths[DataflowBasePathKey]
 	c.IamCredentialsBasePath = DefaultBasePaths[IamCredentialsBasePathKey]
 	c.ResourceManagerV3BasePath = DefaultBasePaths[ResourceManagerV3BasePathKey]

@@ -177,7 +177,6 @@ func Provider() *schema.Provider {
 			},
 
 			// Handwritten Products / Versioned / Atypical Entries
-			transport_tpg.CloudBillingCustomEndpointEntryKey:           transport_tpg.CloudBillingCustomEndpointEntry,
 			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
 			transport_tpg.IamCredentialsCustomEndpointEntryKey:         transport_tpg.IamCredentialsCustomEndpointEntry,
 			transport_tpg.ResourceManagerV3CustomEndpointEntryKey:      transport_tpg.ResourceManagerV3CustomEndpointEntry,
@@ -201,6 +200,20 @@ func Provider() *schema.Provider {
 				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
 			},
 			{{- end }}
+
+			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/27037
+			"core_billing_custom_endpoint": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
+			},
+
+			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/27038
+			"billing_custom_endpoint": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
+			},
 		},
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -316,32 +329,25 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		})
 	}
 
-	// The mtls service client gives the type of endpoint (mtls/regular)
-	// at client creation. Since we use a shared client for requests we must
-	// rewrite the endpoints to be mtls endpoints for the scenario where
-	// mtls is enabled.
-	if isMtls() {
-		// if mtls is enabled switch all default endpoints to use the mtls endpoint
-		for key, bp := range transport_tpg.DefaultBasePaths {
-			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
+	config.CustomEndpoints = map[string]string{}
+	for _, p := range registry.ListProducts() {
+		customEndpoint := ""
+		if v := d.Get(p.CustomEndpointField).(string); v != "" {
+			customEndpoint = v
+		} else if v = transport_tpg.MultiEnvSearch([]string{p.CustomEndpointEnvVar}); v != "" {
+			customEndpoint = v
+		}
+		if customEndpoint != "" {
+			config.CustomEndpoints[p.CustomEndpointField] = customEndpoint
 		}
 	}
+
+	// Detect whether this is running in an mTLS context.
+	config.IsMtls = transport_tpg.IsMtls()
 	
 	// Set the universe domain to the configured value, if any
 	if v, ok := d.GetOk("universe_domain"); ok {
 		config.UniverseDomain = v.(string)
-	}
-
-	// Replace hostname by the universe_domain field.
-	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
-		for key, basePath := range transport_tpg.DefaultBasePaths {
-			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(basePath, "googleapis.com", config.UniverseDomain)
-		}
-	}
-
-	err = transport_tpg.SetEndpointDefaults(d)
-	if err != nil {
-		return nil, diag.FromErr(err)
 	}
 
 	// Given that impersonate_service_account is a secondary auth method, it has
@@ -392,16 +398,37 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 	config.BatchingConfig = batchCfg
 
-	// Generated products
+	// Registered products
 	{{- range $product := $.Products }}
-	config.{{ $product.Name }}BasePath = d.Get("{{ underscore $product.Name }}_custom_endpoint").(string)
+	config.{{ $product.Name }}BasePath = transport_tpg.BaseUrl(registry.GetProduct("{{ lower $product.Name }}"), &config)
 	{{- if $product.Version.RepEnabled }}
-	config.{{ $product.Name }}RepBasePath = "{{ $product.Version.RepUrl }}"
+	config.{{ $product.Name }}RepBasePath = registry.GetProduct("{{ lower $product.Name }}").RepUrl
 	{{- end -}}
 	{{- end }}
 
+	// Legacy logic for non-registered products
+	// The mtls service client gives the type of endpoint (mtls/regular)
+	// at client creation. Since we use a shared client for requests we must
+	// rewrite the endpoints to be mtls endpoints for the scenario where
+	// mtls is enabled.
+	if config.IsMtls {
+		// if mtls is enabled switch all default endpoints to use the mtls endpoint
+		for key, bp := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = transport_tpg.GetMtlsEndpoint(bp)
+		}
+	}
+	// Replace hostname by the universe_domain field.
+	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
+		for key, basePath := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(basePath, "googleapis.com", config.UniverseDomain)
+		}
+	}
+	err = transport_tpg.SetEndpointDefaults(d)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+
 	// Handwritten Products / Versioned / Atypical Entries
-	config.CloudBillingBasePath = d.Get(transport_tpg.CloudBillingCustomEndpointEntryKey).(string)
 	config.DataflowBasePath = d.Get(transport_tpg.DataflowCustomEndpointEntryKey).(string)
 	config.IamCredentialsBasePath = d.Get(transport_tpg.IamCredentialsCustomEndpointEntryKey).(string)
 	config.ResourceManagerV3BasePath = d.Get(transport_tpg.ResourceManagerV3CustomEndpointEntryKey).(string)

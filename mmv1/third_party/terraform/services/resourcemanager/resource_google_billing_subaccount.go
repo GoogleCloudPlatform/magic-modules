@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
-	"github.com/hashicorp/terraform-provider-google/google/services/billing"
+	cloudbilling_tpg "github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudbilling/v1"
@@ -72,7 +72,7 @@ func resourceBillingSubaccountCreate(d *schema.ResourceData, meta interface{}) e
 
 	billingAccount := &cloudbilling.BillingAccount{
 		DisplayName:          displayName,
-		MasterBillingAccount: billing.CanonicalBillingAccountName(masterBillingAccount),
+		MasterBillingAccount: cloudbilling_tpg.CanonicalBillingAccountName(masterBillingAccount),
 	}
 
 	res, err := config.NewBillingClient(userAgent).BillingAccounts.Create(billingAccount).Do()
