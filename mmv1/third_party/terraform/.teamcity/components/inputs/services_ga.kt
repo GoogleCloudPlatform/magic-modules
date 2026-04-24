@@ -861,6 +861,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Tags",
         "path" to "./google/services/tags"
     ),
+    "tagslocation" to mapOf(
+        "name" to "tagslocation",
+        "displayName" to "Tagslocation",
+        "path" to "./google/services/tagslocation"
+    ),
     "tpuv2" to mapOf(
         "name" to "tpuv2",
         "displayName" to "Tpuv2",
