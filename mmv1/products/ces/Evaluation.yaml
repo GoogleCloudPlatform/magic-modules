@@ -141,7 +141,7 @@ properties:
                 properties:
                   - name: userInput
                     type: NestedObject
-                    description: Represents user input for the conversation.
+                    description: "Represents user input for the conversation. Note: 'userInput' and 'expectation' are mutually exclusive."
                     properties:
                       - name: text
                         type: String
@@ -236,7 +236,7 @@ properties:
                         output: true
                   - name: expectation
                     type: NestedObject
-                    description: Executes an expectation on the current turn to verify the agent's behavior.
+                    description: "Executes an expectation on the current turn to verify the agent's behavior. Note: 'userInput' and 'expectation' are mutually exclusive."
                     properties:
                       - name: note
                         type: String
