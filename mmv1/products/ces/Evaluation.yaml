@@ -16,6 +16,13 @@ examples:
       evaluation_id: evaluation-id
       app_id: app-id
       app_display_name: my-app
+  - name: ces_evaluation_full
+    primary_resource_id: ces_evaluation_full
+    vars:
+      evaluation_display_name: my-evaluation-full
+      evaluation_id: evaluation-id-full
+      app_id: app-id-full
+      app_display_name: my-app-full
 parameters:
   - name: location
     type: String
