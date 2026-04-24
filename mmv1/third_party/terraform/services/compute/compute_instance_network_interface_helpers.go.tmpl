@@ -20,7 +20,7 @@ import (
 func computeInstanceDeleteAccessConfigs(d *schema.ResourceData, config *transport_tpg.Config, instNetworkInterface *compute.NetworkInterface, project, zone, userAgent, instanceName string) error {
 	// Delete any accessConfig that currently exists in instNetworkInterface
 	for _, ac := range instNetworkInterface.AccessConfigs {
-		op, err := config.NewComputeClient(userAgent).Instances.DeleteAccessConfig(
+		op, err := NewClient(config, userAgent).Instances.DeleteAccessConfig(
 			project, zone, instanceName, ac.Name, instNetworkInterface.Name).Do()
 		if err != nil {
 			return fmt.Errorf("Error deleting old access_config: %s", err)
@@ -36,7 +36,7 @@ func computeInstanceDeleteAccessConfigs(d *schema.ResourceData, config *transpor
 func computeInstanceAddAccessConfigs(d *schema.ResourceData, config *transport_tpg.Config, instNetworkInterface *compute.NetworkInterface, accessConfigs []*compute.AccessConfig, project, zone, userAgent, instanceName string) error {
 	// Create new ones
 	for _, ac := range accessConfigs {
-		op, err := config.NewComputeClient(userAgent).Instances.AddAccessConfig(project, zone, instanceName, instNetworkInterface.Name, ac).Do()
+		op, err := NewClient(config, userAgent).Instances.AddAccessConfig(project, zone, instanceName, instNetworkInterface.Name, ac).Do()
 		if err != nil {
 			return fmt.Errorf("Error adding new access_config: %s", err)
 		}
@@ -70,7 +70,7 @@ func computeInstanceCreateUpdateWhileStoppedCall(d *schema.ResourceData, config 
 			}
 		}
 
-		op, err := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instanceName, instNetworkInterface.Name, networkInterfacePatchObj).Do()
+		op, err := NewClient(config, userAgent).Instances.UpdateNetworkInterface(project, zone, instanceName, instNetworkInterface.Name, networkInterfacePatchObj).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
 		}
@@ -96,7 +96,7 @@ func computeInstanceAddSecurityPolicy(d *schema.ResourceData, config *transport_
 			NetworkInterfaces: nics,
 			SecurityPolicy:    sp,
 		}
-		op, err := config.NewComputeClient(userAgent).Instances.SetSecurityPolicy(project, zone, instanceName, req).Do()
+		op, err := NewClient(config, userAgent).Instances.SetSecurityPolicy(project, zone, instanceName, req).Do()
 		if err != nil {
 			return fmt.Errorf("Error adding security policy: %s", err)
 		}
