@@ -176,9 +176,6 @@ func Provider() *schema.Provider {
 				Optional: true,
 			},
 
-			// Handwritten Products / Versioned / Atypical Entries
-			transport_tpg.TagsLocationCustomEndpointEntryKey:           transport_tpg.TagsLocationCustomEndpointEntry,
-
 			// dcl
 			transport_tpg.ContainerAwsCustomEndpointEntryKey:           transport_tpg.ContainerAwsCustomEndpointEntry,
 			transport_tpg.ContainerAzureCustomEndpointEntryKey:         transport_tpg.ContainerAzureCustomEndpointEntry,
@@ -429,9 +426,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
-
-	// Handwritten Products / Versioned / Atypical Entries
-	config.TagsLocationBasePath = d.Get(transport_tpg.TagsLocationCustomEndpointEntryKey).(string)
 
 	// dcl
 	config.ContainerAwsBasePath = d.Get(transport_tpg.ContainerAwsCustomEndpointEntryKey).(string)

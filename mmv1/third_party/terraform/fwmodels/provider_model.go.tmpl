@@ -43,9 +43,6 @@ type ProviderModel struct {
 	{{ $product.Name }}CustomEndpoint types.String `tfsdk:"{{ underscore $product.Name }}_custom_endpoint"`
 {{- end }}
 
-	// Handwritten Products / Versioned / Atypical Entries
-	TagsLocationCustomEndpoint      types.String `tfsdk:"tags_location_custom_endpoint"`
-
 	// dcl
 	ContainerAwsCustomEndpoint      types.String `tfsdk:"container_aws_custom_endpoint"`
 	ContainerAzureCustomEndpoint    types.String `tfsdk:"container_azure_custom_endpoint"`

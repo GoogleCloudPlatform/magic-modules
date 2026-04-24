@@ -181,14 +181,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional: true,
             },
 
-            // Handwritten Products / Versioned / Atypical Entries
-            "tags_location_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-
             // DCL
             "container_aws_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
