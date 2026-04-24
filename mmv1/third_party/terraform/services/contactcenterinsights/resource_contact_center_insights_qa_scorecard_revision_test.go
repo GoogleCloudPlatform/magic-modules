@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccContactCenterInsightsQaScorecardRevision_qaScorecardRevisionOptional(t *testing.T) {
