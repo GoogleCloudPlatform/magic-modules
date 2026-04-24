@@ -51,7 +51,7 @@ examples:
   - name: 'data_lineage_config_folder'
     primary_resource_id: 'default'
     vars:
-      folder_name: 'config-folder'
+      folder_name: 'config-f'
     test_env_vars:
       organization: 'ORG_ID'
       service_account: 'SERVICE_ACCT'
