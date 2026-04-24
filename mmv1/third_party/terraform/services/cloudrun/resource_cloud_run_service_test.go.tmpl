@@ -13,7 +13,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tftest-cloudrun-1" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -391,9 +391,10 @@ resource "google_cloud_run_service" "default" {
 }
 
 func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
-  // The test failed if VCR testing is enabled, because the cached provider config is used.
+	// trigger tests for VCR comment testing
+<!--   // The test failed if VCR testing is enabled, because the cached provider config is used.
 	// With the cached provider config, any changes in the provider default labels will not be applied.
-	acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t) -->
 	t.Parallel()
 
   context := map[string]interface{}{
@@ -1307,8 +1308,9 @@ func TestAccCloudRunService_withCreationOnlyAttribution(t *testing.T) {
 }
 
 func TestAccCloudRunService_withProactiveAttribution(t *testing.T) {
-	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
-	acctest.SkipIfVcr(t)
+	// trigger tests for VCR comment testing
+<!-- 	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
+	acctest.SkipIfVcr(t) -->
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
