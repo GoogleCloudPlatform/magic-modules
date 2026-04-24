@@ -184,6 +184,15 @@ func (c *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, 
 	return convertGHComments(allComments), nil
 }
 
+// GetPullRequestComment fetches a single comment by ID
+func (c *Client) GetPullRequestComment(commentID int) (PullRequestComment, error) {
+	comment, _, err := c.gh.Issues.GetComment(c.ctx, defaultOwner, defaultRepo, int64(commentID))
+	if err != nil {
+		return PullRequestComment{}, err
+	}
+	return convertGHComment(comment), nil
+}
+
 // GetTeamMembers gets all members of a team, handling pagination
 func (c *Client) GetTeamMembers(organization, team string) ([]User, error) {
 	var allMembers []*gh.User

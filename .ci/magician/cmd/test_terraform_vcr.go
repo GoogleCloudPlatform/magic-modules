@@ -512,22 +512,19 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 	return false, nil
 }
 
+// appendVCRResultToDiffComment appends content to the existing diff report comment
+// identified by the ID in /workspace/diff_comment_id.txt.
+// If the file is missing or the comment cannot be fetched, it falls back to posting a new comment.
 func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClient, rnr ExecRunner) error {
-	comments, err := gh.GetPullRequestComments(prNumber)
-	if err != nil {
-		return fmt.Errorf("error getting PR comments: %w", err)
-	}
-
 	var diffComment *github.PullRequestComment
 
 	// Try to find by ID from file
 	if idStr, err := rnr.ReadFile("/workspace/diff_comment_id.txt"); err == nil {
 		if id, err := strconv.Atoi(strings.TrimSpace(idStr)); err == nil {
-			for _, c := range comments {
-				if c.ID == id {
-					diffComment = &c
-					break
-				}
+			if comment, err := gh.GetPullRequestComment(id); err == nil {
+				diffComment = &comment
+			} else {
+				fmt.Printf("Warning: failed to fetch comment %d by ID: %v\n", id, err)
 			}
 		}
 	}
@@ -538,7 +535,7 @@ func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClie
 	}
 
 	// Fallback to posting a new comment if diff report not found
-	_, err = gh.PostComment(prNumber, content)
+	_, err := gh.PostComment(prNumber, content)
 	return err
 }
 

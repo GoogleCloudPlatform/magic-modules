@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 
 	"magician/github"
 )
@@ -60,6 +61,16 @@ func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]github.
 func (m *mockGithub) GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error) {
 	m.calledMethods["GetPullRequestComments"] = append(m.calledMethods["GetPullRequestComments"], []any{prNumber})
 	return m.pullRequestComments, nil
+}
+
+func (m *mockGithub) GetPullRequestComment(commentID int) (github.PullRequestComment, error) {
+	m.calledMethods["GetPullRequestComment"] = append(m.calledMethods["GetPullRequestComment"], []any{commentID})
+	for _, c := range m.pullRequestComments {
+		if c.ID == commentID {
+			return c, nil
+		}
+	}
+	return github.PullRequestComment{}, fmt.Errorf("comment not found")
 }
 
 func (m *mockGithub) GetCommitMessage(owner, repo, sha string) (string, error) {
