@@ -110,45 +110,8 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 		}
 
 		config := m.(*transport_tpg.Config)
-		if resourceIdentityParser != nil && d.Id() == "" {
-			identity, err := d.Identity()
-			if err != nil {
-				return nil, err
-			}
-			resourceID, err := resourceIdentityParser(d, identity, config)
-			if err != nil {
-				return nil, err
-			}
-			roleVal, ok := identity.GetOk("role")
-			if !ok {
-				return nil, fmt.Errorf("import identity is missing attribute %q", "role")
-			}
-			role, ok := roleVal.(string)
-			if !ok || role == "" {
-				return nil, fmt.Errorf("import identity attribute %q must be a non-empty string", "role")
-			}
-			memberVal, ok := identity.GetOk("member")
-			if !ok {
-				return nil, fmt.Errorf("import identity is missing attribute %q", "member")
-			}
-			member, ok := memberVal.(string)
-			if !ok || member == "" {
-				return nil, fmt.Errorf("import identity attribute %q must be a non-empty string", "member")
-			}
-			member = tpgresource.NormalizeIamPrincipalCasing(member)
-			conditionTitle := ""
-			if ctVal, ok := identity.GetOk("condition_title"); ok {
-				ct, ok := ctVal.(string)
-				if !ok {
-					return nil, fmt.Errorf("import identity attribute %q must be a string", "condition_title")
-				}
-				conditionTitle = ct
-			}
-			idParts := []string{resourceID, role, member}
-			if conditionTitle != "" {
-				idParts = append(idParts, conditionTitle)
-			}
-			d.SetId(strings.Join(idParts, " "))
+		if err := setIamMemberIdFromResourceIdentity(d, config, resourceIdentityParser); err != nil {
+			return nil, err
 		}
 
 		s := strings.Fields(d.Id())
@@ -225,6 +188,55 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 
 		return []*schema.ResourceData{d}, nil
 	}
+}
+
+// setIamMemberIdFromResourceIdentity converts a resource-identity import into
+// the canonical id (`{resource} {role} {member} [condition_title]`) consumed
+// by iamMemberImport. No-op if there is no identity parser or d already has
+// an id.
+func setIamMemberIdFromResourceIdentity(d *schema.ResourceData, config *transport_tpg.Config, resourceIdentityParser ResourceIdentityParserFunc) error {
+	if resourceIdentityParser == nil || d.Id() != "" {
+		return nil
+	}
+	identity, err := d.Identity()
+	if err != nil {
+		return err
+	}
+	resourceID, err := resourceIdentityParser(d, identity, config)
+	if err != nil {
+		return err
+	}
+	roleVal, ok := identity.GetOk("role")
+	if !ok {
+		return fmt.Errorf("import identity is missing attribute %q", "role")
+	}
+	role, ok := roleVal.(string)
+	if !ok || role == "" {
+		return fmt.Errorf("import identity attribute %q must be a non-empty string", "role")
+	}
+	memberVal, ok := identity.GetOk("member")
+	if !ok {
+		return fmt.Errorf("import identity is missing attribute %q", "member")
+	}
+	member, ok := memberVal.(string)
+	if !ok || member == "" {
+		return fmt.Errorf("import identity attribute %q must be a non-empty string", "member")
+	}
+	member = tpgresource.NormalizeIamPrincipalCasing(member)
+	conditionTitle := ""
+	if ctVal, ok := identity.GetOk("condition_title"); ok {
+		ct, ok := ctVal.(string)
+		if !ok {
+			return fmt.Errorf("import identity attribute %q must be a string", "condition_title")
+		}
+		conditionTitle = ct
+	}
+	idParts := []string{resourceID, role, member}
+	if conditionTitle != "" {
+		idParts = append(idParts, conditionTitle)
+	}
+	d.SetId(strings.Join(idParts, " "))
+	return nil
 }
 
 // setIamMemberResourceIdentity sets parent attributes from state plus role/member/condition_title.
