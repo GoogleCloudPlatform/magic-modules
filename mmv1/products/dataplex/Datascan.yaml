@@ -84,6 +84,8 @@ examples:
       datascan_name: 'dataprofile-onetime'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
   - name: 'dataplex_datascan_basic_quality'
     primary_resource_id: 'basic_quality'
     vars:
@@ -110,6 +112,8 @@ examples:
       datascan_name: 'dataquality-onetime'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
     exclude_test: true
   - name: 'dataplex_datascan_basic_discovery'
     primary_resource_id: 'basic_discovery'
@@ -132,6 +136,8 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
     exclude_test: true
   - name: 'dataplex_datascan_documentation'
     primary_resource_id: 'documentation'
@@ -150,6 +156,8 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
   - name: 'dataplex_datascan_execution_identity_user_credential'
     primary_resource_id: 'identity_user_credential'
     vars:
@@ -166,8 +174,6 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
-    ignore_read_extra:
-      - 'execution_status.0.latest_job_end_time'
     external_providers: ["time"]
 parameters:
   - name: 'location'
