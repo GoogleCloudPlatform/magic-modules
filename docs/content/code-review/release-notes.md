@@ -81,6 +81,23 @@ Replace `DATASOURCE_NAME` according to the pull request content. For example:
 ```
 ~~~
 {{< /tab >}}
+{{< tab "New list resource" >}}
+Write your release note in the following format:
+
+~~~markdown
+```release-note:new-list-resource
+`LIST_RESOURCE_NAME`
+```
+~~~
+
+Replace `LIST_RESOURCE_NAME` according to the pull request content. For example:
+
+~~~markdown
+```release-note:new-list-resource
+`google_compute_new_list_resource`
+```
+~~~
+{{< /tab >}}
 {{< tab "Other" >}}
 ### Choose a release note type
 For each release note block, choose an appropriate type from the following list:

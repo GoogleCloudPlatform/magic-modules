@@ -25,6 +25,7 @@ var TypeValues = []string{
 	"note",
 	"none",
 	"new-resource",
+	"new-list-resource",
 	"new-datasource",
 	"deprecation",
 	"breaking-change",
