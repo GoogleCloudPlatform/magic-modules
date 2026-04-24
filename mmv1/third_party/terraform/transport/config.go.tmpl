@@ -272,7 +272,6 @@ type Config struct {
 	{{- end -}}
 	{{- end }}
 
-	DataflowBasePath string
 	IamCredentialsBasePath string
 	ResourceManagerV3BasePath string
 	IAMBasePath string
@@ -297,7 +296,6 @@ type Config struct {
 {{- range $product := $.Products }}
 const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
 {{- end }}
-const DataflowBasePathKey = "Dataflow"
 const IAMBasePathKey = "IAM"
 const IamCredentialsBasePathKey = "IamCredentials"
 const ResourceManagerV3BasePathKey = "ResourceManagerV3"
@@ -310,7 +308,6 @@ var DefaultBasePaths = map[string]string{
 {{- range $product := $.Products }}
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
-	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
 	IAMBasePathKey : "https://iam.googleapis.com/v1/",
 	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
 	ResourceManagerV3BasePathKey : "https://cloudresourcemanager.googleapis.com/v3/",
@@ -410,12 +407,6 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 
 // Legacy logic for non-registered products.
 func SetEndpointDefaults(d *schema.ResourceData) error {
-	if d.Get(DataflowCustomEndpointEntryKey) == "" {
-		d.Set(DataflowCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_DATAFLOW_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[DataflowBasePathKey]))
-	}
-
 	if d.Get(IamCredentialsCustomEndpointEntryKey) == "" {
 		d.Set(IamCredentialsCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_IAM_CREDENTIALS_CUSTOM_ENDPOINT",
@@ -1488,7 +1479,6 @@ func ConfigureBasePaths(c *Config) {
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
-	c.DataflowBasePath = DefaultBasePaths[DataflowBasePathKey]
 	c.IamCredentialsBasePath = DefaultBasePaths[IamCredentialsBasePathKey]
 	c.ResourceManagerV3BasePath = DefaultBasePaths[ResourceManagerV3BasePathKey]
 	c.IAMBasePath = DefaultBasePaths[IAMBasePathKey]
