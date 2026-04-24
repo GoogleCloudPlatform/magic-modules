@@ -85,7 +85,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 {{- if not $.IamPolicy.ExcludeImportTest }}
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version1_12_0),
+			tfversion.SkipBelow(tfversion.Version1_12_0), // resource identity min version
 		},
 {{-  end }}
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
