@@ -377,15 +377,15 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
 }
 
-// GenerateProduct creates the operation.go file for the bazel version of the MM compiler.
-func (t *Terraform) GenerateOperationFile(object api.Resource, targetFilePath string) {
-	targetFolder := path.Dir(targetFilePath)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
-	templateData := NewTemplateData("", t.TargetVersionName, t.templateFS)
-	templateData.GenerateOperationFile(targetFilePath, object)
-}
+// // GenerateProduct creates the operation.go file for the bazel version of the MM compiler.
+// func (t *Terraform) GenerateOperationFile(object api.Resource, targetFilePath string) {
+// 	targetFolder := path.Dir(targetFilePath)
+// 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+// 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+// 	}
+// 	templateData := NewTemplateData("", t.TargetVersionName, t.templateFS)
+// 	templateData.GenerateOperationFile(targetFilePath, object)
+// }
 
 // Generate the IAM policy for this object. This is used to query and test
 // IAM policies separately from the resource itself

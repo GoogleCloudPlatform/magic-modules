@@ -177,10 +177,6 @@ func Provider() *schema.Provider {
 			},
 
 			// Handwritten Products / Versioned / Atypical Entries
-			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
-			transport_tpg.IamCredentialsCustomEndpointEntryKey:         transport_tpg.IamCredentialsCustomEndpointEntry,
-			transport_tpg.ResourceManagerV3CustomEndpointEntryKey:      transport_tpg.ResourceManagerV3CustomEndpointEntry,
-			transport_tpg.IAMCustomEndpointEntryKey:                    transport_tpg.IAMCustomEndpointEntry,
 			transport_tpg.TagsLocationCustomEndpointEntryKey:           transport_tpg.TagsLocationCustomEndpointEntry,
 
 			// dcl
@@ -192,24 +188,30 @@ func Provider() *schema.Provider {
 			transport_tpg.FirebaserulesEndpointEntryKey:                transport_tpg.FirebaserulesEndpointEntry,
 			transport_tpg.RecaptchaEnterpriseEndpointEntryKey:          transport_tpg.RecaptchaEnterpriseEndpointEntry,
 
+			// Tombstoned schema fields - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/26814
 			{{- if ne $.TargetVersionName "ga" }}
-			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/26814
 			"runtimeconfig_custom_endpoint": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
 			},
 			{{- end }}
-
-			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/27037
 			"core_billing_custom_endpoint": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
 			},
-
-			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/27038
 			"billing_custom_endpoint": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
+			},
+			"resource_manager3_custom_endpoint": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
+			},
+			"iam_custom_endpoint": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
@@ -429,9 +431,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 
 	// Handwritten Products / Versioned / Atypical Entries
-	config.IamCredentialsBasePath = d.Get(transport_tpg.IamCredentialsCustomEndpointEntryKey).(string)
-	config.ResourceManagerV3BasePath = d.Get(transport_tpg.ResourceManagerV3CustomEndpointEntryKey).(string)
-	config.IAMBasePath = d.Get(transport_tpg.IAMCustomEndpointEntryKey).(string)
 	config.TagsLocationBasePath = d.Get(transport_tpg.TagsLocationCustomEndpointEntryKey).(string)
 
 	// dcl

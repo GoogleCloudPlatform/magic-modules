@@ -1,4 +1,4 @@
-package resourcemanager3_test
+package resourcemanagerv3_test
 
 import (
 	"regexp"

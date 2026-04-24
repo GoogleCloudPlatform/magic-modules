@@ -272,9 +272,6 @@ type Config struct {
 	{{- end -}}
 	{{- end }}
 
-	IamCredentialsBasePath string
-	ResourceManagerV3BasePath string
-	IAMBasePath string
 	TagsLocationBasePath string
 
 	// DCL
@@ -296,9 +293,6 @@ type Config struct {
 {{- range $product := $.Products }}
 const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
 {{- end }}
-const IAMBasePathKey = "IAM"
-const IamCredentialsBasePathKey = "IamCredentials"
-const ResourceManagerV3BasePathKey = "ResourceManagerV3"
 const ContainerAwsBasePathKey = "ContainerAws"
 const ContainerAzureBasePathKey = "ContainerAzure"
 const TagsLocationBasePathKey = "TagsLocation"
@@ -308,9 +302,6 @@ var DefaultBasePaths = map[string]string{
 {{- range $product := $.Products }}
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
-	IAMBasePathKey : "https://iam.googleapis.com/v1/",
-	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
-	ResourceManagerV3BasePathKey : "https://cloudresourcemanager.googleapis.com/v3/",
 	TagsLocationBasePathKey: "https://{{"{{"}}location{{"}}"}}-cloudresourcemanager.googleapis.com/v3/",
 	// DCL
 	ContainerAwsBasePathKey: "https://{{"{{"}}location{{"}}"}}-gkemulticloud.googleapis.com/v1/",
@@ -407,24 +398,6 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 
 // Legacy logic for non-registered products.
 func SetEndpointDefaults(d *schema.ResourceData) error {
-	if d.Get(IamCredentialsCustomEndpointEntryKey) == "" {
-		d.Set(IamCredentialsCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_IAM_CREDENTIALS_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[IamCredentialsBasePathKey]))
-	}
-
-	if d.Get(ResourceManagerV3CustomEndpointEntryKey) == "" {
-		d.Set(ResourceManagerV3CustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_RESOURCE_MANAGER_V3_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[ResourceManagerV3BasePathKey]))
-	}
-
-	if d.Get(IAMCustomEndpointEntryKey) == "" {
-		d.Set(IAMCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_IAM_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[IAMBasePathKey]))
-	}
-
 	if d.Get(TagsLocationCustomEndpointEntryKey) == "" {
 		d.Set(TagsLocationCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_TAGS_LOCATION_CUSTOM_ENDPOINT",
@@ -949,7 +922,7 @@ func(c *Config) NewRuntimeconfigClient(userAgent string) *runtimeconfig.Service 
 {{- end }}
 
 func (c *Config) NewIamClient(userAgent string) *iam.Service {
-	iamClientBasePath := RemoveBasePathVersion(c.IAMBasePath)
+	iamClientBasePath := RemoveBasePathVersion(c.IAMBetaBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud IAM client for path %s", iamClientBasePath)
 	clientIAM, err := iam.NewService(c.Context, option.WithHTTPClient(c.Client))
 	if err != nil {
@@ -1479,9 +1452,6 @@ func ConfigureBasePaths(c *Config) {
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
-	c.IamCredentialsBasePath = DefaultBasePaths[IamCredentialsBasePathKey]
-	c.ResourceManagerV3BasePath = DefaultBasePaths[ResourceManagerV3BasePathKey]
-	c.IAMBasePath = DefaultBasePaths[IAMBasePathKey]
 	c.TagsLocationBasePath = DefaultBasePaths[TagsLocationBasePathKey]
 
 	// DCL
