@@ -721,4 +721,3 @@ properties:
         description: Evaluation expectations.
         item_type:
           type: String
-
