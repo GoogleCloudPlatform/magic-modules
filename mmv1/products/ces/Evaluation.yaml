@@ -141,7 +141,7 @@ properties:
                 properties:
                   - name: userInput
                     type: NestedObject
-                    description: "Represents user input for the conversation. Note: 'userInput' and 'expectation' are mutually exclusive."
+                    description: "Represents user input for the conversation. Note: 'user_input' and 'expectation' are mutually exclusive."
                     properties:
                       - name: text
                         type: String
@@ -207,7 +207,6 @@ properties:
                             type: String
                             required: true
                             description: Raw bytes of the blob, base64-encoded.
-
                       - name: variables
                         type: KeyValuePairs
                         description: Map of variables to set.
@@ -236,7 +235,7 @@ properties:
                         output: true
                   - name: expectation
                     type: NestedObject
-                    description: "Executes an expectation on the current turn to verify the agent's behavior. Note: 'userInput' and 'expectation' are mutually exclusive."
+                    description: "Executes an expectation on the current turn to verify the agent's behavior. Note: 'user_input' and 'expectation' are mutually exclusive."
                     properties:
                       - name: note
                         type: String
@@ -253,14 +252,14 @@ properties:
                             description: Display name of the tool.
                             output: true
                           - name: args
-                            type: String
+                            type: KeyValuePairs
                             description: The input parameters and values for the tool in JSON object format.
                           - name: tool
                             type: String
-                            description: The resource name of the tool.
+                            description: "The resource name of the tool. Note: 'tool' and 'toolsetTool' are mutually exclusive."
                           - name: toolsetTool
                             type: NestedObject
-                            description: A tool that is created from a toolset.
+                            description: "A tool that is created from a toolset. Note: 'tool' and 'toolsetTool' are mutually exclusive."
                             properties:
                               - name: toolset
                                 type: String
