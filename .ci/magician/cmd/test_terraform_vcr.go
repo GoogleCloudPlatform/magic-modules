@@ -263,6 +263,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
+	if len(replayingResult.FailedTests) == 0 {
+		mentionStr := getMentions(prNumber, gh)
+		if mentionStr != "" {
+			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
+		}
+	}
 	if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
 		return fmt.Errorf("error appending comment: %w", err)
 	}
@@ -344,6 +350,10 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
+		}
+		mentionStr := getMentions(prNumber, gh)
+		if mentionStr != "" {
+			recordReplayComment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", recordReplayComment, mentionStr, mmCommitSha)
 		}
 		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, gh, rnr); err != nil {
 			return fmt.Errorf("error appending comment: %w", err)
@@ -501,6 +511,10 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 		comment := color("red", fmt.Sprintf("The provider crashed while running the VCR tests in %s mode\n", mode.Upper()))
 		comment += fmt.Sprintf(`Please fix it to complete your PR.
 View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
+		mentionStr := getMentions(prNumber, gh)
+		if mentionStr != "" {
+			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
+		}
 		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
@@ -510,6 +524,35 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 		return true, nil
 	}
 	return false, nil
+}
+
+func getMentions(prNumber string, gh GithubClient) string {
+	author := ""
+	reviewerMentions := ""
+	if authorName, err := gh.GetPullRequestAuthor(prNumber); err == nil {
+		author = "@" + authorName
+	}
+	if reviewers, err := gh.GetPullRequestRequestedReviewers(prNumber); err == nil {
+		var mentions []string
+		for _, r := range reviewers {
+			mentions = append(mentions, "@"+r.Login)
+		}
+		if len(mentions) > 0 {
+			reviewerMentions = strings.Join(mentions, ", ")
+		}
+	}
+
+	mentionStr := ""
+	if author != "" {
+		mentionStr += author
+	}
+	if reviewerMentions != "" {
+		if mentionStr != "" {
+			mentionStr += ", "
+		}
+		mentionStr += reviewerMentions
+	}
+	return mentionStr
 }
 
 // appendVCRResultToDiffComment appends content to the existing diff report comment

@@ -38,6 +38,11 @@ func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error)
 	return m.pullRequest, nil
 }
 
+func (m *mockGithub) GetPullRequestAuthor(prNumber string) (string, error) {
+	m.calledMethods["GetPullRequestAuthor"] = append(m.calledMethods["GetPullRequestAuthor"], []any{prNumber})
+	return m.pullRequest.User.Login, nil
+}
+
 func (m *mockGithub) GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error) {
 	m.calledMethods["GetPullRequests"] = append(m.calledMethods["GetPullRequests"], []any{state, base, sort, direction})
 	return []github.PullRequest{m.pullRequest}, nil
