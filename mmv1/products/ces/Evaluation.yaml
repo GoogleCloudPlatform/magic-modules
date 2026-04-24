@@ -21,8 +21,6 @@ update_verb: PATCH
 update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{name}}
-custom_code:
-  constants: 'templates/terraform/constants/ces_evaluation_empty_map_diff_suppress.go.tmpl'
 examples:
   - name: ces_evaluation_basic
     primary_resource_id: ces_evaluation_basic
@@ -229,7 +227,6 @@ properties:
                       - name: variables
                         type: KeyValuePairs
                         description: Map of variables to set.
-                        diff_suppress_func: 'cesEvaluationEmptyMapDiffSuppress'
                       - name: event
                         type: NestedObject
                         description: An event to be sent to the session.
@@ -274,7 +271,6 @@ properties:
                           - name: args
                             type: KeyValuePairs
                             description: The input parameters and values for the tool in JSON object format.
-                            diff_suppress_func: 'cesEvaluationEmptyMapDiffSuppress'
                           - name: tool
                             type: String
                             description: "The resource name of the tool. Note: 'tool' and 'toolset_tool' are mutually exclusive."
@@ -324,9 +320,6 @@ properties:
                           - name: role
                             type: String
                             description: The role within the conversation, e.g., user, agent.
-                          - name: eventTime
-                            type: String
-                            description: Timestamp when the message was sent or received.
                           - name: chunks
                             type: Array
                             description: Content of the message as a series of chunks.
@@ -336,16 +329,9 @@ properties:
                                 - name: text
                                   type: String
                                   description: Text data.
-                                - name: transcript
-                                  type: String
-                                  description: Transcript data.
-
                                 - name: updatedVariables
-                                  type: String
+                                  type: KeyValuePairs
                                   description: Updated variables in JSON object format.
-                                - name: defaultVariables
-                                  type: String
-                                  description: Default variables in JSON object format.
                                 - name: blob
                                   type: NestedObject
                                   description: Represents a blob input or output in the conversation.
@@ -384,7 +370,6 @@ properties:
                                     - name: args
                                       type: KeyValuePairs
                                       description: The input parameters and values for the tool in JSON object format.
-                                      diff_suppress_func: 'cesEvaluationEmptyMapDiffSuppress'
                                     - name: tool
                                       type: String
                                       description: The resource name of the tool.
@@ -411,7 +396,7 @@ properties:
                                       description: Display name of the tool.
                                       output: true
                                     - name: response
-                                      type: String
+                                      type: KeyValuePairs
                                       description: The tool execution result in JSON object format.
                                     - name: tool
                                       type: String
@@ -468,7 +453,7 @@ properties:
                             description: Display name of the tool.
                             output: true
                           - name: response
-                            type: String
+                            type: KeyValuePairs
                             description: The tool execution result in JSON object format.
                           - name: tool
                             type: String
@@ -487,237 +472,5 @@ properties:
       - name: evaluationExpectations
         type: Array
         description: "The evaluation expectations to evaluate the replayed conversation against. Format: projects/{project}/locations/{location}/apps/{app}/evaluationExpectations/{evaluationExpectation}"
-        item_type:
-          type: String
-  - name: scenario
-    type: NestedObject
-    description: Scenario input.
-    properties:
-      - name: task
-        type: String
-        description: The task to evaluate.
-        required: true
-      - name: userFacts
-        type: Array
-        description: Facts about the user as a key value pair.
-        item_type:
-          type: NestedObject
-          properties:
-            - name: name
-              type: String
-              description: The name of the user fact.
-              required: true
-            - name: value
-              type: String
-              description: The value of the user fact.
-              required: true
-      - name: maxTurns
-        type: Integer
-        description: Max turns.
-      - name: rubrics
-        type: Array
-        description: Rubrics.
-        required: true
-        item_type:
-          type: String
-      - name: scenarioExpectations
-        type: Array
-        description: Scenario expectations.
-        required: true
-        item_type:
-          type: NestedObject
-          exactly_one_of:
-            - 'toolExpectation'
-            - 'agentResponse'
-          properties:
-            - name: toolExpectation
-              type: NestedObject
-              description: Tool expectation.
-              properties:
-                - name: expectedToolCall
-                  type: NestedObject
-                  description: Expected tool call.
-                  properties:
-                    - name: id
-                      type: String
-                      description: Optional. The unique identifier of the tool call.
-                    - name: displayName
-                      type: String
-                      description: Output only. Display name of the tool.
-                      output: true
-                    - name: args
-                      type: String
-                      description: The input parameters and values for the tool in JSON object format.
-                    - name: tool
-                      type: String
-                      description: Name of the tool.
-                    - name: toolsetTool
-                      type: NestedObject
-                      description: The toolset tool.
-                      properties:
-                        - name: toolset
-                          type: String
-                          description: Required. The toolset name.
-                        - name: toolId
-                          type: String
-                          description: The tool ID.
-                - name: mockToolResponse
-                  type: NestedObject
-                  description: Mock tool response.
-                  properties:
-                    - name: id
-                      type: String
-                      description: Optional. Matching ID of the tool call.
-                    - name: displayName
-                      type: String
-                      description: Output only. Display name of the tool.
-                      output: true
-                    - name: response
-                      type: String
-                      description: The tool execution result in JSON object format.
-                    - name: tool
-                      type: String
-                      description: Name of the tool to execute.
-                    - name: toolsetTool
-                      type: NestedObject
-                      description: The toolset tool that got executed.
-                      properties:
-                        - name: toolset
-                          type: String
-                          description: Required. The toolset name.
-                        - name: toolId
-                          type: String
-                          description: The tool ID.
-            - name: agentResponse
-              type: NestedObject
-              description: Agent response.
-              properties:
-                - name: role
-                  type: String
-                  description: The role within the conversation, e.g., user, agent.
-                - name: eventTime
-                  type: String
-                  description: Timestamp when the message was sent or received.
-                - name: chunks
-                  type: Array
-                  description: Content of the message as a series of chunks.
-                  item_type:
-                    type: NestedObject
-                    properties:
-                      - name: text
-                        type: String
-                        description: Text data.
-                      - name: transcript
-                        type: String
-                        description: Transcript data.
-
-                      - name: updatedVariables
-                        type: String
-                        description: Updated variables in JSON object format.
-                      - name: defaultVariables
-                        type: String
-                        description: Default variables in JSON object format.
-                      - name: blob
-                        type: NestedObject
-                        description: Represents a blob input or output in the conversation.
-                        properties:
-                          - name: mimeType
-                            type: String
-                            description: The IANA standard MIME type of the source data.
-                            required: true
-                          - name: data
-                            type: String
-                            description: Raw bytes of the blob.
-                            required: true
-                      - name: image
-                        type: NestedObject
-                        description: Represents an image input or output in the conversation.
-                        properties:
-                          - name: mimeType
-                            type: String
-                            description: The IANA standard MIME type of the source data.
-                            required: true
-                          - name: data
-                            type: String
-                            description: Raw bytes of the image.
-                            required: true
-                      - name: toolCall
-                        type: NestedObject
-                        description: Request for the client or the agent to execute the specified tool.
-                        properties:
-                          - name: id
-                            type: String
-                            description: The unique identifier of the tool call.
-                          - name: displayName
-                            type: String
-                            description: Display name of the tool.
-                            output: true
-                          - name: args
-                            type: String
-                            description: The input parameters and values for the tool in JSON object format.
-                          - name: tool
-                            type: String
-                            description: The resource name of the tool.
-                          - name: toolsetTool
-                            type: NestedObject
-                            description: A tool that is created from a toolset.
-                            properties:
-                              - name: toolset
-                                type: String
-                                description: The resource name of the Toolset.
-                                required: true
-                              - name: toolId
-                                type: String
-                                description: The tool ID to filter the tools to retrieve the schema for.
-                      - name: toolResponse
-                        type: NestedObject
-                        description: The execution result of a specific tool from the client or the agent.
-                        properties:
-                          - name: id
-                            type: String
-                            description: The matching ID of the tool call the response is for.
-                          - name: displayName
-                            type: String
-                            description: Display name of the tool.
-                            output: true
-                          - name: response
-                            type: String
-                            description: The tool execution result in JSON object format.
-                          - name: tool
-                            type: String
-                            description: The resource name of the tool.
-                          - name: toolsetTool
-                            type: NestedObject
-                            description: A tool that is created from a toolset.
-                            properties:
-                              - name: toolset
-                                type: String
-                                description: The resource name of the Toolset.
-                                required: true
-                              - name: toolId
-                                type: String
-                                description: The tool ID to filter the tools to retrieve the schema for.
-                      - name: agentTransfer
-                        type: NestedObject
-                        description: Represents an event indicating the transfer of a conversation to a different agent.
-                        properties:
-                          - name: targetAgent
-                            type: String
-                            description: The agent to which the conversation is being transferred.
-                            required: true
-                          - name: displayName
-                            type: String
-                            description: Display name of the agent.
-                            output: true
-
-      - name: variableOverrides
-        type: String
-        description: Variables / Session Parameters as context for the session, keyed by variable names. Members of this struct will override any default values set by the system.
-      - name: userGoalBehavior
-        type: String
-        description: User goal behavior.
-      - name: evaluationExpectations
-        type: Array
-        description: Evaluation expectations.
         item_type:
           type: String

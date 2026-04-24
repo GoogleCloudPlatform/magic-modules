@@ -63,7 +63,28 @@ resource "google_ces_evaluation" "ces_evaluation_full" {
         expectation {
           note = "Expect agent response"
           agent_response {
-             role = "agent"
+            role = "agent"
+            chunks {
+              updated_variables = { "key": "value" }
+            }
+            chunks {
+              agent_transfer {
+                target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent"
+              }
+            }
+            chunks {
+              tool_call {
+                id = "tool-call-id-3"
+                tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+              }
+            }
+            chunks {
+              tool_response {
+                id = "tool-call-id-3"
+                response = { result = "success" }
+                tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+              }
+            }
           }
         }
       }
@@ -75,6 +96,59 @@ resource "google_ces_evaluation" "ces_evaluation_full" {
             toolset_tool {
               toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
               tool_id = "dummy-tool"
+            }
+          }
+        }
+      }
+      steps {
+        agent_transfer {
+          target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent"
+        }
+      }
+      steps {
+        expectation {
+          agent_transfer {
+            target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent"
+            display_name = "dummy-agent"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect mock tool response"
+          mock_tool_response {
+            id = "tool-call-id-4"
+            response = { result = "mocked" }
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect tool response"
+          tool_response {
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
+              tool_id = "dummy-tool"
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect updated variables"
+          updated_variables {
+            notes = "Some notes"
+          }
+        }
+      }
+      steps {
+        user_input {
+          tool_responses {
+            tool_responses {
+              id = "tool-call-id-5"
+              response = { result = "user-provided" }
+              tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
             }
           }
         }
