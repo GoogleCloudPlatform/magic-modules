@@ -1,0 +1,52 @@
+package contactcenterinsights_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccContactCenterInsightsQaScorecardRevision_qaScorecardRevisionOptional(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"scorecard_id":  "tf-test-qa-scorecard" + randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContactCenterInsightsQaScorecardRevisionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContactCenterInsightsQaScorecardRevision_qaScorecardRevisionOptional(context),
+			},
+			{
+				ResourceName:            "google_contact_center_insights_qa_scorecard_revision.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"qa_scorecard_revision_id"},
+			},
+		},
+	})
+}
+
+func testAccContactCenterInsightsQaScorecardRevision_qaScorecardRevisionOptional(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_contact_center_insights_qa_scorecard" "scorecard" {
+  qa_scorecard_id = "%{scorecard_id}"
+  location        = "us-central1"
+  display_name    = "My Scorecard"
+  source          = "QA_SCORECARD_SOURCE_CUSTOMER_DEFINED"
+}
+
+resource "google_contact_center_insights_qa_scorecard_revision" "default" {
+  qa_scorecard              = google_contact_center_insights_qa_scorecard.scorecard.qa_scorecard_id
+  location                 = "us-central1"
+}
+`, context)
+}
