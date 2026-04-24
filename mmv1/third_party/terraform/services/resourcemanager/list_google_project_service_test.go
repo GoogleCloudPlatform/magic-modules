@@ -29,6 +29,13 @@ func TestAccProjectServiceListResource_queryIdentity(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccProjectServiceList_prereq(project, service),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_project_service.prereq", "service", service),
+					resource.TestCheckResourceAttr("google_project_service.prereq", "project", project),
+				),
+			},
+			{
 				Query:  true,
 				Config: testAccProjectServiceListQuery(project),
 				QueryResultChecks: []querycheck.QueryResultCheck{
@@ -41,6 +48,15 @@ func TestAccProjectServiceListResource_queryIdentity(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccProjectServiceList_prereq(project, service string) string {
+	return fmt.Sprintf(`
+resource "google_project_service" "prereq" {
+  project = %q
+  service = %q
+}
+`, project, service)
 }
 
 func testAccProjectServiceListQuery(project string) string {
