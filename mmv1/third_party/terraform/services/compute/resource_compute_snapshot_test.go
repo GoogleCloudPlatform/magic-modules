@@ -251,6 +251,11 @@ resource "google_tags_tag_value_iam_member" "value_user" {
   member    = local.iam_member
 }
 
+resource "time_sleep" "wait_for_tag_iam" {
+  depends_on      = [google_tags_tag_value_iam_member.value_user]
+  create_duration = "60s"
+}
+
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -273,7 +278,7 @@ resource "google_compute_snapshot" "foobar" {
       "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
     }
   }
-  depends_on = [google_tags_tag_value_iam_member.value_user]
+  depends_on = [time_sleep.wait_for_tag_iam]
 }
 `, context)
 }
