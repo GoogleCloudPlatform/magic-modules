@@ -21,6 +21,8 @@ update_verb: PATCH
 update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{name}}
+custom_code:
+  constants: 'templates/terraform/constants/ces_evaluation_empty_map_diff_suppress.go.tmpl'
 examples:
   - name: ces_evaluation_basic
     primary_resource_id: ces_evaluation_basic
@@ -166,36 +168,40 @@ properties:
                         type: String
                         description: Audio data from the end user.
                       - name: toolResponses
-                        type: Array
+                        type: NestedObject
                         description: The list of tool execution results.
-                        item_type:
-                          type: NestedObject
-                          properties:
-                            - name: id
-                              type: String
-                              description: Optional. Matching ID of the tool call.
-                            - name: displayName
-                              type: String
-                              description: Output only. Display name of the tool.
-                              output: true
-                            - name: response
-                              type: KeyValuePairs
-                              description: Required. The tool execution result in JSON.
-                              required: true
-                            - name: tool
-                              type: String
-                              description: Name of the tool to execute.
-                            - name: toolsetTool
+                        properties:
+                          - name: toolResponses
+                            type: Array
+                            description: The list of tool execution results.
+                            item_type:
                               type: NestedObject
-                              description: The toolset tool that got executed.
                               properties:
-                                - name: toolset
+                                - name: id
                                   type: String
+                                  description: Optional. Matching ID of the tool call.
+                                - name: displayName
+                                  type: String
+                                  description: Output only. Display name of the tool.
+                                  output: true
+                                - name: response
+                                  type: KeyValuePairs
+                                  description: Required. The tool execution result in JSON.
                                   required: true
-                                  description: The toolset name.
-                                - name: toolId
+                                - name: tool
                                   type: String
-                                  description: The tool ID.
+                                  description: Name of the tool to execute.
+                                - name: toolsetTool
+                                  type: NestedObject
+                                  description: The toolset tool that got executed.
+                                  properties:
+                                    - name: toolset
+                                      type: String
+                                      required: true
+                                      description: The toolset name.
+                                    - name: toolId
+                                      type: String
+                                      description: The tool ID.
                       - name: image
                         type: NestedObject
                         description: Image data from the end user.
@@ -223,6 +229,7 @@ properties:
                       - name: variables
                         type: KeyValuePairs
                         description: Map of variables to set.
+                        diff_suppress_func: 'cesEvaluationEmptyMapDiffSuppress'
                       - name: event
                         type: NestedObject
                         description: An event to be sent to the session.
@@ -267,6 +274,7 @@ properties:
                           - name: args
                             type: KeyValuePairs
                             description: The input parameters and values for the tool in JSON object format.
+                            diff_suppress_func: 'cesEvaluationEmptyMapDiffSuppress'
                           - name: tool
                             type: String
                             description: "The resource name of the tool. Note: 'tool' and 'toolset_tool' are mutually exclusive."
@@ -293,7 +301,7 @@ properties:
                             description: Display name of the tool.
                             output: true
                           - name: response
-                            type: String
+                            type: KeyValuePairs
                             description: The tool execution result in JSON object format.
                           - name: tool
                             type: String
@@ -331,9 +339,7 @@ properties:
                                 - name: transcript
                                   type: String
                                   description: Transcript data.
-                                - name: payload
-                                  type: String
-                                  description: Payload data in JSON object format.
+
                                 - name: updatedVariables
                                   type: String
                                   description: Updated variables in JSON object format.
@@ -376,8 +382,9 @@ properties:
                                       description: Display name of the tool.
                                       output: true
                                     - name: args
-                                      type: String
+                                      type: KeyValuePairs
                                       description: The input parameters and values for the tool in JSON object format.
+                                      diff_suppress_func: 'cesEvaluationEmptyMapDiffSuppress'
                                     - name: tool
                                       type: String
                                       description: The resource name of the tool.
@@ -603,9 +610,7 @@ properties:
                       - name: transcript
                         type: String
                         description: Transcript data.
-                      - name: payload
-                        type: String
-                        description: Payload data in JSON object format.
+
                       - name: updatedVariables
                         type: String
                         description: Updated variables in JSON object format.
@@ -711,8 +716,6 @@ properties:
       - name: userGoalBehavior
         type: String
         description: User goal behavior.
-
-
       - name: evaluationExpectations
         type: Array
         description: Evaluation expectations.
