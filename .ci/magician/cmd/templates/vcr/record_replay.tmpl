@@ -4,7 +4,7 @@
 
 | Test Name | Recording Mode | Replaying Rerun |
 | :--- | :--- | :--- |
-{{range .AttemptedTests}}
+{{range .AttemptedTests -}}
 | `{{.}}` | {{if contains $.RecordingResult.PassedTests .}}{{color "green" "Passed"}} [[Debug log]({{$.LogBaseUrl}}/recording/{{.}}.log)]{{else if contains $.RecordingResult.FailedTests .}}{{color "red" "Failed"}} [[Error message]({{$.LogBaseUrl}}/build-log/recording_build/{{compoundTest .}}_recording_test.log)] [[Debug log]({{$.LogBaseUrl}}/recording/{{.}}.log)]{{else}}{{color "red" "Terminated"}}{{end}} | {{if contains $.ReplayingAfterRecordingResult.PassedTests .}}{{color "green" "Passed"}}{{else if contains $.ReplayingAfterRecordingResult.FailedTests .}}{{color "red" "Failed"}} [[Error message]({{$.LogBaseUrl}}/build-log/replaying_build_after_recording/{{compoundTest .}}_replaying_test.log)] [[Debug log]({{$.LogBaseUrl}}/replaying_after_recording/{{.}}.log)]{{else}}-{{end}} |
 {{end}}
 
