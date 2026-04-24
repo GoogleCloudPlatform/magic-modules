@@ -256,10 +256,10 @@ properties:
                             description: The input parameters and values for the tool in JSON object format.
                           - name: tool
                             type: String
-                            description: "The resource name of the tool. Note: 'tool' and 'toolsetTool' are mutually exclusive."
+                            description: "The resource name of the tool. Note: 'tool' and 'toolset_tool' are mutually exclusive."
                           - name: toolsetTool
                             type: NestedObject
-                            description: "A tool that is created from a toolset. Note: 'tool' and 'toolsetTool' are mutually exclusive."
+                            description: "A tool that is created from a toolset. Note: 'tool' and 'toolset_tool' are mutually exclusive."
                             properties:
                               - name: toolset
                                 type: String
