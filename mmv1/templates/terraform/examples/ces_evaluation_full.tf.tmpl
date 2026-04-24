@@ -60,6 +60,18 @@ resource "google_ces_evaluation" "ces_evaluation_full" {
           }
         }
       }
+      steps {
+        user_input {
+          event {
+            event = "my-event"
+          }
+        }
+      }
+      steps {
+        user_input {
+          dtmf = "1234"
+        }
+      }
     }
   }
 }
