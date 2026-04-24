@@ -49,6 +49,9 @@ resource "google_ces_evaluation" "ces_evaluation_full" {
           tool_call {
             id = "tool-call-id"
             tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+            args = {
+              param = "value"
+            }
           }
         }
       }
