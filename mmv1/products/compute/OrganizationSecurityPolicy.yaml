@@ -18,7 +18,7 @@ description: |
   Organization security policies are used to control incoming/outgoing traffic.
 references:
   guides:
-    'Creating a firewall policy': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-policy'
+    'Configure hierarchical security policies': 'https://docs.cloud.google.com/armor/docs/hierarchical-policies-using'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/organizationSecurityPolicies'
 docs:
 id_format: 'locations/global/securityPolicies/{{policy_id}}'
@@ -60,6 +60,7 @@ properties:
     type: String
     description: |
       User-provided name of the organization security policy. The name should be unique in the organization in which the security policy is created. This should only be used when SecurityPolicyType is FIREWALL.
+    deprecation_message: '`displayName` is deprecated and will be removed in a future major release. Please use `google_compute_firewall_policy` resource instead when working with policies of FIREWALL type.'
     immutable: true
     ignore_read: true
   - name: 'description'
