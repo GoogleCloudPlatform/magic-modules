@@ -75,6 +75,21 @@ func TimestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 	}
 }
 
+// Rfc3339TimeDiffSuppress suppresses diffs between RFC3339 timestamps
+// that represent the same instant in time, even if they use different
+// timezone offsets (e.g. "2027-01-10T00:00:00+01:00" vs "2026-12-31T23:00:00Z").
+func Rfc3339TimeDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	oldT, err := time.Parse(time.RFC3339, old)
+	if err != nil {
+		return false
+	}
+	newT, err := time.Parse(time.RFC3339, new)
+	if err != nil {
+		return false
+	}
+	return oldT.Equal(newT)
+}
+
 // Suppress diffs for duration format. ex "60.0s" and "60s" same
 // https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#duration
 func DurationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
