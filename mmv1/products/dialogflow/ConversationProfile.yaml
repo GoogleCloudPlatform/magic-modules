@@ -275,6 +275,10 @@ properties:
                       name: 'recentSentencesCount'
                       description: |
                         Number of recent non-small-talk sentences to use as context for article and FAQ suggestion
+                - type: Boolean
+                  name: 'enableResponseDebugInfo'
+                  description: |
+                    If true, include debug information in suggestion responses
           - type: Boolean
             name: 'groupSuggestionResponses'
             description: |
@@ -291,6 +295,18 @@ properties:
             name: 'disableHighLatencyFeaturesSyncDelivery'
             description: |
               When disableHighLatencyFeaturesSyncDelivery is true and using the AnalyzeContent API, we will not deliver the responses from high latency features in the API response. The humanAgentAssistantConfig.notification_config must be configured and enableEventBasedSuggestion must be set to true to receive the responses from high latency features in Pub/Sub. High latency feature(s): KNOWLEDGE_ASSIST
+          - type: Boolean
+            name: 'skipEmptyEventBasedSuggestion'
+            description: |
+              If true, skip suggestion delivery for empty agent utterances.
+          - type: Boolean
+            name: 'useUnredactedConversationData'
+            description: |
+              If true, use unredacted conversation data for suggestions.
+          - type: Boolean
+            name: 'enableAsyncToolCall'
+            description: |
+              If true, enable asynchronous tool calls in suggestions.
       - type: NestedObject
         name: 'endUserSuggestionConfig'
         description: |
@@ -476,6 +492,10 @@ properties:
                       name: 'recentSentencesCount'
                       description: |
                         Number of recent non-small-talk sentences to use as context for article and FAQ suggestion
+                - type: Boolean
+                  name: 'enableResponseDebugInfo'
+                  description: |
+                    If true, include debug information in suggestion responses
           - type: Boolean
             name: 'groupSuggestionResponses'
             description: |
@@ -492,6 +512,18 @@ properties:
             name: 'disableHighLatencyFeaturesSyncDelivery'
             description: |
               When disableHighLatencyFeaturesSyncDelivery is true and using the AnalyzeContent API, we will not deliver the responses from high latency features in the API response. The humanAgentAssistantConfig.notification_config must be configured and enableEventBasedSuggestion must be set to true to receive the responses from high latency features in Pub/Sub. High latency feature(s): KNOWLEDGE_ASSIST
+          - type: Boolean
+            name: 'skipEmptyEventBasedSuggestion'
+            description: |
+              If true, skip suggestion delivery for empty agent utterances.
+          - type: Boolean
+            name: 'useUnredactedConversationData'
+            description: |
+              If true, use unredacted conversation data for suggestions.
+          - type: Boolean
+            name: 'enableAsyncToolCall'
+            description: |
+              If true, enable asynchronous tool calls in suggestions.
       - type: NestedObject
         name: 'messageAnalysisConfig'
         description: |
