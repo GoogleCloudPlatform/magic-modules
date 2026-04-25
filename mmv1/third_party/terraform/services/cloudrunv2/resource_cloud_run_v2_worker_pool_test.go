@@ -513,6 +513,7 @@ resource "google_cloud_run_v2_worker_pool" "default" {
   client = "client-1"
   client_version = "client-version-1"
   scaling {
+    scaling_mode = "MANUAL"
     manual_instance_count = 2
   }
   template {
