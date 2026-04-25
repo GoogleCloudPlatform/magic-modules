@@ -569,6 +569,11 @@ properties:
           Defines whether the instance is preemptible. This can only be set
           during instance creation, it cannot be set or changed after the
           instance has been created.
+      - name: 'locationHint'
+        type: String
+        description: |
+          An opaque location hint used to place the instance in a specific
+          location.
   - name: 'reservationAffinity'
     type: NestedObject
     description: |

@@ -140,6 +140,29 @@ func TestAccComputeInstanceFromMachineImage_terminationTime(t *testing.T) {
 		},
 	})
 }
+func TestAccComputeInstanceFromMachineImage_location_hint(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_machine_image.foobar"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_location_hint(instanceName, generatedInstanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.location_hint", "custom-hint"),
+				),
+			},
+		},
+	})
+}
 {{- end }}
 
 func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T) {
@@ -784,6 +807,50 @@ resource "google_compute_instance_from_machine_image" "foobar5" {
   }
 }
 `, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
+}
+
+func testAccComputeInstanceFromMachineImage_location_hint(instance, newInstance string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    automatic_restart = true
+  }
+}
+
+resource "google_compute_machine_image" "foobar" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  scheduling {
+    automatic_restart = true
+    location_hint     = "custom-hint"
+  }
+}
+`, instance, instance, newInstance)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
