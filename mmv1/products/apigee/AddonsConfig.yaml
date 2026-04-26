@@ -122,3 +122,17 @@ properties:
               Time at which the Connectors Platform add-on expires in milliseconds since epoch.
               If unspecified, the add-on will never expire.
             output: true
+      - name: 'analyticsConfig'
+        type: NestedObject
+        description: Configuration for the Analytics add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Analytics add-on is enabled.
+          - name: 'expiresAt'
+            type: String
+            description:
+              Time at which the Analytics add-on expires in milliseconds since epoch.
+              If unspecified, the add-on will never expire.
+            output: true
