@@ -130,3 +130,30 @@ properties:
           type: String
           description: |
             Soak time after upgrading all the clusters in the stage, specified in seconds.
+  - name: 'autoUpgradeConfig'
+    type: NestedObject
+    description: |
+      Configuration for automatic upgrades.
+      If not specified, the system applies default behavior.
+    properties:
+      - name: 'rolloutCreationScope'
+        type: NestedObject
+        description: |
+          Specifies the scope of automation for the creation of rollouts.
+          Represents the types of rollouts (version upgrades) the sequence should
+          initiate automatically.
+          If this field is not specified, it defaults to all types.
+          If this field is specified, but the nested upgradeTypes field is empty,
+          most automatic rollouts are disabled for this sequence.
+          Exceptions are rollouts enforcing our security policies (e.g. such as
+          end-of-support and outdated control plane patch enforcements).
+          These policy enforcements cannot be disabled.
+        properties:
+          - name: 'upgradeTypes'
+            type: Array
+            is_set: true
+            description: |
+              The list of enabled upgrade types.
+              Current valid values are `CONTROL_PLANE_MINOR`, `CONTROL_PLANE_PATCH`, `NODE_MINOR`, and `NODE_PATCH`.
+            item_type:
+              type: String
