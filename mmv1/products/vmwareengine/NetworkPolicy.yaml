@@ -44,6 +44,8 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
+  dependencies:
+    - "google_vmwareengine_external_address"
   url_substitutions:
     - region: "me-west1"
 examples:
