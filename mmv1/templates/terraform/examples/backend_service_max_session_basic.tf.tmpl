@@ -1,0 +1,92 @@
+resource "google_compute_network" "custom" {
+  provider              = google-beta
+  name                    = "custom-vpc%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
+  provider      = google-beta
+  name          = "custom-subnet%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.custom.id
+}
+
+resource "google_compute_region_instance_template" "foobar_template" {
+  provider     = google-beta
+  name_prefix  = "foobar-template-"
+  machine_type = "e2-medium"
+  region       = "us-central1" 
+
+  disk {
+    source_image = "debian-cloud/debian-11"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network    = google_compute_network.custom.id
+    subnetwork = google_compute_subnetwork.default.id
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "foobar" {
+  provider           = google-beta
+  name               = "foobar-mig"
+  base_instance_name = "foobar-app"
+  region             = "us-central1"
+
+  version {
+    instance_template = google_compute_region_instance_template.foobar_template.id
+    name              = "primary"
+  }
+
+  target_size = 2 
+
+  named_port {
+    name = "http"
+    port = 80
+  }
+
+  distribution_policy_zones = ["us-central1-a", "us-central1-b", "us-central1-c"]
+
+  update_policy {
+    type                  = "PROACTIVE"
+    minimal_action        = "REPLACE"
+    max_surge_fixed       = 3
+    max_unavailable_fixed = 0
+  }
+}
+
+resource "google_compute_health_check" "{{$.PrimaryResourceId}}"{
+  provider           = google-beta
+  name               = "tf-test-health-check"
+  check_interval_sec = 5
+  timeout_sec        = 5
+
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "backend_service_name"}}"
+  description           = "Hello World 1234"
+  port_name             = "http"
+  protocol              = "TCP"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  health_checks = [google_compute_health_check.default.id]
+  connection_draining_timeout_sec = 300 
+
+  backend {
+    group          = google_compute_region_instance_group_manager.foobar.instance_group
+    balancing_mode = "CONNECTION"
+    max_connections_per_instance = 100
+    max_session_per_instance = 100
+  }
+}
