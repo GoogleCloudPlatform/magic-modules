@@ -13,4 +13,9 @@ resource "google_compute_region_commitment" "foobar" {
       type = "MEMORY"
       amount = "9"
   }
+  params {
+    resource_manager_tags = {
+      "tagKeys/123456789" = "tagValues/987654321"
+    }
+  }
 }
