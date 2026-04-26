@@ -36,3 +36,7 @@ resource "google_discovery_engine_widget_config" "basic" {
     }
   }
 }
+
+output "widget_config_id" {
+  value = google_discovery_engine_widget_config.basic.config_id
+}

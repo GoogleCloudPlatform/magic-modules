@@ -71,6 +71,10 @@ properties:
       The full resource name of the widget config. Format:
       `projects/{project}/locations/{location}/collections/{collection_id}/engines/{engine_id}/widgetConfigs/{widget_config_id}`.
     output: true
+  - name: 'configId'
+    type: String
+    description: 'Output only. Unique obfuscated identifier of a WidgetConfig.'
+    output: true
   - name: 'accessSettings'
     type: NestedObject
     description: 'Describes widget access settings.'
