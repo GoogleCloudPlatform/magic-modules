@@ -405,6 +405,15 @@ func TestAccContainerCluster_withFilteredNotificationConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
+				Config: testAccContainerCluster_withEmptyFilteredNotificationConfig(clusterName, newTopic, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.filtered_notification_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
 				Config: testAccContainerCluster_disableFilteredNotificationConfig(clusterName, newTopic, networkName, subnetworkName),
 			},
 			{
@@ -8402,6 +8411,35 @@ resource "google_container_cluster" "filtered_notification_config" {
 	  topic   = google_pubsub_topic.%s.id
 	  filter {
 		event_type = ["UPGRADE_AVAILABLE_EVENT"]
+	  }
+	}
+  }
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, topic, topic, clusterName, topic, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withEmptyFilteredNotificationConfig(clusterName, topic, networkName, subnetworkName string) string {
+
+	return fmt.Sprintf(`
+
+resource "google_pubsub_topic" "%s" {
+  name = "%s"
+}
+
+resource "google_container_cluster" "filtered_notification_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 3
+  notification_config {
+	pubsub {
+	  enabled = true
+	  topic   = google_pubsub_topic.%s.id
+	  filter {
+		event_type = []
 	  }
 	}
   }
