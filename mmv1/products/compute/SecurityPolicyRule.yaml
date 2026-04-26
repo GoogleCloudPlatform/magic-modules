@@ -69,6 +69,10 @@ examples:
     test_vars_overrides:
       # for backward compatible
       sec_policy_name: '"policywithmultiplerules" + randomSuffix'
+  - name: 'security_policy_rule_advanced_features'
+    primary_resource_id: 'policy'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 parameters:
   - name: 'security_policy'
     type: String
