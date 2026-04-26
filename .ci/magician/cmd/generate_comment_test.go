@@ -702,3 +702,114 @@ random: Example Subcategory
 		})
 	}
 }
+
+func TestGetActualResourceName(t *testing.T) {
+	cases := map[string]struct {
+		content  string
+		testName string
+		filePath string
+		want     string
+	}{
+		"ResourceName found in step": {
+			content: `
+func TestAccBigQueryTable_basic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				ResourceName: "google_bigquery_table.table",
+			},
+		},
+	})
+}`,
+			testName: "TestAccBigQueryTable_basic",
+			filePath: "resource_bigquery_table_test.go",
+			want:     "google_bigquery_table",
+		},
+		"Fallback to file name (resource)": {
+			content: `
+func TestAccBigQueryTable_basic(t *testing.T) {
+	// No ResourceName here
+}`,
+			testName: "TestAccBigQueryTable_basic",
+			filePath: "resource_bigquery_table_test.go",
+			want:     "google_bigquery_table",
+		},
+		"Fallback to file name (datasource)": {
+			content:  "some content",
+			testName: "TestAccDataSourceDnsKeys_basic",
+			filePath: "datasource_dns_keys_test.go",
+			want:     "dns_keys",
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			got := getActualResourceName(tc.content, tc.testName, tc.filePath)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestValidateTestNames(t *testing.T) {
+	cases := map[string]struct {
+		diff     string
+		content  string
+		wantErrs []string
+	}{
+		"valid test name": {
+			diff: `@@ -0,0 +1,5 @@
++func TestAccBigQueryTable_basic(t *testing.T) {`,
+			content: `
+func TestAccBigQueryTable_basic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				ResourceName: "google_bigquery_table.table",
+			},
+		},
+	})
+}`,
+			wantErrs: nil,
+		},
+		"mismatch should return error": {
+			diff: `@@ -0,0 +1,5 @@
++func TestAccBigQueryTable_mismatch(t *testing.T) {`,
+			content: `
+func TestAccBigQueryTable_mismatch(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				ResourceName: "google_compute_instance.instance",
+			},
+		},
+	})
+}`,
+			wantErrs: []string{"Test name TestAccBigQueryTable_mismatch does not match resource google_compute_instance (inferred google_bigquery_table)"},
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			mr := NewMockRunner().(*mockRunner)
+			repo := &source.Repo{
+				Name:         "terraform-provider-google-beta",
+				Path:         "/mock/dir/tpgb",
+				Branch:       "auto-pr-123456",
+				ChangedFiles: []string{"resource_bigquery_table_test.go"},
+			}
+
+			// Stub git diff for the file
+			cmd := "/mock/dir/tpgb git [diff --unified=0 origin/auto-pr-123456-old origin/auto-pr-123456 -- resource_bigquery_table_test.go] map[]"
+			mr.cmdResults[cmd] = tc.diff
+
+			// Stub file read
+			mr.WriteFile("/mock/dir/tpgb/resource_bigquery_table_test.go", tc.content)
+
+			errs := validateTestNames(repo, mr)
+			assert.Equal(t, tc.wantErrs, errs)
+		})
+	}
+}
