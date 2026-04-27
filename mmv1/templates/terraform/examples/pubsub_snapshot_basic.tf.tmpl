@@ -1,0 +1,11 @@
+resource "google_pubsub_topic" "example" {
+  name = "{{index $.Vars "topic_name"}}"
+}
+
+resource "google_pubsub_snapshot" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "snapshot_name"}}"
+  topic        = google_pubsub_topic.example.id
+  labels = {
+    foo = "bar"
+  }
+}
