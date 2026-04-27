@@ -3,6 +3,7 @@ package compute
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -1454,7 +1455,7 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 				disk.DiskEncryptionKey.KmsKeyServiceAccount = v.(string)
 			}
 		}
-		// Assign disk.DiskSizeGb and disk.InitializeParams.DiskSizeGb the same value
+		
 		if v, ok := d.GetOk(prefix + ".disk_size_gb"); ok {
 			disk.DiskSizeGb = int64(v.(int))
 		}
@@ -1472,7 +1473,6 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 			if v, ok := d.GetOk(prefix + ".disk_name"); ok {
 				disk.InitializeParams.DiskName = v.(string)
 			}
-			// Assign disk.DiskSizeGb and disk.InitializeParams.DiskSizeGb the same value
 			if v, ok := d.GetOk(prefix + ".disk_size_gb"); ok {
 				disk.InitializeParams.DiskSizeGb = int64(v.(int))
 			}
@@ -1539,17 +1539,15 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 			}
 
 			if _, ok := d.GetOk(prefix + ".resource_policies"); ok {
-				// instance template only supports a resource name here (not uri)
 				disk.InitializeParams.ResourcePolicies = expandInstanceTemplateResourcePolicies(d, prefix + ".resource_policies")
 			}
 			
 			if v, ok := d.GetOk(prefix + ".storage_pool"); ok {
-    			// Convert name/partial ID to a full URL
-    			storagePoolUrl, err := ExpandStoragePoolUrl(v, d, config)
-    			if err != nil {
-        			return nil, err
-    			}
-    			disk.InitializeParams.StoragePool = storagePoolUrl
+				storagePoolUrl, err := ExpandStoragePoolUrl(v, d, config)
+				if err != nil {
+					return nil, err
+				}
+				disk.InitializeParams.StoragePool = storagePoolUrl
 			}
 		}
 
@@ -1602,8 +1600,6 @@ func expandInstanceTemplateGuestAccelerators(d tpgresource.TerraformResourceData
 		}
 		guestAccelerators = append(guestAccelerators, &compute.AcceleratorConfig{
 			AcceleratorCount: int64(data["count"].(int)),
-			// We can't use ParseAcceleratorFieldValue here because an instance
-			// template does not have a zone we can use.
 			AcceleratorType: data["type"].(string),
 		})
 	}
@@ -1710,23 +1706,55 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	} else {
 		itName = id.UniqueId()
 	}
+
 	instanceTemplate := &compute.InstanceTemplate{
 		Description: d.Get("description").(string),
 		Properties:  instanceProperties,
 		Name:        itName,
 	}
 
-	op, err := config.NewComputeClient(userAgent).InstanceTemplates.Insert(project, instanceTemplate).Do()
+	instanceTemplateMap, err := tpgresource.ConvertToMap(instanceTemplate)
+	if err != nil {
+		return fmt.Errorf("Error converting instance template to map: %s", err)
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/instanceTemplates")
+	if err != nil {
+		return err
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      instanceTemplateMap,
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating instance template: %s", err)
 	}
 
 	// Store the ID now
-	d.SetId(fmt.Sprintf("projects/%s/global/instanceTemplates/%s", project, instanceTemplate.Name))
+	d.SetId(fmt.Sprintf("projects/%s/global/instanceTemplates/%s", project, itName))
+	
 	// And also the unique ID
-	d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", d.Id(), op.TargetId))
+	var targetId string
+	if tid, ok := res["targetId"]; ok {
+		switch v := tid.(type) {
+		case string:
+			targetId = v
+		case float64:
+			targetId = fmt.Sprintf("%.0f", v)
+		case json.Number:
+			targetId = v.String()
+		default:
+			targetId = fmt.Sprintf("%v", v)
+		}
+	}
+	d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", d.Id(), targetId))
 
-	err = ComputeOperationWaitTime(config, op, project, "Creating Instance Template", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, res, project, "Creating Instance Template", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -1791,9 +1819,27 @@ func diskCharacteristicsFromMap(m map[string]interface{}) diskCharacteristics {
 	return dc
 }
 
+func getInt(v interface{}) int64 {
+	switch t := v.(type) {
+	case int:
+		return int64(t)
+	case int64:
+		return t
+	case float64:
+		return int64(t)
+	case string:
+		i, _ := strconv.ParseInt(t, 10, 64)
+		return i
+	case json.Number:
+		i, _ := t.Int64()
+		return i
+	default:
+		return 0
+	}
+}
+
 func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultProject string) (map[string]interface{}, error) {
 	diskMap := make(map[string]interface{})
-
 
 	// These values are not returned by the API, so we copy them from the config.
 	diskMap["source_image_encryption_key"] = configDisk["source_image_encryption_key"]
@@ -2006,14 +2052,35 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 
 	splits := strings.Split(idStr, "/")
-	{{- if eq $.TargetVersionName "ga" }}
-	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
-	{{- else }}
-	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).View("FULL").Do()
+	url := fmt.Sprintf("%sprojects/%s/global/instanceTemplates/%s", config.ComputeBasePath, project, splits[len(splits)-1])
+	
+	{{- if ne $.TargetVersionName "ga" }}
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
+	if err != nil {
+		return err
+	}
 	{{- end }}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
 	}
+
+	var instanceTemplate compute.InstanceTemplate
+	resBytes, err := json.Marshal(res)
+	if err != nil {
+		return fmt.Errorf("Error marshaling response: %s", err)
+	}
+	if err := json.Unmarshal(resBytes, &instanceTemplate); err != nil {
+		return fmt.Errorf("Error unmarshaling response to struct: %s", err)
+	}
+
 	// Set the metadata fingerprint if there is one.
 	if instanceTemplate.Properties.Metadata != nil {
 		if err = d.Set("metadata_fingerprint", instanceTemplate.Properties.Metadata.Fingerprint); err != nil {
@@ -2225,13 +2292,19 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 	}
 
 	splits := strings.Split(d.Id(), "/")
-	op, err := config.NewComputeClient(userAgent).InstanceTemplates.Delete(
-		project, splits[len(splits)-1]).Do()
+	url := fmt.Sprintf("%sprojects/%s/global/instanceTemplates/%s", config.ComputeBasePath, project, splits[len(splits)-1])
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error deleting instance template: %s", err)
 	}
 
-	err = ComputeOperationWaitTime(config, op, project, "Deleting Instance Template", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, res, project, "Deleting Instance Template", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}
