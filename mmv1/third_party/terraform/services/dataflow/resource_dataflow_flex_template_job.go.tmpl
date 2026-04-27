@@ -893,7 +893,7 @@ func findDataflowJobByName(config *transport_tpg.Config, project, region, userAg
 	if region == "" {
 		return nil, fmt.Errorf("region is required to list dataflow jobs")
 	}
-	call := client.Projects.Locations.Jobs.List(project, region)
+	call := client.Projects.Locations.Jobs.List(project, region).Name(name)
 
 	resp, err := call.Do()
 	if err != nil {
