@@ -43,13 +43,6 @@ type ProviderModel struct {
 	{{ $product.Name }}CustomEndpoint types.String `tfsdk:"{{ underscore $product.Name }}_custom_endpoint"`
 {{- end }}
 
-	// Handwritten Products / Versioned / Atypical Entries
-	DataflowCustomEndpoint          types.String `tfsdk:"dataflow_custom_endpoint"`
-	IamCredentialsCustomEndpoint    types.String `tfsdk:"iam_credentials_custom_endpoint"`
-	ResourceManagerV3CustomEndpoint types.String `tfsdk:"resource_manager_v3_custom_endpoint"`
-	IAMCustomEndpoint               types.String `tfsdk:"iam_custom_endpoint"`
-	TagsLocationCustomEndpoint      types.String `tfsdk:"tags_location_custom_endpoint"`
-
 	// dcl
 	ContainerAwsCustomEndpoint      types.String `tfsdk:"container_aws_custom_endpoint"`
 	ContainerAzureCustomEndpoint    types.String `tfsdk:"container_azure_custom_endpoint"`
@@ -67,6 +60,8 @@ type ProviderModel struct {
 {{- end }}
 	CoreBillingCustomEndpoint   types.String `tfsdk:"core_billing_custom_endpoint"`
 	BillingCustomEndpoint       types.String `tfsdk:"billing_custom_endpoint"`
+	ResourceManager3CustomEndpoint types.String `tfsdk:"resource_manager3_custom_endpoint"`
+	IAMCustomEndpoint               types.String `tfsdk:"iam_custom_endpoint"`
 }
 
 type ProviderBatching struct {

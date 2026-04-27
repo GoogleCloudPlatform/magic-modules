@@ -199,7 +199,7 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata": struct{}{},
+		"bbasata":  struct{}{},
 		"tavasyag": struct{}{},
 	}
 )

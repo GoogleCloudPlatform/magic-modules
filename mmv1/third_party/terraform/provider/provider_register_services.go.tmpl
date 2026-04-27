@@ -1,9 +1,9 @@
 package provider
 
 import (
-	// Register services with at least one Magic Modules resource by importing them.
-	{{- range $service := $.GetMmv1ServicesInVersion $.Products }}
-	_ "github.com/hashicorp/terraform-provider-google/google/services/{{ $service }}"
+	// Register all services by importing them.
+	{{- range $product := $.Products }}
+	_ "github.com/hashicorp/terraform-provider-google/google/services/{{ $product.ApiName }}"
 	{{- end }}
 	_ "github.com/hashicorp/terraform-provider-google/google/services/apikeys"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/assuredworkloads"
