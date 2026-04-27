@@ -181,20 +181,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional: true,
             },
 
-            // DCL
-            "firebaserules_custom_endpoint": &schema.StringAttribute{
-                Optional: true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "recaptcha_enterprise_custom_endpoint": &schema.StringAttribute{
-                Optional: true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-
 			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/26814
             {{- if ne $.TargetVersionName "ga" }}
             "runtimeconfig_custom_endpoint": &schema.StringAttribute{

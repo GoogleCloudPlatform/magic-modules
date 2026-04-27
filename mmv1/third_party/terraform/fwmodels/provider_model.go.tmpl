@@ -43,10 +43,6 @@ type ProviderModel struct {
 	{{ $product.Name }}CustomEndpoint types.String `tfsdk:"{{ underscore $product.Name }}_custom_endpoint"`
 {{- end }}
 
-	// dcl generated
-	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
-	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
-
 	// Tombstoned
 {{- if ne $.TargetVersionName "ga" }}
 	RuntimeconfigCustomEndpoint types.String `tfsdk:"runtimeconfig_custom_endpoint"`
