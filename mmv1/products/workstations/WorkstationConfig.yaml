@@ -70,6 +70,16 @@ examples:
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
+  - name: 'workstation_config_hyperdisk'
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - name: 'workstation_config_hyperdisk_source_snapshot'
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
   - name: 'workstation_config_persistent_directories'
     primary_resource_id: 'default'
     vars:
@@ -427,6 +437,30 @@ properties:
               description: |
                 Name of the snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, `sizeGb` and `fsType` must be empty. Can only be updated if it has an existing value.
               # TODO: Add conflicting fields once complex lists are supported.
+        - name: 'gceHd'
+          type: NestedObject
+          description: |
+            A directory to persist across workstation sessions, backed by a Compute Engine Hyperdisk Balanced High Availability disk.
+          properties:
+            - name: 'sizeGb'
+              type: Integer
+              description: |
+                The GB capacity of a persistent home directory. Defaults to '200'.
+            - name: 'sourceSnapshot'
+              type: String
+              description: |
+                Name of the snapshot to use as the source for the disk.
+            - name: 'reclaimPolicy'
+              type: Enum
+              description: |
+                Whether the persistent disk should be deleted when the workstation is deleted.
+              enum_values:
+                - 'DELETE'
+                - 'RETAIN'
+            - name: 'archiveTimeout'
+              type: String
+              description: |
+                How long to wait before converting the disk into a snapshot.
   - name: 'ephemeralDirectories'
     type: Array
     description: |
