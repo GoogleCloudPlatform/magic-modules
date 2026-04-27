@@ -3,6 +3,7 @@ package fwprovider
 import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 
+	"github.com/hashicorp/terraform-provider-google/google/services/dns"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
@@ -15,5 +16,6 @@ func listResourceFunc(lr list.ListResource) func() list.ListResource {
 var generatedListResources = []func() list.ListResource{}
 
 var handwrittenListResources = []func() list.ListResource{
+	listResourceFunc(dns.NewGoogleDnsRecordSetListResource()),
 	listResourceFunc(resourcemanager.NewGoogleServiceAccountListResource()),
 }
