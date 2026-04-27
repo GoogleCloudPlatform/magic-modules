@@ -43,10 +43,6 @@ type ProviderModel struct {
 	{{ $product.Name }}CustomEndpoint types.String `tfsdk:"{{ underscore $product.Name }}_custom_endpoint"`
 {{- end }}
 
-	// dcl
-	ContainerAwsCustomEndpoint      types.String `tfsdk:"container_aws_custom_endpoint"`
-	ContainerAzureCustomEndpoint    types.String `tfsdk:"container_azure_custom_endpoint"`
-
 	// dcl generated
 	ApikeysCustomEndpoint              types.String `tfsdk:"apikeys_custom_endpoint"`
 	AssuredWorkloadsCustomEndpoint     types.String `tfsdk:"assured_workloads_custom_endpoint"`

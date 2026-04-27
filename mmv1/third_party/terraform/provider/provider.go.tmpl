@@ -177,8 +177,6 @@ func Provider() *schema.Provider {
 			},
 
 			// dcl
-			transport_tpg.ContainerAwsCustomEndpointEntryKey:           transport_tpg.ContainerAwsCustomEndpointEntry,
-			transport_tpg.ContainerAzureCustomEndpointEntryKey:         transport_tpg.ContainerAzureCustomEndpointEntry,
 			transport_tpg.ApikeysEndpointEntryKey:                      transport_tpg.ApikeysEndpointEntry,
 			transport_tpg.AssuredWorkloadsEndpointEntryKey:             transport_tpg.AssuredWorkloadsEndpointEntry,
 			transport_tpg.CloudResourceManagerEndpointEntryKey:         transport_tpg.CloudResourceManagerEndpointEntry,
@@ -428,8 +426,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 
 	// dcl
-	config.ContainerAwsBasePath = d.Get(transport_tpg.ContainerAwsCustomEndpointEntryKey).(string)
-	config.ContainerAzureBasePath = d.Get(transport_tpg.ContainerAzureCustomEndpointEntryKey).(string)
 	config.ApikeysBasePath = d.Get(transport_tpg.ApikeysEndpointEntryKey).(string)
 	config.AssuredWorkloadsBasePath = d.Get(transport_tpg.AssuredWorkloadsEndpointEntryKey).(string)
 	config.CloudResourceManagerBasePath = d.Get(transport_tpg.CloudResourceManagerEndpointEntryKey).(string)

@@ -10,19 +10,6 @@ import (
 // to update the provider_reference docs page.
 
 // DCL
-var ContainerAwsCustomEndpointEntryKey = "container_aws_custom_endpoint"
-var ContainerAwsCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-
-var ContainerAzureCustomEndpointEntryKey = "container_azure_custom_endpoint"
-var ContainerAzureCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
 var ApikeysEndpointEntryKey = "apikeys_custom_endpoint"
 var ApikeysEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,

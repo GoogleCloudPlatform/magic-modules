@@ -263,8 +263,6 @@ type Config struct {
 	{{- end }}
 
 	// DCL
-	ContainerAwsBasePath string
-	ContainerAzureBasePath string
 	ApikeysBasePath string
 	AssuredWorkloadsBasePath string
 	CloudResourceManagerBasePath string
@@ -281,8 +279,6 @@ type Config struct {
 {{- range $product := $.Products }}
 const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
 {{- end }}
-const ContainerAwsBasePathKey = "ContainerAws"
-const ContainerAzureBasePathKey = "ContainerAzure"
 
 // Generated product base paths
 var DefaultBasePaths = map[string]string{
@@ -290,8 +286,6 @@ var DefaultBasePaths = map[string]string{
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
 	// DCL
-	ContainerAwsBasePathKey: "https://{{"{{"}}location{{"}}"}}-gkemulticloud.googleapis.com/v1/",
-	ContainerAzureBasePathKey: "https://{{"{{"}}location{{"}}"}}-gkemulticloud.googleapis.com/v1/",
 	ApikeysEndpointEntryKey: "https://apikeys.googleapis.com/v2/",
 {{- if eq $.TargetVersionName "ga" }}
 	AssuredWorkloadsEndpointEntryKey: "https://{{"{{"}}location{{"}}"}}-assuredworkloads.googleapis.com/v1beta1/",
@@ -386,18 +380,6 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 func SetEndpointDefaults(d *schema.ResourceData) error {
 	// DCL endpoints - these are hardcoded as a workaround for the DCL not providing a way to
 	// determine base paths at generation time.
-
-	if d.Get(ContainerAwsCustomEndpointEntryKey) == "" {
-		d.Set(ContainerAwsCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[ContainerAwsBasePathKey]))
-	}
-
-	if d.Get(ContainerAzureCustomEndpointEntryKey) == "" {
-		d.Set(ContainerAzureCustomEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_CONTAINERAZURE_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[ContainerAzureBasePathKey]))
-	}
 	if d.Get(ApikeysEndpointEntryKey) == "" {
 		d.Set(ApikeysEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_APIKEYS_CUSTOM_ENDPOINT",
@@ -1342,8 +1324,6 @@ func ConfigureBasePaths(c *Config) {
 	{{- end }}
 
 	// DCL
-	c.ContainerAwsBasePath = DefaultBasePaths[ContainerAwsBasePathKey]
-	c.ContainerAzureBasePath = DefaultBasePaths[ContainerAzureBasePathKey]
 	c.ApikeysBasePath = DefaultBasePaths[ApikeysEndpointEntryKey]
 	c.AssuredWorkloadsBasePath = DefaultBasePaths[AssuredWorkloadsEndpointEntryKey]
 	c.CloudResourceManagerBasePath = DefaultBasePaths[CloudResourceManagerEndpointEntryKey]
