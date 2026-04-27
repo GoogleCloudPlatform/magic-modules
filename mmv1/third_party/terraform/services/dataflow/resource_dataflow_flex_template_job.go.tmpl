@@ -259,6 +259,13 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 				Default:     false,
 				Description: `If true, treat DRAINING and CANCELLING as terminal job states and do not wait for further changes before removing from terraform state and moving on. WARNING: this will lead to job name conflicts if you do not ensure that the job names are different, e.g. by embedding a release ID or by using a random_id.`,
 			},
+
+			"create_ignore_already_exists": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: `If true, if a 409 AlreadyExists error is returned on create, the provider will ignore it and adopt the existing resource.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -298,6 +305,21 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 
 	response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 	if err != nil {
+		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && d.Get("create_ignore_already_exists").(bool) {
+			log.Printf("[DEBUG] Job already exists and create_ignore_already_exists is true, attempting to adopt it.")
+			jobName := d.Get("name").(string)
+			existingJob, lookupErr := findDataflowJobByName(config, project, region, userAgent, jobName)
+			if lookupErr != nil {
+				return fmt.Errorf("error looking up job after 409: %s", lookupErr)
+			}
+			if existingJob != nil {
+				d.SetId(existingJob.Id)
+				if err := d.Set("job_id", existingJob.Id); err != nil {
+					return fmt.Errorf("Error setting job_id: %s", err)
+				}
+				return resourceDataflowFlexTemplateJobRead(d, meta)
+			}
+		}
 		return err
 	}
 
@@ -863,6 +885,28 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 		}
 	}
 	return nil
+}
+
+func findDataflowJobByName(config *transport_tpg.Config, project, region, userAgent, name string) (*dataflow.Job, error) {
+	client := config.NewDataflowClient(userAgent)
+	
+	if region == "" {
+		return nil, fmt.Errorf("region is required to list dataflow jobs")
+	}
+	call := client.Projects.Locations.Jobs.List(project, region)
+
+	resp, err := call.Do()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, job := range resp.Jobs {
+		if job.Name == name {
+			return job, nil
+		}
+	}
+
+	return nil, nil
 }
 
 func init() {
