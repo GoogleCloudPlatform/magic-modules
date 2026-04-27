@@ -50,6 +50,9 @@ if d.HasChange("gce_setup.0.metadata") {
 if d.HasChange("effective_labels") {
     newUpdateMask = append(newUpdateMask, "labels")
 }
+if d.HasChange("enable_deletion_protection") {
+    newUpdateMask = append(newUpdateMask, "enableDeletionProtection")
+}
 if d.HasChange("gce_setup.0.container_image") {
     newUpdateMask = append(newUpdateMask, "gce_setup.container_image")
     stopInstance = true
