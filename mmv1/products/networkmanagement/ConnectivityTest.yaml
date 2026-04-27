@@ -56,6 +56,10 @@ examples:
     primary_resource_id: endpoints-test
     vars:
       primary_resource_name: conn-test-endpoints
+  - name: network_management_connectivity_test_gke_pod
+    primary_resource_id: pod-test
+    vars:
+      primary_resource_name: conn-test-pod
 properties:
   - name: name
     type: String
@@ -230,6 +234,16 @@ properties:
           2. When you are using Shared VPC and the IP address that you provide is
           from the service project. In this case, the network that the IP address
           resides in is defined in the host project.
+      - name: gkePod
+        type: String
+        description: A [GKE Pod](https://cloud.google.com/kubernetes-engine/docs/concepts/pod) URI.
+      - name: networkType
+        type: Enum
+        description: For source endpoints, type of the network where the endpoint is located. Not relevant for destination endpoints.
+        enum_values:
+          - GCP_NETWORK
+          - NON_GCP_NETWORK
+          - INTERNET
   - name: protocol
     type: String
     default_value: TCP
