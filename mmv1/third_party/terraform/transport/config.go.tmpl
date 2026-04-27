@@ -263,8 +263,6 @@ type Config struct {
 	{{- end }}
 
 	// DCL
-	ApikeysBasePath string
-	AssuredWorkloadsBasePath string
 	CloudResourceManagerBasePath string
 	FirebaserulesBasePath string
 	RecaptchaEnterpriseBasePath string
@@ -286,12 +284,6 @@ var DefaultBasePaths = map[string]string{
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
 	// DCL
-	ApikeysEndpointEntryKey: "https://apikeys.googleapis.com/v2/",
-{{- if eq $.TargetVersionName "ga" }}
-	AssuredWorkloadsEndpointEntryKey: "https://{{"{{"}}location{{"}}"}}-assuredworkloads.googleapis.com/v1beta1/",
-{{- else }}
-	AssuredWorkloadsEndpointEntryKey: "https://{{"{{"}}location{{"}}"}}-assuredworkloads.googleapis.com/v1/",
-{{- end }}
 	CloudResourceManagerEndpointEntryKey: "https://cloudresourcemanager.googleapis.com/",
 	FirebaserulesEndpointEntryKey: "https://firebaserules.googleapis.com/v1/",
 	RecaptchaEnterpriseEndpointEntryKey: "https://recaptchaenterprise.googleapis.com/v1/",
@@ -380,16 +372,6 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 func SetEndpointDefaults(d *schema.ResourceData) error {
 	// DCL endpoints - these are hardcoded as a workaround for the DCL not providing a way to
 	// determine base paths at generation time.
-	if d.Get(ApikeysEndpointEntryKey) == "" {
-		d.Set(ApikeysEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_APIKEYS_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[ApikeysEndpointEntryKey]))
-	}
-	if d.Get(AssuredWorkloadsEndpointEntryKey) == "" {
-		d.Set(AssuredWorkloadsEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_ASSURED_WORKLOADS_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[AssuredWorkloadsEndpointEntryKey]))
-	}
 	if d.Get(CloudResourceManagerEndpointEntryKey) == "" {
 		d.Set(CloudResourceManagerEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_CLOUD_RESOURCE_MANAGER_CUSTOM_ENDPOINT",
@@ -1324,8 +1306,6 @@ func ConfigureBasePaths(c *Config) {
 	{{- end }}
 
 	// DCL
-	c.ApikeysBasePath = DefaultBasePaths[ApikeysEndpointEntryKey]
-	c.AssuredWorkloadsBasePath = DefaultBasePaths[AssuredWorkloadsEndpointEntryKey]
 	c.CloudResourceManagerBasePath = DefaultBasePaths[CloudResourceManagerEndpointEntryKey]
 	c.FirebaserulesBasePath = DefaultBasePaths[FirebaserulesEndpointEntryKey]
 	c.RecaptchaEnterpriseBasePath = DefaultBasePaths[RecaptchaEnterpriseEndpointEntryKey]

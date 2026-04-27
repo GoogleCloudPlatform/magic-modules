@@ -10,20 +10,6 @@ import (
 // to update the provider_reference docs page.
 
 // DCL
-var ApikeysEndpointEntryKey = "apikeys_custom_endpoint"
-var ApikeysEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-
-var AssuredWorkloadsEndpointEntryKey = "assured_workloads_custom_endpoint"
-var AssuredWorkloadsEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-
 var CloudResourceManagerEndpointEntryKey = "cloud_resource_manager_custom_endpoint"
 var CloudResourceManagerEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
