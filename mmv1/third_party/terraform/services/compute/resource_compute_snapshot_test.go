@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeSnapshot_encryption(t *testing.T) {
@@ -200,6 +201,84 @@ resource "google_compute_disk" "persistent" {
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-a"
+}
+`, context)
+}
+
+func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	pid := envvar.GetTestProjectFromEnv()
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    pid,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_resourceManagerTags(context),
+			},
+		},
+	})
+}
+
+func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "tag_key" {
+  parent     = "projects/%{project_id}"
+  short_name = "tf-test-key-%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = "tagKeys/${google_tags_tag_key.tag_key.name}"
+  short_name = "tf-test-value-%{random_suffix}"
+}
+
+data "google_client_openid_userinfo" "me" {}
+
+locals {
+  member_type = endswith(data.google_client_openid_userinfo.me.email, "iam.gserviceaccount.com") ? "serviceAccount" : "user"
+  iam_member  = "${local.member_type}:${data.google_client_openid_userinfo.me.email}"
+}
+
+resource "google_tags_tag_value_iam_member" "value_user" {
+  tag_value = google_tags_tag_value.tag_value.name
+  role      = "roles/resourcemanager.tagUser"
+  member    = local.iam_member
+}
+
+resource "time_sleep" "wait_for_tag_iam" {
+  depends_on      = [google_tags_tag_value_iam_member.value_user]
+  create_duration = "60s"
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "tf-test-disk-%{random_suffix}"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name        = "tf-test-snapshot-%{random_suffix}"
+  source_disk = google_compute_disk.foobar.name
+  zone        = "us-central1-a"
+  params {
+    resource_manager_tags = {
+      "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
+    }
+  }
+  depends_on = [time_sleep.wait_for_tag_iam]
 }
 `, context)
 }
