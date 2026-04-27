@@ -6482,7 +6482,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, np, networkName, subnetworkName, storagePoolResourceName, location)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName string) string {
     return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -6576,9 +6575,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
         },
     })
 }
-{{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerNodePool_acceleratorNetworkProfile_manual(clusterName, npName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
@@ -6883,4 +6880,3 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 		},
 	})
 }
-{{- end }}
