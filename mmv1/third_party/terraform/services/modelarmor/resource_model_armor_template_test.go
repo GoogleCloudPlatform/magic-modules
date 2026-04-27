@@ -29,10 +29,9 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 				Config: testAccModelArmorTemplate_basic_config(basicContext),
 			},
 			{
-				ResourceName:            "google_model_armor_template.template-basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"template_metadata"},
+				ResourceName:      "google_model_armor_template.template-basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
