@@ -93,6 +93,13 @@ examples:
       project_id: '"quota" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
+  - name: consumer_quota_override_admin_override
+    primary_resource_id: override
+    min_version: beta
+    vars:
+      project_id: quota
+    test_env_vars:
+      org_id: ORG_ID
 parameters:
   - name: name
     type: String
@@ -150,3 +157,6 @@ properties:
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
     immutable: true
     min_version: beta
+  - name: adminOverrideAncestor
+    type: String
+    description: 'The resource name of the ancestor that requested the override. For example: `organizations/12345` or `folders/67890`. Used by admin overrides only.'
