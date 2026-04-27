@@ -9,12 +9,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func DataSourceGoogleComputeNodeTypes() *schema.Resource {
@@ -42,7 +36,7 @@ func DataSourceGoogleComputeNodeTypes() *schema.Resource {
 
 func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -57,11 +51,22 @@ func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Please specify zone to get appropriate node types for zone. Unable to get zone: %s", err)
 	}
 
-	resp, err := config.NewComputeClient(userAgent).NodeTypes.List(project, zone).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/nodeTypes", config.ComputeBasePath, project, zone)
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return err
 	}
-	nodeTypes := flattenComputeNodeTypes(resp.Items)
+	var rawItems []interface{}
+	if items, ok := resp["items"].([]interface{}); ok {
+		rawItems = items
+	}
+	nodeTypes := flattenComputeNodeTypes(rawItems)
 	log.Printf("[DEBUG] Received Google Compute Regions: %q", nodeTypes)
 
 	if err := d.Set("names", nodeTypes); err != nil {
@@ -78,10 +83,16 @@ func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func flattenComputeNodeTypes(nodeTypes []*compute.NodeType) []string {
-	result := make([]string, len(nodeTypes))
-	for i, nodeType := range nodeTypes {
-		result[i] = nodeType.Name
+func flattenComputeNodeTypes(nodeTypes []interface{}) []string {
+	result := make([]string, 0, len(nodeTypes))
+	for _, raw := range nodeTypes {
+		nt, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if name, ok := nt["name"].(string); ok {
+			result = append(result, name)
+		}
 	}
 	sort.Strings(result)
 	return result
@@ -89,9 +100,9 @@ func flattenComputeNodeTypes(nodeTypes []*compute.NodeType) []string {
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_node_types",
+		Name:        "google_compute_node_types",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeNodeTypes(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeNodeTypes(),
 	}.Register()
 }
