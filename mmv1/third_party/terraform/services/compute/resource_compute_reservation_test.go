@@ -25,6 +25,9 @@ func TestAccComputeReservation_resourcePolicies(t *testing.T) {
 			{
 				Config: testAccComputeReservation_resourcePolicies(reservationName, policyName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_compute_reservation.reservation", "specific_reservation_required", "true",
+					),
 					resource.TestMatchResourceAttr(
 						"google_compute_reservation.reservation",
 						"resource_policies.policy1",
@@ -136,7 +139,8 @@ func testAccComputeReservation_resourcePolicies(reservationName, policyName stri
 resource "google_compute_resource_policy" "placement" {
   name   = "%s"
   region = "us-central1"
-  // Compact policy for reservation must not set vm_count (API: incremental only).
+  // Incremental compact placement only: do not set vm_count (see resource_policies
+  // on google_compute_reservation in the provider docs).
   group_placement_policy {
     collocation = "COLLOCATED"
   }
