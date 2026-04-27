@@ -1,0 +1,121 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: UllMirroringCollectorRule
+description: UllMirroringCollectorRule is a resource that defines what traffic should be mirrored.
+base_url: projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector}}/rules
+self_link: projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector}}/rules/{{ull_mirroring_collector_rule_id}}
+create_url: projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector}}/rules?ullMirroringCollectorRuleId={{ull_mirroring_collector_rule_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector}}/rules/{{ull_mirroring_collector_rule_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: VWxsTWlycm9yaW5nQ29sbGVjdG9yUnVsZQ==
+autogen_async: true
+examples:
+  - name: 'network_security_ull_mirroring_collector_rule_basic'
+    config_path: 'templates/terraform/examples/network_security_ull_mirroring_collector_rule_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'example-network'
+      subnetwork_name: 'example-subnet'
+      health_check_name: 'example-hc'
+      backend_service_name: 'example-bs'
+      forwarding_rule_name: 'example-fwr'
+      ull_mirroring_engine_id: 'example-ull-eng'
+      ull_mirroring_collector_id: 'example-ull-col'
+      ull_mirroring_collector_rule_id: 'example-ull-rule'
+    exclude_test: true
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: ullMirroringCollector
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: ullMirroringCollectorRuleId
+    type: String
+    required: true
+    description: ID for the new UllMirroringCollectorRule.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: '[Output only] Create time stamp'
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs
+  - name: match
+    type: NestedObject
+    required: true
+    description: Match defines what traffic to mirror.
+    properties:
+      - name: direction
+        type: String
+        description: |-
+          Direction of traffic to match. When unset, matches any direction.
+          Possible values:
+          INGRESS: Traffic inbound to the capture point.
+          EGRESS: Traffic outbound from the capture point.
+      - name: dstIpRanges
+        type: Array
+        description: |-
+          Destination IP ranges to match. When unset, matches any destination IP
+          range.
+        item_type:
+          type: String
+      - name: ipProtocols
+        type: Array
+        description: |-
+          IP protocols to match. When unset, matches any IP protocol.
+          Examples: "tcp", "udp", "icmp". If unset, matches any IP protocol.
+        item_type:
+          type: String
+      - name: srcIpRanges
+        type: Array
+        description: Source IP ranges to match. When unset, matches any source IP range.
+        item_type:
+          type: String
+  - name: name
+    type: String
+    description: Identifier. The name of the UllMirroringCollectorRule.
+    output: true
+  - name: reconciling
+    type: Boolean
+    description: |-
+      Whether reconciling is in progress, recommended per
+      https://google.aip.dev/128.
+    output: true
+  - name: updateTime
+    type: String
+    description: '[Output only] Update time stamp'
+    output: true
+min_version: beta
