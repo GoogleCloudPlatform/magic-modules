@@ -1,0 +1,19 @@
+resource "google_ces_app" "app" {
+  app_id = "{{index $.Vars "app_id"}}"
+  location = "us"
+  display_name = "{{index $.Vars "app_display_name"}}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_basic" {
+  evaluation_id = "{{index $.Vars "evaluation_id"}}"
+  display_name = "{{index $.Vars "evaluation_display_name"}}"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+}
