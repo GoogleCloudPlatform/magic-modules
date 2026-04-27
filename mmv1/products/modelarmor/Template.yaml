@@ -111,6 +111,8 @@ examples:
       filter_config_sdp_settings_advanced_config_deidentify_template: '"projects/llm-firewall-demo/locations/us-central1/deidentifyTemplates/t2"'
       filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
       template_metadata_multi_language_detection_enable_multi_language_detection: false
+custom_code:
+  pre_update: 'templates/terraform/pre_update/modelarmor_template.go.tmpl'
 autogen_status: VGVtcGxhdGU=
 parameters:
   - name: location
@@ -257,6 +259,7 @@ properties:
     type: NestedObject
     description: Message describing TemplateMetadata
     allow_empty_object: true
+    custom_flatten: 'templates/terraform/custom_flatten/modelarmor_template_template_metadata.go.tmpl'
     properties:
       - name: logTemplateOperations
         type: Boolean
@@ -267,7 +270,6 @@ properties:
       - name: multiLanguageDetection
         type: NestedObject
         description: Metadata to enable multi language detection via template.
-        custom_flatten: 'templates/terraform/custom_flatten/modelarmor_template_multilanguage_detection.go.tmpl'
         properties:
           - name: enableMultiLanguageDetection
             type: Boolean
