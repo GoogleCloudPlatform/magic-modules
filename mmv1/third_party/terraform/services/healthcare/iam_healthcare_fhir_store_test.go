@@ -150,7 +150,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamBindingExists(t *testing.T, binding
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.FhirStoreId()).Do()
+		p, err := healthcare.NewClient(config, config.UserAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.FhirStoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -186,7 +186,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamMemberExists(t *testing.T, n, role,
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.FhirStoreId()).Do()
+		p, err := healthcare.NewClient(config, config.UserAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.FhirStoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -221,7 +221,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamPolicyExists(t *testing.T, n, role,
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.FhirStoreId()).Do()
+		p, err := healthcare.NewClient(config, config.UserAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.FhirStoreId()).Do()
 		if err != nil {
 			return err
 		}
