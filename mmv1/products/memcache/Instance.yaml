@@ -339,3 +339,19 @@ properties:
     ignore_read: true
     item_type:
       type: String
+  - name: 'maintenance_version'
+    type: String
+    description: |
+      The version of the maintenance running on the instance.
+  - name: 'effective_maintenance_version'
+    type: String
+    description: |
+      The maintenance version that the instance is planned to be upgraded to.
+    output: true
+  - name: 'available_maintenance_versions'
+    type: Array
+    description: |
+      The versions of available maintenance for the instance.
+    output: true
+    item_type:
+      type: String
