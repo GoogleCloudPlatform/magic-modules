@@ -58,15 +58,12 @@ import (
 	container "google.golang.org/api/container/v1beta1"
 {{- end }}
 	dataflow "google.golang.org/api/dataflow/v1b3"
-	"google.golang.org/api/dataproc/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/iam/v1"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 	cloudlogging "google.golang.org/api/logging/v2"
 	runadminv2 "google.golang.org/api/run/v2"
 	"google.golang.org/api/serviceusage/v1"
-	"google.golang.org/api/sourcerepo/v1"
-	"google.golang.org/api/spanner/v1"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 	backupdr "google.golang.org/api/backupdr/v1"
 	"google.golang.org/api/storage/v1"
@@ -900,20 +897,6 @@ func (c *Config) NewCloudFunctionsClient(userAgent string) *cloudfunctions.Servi
 	return clientCloudFunctions
 }
 
-func (c *Config) NewSourceRepoClient(userAgent string) *sourcerepo.Service {
-	sourceRepoClientBasePath := RemoveBasePathVersion(c.SourceRepoBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Source Repo client for path %s", sourceRepoClientBasePath)
-	clientSourceRepo, err := sourcerepo.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client source repo: %s", err)
-		return nil
-	}
-	clientSourceRepo.UserAgent = userAgent
-	clientSourceRepo.BasePath = sourceRepoClientBasePath
-
-	return clientSourceRepo
-}
-
 func (c *Config) NewBigQueryClient(userAgent string) *bigquery.Service {
 	bigQueryClientBasePath := c.BigQueryBasePath
 	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
@@ -927,34 +910,6 @@ func (c *Config) NewBigQueryClient(userAgent string) *bigquery.Service {
 	clientBigQuery.BasePath = bigQueryClientBasePath
 
 	return clientBigQuery
-}
-
-func (c *Config) NewSpannerClient(userAgent string) *spanner.Service {
-	spannerClientBasePath := RemoveBasePathVersion(c.SpannerBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Spanner client for path %s", spannerClientBasePath)
-	clientSpanner, err := spanner.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client source repo: %s", err)
-		return nil
-	}
-	clientSpanner.UserAgent = userAgent
-	clientSpanner.BasePath = spannerClientBasePath
-
-	return clientSpanner
-}
-
-func (c *Config) NewDataprocClient(userAgent string) *dataproc.Service {
-	dataprocClientBasePath := RemoveBasePathVersion(c.DataprocBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Dataproc client for path %s", dataprocClientBasePath)
-	clientDataproc, err := dataproc.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client dataproc: %s", err)
-		return nil
-	}
-	clientDataproc.UserAgent = userAgent
-	clientDataproc.BasePath = dataprocClientBasePath
-
-	return clientDataproc
 }
 
 func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service {

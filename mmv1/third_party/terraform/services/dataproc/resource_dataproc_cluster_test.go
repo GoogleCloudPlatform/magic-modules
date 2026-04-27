@@ -15,6 +15,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	dataproc_tpg "github.com/hashicorp/terraform-provider-google/google/services/dataproc"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -1696,7 +1697,7 @@ func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
 
 			parts := strings.Split(rs.Primary.ID, "/")
 			clusterId := parts[len(parts)-1]
-			_, err = config.NewDataprocClient(config.UserAgent).Projects.Regions.Clusters.Get(
+			_, err = dataproc_tpg.NewClient(config, config.UserAgent).Projects.Regions.Clusters.Get(
 				project, attributes["region"], clusterId).Do()
 
 			if err != nil {
@@ -1887,7 +1888,7 @@ func testAccCheckDataprocClusterExists(t *testing.T, n string, cluster *dataproc
 
 		parts := strings.Split(rs.Primary.ID, "/")
 		clusterId := parts[len(parts)-1]
-		found, err := config.NewDataprocClient(config.UserAgent).Projects.Regions.Clusters.Get(
+		found, err := dataproc_tpg.NewClient(config, config.UserAgent).Projects.Regions.Clusters.Get(
 			project, rs.Primary.Attributes["region"], clusterId).Do()
 		if err != nil {
 			return err
