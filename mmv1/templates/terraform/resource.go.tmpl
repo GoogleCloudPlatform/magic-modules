@@ -745,6 +745,38 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 
     log.Printf("[DEBUG] Finished reading {{ $.ResourceName }} %q: %#v", d.Id(), res)
+{{- if $.CustomCode.PostRead }}
+    {{ customTemplate $ $.CustomCode.PostRead false -}}
+{{- end }}
+
+{{if $.NestedQuery -}}
+    res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
+    if err != nil {
+        return err
+    }
+
+    if res == nil {
+        // Object isn't there any more - remove it from the state.
+        log.Printf("[DEBUG] Removing {{ $.ResourceName }} because it couldn't be matched.")
+        d.SetId("")
+        return nil
+    }
+
+{{- end}}
+
+{{if $.CustomCode.Decoder -}}
+    res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    if err != nil {
+        return err
+    }
+
+    if res == nil {
+        // Decoding the object has resulted in it being gone. It may be marked deleted
+        log.Printf("[DEBUG] Removing {{ $.ResourceName }} because it no longer exists.")
+        d.SetId("")
+        return nil
+    }
+{{ end}}
 {{- if $.VirtualFields }}
 
   // Explicitly set virtual fields to default values if unset
@@ -1489,40 +1521,9 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
 
 {{ if not $.ExcludeRead }}
 func Resource{{ $.ResourceName -}}Flatten(d *schema.ResourceData, meta interface{}, res map[string]interface{}, config *transport_tpg.Config,{{if $.HasProject -}}project string, {{end -}}userAgent string, billingProject string, url string, headers http.Header) error {
-{{- if or $.NestedQuery $.CustomCode.Decoder $.CustomCode.PostRead $.GettableProperties $.HasSelfLink }}
+{{- if or $.GettableProperties $.HasSelfLink }}
 var err error
 {{- end }}
-{{- if and $.CustomCode.PostRead }}
-    {{ customTemplate $ $.CustomCode.PostRead false -}}
-{{- end }}
-{{if $.NestedQuery -}}
-res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
-if err != nil {
-    return err
-}
-
-if res == nil {
-    // Object isn't there any more - remove it from the state.
-    log.Printf("[DEBUG] Removing {{ $.ResourceName }} because it couldn't be matched.")
-    d.SetId("")
-    return nil
-}
-
-{{- end}}
-
-{{- if $.CustomCode.Decoder }}
-res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
-if err != nil {
-    return fmt.Errorf("Error decoding response: %s", err)
-}
-
-if res == nil {
-    // Decoding the object has resulted in it being gone. It may be marked deleted
-    log.Printf("[DEBUG] Removing {{ $.ResourceName }} because it no longer exists.")
-    d.SetId("")
-    return nil
-}
-{{ end }}
 {{ range $prop := $.GettableProperties }}
 {{if $prop.FlattenObject -}}
 // Terraform must set the top level schema field, but since this object contains collapsed properties
