@@ -1,0 +1,28 @@
+err = transport_tpg.Retry(transport_tpg.RetryOptions{
+	Timeout: d.Timeout(schema.TimeoutDelete),
+	RetryFunc: func() error {
+		if err := resourceNetworkManagementNetworkMonitoringProviderRead(d, meta); err != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+				log.Printf("[DEBUG] NetworkMonitoringProvider not found (404), deletion confirmed")
+				return nil
+			}
+			return err
+		}
+		if d.Id() == "" {
+			log.Printf("[DEBUG] NetworkMonitoringProvider ID is empty, deletion confirmed")
+			return nil
+		}
+		return fmt.Errorf("NetworkMonitoringProvider %q still exists", d.Id())
+	},
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
+		func(err error) (bool, string) {
+			if strings.Contains(err.Error(), "still exists") {
+				return true, "waiting for resource to be fully purged"
+			}
+			return false, ""
+		},
+	},
+})
+if err != nil {
+	return fmt.Errorf("Error waiting for NetworkMonitoringProvider to be purged: %s", err)
+}
