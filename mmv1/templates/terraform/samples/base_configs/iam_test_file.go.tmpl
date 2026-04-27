@@ -12,6 +12,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+{{- if not $.IamPolicy.ExcludeImportTest }}
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+{{- end }}
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
@@ -80,6 +83,11 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 {{ template "IamTestSetupSample" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
+{{- if not $.IamPolicy.ExcludeImportTest }}
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0), // resource identity min version
+		},
+{{-  end }}
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 {{- if eq $.MinVersionObj.Name "beta" }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
@@ -105,11 +113,15 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				ResourceName:    "{{ $.IamTerraformName }}_member.foo",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
 {{-  end }}
 		},
 	})
 }
-
 func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 {{ if $.IamPolicy.AdminIamRole }}

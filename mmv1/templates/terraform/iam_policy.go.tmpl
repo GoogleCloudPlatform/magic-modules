@@ -56,7 +56,7 @@ func init() {
         Name: "{{ $.TerraformName }}_iam_member",
         ProductName: "{{ $.ProductMetadata.Name }}",
         Type: registry.SchemaTypeIAMResource,
-        Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
+        Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc, tpgiamresource.IamWithResourceIdentity({{ $.ResourceName }}IamResourceIdentityParser){{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
     }.Register()
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_policy",
@@ -347,6 +347,17 @@ func (u *{{ $.ResourceName }}IamUpdater) qualify{{ $.Name }}Url(methodIdentifier
 
 func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
 	return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }})
+}
+
+func {{ $.ResourceName }}IamResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, transportConfig *transport_tpg.Config) (string, error) {
+	return tpgiamresource.ParseIamResourceIdentity(d, identity, transportConfig, tpgiamresource.IamResourceIdentityConfig{
+		Params: []tpgiamresource.IamIdentityParam{
+{{- range $param := $.IamResourceParams }}
+			{Key: "{{ camelize $param "lower" }}", IdentityKey: "{{ underscore $param }}"},
+{{- end }}
+		},
+		UriFormat: "{{ $.IamResourceUriFormat }}",
+	})
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) GetMutexKey() string {
