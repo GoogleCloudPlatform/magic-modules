@@ -10,13 +10,6 @@ import (
 // to update the provider_reference docs page.
 
 // DCL
-var CloudResourceManagerEndpointEntryKey = "cloud_resource_manager_custom_endpoint"
-var CloudResourceManagerEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: ValidateCustomEndpoint,
-}
-
 var FirebaserulesEndpointEntryKey = "firebaserules_custom_endpoint"
 var FirebaserulesEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,

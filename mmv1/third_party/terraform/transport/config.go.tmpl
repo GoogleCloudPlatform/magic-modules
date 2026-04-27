@@ -263,7 +263,6 @@ type Config struct {
 	{{- end }}
 
 	// DCL
-	CloudResourceManagerBasePath string
 	FirebaserulesBasePath string
 	RecaptchaEnterpriseBasePath string
 
@@ -284,7 +283,6 @@ var DefaultBasePaths = map[string]string{
 	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
 {{- end }}
 	// DCL
-	CloudResourceManagerEndpointEntryKey: "https://cloudresourcemanager.googleapis.com/",
 	FirebaserulesEndpointEntryKey: "https://firebaserules.googleapis.com/v1/",
 	RecaptchaEnterpriseEndpointEntryKey: "https://recaptchaenterprise.googleapis.com/v1/",
 }
@@ -372,11 +370,6 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 func SetEndpointDefaults(d *schema.ResourceData) error {
 	// DCL endpoints - these are hardcoded as a workaround for the DCL not providing a way to
 	// determine base paths at generation time.
-	if d.Get(CloudResourceManagerEndpointEntryKey) == "" {
-		d.Set(CloudResourceManagerEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_CLOUD_RESOURCE_MANAGER_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[CloudResourceManagerEndpointEntryKey]))
-	}
 	if d.Get(FirebaserulesEndpointEntryKey) == "" {
 		d.Set(FirebaserulesEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_FIREBASERULES_CUSTOM_ENDPOINT",
@@ -1306,7 +1299,6 @@ func ConfigureBasePaths(c *Config) {
 	{{- end }}
 
 	// DCL
-	c.CloudResourceManagerBasePath = DefaultBasePaths[CloudResourceManagerEndpointEntryKey]
 	c.FirebaserulesBasePath = DefaultBasePaths[FirebaserulesEndpointEntryKey]
 	c.RecaptchaEnterpriseBasePath = DefaultBasePaths[RecaptchaEnterpriseEndpointEntryKey]
 }

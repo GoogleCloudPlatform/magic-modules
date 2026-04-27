@@ -182,12 +182,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
 
             // DCL
-            "cloud_resource_manager_custom_endpoint": &schema.StringAttribute{
-                Optional: true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
             "firebaserules_custom_endpoint": &schema.StringAttribute{
                 Optional: true,
                 Validators: []validator.String{
@@ -230,6 +224,12 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
             "iam_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            "cloud_resource_manager_custom_endpoint": &schema.StringAttribute{
+                Optional: true,
                 Validators: []validator.String{
                     transport_tpg.CustomEndpointValidator(),
                 },

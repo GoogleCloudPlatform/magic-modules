@@ -44,7 +44,6 @@ type ProviderModel struct {
 {{- end }}
 
 	// dcl generated
-	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
 	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
 	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
 
@@ -56,6 +55,7 @@ type ProviderModel struct {
 	BillingCustomEndpoint       types.String `tfsdk:"billing_custom_endpoint"`
 	ResourceManager3CustomEndpoint types.String `tfsdk:"resource_manager3_custom_endpoint"`
 	IAMCustomEndpoint               types.String `tfsdk:"iam_custom_endpoint"`
+	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
 }
 
 type ProviderBatching struct {
