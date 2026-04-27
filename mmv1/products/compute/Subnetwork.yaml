@@ -333,6 +333,24 @@ properties:
             E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
           resource: InternalRange
           imports: selfLink
+        - name: ipVersion
+          type: Enum
+          description: |
+            The IP version of the secondary range. If not specified, IPV4 is used.
+          min_version: 'beta'
+          enum_values:
+            - IPV4
+            - IPV6
+        - name: ipCollection
+          type: ResourceRef
+          description: |
+            Reference to a Public Delegated Prefix (PDP) for BYOIP. 
+            This field should be specified for configuring BYOGUA internal IPv6 secondary range. 
+            When specified along with the ip_cidr_range, the ip_cidr_range must lie within the PDP referenced by the `ipCollection` field. 
+            When specified without the ip_cidr_range, the range is auto-allocated from the PDP referenced by the `ipCollection` field.
+          min_version: 'beta'
+          resource: PublicDelegatedPrefix
+          imports: selfLink
   - name: privateIpGoogleAccess
     type: Boolean
     description: |
