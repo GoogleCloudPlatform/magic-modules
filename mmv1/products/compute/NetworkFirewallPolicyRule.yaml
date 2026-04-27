@@ -20,6 +20,7 @@ description: |
 references:
   api: https://cloud.google.com/compute/docs/reference/rest/v1/networkFirewallPolicies/addRule
 base_url: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}
+supports_request_id: true
 self_link: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}
 create_url: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addRule
 delete_url: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}

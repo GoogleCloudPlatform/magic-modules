@@ -5,6 +5,7 @@ description: |
   Resource that enables a convenient way to save a virtual machine (VM) instance's configuration
   that includes all of its properties and allows you to create a new instance from it.
 base_url: 'projects/{{project}}/global/instanceTemplates'
+supports_request_id: true
 has_self_link: true
 exclude_resource: true
 properties:

@@ -35,6 +35,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/beta/addresses'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/addresses'
+supports_request_id: true
 has_self_link: true
 immutable: true
 timeouts:

@@ -38,6 +38,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/healthChecks'
 docs:
 base_url: 'projects/{{project}}/global/healthChecks'
+supports_request_id: true
 has_self_link: true
 timeouts:
   insert_minutes: 20

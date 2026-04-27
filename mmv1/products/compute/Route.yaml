@@ -49,6 +49,7 @@ docs:
       `next_hop_instance`.  Omit if `next_hop_instance` is specified as
       a URL.
 base_url: 'projects/{{project}}/global/routes'
+supports_request_id: true
 has_self_link: true
 immutable: true
 mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'

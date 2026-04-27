@@ -24,6 +24,7 @@ references:
 docs:
 id_format: 'locations/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}'
 base_url: 'locations/global/firewallPolicies/{{firewall_policy}}'
+supports_request_id: true
 self_link: 'locations/global/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}'
 create_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addRule'
 update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/patchRule?priority={{priority}}'

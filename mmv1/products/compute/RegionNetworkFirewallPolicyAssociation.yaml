@@ -20,6 +20,7 @@ references:
   guides: {}
   api: https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addAssociation
 base_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}
+supports_request_id: true
 immutable: true
 self_link: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}
 create_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addAssociation

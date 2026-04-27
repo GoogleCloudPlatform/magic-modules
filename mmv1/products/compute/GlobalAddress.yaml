@@ -25,6 +25,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/v1/globalAddresses'
 docs:
 base_url: 'projects/{{project}}/global/addresses'
+supports_request_id: true
 has_self_link: true
 immutable: true
 timeouts:
