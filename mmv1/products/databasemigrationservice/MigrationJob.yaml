@@ -75,6 +75,24 @@ examples:
       source_sqldb_pass: '"password" + randomSuffix'
       # for backward compatible
       source_sqldb_user: '"username" + randomSuffix'
+  - name: database_migration_service_migration_job_postgres_to_postgres_objects
+    primary_resource_id: psqltopsqlobjects
+    vars:
+      destination_cp: destination-cp
+      destination_csql: destination-csql
+      migration_id: my-migrationid
+      source_cp: source-cp
+      source_csql: source-csql
+      source_sqldb_cert: cert
+      source_sqldb_pass: password
+      source_sqldb_user: username
+    test_vars_overrides:
+      # for backward compatible
+      source_sqldb_cert: '"cert" + randomSuffix'
+      # for backward compatible
+      source_sqldb_pass: '"password" + randomSuffix'
+      # for backward compatible
+      source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_alloydb
     primary_resource_id: psqltoalloydb
     vars:
@@ -294,3 +312,63 @@ properties:
         type: String
         description: |
           The name of the VPC network to peer with the Cloud SQL private network.
+  - name: objectsConfig
+    type: NestedObject
+    description: |
+      The objects that need to be migrated. If unset, the default is to migrate
+      all objects available on the source.
+    immutable: true
+    properties:
+      - name: sourceObjectsConfig
+        type: NestedObject
+        description: |
+          Configuration for the source objects to be migrated.
+        properties:
+          - name: objectsSelectionType
+            type: Enum
+            description: |
+              The objects selection type of the migration job. When set to
+              `SPECIFIED_OBJECTS`, only the objects listed in `objectConfigs` are
+              migrated. When set to `ALL_OBJECTS`, all objects available on the
+              source are migrated.
+            enum_values:
+              - ALL_OBJECTS
+              - SPECIFIED_OBJECTS
+          - name: objectConfigs
+            type: Array
+            description: |
+              The list of objects to migrate. Should only be set when
+              `objectsSelectionType` is `SPECIFIED_OBJECTS`.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: objectIdentifier
+                  type: NestedObject
+                  description: |
+                    The identifier of the migration job object.
+                  properties:
+                    - name: type
+                      type: Enum
+                      required: true
+                      description: |
+                        The category of the migration job object: `DATABASE`,
+                        `SCHEMA`, or `TABLE`.
+                      enum_values:
+                        - DATABASE
+                        - SCHEMA
+                        - TABLE
+                    - name: database
+                      type: String
+                      description: |
+                        The database name. Required only if the object uses
+                        a database name as part of its unique identifier.
+                    - name: schema
+                      type: String
+                      description: |
+                        The schema name. Required only if the object uses
+                        a schema name as part of its unique identifier.
+                    - name: table
+                      type: String
+                      description: |
+                        The table name. Required only if the object is a level
+                        below database or schema.
