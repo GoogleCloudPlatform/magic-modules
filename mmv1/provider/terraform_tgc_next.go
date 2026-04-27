@@ -243,7 +243,6 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		// common
 		"pkg/transport/base_url.go":                "third_party/terraform/transport/base_url.go",
 		"pkg/transport/batcher.go":                 "third_party/terraform/transport/batcher.go",
-		"pkg/transport/bigtable_client_factory.go": "third_party/terraform/transport/bigtable_client_factory.go",
 		"pkg/transport/error_retry_predicates.go":  "third_party/terraform/transport/error_retry_predicates.go",
 		"pkg/transport/header_transport.go":        "third_party/terraform/transport/header_transport.go",
 		"pkg/transport/mtls_util.go":               "third_party/terraform/transport/mtls_util.go",
