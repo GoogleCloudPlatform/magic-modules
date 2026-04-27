@@ -47,6 +47,13 @@ type IamPolicy struct {
 	// as its IAM policies refer to compute resources.
 	ParentResourceType string `yaml:"parent_resource_type,omitempty"`
 
+	// By default, the parent resource id is stored as the resource name format
+	// ie. project/{{project}}/resource/{{resource}}. Setting this to true will
+	// instead use the resource id ie. {{resource}}. The IAP product needs
+	// these for IAM policies that behave as singletons (their parent is often
+	// a project or location).
+	ParentIsResourceId bool `yaml:"parent_is_resource_id,omitempty"`
+
 	// Some resources allow retrieving the IAM policy with GET requests,
 	// others expect POST requests
 	FetchIamPolicyVerb string `yaml:"fetch_iam_policy_verb,omitempty"`
@@ -98,6 +105,10 @@ type IamPolicy struct {
 
 	// How the API supports IAM conditions
 	IamConditionsRequestType string `yaml:"iam_conditions_request_type,omitempty"`
+
+	// [Optional] Whether to include an updateMask in the setIamPolicy request.
+	// Mandatory for older APIs like DNS to support IAM conditions.
+	UpdateMask bool `yaml:"update_mask,omitempty"`
 
 	// Allows us to override the base_url of the resource. This is required for Cloud Run as the
 	// IAM resources use an entirely different base URL from the actual resource

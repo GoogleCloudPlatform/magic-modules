@@ -31,6 +31,8 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 description: |
  The Eventarc Trigger resource
 sweeper:

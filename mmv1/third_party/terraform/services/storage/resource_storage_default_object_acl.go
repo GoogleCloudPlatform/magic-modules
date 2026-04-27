@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/storage/v1"
@@ -163,4 +164,13 @@ func resourceStorageDefaultObjectAclDelete(d *schema.ResourceData, meta interfac
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_default_object_acl",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceStorageDefaultObjectAcl(),
+	}.Register()
 }

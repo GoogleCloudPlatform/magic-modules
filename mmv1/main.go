@@ -127,6 +127,8 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(outputPath, productsForVersion, "")
 	}
+
+	log.Printf("Done MM generation.")
 }
 
 // GenerateProduct generates code and documentation for a product

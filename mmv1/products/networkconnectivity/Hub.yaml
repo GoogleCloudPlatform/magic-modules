@@ -36,29 +36,54 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 legacy_long_form_project: true
+iam_policy:
+  parent_resource_attribute: 'hub'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'GET'
+  import_format:
+    - 'projects/{{project}}/locations/global/hubs/{{name}}'
+    - '{{name}}'
+  allowed_iam_role: 'roles/networkconnectivity.hubViewer'
 examples:
   - name: 'network_connectivity_hub_basic'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"basic" + randomSuffix'
   - name: 'network_connectivity_hub_with_export_psc'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"basic" + randomSuffix'
   - name: 'network_connectivity_hub_mesh_topology'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'mesh'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"mesh" + randomSuffix'
   - name: 'network_connectivity_hub_star_topology'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'star'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"star" + randomSuffix'
   - name: 'network_connectivity_hub_policy_mode'
     primary_resource_id: 'primary'
     vars:
       resource_name: 'policy'
 
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"policy" + randomSuffix'
 parameters:
 properties:
   - name: 'name'
@@ -68,6 +93,8 @@ properties:
     immutable: true
     default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
   - name: 'createTime'
     type: String
     description: Output only. The time the hub was created.

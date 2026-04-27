@@ -1,0 +1,59 @@
+{{/*
+The following Go code is injected into the Terraform resource after a successful create operation.
+It's used to populate the "serviceAgents" field from the API response.
+*/}}
+
+  opName, ok := res["name"].(string)
+  if !ok {
+    return fmt.Errorf("could not find operation name in initial response: %#v", res)
+  }
+
+  log.Printf("[DEBUG] {{ .Name }}PostCreate: Attempting to get operation %s", opName)
+
+  getOpURL := config.WorkloadIdentityBasePath + opName
+  opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "GET",
+    RawURL:    getOpURL,
+    UserAgent: userAgent,
+  })
+  if err != nil {
+    return fmt.Errorf("error getting operation %s: %w", opName, err)
+  }
+
+  if opRes["error"] != nil {
+    return fmt.Errorf("operation %s failed: %#v", opName, opRes["error"])
+  }
+
+  done, ok := opRes["done"].(bool)
+  // Ensure 'done' field is present and is a boolean. If not, treat as not done.
+  if !ok || !done {
+    return fmt.Errorf("operation %s did not complete: %#v", opName, opRes)
+  }
+
+  responseData, ok := opRes["response"].(map[string]interface{})
+  if !ok {
+    return fmt.Errorf("LRO 'response' field not found or not a map in final operation: %#v", opRes)
+  }
+
+  serviceAgentsData, ok := responseData["serviceAgents"].([]interface{})
+  if !ok {
+    return fmt.Errorf("required field 'serviceAgents' not found or is not an array in response data: %#v", responseData)
+  }
+
+  if len(serviceAgentsData) == 0 {
+    return fmt.Errorf("required field 'serviceAgents' was empty in response data for operation %s", opName)
+  }
+
+  log.Printf("[DEBUG] {{ .Name }}PostCreate: Retrieved %d service agent(s).", len(serviceAgentsData))
+  for i, agent := range serviceAgentsData {
+    log.Printf("[DEBUG] {{ .Name }}PostCreate: Service Agent [%d]: %#v", i, agent)
+  }
+
+  if err := d.Set("service_agents", flattenWorkloadIdentityServiceAgentServiceAgents(serviceAgentsData, d, config)); err != nil {
+    return fmt.Errorf("error setting service_agents for {{ .Name }}: %w", err)
+  }
+
+  log.Printf("[DEBUG] {{ .Name }}PostCreate: Successfully set service_agents.")
+
+  return nil

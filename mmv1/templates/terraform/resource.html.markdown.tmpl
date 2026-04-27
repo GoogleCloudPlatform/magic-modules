@@ -186,8 +186,18 @@ This resource provides the following
 - `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.
 {{- end }}
 - `delete` - Default is {{$.Timeouts.DeleteMinutes}} minutes.
+{{ if $.ProductMetadata.Version.RepEnabled }}
+## Regional Endpoint Policies
 
+This resource supports Regional Endpoint Policies (REP). See the [provider reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#prefer_regional_endpoints) for more details on configuration.
+
+{{- if $.ProductMetadata.RepByDefault }}
+~> **Note:** REP is enabled by default for this product.
+{{- end }}
+{{ "" }}
+{{- end }}
 ## Import
+
 {{- if $.ExcludeImport }}
 
 This resource does not support import.
@@ -199,6 +209,18 @@ This resource does not support import.
 * `{{replaceAll $idFormat "%" "" }}`
 {{- end }}
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import {{$.Name}} using identity values. For example:
+
+```tf
+import {
+  identity = {
+    {{- range $identity := $.IdentityProperties }}
+    {{ $identity.Name }} = "<-{{ if $identity.Required }}required{{ else }}optional{{ end }} value->"
+    {{- end }}
+  }
+  to = {{$.TerraformName}}.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import {{$.Name}} using one of the formats above. For example:
 

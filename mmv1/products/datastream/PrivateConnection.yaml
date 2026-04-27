@@ -27,6 +27,8 @@ create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?priv
 immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+deletion_policy_custom_docs: true
+deletion_policy_default: "FORCE"
 timeouts:
   insert_minutes: 30
   update_minutes: 30
@@ -52,6 +54,15 @@ examples:
     vars:
       private_connection_id: 'my-connection'
       network_name: 'my-network'
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'datastream_private_connection_force_delete'
+    primary_resource_id: 'default'
+    vars:
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'datastream_private_connection_psc_interface'
     primary_resource_id: 'default'
     test_env_vars:
@@ -64,6 +75,22 @@ examples:
       network_attachment_name: 'my-network-attachment'
       network_name: 'my-network'
       subnetwork_name: 'my-subnetwork'
+    ignore_read_extra:
+      - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      The deletion policy for the private connection. Setting `FORCE` will also delete any child
+      routes that belong to this private connection. Setting `DEFAULT` will fail the delete if
+      child routes exist. Defaults to `FORCE` for backwards compatibility.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", the command will behave as if set to "DEFAULT".
+    type: String
+    exclude: true
 parameters:
   - name: 'privateConnectionId'
     type: String

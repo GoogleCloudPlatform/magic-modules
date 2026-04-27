@@ -65,6 +65,10 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	return t
 }
 
+func (tgc TerraformGoogleConversion) Compiler() string {
+	return "terraformgoogleconversion-codegen"
+}
+
 func (tgc TerraformGoogleConversion) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	// Temporary shim to generate the missing resources directory. Can be removed
 	// once the folder exists downstream.
@@ -200,12 +204,19 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 	tgc.CompileFileList(outputFolder, testSource, *templateData, products)
 
 	resourceConverters := map[string]string{
-		"converters/google/resources/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"converters/google/resources/resource_converters.go":                       "third_party/tgc/resource_converters.go.tmpl",
-		"converters/google/resources/services/kms/iam_kms_key_ring.go":             "third_party/terraform/services/kms/iam_kms_key_ring.go.tmpl",
-		"converters/google/resources/services/kms/iam_kms_crypto_key.go":           "third_party/terraform/services/kms/iam_kms_crypto_key.go.tmpl",
-		"converters/google/resources/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
+		"converters/google/resources/services/bigquery/iam_bigquery_dataset.go":    "third_party/terraform/services/bigquery/iam_bigquery_dataset.go.tmpl",
 		"converters/google/resources/services/compute/compute_instance.go":         "third_party/tgc/services/compute/compute_instance.go.tmpl",
+		"converters/google/resources/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"converters/google/resources/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
+		"converters/google/resources/services/kms/iam_kms_crypto_key.go":           "third_party/terraform/services/kms/iam_kms_crypto_key.go.tmpl",
+		"converters/google/resources/services/kms/iam_kms_key_ring.go":             "third_party/terraform/services/kms/iam_kms_key_ring.go.tmpl",
+		"converters/google/resources/services/pubsub/iam_pubsub_subscription.go":   "third_party/terraform/services/pubsub/iam_pubsub_subscription.go.tmpl",
+		"converters/google/resources/services/resourcemanager/iam_folder.go":       "third_party/terraform/services/resourcemanager/iam_folder.go.tmpl",
+		"converters/google/resources/services/resourcemanager/iam_organization.go": "third_party/terraform/services/resourcemanager/iam_organization.go.tmpl",
+		"converters/google/resources/services/resourcemanager/iam_project.go":      "third_party/terraform/services/resourcemanager/iam_project.go.tmpl",
+		"converters/google/resources/services/spanner/iam_spanner_database.go":     "third_party/terraform/services/spanner/iam_spanner_database.go.tmpl",
+		"converters/google/resources/services/spanner/iam_spanner_instance.go":     "third_party/terraform/services/spanner/iam_spanner_instance.go.tmpl",
 	}
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
@@ -386,11 +397,7 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"converters/google/resources/services/kms/kms_utils.go":                                 "third_party/terraform/services/kms/kms_utils.go",
 		"converters/google/resources/services/sourcerepo/source_repo_utils.go":                  "third_party/terraform/services/sourcerepo/source_repo_utils.go",
 		"converters/google/resources/services/pubsub/pubsub_utils.go":                           "third_party/terraform/services/pubsub/pubsub_utils.go",
-		"converters/google/resources/services/resourcemanager/iam_organization.go":              "third_party/terraform/services/resourcemanager/iam_organization.go",
-		"converters/google/resources/services/resourcemanager/iam_folder.go":                    "third_party/terraform/services/resourcemanager/iam_folder.go",
-		"converters/google/resources/services/resourcemanager/iam_project.go":                   "third_party/terraform/services/resourcemanager/iam_project.go",
 		"converters/google/resources/services/privateca/privateca_utils.go":                     "third_party/terraform/services/privateca/privateca_utils.go",
-		"converters/google/resources/services/bigquery/iam_bigquery_dataset.go":                 "third_party/terraform/services/bigquery/iam_bigquery_dataset.go",
 		"converters/google/resources/services/bigquery/bigquery_dataset_iam.go":                 "third_party/tgc/services/bigquery/bigquery_dataset_iam.go",
 		"converters/google/resources/services/compute/compute_security_policy.go":               "third_party/tgc/services/compute/compute_security_policy.go",
 		"converters/google/resources/services/eventarc/eventarc_utils.go":                       "third_party/terraform/services/eventarc/eventarc_utils.go",
@@ -398,11 +405,8 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"converters/google/resources/services/kms/kms_crypto_key_iam.go":                        "third_party/tgc/services/kms/kms_crypto_key_iam.go",
 		"converters/google/resources/services/resourcemanager/project_iam_custom_role.go":       "third_party/tgc/services/resourcemanager/project_iam_custom_role.go",
 		"converters/google/resources/services/resourcemanager/organization_iam_custom_role.go":  "third_party/tgc/services/resourcemanager/organization_iam_custom_role.go",
-		"converters/google/resources/services/pubsub/iam_pubsub_subscription.go":                "third_party/terraform/services/pubsub/iam_pubsub_subscription.go",
 		"converters/google/resources/services/pubsub/pubsub_subscription_iam.go":                "third_party/tgc/services/pubsub/pubsub_subscription_iam.go",
-		"converters/google/resources/services/spanner/iam_spanner_database.go":                  "third_party/terraform/services/spanner/iam_spanner_database.go",
 		"converters/google/resources/services/spanner/spanner_database_iam.go":                  "third_party/tgc/services/spanner/spanner_database_iam.go",
-		"converters/google/resources/services/spanner/iam_spanner_instance.go":                  "third_party/terraform/services/spanner/iam_spanner_instance.go",
 		"converters/google/resources/services/spanner/spanner_instance_iam.go":                  "third_party/tgc/services/spanner/spanner_instance_iam.go",
 		"converters/google/resources/services/storage/storage_bucket_iam.go":                    "third_party/tgc/services/storage/storage_bucket_iam.go",
 		"converters/google/resources/services/resourcemanager/organization_policy.go":           "third_party/tgc/services/resourcemanager/organization_policy.go",

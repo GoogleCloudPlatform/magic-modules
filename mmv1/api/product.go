@@ -58,7 +58,7 @@ type Product struct {
 	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
-	ResourcesWithCaiAssetType map[string]struct{}
+	ResourcesWithCaiAssetType map[string]struct{} `yaml:"-"`
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
@@ -80,6 +80,10 @@ type Product struct {
 
 	// ImportPath contains the prefix used for importing packages in generated files.
 	ImportPath string `yaml:"-"`
+
+	// RepByDefault is if this product should default to REP endpoints if
+	// available. Changing this requires REP to be supported in *ALL* regions
+	RepByDefault bool `yaml:"rep_by_default,omitempty"`
 
 	// Used for controlling merges of deletion policy in batches by product
 	// Will be removed prior to main merge

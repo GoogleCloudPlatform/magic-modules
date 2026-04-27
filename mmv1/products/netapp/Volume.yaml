@@ -769,4 +769,3 @@ properties:
         description: |
           The number of internal constituents (e.g., FlexVols) for this large volume.
           The minimum number of constituents is 2.
-    min_version: beta

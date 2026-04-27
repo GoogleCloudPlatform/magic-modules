@@ -132,6 +132,9 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'rbs-health-check'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
   - name: 'region_backend_service_dynamic_backend_count'
     primary_resource_id: 'default'
     vars:
@@ -139,6 +142,9 @@ examples:
       health_check_name: 'health-check'
       instance_group_name: 'instance_group'
       network_name: 'network'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
     exclude_test: true
   - name: 'region_backend_service_dynamic_forwarding'
     primary_resource_id: 'default'
@@ -174,6 +180,9 @@ examples:
       region_backend_service_name: 'region-service'
       health_check_name: 'health-check'
       authentication_name: 'authentication'
+    test_vars_overrides:
+      # for backward compatible
+      authentication_name: '"authentication" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -892,6 +901,7 @@ properties:
         description: |
           OAuth2 Client ID for IAP
         send_empty_value: true
+        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
       - name: 'oauth2ClientSecret'
         type: String
         description: |

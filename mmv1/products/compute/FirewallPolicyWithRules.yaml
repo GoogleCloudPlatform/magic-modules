@@ -48,6 +48,13 @@ examples:
       security_profile_group: 'spg'
       tag_key: 'tag-key'
       tag_value: 'tag-value'
+    test_vars_overrides:
+      # for backward compatible
+      network: '"network" + randomSuffix'
+      # for backward compatible
+      security_profile: '"sp" + randomSuffix'
+      # for backward compatible
+      security_profile_group: '"spg" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:

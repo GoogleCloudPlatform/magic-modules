@@ -10,13 +10,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'Iap'
 display_name: 'Identity-Aware Proxy'
 deletion_policy_opt_in: true
 versions:
   - name: 'ga'
+    base_url: 'https://iap.googleapis.com/v1/'
+  - name: 'beta'
     base_url: 'https://iap.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

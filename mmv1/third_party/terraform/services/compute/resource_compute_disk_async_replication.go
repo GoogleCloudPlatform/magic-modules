@@ -1,0 +1,418 @@
+package compute
+
+import (
+	"fmt"
+	"log"
+	"regexp"
+	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func ResourceComputeDiskAsyncReplication() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceDiskAsyncReplicationCreate,
+		Read:   resourceDiskAsyncReplicationRead,
+		Update: resourceDiskAsyncReplicationUpdate,
+		Delete: resourceDiskAsyncReplicationDelete,
+
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(5 * time.Minute),
+			Delete: schema.DefaultTimeout(5 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"primary_disk": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      `Primary disk for asynchronous replication.`,
+				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+			},
+			"secondary_disk": {
+				Type:        schema.TypeList,
+				Required:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: `Secondary disk for asynchronous replication.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"disk": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							Description:      `Secondary disk for asynchronous replication.`,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+						},
+						"state": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Output-only. Status of replication on the secondary disk.`,
+						},
+					},
+				},
+			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
+		},
+		UseJSONNumber: true,
+	}
+}
+
+func asyncReplicationGetConfigAndUserAgent(d *schema.ResourceData, meta interface{}) (*transport_tpg.Config, string, error) {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return nil, "", err
+	}
+	return config, userAgent, nil
+}
+
+func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (zv *tpgresource.ZonalFieldValue, rv *tpgresource.RegionalFieldValue, resourceId string, err error) {
+	config := meta.(*transport_tpg.Config)
+
+	var zonalMatch bool
+	zonalMatch, err = regexp.MatchString(fmt.Sprintf(tpgresource.ZonalLinkBasePattern, "disks"), disk)
+	if err != nil {
+		return
+	}
+	zv, parseErr := tpgresource.ParseDiskFieldValue(disk, d, config)
+	if !zonalMatch || parseErr != nil {
+		rv, err = tpgresource.ParseRegionDiskFieldValue(disk, d, config)
+		if err != nil {
+			return
+		}
+		var regionalMatch bool
+		regionalMatch, err = regexp.MatchString(fmt.Sprintf(tpgresource.RegionalLinkBasePattern, "disks"), disk)
+		if !regionalMatch || err != nil {
+			err = fmt.Errorf("regional disk expected: %s", disk)
+			return
+		}
+		resourceId = fmt.Sprintf(tpgresource.RegionalLinkTemplate, rv.Project, rv.Region, "disks", rv.Name)
+	} else {
+		resourceId = fmt.Sprintf(tpgresource.ZonalLinkTemplate, zv.Project, zv.Zone, "disks", zv.Name)
+	}
+	return
+}
+
+func asyncReplicationGetDiskStatus(config *transport_tpg.Config, userAgent string, zv *tpgresource.ZonalFieldValue, rv *tpgresource.RegionalFieldValue) (map[string]interface{}, error) {
+	var url string
+	var project string
+	if rv == nil { // Zonal disk
+		url = fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s", config.ComputeBasePath, zv.Project, zv.Zone, zv.Name)
+		project = zv.Project
+		log.Printf("[DEBUG] Get disk zones/%s/%s", zv.Zone, zv.Name)
+	} else {
+		url = fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s", config.ComputeBasePath, rv.Project, rv.Region, rv.Name)
+		project = rv.Project
+		log.Printf("[DEBUG] Get disk regions/%s/%s", rv.Region, rv.Name)
+	}
+	diskStatus, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return diskStatus, nil
+}
+
+func resourceDiskAsyncReplicationCreate(d *schema.ResourceData, meta interface{}) error {
+	config, userAgent, err := asyncReplicationGetConfigAndUserAgent(d, meta)
+	if err != nil {
+		return err
+	}
+
+	zv, rv, resourceId, err := asyncReplicationGetDiskFromConfig(d.Get("primary_disk").(string), d, meta)
+	if err != nil {
+		return err
+	}
+
+	secondaryDiskList := d.Get("secondary_disk").([]interface{})
+	secondaryDiskMap := secondaryDiskList[0].(map[string]interface{})
+	secondaryDisk := secondaryDiskMap["disk"].(string)
+	if rv == nil { // Zonal disk
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s/startAsyncReplication", config.ComputeBasePath, zv.Project, zv.Zone, zv.Name)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   zv.Project,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body: map[string]interface{}{
+				"asyncSecondaryDisk": secondaryDisk,
+			},
+		})
+		if err != nil {
+			return err
+		}
+	} else {
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s/startAsyncReplication", config.ComputeBasePath, rv.Project, rv.Region, rv.Name)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   rv.Project,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body: map[string]interface{}{
+				"asyncSecondaryDisk": secondaryDisk,
+			},
+		})
+		if err != nil {
+			return err
+		}
+	}
+	err = retry.Retry(time.Minute*time.Duration(5), func() *retry.RetryError {
+		diskStatus, err := asyncReplicationGetDiskStatus(config, userAgent, zv, rv)
+		if err != nil {
+			return retry.NonRetryableError(err)
+		}
+		resourceStatus, ok := diskStatus["resourceStatus"].(map[string]interface{})
+		if !ok {
+			return retry.RetryableError(fmt.Errorf("no resource status for disk: %s", resourceId))
+		}
+		asyncSecondaryDisks, ok := resourceStatus["asyncSecondaryDisks"].(map[string]interface{})
+		if !ok {
+			time.Sleep(5 * time.Second)
+			return retry.RetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
+		}
+		if rawState, ok := asyncSecondaryDisks[secondaryDisk]; ok {
+			stateMap, _ := rawState.(map[string]interface{})
+			state, _ := stateMap["state"].(string)
+			if state != "ACTIVE" {
+				time.Sleep(5 * time.Second)
+				return retry.RetryableError(fmt.Errorf("secondary disk %s state (%s) is not: ACTIVE", secondaryDisk, state))
+			}
+			return nil
+		}
+		time.Sleep(5 * time.Second)
+		return retry.RetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
+	})
+	if err != nil {
+		return err
+	}
+	d.SetId(resourceId)
+	return resourceDiskAsyncReplicationRead(d, meta)
+}
+
+func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) error {
+	config, userAgent, err := asyncReplicationGetConfigAndUserAgent(d, meta)
+	if err != nil {
+		return err
+	}
+
+	primaryDisk := d.Get("primary_disk").(string)
+	if primaryDisk == "" {
+		primaryDisk = d.Id()
+		d.Set("primary_disk", primaryDisk)
+	}
+
+	zv, rv, resourceId, err := asyncReplicationGetDiskFromConfig(primaryDisk, d, meta)
+	if err != nil {
+		return err
+	}
+
+	diskStatus, err := asyncReplicationGetDiskStatus(config, userAgent, zv, rv)
+	if err != nil {
+		return err
+	}
+
+	secondaryDisks := make([]map[string]string, 0)
+	existingSecondaryDisks := make(map[string]bool, 0)
+	if rawAsyncDisks, ok := diskStatus["asyncSecondaryDisks"].(map[string]interface{}); ok {
+		for _, rawDisk := range rawAsyncDisks {
+			disk, ok := rawDisk.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			secondaryDisk := make(map[string]string)
+
+			diskUrl := ""
+			if ard, ok := disk["asyncReplicationDisk"].(map[string]interface{}); ok {
+				diskUrl, _ = ard["disk"].(string)
+			}
+
+			_, _, resourceName, err := asyncReplicationGetDiskFromConfig(diskUrl, d, meta)
+			if err != nil {
+				return err
+			}
+
+			resourceStatus, ok := diskStatus["resourceStatus"].(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("no resource status for disk: %s", resourceId)
+			}
+
+			secondaryDisk["disk"] = resourceName
+			existingSecondaryDisks[resourceName] = true
+			if asyncStatusMap, ok := resourceStatus["asyncSecondaryDisks"].(map[string]interface{}); ok {
+				if rawState, ok := asyncStatusMap[resourceName]; ok {
+					// Note this might be other than ACTIVE or STOPPED, but we wait for proper state
+					// on replication start/stop so it shouldnt affect Terraform
+					stateMap, _ := rawState.(map[string]interface{})
+					state, _ := stateMap["state"].(string)
+					log.Printf("[DEBUG] Secondary disk %s is in state: %s", resourceName, state)
+					secondaryDisk["state"] = state
+				}
+			}
+			secondaryDisks = append(secondaryDisks, secondaryDisk)
+		}
+	}
+
+	log.Printf("[DEBUG] Secondary disks: %v", secondaryDisks)
+	if err = d.Set("secondary_disk", secondaryDisks); err != nil {
+		return fmt.Errorf("Error setting secondary_disk: %s", err)
+	}
+	d.SetId(resourceId)
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+	//UDP default read end
+	return nil
+}
+
+// UDP update start
+func resourceDiskAsyncReplicationUpdate(d *schema.ResourceData, meta interface{}) error {
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceDiskAsyncReplicationRead(d, meta)
+}
+
+//UDP update end
+
+func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+	//UDP pre-delete end
+	config, userAgent, err := asyncReplicationGetConfigAndUserAgent(d, meta)
+	if err != nil {
+		return err
+	}
+
+	zv, rv, _, err := asyncReplicationGetDiskFromConfig(d.Get("primary_disk").(string), d, meta)
+	if err != nil {
+		return err
+	}
+
+	var replicationStopped bool = false
+	secondaryDiskList := d.Get("secondary_disk").([]interface{})
+	secondaryDiskMap := secondaryDiskList[0].(map[string]interface{})
+	secondaryDisk := secondaryDiskMap["disk"].(string)
+	_, _, resourceName, err := asyncReplicationGetDiskFromConfig(secondaryDisk, d, meta)
+	if err != nil {
+		return err
+	}
+
+	diskStatus, err := asyncReplicationGetDiskStatus(config, userAgent, zv, rv)
+	if err != nil {
+		return err
+	}
+
+	resourceStatus, ok := diskStatus["resourceStatus"].(map[string]interface{})
+	if !ok {
+		// Nothing to do, replication not running
+		return nil
+	}
+	asyncSecondaryDisks, ok := resourceStatus["asyncSecondaryDisks"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("could not find secondary disk: %s", secondaryDisk)
+	}
+
+	if rawState, ok := asyncSecondaryDisks[resourceName]; ok {
+		stateMap, _ := rawState.(map[string]interface{})
+		state, _ := stateMap["state"].(string)
+		if state != "STOPPED" {
+			replicationStopped = true
+			if rv == nil { // Zonal disk
+				url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s/stopAsyncReplication", config.ComputeBasePath, zv.Project, zv.Zone, zv.Name)
+				_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   zv.Project,
+					RawURL:    url,
+					UserAgent: userAgent,
+				})
+				if err != nil {
+					return err
+				}
+			} else {
+				url := fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s/stopAsyncReplication", config.ComputeBasePath, rv.Project, rv.Region, rv.Name)
+				_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   rv.Project,
+					RawURL:    url,
+					UserAgent: userAgent,
+				})
+				if err != nil {
+					return err
+				}
+			}
+			err = retry.Retry(time.Minute*time.Duration(5), func() *retry.RetryError {
+				diskStatus, err := asyncReplicationGetDiskStatus(config, userAgent, zv, rv)
+				if err != nil {
+					return retry.NonRetryableError(err)
+				}
+				rs, ok := diskStatus["resourceStatus"].(map[string]interface{})
+				if !ok {
+					return retry.NonRetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
+				}
+				asd, ok := rs["asyncSecondaryDisks"].(map[string]interface{})
+				if !ok {
+					return retry.NonRetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
+				}
+				if rawState, ok := asd[resourceName]; ok {
+					sm, _ := rawState.(map[string]interface{})
+					st, _ := sm["state"].(string)
+					if st != "STOPPED" {
+						time.Sleep(5 * time.Second)
+						return retry.RetryableError(fmt.Errorf("secondary disk %s state (%s) is not STOPPED", secondaryDisk, st))
+					}
+					return nil
+				}
+				return retry.NonRetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
+			})
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		return fmt.Errorf("could not find secondary disk: %s", secondaryDisk)
+	}
+
+	if replicationStopped {
+		// Allow the replication to quiescence
+		time.Sleep(5000 * time.Millisecond)
+	}
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_disk_async_replication",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceComputeDiskAsyncReplication(),
+	}.Register()
+}

@@ -16,6 +16,8 @@ name: 'Dataform'
 display_name: 'Dataform'
 deletion_policy_opt_in: true
 versions:
+  - name: 'ga'
+    base_url: 'https://dataform.googleapis.com/v1/'
   - name: 'beta'
     base_url: 'https://dataform.googleapis.com/v1beta1/'
 scopes:

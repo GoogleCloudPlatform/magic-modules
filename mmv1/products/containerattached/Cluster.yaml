@@ -51,14 +51,23 @@ examples:
     primary_resource_id: 'primary'
     vars:
       name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"basic" + randomSuffix'
   - name: 'container_attached_cluster_full'
     primary_resource_id: 'primary'
     vars:
       name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"basic" + randomSuffix'
   - name: 'container_attached_cluster_ignore_errors'
     primary_resource_id: 'primary'
     vars:
       name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"basic" + randomSuffix'
     ignore_read_extra:
       - 'deletion_policy'
 virtual_fields:
