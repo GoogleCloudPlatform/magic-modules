@@ -1,0 +1,38 @@
+	if v, ok := d.GetOk("qa_scorecard_revision_id"); !ok || v == "" {
+		getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ContactCenterInsightsBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/qaScorecards/{{"{{"}}qa_scorecard{{"}}"}}/revisions")
+		if err != nil {
+			return err
+		}
+		headers := make(http.Header)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    getUrl,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+		if err != nil {
+			return err
+		}
+
+		revisions, ok := res["qaScorecardRevisions"].([]interface{})
+		var newLatestID string
+		if ok && len(revisions) > 0 {
+			lastRev := revisions[0].(map[string]interface{})
+			fullName := lastRev["name"].(string)
+			parts := strings.Split(fullName, "/")
+			newLatestID = parts[len(parts)-1]
+		}
+
+		if newLatestID != "" {
+			d.Set("qa_scorecard_revision_id", newLatestID)
+			id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/qaScorecards/{{"{{"}}qa_scorecard{{"}}"}}/revisions/{{"{{"}}qa_scorecard_revision_id{{"}}"}}")
+			if err != nil {
+				return err
+			}
+			d.SetId(id)
+		}
+
+		return resourceContactCenterInsightsQaScorecardRevisionRead(d, meta)
+	}
