@@ -106,6 +106,10 @@ type IamPolicy struct {
 	// How the API supports IAM conditions
 	IamConditionsRequestType string `yaml:"iam_conditions_request_type,omitempty"`
 
+	// [Optional] Whether to include an updateMask in the setIamPolicy request.
+	// Mandatory for older APIs like DNS to support IAM conditions.
+	UpdateMask bool `yaml:"update_mask,omitempty"`
+
 	// Allows us to override the base_url of the resource. This is required for Cloud Run as the
 	// IAM resources use an entirely different base URL from the actual resource
 	BaseUrl string `yaml:"base_url,omitempty"`

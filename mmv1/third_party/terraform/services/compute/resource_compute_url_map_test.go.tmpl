@@ -6,9 +6,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-{{ if ne $.TargetVersionName `ga` -}}
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-{{- end }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -432,7 +430,6 @@ func TestAccComputeUrlMap_routeRulesCustomErrorResponsePolicy(t *testing.T) {
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeUrlMap_cachePolicyMultiLevelUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -440,7 +437,7 @@ func TestAccComputeUrlMap_cachePolicyMultiLevelUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -467,7 +464,6 @@ func TestAccComputeUrlMap_cachePolicyMultiLevelUpdate(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func testAccComputeUrlMap_basic1(bsName, hcName, umName string) string {
 	return fmt.Sprintf(`
@@ -2154,11 +2150,9 @@ resource "google_compute_url_map" "url_map" {
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeUrlMap_cachePolicyMultiLevel(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_url_map" "urlmap" {
-  provider = google-beta
   name     = "urlmap-test-%s"
   
   default_service = google_compute_backend_service.default.id
@@ -2367,7 +2361,6 @@ resource "google_compute_url_map" "urlmap" {
 }
 
 resource "google_compute_backend_service" "default" {
-  provider = google-beta
   name     = "backend-test-%s"
   
   protocol              = "HTTP"
@@ -2377,7 +2370,6 @@ resource "google_compute_backend_service" "default" {
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
   name     = "hc-test-%s"
   http_health_check {
     port = 80
@@ -2389,7 +2381,6 @@ resource "google_compute_health_check" "default" {
 func testAccComputeUrlMap_cachePolicyMultiLevelUpdate(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_url_map" "urlmap" {
-  provider = google-beta
   name     = "urlmap-test-%s"
   
   default_service = google_compute_backend_service.default.id
@@ -2513,7 +2504,6 @@ resource "google_compute_url_map" "urlmap" {
 }
 
 resource "google_compute_backend_service" "default" {
-  provider = google-beta
   name     = "backend-test-%s"
   
   protocol              = "HTTP"
@@ -2523,7 +2513,6 @@ resource "google_compute_backend_service" "default" {
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
   name     = "hc-test-%s"
   http_health_check {
     port = 80
@@ -2531,4 +2520,3 @@ resource "google_compute_health_check" "default" {
 }
 `, suffix, suffix, suffix)
 }
-{{- end }}

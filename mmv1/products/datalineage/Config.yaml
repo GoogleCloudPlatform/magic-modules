@@ -1,0 +1,137 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Config'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/config'
+  - 'folders/{folder}/locations/{location}/config'
+  - 'organizations/{organization}/locations/{location}/config'
+description: |
+  Configuration for Data Lineage.
+
+  Defines configuration options for Lineage customers to control behavior of
+  lineage systems.
+references:
+  guides:
+    'Official Documentation': 'https://docs.cloud.google.com/dataplex/docs/about-data-lineage#control-lineage-ingestion'
+  api: 'https://docs.cloud.google.com/dataplex/docs/reference/data-lineage/rest/v1/folders.locations.config'
+docs:
+id_format: '{{parent}}/locations/{{location}}/config'
+base_url: '{{parent}}/locations/{{location}}/config'
+self_link: '{{parent}}/locations/{{location}}/config'
+create_url: '{{parent}}/locations/{{location}}/config'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+delete_verb: 'PATCH'
+update_mask: false
+exclude_delete: false
+import_format:
+  - '{{%parent}}/locations/{{location}}/config'
+
+autogen_async: false
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/datalineage_config.go.tmpl'
+
+examples:
+  - name: 'data_lineage_config_project'
+    primary_resource_id: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'data_lineage_config_folder'
+    primary_resource_id: 'default'
+    vars:
+      folder_name: 'config-f'
+    test_env_vars:
+      organization: 'ORG_ID'
+      service_account: 'SERVICE_ACCT'
+    external_providers: ["time"]
+  - name: 'data_lineage_config_organization'
+    primary_resource_id: 'default'
+    test_env_vars:
+      organization: 'ORG_ID'
+
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      Parent scope for the config.
+      Format: projects/{project-id|project-number} or folders/{folder-number} or organizations/{organization-number}.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The region of the data lineage configuration for integration.
+    url_param_only: true
+    required: true
+    immutable: true
+
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Identifier. The resource name of the config.
+      Format: organizations/{organization_id}/locations/{location}/config,
+      folders/{folder_id}/locations/{location}/config,
+      projects/{project_id}/locations/{location}/config,
+      or projects/{project_number}/locations/{location}/config.
+    output: true
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      Used for optimistic concurrency control when patching config.
+    output: true
+  - name: 'ingestion'
+    type: NestedObject
+    description: |
+      Defines how Lineage should be ingested for this resource.
+    required: true
+    properties:
+      - name: 'rule'
+        type: Array
+        description: |
+          List of ingestion rules for Data Lineage ingestion.
+        api_name: rules
+        required: true
+        min_size: 1
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'integrationSelector'
+              type: NestedObject
+              description: |
+                Selects which integration this rule applies to.
+              required: true
+              properties:
+                - name: 'integration'
+                  type: Enum
+                  description: |
+                    Integration to which the rule applies.
+                  required: true
+                  enum_values:
+                    - 'DATAPROC'
+                    - 'LOOKER_CORE'
+            - name: 'lineageEnablement'
+              type: NestedObject
+              description: |
+                Configures lineage ingestion enablement for this scope.
+              required: true
+              properties:
+                - name: 'enabled'
+                  type: Boolean
+                  description: |
+                    Whether ingestion of lineage should be enabled.
+                  required: true
+                  send_empty_value: true
