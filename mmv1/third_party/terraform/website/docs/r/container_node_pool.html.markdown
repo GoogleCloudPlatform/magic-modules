@@ -175,6 +175,8 @@ cluster.
 * `queued_provisioning` - (Optional) Specifies node pool-level settings of queued provisioning.
     Structure is [documented below](#nested_queued_provisioning).
 
+* `best_effort_provisioning` - (Optional) Best-effort provisioning allows node pool creations to automatically ignore stockout errors once the minimum number of nodes have been provisioned. Structure is [documented below](#nested_best_effort_provisioning).
+
 <a name="nested_autoscaling"></a>The `autoscaling` block supports (either total or per zone limits are required):
 
 * `min_node_count` - (Optional) Minimum number of nodes per zone in the NodePool.
@@ -300,6 +302,11 @@ cluster.
 <a name="nested_queued_provisioning"></a> The `queued_provisioning` block supports:
 
 * `enabled` (Required) - Makes nodes obtainable through the [ProvisioningRequest API](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest) exclusively.
+
+<a name="nested_best_effort_provisioning"></a>The `best_effort_provisioning` block supports:
+
+* `enabled` - (Optional) If `true`, best-effort provisioning is enabled.
+* `min_provision_nodes` - (Optional) Minimum number of nodes to be provisioned.
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 
