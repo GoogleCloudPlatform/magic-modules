@@ -1,4 +1,5 @@
 resource "google_ces_app" "app" {
+  provider = google-beta
   app_id = "{{index $.Vars "app_id"}}"
   location = "us"
   display_name = "{{index $.Vars "app_display_name"}}"
@@ -12,8 +13,8 @@ resource "google_ces_app" "app" {
 }
 
 resource "google_ces_evaluation" "ces_evaluation_basic" {
-  evaluation_id = "{{index $.Vars "evaluation_id"}}"
-  display_name = "{{index $.Vars "evaluation_display_name"}}"
+  provider = google-beta
+  display_name = "my-evaluation-basic"
   location     = "us"
   app          = google_ces_app.app.app_id
 }

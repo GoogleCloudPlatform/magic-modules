@@ -15,6 +15,7 @@
 name: Evaluation
 description: Customer Engagement Suite Evaluation
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations?evaluationId={{evaluation_id}}
 update_verb: PATCH
@@ -23,19 +24,26 @@ import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{name}}
 examples:
   - name: ces_evaluation_basic
+    min_version: beta
     primary_resource_id: ces_evaluation_basic
     vars:
-      evaluation_display_name: my-evaluation
-      evaluation_id: evaluation-id
       app_id: app-id
       app_display_name: my-app
   - name: ces_evaluation_full
+    min_version: beta
     primary_resource_id: ces_evaluation_full
     vars:
-      evaluation_display_name: my-evaluation-full
       evaluation_id: evaluation-id-full
       app_id: app-id-full
       app_display_name: my-app-full
+      tool_id: tool-id-full
+  - name: ces_evaluation_toolset
+    min_version: beta
+    primary_resource_id: ces_evaluation_toolset
+    vars:
+      evaluation_id: eval-toolset
+      app_id: app-id-toolset
+      app_display_name: my-app-toolset
 parameters:
   - name: location
     type: String

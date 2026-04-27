@@ -1,4 +1,5 @@
 resource "google_ces_app" "app" {
+  provider = google-beta
   app_id = "{{index $.Vars "app_id"}}"
   location = "us"
   display_name = "{{index $.Vars "app_display_name"}}"
@@ -12,19 +13,21 @@ resource "google_ces_app" "app" {
 }
 
 resource "google_ces_tool" "tool" {
-    location       = "us"
-    app            = google_ces_app.app.app_id
-    tool_id        = "tool-1"
-    execution_type = "SYNCHRONOUS"
-    python_function {
-        name = "example_function"
-        python_code = "def example_function() -> int: return 0"
-    }
+  provider = google-beta
+  location       = "us"
+  app            = google_ces_app.app.app_id
+  tool_id        = "{{index $.Vars "tool_id"}}"
+  execution_type = "SYNCHRONOUS"
+  python_function {
+      name = "example_function"
+      python_code = "def example_function() -> int: return 0"
+  }
 }
 
 resource "google_ces_evaluation" "ces_evaluation_full" {
+  provider = google-beta
   evaluation_id = "{{index $.Vars "evaluation_id"}}"
-  display_name = "{{index $.Vars "evaluation_display_name"}}"
+  display_name = "my-evaluation-full"
   location     = "us"
   app          = google_ces_app.app.app_id
   description  = "Full evaluation for testing"

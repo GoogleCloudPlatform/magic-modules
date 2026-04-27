@@ -1,3 +1,0 @@
-google-cloud-aiplatform[agent_engines,adk]
-cloudpickle==3.0
-pydantic==2.11.7
