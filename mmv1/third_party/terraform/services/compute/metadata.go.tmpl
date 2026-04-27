@@ -174,7 +174,57 @@ func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Met
 
 	return m, nil
 }
+
+func resourceInstanceMetadata_v2(d tpgresource.TerraformResourceData) (map[string]interface{}, error) {
+	m := map[string]interface{}{}
+	mdMap := d.Get("metadata").(map[string]interface{})
+	if v, ok := d.GetOk("metadata_startup_script"); ok && v.(string) != "" {
+		if w, ok := mdMap["startup-script"]; ok {
+			if v != w {
+				return nil, errors.New("Cannot provide both metadata_startup_script and metadata.startup-script.")
+			}
+		}
+		mdMap["startup-script"] = v
+	}
+	if len(mdMap) > 0 {
+		items := make([]interface{}, 0, len(mdMap))
+		var keys []string
+		for k := range mdMap {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			v := mdMap[k].(string)
+			items = append(items, map[string]interface{}{
+				"key":   k,
+				"value": v,
+			})
+		}
+		m["items"] = items
+		m["fingerprint"] = d.Get("metadata_fingerprint").(string)
+	}
+	return m, nil
+}
 {{- if ne $.TargetVersionName "ga" }}
+
+func resourceInstancePartnerMetadata_v2(d tpgresource.TerraformResourceData) (map[string]interface{}, error) {
+	partnerMetadata := map[string]interface{}{}
+	partnerMetadataMap := d.Get("partner_metadata").(map[string]interface{})
+	if len(partnerMetadataMap) > 0 {
+		for key, value := range partnerMetadataMap {
+			var jsonMap map[string]interface{}
+			err := json.Unmarshal([]byte(value.(string)), &jsonMap)
+			if err != nil {
+				return nil, err
+			}
+			structuredEntries := jsonMap["entries"].(map[string]interface{})
+			partnerMetadata[key] = map[string]interface{}{
+				"entries": structuredEntries,
+			}
+		}
+	}
+	return partnerMetadata, nil
+}
 
 func resourceInstancePartnerMetadata(d tpgresource.TerraformResourceData) (map[string]compute.StructuredEntries, error) {
 	partnerMetadata := make(map[string]compute.StructuredEntries)
