@@ -36,6 +36,12 @@ examples:
     vars:
       address_name: scan-basic-static-ip
       scan_config_name: terraform-scan-config
+  - name: scan_config_ignore_http_status_errors
+    primary_resource_id: scan-config
+    min_version: beta
+    vars:
+      address_name: scan-ignore-http-ip
+      scan_config_name: terraform-scan-config
 properties:
   - name: name
     type: String
@@ -189,3 +195,6 @@ properties:
     enum_values:
       - ENABLED
       - DISABLED
+  - name: ignoreHttpStatusErrors
+    type: Boolean
+    description: Whether to keep scanning even if most requests return HTTP error codes.
