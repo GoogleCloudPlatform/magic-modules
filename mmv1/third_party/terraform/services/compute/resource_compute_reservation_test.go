@@ -136,8 +136,8 @@ func testAccComputeReservation_resourcePolicies(reservationName, policyName stri
 resource "google_compute_resource_policy" "placement" {
   name   = "%s"
   region = "us-central1"
+  // Compact policy for reservation must not set vm_count (API: incremental only).
   group_placement_policy {
-    vm_count    = 2
     collocation = "COLLOCATED"
   }
 }
