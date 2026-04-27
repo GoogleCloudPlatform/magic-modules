@@ -41,6 +41,34 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		ItemName:       "{{ $.CollectionUrlKey }}",
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 			headers := make(http.Header)
+{{- if or $.CustomCode.PostRead $.NestedQuery $.CustomCode.Decoder }}
+			var meta interface{} = config
+			_ = meta
+{{- end }}
+{{- if or $.NestedQuery $.CustomCode.Decoder }}
+			var err error
+{{- end }}
+{{- if $.CustomCode.PostRead }}
+			{{ customTemplate $ $.CustomCode.PostRead false -}}
+{{- end }}
+{{- if $.NestedQuery }}
+			res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
+			if err != nil {
+				return err
+			}
+			if res == nil {
+				return fmt.Errorf("Error matching nested {{ $.ResourceName }} from list response")
+			}
+{{- end }}
+{{- if $.CustomCode.Decoder }}
+			res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+			if err != nil {
+				return err
+			}
+			if res == nil {
+				return fmt.Errorf("Error decoding {{ $.ResourceName }} from list response")
+			}
+{{- end }}
 			if err := Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
