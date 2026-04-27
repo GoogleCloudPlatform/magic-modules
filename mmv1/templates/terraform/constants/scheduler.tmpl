@@ -68,6 +68,14 @@ func validateHttpHeaders() schema.SchemaValidateFunc {
 			es = append(es, fmt.Errorf("Cannot set the Content-Length header on %s", k))
 			return
 		}
+		// Warn (don't reject) on Authorization: legitimate use cases exist
+		// when no oidc_token / oauth_token is configured, but combining the
+		// two leads to drift because Cloud Scheduler overwrites the value
+		// server-side. The flattener strips Authorization on read in that
+		// case to keep state consistent.
+		if _, ok := headers["Authorization"]; ok {
+			s = append(s, fmt.Sprintf("Setting the Authorization header on %s is discouraged when http_target.oidc_token or http_target.oauth_token is configured; the API will overwrite it.", k))
+		}
 		r := regexp.MustCompile(`(X-Google-|X-AppEngine-).*`)
 		for key := range headers {
 			if r.MatchString(key) {
