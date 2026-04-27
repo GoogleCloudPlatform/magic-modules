@@ -43,17 +43,6 @@ type ProviderModel struct {
 	{{ $product.Name }}CustomEndpoint types.String `tfsdk:"{{ underscore $product.Name }}_custom_endpoint"`
 {{- end }}
 
-	// dcl
-	ContainerAwsCustomEndpoint      types.String `tfsdk:"container_aws_custom_endpoint"`
-	ContainerAzureCustomEndpoint    types.String `tfsdk:"container_azure_custom_endpoint"`
-
-	// dcl generated
-	ApikeysCustomEndpoint              types.String `tfsdk:"apikeys_custom_endpoint"`
-	AssuredWorkloadsCustomEndpoint     types.String `tfsdk:"assured_workloads_custom_endpoint"`
-	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
-	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
-	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
-
 	// Tombstoned
 {{- if ne $.TargetVersionName "ga" }}
 	RuntimeconfigCustomEndpoint types.String `tfsdk:"runtimeconfig_custom_endpoint"`
@@ -62,6 +51,7 @@ type ProviderModel struct {
 	BillingCustomEndpoint       types.String `tfsdk:"billing_custom_endpoint"`
 	ResourceManager3CustomEndpoint types.String `tfsdk:"resource_manager3_custom_endpoint"`
 	IAMCustomEndpoint               types.String `tfsdk:"iam_custom_endpoint"`
+	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
 }
 
 type ProviderBatching struct {
