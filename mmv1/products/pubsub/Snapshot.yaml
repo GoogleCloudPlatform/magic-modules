@@ -25,16 +25,13 @@ update_url: 'projects/{{project}}/snapshots/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 id_format: 'projects/{{project}}/snapshots/{{name}}'
-include_in_tgc_next: true
-custom_code:
-  encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
-  tgc_ignore_terraform_encoder: true
+import_format:
+  - projects/{{project}}/snapshots/{{name}}
 examples:
   - name: 'pubsub_snapshot_basic'
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
       snapshot_name: 'example-snapshot'
 properties:
   - name: 'name'
@@ -45,21 +42,6 @@ properties:
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
-  - name: 'subscription'
-    type: ResourceRef
-    description: |
-      The subscription whose backlog the snapshot retains. Specifically, the created snapshot is guaranteed to retain:
-      (a) The existing backlog on the subscription. More precisely, this is defined as the messages in the subscription's backlog that are unacknowledged upon the successful completion of the snapshots.create request; as well as:
-      (b) Any messages published to the subscription's topic following the successful completion of the snapshots.create request.
-      
-      Format is projects/{project}/subscriptions/{sub}.
-    required: true
-    immutable: true
-    resource: 'Subscription'
-    imports: 'name'
-    ignore_read: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/pubsub_snapshot_subscription.go.tmpl'
   - name: 'topic'
     type: ResourceRef
     description: |
