@@ -3,6 +3,7 @@ package compute
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -1716,17 +1717,48 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Name:        itName,
 	}
 
-	op, err := config.NewComputeClient(userAgent).InstanceTemplates.Insert(project, instanceTemplate).Do()
+	instanceTemplateMap, err := tpgresource.ConvertToMap(instanceTemplate)
+	if err != nil {
+		return fmt.Errorf("Error converting instance template to map: %s", err)
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/instanceTemplates")
+	if err != nil {
+		return err
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      instanceTemplateMap,
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating instance template: %s", err)
 	}
 
 	// Store the ID now
 	d.SetId(fmt.Sprintf("projects/%s/global/instanceTemplates/%s", project, instanceTemplate.Name))
+	
 	// And also the unique ID
-	d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", d.Id(), op.TargetId))
+	var targetId string
+	if tid, ok := res["targetId"]; ok {
+		switch v := tid.(type) {
+		case string:
+			targetId = v
+		case float64:
+			targetId = fmt.Sprintf("%.0f", v)
+		case json.Number:
+			targetId = v.String()
+		default:
+			targetId = fmt.Sprintf("%v", v)
+		}
+	}
+	d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", d.Id(), targetId))
 
-	err = ComputeOperationWaitTime(config, op, project, "Creating Instance Template", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, res, project, "Creating Instance Template", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -2006,14 +2038,35 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 
 	splits := strings.Split(idStr, "/")
-	{{- if eq $.TargetVersionName "ga" }}
-	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
-	{{- else }}
-	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).View("FULL").Do()
+	url := fmt.Sprintf("%sprojects/%s/global/instanceTemplates/%s", config.ComputeBasePath, project, splits[len(splits)-1])
+	
+	{{- if ne $.TargetVersionName "ga" }}
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
+	if err != nil {
+		return err
+	}
 	{{- end }}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
 	}
+
+	var instanceTemplate compute.InstanceTemplate
+	resBytes, err := json.Marshal(res)
+	if err != nil {
+		return fmt.Errorf("Error marshaling response: %s", err)
+	}
+	if err := json.Unmarshal(resBytes, &instanceTemplate); err != nil {
+		return fmt.Errorf("Error unmarshaling response to struct: %s", err)
+	}
+
 	// Set the metadata fingerprint if there is one.
 	if instanceTemplate.Properties.Metadata != nil {
 		if err = d.Set("metadata_fingerprint", instanceTemplate.Properties.Metadata.Fingerprint); err != nil {
@@ -2225,13 +2278,19 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 	}
 
 	splits := strings.Split(d.Id(), "/")
-	op, err := config.NewComputeClient(userAgent).InstanceTemplates.Delete(
-		project, splits[len(splits)-1]).Do()
+	url := fmt.Sprintf("%sprojects/%s/global/instanceTemplates/%s", config.ComputeBasePath, project, splits[len(splits)-1])
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error deleting instance template: %s", err)
 	}
 
-	err = ComputeOperationWaitTime(config, op, project, "Deleting Instance Template", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, res, project, "Deleting Instance Template", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}
