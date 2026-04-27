@@ -128,6 +128,10 @@ type Resource struct {
 	// updates. This is typical of newer GCP APIs.
 	UpdateMask bool `yaml:"update_mask,omitempty"`
 
+	// [Optional] If set to true, this resource supports requestId for idempotency.
+	// This is typical of newer GCP APIs complying with AIP-155.
+	SupportsRequestId bool `yaml:"supports_request_id,omitempty"`
+
 	// [Optional] The HTTP verb used during create. Defaults to POST.
 	CreateVerb string `yaml:"create_verb,omitempty"`
 
@@ -797,6 +801,14 @@ func (r Resource) GetAsync() *Async {
 	}
 
 	return r.ProductMetadata.Async
+}
+
+// Returns true if the resource supports requestId for idempotency.
+func (r Resource) HasSupportsRequestId() bool {
+	if r.SupportsRequestId {
+		return true
+	}
+	return false
 }
 
 // Return the resource-specific identity properties, or a best guess of the
