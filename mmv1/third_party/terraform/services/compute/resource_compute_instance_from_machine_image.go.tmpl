@@ -142,7 +142,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		return err
 	}
 	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := config.NewComputeClient(userAgent).Zones.Get(project, z).Do()
+	zone, err := NewClient(config, userAgent).Zones.Get(project, z).Do()
 	if err != nil {
 		return fmt.Errorf("Error loading zone '%s': %s", z, err)
 	}
@@ -180,7 +180,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	tmp := strings.Split(src, "projects/")
 	mi_project := strings.Split(tmp[len(tmp)-1], "/")[0]
 
-	mi, err := config.NewComputeClient(userAgent).MachineImages.Get(mi_project, tpl.Name).Do()
+	mi, err := NewClient(config, userAgent).MachineImages.Get(mi_project, tpl.Name).Do()
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
+	op, err := NewClient(config, userAgent).Instances.Insert(project, zone.Name, instance).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
