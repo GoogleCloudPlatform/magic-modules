@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 func TestAccServiceNetworkingConnection_create(t *testing.T) {
@@ -136,7 +137,7 @@ func testServiceNetworkingConnectionDestroy(t *testing.T, parent, network string
 		config := acctest.GoogleProviderConfig(t)
 		parentService := "services/" + parent
 		networkName := fmt.Sprintf("projects/%s/global/networks/%s", envvar.GetTestProjectFromEnv(), network)
-		listCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkName)
+		listCall := servicenetworking.NewClient(config, config.UserAgent).Services.Connections.List(parentService).Network(networkName)
 		if config.UserProjectOverride {
 			listCall.Header().Add("X-Goog-User-Project", envvar.GetTestProjectFromEnv())
 		}
@@ -160,7 +161,7 @@ func testServiceNetworkingConnectionDestroyAbandon(t *testing.T, parent, network
 		config := acctest.GoogleProviderConfig(t)
 		parentService := "services/" + parent
 		networkName := fmt.Sprintf("projects/%s/global/networks/%s", envvar.GetTestProjectFromEnv(), network)
-		listCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkName)
+		listCall := servicenetworking.NewClient(config, config.UserAgent).Services.Connections.List(parentService).Network(networkName)
 		if config.UserProjectOverride {
 			listCall.Header().Add("X-Goog-User-Project", envvar.GetTestProjectFromEnv())
 		}
