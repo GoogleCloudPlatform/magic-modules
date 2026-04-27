@@ -541,14 +541,12 @@ var schemaNodePool = map[string]*schema.Schema{
 		Description: `Networking configuration for this NodePool. If specified, it overrides the cluster-level defaults.`,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-			{{ if ne $.TargetVersionName `ga` }}
 				"accelerator_network_profile": {
 					Type:        schema.TypeString,
 					Description: "The accelerator network profile to use for this node pool.",
 					Optional:    true,
 					ForceNew: 	 true,
 				},
-			{{- end }}
 				"create_pod_range": {
 					Type:         schema.TypeBool,
 					Optional:     true,
