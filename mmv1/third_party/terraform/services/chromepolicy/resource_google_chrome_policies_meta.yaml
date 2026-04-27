@@ -1,0 +1,12 @@
+resource: 'google_chrome_policies'
+generation_type: 'handwritten'
+api_service_name: 'chromepolicy.googleapis.com'
+api_version: 'v1'
+api_resource_type_kind: 'Policy'
+fields:
+  - field: 'id'
+  - field: 'customer_id'
+  - field: 'org_unit_id'
+  - field: 'group_id'
+  - field: 'schema_filter'
+  - field: 'policies'
