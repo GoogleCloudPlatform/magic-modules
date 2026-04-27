@@ -306,7 +306,6 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 	response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && d.Get("create_ignore_already_exists").(bool) {
-			log.Printf("[DEBUG] Job already exists and create_ignore_already_exists is true, attempting to adopt it.")
 			jobName := d.Get("name").(string)
 			existingJob, lookupErr := findDataflowJobByName(config, project, region, userAgent, jobName)
 			if lookupErr != nil {
