@@ -70,6 +70,15 @@ func (c *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 	return convertGHPullRequest(pr), nil
 }
 
+// GetPullRequestAuthor fetches the author of a pull request
+func (c *Client) GetPullRequestAuthor(prNumber string) (string, error) {
+	pr, err := c.GetPullRequest(prNumber)
+	if err != nil {
+		return "", err
+	}
+	return pr.User.Login, nil
+}
+
 // GetPullRequests fetches multiple pull requests
 func (c *Client) GetPullRequests(state, base, sort, direction string) ([]PullRequest, error) {
 	opts := &gh.PullRequestListOptions{
@@ -182,6 +191,15 @@ func (c *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, 
 	}
 
 	return convertGHComments(allComments), nil
+}
+
+// GetPullRequestComment fetches a single comment by ID
+func (c *Client) GetPullRequestComment(commentID int) (PullRequestComment, error) {
+	comment, _, err := c.gh.Issues.GetComment(c.ctx, defaultOwner, defaultRepo, int64(commentID))
+	if err != nil {
+		return PullRequestComment{}, err
+	}
+	return convertGHComment(comment), nil
 }
 
 // GetTeamMembers gets all members of a team, handling pagination

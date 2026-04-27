@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 
 	"magician/github"
 )
@@ -35,6 +36,11 @@ type mockGithub struct {
 func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error) {
 	m.calledMethods["GetPullRequest"] = append(m.calledMethods["GetPullRequest"], []any{prNumber})
 	return m.pullRequest, nil
+}
+
+func (m *mockGithub) GetPullRequestAuthor(prNumber string) (string, error) {
+	m.calledMethods["GetPullRequestAuthor"] = append(m.calledMethods["GetPullRequestAuthor"], []any{prNumber})
+	return m.pullRequest.User.Login, nil
 }
 
 func (m *mockGithub) GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error) {
@@ -62,6 +68,16 @@ func (m *mockGithub) GetPullRequestComments(prNumber string) ([]github.PullReque
 	return m.pullRequestComments, nil
 }
 
+func (m *mockGithub) GetPullRequestComment(commentID int) (github.PullRequestComment, error) {
+	m.calledMethods["GetPullRequestComment"] = append(m.calledMethods["GetPullRequestComment"], []any{commentID})
+	for _, c := range m.pullRequestComments {
+		if c.ID == commentID {
+			return c, nil
+		}
+	}
+	return github.PullRequestComment{}, fmt.Errorf("comment not found")
+}
+
 func (m *mockGithub) GetCommitMessage(owner, repo, sha string) (string, error) {
 	m.calledMethods["GetCommitMessage"] = append(m.calledMethods["GetCommitMessage"], []any{owner, repo, sha})
 	return m.commitMessage, nil
@@ -85,9 +101,9 @@ func (m *mockGithub) RemovePullRequestReviewers(prNumber string, reviewers []str
 	return nil
 }
 
-func (m *mockGithub) PostComment(prNumber string, comment string) error {
+func (m *mockGithub) PostComment(prNumber string, comment string) (int, error) {
 	m.calledMethods["PostComment"] = append(m.calledMethods["PostComment"], []any{prNumber, comment})
-	return nil
+	return 0, nil
 }
 
 func (m *mockGithub) UpdateComment(prNumber, comment string, id int) error {
