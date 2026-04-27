@@ -85,7 +85,11 @@ func {{ $.ResourceName -}}Tfplan2caiConverter() cai.Tfplan2caiConverter {
 }
 
 func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
+    {{ if eq $.ResourceName "EventarcTrigger" -}}
+    name, err := cai.AssetNameShorten(d, config, "{{ $.GetCaiAssetNameTemplate }}")
+    {{ else -}}
     name, err := cai.AssetName(d, config, "{{ $.GetCaiAssetNameTemplate }}")
+    {{ end -}}
     if err != nil {
         return []caiasset.Asset{}, err
     }
