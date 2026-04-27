@@ -2,11 +2,9 @@ module github.com/hashicorp/go-changelog
 
 go 1.26.0
 
-toolchain go1.24.8
-
 require (
-	github.com/go-git/go-billy/v5 v5.6.2
-	github.com/go-git/go-git/v5 v5.16.5
+	github.com/go-git/go-billy/v5 v5.8.0
+	github.com/go-git/go-git/v5 v5.18.0
 	github.com/google/go-github/v68 v68.0.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.3.0
