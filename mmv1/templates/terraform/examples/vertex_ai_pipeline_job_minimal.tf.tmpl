@@ -1,0 +1,148 @@
+resource "google_compute_network" "vpc_net" {
+  provider                = google-beta
+  project                 = "{{index $.TestEnvVars "project"}}"
+  name                    = "tf-test-vpc-%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  provider      = google-beta
+  project       = "{{index $.TestEnvVars "project"}}"
+  name          = "tf-test-subnet-%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-east1"
+  network       = google_compute_network.vpc_net.id
+}
+
+resource "google_compute_network_attachment" "net_attachment" {
+  provider              = google-beta
+  project               = "{{index $.TestEnvVars "project"}}"
+  region                = "us-east1"
+  name                  = "tf-test-net-att-%{random_suffix}"
+  connection_preference = "ACCEPT_AUTOMATIC"
+  subnetworks           = [google_compute_subnetwork.subnetwork.id]
+}
+
+resource "google_compute_global_address" "reserved_ip" {
+  provider      = google-beta
+  project       = "{{index $.TestEnvVars "project"}}"
+  name          = "tf-test-reserved-ip-%{random_suffix}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 24
+  network       = google_compute_network.vpc_net.id
+}
+
+resource "google_service_account" "pipeline_sa" {
+  provider     = google-beta
+  account_id   = "pipeline-owner-sa"
+  project      = "{{index $.TestEnvVars "project"}}"
+  display_name = "Pipeline Owner Service Account"
+}
+
+resource "google_vertex_ai_metadata_store" "default_test" {
+  provider = google-beta
+  name     = "default-new"
+  project  = "{{index $.TestEnvVars "project"}}"
+  region   = "us-east1"
+}
+
+resource "google_project_iam_member" "pipeline_sa_roles" {
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project"}}"
+  role     = "roles/aiplatform.admin"
+  member   = "serviceAccount:${google_service_account.pipeline_sa.email}"
+}
+
+resource "google_storage_bucket" "pipeline_output" {
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project"}}"
+  name     = "tf-test-pipeline-output-%{random_suffix}"
+  location = "US"
+}
+
+resource "google_vertex_ai_pipeline_job" "primary" {
+  provider     = google-beta
+  project      = "{{index $.TestEnvVars "project"}}"
+  region       = "us-east1"
+  display_name = "tf-test-example-pipeline-job%{random_suffix}"
+  template_uri = "gs://cloud-samples-data/ai-platform/pipelines/hello-world-pipeline.json"
+  
+  labels = {
+    env  = "test"
+    tier = "ml"
+  }
+
+  network = google_compute_network.vpc_net.id
+
+  psc_interface_config = {
+    network_attachment = google_compute_network_attachment.net_attachment.id
+  }
+
+  reserved_ip_ranges = [
+    google_compute_global_address.reserved_ip.name
+  ]
+
+  preflight_validations = true
+
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.pipeline_output.name}/outputs/"
+  }
+
+  service_account = google_service_account.pipeline_sa.email
+
+  depends_on = [
+    google_project_iam_member.pipeline_sa_roles,
+    google_vertex_ai_metadata_store.default_test,
+    google_compute_network_attachment.net_attachment
+  ]
+}
+
+resource "google_vertex_ai_pipeline_job" "clone" {
+  provider     = google-beta
+  project      = "{{index $.TestEnvVars "project"}}"
+  region       = "us-east1"
+  display_name = "tf-test-clone-job%{random_suffix}"
+
+  original_pipeline_job_id = google_vertex_ai_pipeline_job.primary.id
+
+  template_uri = "gs://cloud-samples-data/ai-platform/pipelines/hello-world-pipeline.json"
+
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.pipeline_output.name}/outputs/"
+  }
+
+  service_account = google_service_account.pipeline_sa.email
+
+  depends_on = [
+    google_vertex_ai_pipeline_job.primary
+  ]
+}
+
+resource "google_vertex_ai_pipeline_job" "with_spec" {
+  provider     = google-beta
+  project      = "{{index $.TestEnvVars "project"}}"
+  region       = "us-east1"
+  display_name = "tf-test-spec-job%{random_suffix}"
+
+  pipeline_spec = jsonencode({
+    pipelineInfo = {
+      name = "minimal-test-pipeline"
+    }
+    root = {
+      dag = {
+        tasks = {}
+      }
+    }
+  })
+
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.pipeline_output.name}/outputs/"
+  }
+
+  service_account = google_service_account.pipeline_sa.email
+
+  depends_on = [
+    google_project_iam_member.pipeline_sa_roles
+  ]
+}
