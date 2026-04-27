@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -1715,9 +1716,43 @@ func getInstance(config *transport_tpg.Config, d *schema.ResourceData) (*compute
 		return nil, err
 	}
 	{{- if eq $.TargetVersionName "ga" }}
-	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, d.Get("name").(string))
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	var instance *compute.Instance
+	if err == nil {
+		var inst compute.Instance
+		targetBytes, _ := json.Marshal(res)
+		if err = json.Unmarshal(targetBytes, &inst); err == nil {
+			instance = &inst
+		}
+	}
 	{{- else }}
-	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).View("FULL").Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, d.Get("name").(string))
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
+	if err != nil {
+		return nil, err
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	var instance *compute.Instance
+	if err == nil {
+		var inst compute.Instance
+		targetBytes, _ := json.Marshal(res)
+		if err = json.Unmarshal(targetBytes, &inst); err == nil {
+			instance = &inst
+		}
+	}
 	{{- end }}
 	if err != nil {
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
@@ -1736,7 +1771,22 @@ func getDisk(diskUri string, d *schema.ResourceData, config *transport_tpg.Confi
 		return nil, err
 	}
 
-	disk, err := config.NewComputeClient(userAgent).Disks.Get(source.Project, source.Zone, source.Name).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s", config.ComputeBasePath, source.Project, source.Zone, source.Name)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   source.Project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	var disk *compute.Disk
+	if err == nil {
+		var dsk compute.Disk
+		targetBytes, _ := json.Marshal(res)
+		if err = json.Unmarshal(targetBytes, &dsk); err == nil {
+			disk = &dsk
+		}
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -1960,8 +2010,22 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := config.NewComputeClient(userAgent).Zones.Get(
-		project, z).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s", config.ComputeBasePath, project, z)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	var zone *compute.Zone
+	if err == nil {
+		var zn compute.Zone
+		targetBytes, _ := json.Marshal(res)
+		if err = json.Unmarshal(targetBytes, &zn); err == nil {
+			zone = &zn
+		}
+	}
 	if err != nil {
 		return fmt.Errorf("Error loading zone '%s': %s", z, err)
 	}
@@ -2378,14 +2442,49 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("description") {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
+				url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name)
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    url,
+					UserAgent: userAgent,
+				})
+				var instance *compute.Instance
+				if err == nil {
+					var inst compute.Instance
+					targetBytes, _ := json.Marshal(res)
+					if err = json.Unmarshal(targetBytes, &inst); err == nil {
+						instance = &inst
+					}
+				}
 				if err != nil {
 					return fmt.Errorf("Error retrieving instance: %s", err)
 				}
 
 				instance.Description = d.Get("description").(string)
 
-				op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				instanceBody, err := tpgresource.ConvertToMap(instance)
+				if err != nil {
+					return err
+				}
+				url = fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name)
+				res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      instanceBody,
+				})
+				var op *compute.Operation
+				if err == nil {
+					var operation compute.Operation
+					targetBytes, _ := json.Marshal(res)
+					if err = json.Unmarshal(targetBytes, &operation); err == nil {
+						op = &operation
+					}
+				}
 				if err != nil {
 					return fmt.Errorf("Error updating instance: %s", err)
 				}
@@ -2420,14 +2519,49 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			RetryFunc: func() error {
 				// retrieve up-to-date metadata from the API in case several updates hit simultaneously. instances
 				// sometimes but not always share metadata fingerprints.
-				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
+				url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name)
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    url,
+					UserAgent: userAgent,
+				})
+				var instance *compute.Instance
+				if err == nil {
+					var inst compute.Instance
+					targetBytes, _ := json.Marshal(res)
+					if err = json.Unmarshal(targetBytes, &inst); err == nil {
+						instance = &inst
+					}
+				}
 				if err != nil {
 					return fmt.Errorf("Error retrieving metadata: %s", err)
 				}
 
 				metadataV1.Fingerprint = instance.Metadata.Fingerprint
 
-				op, err := config.NewComputeClient(userAgent).Instances.SetMetadata(project, zone, instance.Name, metadataV1).Do()
+				metadataBody, err := tpgresource.ConvertToMap(metadataV1)
+				if err != nil {
+					return err
+				}
+				url = fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setMetadata", config.ComputeBasePath, project, zone, instance.Name)
+				res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      metadataBody,
+				})
+				var op *compute.Operation
+				if err == nil {
+					var operation compute.Operation
+					targetBytes, _ := json.Marshal(res)
+					if err = json.Unmarshal(targetBytes, &operation); err == nil {
+						op = &operation
+					}
+				}
 				if err != nil {
 					return fmt.Errorf("Error updating metadata: %s", err)
 				}
@@ -2450,7 +2584,26 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("partner_metadata") {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).View("FULL").Do()
+				url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name)
+				url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
+				if err != nil {
+					return err
+				}
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    url,
+					UserAgent: userAgent,
+				})
+				var instance *compute.Instance
+				if err == nil {
+					var inst compute.Instance
+					targetBytes, _ := json.Marshal(res)
+					if err = json.Unmarshal(targetBytes, &inst); err == nil {
+						instance = &inst
+					}
+				}
 				if err != nil {
 					return fmt.Errorf("Error retrieving partner_metadata: %s", err)
 				}
@@ -2458,7 +2611,27 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				instance.PartnerMetadata = resourceInstancePatchPartnerMetadata(d, instance.PartnerMetadata)
 				instance.NullFields = []string{"partnerMetadata"}
 
-				op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				instanceBody, err := tpgresource.ConvertToMap(instance)
+				if err != nil {
+					return err
+				}
+				url = fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name)
+				res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      instanceBody,
+				})
+				var op *compute.Operation
+				if err == nil {
+					var operation compute.Operation
+					targetBytes, _ := json.Marshal(res)
+					if err = json.Unmarshal(targetBytes, &operation); err == nil {
+						op = &operation
+					}
+				}
 				if err != nil {
 					return fmt.Errorf("Error updating partner_metadata: %s", err)
 				}
@@ -2483,8 +2656,27 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if err := tpgresource.Convert(tags, tagsV1); err != nil {
 			return err
 		}
-		op, err := config.NewComputeClient(userAgent).Instances.SetTags(
-			project, zone, d.Get("name").(string), tagsV1).Do()
+		tagsBody, err := tpgresource.ConvertToMap(tagsV1)
+		if err != nil {
+			return err
+		}
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setTags", config.ComputeBasePath, project, zone, d.Get("name").(string))
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      tagsBody,
+		})
+		var op *compute.Operation
+		if err == nil {
+			var operation compute.Operation
+			targetBytes, _ := json.Marshal(res)
+			if err = json.Unmarshal(targetBytes, &operation); err == nil {
+				op = &operation
+			}
+		}
 		if err != nil {
 			return fmt.Errorf("Error updating tags: %s", err)
 		}
@@ -2811,7 +3003,31 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				InternalIpv6PrefixLength: d.Get(prefix+".internal_ipv6_prefix_length").(int64),
 				Fingerprint:              instNetworkInterface.Fingerprint,
 			}
-			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			updateCall := func() (*compute.Operation, error) {
+				niBody, err := tpgresource.ConvertToMap(networkInterfacePatchObj)
+				if err != nil {
+					return nil, err
+				}
+				url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateNetworkInterface?networkInterface=%s", 
+					config.ComputeBasePath, project, zone, instance.Name, networkName)
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      niBody,
+				})
+				if err != nil {
+					return nil, err
+				}
+				var op compute.Operation
+				targetBytes, _ := json.Marshal(res)
+				if err = json.Unmarshal(targetBytes, &op); err != nil {
+					return nil, err
+				}
+				return &op, nil
+			}
 			op, err := updateCall()
 			if err != nil {
 				return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
