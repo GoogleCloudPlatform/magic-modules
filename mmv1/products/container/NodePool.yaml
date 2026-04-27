@@ -79,6 +79,18 @@ properties:
             api_name: 'provisionedThroughput'
             type: 'Integer'
             is_missing_in_cai: true
+      - name: 'linuxNodeConfig'
+        type: 'NestedObject'
+        description: 'Parameters for Linux node configuration.'
+        properties:
+          - name: 'accurateTimeConfig'
+            type: 'NestedObject'
+            description: 'Accurate time configuration.'
+            properties:
+              - name: 'enablePtpKvmTimeSync'
+                type: 'Boolean'
+                description: 'Enable PTP KVM time sync.'
+                is_missing_in_cai: true
   - name: 'networkConfig'
     type: 'NestedObject'
     description: 'Networking configuration for this NodePool.'
