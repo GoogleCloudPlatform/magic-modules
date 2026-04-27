@@ -13,6 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+{{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
+{{- else }}
+	compute "google.golang.org/api/compute/v0.beta"
+{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -22,6 +27,7 @@ type GoogleComputeInstanceListResource struct {
 	tpgresource.ListResourceMetadata
 }
 
+// GoogleComputeInstanceListModel matches [ListResourceMetadata.ListConfigFields] (tfsdk names and types).
 type GoogleComputeInstanceListModel struct {
 	Project types.String `tfsdk:"project"`
 	Zone    types.String `tfsdk:"zone"`
@@ -79,24 +85,19 @@ func (listR *GoogleComputeInstanceListResource) List(ctx context.Context, listRe
 }
 
 func flattenComputeInstanceListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
-	name, _ := res["name"].(string)
-	if name == "" {
+	var instance compute.Instance
+	if err := tpgresource.Convert(res, &instance); err != nil {
+		return fmt.Errorf("error converting compute instance list response: %w", err)
+	}
+	if instance.Name == "" {
 		return fmt.Errorf("missing name in compute instance list response")
 	}
 
-	zoneUrl, _ := res["zone"].(string)
-	zone := tpgresource.GetResourceNameFromSelfLink(zoneUrl)
-
 	project := d.Get("project").(string)
+	zone := tpgresource.GetResourceNameFromSelfLink(instance.Zone)
 
-	if err := d.Set("name", name); err != nil {
-		return fmt.Errorf("error setting name: %w", err)
-	}
-	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("error setting zone: %w", err)
-	}
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, name))
-	return nil
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
+	return populateComputeInstanceResourceData(d, &instance, project, zone, config)
 }
 
 func ListComputeInstances(config *transport_tpg.Config, project, zone string, callback func(rd *schema.ResourceData) error) error {
@@ -104,15 +105,17 @@ func ListComputeInstances(config *transport_tpg.Config, project, zone string, ca
 		return fmt.Errorf("provider client is not configured")
 	}
 	d := ResourceComputeInstance().Data(&terraform.InstanceState{})
-	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("error setting zone on temporary resource data: %w", err)
+	if zone != "" {
+		if err := d.Set("zone", zone); err != nil {
+			return fmt.Errorf("error setting zone on temporary resource data: %w", err)
+		}
 	}
 	if project != "" {
 		if err := d.Set("project", project); err != nil {
 			return fmt.Errorf("error setting project on temporary resource data: %w", err)
 		}
 	}
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instances")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
 	if err != nil {
 		return err
 	}
