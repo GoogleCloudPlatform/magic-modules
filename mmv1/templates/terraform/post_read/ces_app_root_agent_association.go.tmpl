@@ -1,0 +1,26 @@
+// The Read GETs the parent App. Check that rootAgent is set and matches
+// the agent_id stored in state; if not, remove this resource from state.
+// Note: project is already declared by the generated Read code above.
+appId := d.Get("app_id").(string)
+agentId := d.Get("agent_id").(string)
+location := d.Get("location").(string)
+
+parsedAppId := appId
+if !strings.Contains(appId, "/") {
+  parsedAppId = fmt.Sprintf("projects/%s/locations/%s/apps/%s", project, location, appId)
+}
+parsedAgentId := agentId
+if !strings.Contains(agentId, "/") {
+  parsedAgentId = fmt.Sprintf("%s/agents/%s", parsedAppId, agentId)
+}
+
+rootAgentRaw, ok := res["rootAgent"]
+if !ok || rootAgentRaw == nil || rootAgentRaw.(string) != parsedAgentId {
+  log.Printf("[DEBUG] Removing CESAppRootAgentAssociation from state: rootAgent mismatch or unset (got %v, want %s)", rootAgentRaw, parsedAgentId)
+  d.SetId("")
+  return nil
+}
+
+if err := d.Set("agent_id", agentId); err != nil {
+  return fmt.Errorf("Error setting agent_id: %s", err)
+}
