@@ -24,6 +24,7 @@ type Result struct {
 	SkippedSubtests []string
 	FailedSubtests  []string
 	Panics          []string
+	BuildFailures   []string
 }
 
 type Mode int
@@ -81,6 +82,8 @@ var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (Test
 var subtestResultsExpression = regexp.MustCompile(`(?m:^    --- (PASS|FAIL|SKIP): (TestAcc\w+)/(\w+))`)
 
 var testPanicExpression = regexp.MustCompile(`(?m:^panic: .*)`)
+
+var buildFailedExpression = regexp.MustCompile(`FAIL\s+(\S+)\s+\[build failed\]`)
 
 var safeToLog = map[string]bool{
 	"ACCTEST_PARALLELISM":                        true,
@@ -723,9 +726,18 @@ func collectResult(output string) Result {
 		}
 		subtestResultSets[submatches[1]][fmt.Sprintf("%s__%s", submatches[2], submatches[3])] = struct{}{}
 	}
-	results := make(map[string][]string, 4)
+	results := make(map[string][]string, 5)
 	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
 	sort.Strings(results["PANIC"])
+
+	buildFailuresMatches := buildFailedExpression.FindAllStringSubmatch(output, -1)
+	for _, submatches := range buildFailuresMatches {
+		if len(submatches) == 2 {
+			results["BUILD_FAILURE"] = append(results["BUILD_FAILURE"], filepath.Base(submatches[1]))
+		}
+	}
+	sort.Strings(results["BUILD_FAILURE"])
+
 	subtestResults := make(map[string][]string, 3)
 	for _, kind := range []string{"FAIL", "PASS", "SKIP"} {
 		for test := range resultSets[kind] {
@@ -745,5 +757,6 @@ func collectResult(output string) Result {
 		PassedSubtests:  subtestResults["PASS"],
 		SkippedSubtests: subtestResults["SKIP"],
 		Panics:          results["PANIC"],
+		BuildFailures:   results["BUILD_FAILURE"],
 	}
 }
