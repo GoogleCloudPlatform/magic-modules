@@ -731,7 +731,7 @@ func testAccCheckBigtableTableDestroyProducer(t *testing.T) func(s *terraform.St
 			}
 
 			config := acctest.GoogleProviderConfig(t)
-			c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+			c, err := bigtable.NewClientFactory(config, config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 			if err != nil {
 				// The instance is already gone
 				return nil
@@ -758,7 +758,7 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		c, err := bigtable.NewClientFactory(config, config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client. %s", err)
 		}
@@ -792,7 +792,7 @@ func testAccBigtableRowKeySchemaExists(t *testing.T, table_name_space string, ex
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		c, err := bigtable.NewClientFactory(config, config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client %s", err)
 		}
@@ -821,7 +821,7 @@ func testAccBigtableChangeStreamDisabled(t *testing.T) resource.TestCheckFunc {
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		c, err := bigtable.NewClientFactory(config, config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client. %s", err)
 		}
@@ -850,7 +850,7 @@ func verifyBigtableAutomatedBackupsEnablementState(t *testing.T, expectEnabled b
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		c, err := bigtable.NewClientFactory(config, config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client. %s", err)
 		}
