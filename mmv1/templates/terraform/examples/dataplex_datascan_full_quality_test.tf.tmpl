@@ -1,6 +1,7 @@
 resource "google_bigquery_dataset" "tf_test_dataset" {
   dataset_id = "tf_test_dataset_id_%{random_suffix}"
   default_table_expiration_ms = 3600000
+  location   = "us-central1"
 }
 
 resource "google_bigquery_table" "tf_test_table" {
@@ -71,7 +72,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
   }
 
   data {
-    resource = "//bigquery.googleapis.com/projects/{{index $.TestEnvVars "project_name"}}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table.table_id}"
+    resource = "//bigquery.googleapis.com/projects/${"{{index $.TestEnvVars "project_name"}}"}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table.table_id}"
   }
 
   execution_spec {
@@ -86,6 +87,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
     sampling_percent = 5
     row_filter = "station_id > 1000"
     catalog_publishing_enabled = true
+    filter = "attributes.priority = \"high\""
     post_scan_actions {
       notification_report {
         recipients {
@@ -101,6 +103,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
       column = "address"
       dimension = "VALIDITY"
       threshold = 0.99
+      attributes = {
+        priority = "high"
+      }
       non_null_expectation {}
     }
 
@@ -109,6 +114,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
       dimension = "VALIDITY"
       ignore_null = true
       threshold = 0.9
+      attributes = {
+        priority = "low"
+      }
       range_expectation {
         min_value = 1
         max_value = 10
@@ -121,6 +129,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
       column = "power_type"
       dimension = "VALIDITY"
       ignore_null = false
+      attributes = {
+        priority = "high"
+      }
       regex_expectation {
         regex = ".*solar.*"
       }
@@ -130,6 +141,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
       column = "property_type"
       dimension = "VALIDITY"
       ignore_null = false
+      attributes = {
+        priority = "low"
+      }
       set_expectation {
         values = ["sidewalk", "parkland"]
       }
@@ -139,12 +153,18 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
     rules {
       column = "address"
       dimension = "UNIQUENESS"
+      attributes = {
+        priority = "high"
+      }
       uniqueness_expectation {}
     }
 
     rules {
       column = "number_of_docks"
       dimension = "VALIDITY"
+      attributes = {
+        priority = "low"
+      }
       statistic_range_expectation {
         statistic = "MEAN"
         min_value = 5
@@ -157,6 +177,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
     rules {
       column = "footprint_length"
       dimension = "VALIDITY"
+      attributes = {
+        priority = "high"
+      }
       row_condition_expectation {
         sql_expression = "footprint_length > 0 AND footprint_length <= 10"
       }
@@ -164,6 +187,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
 
     rules {
       dimension = "VALIDITY"
+      attributes = {
+        priority = "low"
+      }
       table_condition_expectation {
         sql_expression = "COUNT(*) > 0"
       }
@@ -171,6 +197,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
 
     rules {
       dimension = "VALIDITY"
+      attributes = {
+        priority = "high"
+      }
       sql_assertion {
         sql_statement = "select * from $${data()} where address is null"
       }
