@@ -180,6 +180,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/registry/registry.go":                       "third_party/terraform/registry/registry.go",
 
 		// services
+		"pkg/services/compute/client.go":                   "third_party/terraform/services/compute/client.go.tmpl",
 		"pkg/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"pkg/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
 
