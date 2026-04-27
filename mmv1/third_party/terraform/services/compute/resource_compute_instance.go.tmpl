@@ -1780,7 +1780,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 
 	for i := 0; i < attachedDisksCount; i++ {
 		diskConfig := d.Get(fmt.Sprintf("attached_disk.%d", i)).(map[string]interface{})
-		disk, err := expandAttachedDisk(diskConfig, d, config)
+		disk, err := expandAttachedDisk(diskConfig, d, config, i)
 		if err != nil {
 			return nil, err
 		}
@@ -1978,17 +1978,36 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	}
 	{{- end }}
 
-	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
-	if err != nil {
-		return fmt.Errorf("Error creating instance: %s", err)
+	bulkCompatible, incompatReason := isBulkInsertCompatible(d)
+	usedBulkInsert := bulkCompatible
+	var opRes interface{}
+
+	if err := assertExpectedCreateBackend(usedBulkInsert); err != nil {
+		return err
+	}
+
+	if usedBulkInsert {
+		log.Printf("[INFO] Creating instance %s via bulkInsert (bulk-compatible config)", instance.Name)
+		res, err := createInstanceViaBulkInsert(d, config, instance, project, zone.Name, userAgent)
+		if err != nil {
+			return err
+		}
+		opRes = res
+	} else {
+		log.Printf("[INFO] Instance %s not bulk-compatible (%s), falling back to classic insert", instance.Name, incompatReason)
+		log.Printf("[INFO] Requesting instance creation")
+		op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
+		if err != nil {
+			return fmt.Errorf("Error creating instance: %s", err)
+		}
+		opRes = op
 	}
 
 	// Store the ID now
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instance.Name))
 
 	// Wait for the operation to complete
-	waitErr := ComputeOperationWaitTime(config, op, project, "instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
+	waitErr := ComputeOperationWaitTime(config, opRes, project, "instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")
@@ -2921,9 +2940,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		// Since changing any field within the disk needs to detach+reattach it,
 		// keep track of the hash of the full disk.
 		oDisks := map[uint64]string{}
-		for _, disk := range o.([]interface{}) {
+		for i, disk := range o.([]interface{}) {
 			diskConfig := disk.(map[string]interface{})
-			computeDisk, err := expandAttachedDisk(diskConfig, d, config)
+			computeDisk, err := expandAttachedDisk(diskConfig, d, config, i)
 			if err != nil {
 				return err
 			}
@@ -2942,9 +2961,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		// If a disk with a certain hash is only in the new config, it should be attached.
 		nDisks := map[uint64]struct{}{}
 		var attach []*compute.AttachedDisk
-		for _, disk := range n.([]interface{}) {
+		for i, disk := range n.([]interface{}) {
 			diskConfig := disk.(map[string]interface{})
-			computeDisk, err := expandAttachedDisk(diskConfig, d, config)
+			computeDisk, err := expandAttachedDisk(diskConfig, d, config, i)
 			if err != nil {
 				return err
 			}
@@ -3366,7 +3385,7 @@ func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config
 	return op, err
 }
 
-func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceData, meta interface{}) (*compute.AttachedDisk, error) {
+func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceData, meta interface{}, attachedDiskIndex int) (*compute.AttachedDisk, error) {
 	config := meta.(*transport_tpg.Config)
 
 	s := diskConfig["source"].(string)
@@ -3389,9 +3408,7 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 		Source: sourceLink,
 	}
 
-	if v, ok := diskConfig["mode"]; ok {
-		disk.Mode = v.(string)
-	}
+	disk.Mode = d.Get(fmt.Sprintf("attached_disk.%d.mode", attachedDiskIndex)).(string)
 
 	if v, ok := diskConfig["device_name"]; ok {
 		disk.DeviceName = v.(string)

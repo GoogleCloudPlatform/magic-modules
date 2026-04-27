@@ -286,7 +286,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 	if attachedDisksCount > 0 {
 		for i := 0; i < attachedDisksCount; i++ {
 			diskConfig := d.Get(fmt.Sprintf("attached_disk.%d", i)).(map[string]interface{})
-			disk, err := expandAttachedDisk(diskConfig, d, config)
+			disk, err := expandAttachedDisk(diskConfig, d, config, i)
 			if err != nil {
 				return nil, err
 			}

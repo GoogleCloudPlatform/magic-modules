@@ -1,0 +1,277 @@
+package compute
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+{{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
+{{- else }}
+	compute "google.golang.org/api/compute/v0.beta"
+{{- end }}
+)
+
+func assertExpectedCreateBackend(usedBulkInsert bool) error {
+	expected := strings.ToLower(strings.TrimSpace(os.Getenv("GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND")))
+	if expected == "" {
+		return nil
+	}
+
+	if expected != "bulk" && expected != "insert" {
+		return fmt.Errorf("invalid GOOGLE_COMPUTE_EXPECT_CREATE_BACKEND value %q; expected 'bulk' or 'insert'", expected)
+	}
+
+	if expected == "bulk" && !usedBulkInsert {
+		return fmt.Errorf("expected google_compute_instance create backend 'bulk' but selected 'insert'")
+	}
+	if expected == "insert" && usedBulkInsert {
+		return fmt.Errorf("expected google_compute_instance create backend 'insert' but selected 'bulk'")
+	}
+
+	return nil
+}
+
+func isBulkInsertCompatible(d *schema.ResourceData) (bool, string) {
+	if v, ok := d.GetOk("deletion_protection"); ok && v.(bool) {
+		return false, "deletion_protection is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("enable_display"); ok && v.(bool) {
+		return false, "enable_display is not supported by bulkInsert"
+	}
+
+	if _, ok := d.GetOk("instance_encryption_key"); ok {
+		return false, "instance_encryption_key is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok && v.(string) != "" {
+		return false, "boot_disk disk_encryption_key_raw (CSEK) is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_rsa"); ok && v.(string) != "" {
+		return false, "boot_disk disk_encryption_key_rsa (CSEK) is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key"); ok && v.(string) != "" {
+		return false, "boot_disk source_image_encryption_key raw_key (CSEK) is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key"); ok && v.(string) != "" {
+		return false, "boot_disk source_image_encryption_key rsa_encrypted_key (CSEK) is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.source_snapshot_encryption_key.0.raw_key"); ok && v.(string) != "" {
+		return false, "boot_disk source_snapshot_encryption_key raw_key (CSEK) is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.source_snapshot_encryption_key.0.rsa_encrypted_key"); ok && v.(string) != "" {
+		return false, "boot_disk source_snapshot_encryption_key rsa_encrypted_key (CSEK) is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.snapshot"); ok && v.(string) != "" {
+		return false, "boot_disk initialize_params.snapshot is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.resource_policies"); ok && len(v.([]interface{})) > 0 {
+		return false, "boot_disk initialize_params.resource_policies is not supported by bulkInsert"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.source"); ok && v.(string) != "" && strings.Contains(v.(string), "/zones/") {
+		return false, "boot_disk source must be a regional disk for bulkInsert (zonal disk self_links are rejected)"
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.force_attach"); ok && v.(bool) {
+		return false, "boot_disk force_attach is not supported by bulkInsert"
+	}
+
+	attachedDisksCount := d.Get("attached_disk.#").(int)
+	for i := 0; i < attachedDisksCount; i++ {
+		if v, ok := d.GetOk(fmt.Sprintf("attached_disk.%d.disk_encryption_key_raw", i)); ok && v.(string) != "" {
+			return false, fmt.Sprintf("attached_disk.%d disk_encryption_key_raw (CSEK) is not supported by bulkInsert", i)
+		}
+		if v, ok := d.GetOk(fmt.Sprintf("attached_disk.%d.disk_encryption_key_rsa", i)); ok && v.(string) != "" {
+			return false, fmt.Sprintf("attached_disk.%d disk_encryption_key_rsa (CSEK) is not supported by bulkInsert", i)
+		}
+		if mode := d.Get(fmt.Sprintf("attached_disk.%d.mode", i)).(string); mode != "READ_ONLY" {
+			return false, fmt.Sprintf("attached_disk.%d must use mode READ_ONLY for bulkInsert (got %q)", i, mode)
+		}
+		if src := d.Get(fmt.Sprintf("attached_disk.%d.source", i)).(string); src != "" && strings.Contains(src, "/zones/") {
+			return false, fmt.Sprintf("attached_disk.%d source must be a regional disk for bulkInsert (zonal disk self_links are rejected)", i)
+		}
+	}
+
+	networkInterfacesCount := d.Get("network_interface.#").(int)
+	for i := 0; i < networkInterfacesCount; i++ {
+		if v, ok := d.GetOk(fmt.Sprintf("network_interface.%d.network_ip", i)); ok && v.(string) != "" {
+			return false, fmt.Sprintf("network_interface.%d network_ip is not supported by bulkInsert", i)
+		}
+		if v, ok := d.GetOk(fmt.Sprintf("network_interface.%d.alias_ip_range", i)); ok && len(v.([]interface{})) > 0 {
+			return false, fmt.Sprintf("network_interface.%d alias_ip_range is not supported by bulkInsert", i)
+		}
+		if v, ok := d.GetOk(fmt.Sprintf("network_interface.%d.igmp_query", i)); ok && v.(string) != "" && v.(string) != "IGMP_QUERY_DISABLED" {
+			return false, fmt.Sprintf("network_interface.%d igmp_query %q is not supported by bulkInsert", i, v.(string))
+		}
+
+		accessConfigCount := d.Get(fmt.Sprintf("network_interface.%d.access_config.#", i)).(int)
+		for j := 0; j < accessConfigCount; j++ {
+			if v, ok := d.GetOk(fmt.Sprintf("network_interface.%d.access_config.%d.nat_ip", i, j)); ok && v.(string) != "" {
+				return false, fmt.Sprintf("network_interface.%d.access_config.%d nat_ip is not supported by bulkInsert", i, j)
+			}
+			if v, ok := d.GetOk(fmt.Sprintf("network_interface.%d.access_config.%d.public_ptr_domain_name", i, j)); ok && v.(string) != "" {
+				return false, fmt.Sprintf("network_interface.%d.access_config.%d public_ptr_domain_name is not supported by bulkInsert", i, j)
+			}
+		}
+	}
+
+	return true, ""
+}
+
+func instanceToInstanceProperties(instance *compute.Instance) *compute.InstanceProperties {
+	props := &compute.InstanceProperties{
+		CanIpForward:               instance.CanIpForward,
+		Description:                instance.Description,
+		MachineType:                tpgresource.GetResourceNameFromSelfLink(instance.MachineType),
+		Disks:                      sanitizeBulkInsertDisks(instance.Disks),
+		Metadata:                   instance.Metadata,
+		NetworkInterfaces:          instance.NetworkInterfaces,
+		NetworkPerformanceConfig:   instance.NetworkPerformanceConfig,
+		Tags:                       instance.Tags,
+		Labels:                     instance.Labels,
+		ServiceAccounts:            instance.ServiceAccounts,
+		GuestAccelerators:          sanitizeBulkInsertGuestAccelerators(instance.GuestAccelerators),
+		MinCpuPlatform:             instance.MinCpuPlatform,
+		Scheduling:                 instance.Scheduling,
+		ConfidentialInstanceConfig: instance.ConfidentialInstanceConfig,
+		AdvancedMachineFeatures:    instance.AdvancedMachineFeatures,
+		ShieldedInstanceConfig:     instance.ShieldedInstanceConfig,
+		ResourcePolicies:           sanitizeBulkInsertResourcePolicies(instance.ResourcePolicies),
+		ReservationAffinity:        instance.ReservationAffinity,
+		KeyRevocationActionType:    instance.KeyRevocationActionType,
+		PrivateIpv6GoogleAccess:    instance.PrivateIpv6GoogleAccess,
+		ForceSendFields:            []string{"CanIpForward"},
+	}
+
+	if instance.Params != nil && len(instance.Params.ResourceManagerTags) > 0 {
+		props.ResourceManagerTags = instance.Params.ResourceManagerTags
+	}
+
+	return props
+}
+
+func createInstanceViaBulkInsert(d *schema.ResourceData, config *transport_tpg.Config, instance *compute.Instance, project, zone, userAgent string) (map[string]interface{}, error) {
+	instanceProperties := instanceToInstanceProperties(instance)
+
+	perInstanceProps := map[string]compute.BulkInsertInstanceResourcePerInstanceProperties{
+		instance.Name: {},
+	}
+
+	if instance.Hostname != "" {
+		perInstanceProps[instance.Name] = compute.BulkInsertInstanceResourcePerInstanceProperties{
+			Hostname: instance.Hostname,
+		}
+	}
+
+	bulkReq := &compute.BulkInsertInstanceResource{
+		Count:                 1,
+		PerInstanceProperties: perInstanceProps,
+		InstanceProperties:    instanceProperties,
+	}
+
+	body, err := json.Marshal(bulkReq)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling bulk insert request: %s", err)
+	}
+
+	var bodyMap map[string]interface{}
+	if err := json.Unmarshal(body, &bodyMap); err != nil {
+		return nil, fmt.Errorf("error converting bulk insert request to map: %s", err)
+	}
+
+	requestURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/bulkInsert", config.ComputeBasePath, project, zone)
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    requestURL,
+		UserAgent: userAgent,
+		Body:      bodyMap,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error creating instance via bulkInsert: %s", err)
+	}
+
+	return res, nil
+}
+
+func sanitizeBulkInsertDisks(disks []*compute.AttachedDisk) []*compute.AttachedDisk {
+	sanitized := make([]*compute.AttachedDisk, len(disks))
+	for i, disk := range disks {
+		diskCopy := *disk
+		if diskCopy.DiskEncryptionKey != nil {
+			keyCopy := *diskCopy.DiskEncryptionKey
+			keyCopy.RawKey = ""
+			keyCopy.RsaEncryptedKey = ""
+			diskCopy.DiskEncryptionKey = &keyCopy
+		}
+		if diskCopy.InitializeParams != nil && diskCopy.InitializeParams.SourceImageEncryptionKey != nil {
+			keyCopy := *diskCopy.InitializeParams.SourceImageEncryptionKey
+			keyCopy.RawKey = ""
+			keyCopy.RsaEncryptedKey = ""
+			diskCopy.InitializeParams.SourceImageEncryptionKey = &keyCopy
+		}
+		if diskCopy.InitializeParams != nil && diskCopy.InitializeParams.SourceSnapshotEncryptionKey != nil {
+			keyCopy := *diskCopy.InitializeParams.SourceSnapshotEncryptionKey
+			keyCopy.RawKey = ""
+			keyCopy.RsaEncryptedKey = ""
+			diskCopy.InitializeParams.SourceSnapshotEncryptionKey = &keyCopy
+		}
+		if diskCopy.InitializeParams != nil && diskCopy.InitializeParams.DiskType != "" {
+			diskCopy.InitializeParams.DiskType = tpgresource.GetResourceNameFromSelfLink(diskCopy.InitializeParams.DiskType)
+		}
+		sanitized[i] = &diskCopy
+	}
+	return sanitized
+}
+
+func sanitizeBulkInsertGuestAccelerators(accels []*compute.AcceleratorConfig) []*compute.AcceleratorConfig {
+	if len(accels) == 0 {
+		return accels
+	}
+	out := make([]*compute.AcceleratorConfig, len(accels))
+	for i, a := range accels {
+		if a == nil {
+			continue
+		}
+		cp := *a
+		cp.AcceleratorType = tpgresource.GetResourceNameFromSelfLink(a.AcceleratorType)
+		if cp.AcceleratorType == "" {
+			cp.AcceleratorType = a.AcceleratorType
+		}
+		out[i] = &cp
+	}
+	return out
+}
+
+func sanitizeBulkInsertResourcePolicies(policies []string) []string {
+	if len(policies) == 0 {
+		return policies
+	}
+	out := make([]string, len(policies))
+	for i, p := range policies {
+		name := tpgresource.GetResourceNameFromSelfLink(p)
+		if name == "" {
+			name = p
+		}
+		out[i] = name
+	}
+	return out
+}
