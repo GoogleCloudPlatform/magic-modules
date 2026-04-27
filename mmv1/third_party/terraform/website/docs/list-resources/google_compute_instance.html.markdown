@@ -52,8 +52,12 @@ By default each result includes **resource identity** for `google_compute_instan
 * `project` - Project ID when applicable.
 * `zone` - Zone the instance resides in.
 
-With `include_resource = true` on the `list` block, results also include the full resource-style
-attributes documented for the managed
-[`google_compute_instance` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance#attributes-reference)
-(for example `machine_type`, `self_link`, `network_interface`, `boot_disk`, `tags`, and
-`metadata` where present in state).
+With `include_resource = true` on the `list` block, results also include resource attributes
+populated from the API response. These include `machine_type`, `self_link`, `current_status`,
+`description`, `tags`, `labels`, `metadata`, `network_interface`, `boot_disk`, `scratch_disk`,
+`attached_disk`, `service_account`, `scheduling`, `guest_accelerator`, `shielded_instance_config`,
+`confidential_instance_config`, `advanced_machine_features`, `deletion_protection`, `hostname`,
+`cpu_platform`, `instance_id`, `creation_timestamp`, and `reservation_affinity`.
+
+Note: `metadata_startup_script` is not populated (it is state-dependent). Attached disk ordering
+and raw disk encryption key fields are also omitted as they depend on prior configuration state.
