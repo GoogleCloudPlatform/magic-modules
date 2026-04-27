@@ -101,6 +101,7 @@ examples:
       network_name: 'wbi-test-default'
       reservation_name: 'wbi-reservation'
       key_name: 'my-crypto-key'
+      resource_policy_name: 'wbi-policy'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
@@ -348,6 +349,13 @@ properties:
               Learn more about using your own encryption keys.'
             immutable: true
             diff_suppress_func: 'WorkbenchInstanceKmsDiffSuppress'
+          - name: 'resourcePolicies'
+            type: Array
+            description: |
+              Optional. Resource policies applied to this disk.
+            immutable: true
+            item_type:
+              type: String
       - name: 'dataDisks'
         type: Array
         description: |
