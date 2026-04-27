@@ -125,7 +125,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainCreate(d *schema.ResourceData
 		Name:      name,
 	}
 
-	apiService := config.NewServiceNetworkingClient(userAgent)
+	apiService := NewClient(config, userAgent)
 	peeredDnsDomainsService := servicenetworking.NewServicesProjectsGlobalNetworksPeeredDnsDomainsService(apiService)
 	createCall := peeredDnsDomainsService.Create(parent, r)
 	if config.UserProjectOverride {
@@ -168,7 +168,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, 
 	network := d.Get("network").(string)
 	parent := fmt.Sprintf("services/%s/projects/%s/global/networks/%s", service, projectNumber, network)
 
-	apiService := config.NewServiceNetworkingClient(userAgent)
+	apiService := NewClient(config, userAgent)
 	peeredDnsDomainsService := servicenetworking.NewServicesProjectsGlobalNetworksPeeredDnsDomainsService(apiService)
 	readCall := peeredDnsDomainsService.List(parent)
 	if config.UserProjectOverride {
@@ -224,7 +224,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData
 	}
 
 	name := d.Get("name").(string)
-	apiService := config.NewServiceNetworkingClient(userAgent)
+	apiService := NewClient(config, userAgent)
 	peeredDnsDomainsService := servicenetworking.NewServicesProjectsGlobalNetworksPeeredDnsDomainsService(apiService)
 
 	if err := transport_tpg.Retry(transport_tpg.RetryOptions{

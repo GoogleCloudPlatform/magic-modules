@@ -35,7 +35,6 @@ import (
 	"google.golang.org/grpc"
 	googleoauth "golang.org/x/oauth2/google"
 	externalaccount "golang.org/x/oauth2/google/externalaccount"
-	appengine "google.golang.org/api/appengine/v1"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/cloudbilling/v1"
@@ -48,11 +47,6 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/composer/v1"
-{{- else }}
-	"google.golang.org/api/composer/v1beta1"
-{{- end }}
 {{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/compute/v1"
 {{- else }}
@@ -70,7 +64,6 @@ import (
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 	cloudlogging "google.golang.org/api/logging/v2"
 	runadminv2 "google.golang.org/api/run/v2"
-	"google.golang.org/api/servicenetworking/v1"
 	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/sourcerepo/v1"
 	"google.golang.org/api/spanner/v1"
@@ -962,48 +955,6 @@ func (c *Config) NewDataprocClient(userAgent string) *dataproc.Service {
 	clientDataproc.BasePath = dataprocClientBasePath
 
 	return clientDataproc
-}
-
-func (c *Config) NewAppEngineClient(userAgent string) *appengine.APIService {
-	appEngineClientBasePath := RemoveBasePathVersion(c.AppEngineBasePath)
-	log.Printf("[INFO] Instantiating App Engine client for path %s", appEngineClientBasePath)
-	clientAppEngine, err := appengine.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client appengine: %s", err)
-		return nil
-	}
-	clientAppEngine.UserAgent = userAgent
-	clientAppEngine.BasePath = appEngineClientBasePath
-
-	return clientAppEngine
-}
-
-func (c *Config) NewComposerClient(userAgent string) *composer.Service {
-	composerClientBasePath := RemoveBasePathVersion(c.ComposerBasePath)
-	log.Printf("[INFO] Instantiating Cloud Composer client for path %s", composerClientBasePath)
-	clientComposer, err := composer.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client composer: %s", err)
-		return nil
-	}
-	clientComposer.UserAgent = userAgent
-	clientComposer.BasePath = composerClientBasePath
-
-	return clientComposer
-}
-
-func (c *Config) NewServiceNetworkingClient(userAgent string) *servicenetworking.APIService {
-	serviceNetworkingClientBasePath := RemoveBasePathVersion(c.ServiceNetworkingBasePath)
-	log.Printf("[INFO] Instantiating Service Networking client for path %s", serviceNetworkingClientBasePath)
-	clientServiceNetworking, err := servicenetworking.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client service networking: %s", err)
-		return nil
-	}
-	clientServiceNetworking.UserAgent = userAgent
-	clientServiceNetworking.BasePath = serviceNetworkingClientBasePath
-
-	return clientServiceNetworking
 }
 
 func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service {
