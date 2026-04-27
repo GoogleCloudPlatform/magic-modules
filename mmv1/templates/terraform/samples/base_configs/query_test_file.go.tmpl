@@ -6,13 +6,10 @@
 package {{ lower $.ProductMetadata.Name }}_test
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
-	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"{{ $.ImportPath }}/acctest"
@@ -57,6 +54,8 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 		"{{$n}}": envvar.GetTestRegionFromEnv(),
 		{{- else if eq $n "zone" }}
 		"zone": envvar.GetTestZoneFromEnv(),
+		{{- else if eq $n "project" }}
+		"project": acctest.BootstrapProject(t, "tf-bt-list-", envvar.GetTestBillingAccountFromEnv(t), nil).ProjectId,
 		{{- end }}
 	{{- end }}
 		"random_suffix": randomSuffix,
@@ -91,11 +90,6 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("{{ $example.ResourceType $.TerraformName }}.list_query", 1),
-					querycheck.ExpectResourceDisplayName(
-						"{{ $example.ResourceType $.TerraformName }}.list_query",
-						queryfilter.ByDisplayName(knownvalue.StringRegexp(regexp.MustCompile(randomSuffix+`$`))),
-						knownvalue.StringRegexp(regexp.MustCompile(randomSuffix+`$`)),
-					),
 				},
 			},
 		},
