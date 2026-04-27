@@ -42,6 +42,19 @@ resource "google_compute_reservation" "gpu_reservation" {
   specific_reservation_required = true
 }
 
+resource "google_compute_resource_policy" "my_policy" {
+  name   = "{{index $.Vars "resource_policy_name"}}"
+  region = "us-central1"
+  snapshot_schedule_policy {
+    schedule {
+      daily_schedule {
+        days_in_cycle = 1
+        start_time    = "04:00"
+      }
+    }
+  }
+}
+
 resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "instance_name"}}"
   location = "us-central1-a"
@@ -70,6 +83,7 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
       disk_type = "PD_SSD"
       disk_encryption = "CMEK"
       kms_key = "{{index $.Vars "key_name"}}"
+      resource_policies = [google_compute_resource_policy.my_policy.id]
     }
 
     data_disks {
@@ -123,6 +137,7 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
     google_compute_subnetwork.my_subnetwork,
     google_compute_address.static,
     google_service_account_iam_binding.act_as_permission,
-    google_compute_reservation.gpu_reservation
+    google_compute_reservation.gpu_reservation,
+    google_compute_resource_policy.my_policy
   ]
 }
