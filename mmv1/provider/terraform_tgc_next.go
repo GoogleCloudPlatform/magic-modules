@@ -366,6 +366,130 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		})
 	}
 }
+
+// addTestsFromHandwrittenTestsMultiFile scans the product's service directory for extra handwritten test files
+// (other than the main file) that belong to the resource, and adds their tests to the generated test suite.
+// It applies strict prefix matching to avoid collisions and handles plural resource names in test prefixes.
+func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTestsMultiFile(object *api.Resource) error {
+	if object.ProductMetadata == nil {
+		return nil
+	}
+	productName := strings.ToLower(tgc.Product.Name)
+	resourceFullName := tgc.ResourceGoFilename(*object)
+	dirPath := fmt.Sprintf("third_party/terraform/services/%s", productName)
+
+	entries, err := fs.ReadDir(tgc.templateFS, dirPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			log.Printf("directory not found: %s", dirPath)
+			return nil
+		}
+		return fmt.Errorf("error reading directory %s: %v", dirPath, err)
+	}
+
+	// Skip adding handwritten tests that are already defined in yaml (because they have custom overrides etc.)
+	testNamesInYAML := make(map[string]struct{})
+	for _, test := range object.TGCTests {
+		if test.Name != "" {
+			testNamesInYAML[test.Name] = struct{}{}
+		}
+	}
+
+	tests := make([]resource.TGCTest, 0)
+	prefix := fmt.Sprintf("resource_%s", resourceFullName)
+	normalizedPrefix := strings.ReplaceAll(prefix, "_", "")
+	testPrefix := strings.ToLower("TestAcc" + object.ProductMetadata.Name + object.Name)
+
+	mainFileName := fmt.Sprintf("resource_%s_test.go", resourceFullName)
+
+	// Helper to process a file and extract tests
+	processFile := func(filePath string) error {
+		data, err := fs.ReadFile(tgc.templateFS, filePath)
+		if err != nil {
+			return fmt.Errorf("error reading handwritten test file %s: %v", filePath, err)
+		}
+
+		matches := testRegex.FindAllSubmatch(data, -1)
+		for _, match := range matches {
+			if len(match) == 2 {
+				testName := string(match[1])
+				lowercasedTestName := strings.ToLower(testName)
+				prefixWithUnderscore := testPrefix + "_"
+				prefixWithSUnderscore := testPrefix + "s_"
+
+				if !strings.HasPrefix(lowercasedTestName, prefixWithUnderscore) &&
+					!strings.HasPrefix(lowercasedTestName, prefixWithSUnderscore) &&
+					lowercasedTestName != testPrefix &&
+					lowercasedTestName != testPrefix+"s" {
+					continue
+				}
+				if _, ok := testNamesInYAML[testName]; ok {
+					continue
+				}
+				// Avoid duplicates if multiple files have same test name
+				alreadyAdded := false
+				for _, t := range tests {
+					if t.Name == testName {
+						alreadyAdded = true
+						break
+					}
+				}
+				if !alreadyAdded {
+					tests = append(tests, resource.TGCTest{
+						Name: testName,
+					})
+				}
+			}
+		}
+		return nil
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		// Skip main file as it was handled directly
+		if name == mainFileName || name == mainFileName+".tmpl" {
+			continue
+		}
+
+		normalizedName := strings.ReplaceAll(name, "_", "")
+		if !strings.HasPrefix(normalizedName, normalizedPrefix) {
+			continue
+		}
+
+		// Skip files that belong to another resource with a longer name sharing the prefix
+		belongsToOther := false
+		for _, obj := range tgc.Product.Objects {
+			if obj == object {
+				continue
+			}
+			otherPrefix := fmt.Sprintf("resource_%s", tgc.ResourceGoFilename(*obj))
+			if strings.HasPrefix(name, otherPrefix) && len(otherPrefix) > len(prefix) {
+				belongsToOther = true
+				break
+			}
+		}
+		if belongsToOther {
+			continue
+		}
+
+		if !strings.HasSuffix(name, "_test.go") && !strings.HasSuffix(name, "_test.go.tmpl") {
+			continue
+		}
+
+		filePath := path.Join(dirPath, name)
+		if err := processFile(filePath); err != nil {
+			return err
+		}
+	}
+
+	object.TGCTests = append(object.TGCTests, tests...)
+
+	return nil
+}
+
 func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
 	if object.ProductMetadata == nil {
 		return nil
@@ -409,6 +533,8 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	}
 
 	object.TGCTests = append(object.TGCTests, tests...)
+
+	tgc.addTestsFromHandwrittenTestsMultiFile(object)
 
 	return nil
 }
