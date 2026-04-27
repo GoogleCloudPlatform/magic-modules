@@ -256,3 +256,97 @@ func TestAccDiscoveryEngineDataConnector_DataConnectorEntitiesParamsDiffSuppress
 		}
 	}
 }
+
+func TestAccDiscoveryEngineDataConnector_detachStoresOnDestroy(t *testing.T) {
+	// Skips this test as it requires complex IdP setup.
+	t.Skip()
+
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDiscoveryEngineDataConnector_detachStoresOnDestroy(context),
+			},
+			{
+				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+			},
+		},
+	})
+}
+
+func testAccDiscoveryEngineDataConnector_detachStoresOnDestroy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_discovery_engine_data_connector" "servicenow-basic" {
+  location                     = "global"
+  collection_id                = "tf-test-collection-id%{random_suffix}"
+  collection_display_name      = "tf-test-dataconnector-servicenow"
+  data_source                  = "servicenow"
+  data_source_version          = 3
+  params = {
+    auth_type                  = "OAUTH_PASSWORD_GRANT"
+    instance_uri               = "https://gcpconnector1.service-now.com/"
+    client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
+    client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
+    static_ip_enabled          = "false"
+    user_account               = "connectorsuserqa@google.com"
+    password                   = "SECRET_MANAGER_RESOURCE_NAME"
+  }
+  refresh_interval             = "86400s"
+  entities {
+    entity_name                = "catalog"
+
+    params = jsonencode({
+      "inclusion_filters" : {
+        "knowledgeBaseSysId" : [
+          "123"
+        ]
+      }
+    })
+  }
+  entities {
+    entity_name = "incident"
+    params = jsonencode({
+      "inclusion_filters" : {
+        "knowledgeBaseSysId" : [
+          "123"
+        ]
+      }
+    })
+  }
+  entities {
+    entity_name = "knowledge_base"
+    params = jsonencode({
+      "inclusion_filters" : {
+        "knowledgeBaseSysId" : [
+          "123"
+        ]
+      }
+    })
+  }
+  static_ip_enabled            = false
+  destination_configs {
+    key = "url"
+    destinations {
+      host = "https://gcpconnector1.service-now.com/"
+      port = 123
+    }
+  }
+  connector_modes              = ["DATA_INGESTION"]
+  sync_mode                    = "PERIODIC"
+  detach_stores_on_destroy     = true
+}
+`, context)
+}
