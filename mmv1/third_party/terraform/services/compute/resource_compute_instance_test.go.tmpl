@@ -189,53 +189,61 @@ func TestValidateInstanceMetadata(t *testing.T) {
 
 func TestCheckForCommonAliasIp(t *testing.T) {
 	type testCase struct {
-		old, new []*compute.AliasIpRange
-		expected []*compute.AliasIpRange
+		old, new []map[string]interface{}
+		expected []map[string]interface{}
 	}
 
 	testCases := []testCase{
 		{
-			old: []*compute.AliasIpRange{
-				{IpCidrRange: "10.0.0.0/24"},
-				{IpCidrRange: "10.0.1.0/24"},
+			old: []map[string]interface{}{
+				{"ipCidrRange": "10.0.0.0/24"},
+				{"ipCidrRange": "10.0.1.0/24"},
 			},
-			new: []*compute.AliasIpRange{
-				{IpCidrRange: "10.0.0.0/24"},
-				{IpCidrRange: "10.0.2.0/24"},
+			new: []map[string]interface{}{
+				{"ipCidrRange": "10.0.0.0/24"},
+				{"ipCidrRange": "10.0.2.0/24"},
 			},
-			expected: []*compute.AliasIpRange{
-				{IpCidrRange: "10.0.0.0/24"},
-			},
-		},
-		{
-			old: []*compute.AliasIpRange{
-				{IpCidrRange: "172.16.0.0/24"},
-				{IpCidrRange: "10.0.1.0/24"},
-			},
-			new: []*compute.AliasIpRange{
-				{IpCidrRange: "172.16.0.0/24"},
-				{IpCidrRange: "10.0.2.0/24"},
-			},
-			expected: []*compute.AliasIpRange{
-				{IpCidrRange: "172.16.0.0/24"},
+			expected: []map[string]interface{}{
+				{"ipCidrRange": "10.0.0.0/24"},
 			},
 		},
 		{
-			old: []*compute.AliasIpRange{
-				{IpCidrRange: "10.0.0.0/24"},
-				{IpCidrRange: "10.0.1.0/24"},
+			old: []map[string]interface{}{
+				{"ipCidrRange": "172.16.0.0/24"},
+				{"ipCidrRange": "10.0.1.0/24"},
 			},
-			new: []*compute.AliasIpRange{
-				{IpCidrRange: "192.168.0.0/24"},
-				{IpCidrRange: "172.17.0.0/24"},
+			new: []map[string]interface{}{
+				{"ipCidrRange": "172.16.0.0/24"},
+				{"ipCidrRange": "10.0.2.0/24"},
 			},
-			expected: []*compute.AliasIpRange{},
+			expected: []map[string]interface{}{
+				{"ipCidrRange": "172.16.0.0/24"},
+			},
+		},
+		{
+			old: []map[string]interface{}{
+				{"ipCidrRange": "10.0.0.0/24"},
+				{"ipCidrRange": "10.0.1.0/24"},
+			},
+			new: []map[string]interface{}{
+				{"ipCidrRange": "192.168.0.0/24"},
+				{"ipCidrRange": "172.17.0.0/24"},
+			},
+			expected: []map[string]interface{}{},
 		},
 	}
 
 	for _, tc := range testCases {
-		oldInterface := &compute.NetworkInterface{AliasIpRanges: tc.old}
-		newInterface := &compute.NetworkInterface{AliasIpRanges: tc.new}
+		oldInterface := &compute.NetworkInterface{AliasIpRanges: func() []*compute.AliasIpRange {
+			var r []*compute.AliasIpRange
+			tpgresource.Convert(tc.old, &r)
+			return r
+		}()}
+		newInterface := &compute.NetworkInterface{AliasIpRanges: func() []*compute.AliasIpRange {
+			var r []*compute.AliasIpRange
+			tpgresource.Convert(tc.new, &r)
+			return r
+		}()}
 		result := tpgcompute.CheckForCommonAliasIp(oldInterface, newInterface)
 		assert.Equal(t, tc.expected, result)
 	}
@@ -812,20 +820,25 @@ func TestAccComputeInstance_diskEncryption(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bootEncryptionKey := "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
 	bootEncryptionKeyHash := "esTuF7d4eatX4cnc4JsiEiaI+Rff78JgPhA/v1zxX9E="
-	diskNameToEncryptionKey := map[string]*compute.CustomerEncryptionKey{
-		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			RawKey: "Ym9vdDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
-			Sha256: "awJ7p57H+uVZ9axhJjl1D3lfC2MgA/wnt/z88Ltfvss=",
-		},
-		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			RawKey: "c2Vjb25kNzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
-			Sha256: "7TpIwUdtCOJpq2m+3nt8GFgppu6a2Xsj1t0Gexk13Yc=",
-		},
-		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			RawKey: "dGhpcmQ2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
-			Sha256: "b3pvaS7BjDbCKeLPPTx7yXBuQtxyMobCHN1QJR43xeM=",
-		},
-	}
+	diskNameToEncryptionKey := func() map[string]*compute.CustomerEncryptionKey {
+		m := map[string]map[string]interface{}{
+			fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
+				"rawKey": "Ym9vdDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+				"sha256": "awJ7p57H+uVZ9axhJjl1D3lfC2MgA/wnt/z88Ltfvss=",
+			},
+			fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
+				"rawKey": "c2Vjb25kNzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+				"sha256": "7TpIwUdtCOJpq2m+3nt8GFgppu6a2Xsj1t0Gexk13Yc=",
+			},
+			fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
+				"rawKey": "dGhpcmQ2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+				"sha256": "b3pvaS7BjDbCKeLPPTx7yXBuQtxyMobCHN1QJR43xeM=",
+			},
+		}
+		var res map[string]*compute.CustomerEncryptionKey
+		tpgresource.Convert(m, &res)
+		return res
+	}()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -851,12 +864,17 @@ func TestAccComputeInstance_diskEncryptionRestart(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	bootEncryptionKey := "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
 	bootEncryptionKeyHash := "esTuF7d4eatX4cnc4JsiEiaI+Rff78JgPhA/v1zxX9E="
-	diskNameToEncryptionKey := map[string]*compute.CustomerEncryptionKey{
-		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			RawKey: "Ym9vdDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
-			Sha256: "awJ7p57H+uVZ9axhJjl1D3lfC2MgA/wnt/z88Ltfvss=",
-		},
-	}
+	diskNameToEncryptionKey := func() map[string]*compute.CustomerEncryptionKey {
+		m := map[string]map[string]interface{}{
+			fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
+				"rawKey": "Ym9vdDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+				"sha256": "awJ7p57H+uVZ9axhJjl1D3lfC2MgA/wnt/z88Ltfvss=",
+			},
+		}
+		var res map[string]*compute.CustomerEncryptionKey
+		tpgresource.Convert(m, &res)
+		return res
+	}()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -891,17 +909,22 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 	kms := acctest.BootstrapKMSKey(t)
 
 	bootKmsKeyName := kms.CryptoKey.Name
-	diskNameToEncryptionKey := map[string]*compute.CustomerEncryptionKey{
-		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			KmsKeyName: kms.CryptoKey.Name,
-		},
-		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			KmsKeyName: kms.CryptoKey.Name,
-		},
-		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			KmsKeyName: kms.CryptoKey.Name,
-		},
-	}
+	diskNameToEncryptionKey := func() map[string]*compute.CustomerEncryptionKey {
+		m := map[string]map[string]interface{}{
+			fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
+				"kmsKeyName": kms.CryptoKey.Name,
+			},
+			fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
+				"kmsKeyName": kms.CryptoKey.Name,
+			},
+			fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
+				"kmsKeyName": kms.CryptoKey.Name,
+			},
+		}
+		var res map[string]*compute.CustomerEncryptionKey
+		tpgresource.Convert(m, &res)
+		return res
+	}()
 
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{
@@ -3763,10 +3786,11 @@ func TestAccComputeInstance_maxRunDuration_update(t *testing.T) {
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-mrd-%s", acctest.RandString(t, 10))
-	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeInstance_standardVM_maxRunDurationUpdated
-	expectedMaxRunDuration.Nanos = 456
-	expectedMaxRunDuration.Seconds = 60
+	expectedMaxRunDuration := func() compute.Duration {
+		var d compute.Duration
+		tpgresource.Convert(map[string]interface{}{"seconds": 60, "nanos": 456}, &d)
+		return d
+	}()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -3796,10 +3820,11 @@ func TestAccComputeInstance_standardVM_maxRunDuration_stopTerminationAction(t *t
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeInstance_standardVM_maxRunDuration
-	expectedMaxRunDuration.Nanos = 123
-	expectedMaxRunDuration.Seconds = 60
+	expectedMaxRunDuration := func() compute.Duration {
+		var d compute.Duration
+		tpgresource.Convert(map[string]interface{}{"seconds": 60, "nanos": 123}, &d)
+		return d
+	}()
 	var instanceTerminationAction = "STOP"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3826,10 +3851,11 @@ func TestAccComputeInstance_localSsdVM_maxRunDuration_stopTerminationAction(t *t
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeInstance_localSsdVM_maxRunDuration
-	expectedMaxRunDuration.Nanos = 123
-	expectedMaxRunDuration.Seconds = 180
+	expectedMaxRunDuration := func() compute.Duration {
+		var d compute.Duration
+		tpgresource.Convert(map[string]interface{}{"seconds": 180, "nanos": 123}, &d)
+		return d
+	}()
 	var instanceTerminationAction = "STOP"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3856,10 +3882,11 @@ func TestAccComputeInstance_spotVM_maxRunDuration_deleteTerminationAction(t *tes
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeInstance_spotVM_maxRunDuration
-	expectedMaxRunDuration.Nanos = 123
-	expectedMaxRunDuration.Seconds = 60
+	expectedMaxRunDuration := func() compute.Duration {
+		var d compute.Duration
+		tpgresource.Convert(map[string]interface{}{"seconds": 60, "nanos": 123}, &d)
+		return d
+	}()
 	var instanceTerminationAction = "DELETE"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3886,10 +3913,11 @@ func TestAccComputeInstance_standardVM_maxRunDuration_deleteTerminationAction(t 
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeInstance_standardVM_maxRunDuration
-	expectedMaxRunDuration.Nanos = 123
-	expectedMaxRunDuration.Seconds = 60
+	expectedMaxRunDuration := func() compute.Duration {
+		var d compute.Duration
+		tpgresource.Convert(map[string]interface{}{"seconds": 60, "nanos": 123}, &d)
+		return d
+	}()
 	var instanceTerminationAction = "DELETE"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3916,10 +3944,11 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	// Define in testAccComputeInstance_spotVM_maxRunDuration
-	var expectedMaxRunDuration = compute.Duration{}
-	expectedMaxRunDuration.Nanos = 123
-	expectedMaxRunDuration.Seconds = 60
+	expectedMaxRunDuration := func() compute.Duration {
+		var d compute.Duration
+		tpgresource.Convert(map[string]interface{}{"seconds": 60, "nanos": 123}, &d)
+		return d
+	}()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -3951,10 +3980,11 @@ func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
-	// Define in testAccComputeInstance_localSsdRecoveryTimeout
-	expectedLocalSsdRecoveryTimeout.Nanos = 0
-	expectedLocalSsdRecoveryTimeout.Seconds = 3600
+	expectedLocalSsdRecoveryTimeout := func() compute.Duration {
+		var d compute.Duration
+		tpgresource.Convert(map[string]interface{}{"seconds": 3600, "nanos": 0}, &d)
+		return d
+	}()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -3979,10 +4009,11 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	// Define in testAccComputeInstance_localSsdRecoveryTimeout
-	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
-	expectedLocalSsdRecoveryTimeout.Nanos = 0
-	expectedLocalSsdRecoveryTimeout.Seconds = 3600
+	expectedLocalSsdRecoveryTimeout := func() compute.Duration {
+		var d compute.Duration
+		tpgresource.Convert(map[string]interface{}{"seconds": 3600, "nanos": 0}, &d)
+		return d
+	}()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -4016,10 +4047,15 @@ func TestAccComputeInstance_partnerMetadata(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var namespace = "test.compute.googleapis.com"
-	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
-	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
-		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
-	}
+	expectedPartnerMetadata := func() map[string]compute.StructuredEntries {
+		m := make(map[string]map[string]interface{})
+		m[namespace] = map[string]interface{}{
+			"entries": `{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`,
+		}
+		var res map[string]compute.StructuredEntries
+		tpgresource.Convert(m, &res)
+		return res
+	}()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -4044,10 +4080,15 @@ func TestAccComputeInstance_partnerMetadata_update(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var namespace = "test.compute.googleapis.com"
-	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
-	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
-		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
-	}
+	expectedPartnerMetadata := func() map[string]compute.StructuredEntries {
+		m := make(map[string]map[string]interface{})
+		m[namespace] = map[string]interface{}{
+			"entries": `{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`,
+		}
+		var res map[string]compute.StructuredEntries
+		tpgresource.Convert(m, &res)
+		return res
+	}()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -4080,10 +4121,15 @@ func TestAccComputeInstance_partnerMetadata_deletePartnerMetadata(t *testing.T) 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var namespace = "test.compute.googleapis.com"
-	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
-	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
-		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
-	}
+	expectedPartnerMetadata := func() map[string]compute.StructuredEntries {
+		m := make(map[string]map[string]interface{})
+		m[namespace] = map[string]interface{}{
+			"entries": `{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`,
+		}
+		var res map[string]compute.StructuredEntries
+		tpgresource.Convert(m, &res)
+		return res
+	}()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -5120,11 +5166,20 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 
 		config := acctest.GoogleProviderConfig(t)
 
-		op, err := config.NewComputeClient(config.UserAgent).Instances.Stop(config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
+		url := fmt.Sprintf("projects/%s/zones/%s/instances/%s/stop",
+			config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+		
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
-		err = tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "Waiting on stop", config.UserAgent, 20*time.Minute)
+		err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "Waiting on stop", config.UserAgent, 20*time.Minute)
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
@@ -5732,7 +5787,7 @@ func testAccCheckComputeInstancePartnerMetadata(instance *compute.Instance, expe
 		}
 		for key, value := range expectedPartnerMetadata {
 			var jsonMap map[string]interface{}
-			json.Unmarshal(value.Entries, jsonMap)
+			json.Unmarshal(value.Entries, &jsonMap)
 			expectedPartnerMetadataMap[key] = jsonMap
 		}
 		if !reflect.DeepEqual(acutalPartnerMetadataMap, expectedPartnerMetadataMap) {
