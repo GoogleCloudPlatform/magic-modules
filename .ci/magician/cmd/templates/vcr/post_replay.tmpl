@@ -1,16 +1,24 @@
 ## Test report
 
-{{- if or (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0)}}
-#### Non-exercised tests
-
-{{if gt (len .NotRunBetaTests) 0 -}}
-{{color "red" "Tests were added that are skipped in VCR:"}}
-{{range .NotRunBetaTests}}{{. | printf "- %s\n"}}{{end}}
+{{if or (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0)}}
+{{if gt (len .NotRunBetaTests) 0}}
+> [!IMPORTANT]
+> **Manual Verification Required**
+>
+> VCR cannot automatically execute the following tests added in this PR. Please verify them manually:
+>
+{{range .NotRunBetaTests}}> {{color "red" .}}
+{{end}}
 {{end}}
 
-{{if gt (len .NotRunGATests) 0 -}}
-{{color "red" "Tests were added that are GA-only additions and require manual runs:"}}
-{{range .NotRunGATests}}{{. | printf "- %s\n"}}{{end}}
+{{if gt (len .NotRunGATests) 0}}
+> [!IMPORTANT]
+> **Manual Verification Required (GA-only additions)**
+>
+> The following tests are GA-only additions and cannot be run by VCR in Beta mode. Please verify them manually:
+>
+{{range .NotRunGATests}}> {{color "red" .}}
+{{end}}
 {{end}}
 {{end}}
 
