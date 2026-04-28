@@ -83,6 +83,8 @@ type recordReplay struct {
 	BuildID                       string
 	LogBaseUrl                    string
 	BrowseLogBaseUrl              string
+	NotRunBetaTests               []string
+	NotRunGATests                 []string
 }
 
 var testTerraformVCRCmd = &cobra.Command{
@@ -358,6 +360,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			Version:                       provider.Beta.String(),
 			Head:                          newBranch,
 			BuildID:                       buildID,
+			NotRunBetaTests:               notRunBeta,
+			NotRunGATests:                 notRunGa,
 		}
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
 		if err != nil {

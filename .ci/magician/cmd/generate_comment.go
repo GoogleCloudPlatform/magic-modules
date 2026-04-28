@@ -84,6 +84,7 @@ type Errors struct {
 }
 
 type diffCommentData struct {
+	CommitSHA            string
 	Diffs                []Diff
 	BreakingChanges      []BreakingChange
 	MissingServiceLabels []string
@@ -222,7 +223,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 
 	// Initialize repos
-	data := diffCommentData{}
+	data := diffCommentData{
+		CommitSHA: commitSha,
+	}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
