@@ -556,7 +556,8 @@ func TestHandleBuildFailures(t *testing.T) {
 		BuildFailures: []string{"package1", "package2"},
 	}
 
-	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh)
+	rnr := &mockRunner{}
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh, rnr)
 
 	assert.NoError(t, err)
 	assert.True(t, handled)
@@ -579,7 +580,8 @@ func TestHandleBuildFailures_NoFailures(t *testing.T) {
 	}
 	result := vcr.Result{}
 
-	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh)
+	rnr := &mockRunner{}
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh, rnr)
 
 	assert.NoError(t, err)
 	assert.False(t, handled)
@@ -587,25 +589,6 @@ func TestHandleBuildFailures_NoFailures(t *testing.T) {
 	assert.Len(t, gh.calledMethods["PostBuildStatus"], 0)
 }
 
-func TestAppendVCRResultToDiffComment_Exists(t *testing.T) {
-	gh := &mockGithub{
-		calledMethods: make(map[string][][]any),
-		pullRequestComments: []github.PullRequestComment{
-			{
-				ID:   456,
-				Body: "## Diff report\nsome diffs",
-			},
-		},
-	}
-
-	err := appendVCRResultToDiffComment("123", "VCR Results", gh)
-
-	assert.NoError(t, err)
-	assert.Len(t, gh.calledMethods["UpdateComment"], 1)
-	assert.Equal(t, "123", gh.calledMethods["UpdateComment"][0][0])
-	assert.Contains(t, gh.calledMethods["UpdateComment"][0][1].(string), "VCR Results")
-	assert.Equal(t, 456, gh.calledMethods["UpdateComment"][0][2])
-}
 func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
@@ -662,5 +645,4 @@ func TestAppendVCRResultToDiffComment_UseFileID(t *testing.T) {
 	assert.Equal(t, "123", gh.calledMethods["UpdateComment"][0][0])
 	assert.Contains(t, gh.calledMethods["UpdateComment"][0][1].(string), "VCR Results")
 	assert.Equal(t, 456, gh.calledMethods["UpdateComment"][0][2])
-}
 }

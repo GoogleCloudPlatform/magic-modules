@@ -240,7 +240,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return nil
 	}
 
-	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh); err != nil {
+	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling build failures: %w", err)
 	} else if hasBuildFailures {
 		return nil
@@ -312,7 +312,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return nil
 		}
 
-		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh); err != nil {
+		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling build failures: %w", err)
 		} else if hasBuildFailures {
 			return nil
@@ -540,7 +540,7 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 	return false, nil
 }
 
-func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
+func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.BuildFailures) > 0 {
 		comment := color("red", fmt.Sprintf("The provider failed to build during VCR tests in %s mode\n", mode.Upper()))
 		comment += "\nThe following packages failed to build:\n"
@@ -551,8 +551,14 @@ func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha st
 Please fix the compilation errors to complete your PR.
 
 View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			return true, fmt.Errorf("error posting comment: %v", err)
+
+		mentionStr := getMentions(prNumber, gh)
+		if mentionStr != "" {
+			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
+		}
+
+		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+			return true, fmt.Errorf("error appending comment: %v", err)
 		}
 		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
 			return true, fmt.Errorf("error posting failure status: %v", err)
@@ -589,7 +595,6 @@ func getMentions(prNumber string, gh GithubClient) string {
 		mentionStr += reviewerMentions
 	}
 	return mentionStr
-}
 }
 
 // appendVCRResultToDiffComment appends content to the existing diff report comment
