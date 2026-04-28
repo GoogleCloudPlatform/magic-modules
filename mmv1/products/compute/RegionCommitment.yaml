@@ -57,6 +57,9 @@ examples:
     primary_resource_id: 'foobar'
     vars:
       region_commitment_name: 'my-full-commitment'
+      tag_key: 'tagkey'
+      tag_value: 'tagvalue'
+      org_id: '123456789'
     # Creating a resource means signing a contract
     # Spanning years that cannot be deleted
     exclude_test: true

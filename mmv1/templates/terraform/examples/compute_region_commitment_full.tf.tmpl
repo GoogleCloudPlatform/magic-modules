@@ -15,7 +15,17 @@ resource "google_compute_region_commitment" "foobar" {
   }
   params {
     resource_manager_tags = {
-      "tagKeys/123456789" = "tagValues/987654321"
+      (google_tags_tag_key.tag_key.id) = (google_tags_tag_value.tag_value.id)
     }
   }
+}
+
+resource "google_tags_tag_key" "tag_key" {
+  parent     = "organizations/{{index $.Vars "org_id"}}"
+  short_name = "{{index $.Vars "tag_key"}}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = google_tags_tag_key.tag_key.id
+  short_name = "{{index $.Vars "tag_value"}}"
 }
