@@ -210,8 +210,8 @@ func TestFormatDiffComment(t *testing.T) {
 				"## Diff report",
 				"generated the following diffs",
 				"| Repository | Diff Link | Changes |",
-				"| `Repo 1` | [View Diff](https://github.com/modular-magician/repo-1/compare/1a2a3a4a..1a2a3a4b) | +1 added, -1 removed |",
-				"| `Repo 2` | [View Diff](https://github.com/modular-magician/repo-2/compare/1a2a3a4c..1a2a3a4d) | +2 added, -2 removed |",
+				"| Repo 1 | [View Diff](https://github.com/modular-magician/repo-1/compare/1a2a3a4a..1a2a3a4b) | +1 added, -1 removed |",
+				"| Repo 2 | [View Diff](https://github.com/modular-magician/repo-2/compare/1a2a3a4c..1a2a3a4d) | +2 added, -2 removed |",
 			},
 			notExpectedStrings: []string{
 				"hasn't generated any diffs",
