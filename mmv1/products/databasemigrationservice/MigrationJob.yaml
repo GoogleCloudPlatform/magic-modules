@@ -318,12 +318,14 @@ properties:
       The objects that need to be migrated. If unset, the default is to migrate
       all objects available on the source.
     immutable: true
+    default_from_api: true
     properties:
       - name: sourceObjectsConfig
         type: NestedObject
         description: |
           Configuration for the source objects to be migrated.
         immutable: true
+        default_from_api: true
         properties:
           - name: objectsSelectionType
             type: Enum
@@ -333,6 +335,7 @@ properties:
               migrated. When set to `ALL_OBJECTS`, all objects available on the
               source are migrated.
             immutable: true
+            default_from_api: true
             enum_values:
               - ALL_OBJECTS
               - SPECIFIED_OBJECTS
