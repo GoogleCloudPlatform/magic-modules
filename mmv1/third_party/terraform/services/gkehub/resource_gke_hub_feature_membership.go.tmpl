@@ -473,6 +473,11 @@ func GkeHubFeatureMembershipMeshSchema() *schema.Resource {
 				Optional:    true,
 				Description: "Whether to automatically manage Service Mesh. Possible values: MANAGEMENT_UNSPECIFIED, MANAGEMENT_AUTOMATIC, MANAGEMENT_MANUAL",
 			},
+			"config_api": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to use istio or gateway api to configure Service Mesh. Possible values: CONFIG_API_UNSPECIFIED, CONFIG_API_ISTIO, CONFIG_API_GATEWAY",
+			},
 		},
 	}
 }
@@ -1403,6 +1408,7 @@ func expandGkeHubFeatureMembershipMesh(o interface{}) *FeatureMembershipMesh {
 	return &FeatureMembershipMesh{
 		ControlPlane: FeatureMembershipMeshControlPlaneEnumRef(obj["control_plane"].(string)),
 		Management:   FeatureMembershipMeshManagementEnumRef(obj["management"].(string)),
+		ConfigApi:    FeatureMembershipMeshConfigApiEnumRef(obj["config_api"].(string)),
 	}
 }
 
@@ -1413,6 +1419,7 @@ func flattenGkeHubFeatureMembershipMesh(obj *FeatureMembershipMesh) interface{} 
 	transformed := map[string]interface{}{
 		"control_plane": obj.ControlPlane,
 		"management":    obj.Management,
+		"config_api":    obj.ConfigApi,
 	}
 
 	return []interface{}{transformed}

@@ -569,6 +569,10 @@ The following arguments are supported:
   (Optional)
   Whether to automatically manage Service Mesh. Can either be `MANAGEMENT_AUTOMATIC` or `MANAGEMENT_MANUAL`.
 
+* `config_api` -
+  (Optional)
+  Whether to use istio or gateway api to configure Service Mesh. Can either be `CONFIG_API_ISTIO` or `CONFIG_API_GATEWAY`.
+
 <a name="nested_policycontroller"></a>The `policycontroller` block supports:
 
 * `version` -
