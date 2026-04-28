@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/magic-modules/tpgtools
 go 1.26
 
 require (
-	bitbucket.org/creachadair/stringset v0.0.11
 	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.84.0
 	github.com/golang/glog v1.1.2
 	github.com/hashicorp/hcl v1.0.0
@@ -13,6 +12,7 @@ require (
 )
 
 require (
+	bitbucket.org/creachadair/stringset v0.0.8 // indirect
 	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
