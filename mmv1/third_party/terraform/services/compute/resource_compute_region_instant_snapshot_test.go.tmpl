@@ -160,22 +160,3 @@ resource "google_compute_region_instant_snapshot" "foobar" {
 `, context)
 }
 
-func testAccCheckComputeRegionInstantSnapshotDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_region_instant_snapshot" {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-			region := tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
-
-			_, err := compute_tpg.NewClient(config, config.UserAgent).RegionInstantSnapshots.Get(
-				envvar.GetTestProjectFromEnv(), region, rs.Primary.Attributes["name"]).Do()
-			if err == nil {
-				return fmt.Errorf("RegionInstantSnapshot still exists")
-			}
-		}
-		return nil
-	}
-}
