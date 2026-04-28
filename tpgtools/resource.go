@@ -441,16 +441,16 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	resourceTitle := strings.Split(info.Title, "/")[1]
 
 	res := Resource{
-		title:                SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
-		dclStructName:        TitleCaseResourceName(schema.Title),
-		dclTitle:             TitleCaseResourceName(resourceTitle),
-		productMetadata:      product,
-		versionMetadata:      version,
-		Description:          info.Description,
-		location:             location,
-		InsertTimeoutMinutes: 20,
-		UpdateTimeoutMinutes: 20,
-		DeleteTimeoutMinutes: 20,
+		title:                   SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
+		dclStructName:           TitleCaseResourceName(schema.Title),
+		dclTitle:                TitleCaseResourceName(resourceTitle),
+		productMetadata:         product,
+		versionMetadata:         version,
+		Description:             info.Description,
+		location:                location,
+		InsertTimeoutMinutes:    20,
+		UpdateTimeoutMinutes:    20,
+		DeleteTimeoutMinutes:    20,
 		additionalFileImportSet: make(map[string]struct{}),
 	}
 
