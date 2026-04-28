@@ -220,6 +220,7 @@ service/compute-l7-load-balancer:
   resources:
   - google_compute_backend_bucket
   - google_compute_backend_bucket_signed_url_key
+  - google_compute_region_backend_bucket
   - google_compute_backend_service
   - google_compute_backend_service_signed_url_key
   - google_compute_region_backend_service
@@ -346,6 +347,9 @@ service/dataform:
 service/datafusion:
   resources:
   - google_data_fusion_.*
+service/datalineage:
+  resources:
+  - google_data_lineage_.*
 service/datamigration:
   resources:
   - google_database_migration_service_.*
@@ -382,6 +386,7 @@ service/dialogflow-cx:
   - google_dialogflow_agent
   - google_dialogflow_encryption_spec
   - google_dialogflow_entity_type
+  - google_dialogflow_environment
   - google_dialogflow_fulfillment
   - google_dialogflow_generator
   - google_dialogflow_intent
