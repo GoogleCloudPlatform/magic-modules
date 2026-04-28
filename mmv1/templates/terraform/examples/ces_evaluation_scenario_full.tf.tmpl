@@ -1,0 +1,114 @@
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "{{index $.Vars "app_id"}}"
+  location = "us"
+  display_name = "{{index $.Vars "app_display_name"}}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_tool" "tool" {
+  provider = google-beta
+  location       = "us"
+  app            = google_ces_app.app.app_id
+  tool_id        = "{{index $.Vars "tool_id"}}"
+  execution_type = "SYNCHRONOUS"
+  python_function {
+      name = "example_function"
+      python_code = "def example_function() -> int: return 0"
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_scenario_full" {
+  provider = google-beta
+  evaluation_id = "{{index $.Vars "evaluation_id"}}"
+  display_name = "my-evaluation-scenario-full"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+  description  = "Full evaluation for testing scenario"
+  tags         = ["test", "full", "scenario"]
+
+  scenario {
+    task = "Test task"
+    max_turns = 5
+    rubrics = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/rubrics/dummy-rubric"]
+    user_goal_behavior = "USER_GOAL_SATISFIED"
+    task_completion_behavior = "TASK_SATISFIED"
+    variable_overrides = {
+      key = "value"
+    }
+    evaluation_expectations = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/evaluationExpectations/dummy-exp"]
+
+    user_facts {
+      name = "user_name"
+      value = "John Doe"
+    }
+
+    scenario_expectations {
+      tool_expectation {
+        expected_tool_call {
+          id = "tool-call-id"
+          tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+          args = {
+            param = "value"
+          }
+        }
+        mock_tool_response {
+          id = "tool-call-id"
+          response = { result = "mocked" }
+          tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+        }
+      }
+    }
+
+    scenario_expectations {
+      agent_response {
+        role = "agent"
+        chunks {
+          text = "Hello"
+        }
+        chunks {
+          updated_variables = { "key": "value" }
+        }
+        chunks {
+          blob {
+            mime_type = "text/plain"
+            data = "c29tZSBibG9iIGRhdGE="
+          }
+        }
+        chunks {
+          image {
+            mime_type = "image/png"
+            data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+          }
+        }
+        chunks {
+          tool_call {
+            id = "tool-call-id-3"
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+            args = {
+              param = "value"
+            }
+          }
+        }
+        chunks {
+          tool_response {
+            id = "tool-call-id-3"
+            response = { result = "success" }
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+          }
+        }
+        chunks {
+          agent_transfer {
+            target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent"
+          }
+        }
+      }
+    }
+  }
+}
