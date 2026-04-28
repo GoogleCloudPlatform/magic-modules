@@ -291,7 +291,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 // Gets the ancestry cache for tfplan2cai conversion and the default project
 func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 	ancestryCache := make(map[string]string, 0)
-	defaultProject := ""
+	resolvedProject := ""
 
 	for _, asset := range assets {
 		ancestors := asset.Ancestors
@@ -308,9 +308,9 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 
 			if _, ok := ancestryCache[ancestors[0]]; !ok {
 				ancestryCache[ancestors[0]] = path
-				if defaultProject == "" {
+				if resolvedProject == "" {
 					if s, hasPrefix := strings.CutPrefix(ancestors[0], "projects/"); hasPrefix {
-						defaultProject = s
+						resolvedProject = s
 					}
 				}
 			}
@@ -324,13 +324,18 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 					}
 				}
 
-				if defaultProject == "" {
-					defaultProject = project
+				if resolvedProject == "" {
+					resolvedProject = project
 				}
 			}
 		}
 	}
-	return ancestryCache, defaultProject
+	if resolvedProject == "" {
+		resolvedProject = defaultProject
+	}
+	ancestryCache["projects/"+defaultProject] = "organizations/" + defaultOrganization
+
+	return ancestryCache, resolvedProject
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
