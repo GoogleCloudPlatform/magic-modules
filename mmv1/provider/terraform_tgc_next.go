@@ -267,6 +267,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/services/kms/kms_utils.go":             "third_party/terraform/services/kms/kms_utils.go",
 		"pkg/services/privateca/privateca_utils.go": "third_party/terraform/services/privateca/privateca_utils.go",
 		"pkg/services/eventarc/eventarc_utils.go":   "third_party/terraform/services/eventarc/eventarc_utils.go",
+		"pkg/services/storage/client.go":            "third_party/terraform/services/storage/client.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
