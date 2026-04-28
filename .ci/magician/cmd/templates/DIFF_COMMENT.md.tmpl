@@ -9,7 +9,7 @@ Your PR generated the following diffs in downstream repositories:
 | Repository | Diff Link | Changes |
 | :--- | :--- | :--- |
 {{range .Diffs -}}
-| `{{.Title}}` | [View Diff](https://github.com/modular-magician/{{.Repo}}/compare/{{.OldCommitSHA}}..{{.CommitSHA}}) | {{.ShortStat}} |
+| {{.Title}} | [View Diff](https://github.com/modular-magician/{{.Repo}}/compare/{{.OldCommitSHA}}..{{.CommitSHA}}) | {{.ShortStat}} |
 {{end -}}
 {{end -}}
 
