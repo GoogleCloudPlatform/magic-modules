@@ -26,7 +26,7 @@ func BaseUrl(product registry.Product, config *Config) string {
 	}
 
 	if config.IsMtls {
-		u = GetMtlsEndpoint(product.BaseUrl)
+		u = GetMtlsEndpoint(u)
 	}
 	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
 		u = strings.ReplaceAll(u, "googleapis.com", config.UniverseDomain)
