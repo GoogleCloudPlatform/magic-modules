@@ -1,0 +1,112 @@
+resource "google_project_service" "geminidataanalytics" {
+  provider = google-beta
+
+  service            = "geminidataanalytics.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "bigquery" {
+  provider = google-beta
+
+  service            = "bigquery.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  provider = google-beta
+
+  dataset_id                 = "{{index $.Vars "dataset_id"}}"
+  location                   = "US"
+  delete_contents_on_destroy = true
+
+  depends_on = [google_project_service.bigquery]
+}
+
+resource "google_bigquery_table" "table" {
+  provider = google-beta
+
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  table_id   = "{{index $.Vars "table_id"}}"
+
+  schema = jsonencode([
+    {
+      name = "order_id"
+      type = "STRING"
+      mode = "REQUIRED"
+    },
+    {
+      name = "order_total"
+      type = "FLOAT"
+      mode = "NULLABLE"
+    }
+  ])
+}
+
+resource "google_gemini_data_analytics_data_agent" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  location      = "global"
+  data_agent_id = "{{index $.Vars "data_agent_id"}}"
+  display_name  = "BigQuery data agent"
+  description   = "Example Gemini Data Analytics data agent backed by BigQuery."
+
+  labels = {
+    env = "test"
+  }
+
+  data_analytics_agent {
+    published_context {
+      system_instruction = "Answer questions about sales orders."
+
+      datasource_references {
+        bq {
+          table_references {
+            project_id = google_bigquery_dataset.dataset.project
+            dataset_id = google_bigquery_dataset.dataset.dataset_id
+            table_id   = google_bigquery_table.table.table_id
+          }
+        }
+      }
+
+      options {
+        analysis {
+          python {
+            enabled = true
+          }
+        }
+        datasource {
+          big_query_max_billed_bytes = "1000000000"
+        }
+      }
+
+      example_queries {
+        natural_language_question = "What is the total order value?"
+        sql_query                 = "SELECT SUM(order_total) AS total_order_value FROM sales"
+      }
+
+      glossary_terms {
+        display_name = "Order"
+        description  = "A customer purchase transaction."
+        labels       = ["sales", "transaction"]
+      }
+
+      schema_relationships {
+        left_schema_paths {
+          table_fqn = "${google_bigquery_dataset.dataset.project}.${google_bigquery_dataset.dataset.dataset_id}.${google_bigquery_table.table.table_id}"
+          paths     = ["order_id"]
+        }
+        right_schema_paths {
+          table_fqn = "${google_bigquery_dataset.dataset.project}.${google_bigquery_dataset.dataset.dataset_id}.${google_bigquery_table.table.table_id}"
+          paths     = ["order_total"]
+        }
+        sources          = ["LLM_SUGGESTED"]
+        confidence_score = 0.9
+      }
+    }
+  }
+
+  depends_on = [
+    google_project_service.geminidataanalytics,
+    google_bigquery_table.table,
+  ]
+}

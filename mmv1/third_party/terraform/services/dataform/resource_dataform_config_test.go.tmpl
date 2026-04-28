@@ -131,6 +131,7 @@ resource "google_project_service_identity" "dataform_sa" {
   provider = google-beta
   project  = google_project.project.project_id
   service  = "dataform.googleapis.com"
+  depends_on = [time_sleep.wait_for_dataform_api]
 }
 
 resource "google_kms_key_ring" "keyring" {
@@ -225,9 +226,10 @@ resource "time_sleep" "wait_for_dataform_api" {
 
 # Retrieve the Dataform service identity
 resource "google_project_service_identity" "dataform_sa" {
-  provider = google-beta
-  project  = google_project.project.project_id
-  service  = "dataform.googleapis.com"
+  provider   = google-beta
+  project    = google_project.project.project_id
+  service    = "dataform.googleapis.com"
+  depends_on = [time_sleep.wait_for_dataform_api]
 }
 
 resource "google_kms_key_ring" "keyring" {
@@ -322,9 +324,10 @@ resource "time_sleep" "wait_for_dataform_api" {
 
 # Retrieve the Dataform service identity
 resource "google_project_service_identity" "dataform_sa" {
-  provider = google-beta
-  project  = google_project.project.project_id
-  service  = "dataform.googleapis.com"
+  provider   = google-beta
+  project    = google_project.project.project_id
+  service    = "dataform.googleapis.com"
+  depends_on = [time_sleep.wait_for_dataform_api]
 }
 
 resource "google_kms_key_ring" "keyring" {
