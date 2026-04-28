@@ -17,11 +17,11 @@ func BaseUrl(product registry.Product, config *Config) string {
 	}
 
 	u := product.BaseUrl
-	if config.PreferRegionalEndpoints {
+	if config.PreferRegionalEndpoints && product.RepUrl != "" {
 		u = product.RepUrl
 	} else if config.PreferGlobalEndpoints {
 		u = product.BaseUrl
-	} else if product.RepByDefault {
+	} else if product.RepByDefault && product.RepUrl != "" {
 		u = product.RepUrl
 	}
 
