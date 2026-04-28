@@ -1,0 +1,181 @@
+package compute_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+
+	{{ if eq $.TargetVersionName `ga` }}
+		"google.golang.org/api/compute/v1"
+	{{- else }}
+		compute "google.golang.org/api/compute/v0.beta"
+	{{- end }}
+)
+
+func TestAccComputeRegionInstantSnapshot_basicFeatures(t *testing.T) {
+	var is compute.InstantSnapshot
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstantSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstantSnapshot_basicFeatures(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstantSnapshotExists(t, "google_compute_region_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionInstantSnapshot_labelsUpdate(t *testing.T) {
+	var is compute.InstantSnapshot
+	context_1 := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"label_key":     "test-1",
+		"label_value":   "test-1",
+	}
+	context_2 := map[string]interface{}{
+		"random_suffix": context_1["random_suffix"],
+		"label_key":     "test-1",
+		"label_value":   "test-2",
+	}
+	context_3 := map[string]interface{}{
+		"random_suffix": context_1["random_suffix"],
+		"label_key":     "test-2",
+		"label_value":   "test-2",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstantSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstantSnapshot_labelsUpdate(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstantSnapshotExists(t, "google_compute_region_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
+				),
+			},
+			{
+				Config: testAccComputeRegionInstantSnapshot_labelsUpdate(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstantSnapshotExists(t, "google_compute_region_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
+				),
+			},
+			{
+				Config: testAccComputeRegionInstantSnapshot_labelsUpdate(context_3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstantSnapshotExists(t, "google_compute_region_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckComputeRegionInstantSnapshotExists(t *testing.T, n, p string, is *compute.InstantSnapshot) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		region := tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
+
+		found, err := compute_tpg.NewClient(config, config.UserAgent).RegionInstantSnapshots.Get(
+			p, region, rs.Primary.Attributes["name"]).Do()
+		if err != nil {
+			return err
+		}
+
+		if found.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Region Instant Snapshot not found")
+		}
+
+		*is = *found
+
+		return nil
+	}
+}
+
+func testAccComputeRegionInstantSnapshot_basicFeatures(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_disk" "disk" {
+  name = "tf-test-disk-%{random_suffix}"
+  type = "pd-ssd"
+  region = "us-central1"
+  size = 10
+  replica_zones = ["us-central1-a", "us-central1-f"]
+}
+
+resource "google_compute_region_instant_snapshot" "foobar" {
+  name = "tf-test-instant-snapshot-%{random_suffix}"
+  source_disk = google_compute_region_disk.disk.self_link
+  region = google_compute_region_disk.disk.region
+
+  description = "A test snapshot"
+  labels = {
+	foo = "bar"
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionInstantSnapshot_labelsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_disk" "disk" {
+  name = "tf-test-disk-%{random_suffix}"
+  type = "pd-ssd"
+  region = "us-central1"
+  size = 10
+  replica_zones = ["us-central1-a", "us-central1-f"]
+}
+
+resource "google_compute_region_instant_snapshot" "foobar" {
+  name = "tf-test-instant-snapshot-%{random_suffix}"
+  source_disk = google_compute_region_disk.disk.self_link
+  region = google_compute_region_disk.disk.region
+
+  labels = {
+	%{label_key} = "%{label_value}"
+  }
+}
+`, context)
+}
+
+func testAccCheckComputeRegionInstantSnapshotDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_compute_region_instant_snapshot" {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+			region := tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
+
+			_, err := compute_tpg.NewClient(config, config.UserAgent).RegionInstantSnapshots.Get(
+				envvar.GetTestProjectFromEnv(), region, rs.Primary.Attributes["name"]).Do()
+			if err == nil {
+				return fmt.Errorf("RegionInstantSnapshot still exists")
+			}
+		}
+		return nil
+	}
+}
