@@ -73,3 +73,7 @@ resource "google_billing_project_info" "info" {
 }
 `, projectId, orgId, billingAccountId)
 }
+
+func TestAccBillingProjectInfo_fakeSkip(t *testing.T) {
+	acctest.SkipIfVcr(t)
+}
