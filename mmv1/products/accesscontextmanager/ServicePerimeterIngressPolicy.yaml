@@ -101,6 +101,7 @@ parameters:
       The name of the Service Perimeter to add this resource to.
     url_param_only: true
     required: true
+    immutable: true
     resource: 'ServicePerimeter'
     imports: 'name'
 properties:
