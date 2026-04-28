@@ -19,8 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	sdkdiag "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"google.golang.org/api/chromepolicy/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
@@ -152,27 +150,20 @@ func (r *googleChromePoliciesResource) Create(ctx context.Context, req resource.
 		plan.SchemaFilter = types.StringValue(filter)
 	}
 
-	// Validate all policy schemas match the filter.
 	r.validateSchemasMatchFilter(policies, filter, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	svc, diags := r.getClient()
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	api := r.newAPI(customerID)
 
 	if len(policies) > 0 {
-		sc := newSchemaCache(svc.Customers.PolicySchemas, customerID)
-		r.appendSdkDiags(validatePolicies(ctx, policies, sc), &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
+		if err := validatePolicies(ctx, policies, newSchemaCache(api)); err != nil {
+			resp.Diagnostics.AddError("Policy validation failed", err.Error())
 			return
 		}
-
-		r.appendSdkDiags(batchModifyPolicies(ctx, svc.Customers.Policies, customerID, targetResource, policies), &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
+		if err := batchModifyPolicies(ctx, api, targetResource, policies); err != nil {
+			resp.Diagnostics.AddError("Failed to apply policies", err.Error())
 			return
 		}
 	}
@@ -212,11 +203,7 @@ func (r *googleChromePoliciesResource) Update(ctx context.Context, req resource.
 	kind, targetID, targetResource := r.resolveTarget(&plan)
 	filter := plan.SchemaFilter.ValueString()
 
-	svc, diags := r.getClient()
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	api := r.newAPI(customerID)
 
 	newPolicies := r.expandPolicies(ctx, &plan, &resp.Diagnostics)
 	oldPolicies := r.expandPolicies(ctx, &state, &resp.Diagnostics)
@@ -235,25 +222,22 @@ func (r *googleChromePoliciesResource) Update(ctx context.Context, req resource.
 
 	if !policySetsEqual(oldByKey, newByKey) {
 		if len(newPolicies) > 0 {
-			sc := newSchemaCache(svc.Customers.PolicySchemas, customerID)
-			r.appendSdkDiags(validatePolicies(ctx, newPolicies, sc), &resp.Diagnostics)
-			if resp.Diagnostics.HasError() {
+			if err := validatePolicies(ctx, newPolicies, newSchemaCache(api)); err != nil {
+				resp.Diagnostics.AddError("Policy validation failed", err.Error())
 				return
 			}
 		}
 
 		// Removed policies get inherited (reverted to parent).
-		var inheritRequests []*chromepolicy.GoogleChromePolicyVersionsV1InheritOrgUnitPolicyRequest
+		var inheritRequests []map[string]any
 		for key, pol := range oldByKey {
 			if _, exists := newByKey[key]; !exists {
-				inheritRequests = append(inheritRequests, &chromepolicy.GoogleChromePolicyVersionsV1InheritOrgUnitPolicyRequest{
-					PolicyTargetKey: buildPolicyTargetKey(targetResource, pol),
-					PolicySchema:    identityFromPolicy(pol).SchemaName,
-				})
+				id := identityFromPolicy(pol)
+				inheritRequests = append(inheritRequests, buildInheritRequest(targetResource, id.SchemaName, id.AdditionalTargetKeys))
 			}
 		}
-		r.appendSdkDiags(inheritPolicies(ctx, svc.Customers.Policies, customerID, inheritRequests), &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
+		if err := inheritPolicies(ctx, api, inheritRequests); err != nil {
+			resp.Diagnostics.AddError("Failed to inherit removed policies", err.Error())
 			return
 		}
 
@@ -266,8 +250,8 @@ func (r *googleChromePoliciesResource) Update(ctx context.Context, req resource.
 			}
 		}
 		if len(modifiedPolicies) > 0 {
-			r.appendSdkDiags(batchModifyPolicies(ctx, svc.Customers.Policies, customerID, targetResource, modifiedPolicies), &resp.Diagnostics)
-			if resp.Diagnostics.HasError() {
+			if err := batchModifyPolicies(ctx, api, targetResource, modifiedPolicies); err != nil {
+				resp.Diagnostics.AddError("Failed to apply policies", err.Error())
 				return
 			}
 		}
@@ -289,15 +273,11 @@ func (r *googleChromePoliciesResource) Delete(ctx context.Context, req resource.
 	_, _, targetResource := r.resolveTarget(&state)
 	filter := state.SchemaFilter.ValueString()
 
-	svc, diags := r.getClient()
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	api := r.newAPI(customerID)
 
-	entries, sdkDiags := resolveDirectlySetPolicies(ctx, svc.Customers.Policies, customerID, filter, targetResource)
-	r.appendSdkDiags(sdkDiags, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
+	entries, err := resolveDirectlySetPolicies(ctx, api, filter, targetResource)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to resolve policies", err.Error())
 		return
 	}
 
@@ -305,19 +285,13 @@ func (r *googleChromePoliciesResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	var requests []*chromepolicy.GoogleChromePolicyVersionsV1InheritOrgUnitPolicyRequest
+	requests := make([]map[string]any, 0, len(entries))
 	for _, entry := range entries {
-		requests = append(requests, &chromepolicy.GoogleChromePolicyVersionsV1InheritOrgUnitPolicyRequest{
-			PolicyTargetKey: &chromepolicy.GoogleChromePolicyVersionsV1PolicyTargetKey{
-				TargetResource:       targetResource,
-				AdditionalTargetKeys: entry.Identity.AdditionalTargetKeys,
-			},
-			PolicySchema: entry.Identity.SchemaName,
-		})
+		requests = append(requests, buildInheritRequest(targetResource, entry.Identity.SchemaName, entry.Identity.AdditionalTargetKeys))
 	}
 
-	r.appendSdkDiags(inheritPolicies(ctx, svc.Customers.Policies, customerID, requests), &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
+	if err := inheritPolicies(ctx, api, requests); err != nil {
+		resp.Diagnostics.AddError("Failed to inherit policies", err.Error())
 		return
 	}
 
@@ -355,26 +329,9 @@ func (r *googleChromePoliciesResource) ImportState(ctx context.Context, req reso
 
 //Helpers
 
-func (r *googleChromePoliciesResource) getClient() (*chromepolicy.Service, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	svc := r.config.NewChromePolicyClient(
-		fwtransport.GenerateFrameworkUserAgentString(&fwmodels.ProviderMetaModel{}, r.config.UserAgent),
-	)
-	if svc == nil {
-		diags.AddError("Client Error", "Failed to create Chrome Policy client")
-	}
-	return svc, diags
-}
-
-// appendSdkDiags converts SDKv2 diag.Diagnostics to Framework diag.Diagnostics.
-func (r *googleChromePoliciesResource) appendSdkDiags(sdkDiags sdkdiag.Diagnostics, fwDiags *diag.Diagnostics) {
-	for _, d := range sdkDiags {
-		if d.Severity == sdkdiag.Error {
-			fwDiags.AddError(d.Summary, d.Detail)
-		} else {
-			fwDiags.AddWarning(d.Summary, d.Detail)
-		}
-	}
+func (r *googleChromePoliciesResource) newAPI(customerID string) *chromePolicyAPI {
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(&fwmodels.ProviderMetaModel{}, r.config.UserAgent)
+	return newChromePolicyAPI(r.config, userAgent, customerID)
 }
 
 func (r *googleChromePoliciesResource) validateTarget(model *chromePoliciesModel, diags *diag.Diagnostics) {
@@ -576,15 +533,11 @@ func (r *googleChromePoliciesResource) readIntoState(ctx context.Context, model 
 
 	model.Id = types.StringValue(chromePoliciesResourceID(customerID, kind, targetID, filter))
 
-	svc, d := r.getClient()
-	diags.Append(d...)
-	if diags.HasError() {
-		return
-	}
+	api := r.newAPI(customerID)
 
-	entries, sdkDiags := resolveDirectlySetPolicies(ctx, svc.Customers.Policies, customerID, filter, targetResource)
-	r.appendSdkDiags(sdkDiags, diags)
-	if diags.HasError() {
+	entries, err := resolveDirectlySetPolicies(ctx, api, filter, targetResource)
+	if err != nil {
+		diags.AddError("Failed to resolve policies", err.Error())
 		return
 	}
 
@@ -610,21 +563,14 @@ func (r *googleChromePoliciesResource) readIntoState(ctx context.Context, model 
 		}
 	})
 
-	// Build the policies list as Framework dynamic values.
 	policyElements := make([]attr.Value, 0, len(entries))
 	policyElementTypes := make([]attr.Type, 0, len(entries))
 
 	for _, entry := range entries {
-		var rawValues map[string]interface{}
-		if err := json.Unmarshal(entry.Value.Value, &rawValues); err != nil {
-			diags.AddError("Failed to parse policy values", err.Error())
-			return
-		}
-
 		// Build value as an object with native types.
-		svAttrs := make(map[string]attr.Value, len(rawValues))
-		svAttrTypes := make(map[string]attr.Type, len(rawValues))
-		for k, v := range rawValues {
+		svAttrs := make(map[string]attr.Value, len(entry.Value))
+		svAttrTypes := make(map[string]attr.Type, len(entry.Value))
+		for k, v := range entry.Value {
 			fwVal := nativeToAttrValue(ctx, v)
 			svAttrs[k] = fwVal
 			svAttrTypes[k] = fwVal.Type(ctx)
@@ -635,9 +581,8 @@ func (r *googleChromePoliciesResource) readIntoState(ctx context.Context, model 
 			return
 		}
 
-		// Build the policy object.
 		polAttrs := map[string]attr.Value{
-			"schema": types.StringValue(entry.Value.PolicySchema),
+			"schema": types.StringValue(entry.Schema),
 			"value":  schemaValuesObj,
 		}
 		polAttrTypes := map[string]attr.Type{

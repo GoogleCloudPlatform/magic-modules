@@ -10,15 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"google.golang.org/api/chromepolicy/v1"
-
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-const chromePolicyRetryTimeout = 5 * time.Minute
+const chromePolicyRequestTimeout = 5 * time.Minute
 
 // Target kind
+
 type chromePolicyTargetKind string
 
 const (
@@ -30,74 +28,120 @@ func chromePolicyTargetResource(kind chromePolicyTargetKind, id string) string {
 	return string(kind) + "/" + id
 }
 
-// PolicyTargetKey builder
-func buildPolicyTargetKey(targetResource string, pol map[string]interface{}) *chromepolicy.GoogleChromePolicyVersionsV1PolicyTargetKey {
-	key := &chromepolicy.GoogleChromePolicyVersionsV1PolicyTargetKey{
-		TargetResource: targetResource,
-	}
-	if atk, ok := pol["additional_target_keys"]; ok && atk != nil {
-		raw := atk.(map[string]interface{})
-		if len(raw) > 0 {
-			key.AdditionalTargetKeys = make(map[string]string, len(raw))
-			for k, v := range raw {
-				key.AdditionalTargetKeys[k] = v.(string)
-			}
-		}
+// API client wrapper
+
+// chromePolicyAPI bundles the dependencies needed to call the Chrome Policy
+// REST endpoints via transport_tpg.SendRequest.
+type chromePolicyAPI struct {
+	config    *transport_tpg.Config
+	userAgent string
+	customer  string
+}
+
+func newChromePolicyAPI(config *transport_tpg.Config, userAgent, customer string) *chromePolicyAPI {
+	return &chromePolicyAPI{config: config, userAgent: userAgent, customer: customer}
+}
+
+func (a *chromePolicyAPI) url(path string) string {
+	return a.config.ChromePolicyBasePath + path
+}
+
+func (a *chromePolicyAPI) send(method, url string, body map[string]any) (map[string]interface{}, error) {
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    a.config,
+		Method:    method,
+		RawURL:    url,
+		UserAgent: a.userAgent,
+		Body:      body,
+		Timeout:   chromePolicyRequestTimeout,
+	})
+}
+
+// Policy target key
+
+func buildPolicyTargetKey(targetResource string, additionalTargetKeys map[string]string) map[string]any {
+	key := map[string]any{"targetResource": targetResource}
+	if len(additionalTargetKeys) > 0 {
+		key["additionalTargetKeys"] = additionalTargetKeys
 	}
 	return key
 }
 
-type schemaCache struct {
-	service  *chromepolicy.CustomersPolicySchemasService
-	customer string
-	cache    map[string]*chromepolicy.GoogleChromePolicyVersionsV1PolicySchema
-}
-
-func newSchemaCache(service *chromepolicy.CustomersPolicySchemasService, customer string) *schemaCache {
-	return &schemaCache{
-		service:  service,
-		customer: customer,
-		cache:    make(map[string]*chromepolicy.GoogleChromePolicyVersionsV1PolicySchema),
+func policyAdditionalTargetKeys(pol map[string]interface{}) map[string]string {
+	atk, ok := pol["additional_target_keys"]
+	if !ok || atk == nil {
+		return nil
 	}
+	raw, ok := atk.(map[string]interface{})
+	if !ok || len(raw) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(raw))
+	for k, v := range raw {
+		out[k] = v.(string)
+	}
+	return out
 }
 
-func (sc *schemaCache) get(ctx context.Context, schemaName string) (*chromepolicy.GoogleChromePolicyVersionsV1PolicySchema, error) {
+// Schema cache
+
+// policySchema only deserializes the parts of the API response we care about.
+type policySchema struct {
+	AdditionalTargetKeyNames []policySchemaTargetKeyName `json:"additionalTargetKeyNames"`
+	Definition               policySchemaDefinition      `json:"definition"`
+}
+
+type policySchemaTargetKeyName struct {
+	Key string `json:"key"`
+}
+
+type policySchemaDefinition struct {
+	MessageType []policySchemaMessageType `json:"messageType"`
+}
+
+type policySchemaMessageType struct {
+	Field []policySchemaField `json:"field"`
+}
+
+type policySchemaField struct {
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Label string `json:"label"`
+}
+
+type schemaCache struct {
+	api   *chromePolicyAPI
+	cache map[string]*policySchema
+}
+
+func newSchemaCache(api *chromePolicyAPI) *schemaCache {
+	return &schemaCache{api: api, cache: make(map[string]*policySchema)}
+}
+
+func (sc *schemaCache) get(_ context.Context, schemaName string) (*policySchema, error) {
 	if cached, ok := sc.cache[schemaName]; ok {
 		return cached, nil
 	}
-
-	var schemaDef *chromepolicy.GoogleChromePolicyVersionsV1PolicySchema
-	err := transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() error {
-			var retryErr error
-			schemaDef, retryErr = sc.service.Get(
-				fmt.Sprintf("customers/%s/policySchemas/%s", sc.customer, schemaName),
-			).Do()
-			return retryErr
-		},
-		Timeout: chromePolicyRetryTimeout,
-	})
+	url := sc.api.url(fmt.Sprintf("customers/%s/policySchemas/%s", sc.api.customer, schemaName))
+	res, err := sc.api.send("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	sc.cache[schemaName] = schemaDef
-	return schemaDef, nil
+	b, err := json.Marshal(res)
+	if err != nil {
+		return nil, err
+	}
+	var ps policySchema
+	if err := json.Unmarshal(b, &ps); err != nil {
+		return nil, err
+	}
+	sc.cache[schemaName] = &ps
+	return &ps, nil
 }
 
 // Validation
-func buildSchemaFieldMap(schemaDef *chromepolicy.GoogleChromePolicyVersionsV1PolicySchema) map[string]*chromepolicy.Proto2FieldDescriptorProto {
-	fieldMap := make(map[string]*chromepolicy.Proto2FieldDescriptorProto)
-	for _, mt := range schemaDef.Definition.MessageType {
-		for i, f := range mt.Field {
-			fieldMap[f.Name] = mt.Field[i]
-		}
-	}
-	return fieldMap
-}
 
-// validatePolicies validates policy values against their schema definitions.
-func validatePolicies(ctx context.Context, policies []interface{}, sc *schemaCache) diag.Diagnostics {
+func validatePolicies(ctx context.Context, policies []interface{}, sc *schemaCache) error {
 	for _, policy := range policies {
 		pol := policy.(map[string]interface{})
 		schemaName := pol["schema"].(string)
@@ -105,61 +149,62 @@ func validatePolicies(ctx context.Context, policies []interface{}, sc *schemaCac
 
 		schemaDef, err := sc.get(ctx, schemaName)
 		if err != nil {
-			return diag.FromErr(err)
+			return err
+		}
+		if len(schemaDef.Definition.MessageType) == 0 {
+			return fmt.Errorf("schema definition (%s) is empty", schemaName)
 		}
 
-		if schemaDef == nil || schemaDef.Definition == nil || schemaDef.Definition.MessageType == nil {
-			return diag.Errorf("schema definition (%s) is empty", schemaName)
+		fieldMap := make(map[string]policySchemaField)
+		for _, mt := range schemaDef.Definition.MessageType {
+			for _, f := range mt.Field {
+				fieldMap[f.Name] = f
+			}
 		}
 
-		fieldMap := buildSchemaFieldMap(schemaDef)
 		for fieldName, jsonVal := range schemaValues {
 			field, ok := fieldMap[fieldName]
 			if !ok {
-				return diag.Errorf("field %q is not found in schema %s", fieldName, schemaName)
+				return fmt.Errorf("field %q is not found in schema %s", fieldName, schemaName)
 			}
-
 			var val interface{}
 			if err := json.Unmarshal([]byte(jsonVal.(string)), &val); err != nil {
-				return diag.FromErr(err)
+				return err
 			}
-
 			if field.Label == "LABEL_REPEATED" {
 				arr, ok := val.([]interface{})
 				if !ok {
-					return diag.Errorf("value for %s.%s must be an array (got %T)", schemaName, fieldName, val)
+					return fmt.Errorf("value for %s.%s must be an array (got %T)", schemaName, fieldName, val)
 				}
 				for _, item := range arr {
 					if !validatePolicyFieldValueType(field.Type, item) {
-						return diag.Errorf("array element in %s.%s has incorrect type (expected %s)", schemaName, fieldName, field.Type)
+						return fmt.Errorf("array element in %s.%s has incorrect type (expected %s)", schemaName, fieldName, field.Type)
 					}
 				}
 			} else if !validatePolicyFieldValueType(field.Type, val) {
-				return diag.Errorf("value for %s.%s has incorrect type (expected %s)", schemaName, fieldName, field.Type)
+				return fmt.Errorf("value for %s.%s has incorrect type (expected %s)", schemaName, fieldName, field.Type)
 			}
 		}
 
-		perPolicyATK := identityFromPolicy(pol).AdditionalTargetKeys
-		if schemaDef.AdditionalTargetKeyNames != nil && len(perPolicyATK) == 0 {
-			return diag.Errorf("schema %s requires additional_target_keys", schemaName)
+		perPolicyATK := policyAdditionalTargetKeys(pol)
+		if len(schemaDef.AdditionalTargetKeyNames) > 0 && len(perPolicyATK) == 0 {
+			return fmt.Errorf("schema %s requires additional_target_keys", schemaName)
 		}
-		if schemaDef.AdditionalTargetKeyNames == nil && len(perPolicyATK) > 0 {
-			return diag.Errorf("schema %s does not support additional_target_keys", schemaName)
+		if len(schemaDef.AdditionalTargetKeyNames) == 0 && len(perPolicyATK) > 0 {
+			return fmt.Errorf("schema %s does not support additional_target_keys", schemaName)
 		}
-
 		if len(perPolicyATK) > 0 {
-			allowed := make(map[string]bool)
+			allowed := make(map[string]bool, len(schemaDef.AdditionalTargetKeyNames))
 			for _, tkn := range schemaDef.AdditionalTargetKeyNames {
 				allowed[tkn.Key] = true
 			}
 			for k := range perPolicyATK {
 				if !allowed[k] {
-					return diag.Errorf("additional_target_key %q is not valid for schema %s", k, schemaName)
+					return fmt.Errorf("additional_target_key %q is not valid for schema %s", k, schemaName)
 				}
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -188,143 +233,130 @@ func validatePolicyFieldValueType(fieldType string, fieldValue interface{}) bool
 	}
 }
 
-func batchModifyPolicies(
-	ctx context.Context,
-	policiesService *chromepolicy.CustomersPoliciesService,
-	customer string,
-	targetResource string,
-	policies []interface{},
-) diag.Diagnostics {
-	var requests []*chromepolicy.GoogleChromePolicyVersionsV1ModifyOrgUnitPolicyRequest
+// Batch modify
 
+func batchModifyPolicies(_ context.Context, api *chromePolicyAPI, targetResource string, policies []interface{}) error {
+	requests := make([]map[string]any, 0, len(policies))
 	for _, p := range policies {
 		pol := p.(map[string]interface{})
 		schemaName := pol["schema"].(string)
 		schemaValues := pol["value"].(map[string]interface{})
 
-		// Build the JSON directly from the per-field JSON strings to avoid an unnecessary unmarshal/marshal round-trip.
-		var updateKeys []string
-		jsonParts := make([]string, 0, len(schemaValues))
+		// Per-field values are already JSON-encoded strings; embed them raw to avoid an unmarshal/marshal round trip.
+		valuesRaw := make(map[string]json.RawMessage, len(schemaValues))
+		updateKeys := make([]string, 0, len(schemaValues))
 		for k, v := range schemaValues {
-			keyJSON, _ := json.Marshal(k)
-			jsonParts = append(jsonParts, string(keyJSON)+":"+v.(string))
+			valuesRaw[k] = json.RawMessage(v.(string))
 			updateKeys = append(updateKeys, k)
 		}
-		valueJSON := []byte("{" + strings.Join(jsonParts, ",") + "}")
-
-		requests = append(requests, &chromepolicy.GoogleChromePolicyVersionsV1ModifyOrgUnitPolicyRequest{
-			PolicyTargetKey: buildPolicyTargetKey(targetResource, pol),
-			PolicyValue: &chromepolicy.GoogleChromePolicyVersionsV1PolicyValue{
-				PolicySchema: schemaName,
-				Value:        valueJSON,
+		requests = append(requests, map[string]any{
+			"policyTargetKey": buildPolicyTargetKey(targetResource, policyAdditionalTargetKeys(pol)),
+			"policyValue": map[string]any{
+				"policySchema": schemaName,
+				"value":        valuesRaw,
 			},
-			UpdateMask: strings.Join(updateKeys, ","),
+			"updateMask": strings.Join(updateKeys, ","),
 		})
 	}
 
-	err := transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() error {
-			_, retryErr := policiesService.Orgunits.BatchModify(
-				fmt.Sprintf("customers/%s", customer),
-				&chromepolicy.GoogleChromePolicyVersionsV1BatchModifyOrgUnitPoliciesRequest{Requests: requests},
-			).Do()
-			return retryErr
-		},
-		Timeout: chromePolicyRetryTimeout,
-	})
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	return nil
+	url := api.url(fmt.Sprintf("customers/%s/policies/orgunits:batchModify", api.customer))
+	_, err := api.send("POST", url, map[string]any{"requests": requests})
+	return err
 }
 
-func inheritPolicies(
-	ctx context.Context,
-	policiesService *chromepolicy.CustomersPoliciesService,
-	customer string,
-	requests []*chromepolicy.GoogleChromePolicyVersionsV1InheritOrgUnitPolicyRequest,
-) diag.Diagnostics {
+// Inherit (delete-style)
+
+func inheritPolicies(_ context.Context, api *chromePolicyAPI, requests []map[string]any) error {
 	if len(requests) == 0 {
 		return nil
 	}
-	err := transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() error {
-			_, retryErr := policiesService.Orgunits.BatchInherit(
-				fmt.Sprintf("customers/%s", customer),
-				&chromepolicy.GoogleChromePolicyVersionsV1BatchInheritOrgUnitPoliciesRequest{Requests: requests},
-			).Do()
-			return retryErr
-		},
-		Timeout: chromePolicyRetryTimeout,
-	})
+	url := api.url(fmt.Sprintf("customers/%s/policies/orgunits:batchInherit", api.customer))
+	_, err := api.send("POST", url, map[string]any{"requests": requests})
 	if err != nil {
 		if isNonFatalDeleteError(err) {
 			log.Printf("[DEBUG] Non-fatal error during policy inherit: %v", err)
 			return nil
 		}
-		return diag.FromErr(err)
+		return err
 	}
 	return nil
 }
 
-type resolvedPolicyEntry struct {
-	Identity policyIdentity
-	Value    *chromepolicy.GoogleChromePolicyVersionsV1PolicyValue
+func buildInheritRequest(targetResource, schemaName string, additionalTargetKeys map[string]string) map[string]any {
+	return map[string]any{
+		"policyTargetKey": buildPolicyTargetKey(targetResource, additionalTargetKeys),
+		"policySchema":    schemaName,
+	}
 }
 
-// resolveDirectlySetPolicies does a paginated resolve filtered to directly-set policies.
-func resolveDirectlySetPolicies(
-	ctx context.Context,
-	policiesService *chromepolicy.CustomersPoliciesService,
-	customer string,
-	filter string,
-	targetResource string,
-) ([]resolvedPolicyEntry, diag.Diagnostics) {
-	var result []resolvedPolicyEntry
+// Resolve
 
-	req := &chromepolicy.GoogleChromePolicyVersionsV1ResolveRequest{
-		PolicySchemaFilter: filter,
-		PolicyTargetKey: &chromepolicy.GoogleChromePolicyVersionsV1PolicyTargetKey{
-			TargetResource: targetResource,
-		},
-		PageSize: 1000,
+type resolvedPolicyEntry struct {
+	Identity policyIdentity
+	Schema   string
+	Value    map[string]interface{}
+}
+
+// resolveDirectlySetPolicies pages through the resolve endpoint and keeps only policies
+// directly set on the target (i.e. not inherited from a parent).
+func resolveDirectlySetPolicies(_ context.Context, api *chromePolicyAPI, filter, targetResource string) ([]resolvedPolicyEntry, error) {
+	var result []resolvedPolicyEntry
+	url := api.url(fmt.Sprintf("customers/%s/policies:resolve", api.customer))
+
+	body := map[string]any{
+		"policySchemaFilter": filter,
+		"policyTargetKey":    map[string]any{"targetResource": targetResource},
+		"pageSize":           1000,
 	}
 
 	for {
-		var resp *chromepolicy.GoogleChromePolicyVersionsV1ResolveResponse
-		err := transport_tpg.Retry(transport_tpg.RetryOptions{
-			RetryFunc: func() error {
-				var retryErr error
-				resp, retryErr = policiesService.Resolve(
-					fmt.Sprintf("customers/%s", customer), req,
-				).Do()
-				return retryErr
-			},
-			Timeout: chromePolicyRetryTimeout,
-		})
+		res, err := api.send("POST", url, body)
 		if err != nil {
-			return nil, diag.FromErr(err)
+			return nil, err
 		}
 
-		for _, rp := range resp.ResolvedPolicies {
-			if rp.SourceKey == nil || rp.SourceKey.TargetResource != targetResource {
+		policies, _ := res["resolvedPolicies"].([]interface{})
+		for _, p := range policies {
+			rp, _ := p.(map[string]interface{})
+			sourceKey, _ := rp["sourceKey"].(map[string]interface{})
+			if sourceKey == nil {
 				continue
 			}
+			if tr, _ := sourceKey["targetResource"].(string); tr != targetResource {
+				continue
+			}
+			value, _ := rp["value"].(map[string]interface{})
+			schemaName, _ := value["policySchema"].(string)
+			rawValue, _ := value["value"].(map[string]interface{})
+
+			id := policyIdentity{SchemaName: schemaName}
+			if tk, _ := rp["targetKey"].(map[string]interface{}); tk != nil {
+				if atk, _ := tk["additionalTargetKeys"].(map[string]interface{}); len(atk) > 0 {
+					id.AdditionalTargetKeys = make(map[string]string, len(atk))
+					for k, v := range atk {
+						id.AdditionalTargetKeys[k] = v.(string)
+					}
+				}
+			}
+
 			result = append(result, resolvedPolicyEntry{
-				Identity: identityFromResolved(rp),
-				Value:    rp.Value,
+				Identity: id,
+				Schema:   schemaName,
+				Value:    rawValue,
 			})
 		}
 
-		if resp.NextPageToken == "" {
+		nextPageToken, _ := res["nextPageToken"].(string)
+		if nextPageToken == "" {
 			break
 		}
-		req.PageToken = resp.NextPageToken
+		body["pageToken"] = nextPageToken
 	}
 
 	return result, nil
 }
+
+// Errors
 
 func isNonFatalDeleteError(err error) bool {
 	if err == nil {
@@ -348,6 +380,8 @@ func isNonFatalDeleteError(err error) bool {
 	return false
 }
 
+// Identity
+
 type policyIdentity struct {
 	SchemaName           string
 	AdditionalTargetKeys map[string]string
@@ -366,36 +400,18 @@ func (p policyIdentity) key() string {
 }
 
 func identityFromPolicy(p map[string]interface{}) policyIdentity {
-	id := policyIdentity{
-		SchemaName: p["schema"].(string),
+	return policyIdentity{
+		SchemaName:           p["schema"].(string),
+		AdditionalTargetKeys: policyAdditionalTargetKeys(p),
 	}
-	if atk, ok := p["additional_target_keys"]; ok && atk != nil {
-		raw := atk.(map[string]interface{})
-		if len(raw) > 0 {
-			id.AdditionalTargetKeys = make(map[string]string, len(raw))
-			for k, v := range raw {
-				id.AdditionalTargetKeys[k] = v.(string)
-			}
-		}
-	}
-	return id
 }
 
-func identityFromResolved(rp *chromepolicy.GoogleChromePolicyVersionsV1ResolvedPolicy) policyIdentity {
-	id := policyIdentity{
-		SchemaName: rp.Value.PolicySchema,
-	}
-	if rp.TargetKey != nil && len(rp.TargetKey.AdditionalTargetKeys) > 0 {
-		id.AdditionalTargetKeys = rp.TargetKey.AdditionalTargetKeys
-	}
-	return id
-}
+// Resource ID + set diffing
 
 func chromePoliciesResourceID(customerID string, kind chromePolicyTargetKind, targetID, filter string) string {
 	return customerID + "/" + string(kind) + "/" + targetID + "/" + filter
 }
 
-// policyMapByKey converts a list of policy maps into a map keyed by identity.
 func policyMapByKey(policies []interface{}) map[string]map[string]interface{} {
 	result := make(map[string]map[string]interface{}, len(policies))
 	for _, p := range policies {
@@ -405,7 +421,6 @@ func policyMapByKey(policies []interface{}) map[string]map[string]interface{} {
 	return result
 }
 
-// policySetsEqual returns true if two policy maps have the same keys and values.
 func policySetsEqual(a, b map[string]map[string]interface{}) bool {
 	if len(a) != len(b) {
 		return false
@@ -419,7 +434,6 @@ func policySetsEqual(a, b map[string]map[string]interface{}) bool {
 	return true
 }
 
-// policyValuesEqual compares the "value" field of two policy maps.
 func policyValuesEqual(a, b map[string]interface{}) bool {
 	aVals, _ := a["value"].(map[string]interface{})
 	bVals, _ := b["value"].(map[string]interface{})
