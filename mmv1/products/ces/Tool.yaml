@@ -42,6 +42,13 @@ examples:
       app_id: 'app-id'
       data_store_id: "tool_data_store_id"
       engine_id: "tool_engine_id"
+  - name: "ces_tool_data_store_tool_engine_source_no_engine"
+    primary_resource_id: "ces_tool_data_store_tool_engine_source_no_engine"
+    vars:
+      app_display_name: 'my-app'
+      tool_id: 'ces_tool_basic5'
+      app_id: 'app-id'
+      data_store_id: "tool_data_store_id_no_engine"
   - name: "ces_tool_google_search_tool_basic"
     primary_resource_id: "ces_tool_google_search_tool_basic"
     vars:
