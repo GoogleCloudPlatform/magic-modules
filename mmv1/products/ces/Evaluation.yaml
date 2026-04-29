@@ -16,12 +16,14 @@ name: Evaluation
 description: Customer Engagement Suite Evaluation
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations
 min_version: beta
-self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{name}}
+references:
+  api: 'https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1beta/projects.locations.apps.evaluations'
+self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{evaluation_id}}
 create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations?evaluationId={{evaluation_id}}
 update_verb: PATCH
 update_mask: true
 import_format:
-  - projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{name}}
+  - projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{evaluation_id}}
 examples:
   - name: ces_evaluation_basic
     min_version: beta
@@ -63,6 +65,7 @@ parameters:
       automatically assigned for the evaluation.
     immutable: true
     url_param_only: true
+    required: true
 properties:
   - name: name
     type: String
@@ -138,21 +141,27 @@ properties:
                 - name: name
                   type: String
                   output: true
+                  description: Output only. The name of the span.
                 - name: startTime
                   type: Time
                   output: true
+                  description: Output only. The start time of the span.
                 - name: endTime
                   type: Time
                   output: true
+                  description: Output only. The end time of the span.
                 - name: duration
                   type: String
                   output: true
+                  description: Output only. The duration of the span.
                 - name: attributes
                   type: String
                   output: true
+                  description: Output only. Key-value attributes associated with the span.
                 - name: childSpans
                   type: String
                   output: true
+                  description: Output only. The child spans that are nested under this span.
             - name: steps
               type: Array
               description: The sequence of steps required to replay a golden conversation turn.
