@@ -142,7 +142,6 @@ parameters:
 properties:
   - name: 'diskEncryptionKey'
     type: NestedObject
-    
     description: |
       Encrypts the disk using a customer-supplied encryption key.
 
