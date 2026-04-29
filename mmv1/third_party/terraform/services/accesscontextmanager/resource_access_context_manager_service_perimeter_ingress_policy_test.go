@@ -221,8 +221,8 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest(t *test
 	})
 }
 
-// Step 1: Create with identity_type=ANY_IDENTITY, operations (storage), method_selectors (method + permission)
-// Covers: identity_type, operations.service_name, method_selectors.method, method_selectors.permission, resources
+// Step 1: Create with identity_type=ANY_IDENTITY, operations (storage), method_selectors (wildcard)
+// Covers: identity_type, operations.service_name, method_selectors.method, resources (permission tested in step3 with bigquery)
 func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step1(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
@@ -238,10 +238,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
     operations {
       service_name = "storage.googleapis.com"
       method_selectors {
-        method = "google.storage.objects.create"
-      }
-      method_selectors {
-        permission = "storage.objects.list"
+        method = "*"
       }
     }
   }
