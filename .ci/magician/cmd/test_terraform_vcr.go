@@ -526,9 +526,13 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 
 func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.Panics) > 0 {
-		comment := color("red", fmt.Sprintf("The provider crashed while running the VCR tests in %s mode\n", mode.Upper()))
-		comment += fmt.Sprintf(`Please fix it to complete your PR.
-View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
+		comment := "> [!CAUTION]\n"
+		comment += "> **Panic occurred during VCR tests**\n>\n"
+		comment += fmt.Sprintf("> %s **The provider crashed while running the VCR tests in %s mode**\n>\n", color("red", ""), mode.Upper())
+		comment += "> Please fix it to complete your PR."
+
+		comment += fmt.Sprintf("\n\nView the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)", prNumber, buildID, mode.Lower())
+
 		mentionStr := getMentions(prNumber, gh)
 		if mentionStr != "" {
 			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
@@ -546,15 +550,16 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 
 func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.BuildFailures) > 0 {
-		comment := color("red", fmt.Sprintf("The provider failed to build during VCR tests in %s mode\n", mode.Upper()))
-		comment += "\nThe following packages failed to build:\n"
+		comment := "> [!CAUTION]\n"
+		comment += "> **Build Failure during VCR tests**\n>\n"
+		comment += fmt.Sprintf("> %s **The provider failed to build during VCR tests in %s mode**\n>\n", color("red", ""), mode.Upper())
+		comment += "> The following packages failed to build:\n"
 		for _, pkg := range result.BuildFailures {
-			comment += fmt.Sprintf("- `%s`\n", pkg)
+			comment += fmt.Sprintf("> - `%s`\n", pkg)
 		}
-		comment += fmt.Sprintf(`
-Please fix the compilation errors to complete your PR.
+		comment += ">\n> Please fix the compilation errors to complete your PR."
 
-View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
+		comment += fmt.Sprintf("\n\nView the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)", prNumber, buildID, mode.Lower())
 
 		mentionStr := getMentions(prNumber, gh)
 		if mentionStr != "" {
