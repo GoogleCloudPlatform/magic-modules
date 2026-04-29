@@ -17,7 +17,7 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectID := fmt.Sprintf("tf-test-1%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
