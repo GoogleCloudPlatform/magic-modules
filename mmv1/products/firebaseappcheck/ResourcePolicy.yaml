@@ -36,7 +36,6 @@ examples:
   - name: 'firebase_app_check_resource_policy_oauth2_basic'
     primary_resource_id: 'default'
     vars:
-      service_id: 'oauth2.googleapis.com'
       oauth_client_id: "example-client-id"
     test_env_vars:
       project_id: 'PROJECT_NAME'
