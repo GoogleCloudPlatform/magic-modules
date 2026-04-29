@@ -50,6 +50,9 @@ mmv1/build/*
 .vscode
 *.code-workspace
 
+# windsurf workspace settings
+.windsurf/
+
 # ignore serialization generation build data
 tpgtools/temp.serial
 tpgtools/serialization.go
