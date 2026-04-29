@@ -222,6 +222,15 @@ func TestAccRecaptchaEnterpriseKey_WebPolicyBasedChallengeKey(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
+			{
+				Config: testAccRecaptchaEnterpriseKey_WebPolicyBasedChallengeKeyUpdate0(context),
+			},
+			{
+				ResourceName:            "google_recaptcha_enterprise_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -541,6 +550,42 @@ resource "google_recaptcha_enterprise_key" "primary" {
       action_settings {
         action          = "signup"
         score_threshold = 0.7
+      }
+    }
+  }
+
+  labels = {
+    label-one = "value-one"
+  }
+}
+`, context)
+}
+
+func testAccRecaptchaEnterpriseKey_WebPolicyBasedChallengeKeyUpdate0(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_recaptcha_enterprise_key" "primary" {
+  display_name = "policy-based-challenge-key-%{random_suffix}"
+  project      = "%{project_name}"
+
+  web_settings {
+    allow_all_domains = false
+    allowed_domains   = ["www.example.com"]
+    allow_amp_traffic = false
+    integration_type  = "POLICY_BASED_CHALLENGE"
+
+    challenge_settings {
+      default_settings {
+        score_threshold = 0.6
+      }
+
+      action_settings {
+        action          = "login"
+        score_threshold = 0.4
+      }
+
+      action_settings {
+        action          = "signup"
+        score_threshold = 0.8
       }
     }
   }
