@@ -74,6 +74,9 @@ resource "google_ces_deployment" "my-deployment" {
             modality = "CHAT_AND_VOICE"
             theme = "DARK"
             web_widget_title = "temp_webwidget_title"
+            security_settings {
+                enable_public_access = true
+            }
         }
     }
 }
@@ -107,6 +110,9 @@ resource "google_ces_deployment" "my-deployment" {
             modality = "CHAT_ONLY"
             theme = "LIGHT"
             web_widget_title = "temp_webwidget_title"
+            security_settings {
+                enable_public_access = false
+            }
         }
     }
 }
