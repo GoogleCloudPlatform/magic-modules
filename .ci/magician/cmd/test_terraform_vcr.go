@@ -528,8 +528,11 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 	if len(result.Panics) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Panic occurred during VCR tests**\n>\n"
-		comment += fmt.Sprintf("> %s **The provider crashed while running the VCR tests in %s mode**\n>\n", color("red", ""), mode.Upper())
-		comment += "> Please fix it to complete your PR."
+		comment += fmt.Sprintf("> %s\n", color("red", fmt.Sprintf("**%s mode**: The following tests crashed with a panic:", mode.Upper())))
+		for _, test := range result.Panics {
+			comment += fmt.Sprintf("> - `%s`\n", test)
+		}
+		comment += ">\n> Please fix the issue to complete your PR."
 
 		comment += fmt.Sprintf("\n\nView the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)", prNumber, buildID, mode.Lower())
 
@@ -552,8 +555,7 @@ func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha st
 	if len(result.BuildFailures) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Build Failure during VCR tests**\n>\n"
-		comment += fmt.Sprintf("> %s **The provider failed to build during VCR tests in %s mode**\n>\n", color("red", ""), mode.Upper())
-		comment += "> The following packages failed to build:\n"
+		comment += fmt.Sprintf("> %s\n", color("red", fmt.Sprintf("**%s mode**: The following packages failed to build:", mode.Upper())))
 		for _, pkg := range result.BuildFailures {
 			comment += fmt.Sprintf("> - `%s`\n", pkg)
 		}
