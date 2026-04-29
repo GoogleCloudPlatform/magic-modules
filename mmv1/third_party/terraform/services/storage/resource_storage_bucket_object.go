@@ -333,6 +333,13 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description: `User-provided metadata, in key/value pairs.`,
 			},
 
+			"custom_headers": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `User-provided custom headers, in key/value pairs.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
 			"self_link": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -455,6 +462,12 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		setEncryptionHeaders(customerEncryption, insertCall.Header())
 	}
 
+	if v_headers, ok := d.GetOk("custom_headers"); ok {
+		for k, v := range v_headers.(map[string]interface{}) {
+			insertCall.Header().Add(k, v.(string))
+		}
+	}
+
 	_, err = insertCall.Do()
 
 	if err != nil {
@@ -518,6 +531,11 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 		if hasRetentionChanges {
 			updateCall.OverrideUnlockedRetention(true)
 		}
+		if v_headers, ok := d.GetOk("custom_headers"); ok {
+			for k, v := range v_headers.(map[string]interface{}) {
+				updateCall.Header().Add(k, v.(string))
+			}
+		}
 		_, err = updateCall.Do()
 
 		if err != nil {
@@ -544,6 +562,11 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if v, ok := d.GetOk("customer_encryption"); ok {
 		customerEncryption := expandCustomerEncryption(v.([]interface{}))
 		setEncryptionHeaders(customerEncryption, getCall.Header())
+	}
+	if v_headers, ok := d.GetOk("custom_headers"); ok {
+		for k, v := range v_headers.(map[string]interface{}) {
+			getCall.Header().Add(k, v.(string))
+		}
 	}
 
 	res, err := getCall.Do()
@@ -644,9 +667,13 @@ func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{})
 	name := d.Get("name").(string)
 
 	objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutDelete)))
-
-	DeleteCall := objectsService.Delete(bucket, name)
-	err = DeleteCall.Do()
+	deleteCall := objectsService.Delete(bucket, name)
+	if v_headers, ok := d.GetOk("custom_headers"); ok {
+		for k, v := range v_headers.(map[string]interface{}) {
+			deleteCall.Header().Add(k, v.(string))
+		}
+	}
+	err = deleteCall.Do()
 
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
