@@ -208,13 +208,10 @@ resource "google_compute_disk" "persistent" {
 func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
-	org := envvar.GetTestOrgFromEnv(t)
-	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-snapshot-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-snapshot-tagvalue", sharedTagkey, org)
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -222,21 +219,39 @@ func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeSnapshot_resourceManagerTags(snapshotName, diskName, tagKeyResult["name"], tagValueResult["name"]),
+				Config: testAccComputeSnapshot_resourceManagerTags(context),
+			},
+			{
+				ResourceName:            "google_compute_snapshot.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"params", "source_disk", "zone"},
 			},
 		},
 	})
 }
 
-func testAccComputeSnapshot_resourceManagerTags(snapshotName, diskName, tagKey, tagValue string) string {
-	return fmt.Sprintf(`
+func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "tag_key" {
+  parent      = "projects/%{project_id}"
+  short_name  = "snapshot-tag-%{random_suffix}"
+  description = "Tag key for snapshot acceptance tests"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent      = google_tags_tag_key.tag_key.id
+  short_name  = "value-%{random_suffix}"
+  description = "Tag value for snapshot acceptance tests"
+}
+
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
 }
 
 resource "google_compute_disk" "foobar" {
-  name  = "%s"
+  name  = "tf-test-disk-%{random_suffix}"
   image = data.google_compute_image.my_image.self_link
   size  = 10
   type  = "pd-ssd"
@@ -244,14 +259,14 @@ resource "google_compute_disk" "foobar" {
 }
 
 resource "google_compute_snapshot" "foobar" {
-  name        = "%s"
+  name        = "tf-test-snapshot-%{random_suffix}"
   source_disk = google_compute_disk.foobar.name
   zone        = "us-central1-a"
   params {
-	resource_manager_tags = {
-		"%s" = "%s"
-	}
+    resource_manager_tags = {
+      (google_tags_tag_key.tag_key.id) = google_tags_tag_value.tag_value.id
+    }
   }
 }
-`, diskName, snapshotName, tagKey, tagValue)
+`, context)
 }
