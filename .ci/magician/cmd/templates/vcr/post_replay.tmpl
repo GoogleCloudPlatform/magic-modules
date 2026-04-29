@@ -55,9 +55,18 @@
 {{ else }}
 {{ if .ReplayingErr }}
 > [!CAUTION]
-> {{color "red" "Errors occurred during REPLAYING mode. Please fix them to complete your PR."}}
+> {{color "red" "Errors occurred during REPLAYING mode. Please check the build log for details."}}
 {{ else }}
 {{color "green" "**All tests passed in Replaying mode! No Recording was needed.**"}}
+
+{{ if or (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0) }}
+> [!CAUTION]
+> **Issues requiring attention before PR completion**
+>
+> {{color "red" "**Manual Verification Required**: New tests were added that are skipped in presubmit tests. See the \"Manual Verification Required\" section at the top for details."}}
+>
+> Please address these issues to complete your PR. If you believe these detections are incorrect or unrelated to your change, please raise the concern with your reviewer.
+{{ end }}
 {{ end }}
 {{ end }}
 

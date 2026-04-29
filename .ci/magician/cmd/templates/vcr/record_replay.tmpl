@@ -27,7 +27,7 @@
 {{ if and .RecordingErr (eq (len .RecordingResult.FailedTests) 0) (eq (len .ReplayingAfterRecordingResult.FailedTests) 0) (not .HasTerminatedTests) }}> {{color "red" "**Recording Errors**: An unexpected error occurred during RECORDING mode. Please check the build log for details."}}
 >
 {{ end -}}
-> Please address these issues to complete your PR. If you believe these failures are incorrect or unrelated to your change, please raise the concern with your reviewer.
+> Please address these issues to complete your PR. If you believe these detections are incorrect or unrelated to your change, please raise the concern with your reviewer.
 {{ else }}
 {{ color "green" "**All tests passed!**" }}
 {{ end }}

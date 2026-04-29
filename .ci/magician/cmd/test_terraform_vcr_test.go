@@ -321,6 +321,8 @@ func TestNonExercisedTestsComment(t *testing.T) {
 				"VCR cannot automatically execute the following tests added in this PR. Please verify them manually:",
 				"> 🔴 beta-1",
 				"> 🔴 beta-2",
+				"> [!CAUTION]",
+				"**Issues requiring attention before PR completion**",
 			},
 		},
 		{
@@ -334,6 +336,8 @@ func TestNonExercisedTestsComment(t *testing.T) {
 				"The following tests are GA-only additions and cannot be run by VCR in Beta mode. Please verify them manually:",
 				"> 🔴 ga-1",
 				"> 🔴 ga-2",
+				"> [!CAUTION]",
+				"**Issues requiring attention before PR completion**",
 			},
 		},
 		{
@@ -352,6 +356,8 @@ func TestNonExercisedTestsComment(t *testing.T) {
 				"The following tests are GA-only additions and cannot be run by VCR in Beta mode. Please verify them manually:",
 				"> 🔴 ga-1",
 				"> 🔴 ga-2",
+				"> [!CAUTION]",
+				"**Issues requiring attention before PR completion**",
 			},
 		},
 	}
@@ -426,7 +432,7 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 			},
 			wantContains: []string{
 				"> [!CAUTION]",
-				"🔴 Errors occurred during REPLAYING mode. Please fix them to complete your PR.",
+				"🔴 Errors occurred during REPLAYING mode. Please check the build log for details.",
 				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_test.log)",
 			},
 		},
