@@ -15,7 +15,7 @@
 {{ if or (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0) }}> {{color "red" "**Manual Verification Required**: New tests were added that are skipped in presubmit tests. See the \"Manual Verification Required\" section at the top for details."}}
 >
 {{ end -}}
-{{ if gt (len .RecordingResult.FailedTests) 0 }}> {{color "red" "**Initial Recording Failed**: Some tests failed during the HTTP recording step. See the table above for details."}}
+{{ if gt (len .RecordingResult.FailedTests) 0 }}> {{color "red" "**Initial Recording Failed**: Some tests failed during the recording step. See the table above for details."}}
 >
 {{ end -}}
 {{ if gt (len .ReplayingAfterRecordingResult.FailedTests) 0 }}> {{color "red" "**Replaying Rerun Failed**: Some tests failed due to non-determinism when VCR replayed the response. See the table above for details."}}
