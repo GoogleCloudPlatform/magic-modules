@@ -558,6 +558,7 @@ func TestHandleBuildFailures(t *testing.T) {
 	assert.Len(t, gh.calledMethods["PostComment"], 1)
 	assert.Equal(t, "123", gh.calledMethods["PostComment"][0][0])
 	comment := gh.calledMethods["PostComment"][0][1].(string)
+	assert.Contains(t, comment, "**Step 1: Replaying Mode**")
 	assert.Contains(t, comment, "package1")
 	assert.Contains(t, comment, "package2")
 
@@ -565,6 +566,27 @@ func TestHandleBuildFailures(t *testing.T) {
 	assert.Equal(t, "123", gh.calledMethods["PostBuildStatus"][0][0])
 	assert.Equal(t, "VCR-test", gh.calledMethods["PostBuildStatus"][0][1])
 	assert.Equal(t, "failure", gh.calledMethods["PostBuildStatus"][0][2])
+}
+
+func TestHandleBuildFailures_Recording(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+	}
+	result := vcr.Result{
+		BuildFailures: []string{"package1", "package2"},
+	}
+
+	rnr := &mockRunner{}
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Recording, gh, rnr)
+
+	assert.NoError(t, err)
+	assert.True(t, handled)
+
+	assert.Len(t, gh.calledMethods["PostComment"], 1)
+	comment := gh.calledMethods["PostComment"][0][1].(string)
+	assert.Contains(t, comment, "**Step 2: Recording Mode**")
+	assert.Contains(t, comment, "package1")
+	assert.Contains(t, comment, "package2")
 }
 
 func TestHandleBuildFailures_NoFailures(t *testing.T) {

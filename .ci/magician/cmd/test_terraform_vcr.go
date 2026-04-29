@@ -528,10 +528,7 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 	if len(result.Panics) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Panic occurred during VCR tests**\n>\n"
-		comment += fmt.Sprintf("> %s\n", color("red", fmt.Sprintf("**%s mode**: The following tests crashed with a panic:", mode.Upper())))
-		for _, test := range result.Panics {
-			comment += fmt.Sprintf("> - `%s`\n", test)
-		}
+		comment += fmt.Sprintf("> %s\n", color("red", fmt.Sprintf("**%s mode**: The provider crashed with a panic. Please check the build log for details.", mode.Upper())))
 		comment += ">\n> Please fix the issue to complete your PR."
 
 		comment += fmt.Sprintf("\n\nView the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)", prNumber, buildID, mode.Lower())
@@ -540,6 +537,15 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 		if mentionStr != "" {
 			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
 		}
+
+		header := ""
+		if mode == vcr.Recording {
+			header = "---\n\n**Step 2: Recording Mode**\n\n"
+		} else if mode == vcr.Replaying {
+			header = "**Step 1: Replaying Mode**\n\n"
+		}
+		comment = header + comment
+
 		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
@@ -567,6 +573,14 @@ func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha st
 		if mentionStr != "" {
 			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
 		}
+
+		header := ""
+		if mode == vcr.Recording {
+			header = "---\n\n**Step 2: Recording Mode**\n\n"
+		} else if mode == vcr.Replaying {
+			header = "**Step 1: Replaying Mode**\n\n"
+		}
+		comment = header + comment
 
 		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
