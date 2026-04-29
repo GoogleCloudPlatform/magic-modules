@@ -115,9 +115,9 @@ func (c *ListDisplayName) Capture(resourceAddr string, attrCandidates []string) 
 	}
 }
 
-// Check returns a knownvalue.Check that compares against the
+// CheckValue returns a knownvalue.Check that compares against the
 // captured value. Fails if Capture has not run yet.
-func (c *ListDisplayName) Check() knownvalue.Check {
+func (c *ListDisplayName) CheckValue() knownvalue.Check {
 	return knownvalue.StringFunc(func(v string) error {
 		if c.value == "" {
 			return fmt.Errorf("display name was not captured from create step")
