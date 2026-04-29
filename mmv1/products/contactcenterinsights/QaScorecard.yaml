@@ -13,7 +13,7 @@
 
 ---
 name: QaScorecard
-description: Description
+description: A QaScorecard represents a collection of questions to be scored during analysis.
 base_url: projects/{{project}}/locations/{{location}}/qaScorecards
 self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard_id}}
 create_url: projects/{{project}}/locations/{{location}}/qaScorecards?qaScorecardId={{qa_scorecard_id}}

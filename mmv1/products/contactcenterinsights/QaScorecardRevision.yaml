@@ -13,7 +13,7 @@
 
 ---
 name: QaScorecardRevision
-description: Description
+description: A revision of a QaScorecard.
 base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{qa_scorecard_revision_id}}

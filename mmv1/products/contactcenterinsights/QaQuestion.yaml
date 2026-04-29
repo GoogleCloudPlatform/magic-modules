@@ -13,7 +13,7 @@
 
 ---
 name: QaQuestion
-description: Description
+description: A single question to be scored by the Insights QA feature.
 base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions
 self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions
