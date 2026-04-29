@@ -160,3 +160,52 @@ resource "google_compute_region_instant_snapshot" "foobar" {
 `, context)
 }
 
+func TestAccComputeRegionInstantSnapshot_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	suffix := acctest.RandString(t, 10)
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-region-instant-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagKey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-region-instant-snapshots-tagvalue", sharedTagKey, org)
+
+	context := map[string]interface{}{
+		"random_suffix": suffix,
+		"tag_key_id":    tagKeyResult["name"],
+		"tag_value_id":  tagValueResult["name"],
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstantSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstantSnapshot_resourceManagerTags(context),
+			},
+		},
+	})
+}
+
+func testAccComputeRegionInstantSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_disk" "disk" {
+  name = "tf-test-disk-%{random_suffix}"
+  type = "pd-ssd"
+  region = "us-central1"
+  size = 10
+  replica_zones = ["us-central1-a", "us-central1-f"]
+}
+
+resource "google_compute_region_instant_snapshot" "foobar" {
+  name        = "tf-test-instant-snapshot-%{random_suffix}"
+  source_disk = google_compute_region_disk.disk.self_link
+  region      = google_compute_region_disk.disk.region
+  params {
+    resource_manager_tags = {
+      "%{tag_key_id}" = "%{tag_value_id}"
+    }
+  }
+}
+`, context)
+}
