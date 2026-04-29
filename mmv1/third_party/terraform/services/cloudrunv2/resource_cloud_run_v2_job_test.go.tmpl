@@ -46,7 +46,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_cloud_run_v2_job" "default" {
-    name     = "tf-test-cloudrun-job%{random_suffix}"
+    name     = "tf-test-cloudrun-job-1%{random_suffix}"
     location = "us-central1"
     labels = {
       label-1 = "value-1"
