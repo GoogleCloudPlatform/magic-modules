@@ -91,12 +91,6 @@ examples:
     primary_resource_id: 'primary'
     vars:
       region_disk_name: 'my-region-hyperdisk'
-  - name: 'region_disk_from_image'
-    primary_resource_id: 'regiondisk'
-    vars:
-      region_disk_name: 'my-region-disk-from-image'
-    # Hidden from docs because this feature is behind an allowlist
-    exclude_docs: true
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -191,12 +185,23 @@ properties:
 
       **Note:** This field is currently behind an allowlist and requires special permission to use.
     immutable: true
+    ignore_read: true
     properties:
       - name: 'rawKey'
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
+        is_missing_in_cai: true
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
+        sensitive: true
+        is_missing_in_cai: true
       - name: 'sha256'
         type: String
         description: |
@@ -208,6 +213,11 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+      - name: 'kmsKeyServiceAccount'
+        type: String
+        description: |
+          The service account used for the encryption request for the given KMS key.
+          If absent, the Compute Engine Service Agent service account is used.
   - name: 'sourceImageId'
     type: String
     description: |

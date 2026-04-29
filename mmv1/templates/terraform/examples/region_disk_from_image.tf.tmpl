@@ -1,9 +1,0 @@
-resource "google_compute_region_disk" "regiondisk" {
-  name          = "{{index $.Vars "region_disk_name"}}"
-  image         = "debian-cloud/debian-12"
-  type          = "pd-ssd"
-  region        = "us-central1"
-  size          = 200
-
-  replica_zones = ["us-central1-a", "us-central1-f"]
-}
