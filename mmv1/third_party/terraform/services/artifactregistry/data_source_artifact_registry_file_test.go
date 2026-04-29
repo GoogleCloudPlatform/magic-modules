@@ -28,6 +28,7 @@ const testPackageID = "hello-pkg"
 const testVersionID = "1.0.0"
 
 func TestAccDataSourceArtifactRegistryFile_basic(t *testing.T) {
+	// Skipped in VCR due to non-deterministic multipart boundaries and random paths.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
