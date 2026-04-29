@@ -583,55 +583,61 @@ The `verify_config` block supports:
     
 * `tasks` -
   (Optional)
-  Optional. The tasks that will run as a part of the verify job.
+  Optional. The tasks that will run as a part of the verify job. The tasks are executed sequentially in the order specified.
 
 The `analysis` block supports:
     
 * `duration` -
   (Required)
-  Required. Duration of the analysis.
+  Required. The amount of time in minutes the analysis on the target will last. If all analysis checks have successfully completed before the specified duration, the analysis is successful. If a check is still running while the specified duration passes, it will wait for that check to complete to determine if the analysis is successful. The maximum duration is 48 hours.
     
 * `google_cloud` -
   (Optional)
-  Optional. Google Cloud specific analysis configuration.
+  Optional. Google Cloud - based analysis checks.
     
 * `custom_checks` -
   (Optional)
-  Optional. Custom checks to perform during analysis.
+  Optional. Custom analysis checks from 3P metric providers.
 
 The `google_cloud` block supports:
     
 * `alert_policy_checks` -
   (Optional)
-  Optional. Alert policy checks to perform.
+  Optional. A list of Cloud Monitoring Alert Policy checks to perform as part of the analysis.
 
 The `alert_policy_checks` block supports:
     
 * `id` -
   (Required)
-  Required. Unique identifier for the alert policy check.
+  Required. The ID of the analysis check.
     
 * `alert_policies` -
   (Required)
-  Required. The list of alert policy names to check. Format: `projects/{project}/alertPolicies/{alert_policy}`.
+  Required. The Cloud Monitoring Alert Policies to check for active alerts. Format is `projects/{project}/alertPolicies/{alert_policy}`.
     
 * `labels` -
   (Optional)
-  Optional. Labels to filter the alert policies.
+  Optional. A set of labels to filter active alerts. If set, only alerts having all of the specified labels will be considered. Otherwise, all active alerts will be considered.
 
 The `custom_checks` block supports:
     
 * `id` -
   (Required)
-  Required. Unique identifier for the custom check.
+  Required. The ID of the custom Analysis check.
     
 * `frequency` -
   (Optional)
-  Optional. Frequency of the custom check.
+  Optional. The frequency at which the custom check will be run, with a minimum and default of 5 minutes.
     
 * `task` -
+  (Required)
+  Required. The Task to be run for this custom check.
+
+The `task` block supports:
+    
+* `container` -
   (Optional)
-  Optional. The task to run for the custom check.
+  Optional. This task is represented by a container that is executed in the Cloud Build execution environment.
 
 The `tasks` block supports:
     
@@ -647,11 +653,11 @@ The `container` block supports:
     
 * `command` -
   (Optional)
-  Optional. Command is the container entrypoint to use.
+  Optional. Command is the container entrypoint to use. This overrides the default entrypoint defined in the container image.
     
 * `args` -
   (Optional)
-  Optional. Args is the container arguments to use.
+  Optional. Args is the container arguments to use. This overrides the default arguments defined in the container image.
     
 * `env` -
   (Optional)
