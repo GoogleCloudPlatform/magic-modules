@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -346,7 +347,7 @@ func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected ma
 		// Actual value in API should match state and expected
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
+		found, err := rmClient.NewClient(config, config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
 			return err
 		}
@@ -388,7 +389,7 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 		// Actual value in API should match state and expected
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
+		found, err := rmClient.NewClient(config, config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
 			return err
 		}

@@ -46,6 +46,10 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
+{{if $.Res.CustomCode.TestConstants -}} 
+    {{- customTemplate $ $.Res.CustomCode.TestConstants true -}}
+{{- end}}
+
 var (
 	_ = fmt.Sprintf
 	_ = log.Print

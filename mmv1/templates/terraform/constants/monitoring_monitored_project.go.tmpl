@@ -1,3 +1,7 @@
+import (
+	rmClient "{{ $.ImportPath }}/services/resourcemanager/client"
+)
+
 func ResourceMonitoringMonitoredProjectNameDiffSuppressFunc(k, old, new string, d tpgresource.TerraformResourceDataChange) bool {
 	// Don't suppress if values are empty strings
 	if old == "" || new == "" {

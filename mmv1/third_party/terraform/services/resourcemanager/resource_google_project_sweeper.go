@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
@@ -51,7 +52,7 @@ func testSweepProject(region string) error {
 	for paginate := true; paginate; {
 		// Filter for projects with test prefix
 		filter := fmt.Sprintf("id:\"%s*\" -lifecycleState:DELETE_REQUESTED parent.id:%v", TestPrefix, org)
-		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.List().Filter(filter).PageToken(token).Do()
+		found, err := rmClient.NewClient(config, config.UserAgent).Projects.List().Filter(filter).PageToken(token).Do()
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error listing projects: %s", err)
 			return nil
@@ -59,7 +60,7 @@ func testSweepProject(region string) error {
 
 		for _, project := range found.Projects {
 			log.Printf("[INFO][SWEEPER_LOG] Sweeping Project id: %s", project.ProjectId)
-			_, err := config.NewResourceManagerClient(config.UserAgent).Projects.Delete(project.ProjectId).Do()
+			_, err := rmClient.NewClient(config, config.UserAgent).Projects.Delete(project.ProjectId).Do()
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] Error, failed to delete project %s: %s", project.Name, err)
 				continue

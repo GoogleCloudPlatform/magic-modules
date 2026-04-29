@@ -13,9 +13,11 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanagerv3"
 	storage_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/storage"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 
 	"go.uber.org/zap"
 )
@@ -61,8 +63,8 @@ func New(cfg *transport_tpg.Config, offline bool, entries map[string]string, err
 		errorLogger:   errorLogger,
 	}
 	if !offline {
-		am.resourceManagerV1 = cfg.NewResourceManagerClient(cfg.UserAgent)
-		am.resourceManagerV3 = cfg.NewResourceManagerV3Client(cfg.UserAgent)
+		am.resourceManagerV1 = rmClient.NewClient(cfg, cfg.UserAgent)
+		am.resourceManagerV3 = resourcemanagerv3.NewClient(cfg, cfg.UserAgent)
 		am.storageClient = storage_tpg.NewClient(cfg, cfg.UserAgent)
 	}
 	err := am.initAncestryCache(entries)
