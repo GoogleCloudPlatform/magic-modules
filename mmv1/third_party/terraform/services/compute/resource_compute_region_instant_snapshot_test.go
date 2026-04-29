@@ -1,25 +1,14 @@
 package compute_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-
-	{{ if eq $.TargetVersionName `ga` }}
-		"google.golang.org/api/compute/v1"
-	{{- else }}
-		compute "google.golang.org/api/compute/v0.beta"
-	{{- end }}
 )
 
 func TestAccComputeRegionInstantSnapshot_basicFeatures(t *testing.T) {
-	var is compute.InstantSnapshot
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -31,16 +20,18 @@ func TestAccComputeRegionInstantSnapshot_basicFeatures(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionInstantSnapshot_basicFeatures(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRegionInstantSnapshotExists(t, "google_compute_region_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
-				),
+			},
+			{
+				ResourceName:            "google_compute_region_instant_snapshot.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "params", "region", "terraform_labels"},
 			},
 		},
 	})
 }
 
 func TestAccComputeRegionInstantSnapshot_labelsUpdate(t *testing.T) {
-	var is compute.InstantSnapshot
 	context_1 := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"label_key":     "test-1",
@@ -64,55 +55,33 @@ func TestAccComputeRegionInstantSnapshot_labelsUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionInstantSnapshot_labelsUpdate(context_1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRegionInstantSnapshotExists(t, "google_compute_region_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
-				),
+			},
+			{
+				ResourceName:            "google_compute_region_instant_snapshot.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "params", "region", "terraform_labels"},
 			},
 			{
 				Config: testAccComputeRegionInstantSnapshot_labelsUpdate(context_2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRegionInstantSnapshotExists(t, "google_compute_region_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
-				),
+			},
+			{
+				ResourceName:            "google_compute_region_instant_snapshot.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "params", "region", "terraform_labels"},
 			},
 			{
 				Config: testAccComputeRegionInstantSnapshot_labelsUpdate(context_3),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRegionInstantSnapshotExists(t, "google_compute_region_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
-				),
+			},
+			{
+				ResourceName:            "google_compute_region_instant_snapshot.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "params", "region", "terraform_labels"},
 			},
 		},
 	})
-}
-
-func testAccCheckComputeRegionInstantSnapshotExists(t *testing.T, n, p string, is *compute.InstantSnapshot) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := acctest.GoogleProviderConfig(t)
-
-		region := tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
-
-		found, err := compute_tpg.NewClient(config, config.UserAgent).RegionInstantSnapshots.Get(
-			p, region, rs.Primary.Attributes["name"]).Do()
-		if err != nil {
-			return err
-		}
-
-		if found.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Region Instant Snapshot not found")
-		}
-
-		*is = *found
-
-		return nil
-	}
 }
 
 func testAccComputeRegionInstantSnapshot_basicFeatures(context map[string]interface{}) string {
@@ -182,6 +151,12 @@ func TestAccComputeRegionInstantSnapshot_resourceManagerTags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionInstantSnapshot_resourceManagerTags(context),
+			},
+			{
+				ResourceName:            "google_compute_region_instant_snapshot.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "params", "region", "terraform_labels"},
 			},
 		},
 	})
