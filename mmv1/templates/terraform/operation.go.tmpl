@@ -25,7 +25,6 @@ import (
   "log"
   "strings"
   "time"
-  urlPkg "net/url"
 
   "{{ $.ImportPath }}/tpgresource"
   transport_tpg "{{ $.ImportPath }}/transport"
@@ -65,13 +64,11 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) QueryOp() (interface{}, er
     return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
   }
   // Returns the proper get.
-  url, err := urlPkg.JoinPath(
+  url := fmt.Sprintf(
+    "%s%s",
     transport_tpg.BaseUrl(Product, w.Config),
     fmt.Sprintf("{{ replaceAll $.GetAsync.Operation.BaseUrl "{{op_id}}" "%s" }}", w.CommonOperationWaiter.Op.Name),
   )
-  if err != nil {
-    return nil, err
-  }
 {{- if $.ProductMetadata.Version.RepEnabled }}
   if strings.Contains(url, "{{"{{"}}location{{"}}"}}") && w.Location == "" {
     return nil, fmt.Errorf("failed to find location for a resource with a regionalized endpoint %s", url)

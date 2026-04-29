@@ -24,7 +24,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	urlPkg "net/url"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -50,7 +49,6 @@ var (
     _ = tpgresource.SetLabels
     _ = transport_tpg.Config{}
     _ = googleapi.Error{}
-	_ = urlPkg.JoinPath
 	_ = {{ lower $.Res.ProductMetadata.Name }}.Product
 )
 
@@ -156,11 +154,7 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)
-		url, err := urlPkg.JoinPath(transport_tpg.BaseUrl({{ lower $.Res.ProductMetadata.Name }}.Product, config), "{{$.Res.SelfLinkUri}}")
-		if err != nil {
-			return err
-		}
-		url, err = tpgresource.ReplaceVarsForTest(config, rs, url)
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("%s%s", transport_tpg.BaseUrl({{ lower $.Res.ProductMetadata.Name }}.Product, config), "{{$.Res.SelfLinkUri}}"))
 		if err != nil {
 			return err
 		}
