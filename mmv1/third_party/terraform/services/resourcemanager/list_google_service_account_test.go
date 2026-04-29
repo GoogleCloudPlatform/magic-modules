@@ -23,7 +23,8 @@ func TestAccServiceAccountListResource_queryIdentity(t *testing.T) {
 	accountId := "a" + acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
-	listDisplayName := acctest.ListDisplayName{}
+	var listDisplayName = acctest.ListDisplayName{}
+
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
@@ -36,7 +37,7 @@ func TestAccServiceAccountListResource_queryIdentity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_service_account.acceptance", "email", expectedEmail),
 					resource.TestCheckResourceAttr("google_service_account.acceptance", "project", project),
-					listDisplayName.Capture("google_service_account.acceptance", []string{"display_name", "email"}),
+					listDisplayName.Capture("google_service_account.acceptance", []string{"display_name"}),
 				),
 			},
 			{
