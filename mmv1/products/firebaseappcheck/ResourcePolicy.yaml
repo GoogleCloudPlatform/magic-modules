@@ -63,7 +63,7 @@ properties:
     type: String
     description: |
       Service specific name of the resource object to which this policy applies, in the format:
-      * iOS OAuth clients (Google Identity for iOS): 
+      * iOS OAuth clients (Google Identity for iOS):
         `//oauth2.googleapis.com/projects/{project_number}/oauthClients/{oauthClientId}`
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     required: true
