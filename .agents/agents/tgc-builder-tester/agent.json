@@ -1,0 +1,6 @@
+{
+  "name": "tgc-builder-tester",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

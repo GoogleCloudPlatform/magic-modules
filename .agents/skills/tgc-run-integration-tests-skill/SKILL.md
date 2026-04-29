@@ -18,22 +18,17 @@ When you need to run integration tests for TGC, use this skill.
 
 If you added or modified a resource, you must run its corresponding integration tests.
 
-1. Ensure the debug output directory exists in the downstream path:
-   ```bash
-   mkdir -p <terraform-google-conversion-path>/debug_output/raw_logs
-   ```
-
-2. Set the following environment variable in the TGC repository (or prepend it directly to your test command):
-   ```bash
-   export WRITE_FILES=true
-   ```
-
-3. Identify the target test name and its specific service directory. 
+1. Identify the target test name and its specific service directory. 
    - *Example*: Target `TestAccAlloydbBackup` located in `./test/services/alloydb`.
 
-4. Run the test, redirecting both standard output and standard error to a log file:
+2. Run the test using the script from the `scripts` file, passing the test path and test name:
    ```bash
-   make test-integration-local TESTPATH=./test/services/alloydb TESTARGS='-run=TestAccAlloydbBackup' > debug_output/raw_logs/alloydbBackup.log 2>&1
+   .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh <test-path> <test-name>
+   ```
+   **Example**:
+   ```bash
+   .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh ./test/services/alloydb TestAccAlloydbBackup
    ```
 
-> **Note**: Every time you run an integration test, save the logs to a unique file so you don't overwrite the output of previous runs.
+> [!IMPORTANT]
+> You MUST use the `./` prefix for the `<test-path>` (e.g., `./test/services/alloydb`) to ensure `go test` interprets it as a local directory rather than a standard library package.
