@@ -24,7 +24,6 @@ func DataSourceGoogleCloudRunV2Job() *schema.Resource {
 }
 
 func dataSourceGoogleCloudRunV2JobRead(d *schema.ResourceData, meta interface{}) error {
-	panic("Fake panic in data source read")
 	config := meta.(*transport_tpg.Config)
 
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/jobs/{{name}}")
