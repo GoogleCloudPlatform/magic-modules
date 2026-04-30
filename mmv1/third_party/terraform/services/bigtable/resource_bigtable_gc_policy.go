@@ -101,7 +101,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 		Delete: resourceBigtableGCPolicyDestroy,
 		Update: resourceBigtableGCPolicyUpsert,
 		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderDeletionPolicy(""),
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			resourceBigtableGCPolicyCustomizeDiff,
 		),
 		Timeouts: &schema.ResourceTimeout{
@@ -212,19 +212,9 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
-			"deletion_policy": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: `The deletion policy for the GC policy. Setting ABANDON allows the resource
-				to be abandoned rather than deleted. This is useful for GC policy as it cannot be deleted
-				in a replicated instance.
-				
-				When a 'terraform destroy' or 'terraform apply' would delete the resource,
-				the command will fail if this field is set to "PREVENT" in Terraform state.
-				When set to "DELETE" or "", deleting the resource is allowed.
-
-				Possible values: PREVENT, ABANDON, DELETE`,
-			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 
 			"ignore_warnings": {
 				Type:     schema.TypeBool,
@@ -383,7 +373,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, ""); err != nil {
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
 	//UDP default read end
