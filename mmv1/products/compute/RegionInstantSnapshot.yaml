@@ -67,7 +67,7 @@ parameters:
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Disk'
+    resource: 'RegionDisk'
     imports: 'name'
   - name: 'region'
     type: ResourceRef
