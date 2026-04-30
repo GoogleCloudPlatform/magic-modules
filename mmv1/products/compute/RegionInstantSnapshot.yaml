@@ -60,24 +60,19 @@ examples:
       disk_name: 'example-disk'
 parameters:
   - name: 'sourceDisk'
-    type: String
+    type: ResourceRef
     description: |
       The source disk used to create this instant snapshot. You can provide this as a partial or full URL to the resource.
-      For example, the following are valid values:
-      * `https://www.googleapis.com/compute/v1/projects/project/zones/zone/disks/disk`
-      * `https://www.googleapis.com/compute/v1/projects/project/regions/region/disks/disk`
-      * `projects/project/zones/zone/disks/disk`
-      * `projects/project/regions/region/disks/disk`
-      * `zones/zone/disks/disk`
-      * `regions/region/disks/disk`
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Disk'
+    imports: 'name'
   - name: 'region'
     type: ResourceRef
     description: 'A reference to the region where the disk is located.'
     default_from_api: true
-    required: false
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
@@ -102,7 +97,6 @@ properties:
   - name: 'description'
     type: String
     description: 'An optional description of this resource.'
-    required: false
   - name: 'sourceDiskId'
     type: String
     description: 'The ID value of the disk used to create this InstantSnapshot.'
@@ -139,20 +133,9 @@ properties:
           and values are in the format tagValues/456.
         api_name: resourceManagerTags
         ignore_read: true
-
-  # Output Only Fields
-  - name: 'id'
-    type: String
-    description: 'The unique identifier for the resource. This identifier is defined by the server.'
-    output: true
-    api_name: id
   - name: 'status'
     type: String
     description: 'The status of the instant snapshot.'
-    output: true
-  - name: 'satisfiesPzs'
-    type: Boolean
-    description: 'Reserved for future use.'
     output: true
   - name: 'architecture'
     type: String
@@ -167,10 +150,6 @@ properties:
         type: Integer
         description: 'The size of the storage used by the instant snapshot.'
         output: true
-  - name: 'satisfiesPzi'
-    type: Boolean
-    description: 'Reserved for future use.'
-    output: true
   - name: 'sourceInstantSnapshotGroup'
     type: String
     description: 'URL of the source instant snapshot group.'
@@ -179,4 +158,3 @@ properties:
     type: String
     description: 'The unique ID of the source instant snapshot group.'
     output: true
-
