@@ -1,90 +1,91 @@
 package accesscontextmanager_test
 
 import (
-	"fmt"
-	"testing"
+  "fmt"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/terraform"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/services/accesscontextmanager"
+  "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+  transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 func testAccAccessContextManagerServicePerimeters_basicTest(t *testing.T) {
-	org := envvar.GetTestOrgFromEnv(t)
-	projectNumber := envvar.GetTestProjectNumberFromEnv()
+  org := envvar.GetTestOrgFromEnv(t)
+  projectNumber := envvar.GetTestProjectNumberFromEnv()
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAccessContextManagerServicePerimetersDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAccessContextManagerServicePerimeters_basic(org, "my policy", "level", "storage_perimeter", "bigtable_perimeter", "bigquery_omni_perimeter"),
-			},
-			{
-				ResourceName:            "google_access_context_manager_service_perimeters.test-access",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"service_perimeters"},
-			},
-			{
-				Config: testAccAccessContextManagerServicePerimeters_update(org, "my policy", "level", "storage_perimeter", "bigquery_perimeter", "bigtable_perimeter", "bigquery_omni_perimeter", projectNumber),
-			},
-			{
-				ResourceName:            "google_access_context_manager_service_perimeters.test-access",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"service_perimeters"},
-			},
-			{
-				Config: testAccAccessContextManagerServicePerimeters_empty(org, "my policy", "level"),
-			},
-			{
-				ResourceName:            "google_access_context_manager_service_perimeters.test-access",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"service_perimeters"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckAccessContextManagerServicePerimetersDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccAccessContextManagerServicePerimeters_basic(org, "my policy", "level", "storage_perimeter", "bigtable_perimeter", "bigquery_omni_perimeter"),
+      },
+      {
+        ResourceName:            "google_access_context_manager_service_perimeters.test-access",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"service_perimeters"},
+      },
+      {
+        Config: testAccAccessContextManagerServicePerimeters_update(org, "my policy", "level", "storage_perimeter", "bigquery_perimeter", "bigtable_perimeter", "bigquery_omni_perimeter", projectNumber),
+      },
+      {
+        ResourceName:            "google_access_context_manager_service_perimeters.test-access",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"service_perimeters"},
+      },
+      {
+        Config: testAccAccessContextManagerServicePerimeters_empty(org, "my policy", "level"),
+      },
+      {
+        ResourceName:            "google_access_context_manager_service_perimeters.test-access",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"service_perimeters"},
+      },
+    },
+  })
 }
 
 func testAccCheckAccessContextManagerServicePerimetersDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_access_context_manager_service_perimeters" {
-				continue
-			}
+  return func(s *terraform.State) error {
+    for _, rs := range s.RootModule().Resources {
+      if rs.Type != "google_access_context_manager_service_perimeters" {
+        continue
+      }
 
-			config := acctest.GoogleProviderConfig(t)
+      config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{parent}}/servicePerimeters")
-			if err != nil {
-				return err
-			}
+      url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(accesscontextmanager.Product, config)+"{{parent}}/servicePerimeters")
+      if err != nil {
+        return err
+      }
 
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("ServicePerimeters still exists at %s", url)
-			}
-		}
+      _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config:    config,
+        Method:    "GET",
+        RawURL:    url,
+        UserAgent: config.UserAgent,
+      })
+      if err == nil {
+        return fmt.Errorf("ServicePerimeters still exists at %s", url)
+      }
+    }
 
-		return nil
-	}
+    return nil
+  }
 }
 
 func testAccAccessContextManagerServicePerimeters_basic(org, policyTitle, levelTitleName, perimeterTitleName1, perimeterTitleName2, perimeterTitleName3 string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
   title  = "%s"
@@ -156,7 +157,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
 }
 
 func testAccAccessContextManagerServicePerimeters_update(org, policyTitle, levelTitleName, perimeterTitleName1, perimeterTitleName2, perimeterTitleName3, perimeterTitleName4, projectNumber string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
   title  = "%s"
@@ -214,93 +215,93 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     use_explicit_dry_run_spec = true
     spec {
     restricted_services = ["bigquery.googleapis.com", "storage.googleapis.com"]
-    	access_levels       = [google_access_context_manager_access_level.test-access.name]
+      access_levels       = [google_access_context_manager_access_level.test-access.name]
     
-    	vpc_accessible_services {
-    		enable_restriction = true
-    		allowed_services   = ["bigquery.googleapis.com", "storage.googleapis.com"]
-    	}
+      vpc_accessible_services {
+        enable_restriction = true
+        allowed_services   = ["bigquery.googleapis.com", "storage.googleapis.com"]
+      }
     
-    	ingress_policies {
-    		title = "ingress policy title 1"
-    		ingress_from {
-    			sources {
-    				access_level = google_access_context_manager_access_level.test-access.name
-    			}
-    			identity_type = "ANY_IDENTITY"
-    		}
+      ingress_policies {
+        title = "ingress policy title 1"
+        ingress_from {
+          sources {
+            access_level = google_access_context_manager_access_level.test-access.name
+          }
+          identity_type = "ANY_IDENTITY"
+        }
     
-    		ingress_to {
-    			resources = [ "*" ]
-    			operations {
-    				service_name = "bigquery.googleapis.com"
+        ingress_to {
+          resources = [ "*" ]
+          operations {
+            service_name = "bigquery.googleapis.com"
     
-    				method_selectors {
-    					method = "BigQueryStorage.ReadRows"
-    				}
+            method_selectors {
+              method = "BigQueryStorage.ReadRows"
+            }
     
-    				method_selectors {
-    					method = "TableService.ListTables"
-    				}
+            method_selectors {
+              method = "TableService.ListTables"
+            }
     
-    				method_selectors {
-    					permission = "bigquery.jobs.get"
-    				}
-    			}
+            method_selectors {
+              permission = "bigquery.jobs.get"
+            }
+          }
     
-    			operations {
-    				service_name = "storage.googleapis.com"
+          operations {
+            service_name = "storage.googleapis.com"
     
-    				method_selectors {
-    					method = "google.storage.objects.create"
-    				}
-    			}
-    		}
-    	}
-    	ingress_policies {
-    		title = "ingress policy title 2"
-    		ingress_from {
-    			identities = ["group:test@google.com"]
-    		}
-    		ingress_to {
-    			resources = ["*"]
+            method_selectors {
+              method = "google.storage.objects.create"
+            }
+          }
+        }
+      }
+      ingress_policies {
+        title = "ingress policy title 2"
+        ingress_from {
+          identities = ["group:test@google.com"]
+        }
+        ingress_to {
+          resources = ["*"]
           roles = ["roles/bigquery.admin"]
-    		}
-    	}
+        }
+      }
     
-    	egress_policies {
-    		title = "egress policy title 1"
-    		egress_from {
-    			identity_type = "ANY_USER_ACCOUNT"
-    		}
-    		egress_to {
-    			operations {
-    				service_name = "bigquery.googleapis.com"
-    				method_selectors {
-    					permission = "externalResource.read"
-    				}
-    			}
-    			external_resources = ["s3://bucket1"]
-    		}
-    	}
-    	egress_policies {
-    		title = "egress policy title 2"
-    		egress_from {
-    			identities = ["group:test@google.com"]
-    		}
-    		egress_to {
-    			resources = ["*"]
-          roles = ["roles/bigquery.admin"]
-    		}
-    	}
       egress_policies {
-    		egress_from {
-    			sources {
+        title = "egress policy title 1"
+        egress_from {
+          identity_type = "ANY_USER_ACCOUNT"
+        }
+        egress_to {
+          operations {
+            service_name = "bigquery.googleapis.com"
+            method_selectors {
+              permission = "externalResource.read"
+            }
+          }
+          external_resources = ["s3://bucket1"]
+        }
+      }
+      egress_policies {
+        title = "egress policy title 2"
+        egress_from {
+          identities = ["group:test@google.com"]
+        }
+        egress_to {
+          resources = ["*"]
+          roles = ["roles/bigquery.admin"]
+        }
+      }
+      egress_policies {
+        egress_from {
+          sources {
             resource = "projects/%s"
           }
           source_restriction = "SOURCE_RESTRICTION_ENABLED"
-    		}
-    	}
+        }
+      }
     }
     status {
       restricted_services = ["bigquery.googleapis.com", "storage.googleapis.com"]
@@ -402,7 +403,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
 }
 
 func testAccAccessContextManagerServicePerimeters_empty(org, policyTitle, levelTitleName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
   title  = "%s"
