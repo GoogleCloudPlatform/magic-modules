@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/services/billing"
@@ -26,6 +26,10 @@ func ResourceBillingSubaccount() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy(""),
+		),
+
 		Schema: map[string]*schema.Schema{
 			"display_name": {
 				Type:     schema.TypeString,
@@ -37,12 +41,9 @@ func ResourceBillingSubaccount() *schema.Resource {
 				ForceNew:         true,
 				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 			},
-			"deletion_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "",
-				ValidateFunc: validation.StringInSlice([]string{"RENAME_ON_DESTROY", ""}, false),
-			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry(""),
+			//UDP schema end
 			"billing_account_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -114,11 +115,21 @@ func resourceBillingSubaccountRead(d *schema.ResourceData, meta interface{}) err
 	if err := d.Set("billing_account_id", strings.TrimPrefix(d.Get("name").(string), "billingAccounts/")); err != nil {
 		return fmt.Errorf("Error setting billing_account_id: %s", err)
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, ""); err != nil {
+		return err
+	}
+	//UDP default read end
 
 	return nil
 }
 
 func resourceBillingSubaccountUpdate(d *schema.ResourceData, meta interface{}) error {
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceBillingSubaccount) {
+		return ResourceBillingSubaccount().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -138,6 +149,13 @@ func resourceBillingSubaccountUpdate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceBillingSubaccountDelete(d *schema.ResourceData, meta interface{}) error {
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
