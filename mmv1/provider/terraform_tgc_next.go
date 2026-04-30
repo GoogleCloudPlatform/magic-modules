@@ -112,7 +112,9 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 		log.Printf("Error adding examples from handwritten tests: %v", err)
 	}
 
-	tgc.GenerateResourceTests(object, *templateData, outputFolder)
+	if err := tgc.GenerateResourceTests(object, *templateData, outputFolder); err != nil {
+		log.Fatalf("Error generating resource tests: %v", err)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -137,9 +139,15 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
-func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) error {
 	if len(object.TGCTests) == 0 {
-		return
+		return fmt.Errorf("No TGC tests for resource %s", object.Name)
+	}
+
+	for _, test := range object.TGCTests {
+		if !strings.HasPrefix(test.Name, "TestAcc") {
+			return fmt.Errorf("TGC test name %s for resource %s does not start with TestAcc", test.Name, object.Name)
+		}
 	}
 
 	productName := tgc.Product.ApiName
@@ -149,6 +157,7 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
 	templateData.GenerateTGCNextTestFile(targetFilePath, object)
+	return nil
 }
 
 // GenerateProduct creates the product.go file for a given service directory.
