@@ -13,11 +13,11 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 
+	rmClient "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager/client"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanagerv3"
 	storage_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/storage"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
-	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 
 	"go.uber.org/zap"
 )

@@ -130,8 +130,10 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 	}
 
 	templatePath := "templates/tgc_next/services/resource.go.tmpl"
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
+	fileName := fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name))
+	targetFilePath := path.Join(targetFolder, fileName)
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+	tgc.replaceImportPath(targetFolder, fileName)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
