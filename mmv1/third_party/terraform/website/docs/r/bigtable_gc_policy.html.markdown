@@ -169,10 +169,7 @@ The following arguments are supported:
     the command will fail if this field is set to "PREVENT" in Terraform state.
     When set to "DELETE" or "", deleting the resource is allowed.
 
-    Possible values: PREVENT, ABANDON, DELETE`,
-
-
-    Possible values are: `ABANDON`.
+    Possible values: PREVENT, ABANDON, DELETE.
 
 * `ignore_warnings` - (Optional) Boolean for whether to allow ignoring warnings when updating the gc policy.
     Setting this to `true` allows relaxing the gc policy for replicated clusters by up to 90 days, but keep in mind this may increase how long clusters are inconsistent. Make sure
