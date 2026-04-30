@@ -1,0 +1,23 @@
+resource "google_compute_region_network_policy" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "policy_name"}}"
+  region      = "{{index $.TestEnvVars "region"}}"
+  project     = "{{index $.TestEnvVars "project_name"}}"
+  description = "A full region network policy"
+
+  traffic_classification_rules {
+    rule_name = "rule1"
+    priority  = 1000
+    match {
+      src_ip_ranges = ["10.0.0.0/8"]
+      dest_ip_ranges = ["192.168.0.0/16"]
+      layer4_configs {
+        ip_protocol = "TCP"
+        ports       = ["80", "8080"]
+      }
+    }
+    action {
+      type = "ALLOW"
+    }
+    disabled = false
+  }
+}
