@@ -31,6 +31,21 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+examples:
+  - name: region_network_policy_basic
+    primary_resource_id: default
+    vars:
+      policy_name: tf-test-policy-basic
+    test_env_vars:
+      project_name: PROJECT_NAME
+      region: REGION
+  - name: region_network_policy_full
+    primary_resource_id: default
+    vars:
+      policy_name: tf-test-policy-full
+    test_env_vars:
+      project_name: PROJECT_NAME
+      region: REGION
 parameters:
   - name: 'region'
     type: String
