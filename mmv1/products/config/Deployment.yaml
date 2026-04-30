@@ -139,7 +139,6 @@ properties:
     type: Enum
     description: "Controls quota checks."
     enum_values:
-      - 'QUOTA_VALIDATION_UNSPECIFIED'
       - 'ENABLED'
       - 'DISABLED'
 

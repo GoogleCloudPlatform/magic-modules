@@ -1,6 +1,8 @@
 package infrastructuremanager_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -8,6 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"google.golang.org/api/googleapi"
 )
 
 func TestAccInfrastructureManagerDeployment_basic(t *testing.T) {
@@ -247,6 +251,45 @@ resource "google_infrastructure_manager_deployment" "full" {
 
 func testAccCheckInfrastructureManagerDeploymentDestroyProducer(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_infrastructure_manager_deployment" {
+				continue
+			}
+
+			if rs.Primary.ID == "" {
+				return fmt.Errorf("Unable to verify delete of deployment ID is empty")
+			}
+
+			project, err := acctest.GetTestProject(rs.Primary, config)
+			if err != nil {
+				return err
+			}
+
+			parts := strings.Split(rs.Primary.ID, "/")
+			deployment_id := parts[len(parts)-1]
+			location := rs.Primary.Attributes["location"]
+
+			url := fmt.Sprintf("https://config.googleapis.com/v1/projects/%s/locations/%s/deployments/%s", project, location, deployment_id)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+					return nil
+				} else if ok {
+					return fmt.Errorf("Error making GCP platform call: http code error : %d, http message error: %s", gerr.Code, gerr.Message)
+				}
+				return fmt.Errorf("Error making GCP platform call: %s", err.Error())
+			}
+			return fmt.Errorf("Deployment still exists")
+		}
+
 		return nil
 	}
 }
