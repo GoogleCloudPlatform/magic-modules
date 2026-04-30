@@ -1,0 +1,17 @@
+# Copyright IBM Corp. 2014, 2026
+# SPDX-License-Identifier: MPL-2.0
+resource: 'google_dataplex_lineage_job'
+generation_type: 'handwritten'
+api_service_name: 'datalineage.googleapis.com'
+api_version: 'v1'
+api_resource_type_kind: 'Process'
+fields:
+  - field: 'description'
+  - field: 'lineage_event_name'
+  - field: 'location'
+  - api_field: 'name'
+  - field: 'namespace'
+  - field: 'process_name'
+  - field: 'run_name'
+  - field: 'update_time'
+
