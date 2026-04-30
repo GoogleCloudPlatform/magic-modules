@@ -66,6 +66,9 @@ examples:
     primary_resource_id: 'policy_rule_one'
     vars:
       sec_policy_name: 'policywithmultiplerules'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policywithmultiplerules" + randomSuffix'
   - name: 'security_policy_rule_with_body_exclude'
     primary_resource_id: 'policy_rule_one'
     min_version: 'beta'
