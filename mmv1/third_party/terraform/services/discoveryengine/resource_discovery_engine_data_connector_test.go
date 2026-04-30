@@ -258,9 +258,6 @@ func TestAccDiscoveryEngineDataConnector_DataConnectorEntitiesParamsDiffSuppress
 }
 
 func TestAccDiscoveryEngineDataConnector_deletionPolicyForce(t *testing.T) {
-	// Skips this test as it requires complex IdP setup.
-	t.Skip()
-
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -278,10 +275,10 @@ func TestAccDiscoveryEngineDataConnector_deletionPolicyForce(t *testing.T) {
 				Config: testAccDiscoveryEngineDataConnector_deletionPolicyForce(context),
 			},
 			{
-				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
+				ResourceName:            "google_discovery_engine_data_connector.jira-with-actions",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection", "deletion_policy"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection", "deletion_policy", "data_source_version", "auto_run_disabled", "incremental_sync_disabled", "sync_mode"},
 			},
 		},
 	})
@@ -289,64 +286,70 @@ func TestAccDiscoveryEngineDataConnector_deletionPolicyForce(t *testing.T) {
 
 func testAccDiscoveryEngineDataConnector_deletionPolicyForce(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_discovery_engine_data_connector" "servicenow-basic" {
+resource "google_discovery_engine_data_connector" "jira-with-actions" {
   location                     = "global"
   collection_id                = "tf-test-collection-id%{random_suffix}"
-  collection_display_name      = "tf-test-dataconnector-servicenow"
-  data_source                  = "servicenow"
-  data_source_version          = 3
+  collection_display_name      = "Jira Federated"
+  data_source                  = "jira"
   params = {
-    auth_type                  = "OAUTH_PASSWORD_GRANT"
-    instance_uri               = "https://gcpconnector1.service-now.com/"
-    client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
-    client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
-    static_ip_enabled          = "false"
-    user_account               = "connectorsuserqa@google.com"
-    password                   = "SECRET_MANAGER_RESOURCE_NAME"
+    instance_uri               = "https://example.atlassian.net"
+    instance_id                = "dummy"
+    client_id                  = "dummy"
+    client_secret              = "dummy"
+    refresh_token              = "dummy"
+    auth_type                  = "OAUTH"
   }
   refresh_interval             = "86400s"
   entities {
-    entity_name                = "catalog"
-
-    params = jsonencode({
-      "inclusion_filters" : {
-        "knowledgeBaseSysId" : [
-          "123"
-        ]
-      }
-    })
+    entity_name                = "project"
   }
   entities {
-    entity_name = "incident"
-    params = jsonencode({
-      "inclusion_filters" : {
-        "knowledgeBaseSysId" : [
-          "123"
-        ]
-      }
-    })
+    entity_name                = "issue"
   }
   entities {
-    entity_name = "knowledge_base"
-    params = jsonencode({
-      "inclusion_filters" : {
-        "knowledgeBaseSysId" : [
-          "123"
-        ]
-      }
-    })
+    entity_name                = "comment"
+  }
+  entities {
+    entity_name                = "attachment"
   }
   static_ip_enabled            = false
   destination_configs {
     key = "url"
     destinations {
-      host = "https://gcpconnector1.service-now.com/"
+      host = "https://example.atlassian.net"
       port = 123
     }
+    params                     = jsonencode({
+      "destination_type": "private"
+    })
   }
-  connector_modes              = ["DATA_INGESTION"]
+  connector_modes              = ["FEDERATED", "ACTIONS"]
   sync_mode                    = "PERIODIC"
+  auto_run_disabled            = true
+  incremental_sync_disabled    = true
+  action_config {
+    action_params = {
+      instance_uri             = "https://example.atlassian.net"
+      instance_id              = "dummy"
+      client_id                = "dummy"
+      client_secret            = "dummy"
+      auth_type                = "OAUTH"
+    }
+    create_bap_connection      = true
+  }
+  bap_config {
+    supported_connector_modes = ["ACTIONS"]
+    enabled_actions = [
+      "create_issue",
+      "update_issue",
+      "change_issue_status",
+      "create_comment",
+      "update_comment",
+      "upload_attachment",
+    ]
+  }
   deletion_policy              = "FORCE"
 }
 `, context)
 }
+
