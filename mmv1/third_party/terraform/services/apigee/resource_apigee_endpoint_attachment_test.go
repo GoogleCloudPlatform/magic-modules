@@ -1,53 +1,53 @@
 package apigee_test
 
 import (
-  "fmt"
-  "strings"
-  "testing"
+	"fmt"
+	"strings"
+	"testing"
 
-  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-provider-google/google/services/apigee"
-  "github.com/hashicorp/terraform-provider-google/google/tpgresource"
-  transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/apigee"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(t *testing.T) {
-  acctest.SkipIfVcr(t)
-  t.Parallel()
+	acctest.SkipIfVcr(t)
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "billing_account": envvar.GetTestBillingAccountFromEnv(t),
-    "org_id":          envvar.GetTestOrgFromEnv(t),
-    "random_suffix":   acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
-    CheckDestroy: testAccCheckApigeeEndpointAttachmentDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(context),
-      },
-      {
-        ResourceName:            "google_apigee_endpoint_attachment.apigee_endpoint_attachment",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"endpoint_attachment_id", "org_id"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeEndpointAttachmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(context),
+			},
+			{
+				ResourceName:            "google_apigee_endpoint_attachment.apigee_endpoint_attachment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"endpoint_attachment_id", "org_id"},
+			},
+		},
+	})
 }
 
 func testAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
@@ -218,40 +218,40 @@ resource "google_apigee_endpoint_attachment" "apigee_endpoint_attachment" {
 }
 
 func testAccCheckApigeeEndpointAttachmentDestroyProducer(t *testing.T) func(s *terraform.State) error {
-  return func(s *terraform.State) error {
-    for name, rs := range s.RootModule().Resources {
-      if rs.Type != "google_apigee_endpoint_attachment" {
-        continue
-      }
-      if strings.HasPrefix(name, "data.") {
-        continue
-      }
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_apigee_endpoint_attachment" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
 
-      config := acctest.GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
-      url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(apigee.Product, config)+"{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}")
-      if err != nil {
-        return err
-      }
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(apigee.Product, config)+"{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}")
+			if err != nil {
+				return err
+			}
 
-      billingProject := ""
+			billingProject := ""
 
-      if config.BillingProject != "" {
-        billingProject = config.BillingProject
-      }
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
 
-      _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-        Config:    config,
-        Method:    "GET",
-        Project:   billingProject,
-        RawURL:    url,
-        UserAgent: config.UserAgent,
-      })
-      if err == nil {
-        return fmt.Errorf("ApigeeEndpointAttachment still exists at %s", url)
-      }
-    }
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("ApigeeEndpointAttachment still exists at %s", url)
+			}
+		}
 
-    return nil
-  }
+		return nil
+	}
 }
