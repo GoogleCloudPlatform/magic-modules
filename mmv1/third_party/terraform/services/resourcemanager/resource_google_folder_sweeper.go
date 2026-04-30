@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -199,8 +200,8 @@ func cleanupFolderContent(config *transport_tpg.Config, folderName string) {
 	folderId := strings.TrimPrefix(folderName, "folders/")
 
 	// 1. Delete projects in folder
-	pSvc := config.NewResourceManagerClient(config.UserAgent)
-	fSvc := config.NewResourceManagerV3Client(config.UserAgent)
+	pSvc := rmClient.NewClient(config, config.UserAgent)
+	fSvc := resourcemanagerv3.NewClient(config, config.UserAgent)
 	projectFilter := fmt.Sprintf("parent.id:%s -lifecycleState:DELETE_REQUESTED", folderId)
 
 	token := ""
