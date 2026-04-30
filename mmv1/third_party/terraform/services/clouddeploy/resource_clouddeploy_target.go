@@ -343,21 +343,21 @@ func ClouddeployTargetExecutionConfigsSchema() *schema.Resource {
 			},
 
 			"default_pool": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				Computed:      true,
-				Description:   "Optional. Use default Cloud Build pool.",
-				MaxItems:      1,
-				Elem:          ClouddeployTargetExecutionConfigsDefaultPoolSchema(),
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "Optional. Use default Cloud Build pool.",
+				MaxItems:    1,
+				Elem:        ClouddeployTargetExecutionConfigsDefaultPoolSchema(),
 			},
 
 			"private_pool": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				Computed:      true,
-				Description:   "Optional. Use private Cloud Build pool.",
-				MaxItems:      1,
-				Elem:          ClouddeployTargetExecutionConfigsPrivatePoolSchema(),
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "Optional. Use private Cloud Build pool.",
+				MaxItems:    1,
+				Elem:        ClouddeployTargetExecutionConfigsPrivatePoolSchema(),
 			},
 		},
 	}

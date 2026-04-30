@@ -1431,12 +1431,12 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryD
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"percentages":    obj.Percentages,
-		"postdeploy":     flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy(obj.Postdeploy),
-		"predeploy":      flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy(obj.Predeploy),
-		"verify":         obj.Verify,
-		"verify_config":  flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardVerifyConfig(obj.VerifyConfig),
-		"analysis":       flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(obj.Analysis),
+		"percentages":   obj.Percentages,
+		"postdeploy":    flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy(obj.Postdeploy),
+		"predeploy":     flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy(obj.Predeploy),
+		"verify":        obj.Verify,
+		"verify_config": flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardVerifyConfig(obj.VerifyConfig),
+		"analysis":      flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(obj.Analysis),
 	}
 
 	return []interface{}{transformed}
@@ -1576,14 +1576,14 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomC
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"percentage":     obj.Percentage,
-		"phase_id":       obj.PhaseId,
-		"postdeploy":     flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy(obj.Postdeploy),
-		"predeploy":      flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy(obj.Predeploy),
-		"profiles":       obj.Profiles,
-		"verify":         obj.Verify,
-		"verify_config":  flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardVerifyConfig(obj.VerifyConfig),
-		"analysis":       flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(obj.Analysis),
+		"percentage":    obj.Percentage,
+		"phase_id":      obj.PhaseId,
+		"postdeploy":    flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy(obj.Postdeploy),
+		"predeploy":     flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy(obj.Predeploy),
+		"profiles":      obj.Profiles,
+		"verify":        obj.Verify,
+		"verify_config": flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardVerifyConfig(obj.VerifyConfig),
+		"analysis":      flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(obj.Analysis),
 	}
 
 	return transformed
@@ -2286,5 +2286,3 @@ func init() {
 		Schema:      ResourceClouddeployDeliveryPipeline(),
 	}.Register()
 }
-
-
