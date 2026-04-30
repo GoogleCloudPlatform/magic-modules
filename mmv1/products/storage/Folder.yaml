@@ -24,6 +24,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
+generate_list_resource: true
 import_format:
   - '{{bucket}}/folders/{{%name}}'
   - '{{bucket}}/{{%name}}'
