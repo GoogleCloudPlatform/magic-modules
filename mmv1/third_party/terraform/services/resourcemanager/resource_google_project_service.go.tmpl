@@ -301,7 +301,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 				checkIfServiceHasUsage = "CHECK"
 			}
 		  {{- end }}
-			servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
+			servicesDisableCall := tpgserviceusage.NewClient(config, userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 				DisableDependentServices: disableDependentServices,
 				{{- if ne $.TargetVersionName "ga" }}
 				CheckIfServiceHasUsage: checkIfServiceHasUsage,
