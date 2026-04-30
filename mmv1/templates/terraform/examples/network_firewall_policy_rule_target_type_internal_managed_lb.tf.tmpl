@@ -1,0 +1,41 @@
+resource "google_compute_network" "net" {
+  provider                = google-beta
+  name                    = "{{index $.Vars "network"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_network_firewall_policy" "fw_policy" {
+  provider = google-beta
+  name     = "{{index $.Vars "fw_policy"}}"
+  project  = "{{index $.TestEnvVars "project_name"}}"
+}
+
+resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
+  provider        = google-beta
+  firewall_policy = google_compute_network_firewall_policy.fw_policy.name
+  priority        = 1000
+  action          = "allow"
+  direction       = "INGRESS"
+
+  target_type = "INTERNAL_MANAGED_LB"
+
+  target_forwarding_rules = [
+    "projects/{{index $.TestEnvVars "project_name"}}/regions/us-central1/forwardingRules/{{index $.Vars "fw_policy"}}"
+  ]
+
+  match {
+    src_ip_ranges = ["10.0.0.0/8"]
+
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports       = ["80", "443"]
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_association" "global_assoc" {
+  provider          = google-beta
+  name              = "global-policy-assoc-%{random_suffix}"
+  firewall_policy   = google_compute_network_firewall_policy.fw_policy.id
+  attachment_target = google_compute_network.net.self_link
+}
