@@ -1,5 +1,5 @@
-if d.Get("detach_stores_on_destroy").(bool) {
-	log.Printf("[DEBUG] detach_stores_on_destroy is true, checking for linked search engines")
+if d.Get("deletion_policy").(string) == "FORCE" {
+	log.Printf("[DEBUG] deletion_policy is FORCE, checking for linked search engines")
 
 	// 1. Get stores from entities
 	entitiesObj := d.Get("entities")

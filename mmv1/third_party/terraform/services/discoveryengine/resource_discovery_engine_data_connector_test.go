@@ -257,7 +257,7 @@ func TestAccDiscoveryEngineDataConnector_DataConnectorEntitiesParamsDiffSuppress
 	}
 }
 
-func TestAccDiscoveryEngineDataConnector_detachStoresOnDestroy(t *testing.T) {
+func TestAccDiscoveryEngineDataConnector_deletionPolicyForce(t *testing.T) {
 	// Skips this test as it requires complex IdP setup.
 	t.Skip()
 
@@ -275,19 +275,19 @@ func TestAccDiscoveryEngineDataConnector_detachStoresOnDestroy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiscoveryEngineDataConnector_detachStoresOnDestroy(context),
+				Config: testAccDiscoveryEngineDataConnector_deletionPolicyForce(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection", "deletion_policy"},
 			},
 		},
 	})
 }
 
-func testAccDiscoveryEngineDataConnector_detachStoresOnDestroy(context map[string]interface{}) string {
+func testAccDiscoveryEngineDataConnector_deletionPolicyForce(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_discovery_engine_data_connector" "servicenow-basic" {
   location                     = "global"
@@ -346,7 +346,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   }
   connector_modes              = ["DATA_INGESTION"]
   sync_mode                    = "PERIODIC"
-  detach_stores_on_destroy     = true
+  deletion_policy              = "FORCE"
 }
 `, context)
 }

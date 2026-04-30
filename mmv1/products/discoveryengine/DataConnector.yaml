@@ -61,13 +61,13 @@ examples:
       collection_id: 'collection-id'
 
 virtual_fields:
-  - name: 'detach_stores_on_destroy'
+  - name: 'deletion_policy'
     description: |
-      If set to `true`, Terraform will detach the associated Data Stores from any Search Engine before deleting the Data Connector.
-      This addresses a circular dependency issue where deleting the Data Connector fails if its stores are in use.
-      Defaults to `false`.
-    type: Boolean
-    default_value: false
+      Policy to determine if the data stores should be forcefully detached from
+      the search engines before destroying the data connector.
+      Possible values: DEFAULT, FORCE.
+    type: String
+    default_value: "DEFAULT"
 
 parameters:
   - name: 'location'
