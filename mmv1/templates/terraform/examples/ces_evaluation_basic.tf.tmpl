@@ -14,6 +14,7 @@ resource "google_ces_app" "app" {
 
 resource "google_ces_evaluation" "ces_evaluation_basic" {
   provider = google-beta
+  evaluation_id = "{{index $.Vars "evaluation_id"}}"
   display_name = "my-evaluation-basic"
   location     = "us"
   app          = google_ces_app.app.app_id

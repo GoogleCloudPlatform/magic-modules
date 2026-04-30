@@ -29,6 +29,7 @@ examples:
     min_version: beta
     primary_resource_id: ces_evaluation_basic
     vars:
+      evaluation_id: eval-basic
       app_id: app-id
       app_display_name: my-app
   - name: ces_evaluation_full
