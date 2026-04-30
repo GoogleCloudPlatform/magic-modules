@@ -1,5 +1,4 @@
 resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
   short_name = "{{index $.Vars "sec_policy_name"}}"
   parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   type         = "CLOUD_ARMOR"
