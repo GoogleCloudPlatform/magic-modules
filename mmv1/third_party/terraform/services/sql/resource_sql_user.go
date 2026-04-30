@@ -61,6 +61,7 @@ func ResourceSqlUser() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		SchemaVersion: 1,
@@ -200,14 +201,9 @@ func ResourceSqlUser() *schema.Resource {
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
-			"deletion_policy": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: `The deletion policy for the user. Setting ABANDON allows the resource
-				to be abandoned rather than deleted. This is useful for Postgres, where users cannot be deleted from the API if they
-				have been granted SQL roles. Possible values are: "ABANDON".`,
-				ValidateFunc: validation.StringInSlice([]string{"ABANDON", ""}, false),
-			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 			"database_roles": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -448,6 +444,11 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	//UDP default read end
 	return nil
 }
 
@@ -491,6 +492,11 @@ func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
 }
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceSqlUser) {
+	    return ResourceSqlUser().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -573,11 +579,11 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-
-	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
-		// Allows for user to be abandoned without deletion to avoid deletion failing
-		// for Postgres users in some circumstances due to existing SQL roles
-		return nil
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
 	}
 
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
