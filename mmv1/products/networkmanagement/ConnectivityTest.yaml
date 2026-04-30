@@ -56,6 +56,10 @@ examples:
     primary_resource_id: endpoints-test
     vars:
       primary_resource_name: conn-test-endpoints
+  - name: network_management_connectivity_test_source_endpoints
+    primary_resource_id: source-endpoints-test
+    vars:
+      primary_resource_name: conn-test-source-endpoints
 properties:
   - name: name
     type: String
@@ -156,6 +160,21 @@ properties:
           2. When you are using Shared VPC and the IP address that you provide is
           from the service project. In this case, the network that the IP address
           resides in is defined in the host project.
+      - name: forwardingRule
+        type: String
+        description: 'A forwarding rule and its corresponding IP address represent the frontend configuration of a Google Cloud load balancer. Forwarding rules are also used for protocol forwarding, Private Service Connect and other network services to provide forwarding information in the control plane. Applicable only to destination endpoint. Format: `projects/{project}/global/forwardingRules/{id}` or `projects/{project}/regions/{region}/forwardingRules/{id}`'
+      - name: fqdn
+        type: String
+        description: DNS endpoint of [Google Kubernetes Engine cluster control plane](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture). Requires gke_master_cluster to be set, can't be used simultaneoulsly with ip_address or network. Applicable only to destination endpoint.
+      - name: gkePod
+        type: String
+        description: A [GKE Pod](https://cloud.google.com/kubernetes-engine/docs/concepts/pod) URI.
+      - name: redisCluster
+        type: String
+        description: A [Redis Cluster](https://cloud.google.com/memorystore/docs/cluster) URI. Applicable only to destination endpoint.
+      - name: redisInstance
+        type: String
+        description: A [Redis Instance](https://cloud.google.com/memorystore/docs/redis) URI. Applicable only to destination endpoint.
   - name: destination
     type: NestedObject
     required: true

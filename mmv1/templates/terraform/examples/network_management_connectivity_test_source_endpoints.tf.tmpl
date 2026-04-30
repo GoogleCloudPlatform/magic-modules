@@ -1,0 +1,15 @@
+resource "google_network_management_connectivity_test" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "primary_resource_name"}}"
+  source {
+    gke_master_cluster = "projects/test-project/locations/us-central1/clusters/name"
+    fqdn               = "name.us-central1.gke.goog"
+    gke_pod            = "projects/test-project/locations/us-central1/clusters/name/namespaces/default/pods/name"
+    forwarding_rule    = "projects/test-project/regions/us-central1/forwardingRules/name"
+    redis_instance     = "projects/test-project/locations/us-central1/instances/name"
+    redis_cluster      = "projects/test-project/locations/us-central1/clusters/name"
+  }
+  destination {
+    ip_address = "10.0.0.1"
+  }
+  protocol = "TCP"
+}
