@@ -224,7 +224,7 @@ func cleanupFolderContent(config *transport_tpg.Config, folderName string) {
 			log.Printf("[INFO][SWEEPER_LOG] Deleting project %s in folder %s", project.ProjectId, folderName)
 
 			// Cleanup liens before deleting project
-			cleanupLiens(fSvc, "projects/"+project.ProjectId)
+			cleanupLiens(fSvc, "projects/"+project.ProjectId, config)
 
 			_, err := pSvc.Projects.Delete(project.ProjectId).Do()
 			if err != nil {
