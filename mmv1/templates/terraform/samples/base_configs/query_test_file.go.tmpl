@@ -46,17 +46,12 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	{{- range $varKey, $varVal := $example.TestContextVars }}
 		"{{$varKey}}": {{$varVal}},
 	{{- end }}
-	{{- range $varKey, $varVal := $example.TestVarsOverrides }}
-		"{{$varKey}}": {{$varVal}},
-	{{- end }}
 	{{- range $scope := $.ListScopeProperties }}
 		{{- $n := underscore $scope.Name }}
 		{{- if or (eq $n "region") (eq $n "location") }}
 		"{{$n}}": envvar.GetTestRegionFromEnv(),
 		{{- else if eq $n "zone" }}
 		"zone": envvar.GetTestZoneFromEnv(),
-		{{- else if eq $n "project" }}
-		"project": acctest.BootstrapProject(t, "tf-bt-list-", envvar.GetTestBillingAccountFromEnv(t), nil).ProjectId,
 		{{- end }}
 	{{- end }}
 		"random_suffix": randomSuffix,
