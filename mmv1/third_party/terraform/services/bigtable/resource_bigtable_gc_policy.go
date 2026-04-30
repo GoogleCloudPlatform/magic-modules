@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigtable"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -95,10 +96,10 @@ func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, d *schema.Resource
 
 func ResourceBigtableGCPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create:        resourceBigtableGCPolicyUpsert,
-		Read:          resourceBigtableGCPolicyRead,
-		Delete:        resourceBigtableGCPolicyDestroy,
-		Update:        resourceBigtableGCPolicyUpsert,
+		Create: resourceBigtableGCPolicyUpsert,
+		Read:   resourceBigtableGCPolicyRead,
+		Delete: resourceBigtableGCPolicyDestroy,
+		Update: resourceBigtableGCPolicyUpsert,
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderDeletionPolicy(""),
 			resourceBigtableGCPolicyCustomizeDiff,
@@ -242,7 +243,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) error {
 	//UDP update shortcircuit start
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceBigtableGCPolicy) {
-	    return ResourceBigtableGCPolicy().Read(d, meta)
+		return ResourceBigtableGCPolicy().Read(d, meta)
 	}
 	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
@@ -382,8 +383,8 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, ""); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, ""); err != nil {
+		return err
 	}
 	//UDP default read end
 
@@ -455,10 +456,10 @@ func GcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]int
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)

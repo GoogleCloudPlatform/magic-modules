@@ -13,8 +13,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/servicenetworking/v1"
 )
 
@@ -231,8 +231,8 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error setting reserved_peering_ranges: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 	return nil
@@ -241,7 +241,7 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 	//UDP update shortcircuit start
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceServiceNetworkingConnection) {
-	    return ResourceServiceNetworkingConnection().Read(d, meta)
+		return ResourceServiceNetworkingConnection().Read(d, meta)
 	}
 	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
@@ -302,10 +302,10 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	config := meta.(*transport_tpg.Config)
 
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 

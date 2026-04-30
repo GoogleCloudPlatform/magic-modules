@@ -16,7 +16,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -465,7 +464,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	//UDP update shortcircuit start
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceStorageBucketObject) {
-	    return ResourceStorageBucketObject().Read(d, meta)
+		return ResourceStorageBucketObject().Read(d, meta)
 	}
 	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
@@ -625,8 +624,8 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error reading Contexts: %s", err)
 	}
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 
@@ -637,10 +636,10 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 	//UDP pre-delete end
 	config := meta.(*transport_tpg.Config)

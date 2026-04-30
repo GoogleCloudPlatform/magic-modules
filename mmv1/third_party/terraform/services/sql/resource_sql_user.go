@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -445,8 +444,8 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 	//UDP default read start
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 	//UDP default read end
 	return nil
@@ -494,7 +493,7 @@ func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	//UDP update shortcircuit start
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceSqlUser) {
-	    return ResourceSqlUser().Read(d, meta)
+		return ResourceSqlUser().Read(d, meta)
 	}
 	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
@@ -580,10 +579,10 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	//UDP pre-delete start
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
 
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
