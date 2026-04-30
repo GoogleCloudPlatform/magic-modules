@@ -57,8 +57,12 @@ func testSweepProject(region string) error {
 			return nil
 		}
 
+		fSvc := config.NewResourceManagerV3Client(config.UserAgent)
 		for _, project := range found.Projects {
 			log.Printf("[INFO][SWEEPER_LOG] Sweeping Project id: %s", project.ProjectId)
+
+			cleanupLiens(fSvc, "projects/"+project.ProjectId, config)
+
 			_, err := config.NewResourceManagerClient(config.UserAgent).Projects.Delete(project.ProjectId).Do()
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] Error, failed to delete project %s: %s", project.Name, err)
