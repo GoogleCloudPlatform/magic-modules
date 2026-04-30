@@ -1,10 +1,9 @@
 resource "google_compute_security_policy" "{{$.PrimaryResourceId}}" {
-  name        = "tf-test-policy-%{random_suffix}"
+  name        = "{{index $.Vars "sec_policy_name"}}"
   description = "Security policy with WAF exclusions, Headers, and Redirect"
 }
 
 resource "google_compute_security_policy_rule" "{{$.PrimaryResourceId}}" {
-  project         = "{{index $.TestEnvVars "project"}}"
   security_policy = google_compute_security_policy.{{$.PrimaryResourceId}}.name
   description     = "Complex rule using advanced features: WAF config, header actions, and redirect options"
   priority        = 100
