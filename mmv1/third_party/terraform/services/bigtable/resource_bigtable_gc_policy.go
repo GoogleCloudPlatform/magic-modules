@@ -99,8 +99,10 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 		Read:          resourceBigtableGCPolicyRead,
 		Delete:        resourceBigtableGCPolicyDestroy,
 		Update:        resourceBigtableGCPolicyUpsert,
-		CustomizeDiff: resourceBigtableGCPolicyCustomizeDiff,
-
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy(""),
+			resourceBigtableGCPolicyCustomizeDiff,
+		),
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
@@ -214,8 +216,13 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 				Optional: true,
 				Description: `The deletion policy for the GC policy. Setting ABANDON allows the resource
 				to be abandoned rather than deleted. This is useful for GC policy as it cannot be deleted
-				in a replicated instance. Possible values are: "ABANDON".`,
-				ValidateFunc: validation.StringInSlice([]string{"ABANDON", ""}, false),
+				in a replicated instance.
+				
+				When a 'terraform destroy' or 'terraform apply' would delete the resource,
+				the command will fail if this field is set to "PREVENT" in Terraform state.
+				When set to "DELETE" or "", deleting the resource is allowed.
+
+				Possible values: PREVENT, ABANDON, DELETE`,
 			},
 
 			"ignore_warnings": {
@@ -233,6 +240,11 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 }
 
 func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) error {
+	//UDP update shortcircuit start
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceBigtableGCPolicy) {
+	    return ResourceBigtableGCPolicy().Read(d, meta)
+	}
+	//UDP update shortcircuit end
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -369,6 +381,11 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
+	//UDP default read start
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, ""); err != nil{
+	    return err
+	}
+	//UDP default read end
 
 	return nil
 }
@@ -437,14 +454,14 @@ func GcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]int
 }
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
-
-	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
-		// Allows for the GC policy to be abandoned without deletion to avoid possible
-		// deletion failure in a replicated instance.
-		log.Printf("[WARN] The GC policy is abandoned")
-		return nil
+	//UDP pre-delete start
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
 	}
+	//UDP pre-delete end
+	config := meta.(*transport_tpg.Config)
 
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
