@@ -1,0 +1,22 @@
+resource "google_infrastructure_manager_deployment" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.Vars "deployment_name"}}"
+  location        = "us-central1"
+  service_account = "projects/{{$.Vars.project}}/serviceAccounts/{{index $.Vars "service_account_email"}}"
+
+  terraform_blueprint {
+    git_source {
+      repo      = "https://github.com/terraform-google-modules/terraform-google-network"
+      directory = "modules/vpc"
+      ref       = "main"
+    }
+    
+    input_values {
+      variable_name = "project_id"
+      input_value   = "{{$.Vars.project}}"
+    }
+    input_values {
+      variable_name = "network_name"
+      input_value   = "my-network"
+    }
+  }
+}

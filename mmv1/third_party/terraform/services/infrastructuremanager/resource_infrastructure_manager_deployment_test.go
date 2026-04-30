@@ -1,0 +1,252 @@
+package infrastructuremanager_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccInfrastructureManagerDeployment_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckInfrastructureManagerDeploymentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInfrastructureManagerDeployment_basic(context),
+			},
+			{
+				ResourceName:            "google_infrastructure_manager_deployment.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "force_destroy", "labels", "annotations"},
+			},
+			{
+				Config: testAccInfrastructureManagerDeployment_update(context),
+			},
+			{
+				ResourceName:            "google_infrastructure_manager_deployment.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "force_destroy", "labels", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccInfrastructureManagerDeployment_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_account" "sa" {
+  account_id   = "im-basic-test-sa-%{random_suffix}"
+  display_name = "Infra Manager Basic Test SA"
+}
+
+resource "google_project_iam_member" "binding" {
+  project = "%{project}"
+  role    = "roles/config.agent"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_project_iam_member" "network_admin" {
+  project = "%{project}"
+  role    = "roles/compute.networkAdmin"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_infrastructure_manager_deployment" "basic" {
+  name            = "basic-deployment-%{random_suffix}"
+  location        = "us-central1"
+  service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
+  force_destroy   = true
+
+  terraform_blueprint {
+    git_source {
+      repo      = "https://github.com/terraform-google-modules/terraform-google-network"
+      directory = "modules/vpc"
+      ref       = "main"
+    }
+    
+    input_values {
+      variable_name = "project_id"
+      input_value   = "%{project}"
+    }
+    input_values {
+      variable_name = "network_name"
+      input_value   = "test-network-%{random_suffix}"
+    }
+  }
+
+  depends_on = [
+    google_project_iam_member.binding,
+    google_project_iam_member.network_admin
+  ]
+}
+`, context)
+}
+
+func testAccInfrastructureManagerDeployment_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_account" "sa" {
+  account_id   = "im-basic-test-sa-%{random_suffix}"
+  display_name = "Infra Manager Basic Test SA"
+}
+
+resource "google_project_iam_member" "binding" {
+  project = "%{project}"
+  role    = "roles/config.agent"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_project_iam_member" "network_admin" {
+  project = "%{project}"
+  role    = "roles/compute.networkAdmin"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_infrastructure_manager_deployment" "basic" {
+  name            = "basic-deployment-%{random_suffix}"
+  location        = "us-central1"
+  service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
+  force_destroy   = true
+
+  labels = {
+    env = "test"
+  }
+
+  terraform_blueprint {
+    git_source {
+      repo      = "https://github.com/terraform-google-modules/terraform-google-network"
+      directory = "modules/vpc"
+      ref       = "main"
+    }
+    
+    input_values {
+      variable_name = "project_id"
+      input_value   = "%{project}"
+    }
+    input_values {
+      variable_name = "network_name"
+      input_value   = "test-network-%{random_suffix}"
+    }
+  }
+
+  depends_on = [
+    google_project_iam_member.binding,
+    google_project_iam_member.network_admin
+  ]
+}
+`, context)
+}
+
+func TestAccInfrastructureManagerDeployment_full(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckInfrastructureManagerDeploymentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInfrastructureManagerDeployment_full(context),
+			},
+			{
+				ResourceName:            "google_infrastructure_manager_deployment.full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "force_destroy", "labels", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccInfrastructureManagerDeployment_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_account" "sa" {
+  account_id   = "im-full-test-sa-%{random_suffix}"
+  display_name = "Infra Manager Full Test SA"
+}
+
+resource "google_project_iam_member" "binding" {
+  project = "%{project}"
+  role    = "roles/config.agent"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project = "%{project}"
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_storage_bucket" "blueprint_bucket" {
+  name          = "im-blueprint-bucket-%{random_suffix}"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "blueprint_object" {
+  name   = "blueprint.zip"
+  bucket = google_storage_bucket.blueprint_bucket.name
+  source = "test-fixtures/blueprint.zip"
+}
+
+resource "google_storage_bucket" "artifacts_bucket" {
+  name          = "im-artifacts-bucket-%{random_suffix}"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_infrastructure_manager_deployment" "full" {
+  name            = "full-deployment-%{random_suffix}"
+  location        = "us-central1"
+  service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
+  force_destroy   = true
+  
+  labels = {
+    environment = "test"
+  }
+  
+  annotations = {
+    purpose = "full-field-testing"
+  }
+
+  terraform_blueprint {
+    gcs_source = "gs://${google_storage_bucket.blueprint_bucket.name}/${google_storage_bucket_object.blueprint_object.name}"
+    
+    input_values {
+      variable_name = "instance_name"
+      input_value   = "test-instance-%{random_suffix}"
+    }
+  }
+
+  artifacts_gcs_bucket = "gs://${google_storage_bucket.artifacts_bucket.name}"
+
+  depends_on = [
+    google_project_iam_member.binding,
+    google_project_iam_member.storage_viewer
+  ]
+}
+`, context)
+}
+
+func testAccCheckInfrastructureManagerDeploymentDestroyProducer(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		return nil
+	}
+}
