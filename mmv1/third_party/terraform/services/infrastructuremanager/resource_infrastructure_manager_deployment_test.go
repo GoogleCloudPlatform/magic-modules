@@ -83,11 +83,11 @@ resource "google_infrastructure_manager_deployment" "basic" {
     
     input_values {
       variable_name = "project_id"
-      input_value   = "%{project}"
+      input_value   = jsonencode("%{project}")
     }
     input_values {
       variable_name = "network_name"
-      input_value   = "test-network-%{random_suffix}"
+      input_value   = jsonencode("test-network-%{random_suffix}")
     }
   }
 
@@ -137,11 +137,11 @@ resource "google_infrastructure_manager_deployment" "basic" {
     
     input_values {
       variable_name = "project_id"
-      input_value   = "%{project}"
+      input_value   = jsonencode("%{project}")
     }
     input_values {
       variable_name = "network_name"
-      input_value   = "test-network-%{random_suffix}"
+      input_value   = jsonencode("test-network-%{random_suffix}")
     }
   }
 
@@ -235,7 +235,7 @@ resource "google_infrastructure_manager_deployment" "full" {
     
     input_values {
       variable_name = "instance_name"
-      input_value   = "test-instance-%{random_suffix}"
+      input_value   = jsonencode("test-instance-%{random_suffix}")
     }
   }
 

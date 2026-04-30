@@ -110,6 +110,8 @@ properties:
               type: String
               description: "The value of the variable."
               required: true
+              custom_expand: 'templates/terraform/custom_expand/infrastructure_manager_input_value.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/infrastructure_manager_input_value.go.tmpl'
 
   - name: 'labels'
     type: KeyValueLabels
