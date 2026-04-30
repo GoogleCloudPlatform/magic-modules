@@ -352,4 +352,3 @@ resource "google_discovery_engine_data_connector" "jira-with-actions" {
 }
 `, context)
 }
-
