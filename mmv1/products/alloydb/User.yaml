@@ -37,7 +37,7 @@ custom_code:
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 # exluding resource_identity due to custom_import
-exclude_identity_generation: true
+generate_list_resource: true
 examples:
   - name: 'alloydb_user_builtin'
     primary_resource_id: 'user1'
@@ -67,6 +67,8 @@ examples:
       'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
       # for backward compatible
       alloydb_user_name: '"user1" + randomSuffix'
+    list_query_scope_sources:
+      cluster: 'google_alloydb_cluster.default#name'
     ignore_read_extra:
       - 'password'
     exclude_docs: true

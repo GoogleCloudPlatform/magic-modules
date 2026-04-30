@@ -77,6 +77,17 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	}
 
 	var listDisplayName acctest.ListDisplayName
+{{- $hasCapture := false }}
+{{- range $scope := $.ListScopeProperties }}
+	{{- if $scope.Required }}
+		{{- if $example.ListQueryScopeCapture (underscore $scope.Name) }}{{- $hasCapture = true }}{{- end }}
+	{{- end }}
+{{- end }}
+{{- if $hasCapture }}
+	// Captured at create-step time and used to populate list-query input variables.
+	var listScope acctest.ListScopeCapture
+{{- end }}
+
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
@@ -109,11 +120,26 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 						{{- end }}
 						},
 					),
+{{- if $hasCapture }}
+					listScope.Capture(map[string]acctest.ScopeSource{
+					{{- range $scope := $.ListScopeProperties }}
+						{{- if $scope.Required }}
+							{{- $n := underscore $scope.Name }}
+							{{- with $example.ListQueryScopeCapture $n }}
+						"{{ $n }}": {Resource: "{{ .Resource }}", Attr: "{{ .Attr }}"},
+							{{- end }}
+						{{- end }}
+					{{- end }}
+					}),
+{{- end }}
 				),
 			},
 			{
 				Query:  true,
-				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
+				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
+{{- if $hasCapture }}
+				ConfigVariables: listScope.AsConfigVariables(),
+{{- end }}
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("{{ $sample.ResourceType $.TerraformName }}.list_query", 1),
 					querycheck.ExpectResourceDisplayName(
@@ -129,11 +155,26 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 
 func testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
-    provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
+{{- range $scope := $.ListScopeProperties }}
+	{{- if $scope.Required }}
+		{{- $n := underscore $scope.Name }}
+		{{- if $example.ListQueryScopeCapture $n }}
+variable "{{ $n }}" { type = string }
+		{{- end }}
+	{{- end }}
+{{- end }}
+list "{{ $example.ResourceType $.TerraformName }}" "list_query" {
+    provider = {{ if $.VersionedProvider $example.MinVersion }}google-beta{{ else }}google{{ end }}
     config {
 {{- range $scope := $.ListScopeProperties }}
-        {{ underscore $scope.Name }} = "%{{"{"}}{{ underscore $scope.Name }}{{"}"}}"
+        {{- if $scope.Required }}
+            {{- $n := underscore $scope.Name }}
+            {{- if $example.ListQueryScopeCapture $n }}
+        {{ $n }} = var.{{ $n }}
+            {{- else }}
+        {{ $n }} = "%{{"{"}}{{ $example.ResolveScopeVarKey $n }}{{"}"}}"
+            {{- end }}
+        {{- end }}
 {{- end }}
     }
 }

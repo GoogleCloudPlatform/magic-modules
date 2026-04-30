@@ -172,6 +172,12 @@ type Examples struct {
 	// your test so avoid if you can.
 	ExternalProviders []string `yaml:"external_providers,omitempty"`
 
+	// ListQueryScopeSources maps a list-query scope field to "<resource_addr>"
+	// or "<resource_addr>#<attr>" (default attr is "name"). Used by the
+	// generated query test to capture scope values from previously-applied
+	// resources at runtime when no matching context var is available.
+	ListQueryScopeSources map[string]string `yaml:"list_query_scope_sources,omitempty"`
+
 	DocumentationHCLText string            `yaml:"-"`
 	TestHCLText          string            `yaml:"-"`
 	OicsHCLText          string            `yaml:"-"`
@@ -413,6 +419,84 @@ func (e *Examples) ResourceType(terraformName string) string {
 		return e.PrimaryResourceType
 	}
 	return terraformName
+}
+
+// ResolveScopeVarKey returns the Nprintf context key that supplies the value
+// for a list-query scope (e.g. "bucket"). It checks the example's vars,
+// test_env_vars, and test_vars_overrides for a key whose underscore-separated
+// tokens end with one of: [scope], [scope,"name"], or [scope,"id"]. Returns
+// scopeName unchanged when nothing matches.
+func (e *Examples) ResolveScopeVarKey(scopeName string) string {
+	has := func(k string) bool {
+		if _, ok := e.Vars[k]; ok {
+			return true
+		}
+		if _, ok := e.TestEnvVars[k]; ok {
+			return true
+		}
+		if _, ok := e.TestVarsOverrides[k]; ok {
+			return true
+		}
+		return false
+	}
+	endsWith := func(tokens, suffix []string) bool {
+		if len(tokens) < len(suffix) {
+			return false
+		}
+		off := len(tokens) - len(suffix)
+		for i, s := range suffix {
+			if tokens[off+i] != s {
+				return false
+			}
+		}
+		return true
+	}
+
+	suffixes := [][]string{{scopeName}, {scopeName, "name"}, {scopeName, "id"}}
+	// Prefer canonical exact-name matches before falling back to suffix scan.
+	for _, suf := range suffixes {
+		if k := strings.Join(suf, "_"); has(k) {
+			return k
+		}
+	}
+	for _, suf := range suffixes {
+		for k := range e.Vars {
+			if endsWith(strings.Split(k, "_"), suf) {
+				return k
+			}
+		}
+		for k := range e.TestEnvVars {
+			if endsWith(strings.Split(k, "_"), suf) {
+				return k
+			}
+		}
+		for k := range e.TestVarsOverrides {
+			if endsWith(strings.Split(k, "_"), suf) {
+				return k
+			}
+		}
+	}
+	return scopeName
+}
+
+// ListQueryScopeCapture parses the list_query_scope_sources entry for a
+// scope. Returns a non-nil ScopeCapture when the scope has an explicit
+// capture mapping; nil otherwise. The default attribute is "name".
+func (e *Examples) ListQueryScopeCapture(scopeName string) *ScopeCapture {
+	raw, ok := e.ListQueryScopeSources[scopeName]
+	if !ok {
+		return nil
+	}
+	if i := strings.IndexByte(raw, '#'); i >= 0 {
+		return &ScopeCapture{Resource: raw[:i], Attr: raw[i+1:]}
+	}
+	return &ScopeCapture{Resource: raw, Attr: "name"}
+}
+
+// ScopeCapture describes the source of a list-query scope value at runtime.
+type ScopeCapture struct {
+	Resource string
+	Attr     string
 }
 
 // Executes example templates for documentation and tests

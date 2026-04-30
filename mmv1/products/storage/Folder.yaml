@@ -34,6 +34,8 @@ examples:
       bucket_name: 'my-bucket'
     ignore_read_extra:
       - 'force_destroy'
+    list_query_scope_sources:
+      bucket: 'google_storage_bucket.bucket#name'
 description: |
   A Google Cloud Storage Folder.
 

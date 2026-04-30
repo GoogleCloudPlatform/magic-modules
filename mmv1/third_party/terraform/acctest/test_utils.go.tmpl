@@ -5,6 +5,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
+	"github.com/hashicorp/terraform-plugin-testing/config"
 	"github.com/hashicorp/terraform-plugin-testing/echoprovider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -127,6 +129,98 @@ func (c *ListDisplayName) CheckValue() knownvalue.Check {
 		}
 		return nil
 	})
+}
+
+// ScopeSource describes where to read a list-query scope value from a previously
+// applied resource's state.
+type ScopeSource struct {
+	// Resource is the Terraform resource address (e.g. "google_alloydb_cluster.default").
+	Resource string
+	// Attr is the attribute on that resource to read (e.g. "name", "id").
+	Attr string
+}
+
+// ListScopeCapture captures scope-field values from the state of resources
+// created in an earlier test step and exposes them as Terraform input
+// variables for a later list-query step.
+//
+// Typical usage:
+//
+//	var listScope acctest.ListScopeCapture
+//	Steps: []resource.TestStep{
+//	    {
+//	        Config: testAccPrimary(context),
+//	        Check: resource.ComposeTestCheckFunc(
+//	            listScope.Capture(map[string]acctest.ScopeSource{
+//	                "cluster": {Resource: "google_alloydb_cluster.default", Attr: "name"},
+//	            }),
+//	        ),
+//	    },
+//	    {
+//	        Query:           true,
+//	        Config:          testAccListQuery(context), // declares variable "cluster" {}
+//	        ConfigVariables: listScope.AsConfigVariables(),
+//	    },
+//	}
+type ListScopeCapture struct {
+	sources map[string]ScopeSource
+	values  map[string]string
+}
+
+// Capture stores the source mapping and returns a TestCheckFunc that, when
+// invoked after a step's apply, walks the state and records each
+// scope -> value into the capture.
+func (c *ListScopeCapture) Capture(sources map[string]ScopeSource) resource.TestCheckFunc {
+	c.sources = sources
+	c.values = map[string]string{}
+	return func(s *terraform.State) error {
+		for scope, src := range sources {
+			rs, ok := s.RootModule().Resources[src.Resource]
+			if !ok {
+				return fmt.Errorf("list scope %q: resource %q not found in state", scope, src.Resource)
+			}
+			attr := src.Attr
+			if attr == "" {
+				attr = "name"
+			}
+			v, ok := rs.Primary.Attributes[attr]
+			if !ok || v == "" {
+				return fmt.Errorf("list scope %q: attribute %q on %s is empty", scope, attr, src.Resource)
+			}
+			c.values[scope] = v
+		}
+		return nil
+	}
+}
+
+// lazyStringVariable is a config.Variable whose JSON encoding is computed
+// each time MarshalJSON is called. This lets a later step read values that
+// are populated by earlier steps' Check functions.
+type lazyStringVariable struct {
+	get func() string
+}
+
+// MarshalJSON implements json.Marshaler (and therefore config.Variable).
+func (v lazyStringVariable) MarshalJSON() ([]byte, error) {
+	return json.Marshal(v.get())
+}
+
+// AsConfigVariables returns a config.Variables map suitable for assigning to
+// TestStep.ConfigVariables. The variables are evaluated lazily during the
+// step that consumes them, so this method may be called at TestCase
+// construction time.
+func (c *ListScopeCapture) AsConfigVariables() config.Variables {
+	out := config.Variables{}
+	for scope := range c.sources {
+		s := scope // pin loop variable for closure
+		out[s] = lazyStringVariable{get: func() string {
+			if c.values == nil {
+				return ""
+			}
+			return c.values[s]
+		}}
+	}
+	return out
 }
 
 
