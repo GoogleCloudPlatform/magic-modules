@@ -50,7 +50,7 @@ func New{{ $.ResourceName -}}ListResource() list.ListResource {
 	listR.SDKv2Resource = Resource{{ $.ResourceName -}}()
 	listR.ListConfigFields = []tpgresource.ListConfigField{
 {{- range $scope := $.ListScopeProperties }}
-		{Name: "{{ underscore $scope.Name }}", Kind: tpgresource.ListConfigKindString, Optional: true},
+		{Name: "{{ underscore $scope.Name }}", Kind: tpgresource.ListConfigKindString, Optional: {{ if $scope.Required }}false{{ else }}true{{ end }}},
 {{- end }}
 	}
 	return listR
