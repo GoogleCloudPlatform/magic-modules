@@ -1,5 +1,5 @@
 {
-  "name": "qa-test-runner",
+  "name": "qa-test-runner-tgc",
   "configPath": {
     "relativePathToConfig": "config.yaml"
   }

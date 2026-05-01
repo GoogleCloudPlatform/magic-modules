@@ -35,8 +35,13 @@ for DIR in $DIRS; do
     if [ -d "$DIR" ]; then
         # Check if it has tests
         if find "$DIR" -name "*_test.go" -print -quit | grep -q .; then
-            echo "🚀 Running unit tests for $DIR..."
-            make test-local TEST="./$DIR/..."
+            if [ "$DIR" = "test" ]; then
+                echo "🚀 Running unit tests for $DIR (non-recursive)..."
+                make test-local TEST="./$DIR"
+            else
+                echo "🚀 Running unit tests for $DIR..."
+                make test-local TEST="./$DIR/..."
+            fi
         else
             echo "ℹ️ No tests found in $DIR tree, skipping."
         fi

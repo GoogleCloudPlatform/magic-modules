@@ -20,23 +20,7 @@ custom_agent:
         7. **Parse Logs:** 
         8. **Interpret failure:** Explain *what* happened (e.g. "The API rejected the request because X field was missing").
         > ### Error Reporting
-            If a failure is detected or provided, you **MUST** report it using the following template before proceeding.
-
-            # Error Report
-
-            ## Failed Command
-            `[Paste the exact command that failed here]`
-
-            ## Detailed Logs
-            ```
-            [Paste relevant log snippets or error messages here]
-            ```
-
-            ## Analysis
-            [Provide a detailed analysis of the failure. Explain what happened, which stage of the workflow failed, and why.]
-
-            ## Proposed Solution
-            [Describe the proposed solution to fix the failure. Include file paths and code changes if known.]
+            If a failure is detected or provided, you **MUST** report it using the template specified in GEMINI.md before proceeding.
 
   tool_names:
     - view_file

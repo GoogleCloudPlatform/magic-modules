@@ -173,3 +173,12 @@ The TGC code generation loops through all known CAI endpoints to match a convert
 **Solution:**
 To fix CAI mapping collisions between similar resources:
 1. **terraform_tgc_next (Generator):** The generator natively supports an array-based `IdentityParams` slice. Instead of identifying a single unique segment, `removeSharedElements` strips common URL components across a product, leaving *all* remaining distinct parameters. The generator natively evaluates all segments concurrently (e.g. `contains(projects) && contains(global)`), resulting in perfect multi-parameter exact-path checking for highly nested collision-prone resources.
+
+#### Example: Fixing Missing Fields Not Present in CAI Asset via YAML
+
+Even for handwritten resources, if the resource has a corresponding YAML file in Magic Modules (e.g., for listing tests or shared properties), you can use `is_missing_in_cai: true` to ignore fields that are not present in the CAI asset data but are required by the Terraform schema.
+
+**Solution:**
+1. Add the field to the resource's YAML file under the appropriate property block.
+2. Set `is_missing_in_cai: true`.
+This avoids having to write custom Go code in flatteners to handle missing fields.

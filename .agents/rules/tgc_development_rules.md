@@ -11,6 +11,8 @@ description: Enforce TGC development Rules
 # Environment Setup Rule
 Before proceeding to Phase 2 (Implementation) or running any tests, the agent MUST execute a command to verify that `TGC_DIR` is set to the active downstream TGC directory and print its value in the chat. Failure to do so is a violation of process.
 
+The agent MUST run the `sync-provider` skill during Phase 1 (Session Setup) before Phase 2, to ensure the downstream repository is aligned with Magic Modules.
+
 # TGC development Rules
 
 As an AI agent operating in this repository, you must **ALWAYS** follow these steps before attempting to add a new resource/field to TGC:
@@ -35,7 +37,7 @@ As an AI agent operating in this repository, you must **ALWAYS** follow these st
 
 6. You must strictly follow the sequence of phases defined in `GEMINI_ADD.md` or `GEMINI_FIX.md` depending on whether you are adding a resource or fixing a failure (Session Setup -> Implementation -> Unit Testing -> Integration Testing). Code generation (Phase 2) MUST be performed before unit tests (Phase 3), and unit tests MUST be performed before integration tests (Phase 5). Structure your `task.md` to reflect these phases.
 
-7. For any failure (build, unit test, integration test, or verification), stop and report the error with detailed logs. Analyze the cause and provide a solution instead of attempting automatic fixes.
+7. For any failure (build, unit test, integration test, or verification), stop execution immediately after reporting the error using the template in GEMINI.md. Do not proceed with applying any fixes or running subsequent steps until the user has explicitly approved the proposed solution in the chat.
 
 8. **Prioritize process reporting**: If the user's request involves a test failure (input or discovered), you must follow the reporting template specified in `GEMINI.md` before proceeding with planning or execution.
 
@@ -50,3 +52,9 @@ As an AI agent operating in this repository, you must **ALWAYS** follow these st
 11. **Skill Reading Before Proposing Solutions**: The agent MUST NOT propose a solution in the error report or create an implementation plan until it has executed the `view_file` tool on the mandatory skill corresponding to the resource type (either `tgc-fix-handwritten-resources-tests-skill` or `tgc-fix-integration-tests-skill`).
 
 12. **Field Ordering in YAML Files**: When adding or modifying fields in Magic Modules YAML files (e.g., `include_in_tgc_next`, `tgc_decoder`), you MUST ensure they follow the order of fields defined in the `Resource` struct in `mmv1/api/resource.go`.
+
+13. **Tracing Evidence for Integration Tests**: For **integration test failures**, the agent MUST NOT propose a solution or apply a fix until it has explicitly cited evidence from the intermediate files (`Test_export.tf`, `Test_roundtrip.json`, etc.) in the chat to demonstrate tracing.
+
+14. **Mandatory Tracing Checklist**: When fixing integration test failures, the agent MUST include explicit sub-items in `task.md` to track the verification of `Test_roundtrip.tf`, `Test_roundtrip.json`, and `Test_export.tf`.
+
+15. **Run All Tests Before Analysis**: When fixing integration test failures, the agent MUST run all integration tests for the affected resource (e.g., by running the top-level test instead of a specific subtest) before analyzing the failure or proposing a solution. Do not assume a user-reported failure is the only one.

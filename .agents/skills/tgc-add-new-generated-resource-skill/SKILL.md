@@ -38,6 +38,18 @@ If you added or modified a generated resource, follow the steps below carefully.
 - If the custom flattener uses `d.Get(...)` instead of reading from the passed value `v` (common in shared templates), it will return empty values during `cai2hcl` conversion because there is no Terraform state.
 - If this causes issues (e.g., dropping required fields), consider adding `tgc_ignore_terraform_custom_flatten: true` to the field's definition in the YAML to use the default mapping.
 
+### 4. Skipping Tests Safely for TGC
+
+- Tests generated from examples and handwritten tests in `third_party` are shared with the standard Google Provider. DO NOT use `exclude_test: true` in examples or rename handwritten tests to skip them for TGC, as this will affect the Google Provider as well!
+- To skip a test generated from an **example** for TGC only: Add `tgc_skip_test: 'Reason for skipping'` to the example definition in the resource's YAML file.
+- To skip a **handwritten test** for TGC only: Add the test name to the `tgc_tests` section at the top-level of the resource's YAML file with `skip: 'Reason for skipping'`. This prevents the generator from creating duplicates and applies the skip.
+
+### 5. Handling Missing CAI Data vs Schema Requirements
+
+- If the CAIS API does not return certain fields, they will be missing in the input CAI asset files for tests.
+- If the resource schema requires at least one of several blocks to be specified, and CAIS returns an empty block (which `cai2hcl` drops), it may fail validation (`Invalid combination of arguments`).
+- **Solution**: Implement a custom `tgc_decoder` in `mmv1/templates/tgc_next/decoders/` to inject minimal valid data or an empty map to satisfy the schema when data is missing in CAI.
+
 ### Troubleshooting Build Failures
 
 ### Missing Package Dependency in Shared Templates

@@ -32,3 +32,6 @@ If you added or modified a resource, you must run its corresponding integration 
 
 > [!IMPORTANT]
 > You MUST use the `./` prefix for the `<test-path>` (e.g., `./test/services/alloydb`) to ensure `go test` interprets it as a local directory rather than a standard library package.
+
+> ### Error Reporting
+   If a failure is detected or provided, you **MUST** report it using the template specified in GEMINI.md before proceeding.

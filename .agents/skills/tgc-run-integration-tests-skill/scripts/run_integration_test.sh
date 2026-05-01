@@ -40,6 +40,6 @@ echo "Logs will be saved to: $LOG_DIR/$LOG_FILE"
 
 cd "$TGC_DIR"
 export WRITE_FILES=true
-TF_CLI_CONFIG_FILE="${PWD}/tf-dev-override.tfrc" GO111MODULE=on go test -run="$TEST_TARGET" "$TEST_PATH" > "$LOG_DIR/$LOG_FILE" 2>&1
+make test-integration-local TESTPATH="$TEST_PATH" TESTARGS="-run=$TEST_TARGET" > "$LOG_DIR/$LOG_FILE" 2>&1
 
 echo "Test execution complete (or failed). Check the log file for outputs."
