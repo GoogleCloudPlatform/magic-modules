@@ -16,6 +16,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai"
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"go.uber.org/zap/zaptest"
 )
@@ -190,7 +191,8 @@ func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 // newTestConfig create a config using the http test server.
 func newTestConfig(server *httptest.Server) *transport_tpg.Config {
 	cfg := &transport_tpg.Config{
-		Project: data.Provider["project"],
+		Project:         data.Provider["project"],
+		CustomEndpoints: map[string]string{},
 	}
 	cfg.Client = server.Client()
 	configureTestBasePaths(cfg, server.URL)
@@ -201,7 +203,7 @@ func configureTestBasePaths(c *transport_tpg.Config, url string) {
 	if !strings.HasSuffix(url, "/") {
 		url = url + "/"
 	}
-	for k, _ := range c.CustomEndpoints {
-		c.CustomEndpoints[k] = url
+	for _, p := range registry.ListProducts() {
+		c.CustomEndpoints[p.CustomEndpointField] = url
 	}
 }

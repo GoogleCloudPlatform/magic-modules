@@ -331,9 +331,9 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		} else if v = transport_tpg.MultiEnvSearch([]string{p.CustomEndpointEnvVar}); v != "" {
 			customEndpoint = v
 		}
-		// Always initialize the product's CustomEndpointField even if it's empty; this
-		// allows us to iterate over them programmatically if needed.
-		config.CustomEndpoints[p.CustomEndpointField] = customEndpoint
+		if customEndpoint != "" {
+			config.CustomEndpoints[p.CustomEndpointField] = customEndpoint
+		}
 	}
 
 	// Detect whether this is running in an mTLS context.
