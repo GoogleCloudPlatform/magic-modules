@@ -350,7 +350,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
 		recordReplayData := recordReplay{
-			AttemptedTests:                replayingResult.FailedTests,
+			AttemptedTests:                subtestResult(replayingResult).FailedTests,
 			RecordingResult:               subtestResult(recordingResult),
 			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
@@ -438,10 +438,14 @@ func subtestResult(original vcr.Result) vcr.Result {
 // Returns the name of the compound test that the given subtest belongs to.
 func compoundTest(subtest string) string {
 	parts := strings.Split(subtest, "__")
-	if len(parts) != 2 {
-		return subtest
+	if len(parts) == 2 {
+		return parts[0]
 	}
-	return parts[0]
+	parts = strings.Split(subtest, "/")
+	if len(parts) >= 2 {
+		return parts[0]
+	}
+	return subtest
 }
 
 // Returns subtests and tests that are not compound tests.
