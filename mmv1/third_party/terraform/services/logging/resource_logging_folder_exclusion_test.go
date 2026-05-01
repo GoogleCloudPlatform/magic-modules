@@ -77,7 +77,7 @@ func testAccLoggingFolderExclusion_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
 	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
-	description := "Description 1" + acctest.RandString(t, 10)
+	description := "Description 2" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
