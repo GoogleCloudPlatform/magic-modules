@@ -349,29 +349,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
-		var attemptedTests []string
-		for _, t := range replayingResult.FailedTests {
-			prefix := t + "__"
-			hasSubtests := false
-			for _, st := range recordingResult.PassedSubtests {
-				if strings.HasPrefix(st, prefix) {
-					attemptedTests = append(attemptedTests, st)
-					hasSubtests = true
-				}
-			}
-			for _, st := range recordingResult.FailedSubtests {
-				if strings.HasPrefix(st, prefix) {
-					attemptedTests = append(attemptedTests, st)
-					hasSubtests = true
-				}
-			}
-			if !hasSubtests {
-				attemptedTests = append(attemptedTests, t)
-			}
-		}
-
 		recordReplayData := recordReplay{
-			AttemptedTests:                attemptedTests,
+			AttemptedTests:                subtestResult(replayingResult).FailedTests,
 			RecordingResult:               subtestResult(recordingResult),
 			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
