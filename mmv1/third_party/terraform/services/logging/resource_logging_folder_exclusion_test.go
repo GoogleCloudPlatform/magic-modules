@@ -228,6 +228,10 @@ func testAccCheckLoggingFolderExclusionDestroyProducer(t *testing.T) func(s *ter
 func testAccLoggingFolderExclusion_basicCfg(exclusionName, description, folderName, folderParent string) string {
 	return fmt.Sprintf(`
 resource "google_logging_folder_exclusion" "basic" {
+  name        = "%s"
+  folder      = element(split("/", google_folder.my-folder.name), 1)
+  description = "%s"
+  filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
 
 resource "google_folder" "my-folder" {
@@ -235,7 +239,7 @@ resource "google_folder" "my-folder" {
   parent       = "%s"
   deletion_protection = false
 }
-`, folderName, folderParent)
+`, exclusionName, description, envvar.GetTestProjectFromEnv(), folderName, folderParent)
 }
 
 func testAccLoggingFolderExclusion_withFullFolderPath(exclusionName, description, folderName, folderParent string) string {
