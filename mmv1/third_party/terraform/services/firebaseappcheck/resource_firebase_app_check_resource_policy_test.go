@@ -20,7 +20,7 @@ func TestAccFirebaseAppCheckResourcePolicy_firebaseAppCheckResourcePolicyUpdate(
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckFirebaseAppCheckResourcePolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
