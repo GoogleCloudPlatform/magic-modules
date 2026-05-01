@@ -142,7 +142,7 @@ properties:
     description: "Controls quota checks."
     enum_values:
       - 'ENABLED'
-      - 'DISABLED'
+      - 'ENFORCED'
 
   # Output only fields
   - name: 'state'

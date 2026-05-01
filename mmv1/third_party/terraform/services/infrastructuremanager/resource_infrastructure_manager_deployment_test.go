@@ -128,6 +128,9 @@ resource "google_infrastructure_manager_deployment" "basic" {
     env = "test"
   }
 
+  quota_validation          = "ENABLED"
+  import_existing_resources = true
+
   terraform_blueprint {
     git_source {
       repo      = "https://github.com/terraform-google-modules/terraform-google-network"
