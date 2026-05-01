@@ -184,31 +184,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional: true,
             },
 
-            // Handwritten Products / Versioned / Atypical Entries
-            "cloud_billing_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "dataflow_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "iam_credentials_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "resource_manager_v3_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
+			// Tombstoned - nonfunctional. https://github.com/hashicorp/terraform-provider-google/issues/26814
             {{- if ne $.TargetVersionName "ga" }}
             "runtimeconfig_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
@@ -217,57 +193,31 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 },
             },
             {{- end }}
+            "core_billing_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+			"billing_custom_endpoint": &schema.StringAttribute{
+				Optional: true,
+				Validators: []validator.String{
+					transport_tpg.CustomEndpointValidator(),
+				},
+			},
+            "resource_manager3_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
             "iam_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
                     transport_tpg.CustomEndpointValidator(),
                 },
             },
-            "tags_location_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-
-            // DCL
-            "container_aws_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "container_azure_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "apikeys_custom_endpoint": &schema.StringAttribute{
-                Optional: true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "assured_workloads_custom_endpoint": &schema.StringAttribute{
-                Optional: true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
             "cloud_resource_manager_custom_endpoint": &schema.StringAttribute{
-                Optional: true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "firebaserules_custom_endpoint": &schema.StringAttribute{
-                Optional: true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "recaptcha_enterprise_custom_endpoint": &schema.StringAttribute{
                 Optional: true,
                 Validators: []validator.String{
                     transport_tpg.CustomEndpointValidator(),
@@ -410,4 +360,8 @@ func (p *FrameworkProvider) ListResources(_ context.Context) []func() list.ListR
 	listResources = append(listResources, generatedListResources...)
 	listResources = append(listResources, handwrittenListResources...)
 	return listResources
+}
+
+func (p *FrameworkProvider) GenerateResourceConfig(context.Context, any) (any, error) {
+    return nil, nil
 }

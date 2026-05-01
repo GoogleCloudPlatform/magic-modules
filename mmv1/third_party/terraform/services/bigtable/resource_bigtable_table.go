@@ -235,7 +235,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -365,7 +365,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -514,7 +514,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -667,7 +667,7 @@ func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}

@@ -123,7 +123,6 @@ to default to the backend value. See [structure below](#nested_cluster).
   When set to "DELETE", deleting the resource is allowed.
 
 * `tags` - (Optional) A set of key/value label pairs to assign to the resource. Tags must follow the requirements at [create and manage tags](https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing).
->>>>>>> upstream/main
 
 -----
 

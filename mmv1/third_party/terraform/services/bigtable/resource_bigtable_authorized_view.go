@@ -146,7 +146,7 @@ func resourceBigtableAuthorizedViewCreate(d *schema.ResourceData, meta interface
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -212,7 +212,7 @@ func resourceBigtableAuthorizedViewRead(d *schema.ResourceData, meta interface{}
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -284,7 +284,7 @@ func resourceBigtableAuthorizedViewUpdate(d *schema.ResourceData, meta interface
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -355,7 +355,7 @@ func resourceBigtableAuthorizedViewDestroy(d *schema.ResourceData, meta interfac
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}

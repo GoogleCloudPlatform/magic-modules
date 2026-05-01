@@ -18,5 +18,7 @@ deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://ces.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://ces.googleapis.com/v1beta/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

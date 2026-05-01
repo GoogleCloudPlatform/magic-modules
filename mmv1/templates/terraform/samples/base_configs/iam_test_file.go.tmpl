@@ -39,13 +39,13 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 {{-  else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-	{{- if $sample.ExternalProviders }}
+{{-  end }}
+{{- if $sample.ExternalProviders }}
 		ExternalProviders: map[string]resource.ExternalProvider{
-		{{- range $provider := $sample.ExternalProviders }}
+	{{- range $provider := $sample.ExternalProviders }}
 			"{{$provider}}": {},
-		{{- end }}
+	{{- end }}
 		},
-	{{-  end }}
 {{-  end }}
 		Steps: []resource.TestStep{
 			{
