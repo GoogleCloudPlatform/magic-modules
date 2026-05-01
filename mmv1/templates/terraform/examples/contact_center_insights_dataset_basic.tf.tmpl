@@ -1,5 +1,4 @@
 resource "google_contact_center_insights_dataset" "{{$.PrimaryResourceId}}" {
-  provider     = google-beta
   dataset_id   = "{{index $.Vars "dataset_id"}}"
   location     = "us-central1"
   display_name = "My Dataset"

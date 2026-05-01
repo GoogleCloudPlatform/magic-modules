@@ -1,5 +1,4 @@
 resource "google_contact_center_insights_authorized_view_set" "{{$.PrimaryResourceId}}" {
-  provider               = google-beta
   authorized_view_set_id = "{{index $.Vars "authorized_view_set_id"}}"
   location               = "us-central1"
   display_name           = "My Authorized View Set"
