@@ -52,9 +52,6 @@ terraform {
 		}
 	}
 
-	if err := terraformInit("terraform", dir, project); err != nil {
-		return err
-	}
 	if err := terraformPlan("terraform", dir, project, name+".tfplan"); err != nil {
 		return err
 	}
