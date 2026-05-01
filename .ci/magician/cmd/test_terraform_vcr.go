@@ -680,6 +680,7 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 		"add":          func(i, j int) int { return i + j },
 		"color":        color,
 		"compoundTest": compoundTest,
+		"replace":      strings.ReplaceAll,
 		"contains": func(slice []string, item string) bool {
 			for _, s := range slice {
 				if s == item {
