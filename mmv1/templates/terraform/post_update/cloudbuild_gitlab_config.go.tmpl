@@ -49,7 +49,7 @@ if d.HasChange("connected_repositories") {
 
 			connectedRepoRequest := make(map[string]interface{})
 			connectedRepoRequest["parent"] = parent
-			connectedRepoRequest["gitLabConnectedRepository"] = connectedRepo
+			connectedRepoRequest["gitlabConnectedRepository"] = connectedRepo
 
 			requests = append(requests, connectedRepoRequest)
 		}

@@ -14,7 +14,7 @@ if v, ok := d.GetOkExists("connected_repositories"); !tpgresource.IsEmptyValue(r
 
         connectedRepoRequest := make(map[string]interface{})
         connectedRepoRequest["parent"] = id
-        connectedRepoRequest["gitLabConnectedRepository"] = connectedRepo
+        connectedRepoRequest["gitlabConnectedRepository"] = connectedRepo
         
         requests[i] = connectedRepoRequest
     }
