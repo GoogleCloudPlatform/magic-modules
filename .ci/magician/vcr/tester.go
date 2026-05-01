@@ -79,7 +79,7 @@ const replayingTimeout = "360m"
 
 var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (TestAcc\w+))`)
 
-var subtestResultsExpression = regexp.MustCompile(`(?m:^\s+--- (PASS|FAIL|SKIP): (TestAcc\w+)/(\w+))`)
+var subtestResultsExpression = regexp.MustCompile(`(?m:^    --- (PASS|FAIL|SKIP): (TestAcc\w+)/(\w+))`)
 
 var testPanicExpression = regexp.MustCompile(`(?m:^panic: .*)`)
 
