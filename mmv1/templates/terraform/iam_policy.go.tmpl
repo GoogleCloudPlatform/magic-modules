@@ -36,6 +36,15 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 	transport_tpg "{{ $.ImportPath }}/transport"
 )
+{{- /* Force import/registration of the related product in TGC */ -}}
+{{- if contains $.ProductMetadata.Compiler "terraformgoogleconversion" }}
+
+import (
+	"{{ $.ImportPath }}/services/{{ lower $.ProductMetadata.Name }}"
+)
+
+var _ = {{ lower $.ProductMetadata.Name }}.Product
+{{- end }}
 
 var (
     _ = regexp.Match
