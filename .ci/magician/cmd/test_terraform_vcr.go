@@ -351,7 +351,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 
 		var attemptedTests []string
 		for _, t := range replayingResult.FailedTests {
-			prefix := t + "/"
+			prefix := t + "__"
 			hasSubtests := false
 			for _, st := range recordingResult.PassedSubtests {
 				if strings.HasPrefix(st, prefix) {
