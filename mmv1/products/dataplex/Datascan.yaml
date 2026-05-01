@@ -55,6 +55,7 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
     - '{{data_scan_id}}'
+include_in_tgc_next: true
 custom_code:
 examples:
   - name: 'dataplex_datascan_basic_profile'
