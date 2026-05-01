@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -205,5 +206,16 @@ func configureTestBasePaths(c *transport_tpg.Config, url string) {
 	}
 	for _, p := range registry.ListProducts() {
 		c.CustomEndpoints[p.CustomEndpointField] = url
+	}
+	// Compatibility shim while there are still direct
+	// references to BasePath fields.
+	typ := reflect.ValueOf(c).Elem().Type()
+	val := reflect.ValueOf(c).Elem()
+
+	for i := 0; i < typ.NumField(); i++ {
+		name := typ.Field(i).Name
+		if strings.HasSuffix(name, "BasePath") {
+			val.Field(i).SetString(url)
+		}
 	}
 }
