@@ -10,6 +10,8 @@ import (
 	"strings"
 	"text/template"
 
+	"strconv"
+
 	"github.com/spf13/cobra"
 
 	"magician/exec"
@@ -69,6 +71,7 @@ type postReplay struct {
 }
 
 type recordReplay struct {
+	AttemptedTests                []string
 	RecordingResult               vcr.Result
 	ReplayingAfterRecordingResult vcr.Result
 	HasTerminatedTests            bool
@@ -80,6 +83,8 @@ type recordReplay struct {
 	BuildID                       string
 	LogBaseUrl                    string
 	BrowseLogBaseUrl              string
+	NotRunBetaTests               []string
+	NotRunGATests                 []string
 }
 
 var testTerraformVCRCmd = &cobra.Command{
@@ -231,13 +236,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
-	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh); err != nil {
+	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling panics: %w", err)
 	} else if hasPanics {
 		return nil
 	}
 
-	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh); err != nil {
+	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling build failures: %w", err)
 	} else if hasBuildFailures {
 		return nil
@@ -266,8 +271,14 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
-	if err := gh.PostComment(prNumber, comment); err != nil {
-		return fmt.Errorf("error posting comment: %w", err)
+	if len(replayingResult.FailedTests) == 0 {
+		mentionStr := getMentions(prNumber, gh)
+		if mentionStr != "" {
+			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
+		}
+	}
+	if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+		return fmt.Errorf("error appending comment: %w", err)
 	}
 	if len(replayingResult.FailedTests) > 0 {
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
@@ -297,13 +308,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
-		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh); err != nil {
+		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
 			return nil
 		}
 
-		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh); err != nil {
+		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling build failures: %w", err)
 		} else if hasBuildFailures {
 			return nil
@@ -339,6 +350,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
 		recordReplayData := recordReplay{
+			AttemptedTests:                replayingResult.FailedTests,
 			RecordingResult:               subtestResult(recordingResult),
 			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
@@ -348,13 +360,19 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			Version:                       provider.Beta.String(),
 			Head:                          newBranch,
 			BuildID:                       buildID,
+			NotRunBetaTests:               notRunBeta,
+			NotRunGATests:                 notRunGa,
 		}
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
-		if err := gh.PostComment(prNumber, recordReplayComment); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
+		mentionStr := getMentions(prNumber, gh)
+		if mentionStr != "" {
+			recordReplayComment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", recordReplayComment, mentionStr, mmCommitSha)
+		}
+		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, gh, rnr); err != nil {
+			return fmt.Errorf("error appending comment: %w", err)
 		}
 	}
 
@@ -506,13 +524,30 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 	return result, testDirs, replayingErr
 }
 
-func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
+func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.Panics) > 0 {
-		comment := color("red", fmt.Sprintf("The provider crashed while running the VCR tests in %s mode\n", mode.Upper()))
-		comment += fmt.Sprintf(`Please fix it to complete your PR.
-View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			return true, fmt.Errorf("error posting comment: %v", err)
+		comment := "> [!CAUTION]\n"
+		comment += "> **Panic occurred during VCR tests**\n>\n"
+		comment += fmt.Sprintf("> %s\n", color("red", fmt.Sprintf("**%s mode**: The provider crashed with a panic. Please check the build log for details.", mode.Upper())))
+		comment += ">\n> Please fix the issue to complete your PR."
+
+		comment += fmt.Sprintf("\n\nView the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)", prNumber, buildID, mode.Lower())
+
+		mentionStr := getMentions(prNumber, gh)
+		if mentionStr != "" {
+			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
+		}
+
+		header := ""
+		if mode == vcr.Recording {
+			header = "---\n\n**Step 2: Recording Mode**\n\n"
+		} else if mode == vcr.Replaying {
+			header = "**Step 1: Replaying Mode**\n\n"
+		}
+		comment = header + comment
+
+		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+			return true, fmt.Errorf("error appending comment: %v", err)
 		}
 		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
 			return true, fmt.Errorf("error posting failure status: %v", err)
@@ -522,19 +557,33 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 	return false, nil
 }
 
-func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
+func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.BuildFailures) > 0 {
-		comment := color("red", fmt.Sprintf("The provider failed to build during VCR tests in %s mode\n", mode.Upper()))
-		comment += "\nThe following packages failed to build:\n"
+		comment := "> [!CAUTION]\n"
+		comment += "> **Build Failure during VCR tests**\n>\n"
+		comment += fmt.Sprintf("> %s\n", color("red", fmt.Sprintf("**%s mode**: The following packages failed to build:", mode.Upper())))
 		for _, pkg := range result.BuildFailures {
-			comment += fmt.Sprintf("- `%s`\n", pkg)
+			comment += fmt.Sprintf("> - `%s`\n", pkg)
 		}
-		comment += fmt.Sprintf(`
-Please fix the compilation errors to complete your PR.
+		comment += ">\n> Please fix the compilation errors to complete your PR."
 
-View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			return true, fmt.Errorf("error posting comment: %v", err)
+		comment += fmt.Sprintf("\n\nView the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)", prNumber, buildID, mode.Lower())
+
+		mentionStr := getMentions(prNumber, gh)
+		if mentionStr != "" {
+			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
+		}
+
+		header := ""
+		if mode == vcr.Recording {
+			header = "---\n\n**Step 2: Recording Mode**\n\n"
+		} else if mode == vcr.Replaying {
+			header = "**Step 1: Replaying Mode**\n\n"
+		}
+		comment = header + comment
+
+		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+			return true, fmt.Errorf("error appending comment: %v", err)
 		}
 		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
 			return true, fmt.Errorf("error posting failure status: %v", err)
@@ -542,6 +591,62 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 		return true, nil
 	}
 	return false, nil
+}
+
+func getMentions(prNumber string, gh GithubClient) string {
+	author := ""
+	reviewerMentions := ""
+	if authorName, err := gh.GetPullRequestAuthor(prNumber); err == nil {
+		author = "@" + authorName
+	}
+	if reviewers, err := gh.GetPullRequestRequestedReviewers(prNumber); err == nil {
+		var mentions []string
+		for _, r := range reviewers {
+			mentions = append(mentions, "@"+r.Login)
+		}
+		if len(mentions) > 0 {
+			reviewerMentions = strings.Join(mentions, ", ")
+		}
+	}
+
+	mentionStr := ""
+	if author != "" {
+		mentionStr += author
+	}
+	if reviewerMentions != "" {
+		if mentionStr != "" {
+			mentionStr += ", "
+		}
+		mentionStr += reviewerMentions
+	}
+	return mentionStr
+}
+
+// appendVCRResultToDiffComment appends content to the existing diff report comment
+// identified by the ID in /workspace/diff_comment_id.txt.
+// If the file is missing or the comment cannot be fetched, it falls back to posting a new comment.
+func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClient, rnr ExecRunner) error {
+	var diffComment *github.PullRequestComment
+
+	// Try to find by ID from file
+	if idStr, err := rnr.ReadFile("/workspace/diff_comment_id.txt"); err == nil {
+		if id, err := strconv.Atoi(strings.TrimSpace(idStr)); err == nil {
+			if comment, err := gh.GetPullRequestComment(id); err == nil {
+				diffComment = &comment
+			} else {
+				fmt.Printf("Warning: failed to fetch comment %d by ID: %v\n", id, err)
+			}
+		}
+	}
+
+	if diffComment != nil {
+		newBody := diffComment.Body + "\n\n" + content
+		return gh.UpdateComment(prNumber, newBody, diffComment.ID)
+	}
+
+	// Fallback to posting a new comment if diff report not found
+	_, err := gh.PostComment(prNumber, content)
+	return err
 }
 
 func init() {
@@ -554,6 +659,14 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 		"add":          func(i, j int) int { return i + j },
 		"color":        color,
 		"compoundTest": compoundTest,
+		"contains": func(slice []string, item string) bool {
+			for _, s := range slice {
+				if s == item {
+					return true
+				}
+			}
+			return false
+		},
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
 	if err != nil {
