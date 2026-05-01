@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'InfrastructureManager'
+name: 'Config'
 display_name: 'Infrastructure Manager'
 versions:
   - name: 'ga'

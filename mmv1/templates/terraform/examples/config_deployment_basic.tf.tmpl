@@ -1,4 +1,4 @@
-resource "google_infrastructure_manager_deployment" "{{$.PrimaryResourceId}}" {
+resource "google_config_deployment" "{{$.PrimaryResourceId}}" {
   name            = "{{index $.Vars "deployment_name"}}"
   location        = "us-central1"
   service_account = "projects/{{$.Vars.project}}/serviceAccounts/{{index $.Vars "service_account_email"}}"

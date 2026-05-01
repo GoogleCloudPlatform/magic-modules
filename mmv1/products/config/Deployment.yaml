@@ -47,9 +47,9 @@ virtual_fields:
     description: "If true, deletes the deployment and its nested resources."
 
 examples:
-  - name: 'infrastructure_manager_deployment_basic'
+  - name: 'config_deployment_basic'
     primary_resource_id: 'default'
-    exclude_test: true # Acceptance tests are handwritten in resource_infrastructure_manager_deployment_test.go due to complex prerequisites (IAM, fixtures).
+    exclude_test: true # Acceptance tests are handwritten in resource_config_deployment_test.go due to complex prerequisites (IAM, fixtures).
     vars:
       deployment_name: 'my-deployment'
       service_account_email: 'my-service-account@my-project.iam.gserviceaccount.com'
@@ -110,8 +110,8 @@ properties:
               type: String
               description: "The value of the variable."
               required: true
-              custom_expand: 'templates/terraform/custom_expand/infrastructure_manager_input_value.go.tmpl'
-              custom_flatten: 'templates/terraform/custom_flatten/infrastructure_manager_input_value.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/config_input_value.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/config_input_value.go.tmpl'
 
   - name: 'labels'
     type: KeyValueLabels

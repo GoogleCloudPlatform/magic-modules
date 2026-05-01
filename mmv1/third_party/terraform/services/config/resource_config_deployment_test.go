@@ -1,4 +1,4 @@
-package infrastructuremanager_test
+package config_test
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-func TestAccInfrastructureManagerDeployment_basic(t *testing.T) {
+func TestAccConfigDeployment_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -25,22 +25,22 @@ func TestAccInfrastructureManagerDeployment_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckInfrastructureManagerDeploymentDestroyProducer(t),
+		CheckDestroy:             testAccCheckConfigDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInfrastructureManagerDeployment_basic(context),
+				Config: testAccConfigDeployment_basic(context),
 			},
 			{
-				ResourceName:            "google_infrastructure_manager_deployment.basic",
+				ResourceName:            "google_config_deployment.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "force_destroy", "labels", "annotations"},
 			},
 			{
-				Config: testAccInfrastructureManagerDeployment_update(context),
+				Config: testAccConfigDeployment_update(context),
 			},
 			{
-				ResourceName:            "google_infrastructure_manager_deployment.basic",
+				ResourceName:            "google_config_deployment.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "force_destroy", "labels", "annotations"},
@@ -49,7 +49,7 @@ func TestAccInfrastructureManagerDeployment_basic(t *testing.T) {
 	})
 }
 
-func testAccInfrastructureManagerDeployment_basic(context map[string]interface{}) string {
+func testAccConfigDeployment_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
   account_id   = "im-basic-test-sa-%{random_suffix}"
@@ -68,7 +68,7 @@ resource "google_project_iam_member" "network_admin" {
   member  = "serviceAccount:${google_service_account.sa.email}"
 }
 
-resource "google_infrastructure_manager_deployment" "basic" {
+resource "google_config_deployment" "basic" {
   name            = "basic-deployment-%{random_suffix}"
   location        = "us-central1"
   service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
@@ -99,7 +99,7 @@ resource "google_infrastructure_manager_deployment" "basic" {
 `, context)
 }
 
-func testAccInfrastructureManagerDeployment_update(context map[string]interface{}) string {
+func testAccConfigDeployment_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
   account_id   = "im-basic-test-sa-%{random_suffix}"
@@ -118,7 +118,7 @@ resource "google_project_iam_member" "network_admin" {
   member  = "serviceAccount:${google_service_account.sa.email}"
 }
 
-resource "google_infrastructure_manager_deployment" "basic" {
+resource "google_config_deployment" "basic" {
   name            = "basic-deployment-%{random_suffix}"
   location        = "us-central1"
   service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
@@ -156,7 +156,7 @@ resource "google_infrastructure_manager_deployment" "basic" {
 `, context)
 }
 
-func TestAccInfrastructureManagerDeployment_full(t *testing.T) {
+func TestAccConfigDeployment_full(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -167,13 +167,13 @@ func TestAccInfrastructureManagerDeployment_full(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckInfrastructureManagerDeploymentDestroyProducer(t),
+		CheckDestroy:             testAccCheckConfigDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInfrastructureManagerDeployment_full(context),
+				Config: testAccConfigDeployment_full(context),
 			},
 			{
-				ResourceName:            "google_infrastructure_manager_deployment.full",
+				ResourceName:            "google_config_deployment.full",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "force_destroy", "labels", "annotations"},
@@ -182,7 +182,7 @@ func TestAccInfrastructureManagerDeployment_full(t *testing.T) {
 	})
 }
 
-func testAccInfrastructureManagerDeployment_full(context map[string]interface{}) string {
+func testAccConfigDeployment_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
   account_id   = "im-full-test-sa-%{random_suffix}"
@@ -219,7 +219,7 @@ resource "google_storage_bucket" "artifacts_bucket" {
   force_destroy = true
 }
 
-resource "google_infrastructure_manager_deployment" "full" {
+resource "google_config_deployment" "full" {
   name            = "full-deployment-%{random_suffix}"
   location        = "us-central1"
   service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
@@ -252,12 +252,12 @@ resource "google_infrastructure_manager_deployment" "full" {
 `, context)
 }
 
-func testAccCheckInfrastructureManagerDeploymentDestroyProducer(t *testing.T) resource.TestCheckFunc {
+func testAccCheckConfigDeploymentDestroyProducer(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_infrastructure_manager_deployment" {
+			if rs.Type != "google_config_deployment" {
 				continue
 			}
 
