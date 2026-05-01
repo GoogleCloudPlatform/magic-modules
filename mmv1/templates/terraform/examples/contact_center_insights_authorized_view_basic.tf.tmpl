@@ -5,8 +5,10 @@ resource "google_contact_center_insights_authorized_view_set" "set" {
 }
 
 resource "google_contact_center_insights_authorized_view" "{{$.PrimaryResourceId}}" {
-  authorizedviewset  = google_contact_center_insights_authorized_view_set.set.authorized_view_set_id
-  authorized_view_id = "{{index $.Vars "authorized_view_id"}}"
-  location           = "us-central1"
-  display_name       = "My Authorized View"
+  authorizedviewset   = google_contact_center_insights_authorized_view_set.set.authorized_view_set_id
+  authorized_view_id  = "{{index $.Vars "authorized_view_id"}}"
+  location            = "us-central1"
+  display_name        = "My Authorized View"
+  conversation_filter = "agent_id = \"1\""
 }
+

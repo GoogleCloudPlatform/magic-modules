@@ -69,8 +69,10 @@ properties:
   - name: ttl
     type: String
     description: Option TTL for the dataset.
+    ignore_read: true
   - name: type
     type: String
+    ignore_read: true
     description: |-
       Dataset usage type.
       Possible values:

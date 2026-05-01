@@ -36,6 +36,8 @@ examples:
     primary_resource_id: default
     vars:
       qa_question_tag_id: tag
+    ignore_read_extra:
+      - 'update_time'
 parameters:
   - name: location
     type: String
