@@ -26,7 +26,7 @@ func TestAccCloudBuildGitLabConfig_update(t *testing.T) {
 				Config: testAccCloudBuildGitLabConfig_full(context),
 			},
 			{
-				ResourceName:            "google_cloudbuild_gitlab_config.gitlab-config",
+				ResourceName:            "google_cloudbuild_git_lab_config.gitlab-config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"config_id", "location"},
@@ -35,12 +35,12 @@ func TestAccCloudBuildGitLabConfig_update(t *testing.T) {
 				Config: testAccCloudBuildGitLabConfig_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_cloudbuild_gitlab_config.gitlab-config", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_cloudbuild_git_lab_config.gitlab-config", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:            "google_cloudbuild_gitlab_config.gitlab-config",
+				ResourceName:            "google_cloudbuild_git_lab_config.gitlab-config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"config_id", "location"},
@@ -51,7 +51,7 @@ func TestAccCloudBuildGitLabConfig_update(t *testing.T) {
 
 func testAccCloudBuildGitLabConfig_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_cloudbuild_gitlab_config" "gitlab-config" {
+resource "google_cloudbuild_git_lab_config" "gitlab-config" {
     config_id = "%{config_id}"
     location = "us-central1"
     username = "test-user"
@@ -67,7 +67,7 @@ resource "google_cloudbuild_gitlab_config" "gitlab-config" {
 
 func testAccCloudBuildGitLabConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_cloudbuild_gitlab_config" "gitlab-config" {
+resource "google_cloudbuild_git_lab_config" "gitlab-config" {
     config_id = "%{config_id}"
     location = "us-central1"
     username = "updated-user"
