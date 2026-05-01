@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -139,7 +140,7 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	// Since we waited above, the operation is guaranteed to have been successful by this point.
-	waitOp, err := resourcemanagerv3.NewClient(config, userAgent).Operations.Get(op.Name).Do()
+	waitOp, err := resourcemanager.NewClient(config, userAgent).Operations.Get(op.Name).Do()
 	if err != nil {
 		return fmt.Errorf("The folder '%s' has been created but we could not retrieve its id. Delete the folder manually and retry or use 'terraform import': %s", displayName, err)
 	}
