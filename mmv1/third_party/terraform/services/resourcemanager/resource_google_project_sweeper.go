@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
@@ -60,7 +61,7 @@ func testSweepProject(region string) error {
 			return nil
 		}
 
-		fSvc := config.NewResourceManagerV3Client(config.UserAgent)
+		fSvc := resourcemanagerv3.NewClient(config, config.UserAgent)
 		for _, project := range found.Projects {
 			log.Printf("[INFO][SWEEPER_LOG] Sweeping Project id: %s", project.ProjectId)
 			cleanupLiens(fSvc, "projects/"+project.ProjectId, config)
