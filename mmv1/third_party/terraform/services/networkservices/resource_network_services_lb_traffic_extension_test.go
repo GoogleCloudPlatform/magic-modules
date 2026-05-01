@@ -247,9 +247,10 @@ resource "google_network_services_lb_traffic_extension" "default" {
       timeout   = "0.1s"
       fail_open = false
 
-      supported_events = ["REQUEST_HEADERS"]
-      forward_headers  = ["custom-header"]
-      metadata = {
+      supported_events   = ["REQUEST_HEADERS"]
+      forward_attributes = []
+      forward_headers    = ["custom-header"]
+      metadata           = {
         "exampleId" = "test"
       }
     }
@@ -566,9 +567,10 @@ resource "google_network_services_lb_traffic_extension" "default" {
       timeout   = "0.1s"
       fail_open = false
 
-      supported_events = ["REQUEST_HEADERS"]
-      forward_headers = ["custom-header"]
-      metadata = {
+      supported_events   = ["REQUEST_HEADERS"]
+      forward_attributes = ["source.ip", "source.port"]
+      forward_headers    = ["custom-header"]
+      metadata           = {
         "exampleId" = "test"
       }
     }
