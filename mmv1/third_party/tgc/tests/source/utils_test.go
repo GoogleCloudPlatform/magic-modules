@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -202,13 +201,7 @@ func configureTestBasePaths(c *transport_tpg.Config, url string) {
 	if !strings.HasSuffix(url, "/") {
 		url = url + "/"
 	}
-	typ := reflect.ValueOf(c).Elem().Type()
-	val := reflect.ValueOf(c).Elem()
-
-	for i := 0; i < typ.NumField(); i++ {
-		name := typ.Field(i).Name
-		if strings.HasSuffix(name, "BasePath") {
-			val.Field(i).SetString(url)
-		}
+	for k, _ := range c.CustomEndpoints {
+		c.CustomEndpoints[k] = url
 	}
 }
