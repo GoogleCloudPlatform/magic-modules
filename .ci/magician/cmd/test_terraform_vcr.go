@@ -349,8 +349,29 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
+		var attemptedTests []string
+		for _, t := range replayingResult.FailedTests {
+			prefix := t + "__"
+			hasSubtests := false
+			for _, st := range recordingResult.PassedSubtests {
+				if strings.HasPrefix(st, prefix) {
+					attemptedTests = append(attemptedTests, st)
+					hasSubtests = true
+				}
+			}
+			for _, st := range recordingResult.FailedSubtests {
+				if strings.HasPrefix(st, prefix) {
+					attemptedTests = append(attemptedTests, st)
+					hasSubtests = true
+				}
+			}
+			if !hasSubtests {
+				attemptedTests = append(attemptedTests, t)
+			}
+		}
+
 		recordReplayData := recordReplay{
-			AttemptedTests:                subtestResult(replayingResult).FailedTests,
+			AttemptedTests:                attemptedTests,
 			RecordingResult:               subtestResult(recordingResult),
 			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
@@ -438,14 +459,10 @@ func subtestResult(original vcr.Result) vcr.Result {
 // Returns the name of the compound test that the given subtest belongs to.
 func compoundTest(subtest string) string {
 	parts := strings.Split(subtest, "__")
-	if len(parts) == 2 {
-		return parts[0]
+	if len(parts) != 2 {
+		return subtest
 	}
-	parts = strings.Split(subtest, "/")
-	if len(parts) >= 2 {
-		return parts[0]
-	}
-	return subtest
+	return parts[0]
 }
 
 // Returns subtests and tests that are not compound tests.
