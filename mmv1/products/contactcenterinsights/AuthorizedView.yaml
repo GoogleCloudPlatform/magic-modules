@@ -21,13 +21,7 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/authorizedViewSets/{{authorizedviewset}}/authorizedViews/{{authorized_view_id}}
-async:
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
 autogen_status: QXV0aG9yaXplZFZpZXc=
-autogen_async: true
 examples:
   - name: contact_center_insights_authorized_view_basic
     primary_resource_id: default
