@@ -1,0 +1,16 @@
+resource "google_cloudaicompanion_gda_observability_setting" "example" {
+  provider = google-beta
+  location = "global"
+  gda_observability_setting_id = "default"
+  
+  conversational_analytics_setting {
+    feedback_enabled = true
+    logging_enabled  = true
+    metrics_enabled  = true
+    traces_enabled   = true
+  }
+
+  labels = {
+    "env" = "test"
+  }
+}

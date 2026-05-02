@@ -1,0 +1,17 @@
+resource "google_cloudaicompanion_gibq_observability_setting" "example" {
+  provider = google-beta
+  location = "global"
+  gibq_observability_setting_id = "default"
+  
+  conversational_analytics_setting {
+    feedback_enabled = true
+    logging_enabled  = true
+    metrics_enabled  = true
+    traces_enabled   = true
+  }
+
+  labels = {
+    "env" = "test"
+  }
+}
+

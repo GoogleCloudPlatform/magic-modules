@@ -1,0 +1,15 @@
+resource "google_cloudaicompanion_gemini_gcp_enablement_setting" "example" {
+  provider = google-beta
+  location = "global"
+  gemini_gcp_enablement_setting_id = "default"
+  
+  web_grounding_type        = "GROUNDING_WITH_GOOGLE_SEARCH"
+  proactive_agents_enabled   = true
+  mutations_enabled          = true
+  release_channel           = "EXPERIMENTAL"
+
+  labels = {
+    "env" = "test"
+  }
+}
+
