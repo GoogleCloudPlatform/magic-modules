@@ -123,7 +123,7 @@ func run(t *testing.T, cmd *exec.Cmd, wantError bool) ([]byte, []byte, error) {
 	var stderr, stdout bytes.Buffer
 	cmd.Stderr, cmd.Stdout = &stderr, &stdout
 	err := cmd.Run()
-	
+
 	// Do not log output here to avoid cluttering test results on retries.
 	// The full output is included in the error returned on failure.
 
@@ -131,19 +131,6 @@ func run(t *testing.T, cmd *exec.Cmd, wantError bool) ([]byte, []byte, error) {
 		return stdout.Bytes(), stderr.Bytes(), fmt.Errorf("running %s: \nerror=%v \nstderr=%s", cmd.String(), err, stderr.String())
 	}
 	return stdout.Bytes(), stderr.Bytes(), nil
-}
-
-func GetSubTestName(fullTestName string) string {
-	_, after, found := strings.Cut(fullTestName, "/")
-	if !found {
-		return ""
-	}
-	return after
-}
-
-type TestCase struct {
-	Name string
-	Skip string
 }
 
 // Creates a deep copy of a source map using JSON marshalling and unmarshalling.
@@ -159,4 +146,17 @@ func DeepCopyMap(source interface{}, destination interface{}) error {
 	}
 
 	return nil
+}
+
+type TestCase struct {
+	Name string
+	Skip string
+}
+
+func GetSubTestName(fullTestName string) string {
+	_, after, found := strings.Cut(fullTestName, "/")
+	if !found {
+		return ""
+	}
+	return after
 }
