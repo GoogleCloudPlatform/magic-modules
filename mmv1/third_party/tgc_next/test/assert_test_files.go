@@ -231,7 +231,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
 		log.Printf("%s: missing fields in resource %s after cai2hcl conversion:\n%s", testName, testData.ResourceAddress, missingKeys)
-		return retry.RetryableError(fmt.Errorf("missing fields"))
+		return retry.RetryableError(fmt.Errorf("missing fields: %v", missingKeys))
 	}
 	log.Printf("%s: Step 1 passes for resource %s. All of the fields in raw config are in export config", testName, testData.ResourceAddress)
 
@@ -245,7 +245,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	ancestryCache, defaultProject := getAncestryCache(assets)
 	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {
-		return fmt.Errorf("error when converting the round-trip config: %#v", err)
+		return retry.RetryableError(fmt.Errorf("error when converting the round-trip config: %v", err))
 	}
 
 	rtTfFile := fmt.Sprintf("%s_roundtrip.tf", strings.ReplaceAll(testName, "/", "_"))
@@ -570,7 +570,9 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 // Converts tf file to CAI assets
 func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, error) {
 	// Run terraform init and terraform apply to generate tfplan.json files
-	terraformWorkflow(t, tfDir, tfFileName, defaultProject)
+	if err := terraformWorkflow(t, tfDir, tfFileName, defaultProject); err != nil {
+		return nil, err
+	}
 
 	planFile := fmt.Sprintf("%s.tfplan.json", tfFileName)
 	planfilePath := filepath.Join(tfDir, planFile)

@@ -30,7 +30,7 @@ const (
 	defaultProject      = "ci-test-project-nightly-beta"
 )
 
-func terraformWorkflow(t *testing.T, dir, name, project string) {
+func terraformWorkflow(t *testing.T, dir, name, project string) error {
 	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tf", name)))
 	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tfplan", name)))
 
@@ -49,29 +49,41 @@ terraform {
 }
 `
 		if err := os.WriteFile(tfFile, append(content, []byte(override)...), 0644); err != nil {
-			t.Fatalf("Error writing provider override to %s: %v", tfFile, err)
+			return fmt.Errorf("Error writing provider override to %s: %v", tfFile, err)
 		}
 	}
 
-	terraformInit(t, "terraform", dir, project)
-	terraformPlan(t, "terraform", dir, project, name+".tfplan")
-	payload := terraformShow(t, "terraform", dir, project, name+".tfplan")
-	saveFile(t, dir, name+".tfplan.json", payload)
+	if err := terraformInit(t, "terraform", dir, project); err != nil {
+		return err
+	}
+	if err := terraformPlan(t, "terraform", dir, project, name+".tfplan"); err != nil {
+		return err
+	}
+	payload, err := terraformShow(t, "terraform", dir, project, name+".tfplan")
+	if err != nil {
+		return err
+	}
+	if err := saveFile(t, dir, name+".tfplan.json", payload); err != nil {
+		return err
+	}
+	return nil
 }
 
-func terraformInit(t *testing.T, executable, dir, project string) {
-	terraformExec(t, executable, dir, project, "init", "-input=false")
+func terraformInit(t *testing.T, executable, dir, project string) error {
+	_, err := terraformExec(t, executable, dir, project, "init", "-input=false")
+	return err
 }
 
-func terraformPlan(t *testing.T, executable, dir, project, tfplan string) {
-	terraformExec(t, executable, dir, project, "plan", "-input=false", "-refresh=false", "-out", tfplan)
+func terraformPlan(t *testing.T, executable, dir, project, tfplan string) error {
+	_, err := terraformExec(t, executable, dir, project, "plan", "-input=false", "-refresh=false", "-out", tfplan)
+	return err
 }
 
-func terraformShow(t *testing.T, executable, dir, project, tfplan string) []byte {
+func terraformShow(t *testing.T, executable, dir, project, tfplan string) ([]byte, error) {
 	return terraformExec(t, executable, dir, project, "show", "--json", tfplan)
 }
 
-func terraformExec(t *testing.T, executable, dir, project string, args ...string) []byte {
+func terraformExec(t *testing.T, executable, dir, project string, args ...string) ([]byte, error) {
 	if project == "" {
 		project = defaultProject
 	}
@@ -88,44 +100,50 @@ func terraformExec(t *testing.T, executable, dir, project string, args ...string
 	}
 	cmd.Dir = dir
 	wantError := false
-	payload, _ := run(t, cmd, wantError)
-	return payload
+	payload, _, err := run(t, cmd, wantError)
+	return payload, err
 }
 
-func saveFile(t *testing.T, dir, filename string, payload []byte) {
+func saveFile(t *testing.T, dir, filename string, payload []byte) error {
 	fullpath := filepath.Join(dir, filename)
 	f, err := os.Create(fullpath)
 	if err != nil {
-		t.Fatalf("error while creating file %s, error %v", fullpath, err)
+		return fmt.Errorf("error while creating file %s, error %v", fullpath, err)
 	}
+	defer f.Close()
 	_, err = f.Write(payload)
 	if err != nil {
-		t.Fatalf("error while writing to file %s, error %v", fullpath, err)
+		return fmt.Errorf("error while writing to file %s, error %v", fullpath, err)
 	}
+	return nil
 }
 
-// run a command and call t.Fatal on non-zero exit.
-func run(t *testing.T, cmd *exec.Cmd, wantError bool) ([]byte, []byte) {
+// run a command and return error on non-zero exit instead of t.Fatalf.
+func run(t *testing.T, cmd *exec.Cmd, wantError bool) ([]byte, []byte, error) {
 	var stderr, stdout bytes.Buffer
 	cmd.Stderr, cmd.Stdout = &stderr, &stdout
 	err := cmd.Run()
+	
+	// Do not log output here to avoid cluttering test results on retries.
+	// The full output is included in the error returned on failure.
+
 	if gotError := (err != nil); gotError != wantError {
-		t.Fatalf("running %s: \nerror=%v \nstderr=%s \nstdout=%s", cmd.String(), err, stderr.String(), stdout.String())
+		return stdout.Bytes(), stderr.Bytes(), fmt.Errorf("running %s: \nerror=%v \nstderr=%s", cmd.String(), err, stderr.String())
 	}
-	// Print env, stdout and stderr if verbose flag is used.
-	if len(cmd.Env) != 0 {
-		t.Logf("=== Environment Variable of %s ===", cmd.String())
-		t.Log(strings.Join(cmd.Env, "\n"))
+	return stdout.Bytes(), stderr.Bytes(), nil
+}
+
+func GetSubTestName(fullTestName string) string {
+	_, after, found := strings.Cut(fullTestName, "/")
+	if !found {
+		return ""
 	}
-	if stdout.String() != "" {
-		t.Logf("=== STDOUT of %s ===", cmd.String())
-		t.Log(stdout.String())
-	}
-	if stderr.String() != "" {
-		t.Logf("=== STDERR of %s ===", cmd.String())
-		t.Log(stderr.String())
-	}
-	return stdout.Bytes(), stderr.Bytes()
+	return after
+}
+
+type TestCase struct {
+	Name string
+	Skip string
 }
 
 // Creates a deep copy of a source map using JSON marshalling and unmarshalling.
@@ -141,17 +159,4 @@ func DeepCopyMap(source interface{}, destination interface{}) error {
 	}
 
 	return nil
-}
-
-type TestCase struct {
-	Name string
-	Skip string
-}
-
-func GetSubTestName(fullTestName string) string {
-	_, after, found := strings.Cut(fullTestName, "/")
-	if !found {
-		return ""
-	}
-	return after
 }
