@@ -27,7 +27,7 @@ examples:
     vars:
       configuration_id: "example-configuration"
       product: "products/my-product"
-      count: 10
+      license_count: 10
 async:
   operation:
     base_url: '{{op_id}}'
@@ -80,7 +80,7 @@ properties:
     type: String
     required: true
     description: Name field (with URL) of the Product offered for SPLA.
-  - name: count
+  - name: license_count
     type: Integer
     required: true
     description: Number of units to bill for.
