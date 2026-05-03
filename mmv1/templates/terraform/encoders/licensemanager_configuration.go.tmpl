@@ -1,0 +1,30 @@
+product := obj["product"].(string)
+count := obj["count"].(int64)
+
+licenseType := "LICENSE_TYPE_PER_MONTH_PER_USER"
+if product == "MicrosoftSQLServer2022Enterprise" {
+    licenseType = "LICENSE_TYPE_PER_MONTH_PER_PACK"
+}
+
+obj["licenseType"] = licenseType
+
+billingInfo := map[string]interface{}{}
+if licenseType == "LICENSE_TYPE_PER_MONTH_PER_USER" {
+    billingInfo["userCountBilling"] = map[string]interface{}{
+        "userCount": count,
+    }
+} else if licenseType == "LICENSE_TYPE_PER_MONTH_PER_PACK" {
+    billingInfo["packCountBilling"] = map[string]interface{}{
+        "packCount": count,
+    }
+}
+
+obj["currentBillingInfo"] = billingInfo
+obj["nextBillingInfo"] = billingInfo
+
+if _, ok := obj["displayName"]; !ok {
+    obj["displayName"] = "Managed by Terraform"
+}
+
+delete(obj, "count")
+return obj, nil
