@@ -17,7 +17,7 @@ display_name: License Manager
 scopes:
     - https://www.googleapis.com/auth/cloud-platform
 versions:
-  - base_url: https://licensemanager.googleapis.com/v1/
-    name: ga
-  - base_url: https://licensemanager.googleapis.com/v1alpha/
-    name: beta
+    - base_url: https://licensemanager.googleapis.com/v1/
+      name: ga
+    - base_url: https://licensemanager.googleapis.com/v1alpha/
+      name: beta
