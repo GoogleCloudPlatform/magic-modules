@@ -1,0 +1,51 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+billingProject := ""
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for Configuration: %s", err)
+}
+billingProject = project
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+if d.HasChange("active") {
+	_, newActive := d.GetChange("active")
+	isActive := newActive.(bool)
+
+	var action string
+	if isActive {
+		action = "reactivate"
+	} else {
+		action = "deactivate"
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}LicenseManagerBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/locations/{{ "{{" }}location{{ "}}" }}/configurations/{{ "{{" }}configuration_id{{ "}}" }}:"+action)
+	if err != nil {
+		return err
+	}
+
+	obj := make(map[string]interface{})
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error %s Configuration %q: %s", action, d.Id(), err)
+	}
+
+	err = LicenseManagerOperationWaitTime(config, res, project, fmt.Sprintf("%s Configuration", strings.Title(action)), userAgent, d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return err
+	}
+}

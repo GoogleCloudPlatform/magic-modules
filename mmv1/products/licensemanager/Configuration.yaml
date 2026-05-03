@@ -42,6 +42,7 @@ autogen_async: true
 custom_code:
   encoder: 'templates/terraform/encoders/licensemanager_configuration.go.tmpl'
   post_read: 'templates/terraform/post_read/licensemanager_configuration.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/licensemanager_configuration.go.tmpl'
 parameters:
   - name: location
     type: String
@@ -80,7 +81,11 @@ properties:
     type: String
     required: true
     description: Name field (with URL) of the Product offered for SPLA.
-  - name: licenseCount
+  - name: license_count
     type: Integer
     required: true
     description: Number of units to bill for.
+  - name: active
+    type: Boolean
+    default_value: true
+    description: Whether the configuration is active.
