@@ -1,12 +1,12 @@
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
-	return nil, err
+	return err
 }
 
 billingProject := ""
 project, err := tpgresource.GetProject(d, config)
 if err != nil {
-	return nil, fmt.Errorf("Error fetching project for Configuration: %s", err)
+	return fmt.Errorf("Error fetching project for Configuration: %s", err)
 }
 billingProject = project
 if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
@@ -49,4 +49,4 @@ if d.HasChange("active") {
 		return err
 	}
 }
-return obj, nil
+return nil
