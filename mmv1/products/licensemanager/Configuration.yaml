@@ -81,7 +81,7 @@ properties:
     type: String
     required: true
     description: Name field (with URL) of the Product offered for SPLA.
-  - name: license_count
+  - name: licenseCount
     type: Integer
     required: true
     description: Number of units to bill for.
