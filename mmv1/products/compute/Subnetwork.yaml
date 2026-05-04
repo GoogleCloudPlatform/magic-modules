@@ -177,9 +177,10 @@ examples:
   - name: subnetwork_with_secondary_ipv6_range
     primary_resource_id: subnetwork_with_secondary_ipv6_range
     vars:
-      network_name: network-byoipv6-internal-prefix
+      network_name: network-with-secondary-ranges
       subnetwork_name: subnet-with-secondary-ranges
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+      pap_name: pap-for-secondary-ranges
+      pdp_name: pdp-for-secondary-ranges
     min_version: 'beta'
 virtual_fields:
   - name: send_secondary_ip_range_if_empty

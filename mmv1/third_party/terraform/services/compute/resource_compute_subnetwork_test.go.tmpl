@@ -448,12 +448,14 @@ func TestAccComputeSubnetwork_secondaryIpRanges_sendEmpty(t *testing.T) {
 	})
 }
 
-func TestAccComputeSubnetwork_secondaryIpv6ULA_beta(t *testing.T) {
+func TestAccComputeSubnetwork_secondaryIpv6Ranges_beta(t *testing.T) {
 	t.Parallel()
 
 	var subnetwork compute.Subnetwork
 	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	subnetworkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	papName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	pdpName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -461,76 +463,40 @@ func TestAccComputeSubnetwork_secondaryIpv6ULA_beta(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeSubnetwork_secondaryIpv6ULA_beta(cnName, subnetworkName),
+				// Step 1: Create a normal custom subnet
+				Config: testAccComputeSubnetwork_secondaryIpv6RangesBase_beta(cnName, subnetworkName, papName, pdpName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-ula-subnet", &subnetwork),
-					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-ula-range", "IPV6", ""),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeSubnetwork_secondaryIpv6BYOGUA_beta(t *testing.T) {
-	t.Parallel()
-
-	var subnetwork compute.Subnetwork
-	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	subnetworkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	// Using the static PDP from the shared testing project as per the User Guide
-	pdpUrl := "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeSubnetwork_secondaryIpv6BYOGUA_beta(cnName, subnetworkName, pdpUrl),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-byogua-subnet", &subnetwork),
-					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-byogua-range", "IPV6", pdpUrl),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeSubnetwork_secondaryIpv6Update_beta(t *testing.T) {
-	t.Parallel()
-
-	var subnetwork compute.Subnetwork
-	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	subnetworkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t) ,
-		Steps: []resource.TestStep{
-			{
-				// Step 1: Create with one IPV6 secondary range
-				Config: testAccComputeSubnetwork_secondaryIpv6Update1_beta(cnName, subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-update-subnet", &subnetwork),
-					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "range-1", "IPV6", ""),
+					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
 				),
 			},
 			{
-				// Step 2: Add a second IPV6 secondary range (In-place PATCH)
-				Config: testAccComputeSubnetwork_secondaryIpv6Update2_beta(cnName, subnetworkName),
+				// Step 2: Add 3 secondary ranges to the subnet: 1 ULA, 2 BYOGUA (1 auto, 1 manual)
+				Config: testAccComputeSubnetwork_secondaryIpv6RangesAdd_beta(cnName, subnetworkName, papName, pdpName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-update-subnet", &subnetwork),
-					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "range-1", "IPV6", ""),
-					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "range-2", "IPV6", ""),
+					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
+					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-ula", "IPV6", ""),
+					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-byoip-auto", "IPV6", ""),
+					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-byoip-manual", "IPV6", ""),
 				),
 			},
 			{
-				// Step 3: Remove the first range (In-place PATCH)
-				Config: testAccComputeSubnetwork_secondaryIpv6Update3_beta(cnName, subnetworkName),
+				// Step 3: Change the order of the secondary ranges (Verifies no-op/no re-creation)
+				Config: testAccComputeSubnetwork_secondaryIpv6RangesReorder_beta(cnName, subnetworkName, papName, pdpName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-update-subnet", &subnetwork),
-					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "range-2", "IPV6", ""),
+					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
+					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-ula", "IPV6", ""),
+					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-byoip-auto", "IPV6", ""),
+					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-byoip-manual", "IPV6", ""),
+				),
+			},
+			{
+				// Step 4: Remove 2 ranges (ULA and Manual), leave 1 (Auto)
+				Config: testAccComputeSubnetwork_secondaryIpv6RangesRemove_beta(cnName, subnetworkName, papName, pdpName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
+					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-byoip-auto", "IPV6", ""),
+					testAccCheckComputeSubnetworkHasNotSecondaryIpv6Range(&subnetwork, "v6-ula"),
+					testAccCheckComputeSubnetworkHasNotSecondaryIpv6Range(&subnetwork, "v6-byoip-manual"),
 				),
 			},
 		},
@@ -1553,6 +1519,8 @@ resource "google_compute_subnetwork" "test_subnet" {
 `, context)
 
 func testAccComputeSubnetwork_secondaryIpv6ULA_beta(cnName, subnetworkName string) string {
+// Shared base config (Network, PAP, PDP)
+func testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "custom-test" {
   name                     = "%s"
@@ -1560,111 +1528,111 @@ resource "google_compute_network" "custom-test" {
   enable_ula_internal_ipv6 = true
 }
 
-resource "google_compute_subnetwork" "ipv6-ula-subnet" {
+resource "google_compute_public_advertised_prefix" "ipv6_pap" {
+  name             = "%s"
+  ip_cidr_range    = "2001:db8::/32"
+  pdp_scope        = "REGIONAL"
+  ipv6_access_type = "INTERNAL"
+}
+
+resource "google_compute_public_delegated_prefix" "ipv6_pdp" {
+  name          = "%s"
+  region        = "us-central1"
+  ip_cidr_range = "2001:db8:abcd::/48"
+  parent_prefix = google_compute_public_advertised_prefix.ipv6_pap.id
+  mode          = "INTERNAL_IPV6_SUBNETWORK_CREATION"
+}
+`, cnName, papName, pdpName)
+}
+
+// Step 1: Creating a normal IPv6 Internal access type subnet
+func testAccComputeSubnetwork_secondaryIpv6RangesBase_beta(cnName, subnetworkName, papName, pdpName string) string {
+	return fmt.Sprintf(`
+%s
+resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
+  name             = "%s"
+  region           = "us-central1"
+  network          = google_compute_network.custom-test.self_link
+  stack_type       = "IPV6_ONLY"
+  ipv6_access_type = "INTERNAL"
+}
+`, testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName), subnetworkName)
+}
+
+// Step 2: Add the 3 ranges
+func testAccComputeSubnetwork_secondaryIpv6RangesAdd_beta(cnName, subnetworkName, papName, pdpName string) string {
+	return fmt.Sprintf(`
+%s
+resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
   name             = "%s"
   network          = google_compute_network.custom-test.self_link
   region           = "us-central1"
   stack_type       = "IPV6_ONLY"
   ipv6_access_type = "INTERNAL"
 
-  secondary_ip_range {
-    range_name = "v6-ula-range"
+  secondary_ip_range { range_name = "v6-ula"; ip_version = "IPV6" }
+  secondary_ip_range { 
+    range_name = "v6-byoip-auto"
     ip_version = "IPV6"
+    ip_collection = google_compute_public_delegated_prefix.ipv6_pdp.self_link 
+  }
+  secondary_ip_range { 
+    range_name = "v6-byoip-manual"
+    ip_version = "IPV6"
+    ip_collection = google_compute_public_delegated_prefix.ipv6_pdp.self_link
+    ip_cidr_range = "2001:db8:abcd:2::/64" 
   }
 }
-`, cnName, subnetworkName)
+`, testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName), subnetworkName)
 }
 
-func testAccComputeSubnetwork_secondaryIpv6BYOGUA_beta(cnName, subnetworkName, pdpUrl string) string {
+// Step 3: Change order (Manual -> Auto -> ULA)
+func testAccComputeSubnetwork_secondaryIpv6RangesReorder_beta(cnName, subnetworkName, papName, pdpName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_network" "custom-test" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "ipv6-byogua-subnet" {
+%s
+resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
   name             = "%s"
-  network          = google_compute_network.custom-test.self_link
   region           = "us-central1"
+  network          = google_compute_network.custom-test.self_link
   stack_type       = "IPV6_ONLY"
   ipv6_access_type = "INTERNAL"
 
-  secondary_ip_range {
-    range_name    = "v6-byogua-range"
+  # Reordered: Manual -> Auto -> ULA
+  secondary_ip_range { 
+    range_name    = "v6-byoip-manual"
     ip_version    = "IPV6"
-    ip_collection = "%s"
+    ip_collection = google_compute_public_delegated_prefix.ipv6_pdp.self_link
+    ip_cidr_range = "2001:db8:abcd:2::/64" 
+  }
+  secondary_ip_range { 
+    range_name    = "v6-byoip-auto"
+    ip_version    = "IPV6"
+    ip_collection = google_compute_public_delegated_prefix.ipv6_pdp.self_link 
+  }
+  secondary_ip_range { 
+    range_name    = "v6-ula"
+    ip_version    = "IPV6" 
   }
 }
-`, cnName, subnetworkName, pdpUrl)
+`, testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName), subnetworkName)
 }
 
-func testAccComputeSubnetwork_secondaryIpv6Update1_beta(cnName, subnetworkName string) string {
+// Step 4: Remove ULA and Manual
+func testAccComputeSubnetwork_secondaryIpv6RangesRemove_beta(cnName, subnetworkName, papName, pdpName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_network" "custom-test" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "ipv6-update-subnet" {
+%s
+resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
   name             = "%s"
-  network          = google_compute_network.custom-test.self_link
   region           = "us-central1"
+  network          = google_compute_network.custom-test.self_link
   stack_type       = "IPV6_ONLY"
   ipv6_access_type = "INTERNAL"
 
-  secondary_ip_range {
-    range_name = "range-1"
-    ip_version = "IPV6"
+  secondary_ip_range { 
+    range_name    = "v6-byoip-auto"
+    ip_version    = "IPV6"
+    ip_collection = google_compute_public_delegated_prefix.ipv6_pdp.self_link 
   }
 }
-`, cnName, subnetworkName)
-}
-
-func testAccComputeSubnetwork_secondaryIpv6Update2_beta(cnName, subnetworkName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "custom-test" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "ipv6-update-subnet" {
-  name             = "%s"
-  network          = google_compute_network.custom-test.self_link
-  region           = "us-central1"
-  stack_type       = "IPV6_ONLY"
-  ipv6_access_type = "INTERNAL"
-
-  secondary_ip_range {
-    range_name = "range-1"
-    ip_version = "IPV6"
-  }
-
-  secondary_ip_range {
-    range_name = "range-2"
-    ip_version = "IPV6"
-  }
-}
-`, cnName, subnetworkName)
-}
-
-func testAccComputeSubnetwork_secondaryIpv6Update3_beta(cnName, subnetworkName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "custom-test" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "ipv6-update-subnet" {
-  name             = "%s"
-  network          = google_compute_network.custom-test.self_link
-  region           = "us-central1"
-  stack_type       = "IPV6_ONLY"
-  ipv6_access_type = "INTERNAL"
-
-  secondary_ip_range {
-    range_name = "range-2"
-    ip_version = "IPV6"
-  }
-}
-`, cnName, subnetworkName)
+`, testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName), subnetworkName)
 }
