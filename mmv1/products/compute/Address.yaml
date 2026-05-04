@@ -260,3 +260,9 @@ properties:
       Partial URL, as in:
         * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{pdp-name}}`
         * `regions/{{region}}/publicDelegatedPrefixes/{{pdp-name}}`
+  - name: 'addressId'
+    type: String
+    api_name: 'id'
+    description: |
+      The unique numeric identifier for the resource. This identifier is defined by the server.
+    output: true
