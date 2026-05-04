@@ -873,6 +873,18 @@ func testAccCheckComputeSubnetworkHasSecondaryIpv6Range(subnetwork *compute.Subn
 	}
 }
 
+func testAccCheckComputeSubnetworkHasNotSecondaryIpv6Range(subnetwork *compute.Subnetwork, rangeName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, secondaryRange := range subnetwork.SecondaryIpRanges {
+			if secondaryRange.RangeName == rangeName {
+				return fmt.Errorf("Secondary IPv6 range %s should have been removed, but still exists in GCP state", rangeName)
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckComputeSubnetworkHasNotSecondaryIpRange(subnetwork *compute.Subnetwork, rangeName, ipCidrRange string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, secondaryRange := range subnetwork.SecondaryIpRanges {
