@@ -421,7 +421,7 @@ func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface
 		// If this is a redundant interface,
 		// remove its reference from other interfaces as well
 		if iface["redundantInterface"] == ifaceName {
-			iface["redundantInterface"] = ""
+			delete(iface, "redundantInterface")
 		}
 		newIfaces = append(newIfaces, iface)
 	}
