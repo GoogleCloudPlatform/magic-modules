@@ -52,7 +52,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 				return err
 			}
 			if res == nil {
-				return fmt.Errorf("Error matching nested {{ $.ResourceName }} from list response")
+				return fmt.Errorf("error matching nested {{ $.ResourceName }} from list response")
 			}
 {{- end }}
 {{- if $.CustomCode.Decoder }}
@@ -61,7 +61,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 				return err
 			}
 			if res == nil {
-				return fmt.Errorf("Error decoding {{ $.ResourceName }} from list response")
+				return fmt.Errorf("error decoding {{ $.ResourceName }} from list response")
 			}
 {{- end }}
 			if err = Resource{{ $.ResourceName }}Flatten(d, nil, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
@@ -75,20 +75,20 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 				if s, ok := v.(string); ok {
 					i, err := strconv.Atoi(s)
 					if err != nil {
-						return fmt.Errorf("Error coercing {{ underscore $id.Name }}: %s", err)
+						return fmt.Errorf("error coercing {{ underscore $id.Name }}: %w", err)
 					}
 					v = i
 				}
 	{{- end }}
 				if err := d.Set("{{ underscore $id.Name }}", v); err != nil {
-					return fmt.Errorf("Error setting {{ underscore $id.Name }}: %s", err)
+					return fmt.Errorf("error setting {{ underscore $id.Name }}: %w", err)
 				}
 			}
 {{- end }}
 {{- end }}
 			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
 			if err != nil {
-				return fmt.Errorf("Error constructing id: %s", err)
+				return fmt.Errorf("error constructing id: %w", err)
 			}
 			d.SetId(id)
 			return nil
