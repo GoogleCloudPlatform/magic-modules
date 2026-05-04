@@ -24,9 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-{{- if and $.HasProject $.LegacyLongFormProject }}
-	"strings"
-{{- end }}
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -89,19 +86,10 @@ func (listR *{{ $.ResourceName -}}ListResource) List(ctx context.Context, listRe
 	}
 
 {{- range $scope := $.ListScopeProperties }}
-{{- if eq $scope.Name "project" }}
-	{{ $scope.CamelizeProperty }} := listR.GetProject(data.{{ $scope.TitlelizeProperty }})
-{{- else if eq $scope.Name "region" }}
-	{{ $scope.CamelizeProperty }} := listR.GetRegion(data.{{ $scope.TitlelizeProperty }})
-{{- else if eq $scope.Name "zone" }}
-	{{ $scope.CamelizeProperty }} := listR.GetZone(data.{{ $scope.TitlelizeProperty }})
-{{- else if eq $scope.Name "location" }}
-	{{ $scope.CamelizeProperty }} := listR.GetLocation(data.{{ $scope.TitlelizeProperty }})
+{{- if or (eq $scope.Name "project") (eq $scope.Name "region") (eq $scope.Name "zone") (eq $scope.Name "location") }}
+	{{ $scope.CamelizeProperty }} := listR.Get{{ $scope.TitlelizeProperty }}(data.{{ $scope.TitlelizeProperty }})
 {{- else }}
-	var {{ $scope.CamelizeProperty }} string
-	if !data.{{ $scope.TitlelizeProperty }}.IsNull() && !data.{{ $scope.TitlelizeProperty }}.IsUnknown() {
-		{{ $scope.CamelizeProperty }} = data.{{ $scope.TitlelizeProperty }}.ValueString()
-	}
+	{{ $scope.CamelizeProperty }} := data.{{ $scope.TitlelizeProperty }}.ValueString()
 {{- end }}
 {{- end }}
 
