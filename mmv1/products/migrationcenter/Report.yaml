@@ -88,7 +88,7 @@ properties:
     output: true
   - name: summary
     type: NestedObject
-    ignore_read: true
+    output: true
     description: |-
       Describes the Summary view of a Report, which contains aggregated values
       for all the groups and preference sets included in this Report.

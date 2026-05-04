@@ -89,7 +89,7 @@ properties:
     output: true
   - name: uploadFileInfo
     type: NestedObject
-    ignore_read: true
+    output: true
     description: A resource that contains a URI to which a data file can be uploaded.
     properties:
       - name: headers
