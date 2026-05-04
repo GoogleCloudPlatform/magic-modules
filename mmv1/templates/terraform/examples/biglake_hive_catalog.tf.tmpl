@@ -1,0 +1,18 @@
+resource "google_storage_bucket" "bucket_for_{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "catalog_id"}}"
+  location      = "us-central1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+  provider = google-beta
+}
+
+resource "google_biglake_hive_catalog" "{{$.PrimaryResourceId}}" {
+    catalog_id = "{{index $.Vars "catalog_id"}}"
+    primary_location="us-central1"
+    location_uri="gs://${google_storage_bucket.bucket_for_{{$.PrimaryResourceId}}.name}"
+    description="terraform test hive catalog"
+    depends_on = [
+      google_storage_bucket.bucket_for_{{$.PrimaryResourceId}}
+    ]
+    provider = google-beta
+}

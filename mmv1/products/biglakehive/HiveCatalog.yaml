@@ -1,0 +1,156 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# API resource name
+name: 'HiveCatalog'
+# Resource description for the provider documentation.
+description: |
+  RESOURCE_DESCRIPTION
+references:
+  guides:
+   # Link to quickstart in the API's Guides section. 
+    'QUICKSTART_TITLE': 'QUICKSTART_URL'
+  # Link to the REST API reference for the resource. For example,
+  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
+  api: 'API_REFERENCE_URL'
+# Marks the resource as beta-only. Ensure a beta version block is present in
+# provider.yaml.
+min_version: beta
+
+# URL for the resource's standard List method. https://google.aip.dev/132
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+base_url: 'hive/v1beta/projects/{{project}}/catalogs'
+# URL for the resource's standard Get method. https://google.aip.dev/131
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog_id}}'
+
+# If true, the resource and all its fields are considered immutable - that is,
+# only creatable, not updatable. Individual fields can override this if they
+# have a custom update method in the API.
+immutable: false
+
+# URL for the resource's standard Create method, including query parameters.
+# https://google.aip.dev/133
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+create_url: 'hive/v1beta/projects/{{project}}/catalogs?hiveCatalogId={{catalog_id}}&primary_location={{primary_location}}'
+
+# Overrides the URL for the resource's standard Update method. (If unset, the
+# self_link URL is used by default.) https://google.aip.dev/134
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+# update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
+# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
+update_verb: 'PATCH'
+# If true, the resource sets an `updateMask` query parameter listing modified
+# fields when updating the resource. If false, it does not.
+update_mask: true
+
+# If true, code for handling long-running operations is generated along with
+# the resource. If false, that code is not generated.
+autogen_async: true
+# Sets parameters for handling operations returned by the API.
+async:
+  # Overrides which API calls return operations. Default: ['create',
+  # 'update', 'delete']
+  # actions: ['create', 'update', 'delete']
+  operation:
+    base_url: '{{op_id}}'
+
+# The IAM policy is shared with IcebergCatalog.
+iam_policy:
+  base_url: 'v1/projects/{{project}}/catalogs/{{catalog_id}}'
+  parent_resource_attribute: 'catalog_id'
+  method_name_separator: ":"
+  fetch_iam_policy_verb: 'GET'
+  import_format:
+    - 'projects/{{project}}/catalogs/{{catalog_id}}'
+    - '{{catalog_id}}'
+  allowed_iam_role: 'roles/biglake.editor'
+examples:
+  - name: 'biglake_hive_catalog'
+    primary_resource_id: 'my_hive_catalog'
+    vars:
+      catalog_id: 'my_hive_catalog'
+    test_env_vars:
+      GOOGLE_BILLING_PROJECT: 'PROJECT'
+      USER_PROJECT_OVERRIDE: 'true'
+    min_version: beta
+parameters:
+  - name: 'catalog_id'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Name of the Hive Catalog.
+  - name: 'primary_location'
+    type: String
+    url_param_only: true
+    immutable: true
+    required: true
+    description: |
+      The primary location for mirroring the remote catalog metadata. It must be
+      a BigLake-supported location, and it should be proximate to the remote
+      catalog's location.
+properties:
+  - name: name
+    type: String
+    description: The full resource name returned by the API.
+    ignore_read: true
+    output: true
+  - name: 'location_uri'
+    type: String
+    required: true
+    description: | 
+      Cloud Storage location path where the catalog data will be stored. Format: gs://bucket/path/to/catalog
+  - name: 'description'
+    type: String
+    description: |
+      Description of the Hive catalog.
+  - name: 'create_time'
+    type: String
+    description: Output only. The creation time of the catalog.
+    output: true
+  - name: 'update_time'
+    type: String
+    description: Output only. The update time of the catalog.
+    output: true
+  - name: 'replicas'
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'region'
+          type: String
+          description: The region of the replica, e.g., `us-east1`.
+          output: true
+        - name: 'state'
+          type: Enum
+          description: If the catalog is replicated to multiple regions, this enum
+            describes the current state of the replica. STATE_UNSPECIFIED - The replica
+            state is unknown. STATE_PRIMARY - The replica is the writable primary.
+            STATE_PRIMARY_IN_PROGRESS - The replica has been recently assigned as
+            the primary, but not all databases are writeable yet. STATE_SECONDARY -
+            The replica is a read-only secondary replica.
+          output: true
+          enum_values:
+            - 'STATE_UNSPECIFIED'
+            - 'STATE_PRIMARY'
+            - 'STATE_PRIMARY_IN_PROGRESS'
+            - 'STATE_SECONDARY'
+    description: Output only. The replicas for the catalog metadata.
+    output: true
