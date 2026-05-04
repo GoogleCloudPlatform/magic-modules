@@ -259,6 +259,7 @@ properties:
     type: NestedObject
     description: Message describing TemplateMetadata
     allow_empty_object: true
+    default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/modelarmor_template_template_metadata.go.tmpl'
     properties:
       - name: logTemplateOperations
