@@ -80,12 +80,16 @@ properties:
   - name: product
     type: String
     required: true
+    immutable: true
+    ignore_read: true
     description: Name field (with URL) of the Product offered for SPLA.
-  - name: licenseCount
+  - name: license_count
     type: Integer
     required: true
+    ignore_read: true
     description: Number of units to bill for.
   - name: active
     type: Boolean
     default_value: true
+    ignore_read: true
     description: Whether the configuration is active.

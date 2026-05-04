@@ -1,5 +1,5 @@
 product := obj["product"].(string)
-count := obj["licenseCount"].(int64)
+count := obj["license_count"].(int)
 
 licenseType := "LICENSE_TYPE_PER_MONTH_PER_USER"
 if product == "MicrosoftSQLServer2022Enterprise" {
@@ -19,12 +19,20 @@ if licenseType == "LICENSE_TYPE_PER_MONTH_PER_USER" {
     }
 }
 
+configurationId := d.Get("configuration_id").(string)
+project := d.Get("project").(string)
+region := d.Get("location").(string)
+
+
 obj["currentBillingInfo"] = billingInfo
 obj["nextBillingInfo"] = billingInfo
+obj["name"] = configurationId
+obj["product"] = fmt.Sprintf("projects/%s/locations/%s/products/%s", project, region, product)
 
 if _, ok := obj["displayName"]; !ok {
-    obj["displayName"] = "Managed by Terraform"
+    obj["displayName"] = configurationId + "-terraform"
 }
 
-delete(obj, "licenseCount")
+delete(obj, "license_count")
+delete(obj, "active")
 return obj, nil
