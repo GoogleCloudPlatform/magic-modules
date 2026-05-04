@@ -1,0 +1,1473 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Asset
+description: Description
+base_url: projects/{{project}}/locations/{{location}}/assets/{{asset}}
+self_link: projects/{{project}}/locations/{{location}}/assets/{{asset}}
+create_url: projects/{{project}}/locations/{{location}}/assets/{{asset}}=?updateMask=*
+update_mask: true
+create_verb: PATCH
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/assets/{{asset}}
+exclude_delete: true
+autogen_status: QXNzZXQ=
+examples: []
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: asset
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: assignedGroups
+    type: Array
+    description: The list of groups that the asset is assigned to.
+    output: true
+    item_type:
+      type: String
+  - name: attributes
+    type: KeyValuePairs
+    description: Generic asset attributes.
+  - name: createTime
+    type: String
+    description: The timestamp when the asset was created.
+    output: true
+  - name: databaseDeploymentDetails
+    type: NestedObject
+    description: The details of a database deployment asset.
+    properties:
+      - name: aggregatedStats
+        type: NestedObject
+        description: Aggregated stats for the database deployment.
+        properties:
+          - name: databaseCount
+            type: Integer
+            description: The number of databases in the deployment.
+            output: true
+      - name: awsRds
+        type: NestedObject
+        description: Specific details for an AWS RDS database deployment.
+        properties: []
+      - name: edition
+        type: String
+        description: The database deployment edition.
+      - name: generatedId
+        type: String
+        description: The database deployment generated ID.
+      - name: manualUniqueId
+        type: String
+        description: A manual unique ID set by the user.
+      - name: mysql
+        type: NestedObject
+        description: Specific details for a Mysql database deployment.
+        properties:
+          - name: plugins
+            type: Array
+            description: List of MySql plugins.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: enabled
+                  type: Boolean
+                  required: true
+                  description: The plugin is active.
+                - name: plugin
+                  type: String
+                  required: true
+                  description: The plugin name.
+                - name: version
+                  type: String
+                  required: true
+                  description: The plugin version.
+          - name: properties
+            type: Array
+            description: List of MySql properties.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: enabled
+                  type: Boolean
+                  required: true
+                  description: The property is enabled.
+                - name: numericValue
+                  type: String
+                  required: true
+                  description: The property numeric value.
+                - name: property
+                  type: String
+                  required: true
+                  description: The property name.
+          - name: resourceGroupsCount
+            type: Integer
+            description: Number of resource groups.
+          - name: variables
+            type: Array
+            description: List of MySql variables.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: category
+                  type: String
+                  required: true
+                  description: The variable category.
+                - name: value
+                  type: String
+                  required: true
+                  description: The variable value.
+                - name: variable
+                  type: String
+                  required: true
+                  description: The variable name.
+      - name: postgresql
+        type: NestedObject
+        description: Specific details for a PostgreSQL database deployment.
+        properties:
+          - name: properties
+            type: Array
+            description: List of PostgreSql properties.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: enabled
+                  type: Boolean
+                  required: true
+                  description: The property is enabled.
+                - name: numericValue
+                  type: String
+                  required: true
+                  description: The property numeric value.
+                - name: property
+                  type: String
+                  required: true
+                  description: The property name.
+          - name: settings
+            type: Array
+            description: List of PostgreSql settings.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: boolValue
+                  type: Boolean
+                  required: true
+                  description: The setting boolean value.
+                - name: intValue
+                  type: String
+                  required: true
+                  description: The setting int value.
+                - name: realValue
+                  type: Double
+                  required: true
+                  description: The setting real value.
+                - name: setting
+                  type: String
+                  required: true
+                  description: The setting name.
+                - name: source
+                  type: String
+                  required: true
+                  description: The setting source.
+                - name: stringValue
+                  type: String
+                  required: true
+                  description: |-
+                    The setting string value.
+                    Notice that enum values are stored as strings.
+                - name: unit
+                  type: String
+                  description: The setting unit.
+      - name: sqlServer
+        type: NestedObject
+        description: Specific details for a Microsoft SQL Server database deployment.
+        properties:
+          - name: features
+            type: Array
+            description: List of SQL Server features.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: enabled
+                  type: Boolean
+                  required: true
+                  description: Field enabled is set when a feature is used on the source deployment.
+                - name: featureName
+                  type: String
+                  required: true
+                  description: The feature name.
+          - name: serverFlags
+            type: Array
+            description: List of SQL Server server flags.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: serverFlagName
+                  type: String
+                  required: true
+                  description: The server flag name.
+                - name: value
+                  type: String
+                  required: true
+                  description: The server flag value set by the user.
+                - name: valueInUse
+                  type: String
+                  required: true
+                  description: |-
+                    The server flag actual value.
+                    If `value_in_use` is different from `value` it means that either the
+                    configuration change was not applied or it is an expected behavior. See SQL
+                    Server documentation for more details.
+          - name: traceFlags
+            type: Array
+            description: List of SQL Server trace flags.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: scope
+                  type: String
+                  required: true
+                  description: |-
+                    The trace flag scope.
+                    Possible values:
+                    OFF
+                    GLOBAL
+                    SESSION
+                - name: traceFlagName
+                  type: String
+                  required: true
+                  description: The trace flag name.
+      - name: topology
+        type: NestedObject
+        description: Details of database deployment's topology.
+        properties:
+          - name: coreCount
+            type: Integer
+            description: Number of total logical cores.
+          - name: coreLimit
+            type: Integer
+            description: Number of total logical cores limited by db deployment.
+          - name: diskAllocatedBytes
+            type: String
+            description: Disk allocated in bytes.
+          - name: diskUsedBytes
+            type: String
+            description: Disk used in bytes.
+          - name: instances
+            type: Array
+            description: List of database instances.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: instanceName
+                  type: String
+                  description: The instance's name.
+                - name: network
+                  type: NestedObject
+                  description: Network details of a database instance.
+                  properties:
+                    - name: hostNames
+                      type: Array
+                      description: The instance's host names.
+                      item_type:
+                        type: String
+                    - name: ipAddresses
+                      type: Array
+                      description: The instance's IP addresses.
+                      item_type:
+                        type: String
+                    - name: primaryMacAddress
+                      type: String
+                      description: The instance's primary MAC address.
+                - name: role
+                  type: String
+                  description: |-
+                    The instance role in the database engine.
+                    Possible values:
+                    PRIMARY
+                    SECONDARY
+                    ARBITER
+          - name: memoryBytes
+            type: String
+            description: Total memory in bytes.
+          - name: memoryLimitBytes
+            type: String
+            description: Total memory in bytes limited by db deployment.
+          - name: physicalCoreCount
+            type: Integer
+            description: Number of total physical cores.
+          - name: physicalCoreLimit
+            type: Integer
+            description: Number of total physical cores limited by db deployment.
+      - name: version
+        type: String
+        description: The database deployment version.
+  - name: databaseDetails
+    type: NestedObject
+    description: Details of a logical database.
+    properties:
+      - name: allocatedStorageBytes
+        type: String
+        description: The allocated storage for the database in bytes.
+      - name: databaseName
+        type: String
+        required: true
+        description: The name of the database.
+      - name: parentDatabaseDeployment
+        type: NestedObject
+        required: true
+        description: The identifiers of the parent database deployment.
+        properties:
+          - name: generatedId
+            type: String
+            description: The parent database deployment generated ID.
+          - name: manualUniqueId
+            type: String
+            description: The parent database deployment optional manual unique ID set by the user.
+      - name: schemas
+        type: Array
+        description: The database schemas.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: mysql
+              type: NestedObject
+              description: Specific details for a Mysql database.
+              properties:
+                - name: storageEngines
+                  type: Array
+                  description: Mysql storage engine tables.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: encryptedTableCount
+                        type: Integer
+                        description: The number of encrypted tables.
+                      - name: engine
+                        type: String
+                        required: true
+                        description: |-
+                          The storage engine.
+                          Possible values:
+                          INNODB
+                          MYISAM
+                          MEMORY
+                          CSV
+                          ARCHIVE
+                          BLACKHOLE
+                          NDB
+                          MERGE
+                          FEDERATED
+                          EXAMPLE
+                          OTHER
+                      - name: tableCount
+                        type: Integer
+                        description: The number of tables.
+            - name: objects
+              type: Array
+              description: List of details of objects by category.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: category
+                    type: String
+                    description: |-
+                      The category of the objects.
+                      Possible values:
+                      TABLE
+                      INDEX
+                      CONSTRAINTS
+                      VIEWS
+                      SOURCE_CODE
+                      OTHER
+                  - name: count
+                    type: String
+                    description: The number of objects.
+            - name: postgresql
+              type: NestedObject
+              description: Specific details for a PostgreSql schema.
+              properties:
+                - name: foreignTablesCount
+                  type: Integer
+                  description: PostgreSql foreign tables.
+                - name: postgresqlExtensions
+                  type: Array
+                  description: PostgreSql extensions.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: extension
+                        type: String
+                        required: true
+                        description: The extension name.
+                      - name: version
+                        type: String
+                        required: true
+                        description: The extension version.
+            - name: schemaName
+              type: String
+              required: true
+              description: The name of the schema.
+            - name: sqlServer
+              type: NestedObject
+              description: Specific details for a SqlServer database.
+              properties:
+                - name: clrObjectCount
+                  type: Integer
+                  description: SqlServer number of CLR objects.
+            - name: tablesSizeBytes
+              type: String
+              description: The total size of tables in bytes.
+  - name: hidden
+    type: Boolean
+    description: Indicates if the asset is hidden.
+  - name: hideReason
+    type: String
+    description: An optional reason for marking this asset as hidden.
+  - name: hideTime
+    type: String
+    description: The timestamp when the asset was marked as hidden.
+    output: true
+  - name: insightList
+    type: NestedObject
+    description: Message containing insights list.
+    properties:
+      - name: insights
+        type: Array
+        description: Insights of the list.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: genericInsight
+              type: NestedObject
+              description: A generic insight about an asset.
+              properties:
+                - name: additionalInformation
+                  type: Array
+                  description: |-
+                    Additional information about the insight, each entry can be a logical entry
+                    and must make sense if it is displayed with line breaks between each entry.
+                    Text can contain md style links.
+                  output: true
+                  item_type:
+                    type: String
+                - name: defaultMessage
+                  type: String
+                  description: |-
+                    In case message_code is not yet known by the client default_message will be
+                    the message to be used instead.
+                  output: true
+                - name: messageId
+                  type: String
+                  description: |-
+                    Represents a globally unique message id for
+                    this insight, can be used for localization purposes, in case message_code
+                    is not yet known by the client use default_message instead.
+                  output: true
+            - name: migrationInsight
+              type: NestedObject
+              description: An insight about potential migrations for an asset.
+              properties:
+                - name: computeEngineTarget
+                  type: NestedObject
+                  description: Compute engine migration target.
+                  properties:
+                    - name: shape
+                      type: NestedObject
+                      description: Compute Engine target shape descriptor.
+                      properties:
+                        - name: logicalCoreCount
+                          type: Integer
+                          description: Number of logical cores.
+                          output: true
+                        - name: machineType
+                          type: String
+                          description: Compute Engine machine type.
+                          output: true
+                        - name: memoryMb
+                          type: Integer
+                          description: Memory in mebibytes.
+                        - name: physicalCoreCount
+                          type: Integer
+                          description: Number of physical cores.
+                        - name: series
+                          type: String
+                          description: Compute Engine machine series.
+                          output: true
+                        - name: storage
+                          type: Array
+                          description: Compute Engine storage. Never empty.
+                          output: true
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: sizeGb
+                                type: Integer
+                                description: Disk size in GiB.
+                                output: true
+                              - name: type
+                                type: String
+                                description: |-
+                                  Possible values:
+                                  PERSISTENT_DISK_TYPE_STANDARD
+                                  PERSISTENT_DISK_TYPE_BALANCED
+                                  PERSISTENT_DISK_TYPE_SSD
+                - name: fit
+                  type: NestedObject
+                  description: Describes the fit level of an asset for migration to a specific target.
+                  properties:
+                    - name: fitLevel
+                      type: String
+                      description: |-
+                        Fit level.
+                        Possible values:
+                        FIT
+                        NO_FIT
+                        REQUIRES_EFFORT
+                      output: true
+      - name: updateTime
+        type: String
+        description: Update timestamp.
+        output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: machineDetails
+    type: NestedObject
+    description: Details of a machine.
+    properties:
+      - name: architecture
+        type: NestedObject
+        description: Details of the machine architecture.
+        properties:
+          - name: bios
+            type: NestedObject
+            description: Details about the BIOS.
+            properties:
+              - name: biosName
+                type: String
+                description: |-
+                  BIOS name.
+                  This fields is deprecated. Please use the `id` field instead.
+              - name: id
+                type: String
+                description: BIOS ID.
+              - name: manufacturer
+                type: String
+                description: BIOS manufacturer.
+              - name: releaseDate
+                type: NestedObject
+                description: |-
+                  Represents a whole or partial calendar date, such as a birthday. The time of
+                  day and time zone are either specified elsewhere or are insignificant. The
+                  date is relative to the Gregorian Calendar. This can represent one of the
+                  following:
+
+                  * A full date, with non-zero year, month, and day values.
+                  * A month and day, with a zero year (for example, an anniversary).
+                  * A year on its own, with a zero month and a zero day.
+                  * A year and month, with a zero day (for example, a credit card expiration
+                  date).
+
+                  Related types:
+
+                  * google.type.TimeOfDay
+                  * google.type.DateTime
+                  * google.protobuf.Timestamp
+                properties:
+                  - name: day
+                    type: Integer
+                    description: |-
+                      Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+                      to specify a year by itself or a year and month where the day isn't
+                      significant.
+                  - name: month
+                    type: Integer
+                    description: |-
+                      Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+                      month and day.
+                  - name: year
+                    type: Integer
+                    description: |-
+                      Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+                      a year.
+              - name: smbiosUuid
+                type: String
+                description: SMBIOS UUID.
+              - name: version
+                type: String
+                description: BIOS version.
+          - name: cpuArchitecture
+            type: String
+            description: CPU architecture, e.g., "x64-based PC", "x86_64", "i686" etc.
+          - name: cpuManufacturer
+            type: String
+            description: CPU manufacturer, e.g., "Intel", "AMD".
+          - name: cpuName
+            type: String
+            description: CPU name, e.g., "Intel Xeon E5-2690", "AMD EPYC 7571" etc.
+          - name: cpuSocketCount
+            type: Integer
+            description: Number of processor sockets allocated to the machine.
+          - name: cpuThreadCount
+            type: Integer
+            description: |-
+              Deprecated: use MachineDetails.core_count instead.
+              Number of CPU threads allocated to the machine.
+          - name: firmwareType
+            type: String
+            description: |-
+              Firmware type.
+              Possible values:
+              BIOS
+              EFI
+          - name: hyperthreading
+            type: String
+            description: |-
+              CPU hyper-threading support.
+              Possible values:
+              DISABLED
+              ENABLED
+          - name: vendor
+            type: String
+            description: Hardware vendor.
+      - name: coreCount
+        type: Integer
+        description: Number of logical CPU cores in the machine. Must be non-negative.
+      - name: createTime
+        type: String
+        description: Machine creation time.
+      - name: diskPartitions
+        type: NestedObject
+        description: Disk partition details.
+        properties:
+          - name: freeSpaceBytes
+            type: String
+            description: Total free space of all partitions.
+            output: true
+          - name: partitions
+            type: NestedObject
+            description: Disk partition list.
+            properties:
+              - name: entries
+                type: Array
+                description: Partition entries.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: capacityBytes
+                      type: String
+                      description: Partition capacity.
+                    - name: fileSystem
+                      type: String
+                      description: Partition file system.
+                    - name: freeBytes
+                      type: String
+                      description: Partition free space.
+                    - name: mountPoint
+                      type: String
+                      description: Mount point (Linux/Windows) or drive letter (Windows).
+                    - name: subPartitions
+                      type: String
+                      description: Recursive field represented as JSON
+                      custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+                      custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                    - name: type
+                      type: String
+                      description: Partition type.
+                    - name: uuid
+                      type: String
+                      description: Partition UUID.
+          - name: totalCapacityBytes
+            type: String
+            description: Total capacity of all partitions.
+            output: true
+      - name: disks
+        type: NestedObject
+        description: Details of machine disks.
+        properties:
+          - name: disks
+            type: NestedObject
+            description: VM disks.
+            properties:
+              - name: entries
+                type: Array
+                description: Disk entries.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: capacityBytes
+                      type: String
+                      description: Disk capacity.
+                    - name: diskLabel
+                      type: String
+                      description: Disk label.
+                    - name: diskLabelType
+                      type: String
+                      description: Disk label type (e.g. BIOS/GPT)
+                    - name: freeBytes
+                      type: String
+                      description: Disk free space.
+                    - name: hwAddress
+                      type: String
+                      description: Disk hardware address (e.g. 0:1 for SCSI).
+                    - name: interfaceType
+                      type: String
+                      description: |-
+                        Disks interface type.
+                        Possible values:
+                        IDE
+                        SATA
+                        SAS
+                        SCSI
+                        NVME
+                        FC
+                        ISCSI
+                    - name: partitions
+                      type: NestedObject
+                      description: Disk partition list.
+                      properties:
+                        - name: entries
+                          type: Array
+                          description: Partition entries.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: capacityBytes
+                                type: String
+                                description: Partition capacity.
+                              - name: fileSystem
+                                type: String
+                                description: Partition file system.
+                              - name: freeBytes
+                                type: String
+                                description: Partition free space.
+                              - name: mountPoint
+                                type: String
+                                description: Mount point (Linux/Windows) or drive letter (Windows).
+                              - name: subPartitions
+                                type: String
+                                description: Recursive field represented as JSON
+                                custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+                                custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                              - name: type
+                                type: String
+                                description: Partition type.
+                              - name: uuid
+                                type: String
+                                description: Partition UUID.
+                    - name: vmware
+                      type: NestedObject
+                      description: VMware disk config details.
+                      properties:
+                        - name: backingType
+                          type: String
+                          description: |-
+                            VMDK backing type.
+                            Possible values:
+                            BACKING_TYPE_FLAT_V1
+                            BACKING_TYPE_FLAT_V2
+                            BACKING_TYPE_PMEM
+                            BACKING_TYPE_RDM_V1
+                            BACKING_TYPE_RDM_V2
+                            BACKING_TYPE_SESPARSE
+                            BACKING_TYPE_SESPARSE_V1
+                            BACKING_TYPE_SESPARSE_V2
+                        - name: rdmCompatibility
+                          type: String
+                          description: |-
+                            RDM compatibility mode.
+                            Possible values:
+                            PHYSICAL_COMPATIBILITY
+                            VIRTUAL_COMPATIBILITY
+                        - name: shared
+                          type: Boolean
+                          description: Is VMDK shared with other VMs.
+                        - name: vmdkMode
+                          type: String
+                          description: |-
+                            VMDK disk mode.
+                            Possible values:
+                            DEPENDENT
+                            INDEPENDENT_PERSISTENT
+                            INDEPENDENT_NONPERSISTENT
+          - name: totalCapacityBytes
+            type: String
+            description: Disk total Capacity.
+          - name: totalFreeBytes
+            type: String
+            description: Total disk free space.
+      - name: guestOs
+        type: NestedObject
+        description: Information from Guest-level collections.
+        properties:
+          - name: config
+            type: NestedObject
+            description: Guest OS config information.
+            properties:
+              - name: fstab
+                type: NestedObject
+                description: Fstab content.
+                properties:
+                  - name: entries
+                    type: Array
+                    description: Fstab entries.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: file
+                          type: String
+                          description: The mount point for the filesystem.
+                        - name: freq
+                          type: Integer
+                          description: Used by dump to determine which filesystems need to be dumped.
+                        - name: mntops
+                          type: String
+                          description: Mount options associated with the filesystem.
+                        - name: passno
+                          type: Integer
+                          description: |-
+                            Used by the fsck(8) program to determine the order in which filesystem
+                            checks are done at reboot time.
+                        - name: spec
+                          type: String
+                          description: The block special device or remote filesystem to be mounted.
+                        - name: vfstype
+                          type: String
+                          description: The type of the filesystem.
+              - name: hosts
+                type: NestedObject
+                description: Hosts content.
+                properties:
+                  - name: entries
+                    type: Array
+                    description: Hosts entries.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: hostNames
+                          type: Array
+                          description: List of host names / aliases.
+                          item_type:
+                            type: String
+                        - name: ip
+                          type: String
+                          description: IP (raw, IPv4/6 agnostic).
+              - name: issue
+                type: String
+                description: OS issue (typically /etc/issue in Linux).
+              - name: nfsExports
+                type: NestedObject
+                description: NFS exports.
+                properties:
+                  - name: entries
+                    type: Array
+                    description: NFS export entries.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: exportDirectory
+                          type: String
+                          description: The directory being exported.
+                        - name: hosts
+                          type: Array
+                          description: The hosts or networks to which the export is being shared.
+                          item_type:
+                            type: String
+              - name: selinuxMode
+                type: String
+                description: |-
+                  Security-Enhanced Linux (SELinux) mode.
+                  Possible values:
+                  SE_LINUX_MODE_DISABLED
+                  SE_LINUX_MODE_PERMISSIVE
+                  SE_LINUX_MODE_ENFORCING
+          - name: family
+            type: String
+            description: |-
+              Possible values:
+              OS_FAMILY_UNKNOWN
+              OS_FAMILY_WINDOWS
+              OS_FAMILY_LINUX
+              OS_FAMILY_UNIX
+          - name: osName
+            type: String
+            description: The name of the operating system.
+          - name: runtime
+            type: NestedObject
+            description: Guest OS runtime information.
+            properties:
+              - name: domain
+                type: String
+                description: Domain, e.g. c.stratozone-development.internal.
+              - name: installedApps
+                type: NestedObject
+                description: Guest installed application list.
+                properties:
+                  - name: entries
+                    type: Array
+                    description: Application entries.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: applicationName
+                          type: String
+                          description: Installed application name.
+                        - name: installTime
+                          type: String
+                          description: The time when the application was installed.
+                        - name: licenses
+                          type: Array
+                          description: License strings associated with the installed application.
+                          item_type:
+                            type: String
+                        - name: path
+                          type: String
+                          description: Source path.
+                        - name: vendor
+                          type: String
+                          description: Installed application vendor.
+                        - name: version
+                          type: String
+                          description: Installed application version.
+              - name: lastBootTime
+                type: String
+                description: Last time the OS was booted.
+              - name: machineName
+                type: String
+                description: Machine name.
+              - name: network
+                type: NestedObject
+                description: Runtime networking information.
+                properties:
+                  - name: connections
+                    type: NestedObject
+                    description: Network connection list.
+                    properties:
+                      - name: entries
+                        type: Array
+                        description: Network connection entries.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: localIpAddress
+                              type: String
+                              description: Local IP address.
+                            - name: localPort
+                              type: Integer
+                              description: Local port.
+                            - name: pid
+                              type: String
+                              description: Process ID.
+                            - name: processName
+                              type: String
+                              description: Process or service name.
+                            - name: protocol
+                              type: String
+                              description: Connection protocol (e.g. TCP/UDP).
+                            - name: remoteIpAddress
+                              type: String
+                              description: Remote IP address.
+                            - name: remotePort
+                              type: Integer
+                              description: Remote port.
+                            - name: state
+                              type: String
+                              description: |-
+                                Network connection state.
+                                Possible values:
+                                OPENING
+                                OPEN
+                                LISTEN
+                                CLOSING
+                                CLOSED
+                  - name: scanTime
+                    type: String
+                    description: Time of the last network scan.
+              - name: openFileList
+                type: NestedObject
+                description: Open file list.
+                properties:
+                  - name: entries
+                    type: Array
+                    description: Open file details entries.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: command
+                          type: String
+                          description: Opened file command.
+                        - name: filePath
+                          type: String
+                          description: Opened file file path.
+                        - name: fileType
+                          type: String
+                          description: Opened file file type.
+                        - name: user
+                          type: String
+                          description: Opened file user.
+              - name: processes
+                type: NestedObject
+                description: List of running guest OS processes.
+                properties:
+                  - name: entries
+                    type: Array
+                    description: Running process entries.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: attributes
+                          type: KeyValuePairs
+                          description: Process extended attributes.
+                        - name: cmdline
+                          type: String
+                          description: Process full command line.
+                        - name: exePath
+                          type: String
+                          description: Process binary path.
+                        - name: pid
+                          type: String
+                          description: Process ID.
+                        - name: user
+                          type: String
+                          description: User running the process.
+              - name: services
+                type: NestedObject
+                description: List of running guest OS services.
+                properties:
+                  - name: entries
+                    type: Array
+                    description: Running service entries.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: cmdline
+                          type: String
+                          description: Service command line.
+                        - name: exePath
+                          type: String
+                          description: Service binary path.
+                        - name: pid
+                          type: String
+                          description: Service pid.
+                        - name: serviceName
+                          type: String
+                          description: Service name.
+                        - name: startMode
+                          type: String
+                          description: |-
+                            Service start mode (OS-agnostic).
+                            Possible values:
+                            BOOT
+                            SYSTEM
+                            AUTO
+                            MANUAL
+                            DISABLED
+                        - name: state
+                          type: String
+                          description: |-
+                            Service state (OS-agnostic).
+                            Possible values:
+                            ACTIVE
+                            PAUSED
+                            STOPPED
+          - name: version
+            type: String
+            description: The version of the operating system.
+      - name: machineName
+        type: String
+        description: Machine name.
+      - name: memoryMb
+        type: Integer
+        description: The amount of memory in the machine. Must be non-negative.
+      - name: network
+        type: NestedObject
+        description: Details of network adapters and settings.
+        properties:
+          - name: adapters
+            type: NestedObject
+            description: List of network adapters.
+            properties:
+              - name: entries
+                type: Array
+                description: Network adapter entries.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: adapterType
+                      type: String
+                      description: Network adapter type (e.g. VMXNET3).
+                    - name: addresses
+                      type: NestedObject
+                      description: List of allocated/assigned network addresses.
+                      properties:
+                        - name: entries
+                          type: Array
+                          description: Network address entries.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: assignment
+                                type: String
+                                description: |-
+                                  Whether DHCP is used to assign addresses.
+                                  Possible values:
+                                  ADDRESS_ASSIGNMENT_STATIC
+                                  ADDRESS_ASSIGNMENT_DHCP
+                              - name: bcast
+                                type: String
+                                description: Broadcast address.
+                              - name: fqdn
+                                type: String
+                                description: Fully qualified domain name.
+                              - name: ipAddress
+                                type: String
+                                description: Assigned or configured IP Address.
+                              - name: subnetMask
+                                type: String
+                                description: Subnet mask.
+                    - name: macAddress
+                      type: String
+                      description: MAC address.
+          - name: defaultGateway
+            type: String
+            description: Default gateway address.
+          - name: primaryIpAddress
+            type: String
+            description: The primary IP address of the machine.
+          - name: primaryMacAddress
+            type: String
+            description: |-
+              MAC address of the machine.
+              This property is used to uniqly identify the machine.
+          - name: publicIpAddress
+            type: String
+            description: The public IP address of the machine.
+      - name: platform
+        type: NestedObject
+        description: Information about the platform.
+        properties:
+          - name: awsEc2Details
+            type: NestedObject
+            description: AWS EC2 specific details.
+            properties:
+              - name: hyperthreading
+                type: String
+                description: |-
+                  Possible values:
+                  HYPERTHREADING_STATUS_DISABLED
+                  HYPERTHREADING_STATUS_ENABLED
+              - name: location
+                type: String
+                description: The location of the machine in the AWS format.
+              - name: machineTypeLabel
+                type: String
+                description: AWS platform's machine type label.
+          - name: azureVmDetails
+            type: NestedObject
+            description: Azure VM specific details.
+            properties:
+              - name: hyperthreading
+                type: String
+                description: |-
+                  Possible values:
+                  HYPERTHREADING_STATUS_DISABLED
+                  HYPERTHREADING_STATUS_ENABLED
+              - name: location
+                type: String
+                description: The location of the machine in the Azure format.
+              - name: machineTypeLabel
+                type: String
+                description: Azure platform's machine type label.
+              - name: provisioningState
+                type: String
+                description: Azure platform's provisioning state.
+          - name: genericDetails
+            type: NestedObject
+            description: Generic platform details.
+            properties:
+              - name: hyperthreading
+                type: String
+                description: |-
+                  Possible values:
+                  HYPERTHREADING_STATUS_DISABLED
+                  HYPERTHREADING_STATUS_ENABLED
+              - name: location
+                type: String
+                description: |-
+                  Free text representation of the machine location.
+                  The format of this field should not be relied on. Different VMs in the same
+                  location may have different string values for this field.
+          - name: physicalDetails
+            type: NestedObject
+            description: Platform specific details for Physical Machines.
+            properties:
+              - name: hyperthreading
+                type: String
+                description: |-
+                  Possible values:
+                  HYPERTHREADING_STATUS_DISABLED
+                  HYPERTHREADING_STATUS_ENABLED
+              - name: location
+                type: String
+                description: |-
+                  Free text representation of the machine location.
+                  The format of this field should not be relied on. Different machines in the
+                  same location may have different string values for this field.
+          - name: vmwareDetails
+            type: NestedObject
+            description: VMware specific details.
+            properties:
+              - name: esxHyperthreading
+                type: String
+                description: |-
+                  Possible values:
+                  HYPERTHREADING_STATUS_DISABLED
+                  HYPERTHREADING_STATUS_ENABLED
+              - name: esxVersion
+                type: String
+                description: ESX version.
+              - name: osid
+                type: String
+                description: |-
+                  VMware os enum -
+                  https://vdc-repo.vmware.com/vmwb-repository/dcr-public/da47f910-60ac-438b-8b9b-6122f4d14524/16b7274a-bf8b-4b4c-a05e-746f2aa93c8c/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html.
+              - name: vcenterFolder
+                type: String
+                description: Folder name in vCenter where asset resides.
+              - name: vcenterUri
+                type: String
+                description: vCenter URI used in collection.
+              - name: vcenterVersion
+                type: String
+                description: vCenter version.
+              - name: vcenterVmId
+                type: String
+                description: vCenter VM ID.
+      - name: powerState
+        type: String
+        description: |-
+          Power state of the machine.
+          Possible values:
+          PENDING
+          ACTIVE
+          SUSPENDING
+          SUSPENDED
+          DELETING
+          DELETED
+      - name: uuid
+        type: String
+        description: Machine unique identifier.
+  - name: name
+    type: String
+    description: The full name of the asset.
+    output: true
+  - name: performanceData
+    type: NestedObject
+    description: Performance data for an asset.
+    properties:
+      - name: dailyResourceUsageAggregations
+        type: Array
+        description: |-
+          Daily resource usage aggregations.
+          Contains all of the data available for an asset, up to the last 420 days.
+          Aggregations are sorted from oldest to most recent.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: cpu
+              type: NestedObject
+              description: Statistical aggregation of CPU usage.
+              properties:
+                - name: utilizationPercentage
+                  type: NestedObject
+                  description: Statistical aggregation of samples for a single resource usage.
+                  properties:
+                    - name: average
+                      type: Double
+                      description: Average usage value.
+                    - name: median
+                      type: Double
+                      description: Median usage value.
+                    - name: ninteyFifthPercentile
+                      type: Double
+                      description: 95th percentile usage value.
+                    - name: peak
+                      type: Double
+                      description: Peak usage value.
+            - name: date
+              type: NestedObject
+              description: |-
+                Represents a whole or partial calendar date, such as a birthday. The time of
+                day and time zone are either specified elsewhere or are insignificant. The
+                date is relative to the Gregorian Calendar. This can represent one of the
+                following:
+
+                * A full date, with non-zero year, month, and day values.
+                * A month and day, with a zero year (for example, an anniversary).
+                * A year on its own, with a zero month and a zero day.
+                * A year and month, with a zero day (for example, a credit card expiration
+                date).
+
+                Related types:
+
+                * google.type.TimeOfDay
+                * google.type.DateTime
+                * google.protobuf.Timestamp
+              properties:
+                - name: day
+                  type: Integer
+                  description: |-
+                    Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+                    to specify a year by itself or a year and month where the day isn't
+                    significant.
+                - name: month
+                  type: Integer
+                  description: |-
+                    Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+                    month and day.
+                - name: year
+                  type: Integer
+                  description: |-
+                    Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+                    a year.
+            - name: disk
+              type: NestedObject
+              description: Statistical aggregation of disk usage.
+              properties:
+                - name: iops
+                  type: NestedObject
+                  description: Statistical aggregation of samples for a single resource usage.
+                  properties:
+                    - name: average
+                      type: Double
+                      description: Average usage value.
+                    - name: median
+                      type: Double
+                      description: Median usage value.
+                    - name: ninteyFifthPercentile
+                      type: Double
+                      description: 95th percentile usage value.
+                    - name: peak
+                      type: Double
+                      description: Peak usage value.
+                - name: readIops
+                  type: NestedObject
+                  description: Statistical aggregation of samples for a single resource usage.
+                  properties:
+                    - name: average
+                      type: Double
+                      description: Average usage value.
+                    - name: median
+                      type: Double
+                      description: Median usage value.
+                    - name: ninteyFifthPercentile
+                      type: Double
+                      description: 95th percentile usage value.
+                    - name: peak
+                      type: Double
+                      description: Peak usage value.
+                - name: writeIops
+                  type: NestedObject
+                  description: Statistical aggregation of samples for a single resource usage.
+                  properties:
+                    - name: average
+                      type: Double
+                      description: Average usage value.
+                    - name: median
+                      type: Double
+                      description: Median usage value.
+                    - name: ninteyFifthPercentile
+                      type: Double
+                      description: 95th percentile usage value.
+                    - name: peak
+                      type: Double
+                      description: Peak usage value.
+            - name: memory
+              type: NestedObject
+              description: Statistical aggregation of memory usage.
+              properties:
+                - name: utilizationPercentage
+                  type: NestedObject
+                  description: Statistical aggregation of samples for a single resource usage.
+                  properties:
+                    - name: average
+                      type: Double
+                      description: Average usage value.
+                    - name: median
+                      type: Double
+                      description: Median usage value.
+                    - name: ninteyFifthPercentile
+                      type: Double
+                      description: 95th percentile usage value.
+                    - name: peak
+                      type: Double
+                      description: Peak usage value.
+            - name: network
+              type: NestedObject
+              description: Statistical aggregation of network usage.
+              properties:
+                - name: egressBps
+                  type: NestedObject
+                  description: Statistical aggregation of samples for a single resource usage.
+                  properties:
+                    - name: average
+                      type: Double
+                      description: Average usage value.
+                    - name: median
+                      type: Double
+                      description: Median usage value.
+                    - name: ninteyFifthPercentile
+                      type: Double
+                      description: 95th percentile usage value.
+                    - name: peak
+                      type: Double
+                      description: Peak usage value.
+                - name: ingressBps
+                  type: NestedObject
+                  description: Statistical aggregation of samples for a single resource usage.
+                  properties:
+                    - name: average
+                      type: Double
+                      description: Average usage value.
+                    - name: median
+                      type: Double
+                      description: Median usage value.
+                    - name: ninteyFifthPercentile
+                      type: Double
+                      description: 95th percentile usage value.
+                    - name: peak
+                      type: Double
+                      description: Peak usage value.
+  - name: sources
+    type: Array
+    description: The list of sources contributing to the asset.
+    output: true
+    item_type:
+      type: String
+  - name: title
+    type: String
+    description: Server generated human readable name of the asset.
+    output: true
+  - name: updateTime
+    type: String
+    description: The timestamp when the asset was last updated.
+    output: true
