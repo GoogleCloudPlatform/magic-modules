@@ -19,9 +19,10 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		return err
 	}
 
-	billingProject := ""
 {{- if $.HasProject }}
-	billingProject = project
+	billingProject := project
+{{- else }}
+	billingProject := ""
 {{- end }}
 	if bp, err := tpgresource.GetBillingProject(resourceData, config); err == nil {
 		billingProject = bp
