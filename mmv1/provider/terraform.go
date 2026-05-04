@@ -200,17 +200,20 @@ func (t *Terraform) GenerateResourceMetadataFile(object api.Resource, targetFile
 	templateData.GenerateMetadataFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
-	eligibleExample := false
+func (t *Terraform) hasEligibleExample(object api.Resource) bool {
 	for _, example := range object.Examples {
-		if !example.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
-				eligibleExample = true
-				break
-			}
+		if example.ExcludeTest {
+			continue
+		}
+		if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+			return true
 		}
 	}
-	if !eligibleExample {
+	return false
+}
+
+func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !t.hasEligibleExample(object) {
 		return
 	}
 
