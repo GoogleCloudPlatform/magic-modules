@@ -128,8 +128,6 @@ parameters:
       [google_compute_image data source](/docs/providers/google/d/compute_image.html).
       For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
       These images can be referred by family name here.
-
-      **Note:** This field is currently behind an allowlist and requires special permission to use.
     api_name: sourceImage
     immutable: true
     diff_suppress_func: 'DiskImageDiffSuppress'
@@ -182,8 +180,6 @@ properties:
     description: |
       The customer-supplied encryption key of the source image. Required if
       the source image is protected by a customer-supplied encryption key.
-
-      **Note:** This field is currently behind an allowlist and requires special permission to use.
     immutable: true
     ignore_read: true
     properties:
@@ -226,8 +222,6 @@ properties:
       disk. For example, if you created the persistent disk from an image
       that was later deleted and recreated under the same name, the source
       image ID would identify the exact version of the image that was used.
-
-      **Note:** This field is currently behind an allowlist and requires special permission to use.
     output: true
   - name: 'sourceSnapshotEncryptionKey'
     type: NestedObject
