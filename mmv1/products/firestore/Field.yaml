@@ -178,9 +178,8 @@ properties:
   - name: 'ttlConfig'
     type: NestedObject
     description: |
-       The TTL configuration for this Field. If set to an empty block (i.e. `ttl_config {}`), a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
+      The TTL configuration for this Field. If set to an empty (i.e. `ttl_config {}`) or non-empty block, a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/empty_object_if_set.go.tmpl'
     properties:
       - name: 'state'
         type: Enum
@@ -191,3 +190,8 @@ properties:
           - 'CREATING'
           - 'ACTIVE'
           - 'NEEDS_REPAIR'
+      - name: 'expirationOffset'
+        type: String
+        description: |
+          The offset, relative to the timestamp value from the field, used to determine the document's expiration time. Formatted as the number of seconds followed by 's'. For example, "60s" represents an offset of one minute. The number of seconds must be between 0 and 2147483647 inclusive.
+        immutable: true
