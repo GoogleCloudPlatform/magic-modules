@@ -38,6 +38,14 @@ import (
 	transport_tpg "{{ $.ImportPath }}/transport"
 )
 
+func init() {
+	registry.FrameworkListResource{
+		Name:        "{{ $.TerraformName }}",
+		ProductName: "{{ $.ProductMetadata.Name }}",
+		Func:        New{{ $.ResourceName -}}ListResource,
+	}.Register()
+}
+
 var _ list.ListResource = &{{ $.ResourceName -}}ListResource{}
 
 type {{ $.ResourceName -}}ListResource struct {
