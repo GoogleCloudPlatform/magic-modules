@@ -726,11 +726,8 @@ func (r Resource) ListScopeProperties() []*Type {
 
 func (r Resource) ListResultDisplayNameKeyStrings() []string {
 	var keys []string
-	for _, p := range r.RootProperties() {
-		if p.Name == "display_name" {
-			keys = append(keys, "display_name")
-			break
-		}
+	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "display_name" }) {
+		keys = append(keys, "display_name")
 	}
 	markers := regexp.MustCompile(`\{\{(\w+)\}\}`).FindAllStringSubmatch(r.IdFormat, -1)
 	if len(markers) > 0 {
