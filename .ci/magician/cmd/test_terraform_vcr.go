@@ -71,13 +71,13 @@ type postReplay struct {
 }
 
 type VCRTestTableRow struct {
-	DisplayName       string
-	RecordingStatus   string
-	ReplayingStatus   string
-	RecordingErrorUrl string
-	RecordingLogUrl   string
-	ReplayingErrorUrl string
-	ReplayingLogUrl   string
+	DisplayName                     string
+	RecordingStatus                 string
+	ReplayingAfterRecordingStatus   string
+	RecordingErrorUrl               string
+	RecordingLogUrl                 string
+	ReplayingAfterRecordingErrorUrl string
+	ReplayingAfterRecordingLogUrl   string
 }
 
 type recordReplay struct {
@@ -382,27 +382,31 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 
 		// Expand compound tests to subtests for accurate status matching
 		expandedRecordingResult := subtestResult(recordingResult)
-		expandedReplayingResult := subtestResult(replayingAfterRecordingResult)
+		expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
 
-		// Group tests by status to list them in order: Terminated -> Failing in Recording -> Failing in Re-replaying -> Passed in Both
-		var terminated, failingInRecording, failingInReplaying, passedInBoth []string
+		// Group tests by status to list them in order:
+		// 1. Passed in both Recording and Re-replaying
+		// 2. Passed in Recording but Failing in Re-replaying
+		// 3. Failing in Recording
+		// 4. Terminated
+		var terminated, failingInRecording, failingInReplayingAfterRecording, passedInBoth []string
 
 		for _, t := range attemptedTests {
 			if !contains(expandedRecordingResult.PassedTests, t) && !contains(expandedRecordingResult.FailedTests, t) {
 				terminated = append(terminated, t)
 			} else if contains(expandedRecordingResult.FailedTests, t) {
 				failingInRecording = append(failingInRecording, t)
-			} else if contains(expandedReplayingResult.FailedTests, t) {
-				failingInReplaying = append(failingInReplaying, t)
+			} else if contains(expandedReplayingAfterRecordingResult.FailedTests, t) {
+				failingInReplayingAfterRecording = append(failingInReplayingAfterRecording, t)
 			} else {
 				passedInBoth = append(passedInBoth, t)
 			}
 		}
 
-		sort.Strings(terminated)
-		sort.Strings(failingInRecording)
-		sort.Strings(failingInReplaying)
 		sort.Strings(passedInBoth)
+		sort.Strings(failingInReplayingAfterRecording)
+		sort.Strings(failingInRecording)
+		sort.Strings(terminated)
 
 		logBasePath := fmt.Sprintf("ci-vcr-logs/%s/refs/heads/%s/artifacts/%s", provider.Beta.String(), newBranch, buildID)
 		if buildID == "" {
@@ -412,22 +416,22 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 
 		var testRows []VCRTestTableRow
 		for _, t := range terminated {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingResult))
+			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
 		}
 		for _, t := range failingInRecording {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingResult))
+			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
 		}
-		for _, t := range failingInReplaying {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingResult))
+		for _, t := range failingInReplayingAfterRecording {
+			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
 		}
 		for _, t := range passedInBoth {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingResult))
+			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
 		}
 
 		recordReplayData := recordReplay{
 			TestRows:                      testRows,
 			RecordingResult:               expandedRecordingResult,
-			ReplayingAfterRecordingResult: expandedReplayingResult,
+			ReplayingAfterRecordingResult: expandedReplayingAfterRecordingResult,
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
@@ -790,13 +794,13 @@ func createTableRow(t string, logBaseUrl string, recordingResult, replayingResul
 	}
 
 	if contains(replayingResult.PassedTests, t) {
-		row.ReplayingStatus = "Passed"
+		row.ReplayingAfterRecordingStatus = "Passed"
 	} else if contains(replayingResult.FailedTests, t) {
-		row.ReplayingStatus = "Failed"
-		row.ReplayingErrorUrl = fmt.Sprintf("%s/build-log/replaying_build_after_recording/%s_replaying_test.log", logBaseUrl, compoundTest(t))
-		row.ReplayingLogUrl = fmt.Sprintf("%s/replaying_after_recording/%s.log", logBaseUrl, t)
+		row.ReplayingAfterRecordingStatus = "Failed"
+		row.ReplayingAfterRecordingErrorUrl = fmt.Sprintf("%s/build-log/replaying_build_after_recording/%s_replaying_test.log", logBaseUrl, compoundTest(t))
+		row.ReplayingAfterRecordingLogUrl = fmt.Sprintf("%s/replaying_after_recording/%s.log", logBaseUrl, t)
 	} else {
-		row.ReplayingStatus = "-"
+		row.ReplayingAfterRecordingStatus = "-"
 	}
 
 	return row

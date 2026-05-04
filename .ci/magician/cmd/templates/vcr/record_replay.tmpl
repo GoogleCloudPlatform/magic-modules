@@ -5,7 +5,7 @@
 | Recording Mode | Replaying Rerun | Test Name |
 | :--- | :--- | :--- |
 {{range .TestRows -}}
-| {{symbol .RecordingStatus}}{{if .RecordingErrorUrl}}&nbsp;[Error]({{.RecordingErrorUrl}}){{end}}{{if .RecordingLogUrl}}{{if .RecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.RecordingLogUrl}}){{end}} | {{symbol .ReplayingStatus}}{{if .ReplayingErrorUrl}}&nbsp;[Error]({{.ReplayingErrorUrl}}){{end}}{{if .ReplayingLogUrl}}{{if .ReplayingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.ReplayingLogUrl}}){{end}} | {{.DisplayName}} |
+| {{symbol .RecordingStatus}}{{if .RecordingErrorUrl}}&nbsp;[Error]({{.RecordingErrorUrl}}){{end}}{{if .RecordingLogUrl}}{{if .RecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.RecordingLogUrl}}){{end}} | {{symbol .ReplayingAfterRecordingStatus}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;[Error]({{.ReplayingAfterRecordingErrorUrl}}){{end}}{{if .ReplayingAfterRecordingLogUrl}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.ReplayingAfterRecordingLogUrl}}){{end}} | {{.DisplayName}} |
 {{end}}
 
 {{ if or (gt (len .ReplayingAfterRecordingResult.FailedTests) 0) (gt (len .RecordingResult.FailedTests) 0) .HasTerminatedTests .RecordingErr (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0) }}
