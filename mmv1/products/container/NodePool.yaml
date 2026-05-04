@@ -99,3 +99,7 @@ properties:
         type: 'Boolean'
         description: 'Whether to create a new range for pod IPs in this node pool.'
         ignore_read: true
+      - name: 'acceleratorNetworkProfile'
+        type: 'String'
+        description: 'Accelerator network profile for this NodePool.'
+        is_missing_in_cai: true
