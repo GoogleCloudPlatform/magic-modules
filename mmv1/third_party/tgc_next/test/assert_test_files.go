@@ -570,7 +570,7 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 // Converts tf file to CAI assets
 func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, error) {
 	// Run terraform init and terraform apply to generate tfplan.json files
-	if err := terraformWorkflow(t, tfDir, tfFileName, defaultProject); err != nil {
+	if err := terraformWorkflow(tfDir, tfFileName, defaultProject); err != nil {
 		return nil, err
 	}
 

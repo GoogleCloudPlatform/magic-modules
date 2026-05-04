@@ -30,7 +30,7 @@ const (
 	defaultProject      = "ci-test-project-nightly-beta"
 )
 
-func terraformWorkflow(t *testing.T, dir, name, project string) error {
+func terraformWorkflow(dir, name, project string) error {
 	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tf", name)))
 	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tfplan", name)))
 
@@ -53,37 +53,37 @@ terraform {
 		}
 	}
 
-	if err := terraformInit(t, "terraform", dir, project); err != nil {
+	if err := terraformInit("terraform", dir, project); err != nil {
 		return err
 	}
-	if err := terraformPlan(t, "terraform", dir, project, name+".tfplan"); err != nil {
+	if err := terraformPlan("terraform", dir, project, name+".tfplan"); err != nil {
 		return err
 	}
-	payload, err := terraformShow(t, "terraform", dir, project, name+".tfplan")
+	payload, err := terraformShow("terraform", dir, project, name+".tfplan")
 	if err != nil {
 		return err
 	}
-	if err := saveFile(t, dir, name+".tfplan.json", payload); err != nil {
+	if err := saveFile(dir, name+".tfplan.json", payload); err != nil {
 		return err
 	}
 	return nil
 }
 
-func terraformInit(t *testing.T, executable, dir, project string) error {
-	_, err := terraformExec(t, executable, dir, project, "init", "-input=false")
+func terraformInit(executable, dir, project string) error {
+	_, err := terraformExec(executable, dir, project, "init", "-input=false")
 	return err
 }
 
-func terraformPlan(t *testing.T, executable, dir, project, tfplan string) error {
-	_, err := terraformExec(t, executable, dir, project, "plan", "-input=false", "-refresh=false", "-out", tfplan)
+func terraformPlan(executable, dir, project, tfplan string) error {
+	_, err := terraformExec(executable, dir, project, "plan", "-input=false", "-refresh=false", "-out", tfplan)
 	return err
 }
 
-func terraformShow(t *testing.T, executable, dir, project, tfplan string) ([]byte, error) {
-	return terraformExec(t, executable, dir, project, "show", "--json", tfplan)
+func terraformShow(executable, dir, project, tfplan string) ([]byte, error) {
+	return terraformExec(executable, dir, project, "show", "--json", tfplan)
 }
 
-func terraformExec(t *testing.T, executable, dir, project string, args ...string) ([]byte, error) {
+func terraformExec(executable, dir, project string, args ...string) ([]byte, error) {
 	if project == "" {
 		project = defaultProject
 	}
@@ -100,11 +100,11 @@ func terraformExec(t *testing.T, executable, dir, project string, args ...string
 	}
 	cmd.Dir = dir
 	wantError := false
-	payload, _, err := run(t, cmd, wantError)
+	payload, _, err := run(cmd, wantError)
 	return payload, err
 }
 
-func saveFile(t *testing.T, dir, filename string, payload []byte) error {
+func saveFile(dir, filename string, payload []byte) error {
 	fullpath := filepath.Join(dir, filename)
 	f, err := os.Create(fullpath)
 	if err != nil {
@@ -119,7 +119,7 @@ func saveFile(t *testing.T, dir, filename string, payload []byte) error {
 }
 
 // run a command and return error on non-zero exit instead of t.Fatalf.
-func run(t *testing.T, cmd *exec.Cmd, wantError bool) ([]byte, []byte, error) {
+func run(cmd *exec.Cmd, wantError bool) ([]byte, []byte, error) {
 	var stderr, stdout bytes.Buffer
 	cmd.Stderr, cmd.Stdout = &stderr, &stdout
 	err := cmd.Run()
