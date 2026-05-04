@@ -389,7 +389,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		// 2. Passed in Recording but Failing in Re-replaying
 		// 3. Failing in Recording
 		// 4. Terminated
-		var terminated, failingInRecording, failingInReplayingAfterRecording, passedInBoth []string
+		var passedInBoth, failingInReplayingAfterRecording, failingInRecording, terminated []string
 
 		for _, t := range attemptedTests {
 			if !contains(expandedRecordingResult.PassedTests, t) && !contains(expandedRecordingResult.FailedTests, t) {
@@ -415,16 +415,16 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		logBaseUrl := fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
 
 		var testRows []VCRTestTableRow
-		for _, t := range terminated {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
-		}
-		for _, t := range failingInRecording {
+		for _, t := range passedInBoth {
 			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
 		}
 		for _, t := range failingInReplayingAfterRecording {
 			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
 		}
-		for _, t := range passedInBoth {
+		for _, t := range failingInRecording {
+			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+		}
+		for _, t := range terminated {
 			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
 		}
 
