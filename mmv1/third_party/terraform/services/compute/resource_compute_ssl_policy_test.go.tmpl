@@ -36,6 +36,8 @@ func TestAccComputeSslPolicy_update(t *testing.T) {
 						"google_compute_ssl_policy.update", "profile", "MODERN"),
 					resource.TestCheckResourceAttr(
 						"google_compute_ssl_policy.update", "min_tls_version", "TLS_1_0"),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.update", "post_quantum_key_exchange", ""),
 				),
 			},
 			{
@@ -52,6 +54,8 @@ func TestAccComputeSslPolicy_update(t *testing.T) {
 						"google_compute_ssl_policy.update", "profile", "RESTRICTED"),
 					resource.TestCheckResourceAttr(
 						"google_compute_ssl_policy.update", "min_tls_version", "TLS_1_2"),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.update", "post_quantum_key_exchange", ""),
 				),
 			},
 			{
@@ -68,6 +72,8 @@ func TestAccComputeSslPolicy_update(t *testing.T) {
 						"google_compute_ssl_policy.update", "profile", "FIPS_202205"),
 					resource.TestCheckResourceAttr(
 						"google_compute_ssl_policy.update", "min_tls_version", "TLS_1_2"),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.update", "post_quantum_key_exchange", ""),
 				),
 			},
 			{
@@ -84,6 +90,8 @@ func TestAccComputeSslPolicy_update(t *testing.T) {
 						"google_compute_ssl_policy.update", "profile", "RESTRICTED"),
 					resource.TestCheckResourceAttr(
 						"google_compute_ssl_policy.update", "min_tls_version", "TLS_1_3"),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.update", "post_quantum_key_exchange", ""),
 				),
 			},
 			{
