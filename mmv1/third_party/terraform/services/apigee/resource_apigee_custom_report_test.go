@@ -11,7 +11,6 @@ import (
 )
 
 func TestAccApigeeCustomReport_update(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
@@ -96,13 +95,13 @@ resource "time_sleep" "wait_300_seconds" {
 }
 
 resource "google_compute_network" "apigee_network" {
-  name       = "apigee-network"
+  name       = "tf-test-apigee-network%{random_suffix}"
   project    = google_project.project.project_id
   depends_on = [time_sleep.wait_300_seconds]
 }
 
 resource "google_compute_global_address" "apigee_range" {
-  name          = "apigee-range"
+  name          = "tf-test-apigee-range%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -180,13 +179,13 @@ resource "time_sleep" "wait_300_seconds" {
 }
 
 resource "google_compute_network" "apigee_network" {
-  name       = "apigee-network"
+  name       = "tf-test-apigee-network%{random_suffix}"
   project    = google_project.project.project_id
   depends_on = [time_sleep.wait_300_seconds]
 }
 
 resource "google_compute_global_address" "apigee_range" {
-  name          = "apigee-range"
+  name          = "tf-test-apigee-range%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
