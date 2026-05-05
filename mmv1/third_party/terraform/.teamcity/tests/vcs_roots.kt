@@ -18,9 +18,9 @@ class VcsTests {
 
         val gaProject = getSubProject(root, gaProjectName)
         val betaProject = getSubProject(root, betaProjectName)
-        val globalSweepersProject = getSubProject(root, globalSweepersProjectName)
+        val projectSweeperProject = getSubProject(root, betaProjectName)
 
-        val allProjects = arrayListOf(gaProject, betaProject, globalSweepersProject)
+        val allProjects = arrayListOf(gaProject, betaProject, projectSweeperProject)
 
         allProjects.forEach { p ->
             p.subProjects.forEach { sp->

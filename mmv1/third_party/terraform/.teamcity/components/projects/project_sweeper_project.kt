@@ -7,7 +7,7 @@
 
 package projects
 
-import GlobalSweepersProjectName
+import ProjectSweeperName
 import SharedResourceNameBeta
 import SharedResourceNameGa
 import SharedResourceNameVcr
@@ -17,11 +17,11 @@ import jetbrains.buildServer.configs.kotlin.Project
 import replaceCharsId
 import vcs_roots.HashiCorpVCSRootGa
 
-// globalSweepersSubProject returns a subproject that contains sweepers for global resources (projects, folders)
+// projectSweeperSubProject returns a subproject that contains a sweeper for project resources
 // Sweeping projects is an edge case because it doesn't respect boundaries between different testing projects GA/Beta/PR
-fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
+fun projectSweeperSubProject(allConfig: AllContextParameters): Project {
 
-    val sweeperId = replaceCharsId("GLOBAL_SWEEPER")
+    val projectId = replaceCharsId("PROJECT_SWEEPER")
 
     // Get config for using the GA identity (arbitrary choice as sweeper isn't confined by GA/Beta etc.)
     val gaConfig = getGaAcceptanceTestConfig(allConfig)
@@ -31,21 +31,17 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
 
     // Create build config for sweeping project resources
     // Uses the HashiCorpVCSRootGa VCS Root so that the latest sweepers in hashicorp/terraform-provider-google are used
-    val serviceSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Project Sweeper", "GoogleProject", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
-    serviceSweeperConfig.addTrigger(NightlyTriggerConfiguration(startHour=12))
-
-    // Create build config for sweeping folder resources
-    val folderSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Folder Sweeper", "GoogleFolder", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
-    folderSweeperConfig.addTrigger(NightlyTriggerConfiguration(startHour=12))
+    val serviceSweeperConfig = BuildConfigurationForProjectSweeper("N/A", ProjectSweeperName, SweepersListGa, projectId, HashiCorpVCSRootGa, sharedResources, gaConfig)
+    val trigger  = NightlyTriggerConfiguration(startHour=12)
+    serviceSweeperConfig.addTrigger(trigger)
 
     return Project{
-        id(sweeperId)
-        name = GlobalSweepersProjectName
-        description = "Subproject containing build configurations for sweeping global resources like projects and folders"
+        id(projectId)
+        name = "Project Sweeper"
+        description = "Subproject containing a build configuration for sweeping project resources"
 
         // Register build configs in the project
         buildType(serviceSweeperConfig)
-        buildType(folderSweeperConfig)
 
         params {
             readOnlySettings()
