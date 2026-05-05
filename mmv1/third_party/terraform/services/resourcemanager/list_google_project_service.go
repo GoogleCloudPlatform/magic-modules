@@ -13,8 +13,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
+
+func init() {
+	registry.FrameworkListResource{
+		Name:        "google_project_service",
+		ProductName: "resourcemanager",
+		Func:        NewGoogleProjectServiceListResource,
+	}.Register()
+}
 
 type GoogleProjectServiceListResource struct {
 	tpgresource.ListResourceMetadata
