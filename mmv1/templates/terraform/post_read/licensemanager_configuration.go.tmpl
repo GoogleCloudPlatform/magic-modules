@@ -1,11 +1,11 @@
 billingInfo, ok := res["currentBillingInfo"].(map[string]interface{})
 if ok {
     if userCountBilling, ok := billingInfo["userCountBilling"].(map[string]interface{}); ok {
-        if err := d.Set("license_count", userCountBilling["userCount"]); err != nil {
+        if err := d.Set("licenseCount", userCountBilling["userCount"]); err != nil {
             return fmt.Errorf("Error setting count: %s", err)
         }
     } else if packCountBilling, ok := billingInfo["packCountBilling"].(map[string]interface{}); ok {
-        if err := d.Set("license_count", packCountBilling["packCount"]); err != nil {
+        if err := d.Set("licenseCount", packCountBilling["packCount"]); err != nil {
             return fmt.Errorf("Error setting count: %s", err)
         }
     }

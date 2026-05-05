@@ -1,5 +1,5 @@
 product := obj["product"].(string)
-count := obj["license_count"].(int)
+count := obj["licenseCount"].(int)
 
 licenseType := "LICENSE_TYPE_PER_MONTH_PER_USER"
 if product == "MicrosoftSQLServer2022Enterprise" {
@@ -33,6 +33,6 @@ if _, ok := obj["displayName"]; !ok {
     obj["displayName"] = configurationId + "-terraform"
 }
 
-delete(obj, "license_count")
+delete(obj, "licenseCount")
 delete(obj, "active")
 return obj, nil

@@ -14,7 +14,7 @@ if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 }
 
 // 1. Handle standard updates (license_count) via PATCH
-if d.HasChange("license_count") {
+if d.HasChange("licenseCount") {
 	obj := make(map[string]interface{})
 
 	productProp, err := expandLicenseManagerConfigurationProduct(d.Get("product"), d, config)
@@ -22,9 +22,9 @@ if d.HasChange("license_count") {
 		obj["product"] = productProp
 	}
 
-	licenseCountProp, err := expandLicenseManagerConfigurationLicenseCount(d.Get("license_count"), d, config)
+	licenseCountProp, err := expandLicenseManagerConfigurationLicenseCount(d.Get("licenseCount"), d, config)
 	if err == nil {
-		obj["license_count"] = licenseCountProp
+		obj["licenseCount"] = licenseCountProp
 	}
 
 	// Run encoder to convert flat schema to API structure (nesting count)

@@ -83,7 +83,7 @@ properties:
     immutable: true
     ignore_read: true
     description: Name field (with URL) of the Product offered for SPLA.
-  - name: license_count
+  - name: licenseCount
     type: Integer
     required: true
     ignore_read: true
