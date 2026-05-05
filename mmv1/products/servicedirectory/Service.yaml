@@ -45,7 +45,6 @@ custom_code:
 exclude_sweeper: true
 examples:
   - name: 'service_directory_service_basic'
-    exclude_identity_import: true
     primary_resource_id: 'example'
     vars:
       service_id: 'example-service'

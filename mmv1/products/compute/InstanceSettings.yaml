@@ -51,7 +51,6 @@ exclude_identity_generation: true
 examples:
   - name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
-    exclude_identity_import: true
 parameters:
   - name: 'zone'
     type: ResourceRef

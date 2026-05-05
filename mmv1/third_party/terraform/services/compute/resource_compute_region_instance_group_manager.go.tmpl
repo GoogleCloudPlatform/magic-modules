@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -39,6 +40,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
+			customdiff.ForceNewIfChange("resource_policies.0.workload_policy", ForceNewResourcePoliciesWorkloadPolicyIfNewIsEmpty),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -926,6 +928,39 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
+			"resource_policies": {
+        Type:        schema.TypeList,
+        Optional:    true,
+        Description: `Resource policies for this managed instance group.`,
+        MaxItems:    1,
+        Elem: &schema.Resource{
+          Schema: map[string]*schema.Schema{
+            "workload_policy": {
+              Type:        schema.TypeString,
+              Optional:    true,
+              DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
+              Description: `The URL of the workload policy that is specified for this managed instance group. It can be a full or partial URL.`,
+            },
+          },
+        },
+      },
+			"target_size_policy": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: `The policy that specifies how the MIG creates its VMs to achieve the target size.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							Description:  `The mode of target size policy based on which the MIG creates its VMs individually or all at once.`,
+							ValidateFunc: validation.StringInSlice([]string{"BULK", "INDIVIDUAL"}, false),
+						},
+					},
+				},
+			},
 			{{- if ne $.TargetVersionName "ga" }}
 			"params": {
 				Type:        schema.TypeList,
@@ -992,6 +1027,8 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
 		DistributionPolicy:          expandDistributionPolicyForCreate(d),
 		StatefulPolicy:              expandStatefulPolicy(d),
+		ResourcePolicies:            expandResourcePolicies(d.Get("resource_policies").([]interface{})),
+		TargetSizePolicy:            expandTargetSizePolicy(d.Get("target_size_policy").([]interface{})),
 		{{- if ne $.TargetVersionName "ga" }}
 		Params:                      expandInstanceGroupManagerParams(d),
 		{{- end }}
@@ -999,7 +1036,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		ForceSendFields: []string{"TargetSize"},
 	}
 
-	op, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Insert(project, region, manager).Do()
+	op, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Insert(project, region, manager).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error creating RegionInstanceGroupManager: %s", err)
@@ -1063,7 +1100,7 @@ func getRegionalManager(d *schema.ResourceData, meta interface{}) (*compute.Inst
 	}
 
 	name := d.Get("name").(string)
-	manager, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Get(project, region, name).Do()
+	manager, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Get(project, region, name).Do()
 	if err != nil {
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Region Instance Manager %q", name))
 	}
@@ -1205,17 +1242,31 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 			return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
 		}
 	}
-	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
+	var statefulPolicyMap map[string]interface{}
+	if manager.StatefulPolicy != nil {
+		spMap, err := tpgresource.ConvertToMap(manager.StatefulPolicy)
+		if err != nil {
+			return fmt.Errorf("Error converting stateful policy: %s", err)
+		}
+		statefulPolicyMap = spMap
+	}
+	if err = d.Set("stateful_disk", flattenStatefulPolicy(statefulPolicyMap)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
 	if err = d.Set("status", flattenStatus(manager.Status)); err != nil {
 		return fmt.Errorf("Error setting status in state: %s", err.Error())
 	}
-	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(d, manager.StatefulPolicy)); err != nil {
+	if err = d.Set("resource_policies", flattenResourcePolicies(manager.ResourcePolicies)); err != nil {
+		return fmt.Errorf("Error setting resource_policies in state: %s", err.Error())
+	}
+	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(d, statefulPolicyMap)); err != nil {
 		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
 	}
-	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(d, manager.StatefulPolicy)); err != nil {
+	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(d, statefulPolicyMap)); err != nil {
 		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
+	}
+	if err = d.Set("target_size_policy", flattenTargetSizePolicy(manager.TargetSizePolicy)); err != nil {
+		return fmt.Errorf("Error setting target_size_policy in state: %s", err.Error())
 	}
 	// If unset in state set to default value
 	if d.Get("wait_for_instances_status").(string) == "" {
@@ -1337,8 +1388,13 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 
+	if d.HasChange("resource_policies") {
+   		updatedManager.ResourcePolicies = expandResourcePolicies(d.Get("resource_policies").([]interface{}))
+   		change = true
+  }
+
 	if change {
-		op, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Patch(project, region, d.Get("name").(string), updatedManager).Do()
+		op, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Patch(project, region, d.Get("name").(string), updatedManager).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating region managed group instances: %s", err)
 		}
@@ -1358,7 +1414,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 			NamedPorts: namedPorts,
 		}
 
-		op, err := config.NewComputeClient(userAgent).RegionInstanceGroups.SetNamedPorts(
+		op, err := NewClient(config, userAgent).RegionInstanceGroups.SetNamedPorts(
 			project, region, d.Get("name").(string), setNamedPorts).Do()
 
 		if err != nil {
@@ -1375,7 +1431,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	if d.HasChange("target_size") && !targetSizePatchUpdate {
 		d.Partial(true)
 		targetSize := int64(d.Get("target_size").(int))
-		op, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Resize(
+		op, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Resize(
 			project, region, d.Get("name").(string), targetSize).Do()
 
 		if err != nil {
@@ -1420,7 +1476,7 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 
 	name := d.Get("name").(string)
 
-	op, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Delete(project, region, name).Do()
+	op, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Delete(project, region, name).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error deleting region instance group manager: %s", err)
@@ -2013,4 +2069,13 @@ func isNullOrEmptyBlock(flexPolicy any) bool {
 	}
 
 	return false // Return false for non-empty flex policy
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_region_instance_group_manager",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeRegionInstanceGroupManager(),
+	}.Register()
 }

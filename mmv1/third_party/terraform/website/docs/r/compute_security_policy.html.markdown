@@ -158,6 +158,31 @@ resource "google_compute_security_policy" "policy" {
 }
 ```
 
+## Example Usage - With advanced options config
+
+```hcl
+resource "google_compute_security_policy" "policy" {
+	name = "my-policy"
+
+  advanced_options_config {
+    json_parsing = "STANDARD"
+    json_custom_config {
+      content_types = [
+        "application/json",
+        "application/vnd.api+json",
+        "application/vnd.collection+json",
+        "application/vnd.hyper+json"
+      ]
+    }
+    log_level    = "VERBOSE"
+    user_ip_request_headers = [
+      "True-Client-IP",
+      "x-custom-ip"
+    ]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -501,6 +526,15 @@ exported:
 * `fingerprint` - Fingerprint of this resource.
 
 * `self_link` - The URI of the created resource.
+
+## Timeouts
+
+This resource provides the following
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
+
+- `create` - Default is 60 minutes.
+- `update` - Default is 60 minutes.
+- `delete` - Default is 60 minutes.
 
 ## Import
 

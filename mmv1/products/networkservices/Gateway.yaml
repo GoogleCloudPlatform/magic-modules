@@ -13,6 +13,7 @@
 
 ---
 name: 'Gateway'
+include_in_tgc_next: true
 description: |
   Gateway represents the configuration for a proxy, typically a load balancer.
   It captures the ip:port over which the services are exposed by the proxy,

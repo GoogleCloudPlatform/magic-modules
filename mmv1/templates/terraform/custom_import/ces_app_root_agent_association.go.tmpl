@@ -1,0 +1,20 @@
+// Import format: projects/{project}/locations/{location}/apps/{app_id}/agents/{agent_id}
+parts := strings.Split(d.Id(), "/")
+if len(parts) != 8 || parts[0] != "projects" || parts[2] != "locations" || parts[4] != "apps" || parts[6] != "agents" {
+  return nil, fmt.Errorf("invalid import format for CESAppRootAgentAssociation, expected projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/apps/{{"{{"}}app_id{{"}}"}}/agents/{{"{{"}}agent_id{{"}}"}}, got %q", d.Id())
+}
+
+if err := d.Set("project", parts[1]); err != nil {
+  return nil, err
+}
+if err := d.Set("location", parts[3]); err != nil {
+  return nil, err
+}
+if err := d.Set("app_id", parts[5]); err != nil {
+  return nil, err
+}
+if err := d.Set("agent_id", parts[7]); err != nil {
+  return nil, err
+}
+
+return []*schema.ResourceData{d}, nil

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -279,4 +280,13 @@ func convertMavenArtifactResponseToStruct(res map[string]interface{}) MavenArtif
 	}
 
 	return mavenArtifact
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_artifact_registry_maven_artifact",
+		ProductName: "artifactregistry",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryMavenArtifact(),
+	}.Register()
 }

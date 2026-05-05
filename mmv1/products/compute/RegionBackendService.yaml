@@ -116,7 +116,6 @@ examples:
       network_name: 'rbs-net'
   - name: 'region_backend_service_connection_tracking'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
@@ -901,6 +900,7 @@ properties:
         description: |
           OAuth2 Client ID for IAP
         send_empty_value: true
+        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
       - name: 'oauth2ClientSecret'
         type: String
         description: |
@@ -1412,7 +1412,6 @@ properties:
       Connection Tracking configuration for this BackendService.
       This is available only for Layer 4 Internal Load Balancing and
       Network Load Balancing.
-    min_version: 'beta'
     properties:
       - name: 'idleTimeoutSec'
         type: Integer

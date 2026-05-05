@@ -87,6 +87,17 @@ properties:
     type: KeyValueLabels
     description: |
       Labels for this Rollout Sequence.
+  - name: 'ignoredClustersSelector'
+    type: NestedObject
+    description: |
+      Selector for clusters to exclude from the Rollout Sequence.
+    properties:
+      - name: 'labelSelector'
+        type: String
+        description: |
+          The label selector must be a valid CEL (Common Expression Language) expression which
+          evaluates resource.labels.
+        required: true
   - name: 'stages'
     type: Array
     description: |

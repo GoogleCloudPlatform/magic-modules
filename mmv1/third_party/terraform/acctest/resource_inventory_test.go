@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 )
 
 type ProviderResource struct {
@@ -179,7 +180,7 @@ func TestValidateResourceMetadata(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	resources := buildProviderResources(provider.ResourceMap(), fwprovider.New(provider.Provider()).Resources(ctx))
+	resources := buildProviderResources(registry.ResourceMap(), fwprovider.New(provider.Provider()).Resources(ctx))
 	metaResources := acctest.GlobalMetadataCache.Cache()
 
 	// Check for resources that are only in the provider / only in metadata

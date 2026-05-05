@@ -51,7 +51,6 @@ examples:
       project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'project'
-    exclude_identity_import: true
 parameters:
   - name: 'configId'
     type: String

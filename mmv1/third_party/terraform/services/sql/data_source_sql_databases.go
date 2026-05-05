@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -52,7 +53,7 @@ func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error 
 	var databases *sqladmin.DatabasesListResponse
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			databases, rerr = config.NewSqlAdminClient(userAgent).Databases.List(project, d.Get("instance").(string)).Do()
+			databases, rerr = NewClient(config, userAgent).Databases.List(project, d.Get("instance").(string)).Do()
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutRead),
@@ -93,4 +94,13 @@ func flattenDatabases(fetchedDatabases []*sqladmin.Database) []map[string]interf
 		databases = append(databases, database)
 	}
 	return databases
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_sql_databases",
+		ProductName: "sql",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlDatabases(),
+	}.Register()
 }

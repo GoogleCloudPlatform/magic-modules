@@ -49,9 +49,8 @@ parameters:
     type: String
     required: true
     description: |-
-      ID of the cluster to create. Must conform to
-      [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
-      alphanumeric, and at most 63 characters).
+      ID of the cluster to create. Must start with a lowercase letter,
+      use only lowercase letters and numbers, and be at most 10 characters long.
     immutable: true
     url_param_only: true
 properties:
@@ -307,6 +306,7 @@ properties:
               - name: count
                 type: String
                 required: true
+                diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
                 description: Number of login node instances to create.
               - name: enableOsLogin
                 type: Boolean
@@ -442,6 +442,7 @@ properties:
                     alphanumeric, and at most 63 characters).
                 - name: maxDynamicNodeCount
                   type: String
+                  diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
                   description: |-
                     Controls how many additional nodes a cluster can bring online to handle
                     workloads. Set this value to enable dynamic node creation and limit the
@@ -450,6 +451,7 @@ properties:
                     on static nodes.
                 - name: staticNodeCount
                   type: String
+                  diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
                   description: |-
                     Number of nodes to be statically created for this nodeset. The cluster will
                     attempt to ensure that at least this many nodes exist at all times.
@@ -748,6 +750,8 @@ examples:
   - name: hypercomputecluster_cluster_basic
     primary_resource_id: 'cluster'
     vars:
-      cluster_id: 'my-cluster'
+      cluster_id: 'mycluster1'
+      network_id: 'cluster-net1'
     test_vars_overrides:
       cluster_id: 'fmt.Sprintf("tf%s", acctest.RandString(t, 8))'
+      network_id: 'fmt.Sprintf("cluster-net1-%s", acctest.RandString(t,10))'

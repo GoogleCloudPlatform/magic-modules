@@ -37,6 +37,9 @@ async:
       delete_minutes: 60
     base_url: '{{op_id}}'
 autogen_async: true
+custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/databasemigrationservice_connection_profile.go.tmpl'
+include_in_tgc_next: true
 examples:
   - name: database_migration_service_connection_profile_cloudsql
     primary_resource_id: cloudsqlprofile

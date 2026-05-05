@@ -592,6 +592,7 @@ properties:
         description: |-
           Number of search results to return per query.
           The default value is 10. The maximum allowed value is 10.
+        deprecation_message: '`max_results` is deprecated and will be removed in a future release.'
       - name: modalityConfigs
         type: Array
         description: The modality configs for the data store.

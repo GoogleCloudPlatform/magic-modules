@@ -636,6 +636,10 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 		nnc.ForceSendFields = []string{"EnablePrivateNodes"}
 	}
 
+	if v, ok := networkNodeConfig["accelerator_network_profile"]; ok {
+		nnc.AcceleratorNetworkProfile = v.(string)
+	}
+
 	if v, ok := networkNodeConfig["additional_node_network_configs"]; ok && len(v.([]interface{})) > 0 {
 		node_network_configs := v.([]interface{})
 		nodeNetworkConfigs := make([]*container.AdditionalNodeNetworkConfig, 0, len(node_network_configs))

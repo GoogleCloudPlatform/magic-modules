@@ -11,6 +11,7 @@ import (
 
 	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -570,4 +571,13 @@ func flattenCloudbuildWorkerPoolAnnotations(v map[string]string, d *schema.Resou
 	}
 
 	return transformed
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_cloudbuild_worker_pool",
+		ProductName: "cloudbuild",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceCloudbuildWorkerPool(),
+	}.Register()
 }

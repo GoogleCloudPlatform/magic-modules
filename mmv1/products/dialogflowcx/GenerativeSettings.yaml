@@ -46,7 +46,6 @@ exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_generative_settings_full'
     primary_resource_id: 'full_generative_settings'
-    exclude_identity_import: true
     vars:
       agent_name: 'dialogflowcx-agent'
 parameters:

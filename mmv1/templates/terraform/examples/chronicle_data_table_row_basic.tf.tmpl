@@ -1,5 +1,4 @@
 resource "google_chronicle_data_table" "example_dt" {
-  provider       = google-beta
   location       = "us"
   instance = "{{index $.TestEnvVars "instance_id"}}"
   data_table_id  = "{{index $.Vars "data_table_id"}}"
@@ -17,7 +16,6 @@ resource "google_chronicle_data_table" "example_dt" {
 }
 
 resource "google_chronicle_data_table_row" "example_row" {
-  provider       = google-beta
   location       = "us"
   instance       = "{{index $.TestEnvVars "instance_id"}}"
   data_table_id  = google_chronicle_data_table.example_dt.data_table_id

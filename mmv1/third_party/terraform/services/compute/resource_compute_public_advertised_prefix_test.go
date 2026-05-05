@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -133,7 +134,7 @@ func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, s
 		newSubPrefixName := rs.Primary.Attributes["name"]
 
 		config := acctest.GoogleProviderConfig(t)
-		computeService := config.NewComputeClient(config.UserAgent)
+		computeService := compute.NewClient(config, config.UserAgent)
 
 		parent, err := computeService.PublicDelegatedPrefixes.Get(project, region, parentName).Do()
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -64,7 +65,7 @@ func dataSourceComputeNetworkEndpointGroupsRead(d *schema.ResourceData, meta int
 
 	networkEndpointGroups := make([]map[string]interface{}, 0)
 
-	networkEndpointGroupsList, err := config.NewComputeClient(userAgent).NetworkEndpointGroups.List(project, zone).Filter(filter).Do()
+	networkEndpointGroupsList, err := NewClient(config, userAgent).NetworkEndpointGroups.List(project, zone).Filter(filter).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NetworkEndpointGroups : %s %s", project, zone))
 	}
@@ -95,4 +96,13 @@ func dataSourceComputeNetworkEndpointGroupsRead(d *schema.ResourceData, meta int
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_network_endpoint_groups",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeNetworkEndpointGroups(),
+	}.Register()
 }

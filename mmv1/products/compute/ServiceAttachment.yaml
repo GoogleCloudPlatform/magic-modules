@@ -280,6 +280,7 @@ properties:
       An array of projects that are not allowed to connect to this service
       attachment.
     send_empty_value: true
+    is_missing_in_cai: true # Ignored in TGC tests due to timing issues in CAI updates where the field disappears in intermediate steps.
     item_type:
       type: String
   - name: 'consumerAcceptLists'

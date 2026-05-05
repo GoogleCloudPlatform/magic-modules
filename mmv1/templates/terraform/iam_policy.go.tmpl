@@ -77,7 +77,7 @@ var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 {{- range $i, $param := $.IamResourceParams }}
 	"{{ underscore $param }}": {
 		Type:             schema.TypeString,
-{{-   if or (eq $param "project") (eq $param "zone") (eq $param "region") (eq $param "location") }}
+{{-   if or (eq $param "project") (eq $param "zone") (eq $param "region") (and (eq $param "location") (not $.IamPolicy.ParentIsResourceId)) }}
 		Computed: true,
 		Optional: true,
 {{-   else }}
@@ -149,17 +149,11 @@ func {{ $.ResourceName }}IamUpdaterProducer(d tpgresource.TerraformResourceData,
 
 {{/* Set all URL qualifiers in state so that we have consistent storage of needed fields */ -}}
 {{-  range $i, $param := $.IamResourceParams }}
-{{-    if eq $i (sub (len $.IamResourceParams) 1) }}
-{{-      if eq $param "project" }}
-	if err := d.Set("project", u.project); err != nil {
-		return nil, fmt.Errorf("Error setting project: %s", err)
-	}
-{{       else }}
-{{/* Set the last parameter as the long name (unless it is project) */ -}}
+{{-    if and (eq $i (sub (len $.IamResourceParams) 1)) (not $.IamPolicy.ParentIsResourceId) }}
+{{/* Set the last parameter as the long name */ -}}
 	if err := d.Set("{{ $.IamParentResourceName }}", u.GetResourceId()); err != nil {
 		return nil, fmt.Errorf("Error setting {{ $.IamParentResourceName }}: %s", err)
 	}
-{{-      end }}{{/* if eq param "project" */}}
 {{    else }}
 	if err := d.Set("{{ underscore $param }}", u.{{ camelize $param "lower" }}); err != nil {
 		return nil, fmt.Errorf("Error setting {{ underscore $param }}: %s", err)
@@ -199,11 +193,12 @@ func {{ $.ResourceName }}IdParseFunc(d *schema.ResourceData, config *transport_t
 		d:       d,
 		Config:  config,
 	}
-{{  if eq (index $.IamResourceParams (sub (len $.IamResourceParams) 1)) "project" }}
-{{- /* Resource is only identified by project, so only set project */ -}}
-	if err := d.Set("project", u.project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
+{{  if $.IamPolicy.ParentIsResourceId }}
+{{-   range $param := $.IamResourceParams }}
+	if err := d.Set("{{ underscore $param }}", u.{{ camelize $param "lower" }}); err != nil {
+		return fmt.Errorf("Error setting {{ underscore $param }}: %s", err)
 	}
+{{-   end }}
 {{-  else }}
 {{- /* Set resource long name in state, this has all the information that we need to identify it */ -}}
 	if err := d.Set("{{  $.IamParentResourceName }}", u.GetResourceId()); err != nil {
@@ -293,6 +288,10 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 {{ if and $.IamPolicy $.IamPolicy.WrappedPolicyObj -}}
 	obj := make(map[string]interface{})
 	obj["policy"] = json
+	{{- if $.IamPolicy.UpdateMask }}
+	// Core APIs require the mask to acknowledge policy version 3 (conditions)
+	obj["updateMask"] = "bindings,etag,version"
+	{{- end }}
 {{- else }}
 	obj := json
 {{- end }}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccUniverseDomainStorage(t *testing.T) {
@@ -61,7 +62,7 @@ func testAccStorageBucketDestroyProducer(t *testing.T) func(s *terraform.State) 
 				continue
 			}
 
-			_, err := config.NewStorageClient(config.UserAgent).Buckets.Get(rs.Primary.ID).Do()
+			_, err := storage.NewClient(config, config.UserAgent).Buckets.Get(rs.Primary.ID).Do()
 			if err == nil {
 				return fmt.Errorf("Bucket still exists")
 			}

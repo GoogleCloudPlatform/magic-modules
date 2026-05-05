@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -75,7 +76,7 @@ func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceDa
 	request := &compute.ProjectsSetDefaultNetworkTierRequest{
 		NetworkTier: d.Get("network_tier").(string),
 	}
-	op, err := config.NewComputeClient(userAgent).Projects.SetDefaultNetworkTier(projectID, request).Do()
+	op, err := NewClient(config, userAgent).Projects.SetDefaultNetworkTier(projectID, request).Do()
 	if err != nil {
 		return fmt.Errorf("SetDefaultNetworkTier failed: %s", err)
 	}
@@ -100,7 +101,7 @@ func resourceComputeProjectDefaultNetworkTierRead(d *schema.ResourceData, meta i
 
 	projectId := d.Id()
 
-	project, err := config.NewComputeClient(userAgent).Projects.Get(projectId).Do()
+	project, err := NewClient(config, userAgent).Projects.Get(projectId).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project data for project %q", projectId))
 	}
@@ -122,4 +123,13 @@ func resourceComputeProjectDefaultNetworkTierDelete(d *schema.ResourceData, meta
 	log.Printf("[WARNING] Default Network Tier will be only removed from Terraform state, but will be left intact on GCP.")
 
 	return schema.RemoveFromState(d, meta)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_project_default_network_tier",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeProjectDefaultNetworkTier(),
+	}.Register()
 }

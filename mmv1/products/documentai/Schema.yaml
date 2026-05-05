@@ -1,0 +1,66 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Schema'
+description: |
+  NextSchema is a collection of SchemaVersions.
+references:
+  api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.schemas'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/schemas'
+self_link: 'projects/{{project}}/locations/{{location}}/schemas/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+examples:
+  - name: 'documentai_schema'
+    primary_resource_id: 'schema'
+    vars:
+      display_name: 'my-schema'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location of the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the Schema.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: |
+      The user-defined name of the Schema.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The Google Cloud labels for the Schema.
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time when the Schema was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time when the Schema was last updated.
+    output: true

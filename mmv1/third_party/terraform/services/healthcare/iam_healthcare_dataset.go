@@ -3,6 +3,7 @@ package healthcare
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -61,7 +62,7 @@ func (u *HealthcareDatasetIamUpdater) GetResourceIamPolicy() (*cloudresourcemana
 		return nil, err
 	}
 
-	p, err := u.Config.NewHealthcareClient(userAgent).Projects.Locations.Datasets.GetIamPolicy(u.resourceId).Do()
+	p, err := NewClient(u.Config, userAgent).Projects.Locations.Datasets.GetIamPolicy(u.resourceId).Do()
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
@@ -88,7 +89,7 @@ func (u *HealthcareDatasetIamUpdater) SetResourceIamPolicy(policy *cloudresource
 		return err
 	}
 
-	_, err = u.Config.NewHealthcareClient(userAgent).Projects.Locations.Datasets.SetIamPolicy(u.resourceId, &healthcare.SetIamPolicyRequest{
+	_, err = NewClient(u.Config, userAgent).Projects.Locations.Datasets.SetIamPolicy(u.resourceId, &healthcare.SetIamPolicyRequest{
 		Policy: healthcarePolicy,
 	}).Do()
 
@@ -127,4 +128,31 @@ func healthcareToResourceManagerPolicy(p *healthcare.Policy) (*cloudresourcemana
 		return nil, errwrap.Wrapf("Cannot convert a healthcare policy to a v1 policy: {{err}}", err)
 	}
 	return out, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_healthcare_dataset_iam_member",
+		ProductName: "healthcare",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc, tpgiamresource.IamWithBatching),
+	}.Register()
+	registry.Schema{
+		Name:        "google_healthcare_dataset_iam_binding",
+		ProductName: "healthcare",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc, tpgiamresource.IamWithBatching),
+	}.Register()
+	registry.Schema{
+		Name:        "google_healthcare_dataset_iam_policy",
+		ProductName: "healthcare",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_healthcare_dataset_iam_policy",
+		ProductName: "healthcare",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater),
+	}.Register()
 }

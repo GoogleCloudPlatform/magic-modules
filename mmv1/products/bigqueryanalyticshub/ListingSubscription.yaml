@@ -30,6 +30,7 @@ immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 custom_code:
+  constants: templates/terraform/constants/bigqueryanalyticshub_listing_subscription.go.tmpl
   decoder: 'templates/terraform/decoders/bigqueryanalyticshub_listing_subscription.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
   post_read: 'templates/terraform/post_read/bigqueryanalyticshub_listing_subscription.go.tmpl'
@@ -52,7 +53,6 @@ examples:
       description: '"example data exchange" + randomSuffix'
   - name: 'bigquery_analyticshub_listing_subscription_multiregion'
     primary_resource_id: 'subscription'
-    min_version: beta
     exclude_test: true
     vars:
       data_exchange_id: 'my_data_exchange'
@@ -125,7 +125,6 @@ properties:
       - name: 'replicaLocations'
         is_set: true
         type: Array
-        min_version: 'beta'
         set_hash_func: 'tpgresource.CaseInsensitiveHash'
         description: |
           List of regions where the subscriber wants dataset replicas.

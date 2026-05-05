@@ -51,7 +51,6 @@ examples:
       config_id: 'my-config'
     test_env_vars:
       org_id: 'ORG_ID'
-    exclude_identity_import: true
 parameters:
   - name: 'organization'
     type: String

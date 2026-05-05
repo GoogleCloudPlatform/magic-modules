@@ -53,7 +53,6 @@ examples:
       alloydb_user_name: '"user1" + randomSuffix'
     ignore_read_extra:
       - 'password'
-    exclude_identity_import: true
     exclude_test: true
   - name: 'alloydb_user_builtin_test'
     primary_resource_id: 'user1'
@@ -68,7 +67,6 @@ examples:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
       # for backward compatible
       alloydb_user_name: '"user1" + randomSuffix'
-    exclude_identity_import: true
     ignore_read_extra:
       - 'password'
     exclude_docs: true
@@ -83,7 +81,6 @@ examples:
     test_vars_overrides:
       # for backward compatible
       alloydb_user_name: '"user2@foo.com" + randomSuffix'
-    exclude_identity_import: true
     exclude_test: true
   - name: 'alloydb_user_iam_test'
     primary_resource_id: 'user2'
@@ -93,7 +90,6 @@ examples:
       alloydb_cluster_pass: 'cluster_secret'
       alloydb_user_name: 'user2@foo.com'
       network_name: 'alloydb-network'
-    exclude_identity_import: true
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
       # for backward compatible

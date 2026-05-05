@@ -23,22 +23,19 @@ import_format:
 
 update_verb: PATCH
 update_mask: true
-min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.dataTables'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataTables'
 examples:
   - name: 'chronicle_data_table_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
     vars:
       data_table_id: 'terraform_test'
   - name: 'chronicle_data_table_with_optional_fields'
     primary_resource_id: 'example_dt'
-    min_version: 'beta'
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
     vars:

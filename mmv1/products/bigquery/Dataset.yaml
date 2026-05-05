@@ -41,6 +41,8 @@ include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
+custom_diff:
+  - 'customCollationDiff'
 # exluding resource_identity due to dataset_id field
 exclude_identity_generation: true
 exclude_sweeper: true
@@ -53,7 +55,6 @@ examples:
     test_vars_overrides:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
-    exclude_identity_import: true
   - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
     vars:
@@ -63,7 +64,6 @@ examples:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
     vars:
@@ -71,7 +71,6 @@ examples:
       key_name: 'example-key'
       keyring_name: 'example-keyring'
     exclude_test: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_authorized_dataset'
     primary_resource_id: 'dataset'
     vars:
@@ -85,7 +84,6 @@ examples:
       public: '"public" + randomSuffix'
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
-    exclude_identity_import: true
   - name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
     vars:
@@ -94,7 +92,6 @@ examples:
       public_routine: 'public_routine'
     test_env_vars:
       service_account: 'SERVICE_ACCT'
-    exclude_identity_import: true
   - name: 'bigquery_dataset_case_insensitive_names'
     primary_resource_id: 'dataset'
     vars:
@@ -104,7 +101,6 @@ examples:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
     vars:
@@ -114,18 +110,15 @@ examples:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
     exclude_test: true
-    exclude_identity_import: true
   - name: 'bigquery_dataset_external_catalog_dataset_options'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
-    exclude_identity_import: true
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
     vars:
@@ -138,7 +131,6 @@ examples:
       # for backward compatible
       dataset_id: '"dataset" + randomSuffix'
     exclude_docs: true
-    exclude_identity_import: true
 virtual_fields:
   - name: 'delete_contents_on_destroy'
     description: |
@@ -457,6 +449,8 @@ properties:
       - 'und:ci': undetermined locale, case insensitive.
       - '': empty string. Default to case-sensitive behavior.
     default_from_api: true
+    send_empty_value: true
+    custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_default_collation.go.tmpl'
   - name: 'storageBillingModel'
     type: String
     description: |

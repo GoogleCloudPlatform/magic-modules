@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -113,7 +114,7 @@ func resourceSqlProvisionScriptCreate(d *schema.ResourceData, meta interface{}) 
 	var databaseInstance *sqladmin.DatabaseInstance
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			databaseInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+			databaseInstance, rerr = NewClient(config, userAgent).Instances.Get(project, instance).Do()
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutCreate),
@@ -128,7 +129,7 @@ func resourceSqlProvisionScriptCreate(d *schema.ResourceData, meta interface{}) 
 
 	log.Printf("[INFO] executing script %s on database %s on instance %s", description, database, instance)
 
-	resp, err := config.NewSqlAdminClient(userAgent).Instances.ExecuteSql(project, instance,
+	resp, err := NewClient(config, userAgent).Instances.ExecuteSql(project, instance,
 		executeSqlPayload).Do()
 
 	if err != nil {
@@ -152,4 +153,13 @@ func resourceSqlProvisionScriptUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceSqlProvisionScriptDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_sql_provision_script",
+		ProductName: "sql",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceSqlProvisionScript(),
+	}.Register()
 }
