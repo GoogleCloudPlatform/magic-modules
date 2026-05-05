@@ -27,7 +27,7 @@ examples:
     vars:
       configuration_id: "example-configuration"
       product: "products/my-product"
-      license_count: 10
+      licensecount: 10
 async:
   operation:
     base_url: '{{op_id}}'
@@ -83,7 +83,7 @@ properties:
     immutable: true
     ignore_read: true
     description: Name field (with URL) of the Product offered for SPLA.
-  - name: licenseCount
+  - name: licensecount
     type: Integer
     required: true
     ignore_read: true

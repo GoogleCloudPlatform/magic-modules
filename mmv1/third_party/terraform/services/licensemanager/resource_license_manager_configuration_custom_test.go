@@ -35,13 +35,13 @@ func TestAccLicenseManagerConfiguration_lifecycle(t *testing.T) {
 	})
 }
 
-func testAccLicenseManagerConfiguration_active(context map[string]interface{}, active bool, licenseCount int) string {
+func testAccLicenseManagerConfiguration_active(context map[string]interface{}, active bool, licensecount int) string {
 	return acctest.Nprintf(`
 resource "google_license_manager_configuration" "example" {
   location         = "us-central1"
   configuration_id = "%{configuration_id}"
   product          = "%{product}"
-  license_count    = `+fmt.Sprintf("%d", licenseCount)+`
+  licensecount    = `+fmt.Sprintf("%d", licensecount)+`
   active           = `+fmt.Sprintf("%t", active)+`
 }
 `, context)
