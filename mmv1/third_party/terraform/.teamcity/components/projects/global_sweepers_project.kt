@@ -7,7 +7,6 @@
 
 package projects
 
-import DefaultParallelism
 import GlobalSweepersProjectName
 import SharedResourceNameBeta
 import SharedResourceNameGa
