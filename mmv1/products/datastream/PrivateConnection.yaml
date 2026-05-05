@@ -52,6 +52,15 @@ examples:
     vars:
       private_connection_id: 'my-connection'
       network_name: 'my-network'
+    ignore_read_extra:
+      - 'deletion_policy'
+  - name: 'datastream_private_connection_force_delete'
+    primary_resource_id: 'default'
+    vars:
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'datastream_private_connection_psc_interface'
     primary_resource_id: 'default'
     test_env_vars:
@@ -64,6 +73,17 @@ examples:
       network_attachment_name: 'my-network-attachment'
       network_name: 'my-network'
       subnetwork_name: 'my-subnetwork'
+    ignore_read_extra:
+      - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      The deletion policy for the private connection. Setting `FORCE` will also delete any child
+      routes that belong to this private connection. Setting `DEFAULT` will fail the delete if
+      child routes exist. Defaults to `FORCE` for backwards compatibility.
+      Possible values: `DEFAULT`, `FORCE`.
+    type: String
+    default_value: "FORCE"
 parameters:
   - name: 'privateConnectionId'
     type: String

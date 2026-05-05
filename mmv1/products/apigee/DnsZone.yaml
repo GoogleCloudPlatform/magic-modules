@@ -40,6 +40,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+exclude_identity_generation: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_dns_zone.go.tmpl'
 examples:

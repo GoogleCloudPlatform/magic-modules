@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -95,7 +97,7 @@ func datasourceGoogleServiceAccountsRead(d *schema.ResourceData, meta interface{
 
 	accounts := make([]map[string]interface{}, 0)
 
-	request := config.NewIamClient(userAgent).Projects.ServiceAccounts.List("projects/" + project)
+	request := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.List("projects/" + project)
 
 	err = request.Pages(context.Background(), func(accountList *iam.ListServiceAccountsResponse) error {
 		for _, account := range accountList.Accounts {
@@ -142,4 +144,13 @@ func datasourceGoogleServiceAccountsRead(d *schema.ResourceData, meta interface{
 	d.SetId(strings.Join(idParts, "/"))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_service_accounts",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleServiceAccounts(),
+	}.Register()
 }

@@ -24,6 +24,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
     sampling_percent = 5
     row_filter = "station_id > 1000"
     catalog_publishing_enabled = true
+    filter = "attributes.priority = 'high'"
     post_scan_actions {
       notification_report {
         recipients {
@@ -39,6 +40,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
       column = "address"
       dimension = "VALIDITY"
       threshold = 0.99
+      attributes = {
+        priority = "high"
+      }
       non_null_expectation {}
     }
 

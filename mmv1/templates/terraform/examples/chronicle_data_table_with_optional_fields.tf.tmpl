@@ -1,5 +1,4 @@
 resource "google_chronicle_data_access_scope" "test_scope_allow_everyone" {
-provider             = google-beta
  location = "us"
  instance = "{{index $.TestEnvVars "chronicle_id"}}"
  data_access_scope_id = "{{index $.Vars "data_access_scope_id"}}"
@@ -10,7 +9,6 @@ provider             = google-beta
 }
 
 resource "google_chronicle_data_table" "example_dt" {
-  provider         = google-beta
   location         = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
   data_table_id  = "{{index $.Vars "data_table_id"}}"

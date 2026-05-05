@@ -15,7 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	tpgcloudbilling "github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -181,7 +184,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	var op *cloudresourcemanager.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (reqErr error) {
-			op, reqErr = config.NewResourceManagerClient(userAgent).Projects.Create(project).Do()
+			op, reqErr = rmClient.NewClient(config, userAgent).Projects.Create(project).Do()
 			return reqErr
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -269,7 +272,7 @@ func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *sc
 	req := &cloudbilling.TestIamPermissionsRequest{
 		Permissions: []string{perm},
 	}
-	resp, err := config.NewBillingClient(userAgent).BillingAccounts.TestIamPermissions(ba, req).Do()
+	resp, err := tpgcloudbilling.NewClient(config, userAgent).BillingAccounts.TestIamPermissions(ba, req).Do()
 	if err != nil {
 		return fmt.Errorf("failed to check permissions on billing account %q: %v", ba, err)
 	}
@@ -277,7 +280,7 @@ func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *sc
 		return fmt.Errorf("missing permission on %q: %v", ba, perm)
 	}
 	if !d.Get("auto_create_network").(bool) {
-		call := config.NewServiceUsageClient(userAgent).Services.Get("projects/00000000000/services/serviceusage.googleapis.com")
+		call := tpgserviceusage.NewClient(config, userAgent).Services.Get("projects/00000000000/services/serviceusage.googleapis.com")
 		if config.UserProjectOverride {
 			if billingProject, err := tpgresource.GetBillingProject(d, config); err == nil {
 				call.Header().Add("X-Goog-User-Project", billingProject)
@@ -366,7 +369,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	var ba *cloudbilling.ProjectBillingInfo
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (reqErr error) {
-			ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
+			ba, reqErr = tpgcloudbilling.NewClient(config, userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 			return reqErr
 		},
 		Timeout: d.Timeout(schema.TimeoutRead),
@@ -502,7 +505,7 @@ func updateProject(config *transport_tpg.Config, d *schema.ResourceData, project
 	var newProj *cloudresourcemanager.Project
 	if err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (updateErr error) {
-			newProj, updateErr = config.NewResourceManagerClient(userAgent).Projects.Update(desiredProject.ProjectId, desiredProject).Do()
+			newProj, updateErr = rmClient.NewClient(config, userAgent).Projects.Update(desiredProject.ProjectId, desiredProject).Do()
 			return updateErr
 		},
 		Timeout: d.Timeout(schema.TimeoutUpdate),
@@ -532,7 +535,7 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 		pid := parts[len(parts)-1]
 		if err := transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				_, delErr := config.NewResourceManagerClient(userAgent).Projects.Delete(pid).Do()
+				_, delErr := rmClient.NewClient(config, userAgent).Projects.Delete(pid).Do()
 				return delErr
 			},
 			Timeout: d.Timeout(schema.TimeoutDelete),
@@ -577,7 +580,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 
 	// Read the network from the API so we can get the correct self link format. We can't construct it from the
 	// base path because it might not line up exactly (compute.googleapis.com vs www.googleapis.com)
-	net, err := config.NewComputeClient(userAgent).Networks.Get(projectId, networkName).Do()
+	net, err := tpgcompute.NewClient(config, userAgent).Networks.Get(projectId, networkName).Do()
 	if err != nil {
 		return err
 	}
@@ -585,7 +588,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 	token := ""
 	for paginate := true; paginate; {
 		filter := fmt.Sprintf("network eq %s", net.SelfLink)
-		resp, err := config.NewComputeClient(userAgent).Firewalls.List(projectId).Filter(filter).Do()
+		resp, err := tpgcompute.NewClient(config, userAgent).Firewalls.List(projectId).Filter(filter).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error listing firewall rules in proj: {{err}}", err)
 		}
@@ -593,7 +596,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 		log.Printf("[DEBUG] Found %d firewall rules in %q network", len(resp.Items), networkName)
 
 		for _, firewall := range resp.Items {
-			op, err := config.NewComputeClient(userAgent).Firewalls.Delete(projectId, firewall.Name).Do()
+			op, err := tpgcompute.NewClient(config, userAgent).Firewalls.Delete(projectId, firewall.Name).Do()
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
@@ -620,7 +623,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 		ba.BillingAccountName = "billingAccounts/" + name
 	}
 	updateBillingInfoFunc := func() error {
-		_, err := config.NewBillingClient(userAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
+		_, err := tpgcloudbilling.NewClient(config, userAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
 		return err
 	}
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -640,7 +643,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 		var ba *cloudbilling.ProjectBillingInfo
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (reqErr error) {
-				ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
+				ba, reqErr = tpgcloudbilling.NewClient(config, userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 				return reqErr
 			},
 			Timeout: d.Timeout(schema.TimeoutRead),
@@ -659,7 +662,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 }
 
 func deleteComputeNetwork(project, network, userAgent string, config *transport_tpg.Config) error {
-	op, err := config.NewComputeClient(userAgent).Networks.Delete(
+	op, err := tpgcompute.NewClient(config, userAgent).Networks.Delete(
 		project, network).Do()
 	if err != nil {
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
@@ -679,7 +682,7 @@ func readGoogleProject(d *schema.ResourceData, config *transport_tpg.Config, use
 	pid := parts[len(parts)-1]
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (reqErr error) {
-			p, reqErr = config.NewResourceManagerClient(userAgent).Projects.Get(pid).Do()
+			p, reqErr = rmClient.NewClient(config, userAgent).Projects.Get(pid).Do()
 			return reqErr
 		},
 		Timeout: d.Timeout(schema.TimeoutRead),
@@ -731,12 +734,12 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 						// BatchEnable returns an error for a single item, so enable with single endpoint
 						name := fmt.Sprintf("projects/%s/services/%s", project, services[0])
 						req := &serviceusage.EnableServiceRequest{}
-						call = config.NewServiceUsageClient(userAgent).Services.Enable(name, req)
+						call = tpgserviceusage.NewClient(config, userAgent).Services.Enable(name, req)
 					} else {
 						// Batch enable for multiple services.
 						name := fmt.Sprintf("projects/%s", project)
 						req := &serviceusage.BatchEnableServicesRequest{ServiceIds: services}
-						call = config.NewServiceUsageClient(userAgent).Services.BatchEnable(name, req)
+						call = tpgserviceusage.NewClient(config, userAgent).Services.BatchEnable(name, req)
 					}
 
 					if config.UserProjectOverride && billingProject != "" {
@@ -800,7 +803,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			ctx := context.Background()
-			call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project)).PageSize(200)
+			call := tpgserviceusage.NewClient(config, userAgent).Services.List(fmt.Sprintf("projects/%s", project)).PageSize(200)
 			if config.UserProjectOverride && billingProject != "" {
 				call.Header().Add("X-Goog-User-Project", billingProject)
 			}
@@ -871,4 +874,13 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 		return errwrap.Wrap(err, fmt.Errorf("failed to enable some service(s) %q for project %s", missing, project))
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_project",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProject(),
+	}.Register()
 }

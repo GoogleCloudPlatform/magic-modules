@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -684,7 +685,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	// source code and we need to try the whole creation again.
 	rerr := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Create(
+			op, err := NewClient(config, userAgent).Projects.Locations.Functions.Create(
 				cloudFuncId.locationId(), function).Do()
 			if err != nil {
 				return err
@@ -718,7 +719,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.CloudFunctionId()).Do()
+	function, err := NewClient(config, userAgent).Projects.Locations.Functions.Get(cloudFuncId.CloudFunctionId()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
@@ -889,7 +890,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	// The full function needs to supplied in the PATCH call to evaluate some Organization Policies. https://github.com/hashicorp/terraform-provider-google/issues/6603
-	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.CloudFunctionId()).Do()
+	function, err := NewClient(config, userAgent).Projects.Locations.Functions.Get(cloudFuncId.CloudFunctionId()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
@@ -1043,7 +1044,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMask := strings.Join(updateMaskArr, ",")
 		rerr := transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Patch(function.Name, function).
+				op, err := NewClient(config, userAgent).Projects.Locations.Functions.Patch(function.Name, function).
 					UpdateMask(updateMask).Do()
 				if err != nil {
 					return err
@@ -1075,7 +1076,7 @@ func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Delete(cloudFuncId.CloudFunctionId()).Do()
+	op, err := NewClient(config, userAgent).Projects.Locations.Functions.Delete(cloudFuncId.CloudFunctionId()).Do()
 	if err != nil {
 		return err
 	}
@@ -1344,4 +1345,13 @@ func flattenOnDeployUpdatePolicy(policy *cloudfunctions.OnDeployUpdatePolicy) []
 	log.Printf("flatten on_deploy_update_policy to: %s", result)
 
 	return result
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_cloudfunctions_function",
+		ProductName: "cloudfunctions",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceCloudFunctionsFunction(),
+	}.Register()
 }

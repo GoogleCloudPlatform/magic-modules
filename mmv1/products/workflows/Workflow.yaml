@@ -42,6 +42,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+include_in_tgc_next: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/workflow.tmpl'
   encoder: 'templates/terraform/encoders/workflow.go.tmpl'
@@ -54,6 +55,9 @@ examples:
     vars:
       name: 'workflow'
       account_id: 'my-account'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"workflow" + randomSuffix'
     exclude_import_test: true
     ignore_read_extra:
       - 'deletion_protection'
@@ -64,6 +68,9 @@ examples:
       account_id: 'my-account'
       tag_key: 'tag_key'
       tag_value: 'tag_value'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"workflow" + randomSuffix'
     exclude_import_test: true
     ignore_read_extra:
       - 'deletion_protection'

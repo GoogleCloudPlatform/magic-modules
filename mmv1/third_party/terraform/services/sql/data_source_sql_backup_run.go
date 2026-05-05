@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -71,12 +73,12 @@ func dataSourceSqlBackupRunRead(d *schema.ResourceData, meta interface{}) error 
 
 	var backup *sqladmin.BackupRun
 	if backupId, ok := d.GetOk("backup_id"); ok {
-		backup, err = config.NewSqlAdminClient(userAgent).BackupRuns.Get(project, instance, int64(backupId.(int))).Do()
+		backup, err = NewClient(config, userAgent).BackupRuns.Get(project, instance, int64(backupId.(int))).Do()
 		if err != nil {
 			return err
 		}
 	} else {
-		res, err := config.NewSqlAdminClient(userAgent).BackupRuns.List(project, instance).Do()
+		res, err := NewClient(config, userAgent).BackupRuns.List(project, instance).Do()
 		if err != nil {
 			return err
 		}
@@ -111,4 +113,13 @@ func dataSourceSqlBackupRunRead(d *schema.ResourceData, meta interface{}) error 
 	}
 	d.SetId(id)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_sql_backup_run",
+		ProductName: "sql",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlBackupRun(),
+	}.Register()
 }

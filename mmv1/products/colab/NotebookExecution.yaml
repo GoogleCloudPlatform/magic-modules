@@ -81,6 +81,8 @@ examples:
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      secret: '"secret" + randomSuffix'
 parameters:
   - name: 'location'
     type: String

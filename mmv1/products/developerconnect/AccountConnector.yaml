@@ -25,23 +25,29 @@ examples:
   - name: developer_connect_account_connector_github
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
+      account_connector_name: my-ac
   - name: developer_connect_account_connector_gitlab
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
+      account_connector_name: my-ac
   - name: developer_connect_account_connector_ghe
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
+      account_connector_name: my-ac
+      client_id_secret_name: ghe-ac-id
+      client_secret_secret_name: ghe-ac-sec
   - name: developer_connect_account_connector_gle
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
+      account_connector_name: my-ac
+      client_id_secret_name: gle-ac-id
+      client_secret_secret_name: gle-ac-sec
   - name: developer_connect_account_connector_bbdc
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
+      account_connector_name: my-ac
+      client_id_secret_name: bbdc-ac-id
+      client_secret_secret_name: bbdc-ac-sec
 autogen_async: true
 async:
   operation:

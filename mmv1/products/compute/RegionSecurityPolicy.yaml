@@ -41,6 +41,8 @@ async:
 include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_security_policy.go.tmpl'
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 sweeper:
   url_substitutions:
     - region: "us-south1"

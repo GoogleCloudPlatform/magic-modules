@@ -3,6 +3,7 @@ package bigtable
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -98,7 +99,7 @@ func (u *BigtableTableIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.
 		return nil, err
 	}
 
-	p, err := u.Config.NewBigTableProjectsInstancesTablesClient(userAgent).GetIamPolicy(u.GetResourceId(), req).Do()
+	p, err := NewProjectsInstancesTablesClient(u.Config, userAgent).GetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -124,7 +125,7 @@ func (u *BigtableTableIamUpdater) SetResourceIamPolicy(policy *cloudresourcemana
 		return err
 	}
 
-	_, err = u.Config.NewBigTableProjectsInstancesTablesClient(userAgent).SetIamPolicy(u.GetResourceId(), req).Do()
+	_, err = NewProjectsInstancesTablesClient(u.Config, userAgent).SetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -142,4 +143,31 @@ func (u *BigtableTableIamUpdater) GetMutexKey() string {
 
 func (u *BigtableTableIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("Bigtable Table %s/%s-%s", u.project, u.instanceName, u.table)
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_bigtable_table_iam_member",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc, tpgiamresource.IamWithStateUpgraders(BigtableTableIamStateUpgraders), tpgiamresource.IamWithSchemaVersion(1)),
+	}.Register()
+	registry.Schema{
+		Name:        "google_bigtable_table_iam_binding",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc, tpgiamresource.IamWithStateUpgraders(BigtableTableIamStateUpgraders), tpgiamresource.IamWithSchemaVersion(1)),
+	}.Register()
+	registry.Schema{
+		Name:        "google_bigtable_table_iam_policy",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc, tpgiamresource.IamWithStateUpgraders(BigtableTableIamStateUpgraders), tpgiamresource.IamWithSchemaVersion(1)),
+	}.Register()
+	registry.Schema{
+		Name:        "google_bigtable_table_iam_policy",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(IamBigtableTableSchema, NewBigtableTableUpdater),
+	}.Register()
 }

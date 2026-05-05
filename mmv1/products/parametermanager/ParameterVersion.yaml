@@ -36,11 +36,17 @@ examples:
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
+    test_vars_overrides:
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
   - name: 'parameter_version_with_json_format'
     primary_resource_id: 'parameter-version-with-json-format'
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
+    test_vars_overrides:
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
   - name: 'parameter_version_with_kms_key'
     primary_resource_id: 'parameter-version-with-kms-key'
     vars:
@@ -49,6 +55,8 @@ examples:
       kms_key: 'kms-key'
     test_vars_overrides:
       'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
@@ -57,6 +65,9 @@ examples:
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
+    test_vars_overrides:
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
   - name: 'parameter_version_with_json_format_with_file'
     primary_resource_id: 'parameter-version-with-json-format-with-file'
     vars:
@@ -65,6 +76,8 @@ examples:
       data: parameter-json-data.json
     test_vars_overrides:
       'data': '"./test-fixtures/parameter_data_json_format.json"'
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
   - name: 'parameter_version_with_yaml_format_with_file'
     primary_resource_id: 'parameter-version-with-yaml-format-with-file'
     vars:
@@ -73,8 +86,11 @@ examples:
       data: parameter-yaml-data.yaml
     test_vars_overrides:
       'data': '"./test-fixtures/parameter_data_yaml_format.yaml"'
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
 custom_code:
   custom_import: 'templates/terraform/custom_import/parameter_manager_parameter_version.go.tmpl'
+exclude_identity_generation: true
 parameters:
   - name: 'parameter'
     type: ResourceRef

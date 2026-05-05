@@ -67,6 +67,9 @@ examples:
     vars:
       name: "test-health-source"
       description: "Example health source basic"
+    test_vars_overrides:
+      # for backward compatible
+      description: '"Example health source basic" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
 

@@ -1,0 +1,28 @@
+package cloudidentity
+
+import (
+	"log"
+
+{{- if ne $.TargetVersionName "ga" }}
+	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
+{{- else }}
+	"google.golang.org/api/cloudidentity/v1"
+{{- end }}
+	"google.golang.org/api/option"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func NewClient(c *transport_tpg.Config, userAgent string) *cloudidentity.Service {
+	cloudidentityClientBasePath := transport_tpg.RemoveBasePathVersion(c.CloudIdentityBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud CloudIdentity client for path %s", cloudidentityClientBasePath)
+	clientCloudIdentity, err := cloudidentity.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client cloud identity: %s", err)
+		return nil
+	}
+	clientCloudIdentity.UserAgent = userAgent
+	clientCloudIdentity.BasePath = cloudidentityClientBasePath
+
+	return clientCloudIdentity
+}

@@ -52,6 +52,8 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_instance.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccAlloydbInstance_connectionPoolConfig'
@@ -306,6 +308,12 @@ properties:
       - name: 'trackActiveQueries'
         type: Boolean
         description: 'Track actively running queries. If not set, default value is "off".'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        send_empty_value: true
+        default_from_api: true
+      - name: 'trackClientAddress'
+        type: Boolean
+        description: 'Track client address for an instance. If not set, default value is "off".'
         include_empty_value_in_cai: true  # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true

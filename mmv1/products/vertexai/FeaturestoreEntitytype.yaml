@@ -69,6 +69,8 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      name: '"terraform" + randomSuffix'
   - name: 'vertex_ai_featurestore_entitytype_with_beta_fields'
     primary_resource_id: 'entity'
     min_version: 'beta'
@@ -81,6 +83,8 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      name: '"terraform2" + randomSuffix'
 parameters:
   - name: 'featurestore'
     type: String

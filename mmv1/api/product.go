@@ -58,7 +58,7 @@ type Product struct {
 	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
-	ResourcesWithCaiAssetType map[string]struct{}
+	ResourcesWithCaiAssetType map[string]struct{} `yaml:"-"`
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
@@ -80,6 +80,10 @@ type Product struct {
 
 	// ImportPath contains the prefix used for importing packages in generated files.
 	ImportPath string `yaml:"-"`
+
+	// RepByDefault is if this product should default to REP endpoints if
+	// available. Changing this requires REP to be supported in *ALL* regions
+	RepByDefault bool `yaml:"rep_by_default,omitempty"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {
@@ -323,6 +327,13 @@ func Merge(self, otherObj reflect.Value, version string) {
 
 		if selfObj.Field(i).Kind() == reflect.Slice {
 			DeepMerge(selfObj.Field(i), otherObj.Field(i), version)
+		} else if selfObj.Field(i).Kind() == reflect.Pointer {
+			// merge the objects that are being pointed to, if both exist (namely, ItemTypes)
+			if reflect.Indirect(selfObj.Field(i)).IsValid() && reflect.Indirect(otherObj.Field(i)).IsValid() {
+				Merge(selfObj.Field(i), reflect.Indirect(otherObj.Field(i)), version)
+			} else {
+				selfObj.Field(i).Set(otherObj.Field(i))
+			}
 		} else {
 			selfObj.Field(i).Set(otherObj.Field(i))
 		}

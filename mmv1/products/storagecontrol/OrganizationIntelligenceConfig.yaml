@@ -60,6 +60,9 @@ examples:
     primary_resource_id: example
     vars:
       org_id: "12345678"
+    test_vars_overrides:
+      # for backward compatible
+      org_id: '"12345678" + randomSuffix'
     exclude_test: true
     exclude_import_test: true
 

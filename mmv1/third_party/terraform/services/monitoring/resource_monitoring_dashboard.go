@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -152,7 +153,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -210,7 +211,7 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:               config,
 		Method:               "PATCH",
@@ -235,7 +236,7 @@ func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -273,4 +274,13 @@ func resourceMonitoringDashboardImport(d *schema.ResourceData, meta interface{})
 	d.SetId(fmt.Sprintf("projects/%s/dashboards/%s", parts["project"], parts["id"]))
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_monitoring_dashboard",
+		ProductName: "monitoring",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceMonitoringDashboard(),
+	}.Register()
 }

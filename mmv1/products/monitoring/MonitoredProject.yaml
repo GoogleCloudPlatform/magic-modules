@@ -36,11 +36,14 @@ async:
     base_url: '{{op_id}}'
 custom_code:
   constants: 'templates/terraform/constants/monitoring_monitored_project.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/monitoring_monitored_project.go.tmpl'
   encoder: 'templates/terraform/encoders/monitoring_monitored_project.go.tmpl'
   decoder: 'templates/terraform/decoders/monitoring_monitored_project.go.tmpl'
   pre_read: 'templates/terraform/pre_read/monitoring_monitored_project.go.tmpl'
   custom_import: 'templates/terraform/custom_import/monitoring_monitored_project.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/monitoring_monitored_project.go.tmpl'
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 error_retry_predicates:
   - 'transport_tpg.IsMonitoringPermissionError'
 schema_version: 1

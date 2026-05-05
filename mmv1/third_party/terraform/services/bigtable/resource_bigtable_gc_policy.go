@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -246,7 +247,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -317,7 +318,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -457,7 +458,7 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -639,4 +640,13 @@ func getMaxAgeDuration(values map[string]interface{}) (time.Duration, error) {
 	days := values["days"].(int)
 
 	return time.Hour * 24 * time.Duration(days), nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_bigtable_gc_policy",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigtableGCPolicy(),
+	}.Register()
 }

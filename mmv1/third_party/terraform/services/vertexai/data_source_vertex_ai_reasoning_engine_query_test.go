@@ -1,0 +1,56 @@
+package vertexai_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccDataSourceVertexAIReasoningEngineQuery_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{"random_suffix": acctest.RandString(t, 10)}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceVertexAIReasoningEngineQuery_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_vertex_ai_reasoning_engine_query.default", "output"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceVertexAIReasoningEngineQuery_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "default" {
+  display_name = "vertex-mds-%{random_suffix}"
+  description  = "Retrieves tenant project number"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/mds_agent_src.tar.gz")
+      }
+
+      python_spec {
+        entrypoint_module = "metadata_agent"
+        entrypoint_object = "root_agent"
+      }
+    }
+  }
+}
+
+data "google_vertex_ai_reasoning_engine_query" "default" {
+  reasoning_engine_id = google_vertex_ai_reasoning_engine.default.name
+  region              = "us-central1"
+  class_method        = "query"
+}
+`, context)
+}

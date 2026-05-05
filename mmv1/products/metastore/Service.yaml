@@ -101,7 +101,6 @@ examples:
       metastore_service_name: 'metastore-srv'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-    exclude_test: true
   - name: 'dataproc_metastore_service_private_service_connect_custom_routes'
     primary_resource_id: 'default'
     min_version: 'beta'

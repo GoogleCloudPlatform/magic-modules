@@ -5674,10 +5674,8 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardSlice(c *Client,
 	return items
 }
 
-// expandDeliveryPipelineSerialPipelineStagesStrategyStandard expands an instance of DeliveryPipelineSerialPipelineStagesStrategyStandard into a JSON
-// request object.
 func expandDeliveryPipelineSerialPipelineStagesStrategyStandard(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyStandard, res *DeliveryPipeline) (map[string]interface{}, error) {
-	if dcl.IsEmptyValueIndirect(f) {
+	if f == nil {
 		return nil, nil
 	}
 
@@ -5695,12 +5693,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyStandard(c *Client, f *De
 	} else if !dcl.IsEmptyValueIndirect(v) {
 		m["postdeploy"] = v
 	}
+	if v, err := expandDeliveryPipelineVerifyConfig(c, f.VerifyConfig, res); err != nil {
+		return nil, fmt.Errorf("error expanding VerifyConfig into verifyConfig: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["verifyConfig"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyStandard flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyStandard from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyStandard(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyStandard {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -5715,6 +5716,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyStandard(c *Client, i in
 	r.Verify = dcl.FlattenBool(m["verify"])
 	r.Predeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy(c, m["predeploy"], res)
 	r.Postdeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy(c, m["postdeploy"], res)
+	r.VerifyConfig = flattenDeliveryPipelineVerifyConfig(c, m["verifyConfig"], res)
 
 	return r
 }
@@ -5800,10 +5802,8 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploySlice(c
 	return items
 }
 
-// expandDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy expands an instance of DeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy into a JSON
-// request object.
 func expandDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy, res *DeliveryPipeline) (map[string]interface{}, error) {
-	if dcl.IsEmptyValueIndirect(f) {
+	if f == nil {
 		return nil, nil
 	}
 
@@ -5811,12 +5811,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy(c *Clie
 	if v := f.Actions; v != nil {
 		m["actions"] = v
 	}
+	if v, err := expandDeliveryPipelineTaskSlice(c, f.Tasks, res); err != nil {
+		return nil, fmt.Errorf("error expanding Tasks into tasks: %w", err)
+	} else if v != nil {
+		m["tasks"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -5829,6 +5832,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy(c *Cli
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy
 	}
 	r.Actions = dcl.FlattenStringSlice(m["actions"])
+	r.Tasks = flattenDeliveryPipelineTaskSlice(c, m["tasks"], res)
 
 	return r
 }
@@ -5914,10 +5918,8 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploySlice(
 	return items
 }
 
-// expandDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy expands an instance of DeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy into a JSON
-// request object.
 func expandDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy, res *DeliveryPipeline) (map[string]interface{}, error) {
-	if dcl.IsEmptyValueIndirect(f) {
+	if f == nil {
 		return nil, nil
 	}
 
@@ -5925,12 +5927,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy(c *Cli
 	if v := f.Actions; v != nil {
 		m["actions"] = v
 	}
+	if v, err := expandDeliveryPipelineTaskSlice(c, f.Tasks, res); err != nil {
+		return nil, fmt.Errorf("error expanding Tasks into tasks: %w", err)
+	} else if v != nil {
+		m["tasks"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -5943,6 +5948,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy(c *Cl
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy
 	}
 	r.Actions = dcl.FlattenStringSlice(m["actions"])
+	r.Tasks = flattenDeliveryPipelineTaskSlice(c, m["tasks"], res)
 
 	return r
 }
@@ -6910,6 +6916,194 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentSl
 	return items
 }
 
+func expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis, res *DeliveryPipeline) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	m := make(map[string]interface{})
+	if v := f.Duration; !dcl.IsEmptyValueIndirect(v) {
+		m["duration"] = v
+	}
+	if v, err := expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud(c, f.GoogleCloud, res); err != nil {
+		return nil, fmt.Errorf("error expanding GoogleCloud into googleCloud: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["googleCloud"] = v
+	}
+	if v, err := expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecksSlice(c, f.CustomChecks, res); err != nil {
+		return nil, fmt.Errorf("error expanding CustomChecks into customChecks: %w", err)
+	} else if v != nil {
+		m["customChecks"] = v
+	}
+	return m, nil
+}
+
+func expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud, res *DeliveryPipeline) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	m := make(map[string]interface{})
+	if v, err := expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheckSlice(c, f.AlertPolicyChecks, res); err != nil {
+		return nil, fmt.Errorf("error expanding AlertPolicyChecks into alertPolicyChecks: %w", err)
+	} else if v != nil {
+		m["alertPolicyChecks"] = v
+	}
+	return m, nil
+}
+
+func expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheckSlice(c *Client, f []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck, res *DeliveryPipeline) ([]map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	items := []map[string]interface{}{}
+	for _, item := range f {
+		i, err := expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, nil
+}
+
+func expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck, res *DeliveryPipeline) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	m := make(map[string]interface{})
+	if v := f.Id; !dcl.IsEmptyValueIndirect(v) {
+		m["id"] = v
+	}
+	if v := f.AlertPolicies; v != nil {
+		m["alertPolicies"] = v
+	}
+	if v := f.Labels; v != nil {
+		m["labels"] = v
+	}
+	return m, nil
+}
+
+func expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecksSlice(c *Client, f []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks, res *DeliveryPipeline) ([]map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	items := []map[string]interface{}{}
+	for _, item := range f {
+		i, err := expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, nil
+}
+
+func expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks, res *DeliveryPipeline) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	m := make(map[string]interface{})
+	if v := f.Id; !dcl.IsEmptyValueIndirect(v) {
+		m["id"] = v
+	}
+	if v := f.Frequency; !dcl.IsEmptyValueIndirect(v) {
+		m["frequency"] = v
+	}
+	if v, err := expandDeliveryPipelineTask(c, f.Task, res); err != nil {
+		return nil, fmt.Errorf("error expanding Task into task: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["task"] = v
+	}
+	return m, nil
+}
+
+func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis{}
+	if dcl.IsEmptyValueIndirect(i) {
+		return nil
+	}
+	r.Duration = dcl.FlattenString(m["duration"])
+	r.GoogleCloud = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud(c, m["googleCloud"], res)
+	r.CustomChecks = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecksSlice(c, m["customChecks"], res)
+	return r
+}
+
+func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud{}
+	if dcl.IsEmptyValueIndirect(i) {
+		return nil
+	}
+	r.AlertPolicyChecks = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheckSlice(c, m["alertPolicyChecks"], res)
+	return r
+}
+
+func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheckSlice(c *Client, i interface{}, res *DeliveryPipeline) []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck {
+	a, ok := i.([]interface{})
+	if !ok {
+		return []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck{}
+	}
+	if len(a) == 0 {
+		return []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck{}
+	}
+	items := make([]DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck, 0, len(a))
+	for _, item := range a {
+		items = append(items, *flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck(c, item.(map[string]interface{}), res))
+	}
+	return items
+}
+
+func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck{}
+	if dcl.IsEmptyValueIndirect(i) {
+		return nil
+	}
+	r.Id = dcl.FlattenString(m["id"])
+	r.AlertPolicies = dcl.FlattenStringSlice(m["alertPolicies"])
+	r.Labels = dcl.FlattenKeyValuePairs(m["labels"])
+	return r
+}
+
+func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecksSlice(c *Client, i interface{}, res *DeliveryPipeline) []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks {
+	a, ok := i.([]interface{})
+	if !ok {
+		return []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks{}
+	}
+	if len(a) == 0 {
+		return []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks{}
+	}
+	items := make([]DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks, 0, len(a))
+	for _, item := range a {
+		items = append(items, *flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks(c, item.(map[string]interface{}), res))
+	}
+	return items
+}
+
+func flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks{}
+	if dcl.IsEmptyValueIndirect(i) {
+		return nil
+	}
+	r.Id = dcl.FlattenString(m["id"])
+	r.Frequency = dcl.FlattenString(m["frequency"])
+	r.Task = flattenDeliveryPipelineTask(c, m["task"], res)
+	return r
+}
+
 // expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment expands an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment into a JSON
 // request object.
 func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment, res *DeliveryPipeline) (map[string]interface{}, error) {
@@ -6934,12 +7128,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment(c 
 	} else if !dcl.IsEmptyValueIndirect(v) {
 		m["postdeploy"] = v
 	}
+	if v, err := expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(c, f.Analysis, res); err != nil {
+		return nil, fmt.Errorf("error expanding Analysis into analysis: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["analysis"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -6955,6 +7152,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployment(c
 	r.Verify = dcl.FlattenBool(m["verify"])
 	r.Predeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy(c, m["predeploy"], res)
 	r.Postdeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy(c, m["postdeploy"], res)
+	r.Analysis = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(c, m["analysis"], res)
 
 	return r
 }
@@ -7040,10 +7238,100 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPr
 	return items
 }
 
-// expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy expands an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy into a JSON
-// request object.
+func expandDeliveryPipelineTaskSlice(c *Client, f []DeliveryPipelineTask, res *DeliveryPipeline) ([]map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	items := []map[string]interface{}{}
+	for _, item := range f {
+		i, err := expandDeliveryPipelineTask(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, nil
+}
+
+func expandDeliveryPipelineTask(c *Client, f *DeliveryPipelineTask, res *DeliveryPipeline) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	m := make(map[string]interface{})
+	if v, err := expandDeliveryPipelineTaskContainer(c, f.Container, res); err != nil {
+		return nil, fmt.Errorf("error expanding Container into container: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["container"] = v
+	}
+	return m, nil
+}
+
+func expandDeliveryPipelineTaskContainer(c *Client, f *DeliveryPipelineContainer, res *DeliveryPipeline) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	m := make(map[string]interface{})
+	if v := f.Image; !dcl.IsEmptyValueIndirect(v) {
+		m["image"] = v
+	}
+	if v := f.Command; v != nil {
+		m["command"] = v
+	}
+	if v := f.Args; v != nil {
+		m["args"] = v
+	}
+	if v := f.Env; v != nil {
+		m["env"] = v
+	}
+	return m, nil
+}
+
+func flattenDeliveryPipelineTaskSlice(c *Client, i interface{}, res *DeliveryPipeline) []DeliveryPipelineTask {
+	a, ok := i.([]interface{})
+	if !ok {
+		return []DeliveryPipelineTask{}
+	}
+	if len(a) == 0 {
+		return []DeliveryPipelineTask{}
+	}
+	items := make([]DeliveryPipelineTask, 0, len(a))
+	for _, item := range a {
+		items = append(items, *flattenDeliveryPipelineTask(c, item.(map[string]interface{}), res))
+	}
+	return items
+}
+
+func flattenDeliveryPipelineTask(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineTask {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := &DeliveryPipelineTask{}
+	if dcl.IsEmptyValueIndirect(i) {
+		return nil
+	}
+	r.Container = flattenDeliveryPipelineTaskContainer(c, m["container"], res)
+	return r
+}
+
+func flattenDeliveryPipelineTaskContainer(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineContainer {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := &DeliveryPipelineContainer{}
+	if dcl.IsEmptyValueIndirect(i) {
+		return nil
+	}
+	r.Image = dcl.FlattenString(m["image"])
+	r.Command = dcl.FlattenStringSlice(m["command"])
+	r.Args = dcl.FlattenStringSlice(m["args"])
+	r.Env = dcl.FlattenKeyValuePairs(m["env"])
+	return r
+}
+
 func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy, res *DeliveryPipeline) (map[string]interface{}, error) {
-	if dcl.IsEmptyValueIndirect(f) {
+	if f == nil {
 		return nil, nil
 	}
 
@@ -7051,12 +7339,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPre
 	if v := f.Actions; v != nil {
 		m["actions"] = v
 	}
+	if v, err := expandDeliveryPipelineTaskSlice(c, f.Tasks, res); err != nil {
+		return nil, fmt.Errorf("error expanding Tasks into tasks: %w", err)
+	} else if v != nil {
+		m["tasks"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -7069,6 +7360,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPr
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy
 	}
 	r.Actions = dcl.FlattenStringSlice(m["actions"])
+	r.Tasks = flattenDeliveryPipelineTaskSlice(c, m["tasks"], res)
 
 	return r
 }
@@ -7154,10 +7446,8 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPo
 	return items
 }
 
-// expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy expands an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy into a JSON
-// request object.
 func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy, res *DeliveryPipeline) (map[string]interface{}, error) {
-	if dcl.IsEmptyValueIndirect(f) {
+	if f == nil {
 		return nil, nil
 	}
 
@@ -7165,12 +7455,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPos
 	if v := f.Actions; v != nil {
 		m["actions"] = v
 	}
+	if v, err := expandDeliveryPipelineTaskSlice(c, f.Tasks, res); err != nil {
+		return nil, fmt.Errorf("error expanding Tasks into tasks: %w", err)
+	} else if v != nil {
+		m["tasks"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -7183,6 +7476,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPo
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy
 	}
 	r.Actions = dcl.FlattenStringSlice(m["actions"])
+	r.Tasks = flattenDeliveryPipelineTaskSlice(c, m["tasks"], res)
 
 	return r
 }
@@ -7384,8 +7678,32 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploy
 	return items
 }
 
-// expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigs expands an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigs into a JSON
-// request object.
+func expandDeliveryPipelineVerifyConfig(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyStandardVerifyConfig, res *DeliveryPipeline) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+	m := make(map[string]interface{})
+	if v, err := expandDeliveryPipelineTaskSlice(c, f.Tasks, res); err != nil {
+		return nil, fmt.Errorf("error expanding Tasks into tasks: %w", err)
+	} else if v != nil {
+		m["tasks"] = v
+	}
+	return m, nil
+}
+
+func flattenDeliveryPipelineVerifyConfig(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyStandardVerifyConfig {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := &DeliveryPipelineSerialPipelineStagesStrategyStandardVerifyConfig{}
+	if dcl.IsEmptyValueIndirect(i) {
+		return nil
+	}
+	r.Tasks = flattenDeliveryPipelineTaskSlice(c, m["tasks"], res)
+	return r
+}
+
 func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigs(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigs, res *DeliveryPipeline) (map[string]interface{}, error) {
 	if f == nil {
 		return nil, nil
@@ -7414,12 +7732,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploym
 	} else if !dcl.IsEmptyValueIndirect(v) {
 		m["postdeploy"] = v
 	}
+	if v, err := expandDeliveryPipelineVerifyConfig(c, f.VerifyConfig, res); err != nil {
+		return nil, fmt.Errorf("error expanding VerifyConfig into verifyConfig: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["verifyConfig"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigs flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigs from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigs(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigs {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -7437,6 +7758,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploy
 	r.Verify = dcl.FlattenBool(m["verify"])
 	r.Predeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy(c, m["predeploy"], res)
 	r.Postdeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy(c, m["postdeploy"], res)
+	r.VerifyConfig = flattenDeliveryPipelineVerifyConfig(c, m["verifyConfig"], res)
 
 	return r
 }
@@ -7522,10 +7844,8 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploy
 	return items
 }
 
-// expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy expands an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy into a JSON
-// request object.
 func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy, res *DeliveryPipeline) (map[string]interface{}, error) {
-	if dcl.IsEmptyValueIndirect(f) {
+	if f == nil {
 		return nil, nil
 	}
 
@@ -7533,12 +7853,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploym
 	if v := f.Actions; v != nil {
 		m["actions"] = v
 	}
+	if v, err := expandDeliveryPipelineTaskSlice(c, f.Tasks, res); err != nil {
+		return nil, fmt.Errorf("error expanding Tasks into tasks: %w", err)
+	} else if v != nil {
+		m["tasks"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -7551,6 +7874,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploy
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy
 	}
 	r.Actions = dcl.FlattenStringSlice(m["actions"])
+	r.Tasks = flattenDeliveryPipelineTaskSlice(c, m["tasks"], res)
 
 	return r
 }
@@ -7636,10 +7960,8 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploy
 	return items
 }
 
-// expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy expands an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy into a JSON
-// request object.
 func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy(c *Client, f *DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy, res *DeliveryPipeline) (map[string]interface{}, error) {
-	if dcl.IsEmptyValueIndirect(f) {
+	if f == nil {
 		return nil, nil
 	}
 
@@ -7647,12 +7969,15 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploym
 	if v := f.Actions; v != nil {
 		m["actions"] = v
 	}
+	if v, err := expandDeliveryPipelineTaskSlice(c, f.Tasks, res); err != nil {
+		return nil, fmt.Errorf("error expanding Tasks into tasks: %w", err)
+	} else if v != nil {
+		m["tasks"] = v
+	}
 
 	return m, nil
 }
 
-// flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy flattens an instance of DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy from a JSON
-// response object.
 func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy(c *Client, i interface{}, res *DeliveryPipeline) *DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy {
 	m, ok := i.(map[string]interface{})
 	if !ok {
@@ -7665,6 +7990,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploy
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy
 	}
 	r.Actions = dcl.FlattenStringSlice(m["actions"])
+	r.Tasks = flattenDeliveryPipelineTaskSlice(c, m["tasks"], res)
 
 	return r
 }

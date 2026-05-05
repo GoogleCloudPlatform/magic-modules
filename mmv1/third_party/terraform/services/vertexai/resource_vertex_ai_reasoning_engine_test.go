@@ -1,0 +1,710 @@
+package vertexai_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) {
+	t.Parallel()
+
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"bucket_name":   acctest.TestBucketName(t),
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineBasic(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic(),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate(),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+locals {
+  class_methods = [
+    {
+      api_mode = "async"
+      description = null
+      name = "async_query"
+      parameters = {
+        type     = "object"
+        required = []
+        properties = {}
+      }
+    }
+  ]
+}
+
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "sample-reasoning-engine"
+  description  = "A sample reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
+  region       = "us-central1"
+
+  encryption_spec {
+    kms_key_name = "%{kms_key_name}"
+  }
+
+  spec {
+    agent_framework = "google-adk"
+    class_methods   = jsonencode(local.class_methods)
+    service_account = google_service_account.service_account.email
+
+    deployment_spec {
+      min_instances         = 1
+      max_instances         = 3
+      container_concurrency = 5
+
+      resource_limits = {
+        cpu    = "2"
+        memory = "2Gi"
+      }
+
+      env {
+        name  = "var_1"
+        value = "value_1"
+      }
+
+      env {
+        name  = "var_2"
+        value = "value_2"
+      }
+
+      secret_env {
+        name = "secret_var_1"
+
+        secret_ref {
+          secret  = google_secret_manager_secret.secret.secret_id
+          version = "latest"
+        }
+      }
+    }
+
+    package_spec {
+      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_adk.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pickle_adk.name}"
+      python_version           = "3.11"
+      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_adk.name}"
+    }
+  }
+
+  depends_on = [
+    time_sleep.wait_5_minutes
+  ]
+}
+
+# Ensure we wait enough time for IAM permissions to be propagated
+resource "time_sleep" "wait_5_minutes" {
+  create_duration = "5m"
+
+  depends_on = [
+    google_project_iam_member.sa_iam_ai_platform_user,
+    google_project_iam_member.sa_iam_object_viewer,
+    google_project_iam_member.sa_iam_viewer,
+    google_secret_manager_secret_iam_member.secret_access,
+    google_secret_manager_secret_version.secret_version
+  ]
+}
+
+resource "google_secret_manager_secret" "secret" {
+  secret_id = "tf-test-secret-%{random_suffix}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret_version" {
+  secret      = google_secret_manager_secret.secret.id
+  secret_data = "test"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_access" {
+  secret_id  = google_secret_manager_secret.secret.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = google_service_account.service_account.member
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "%{bucket_name}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "bucket_obj_requirements_adk" {
+  name   = "requirements_adk.txt"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/requirements_adk.txt"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_pickle_adk" {
+  name   = "pickle_adk.pkl"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/pickle_adk.pkl"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
+  name   = "dependencies_adk.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/dependencies_adk.tar.gz"
+}
+
+resource "google_service_account" "service_account" {
+  account_id = "tf-test-re-sa-%{random_suffix}"
+}
+
+resource "google_project_iam_member" "sa_iam_object_viewer" {
+  role    = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_ai_platform_user" {
+  role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_viewer" {
+  role    = "roles/viewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+data "google_project" "project" {}
+`, context)
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+locals {
+  class_methods = [
+    {
+      api_mode = "async"
+      description = null
+      name = "async_query"
+      parameters = {
+        type     = "object"
+        required = []
+        properties = {}
+      }
+    }
+  ]
+  class_methods_new = [
+    {
+      api_mode    = "async"
+      description = null
+      name        = "async_query"
+      parameters = {
+        type       = "object"
+        required   = []
+        properties = {}
+      }
+    },
+    {
+      api_mode    = "async_stream"
+      description = null
+      name        = "async_query_2"
+      parameters = {
+        type       = "object"
+        required   = []
+        properties = {}
+      }
+    }
+  ]
+}
+
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "sample-reasoning-engine-updated"
+  description  = "A sample reasoning engine updated"
+  labels       = {
+    "key" = "updated"
+  }
+  region       = "us-central1"
+
+  encryption_spec {
+    kms_key_name = "%{kms_key_name}"
+  }
+
+  spec {
+    agent_framework = "langchain"
+    class_methods   = jsonencode(local.class_methods_new)
+    service_account = google_service_account.service_account_new.email
+
+    deployment_spec {
+      min_instances         = 2
+      max_instances         = 4
+      container_concurrency = 6
+
+      resource_limits = {
+        cpu    = "4"
+        memory = "4Gi"
+      }
+
+      env {
+        name  = "var_1"
+        value = "value_1b"
+      }
+
+      env {
+        name  = "var_2"
+        value = "value_2b"
+      }
+
+      secret_env {
+        name = "secret_var_1"
+
+        secret_ref {
+          secret  = google_secret_manager_secret.secret.secret_id
+          version = "latest"
+        }
+      }
+
+      secret_env {
+        name = "secret_var_2"
+
+        secret_ref {
+          secret  = google_secret_manager_secret.secret_new.secret_id
+          version = "2"
+        }
+      }
+    }
+
+    package_spec {
+      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_langchain.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pickle_langchain.name}"
+      python_version           = "3.12"
+      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_langchain.name}"
+    }
+  }
+
+  depends_on = [
+    time_sleep.wait_5_minutes
+  ]
+}
+
+# Ensure we wait enough time for IAM permissions to be propagated
+resource "time_sleep" "wait_5_minutes" {
+  create_duration = "5m"
+
+  depends_on = [
+    google_project_iam_member.sa_iam_ai_platform_user_new,
+    google_project_iam_member.sa_iam_object_viewer_new,
+    google_project_iam_member.sa_iam_viewer_new,
+    google_secret_manager_secret_iam_member.secret_access_new,
+    google_secret_manager_secret_iam_member.secret_new_access,
+    google_secret_manager_secret_version.secret_new_version_2,
+    google_secret_manager_secret_version.secret_version
+  ]
+}
+
+resource "google_secret_manager_secret" "secret" {
+  secret_id = "tf-test-secret-%{random_suffix}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret_version" {
+  secret      = google_secret_manager_secret.secret.id
+  secret_data = "test"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_access" {
+  secret_id  = google_secret_manager_secret.secret.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = google_service_account.service_account.member
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_access_new" {
+  secret_id  = google_secret_manager_secret.secret.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = google_service_account.service_account_new.member
+
+  depends_on = [google_secret_manager_secret_iam_member.secret_access]
+}
+
+resource "google_secret_manager_secret" "secret_new" {
+  secret_id = "tf-test-secret-new-%{random_suffix}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret_new_version_1" {
+  secret      = google_secret_manager_secret.secret_new.id
+  secret_data = "test"
+}
+
+resource "google_secret_manager_secret_version" "secret_new_version_2" {
+  secret      = google_secret_manager_secret.secret_new.id
+  secret_data = "test update"
+
+  depends_on = [
+    google_secret_manager_secret_version.secret_new_version_1
+  ]
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_new_access" {
+  secret_id  = google_secret_manager_secret.secret_new.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = google_service_account.service_account_new.member
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "%{bucket_name}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "bucket_obj_requirements_adk" {
+  name   = "requirements_adk.txt"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/requirements_adk.txt"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_pickle_adk" {
+  name   = "pickle_adk.pkl"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/pickle_adk.pkl"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
+  name   = "dependencies_adk.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/dependencies_adk.tar.gz"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_requirements_langchain" {
+  name   = "requirements_langchain.txt"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/requirements_langchain.txt"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_pickle_langchain" {
+  name   = "pickle_langchain.pkl"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/pickle_langchain.pkl"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_dependencies_langchain" {
+  name   = "dependencies_langchain.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/dependencies_langchain.tar.gz"
+}
+
+resource "google_service_account" "service_account" {
+  account_id = "tf-test-re-sa-%{random_suffix}"
+}
+
+resource "google_project_iam_member" "sa_iam_object_viewer" {
+  role    = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_ai_platform_user" {
+  role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_viewer" {
+  role    = "roles/viewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_service_account" "service_account_new" {
+  account_id = "tf-test-re-sa-new-%{random_suffix}"
+}
+
+resource "google_project_iam_member" "sa_iam_object_viewer_new" {
+  role    = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+resource "google_project_iam_member" "sa_iam_ai_platform_user_new" {
+  role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+resource "google_project_iam_member" "sa_iam_viewer_new" {
+  role    = "roles/viewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+data "google_project" "project" {}
+`, context)
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic() string {
+	return fmt.Sprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "sample-reasoning-engine"
+  description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/source.tar.gz")
+      }
+
+      python_spec {
+        entrypoint_module = "simple_agent"
+        entrypoint_object = "fixed_name_generator"
+        requirements_file = "./requirements.txt"
+        version           = "3.11"
+      }
+    }
+  }
+}
+`)
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate() string {
+	return fmt.Sprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "sample-reasoning-engine"
+  description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "updated"
+  }
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/source_updated.tar.gz")
+      }
+
+      python_spec {
+        entrypoint_module = "updated_agent"
+        entrypoint_object = "updated_name_generator"
+        requirements_file = "./updated_requirements.txt"
+        version           = "3.12"
+      }
+    }
+  }
+}
+`)
+}
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_identityTypeServiceAccount(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.effective_identity"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_identityTypeAgentIdentity(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.effective_identity"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_identityTypeServiceAccount(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "tf-test-sample-reasoning-engine%{random_suffix}"
+  description  = "A reasoning engine for identity type testing"
+  region       = "us-central1"
+
+  spec {
+    identity_type = "SERVICE_ACCOUNT"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIReasoningEngine_identityTypeAgentIdentity(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "tf-test-sample-reasoning-engine%{random_suffix}"
+  description  = "A reasoning engine for identity type testing"
+  region       = "us-central1"
+
+  spec {
+    identity_type = "AGENT_IDENTITY"
+  }
+}
+`, context)
+}
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"name":          "tf-test-reasoning-engine" + randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecExample(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_reasoning_engine.reasoning_engine", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecExample(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_reasoning_engine.reasoning_engine", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "%{name}"
+  description  = "Deployed with BYOC Dockerfile through Terraform (Updated)"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/agent_src2.tar.gz")
+      }
+
+      image_spec {
+        build_args = {
+          "tag" = "latest"
+        }
+      }
+    }
+  }
+}
+`, context)
+}

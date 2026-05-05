@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -114,7 +116,7 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 		ru := &iam.UploadServiceAccountKeyRequest{
 			PublicKeyData: d.Get("public_key_data").(string),
 		}
-		sak, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Upload(serviceAccountName, ru).Do()
+		sak, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Keys.Upload(serviceAccountName, ru).Do()
 		if err != nil {
 			return fmt.Errorf("Error creating service account key: %s", err)
 		}
@@ -123,7 +125,7 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 			KeyAlgorithm:   d.Get("key_algorithm").(string),
 			PrivateKeyType: d.Get("private_key_type").(string),
 		}
-		sak, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Create(serviceAccountName, rc).Do()
+		sak, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Keys.Create(serviceAccountName, rc).Do()
 		if err != nil {
 			return fmt.Errorf("Error creating service account key: %s", err)
 		}
@@ -141,7 +143,7 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error setting private_key: %s", err)
 	}
 
-	err = ServiceAccountKeyWaitTime(config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys, d.Id(), d.Get("public_key_type").(string), "Creating Service account key", 4*time.Minute)
+	err = ServiceAccountKeyWaitTime(iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Keys, d.Id(), d.Get("public_key_type").(string), "Creating Service account key", 4*time.Minute)
 	if err != nil {
 		return err
 	}
@@ -164,7 +166,7 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 	publicKeyType := d.Get("public_key_type").(string)
 
 	// Confirm the service account key exists
-	sak, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Get(d.Id()).PublicKeyType(publicKeyType).Do()
+	sak, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Keys.Get(d.Id()).PublicKeyType(publicKeyType).Do()
 	if err != nil {
 		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", d.Id())); err == nil {
 			return nil
@@ -199,7 +201,7 @@ func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Delete(d.Id()).Do()
+	_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Keys.Delete(d.Id()).Do()
 
 	if err != nil {
 		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", d.Id())); err == nil {
@@ -218,4 +220,13 @@ func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interfac
 
 	d.SetId("")
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_service_account_key",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleServiceAccountKey(),
+	}.Register()
 }

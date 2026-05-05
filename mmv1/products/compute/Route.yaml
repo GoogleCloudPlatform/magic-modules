@@ -98,6 +98,11 @@ examples:
       health_check_name: 'proxy-health-check'
       backend_name: 'compute-backend'
       route_name: 'route-ilb'
+    test_vars_overrides:
+      # for backward compatible
+      producer_name: '"producer" + randomSuffix'
+      # for backward compatible
+      consumer_name: '"consumer" + randomSuffix'
 parameters:
 properties:
   - name: 'destRange'

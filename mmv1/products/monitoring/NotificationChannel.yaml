@@ -63,11 +63,17 @@ examples:
     primary_resource_id: 'basic'
     vars:
       display_name: 'Test Notification Channel'
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"Test Notification Channel" + randomSuffix'
   - name: 'notification_channel_sensitive'
     primary_resource_id: 'default'
     vars:
       display_name: 'Sensitive Notification Channel test'
       # sensitive labels will fail the import verification step.
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"Sensitive Notification Channel test" + randomSuffix'
     exclude_test: true
 virtual_fields:
   - name: 'force_delete'

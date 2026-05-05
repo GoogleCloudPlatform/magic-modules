@@ -111,6 +111,9 @@ examples:
       forwarding_rule_name: 'global-rule'
       http_proxy_name: 'target-proxy'
       backend_service_name: 'backend'
+    test_vars_overrides:
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
     ignore_read_extra:
       - 'port_range'
       - 'target'
@@ -122,6 +125,9 @@ examples:
       http_proxy_name: 'target-proxy'
       backend_service_name: 'backend'
       igm_name: 'igm-internal'
+    test_vars_overrides:
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
     ignore_read_extra:
       - 'port_range'
       - 'target'
@@ -131,6 +137,9 @@ examples:
       forwarding_rule_name: 'global-rule'
       http_proxy_name: 'target-proxy'
       backend_service_name: 'backend'
+    test_vars_overrides:
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
     ignore_read_extra:
       - 'port_range'
       - 'target'
@@ -180,6 +189,9 @@ examples:
       subnetwork_name: 'my-subnetwork'
       global_address_name: 'global-psconnect-ip'
       forwarding_rule_name: 'globalrule'
+    test_vars_overrides:
+      # for backward compatible
+      forwarding_rule_name: '"globalrule" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
     ignore_read_extra:
@@ -192,6 +204,9 @@ examples:
       subnetwork_name: 'my-subnetwork'
       global_address_name: 'global-psconnect-ip'
       forwarding_rule_name: 'globalrule'
+    test_vars_overrides:
+      # for backward compatible
+      forwarding_rule_name: '"globalrule" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
     ignore_read_extra:

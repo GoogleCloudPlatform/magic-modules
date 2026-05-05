@@ -36,6 +36,8 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/alloydb_user.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 examples:
   - name: 'alloydb_user_builtin'
     primary_resource_id: 'user1'
@@ -46,6 +48,9 @@ examples:
       alloydb_user_name: 'user1'
       alloydb_user_pass: 'user_secret'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      # for backward compatible
+      alloydb_user_name: '"user1" + randomSuffix'
     ignore_read_extra:
       - 'password'
     exclude_test: true
@@ -60,6 +65,8 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      # for backward compatible
+      alloydb_user_name: '"user1" + randomSuffix'
     ignore_read_extra:
       - 'password'
     exclude_docs: true
@@ -71,6 +78,9 @@ examples:
       alloydb_cluster_pass: 'cluster_secret'
       alloydb_user_name: 'user2@foo.com'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      # for backward compatible
+      alloydb_user_name: '"user2@foo.com" + randomSuffix'
     exclude_test: true
   - name: 'alloydb_user_iam_test'
     primary_resource_id: 'user2'
@@ -82,6 +92,8 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      # for backward compatible
+      alloydb_user_name: '"user2@foo.com" + randomSuffix'
     exclude_docs: true
 parameters:
   - name: 'cluster'

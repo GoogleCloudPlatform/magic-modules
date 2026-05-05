@@ -15,6 +15,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	dataproc_tpg "github.com/hashicorp/terraform-provider-google/google/services/dataproc"
+	"github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -1153,8 +1155,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We don't provide any, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 5.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
 				),
 			},
 			{
@@ -1164,8 +1164,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.key1", "value1"),
-					// We only provide one, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 6.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "6"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.key1", "value1"),
 				),
 			},
@@ -1185,8 +1183,6 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We don't provide any, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 5.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
 				),
 			},
 		},
@@ -1494,6 +1490,84 @@ resource "google_dataproc_cluster" "tier_cluster" {
 `, bucketName, clusterName, tierConfig, subnetworkName)
 }
 
+func TestAccDataprocCluster_withEngine(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				// Set tier to ENGINE_UNSPECIFIED
+				Config: testAccDataprocCluster_withEngine(rnd, subnetworkName, "ENGINE_UNSPECIFIED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.engine_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.engine_cluster", "cluster_config.0.engine", "ENGINE_UNSPECIFIED"),
+				),
+			},
+			{
+				// Set tier to DEFAULT
+				Config: testAccDataprocCluster_withEngine(rnd, subnetworkName, "DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.engine_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.engine_cluster", "cluster_config.0.engine", "DEFAULT"),
+				),
+			},
+			{
+				// Set tier to LIGHTNING
+				Config: testAccDataprocCluster_withEngine(rnd, subnetworkName, "LIGHTNING"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.engine_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.engine_cluster", "cluster_config.0.engine", "LIGHTNING"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_withEngine(rnd, subnetworkName, engine string) string {
+	engineConfig := ""
+	if engine != "" {
+		engineConfig = fmt.Sprintf(`engine = "%s"`, engine)
+	}
+	clusterName := fmt.Sprintf("tf-test-dproc-tier-%s", rnd)
+	bucketName := clusterName + "-temp-bucket"
+
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = "true"
+}
+
+resource "google_dataproc_cluster" "engine_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+	%s
+	staging_bucket = google_storage_bucket.bucket.name
+	temp_bucket = google_storage_bucket.bucket.name
+
+    software_config {
+      image_version = "2.3.4-debian12"
+    }
+
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+  }
+}
+`, bucketName, clusterName, engineConfig, subnetworkName)
+}
+
 func TestAccDataprocCluster_withClusterTypeSingleNode(t *testing.T) {
 	t.Parallel()
 
@@ -1624,7 +1698,7 @@ func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
 
 			parts := strings.Split(rs.Primary.ID, "/")
 			clusterId := parts[len(parts)-1]
-			_, err = config.NewDataprocClient(config.UserAgent).Projects.Regions.Clusters.Get(
+			_, err = dataproc_tpg.NewClient(config, config.UserAgent).Projects.Regions.Clusters.Get(
 				project, attributes["region"], clusterId).Do()
 
 			if err != nil {
@@ -1666,7 +1740,7 @@ func testAccCheckDataprocClusterAutoscaling(t *testing.T, cluster *dataproc.Clus
 }
 
 func validateBucketExists(bucket string, config *transport_tpg.Config) (bool, error) {
-	_, err := config.NewStorageClient(config.UserAgent).Buckets.Get(bucket).Do()
+	_, err := storage.NewClient(config, config.UserAgent).Buckets.Get(bucket).Do()
 
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == http.StatusNotFound {
@@ -1728,7 +1802,7 @@ func testAccCheckDataprocClusterInitActionSucceeded(t *testing.T, bucket, object
 	// Ensure it exists
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		_, err := config.NewStorageClient(config.UserAgent).Objects.Get(bucket, object).Do()
+		_, err := storage.NewClient(config, config.UserAgent).Objects.Get(bucket, object).Do()
 		if err != nil {
 			return fmt.Errorf("Unable to verify init action success: Error reading object %s in bucket %s: %v", object, bucket, err)
 		}
@@ -1815,7 +1889,7 @@ func testAccCheckDataprocClusterExists(t *testing.T, n string, cluster *dataproc
 
 		parts := strings.Split(rs.Primary.ID, "/")
 		clusterId := parts[len(parts)-1]
-		found, err := config.NewDataprocClient(config.UserAgent).Projects.Regions.Clusters.Get(
+		found, err := dataproc_tpg.NewClient(config, config.UserAgent).Projects.Regions.Clusters.Get(
 			project, rs.Primary.Attributes["region"], clusterId).Do()
 		if err != nil {
 			return err

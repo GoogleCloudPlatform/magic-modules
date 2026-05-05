@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -104,6 +105,7 @@ var (
 
 	clusterConfigKeys = []string{
 		"cluster_config.0.cluster_tier",
+		"cluster_config.0.engine",
 		"cluster_config.0.cluster_type",
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
@@ -565,6 +567,15 @@ func ResourceDataprocCluster() *schema.Resource {
 							AtLeastOneOf: clusterConfigKeys,
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TIER_UNSPECIFIED", "CLUSTER_TIER_STANDARD", "CLUSTER_TIER_PREMIUM"}, false),
+						},
+						"engine": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							Description:  `Specifies the engine of the cluster created.`,
+							AtLeastOneOf: clusterConfigKeys,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"ENGINE_UNSPECIFIED", "DEFAULT", "LIGHTNING"}, false),
 						},
 						"cluster_type": {
 							Type:         schema.TypeString,
@@ -1777,7 +1788,7 @@ by Dataproc`,
 									"idle_delete_ttl": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: `The duration to keep the cluster alive while idling (no jobs running). After this TTL, the cluster will be deleted. Valid range: [10m, 14d].`,
+										Description: `The duration to keep the cluster alive while idling (no jobs running). After this TTL, the cluster will be deleted. Valid range: [300s, 1209600s].`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
@@ -2112,7 +2123,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// Create the cluster
-	op, err := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Create(
+	op, err := NewClient(config, userAgent).Projects.Regions.Clusters.Create(
 		project, region, cluster).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating Dataproc cluster: %s", err)
@@ -2340,6 +2351,10 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 
 	if v, ok := d.GetOk("cluster_config.0.cluster_tier"); ok {
 		conf.ClusterTier = v.(string)
+	}
+
+	if v, ok := d.GetOk("cluster_config.0.engine"); ok {
+		conf.Engine = v.(string)
 	}
 
 	if v, ok := d.GetOk("cluster_config.0.cluster_type"); ok {
@@ -3102,7 +3117,7 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 	if len(updMask) > 0 {
 		gracefulDecommissionTimeout := d.Get("graceful_decommission_timeout").(string)
 
-		patch := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Patch(
+		patch := NewClient(config, userAgent).Projects.Regions.Clusters.Patch(
 			project, region, clusterName, cluster)
 		patch.GracefulDecommissionTimeout(gracefulDecommissionTimeout)
 		patch.UpdateMask(strings.Join(updMask, ","))
@@ -3138,7 +3153,7 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	region := d.Get("region").(string)
 	clusterName := d.Get("name").(string)
 
-	cluster, err := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Get(
+	cluster, err := NewClient(config, userAgent).Projects.Regions.Clusters.Get(
 		project, region, clusterName).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Dataproc Cluster %q", clusterName))
@@ -3317,6 +3332,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("cluster_config.0.staging_bucket").(string),
 		"cluster_tier":              d.Get("cluster_config.0.cluster_tier").(string),
+		"engine":                    d.Get("cluster_config.0.engine").(string),
 		"cluster_type":              cfg.ClusterType,
 		"bucket":                    cfg.ConfigBucket,
 		"temp_bucket":               cfg.TempBucket,
@@ -3841,7 +3857,7 @@ func resourceDataprocClusterDelete(d *schema.ResourceData, meta interface{}) err
 	clusterName := d.Get("name").(string)
 
 	log.Printf("[DEBUG] Deleting Dataproc cluster %s", clusterName)
-	op, err := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Delete(
+	op, err := NewClient(config, userAgent).Projects.Regions.Clusters.Delete(
 		project, region, clusterName).Do()
 	if err != nil {
 		return err
@@ -3921,4 +3937,13 @@ func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
 		subminor: matches[3],
 		osName:   matches[4],
 	}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_dataproc_cluster",
+		ProductName: "dataproc",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDataprocCluster(),
+	}.Register()
 }

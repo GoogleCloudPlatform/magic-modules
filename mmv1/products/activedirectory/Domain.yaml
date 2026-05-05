@@ -63,6 +63,11 @@ examples:
       # the random suffix is 10 chars. In order to make sure these get swept,
       # 'tfgen' is the only option here.
       domain_name: 'tfgen'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"myorg" + randomSuffix'
+      # for backward compatible
+      domain_name: '"tfgen" + randomSuffix'
     ignore_read_extra:
       - 'deletion_protection'
     # skip the test until Active Directory setup issue got resolved

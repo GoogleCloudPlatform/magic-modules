@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
@@ -295,7 +296,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		},
 	}
 
-	response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
+	response, err := NewClient(config, userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 	if err != nil {
 		return err
 	}
@@ -613,7 +614,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 			},
 		}
 
-		response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
+		response, err := NewClient(config, userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 		if err != nil {
 			return err
 		}
@@ -862,6 +863,15 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 		}
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_dataflow_flex_template_job",
+		ProductName: "dataflow",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceDataflowFlexTemplateJob(),
+	}.Register()
 }
 
 {{ end }}

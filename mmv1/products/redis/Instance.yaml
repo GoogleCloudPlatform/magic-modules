@@ -93,6 +93,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      # for backward compatible
+      address_name: '"address" + randomSuffix'
     oics_vars_overrides:
       'prevent_destroy': 'false'
     exclude_test: true

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -85,7 +86,7 @@ func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}
 
 	id := fmt.Sprintf("projects/%s/global/networks/%s", project, name)
 
-	network, err := config.NewComputeClient(userAgent).Networks.Get(project, name).Do()
+	network, err := NewClient(config, userAgent).Networks.Get(project, name).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Network Not Found : %s", name), id)
 	}
@@ -115,4 +116,13 @@ func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}
 	}
 	d.SetId(id)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_network",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeNetwork(),
+	}.Register()
 }

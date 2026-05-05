@@ -35,14 +35,23 @@ examples:
     primary_resource_id: 'parameter-basic'
     vars:
       parameter_id: 'parameter'
+    test_vars_overrides:
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
   - name: 'parameter_with_format'
     primary_resource_id: 'parameter-with-format'
     vars:
       parameter_id: 'parameter'
+    test_vars_overrides:
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
   - name: 'parameter_with_labels'
     primary_resource_id: 'parameter-with-labels'
     vars:
       parameter_id: 'parameter'
+    test_vars_overrides:
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
   - name: 'parameter_with_kms_key'
     primary_resource_id: 'parameter-with-kms-key'
     vars:
@@ -50,6 +59,8 @@ examples:
       kms_key: 'kms-key'
     test_vars_overrides:
       'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      # for backward compatible
+      parameter_id: '"parameter" + randomSuffix'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"

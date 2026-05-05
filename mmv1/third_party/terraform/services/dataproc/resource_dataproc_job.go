@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -299,7 +300,7 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Submit the job
-	job, err := config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Submit(
+	job, err := NewClient(config, userAgent).Projects.Regions.Jobs.Submit(
 		project, region, submitReq).Do()
 	if err != nil {
 		return err
@@ -332,7 +333,7 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 
 	parts := strings.Split(d.Id(), "/")
 	jobId := parts[len(parts)-1]
-	job, err := config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Get(
+	job, err := NewClient(config, userAgent).Projects.Regions.Jobs.Get(
 		project, region, jobId).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Dataproc Job %q", jobId))
@@ -438,7 +439,7 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 		// ignore error if we get one - job may be finished already and not need to
 		// be cancelled. We do however wait for the state to be one that is
 		// at least not active
-		_, _ = config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Cancel(project, region, jobId, &dataproc.CancelJobRequest{}).Do()
+		_, _ = NewClient(config, userAgent).Projects.Regions.Jobs.Cancel(project, region, jobId, &dataproc.CancelJobRequest{}).Do()
 
 		waitErr := DataprocJobOperationWait(config, region, project, jobId,
 			"Cancelling Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete), true)
@@ -449,7 +450,7 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Deleting Dataproc job %s", d.Id())
-	_, err = config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Delete(
+	_, err = NewClient(config, userAgent).Projects.Regions.Jobs.Delete(
 		project, region, jobId).Do()
 	if err != nil {
 		return err
@@ -1356,4 +1357,13 @@ func flattenJobPlacement(jp *dataproc.JobPlacement) []map[string]interface{} {
 			"cluster_uuid": jp.ClusterUuid,
 		},
 	}
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_dataproc_job",
+		ProductName: "dataproc",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDataprocJob(),
+	}.Register()
 }

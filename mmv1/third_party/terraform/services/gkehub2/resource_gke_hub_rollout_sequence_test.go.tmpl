@@ -80,6 +80,9 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
   provider = google-beta
   rollout_sequence_id = "tf-test-rs-basic-%{random_suffix}"
   display_name        = "Basic Rollout Sequence"
+  ignored_clusters_selector {
+        label_selector = "resource.labels.ignored == 'true'"
+        }
   stages {
     fleet_projects = ["projects/%{project_id}"]
     soak_duration  = "60s"
@@ -94,16 +97,19 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
   provider = google-beta
   rollout_sequence_id = "tf-test-rs-basic-%{random_suffix}"
   display_name        = "Modified Rollout Sequence"
+  ignored_clusters_selector {
+        label_selector = "resource.labels.ignored == 'super_true'"
+        }
   stages {
-		fleet_projects = ["projects/%{project_id}"]
-		cluster_selector {
-		  label_selector = "resource.labels.canary=='true'"
-		}
-		soak_duration  = "30s"
+        fleet_projects = ["projects/%{project_id}"]
+        cluster_selector {
+          label_selector = "resource.labels.canary=='true'"
+        }
+        soak_duration  = "30s"
   }
   stages {
-		fleet_projects = ["projects/%{project_id}"]
-		soak_duration  = "60s"
+        fleet_projects = ["projects/%{project_id}"]
+        soak_duration  = "60s"
   }
   labels = {
     some_key = "some_value"

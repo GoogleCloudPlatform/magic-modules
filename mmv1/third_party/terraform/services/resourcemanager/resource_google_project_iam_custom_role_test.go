@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 )
 
 func TestAccProjectIamCustomRole_basic(t *testing.T) {
@@ -138,7 +139,7 @@ func testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t *testing.T) func(s 
 				continue
 			}
 
-			role, err := config.NewIamClient(config.UserAgent).Projects.Roles.Get(rs.Primary.ID).Do()
+			role, err := iambeta.NewClient(config, config.UserAgent).Projects.Roles.Get(rs.Primary.ID).Do()
 
 			if err != nil {
 				return err
@@ -166,7 +167,7 @@ func testAccCheckGoogleProjectIamCustomRoleDeletionStatus(t *testing.T, n string
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		role, err := config.NewIamClient(config.UserAgent).Projects.Roles.Get(rs.Primary.ID).Do()
+		role, err := iambeta.NewClient(config, config.UserAgent).Projects.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {
 			return err

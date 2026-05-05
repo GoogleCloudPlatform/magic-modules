@@ -180,6 +180,8 @@ examples:
     test_vars_overrides:
       'primary_cluster_deletion_protection_enabled': 'false'
       'secondary_cluster_deletion_protection_enabled': 'false'
+      # for backward compatible
+      network_name: '"mynetwork" + randomSuffix'
     oics_vars_overrides:
       'primary_cluster_deletion_protection_enabled': 'false'
       'secondary_cluster_deletion_protection_enabled': 'false'
@@ -392,7 +394,10 @@ properties:
     enum_values:
       - 'REDIS_SHARED_CORE_NANO'
       - 'REDIS_HIGHMEM_MEDIUM'
+      - 'REDIS_HIGHCPU_MEDIUM'
+      - 'REDIS_STANDARD_LARGE'
       - 'REDIS_HIGHMEM_XLARGE'
+      - 'REDIS_HIGHMEM_2XLARGE'
       - 'REDIS_STANDARD_SMALL'
   - name: 'zoneDistributionConfig'
     type: NestedObject
