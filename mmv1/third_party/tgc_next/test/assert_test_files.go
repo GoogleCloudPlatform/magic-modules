@@ -188,7 +188,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		ErrorLogger: logger,
 	})
 	if err != nil {
-		return fmt.Errorf("error when converting the export assets into export config: %#v", err)
+		return fmt.Errorf("error when converting the export assets into export config: %v", err)
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
@@ -275,7 +275,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 		reexportAssets, err := tfplan2caiConvert(t, tfFileName, jsonFileName, tfDir, ancestryCache, defaultProject, logger)
 		if err != nil {
-			return fmt.Errorf("error when converting the third round-trip config: %#v", err)
+			return fmt.Errorf("error when converting the third round-trip config: %v", err)
 		}
 
 		if err = compareCaiAssets(reexportAssets, roundtripAssets, ignoredFieldSet); err != nil {
