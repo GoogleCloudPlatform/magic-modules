@@ -35,6 +35,9 @@ type IamMemberListCallConfig struct {
 	Flattener         func(item map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error
 	ItemName          string // JSON key for items array (default "items")
 	ResourceNameField string // identity key filled by list API, excluded from list block
+	EnableRoleFilter
+	EnableMemberFilter
+
 }
 
 // IamMemberListResource lists IAM member rows by reading IAM policies on one or more policy targets.
@@ -80,7 +83,22 @@ func (r *IamMemberListResource) RawV5Schemas(ctx context.Context, _ list.RawV5Sc
 }
 
 func (r *IamMemberListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
-	resp.Schema = tpgresource.SdkSchemaToListSchema(r.listBlockSchema)
+	s := tpgresource.SdkSchemaToListSchema(r.listBlockSchema)
+
+	if r.listCallConfig.EnableRoleFilter {
+		s.Attributes["role"] = listschema.StringAttribute{
+			Optional: true,
+			Description: "Optional client-side filter for IAM role."
+		}
+	}
+
+	iif r.listCallConfig.EnableMemberFilter {
+		s.Attributes["member"] = listschema.StringAttribute{
+			Optional: true,
+			Description: "Optional client-side filter for IAM member."
+		}
+	}
+	resp.Schema = s
 }
 
 // discoverPolicyTargets returns one ResourceData per GCP resource whose IAM policy should be read.
@@ -128,6 +146,12 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 		return
 	}
 
+	roleFilter, memberFilter, diags := r.readFilters(ctx, req)
+	if Diags.hasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+
 	stream.Results = func(yield func(list.ListResult) bool) {
 		var yielded int64
 		for _, targetRd := range policyTargets {
@@ -152,7 +176,8 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 				}
 				continue
 			}
-			if !r.yieldPolicyMembers(ctx, req, targetRd, updater, p, &yielded, yield) {
+
+			if !r.yieldPolicyMembers(ctx, req, targetRd, updater, p, roleFilter, memberFilter, &yielded, yield) {
 				return
 			}
 		}
@@ -160,16 +185,24 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 }
 
 // yieldPolicyMembers yields one list result per IAM binding member for a single policy target.
-func (r *IamMemberListResource) yieldPolicyMembers(ctx context.Context, req list.ListRequest, targetRd *schema.ResourceData, updater ResourceIamUpdater, p *cloudresourcemanager.Policy, yielded *int64, yield func(list.ListResult) bool) bool {
+func (r *IamMemberListResource) yieldPolicyMembers(ctx context.Context, req list.ListRequest, targetRd *schema.ResourceData, updater ResourceIamUpdater, p *cloudresourcemanager.Policy, roleFilter string, memberFilter string, yielded *int64, yield func(list.ListResult) bool) bool {
 	for _, binding := range p.Bindings {
+		if roleFilter != "" && Binding.Role != roleFilter {
+			continue
+		}
 		for _, mem := range binding.Members {
+			normalized := tpgresource.NormalizeIamPrincipalCasing(mem)
+
+			if memberFilter != "" && normalized != memberFilter {
+				continue
+			}
 			if strings.HasPrefix(mem, "deleted:") {
 				continue
 			}
 			if req.Limit > 0 && *yielded >= req.Limit {
 				return true
 			}
-			res, err := r.buildMemberResult(ctx, req, targetRd, updater, binding, mem, p.Etag)
+			res, err := r.buildMemberResult(ctx, req, targetRd, updater, binding, normalized, p.Etag)
 			if err != nil {
 				res = req.NewListResult(ctx)
 				res.Diagnostics.AddError("Error building IAM member result", err.Error())
@@ -237,4 +270,28 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 
 	res.DisplayName = fmt.Sprintf("%s %s %s", updater.DescribeResource(), binding.Role, normalized)
 	return res, nil
+}
+
+func (r *IamMemberListResource) readFilters(ctx context.Context, req list.ListRequest) (roleFilter string, memberFilter String, diags diag.Diagnostics) {
+	var diags diag.Diagnostics
+	roleFilter := ""
+	memberFilter:= ""
+
+	if r.listCallConfig.EnableRoleFilter {
+		var v types.String 
+		diags.Append(req.Config.Get Attributes(ctx, path.Root("role"), &v)...)
+		if !v.IsNull() && !v.IsUnknown() {
+			roleFilter = v.ValueString()
+		}
+	}
+
+	If r.listCallConfig.EnableMemberFilter {
+		var v types.String
+		diags.Append(req.Config.GetAttribute(ctx, path.Root("member"), &v)...)
+		if !v.IsNull() && !v.IsUnknown() {
+			memberFilter = v.ValueString()
+		}
+	}
+
+	return roleFilter, memberFilter, diags
 }
