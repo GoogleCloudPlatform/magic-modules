@@ -318,6 +318,8 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 					} else {
 						return fmt.Sprintf("%v", v.ValueString())
 					}
+				} else {
+					return ""
 				}
 			}
 		} else {
@@ -346,6 +348,8 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 					} else {
 						return fmt.Sprintf("%v", v.ValueString())
 					}
+				} else {
+					return ""
 				}
 			}
 		}

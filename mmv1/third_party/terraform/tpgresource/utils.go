@@ -788,6 +788,8 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 			v, ok := d.GetOkExists(m[1:])
 			if ok {
 				return url.PathEscape(fmt.Sprintf("%v", v))
+			} else if v != nil {
+				return ""
 			}
 		} else {
 			v, ok := d.GetOkExists(m)
@@ -797,6 +799,8 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 				} else {
 					return fmt.Sprintf("%v", v)
 				}
+			} else if v != nil {
+				return ""
 			}
 		}
 
