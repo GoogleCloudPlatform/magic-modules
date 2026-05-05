@@ -4688,11 +4688,12 @@ data "google_container_engine_versions" "central1c" {
 resource "google_container_cluster" "cluster" {
   name                = "%s"
   location            = "us-central1-b"
-  min_master_version  = data.google_container_engine_versions.central1c.latest_master_version
+  min_master_version  = data.google_container_engine_versions.central1b.latest_master_version
   deletion_protection = false
   network             = "%s"
   subnetwork          = "%s"
   initial_node_count  = 1
+  enable_multi_networking = true
 
   node_config {
     machine_type = "a3-ultragpu-8g"
