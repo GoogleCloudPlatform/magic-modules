@@ -163,6 +163,12 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		targetFolder := t.makeFolder(outputFolder, "website", "docs", "r")
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
 		templateData.GenerateDocumentationFile(targetFilePath, object)
+
+		if object.GenerateListResource {
+			listDocFolder := t.makeFolder(outputFolder, "website", "docs", "list-resources")
+			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s.html.markdown", object.TerraformName()))
+			templateData.GenerateListResourceDocumentationFile(listDocFilePath, object)
+		}
 	}
 }
 
