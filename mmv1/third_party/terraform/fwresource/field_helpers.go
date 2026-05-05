@@ -120,10 +120,16 @@ func ReplaceVarsForFrameworkTest(config *transport_tpg.Config, rs *terraform.Res
 			return f.String()
 		}
 
-		return ""
+		return s
 	}
 
-	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
+	ret := re.ReplaceAllStringFunc(linkTmpl, replaceFunc)
+
+	if re.MatchString(ret) {
+		return "", fmt.Errorf("Unreplaced value found: %s", ret)
+	}
+
+	return ret, nil
 }
 
 func FlattenStringEmptyToNull(configuredValue types.String, apiValue string) types.String {

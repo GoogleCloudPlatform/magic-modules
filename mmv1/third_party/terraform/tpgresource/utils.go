@@ -682,7 +682,7 @@ func IsEmptyValue(v reflect.Value) bool {
 }
 
 func ReplaceVars(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
-	return ReplaceVarsRecursive(d, config, linkTmpl, false, 0)
+	return ReplaceVarsRecursive(d, config, linkTmpl, false)
 }
 
 // relaceVarsForId shortens variables by running them through GetResourceNameFromSelfLink
@@ -694,30 +694,28 @@ func ReplaceVars(d TerraformResourceData, config *transport_tpg.Config, linkTmpl
 // access_level: accessPolicies/foo/accessLevels/bar
 // becomes accessPolicies/foo/accessLevels/bar
 func ReplaceVarsForId(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
-	return ReplaceVarsRecursive(d, config, linkTmpl, true, 0)
+	return ReplaceVarsRecursive(d, config, linkTmpl, true)
 }
 
-// ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
-// (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
-// substitution as 10+ calls to allow for future use cases.
-func ReplaceVarsRecursive(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string, error) {
-	if depth > 10 {
-		return "", errors.New("Recursive substitution detected")
-	}
-
+// ReplaceVarsRecursive runs replacement twice, then returns an error if any replacements remain
+// undone. We currently support two rounds of replacement because some {{ProductBasePath}} replacements
+// will contain `{{location}}` fields or similar; however, we're working to remove {{ProductBasePath}}
+// replacement, at which point a single round of replacement would be sufficient.
+func ReplaceVarsRecursive(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool) (string, error) {
 	// https://github.com/google/re2/wiki/Syntax
 	re := regexp.MustCompile("{{([%[:word:]]+)}}")
 	f, err := BuildReplacementFunc(re, d, config, linkTmpl, shorten)
 	if err != nil {
 		return "", err
 	}
-	final := re.ReplaceAllStringFunc(linkTmpl, f)
+	ret := re.ReplaceAllStringFunc(linkTmpl, f)
+	ret = re.ReplaceAllStringFunc(ret, f)
 
-	if re.Match([]byte(final)) {
-		return ReplaceVarsRecursive(d, config, final, shorten, depth+1)
+	if re.MatchString(ret) {
+		return "", fmt.Errorf("Unreplaced value found: %s", ret)
 	}
 
-	return final, nil
+	return ret, nil
 }
 
 // This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
@@ -775,21 +773,15 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 	}
 
 	f := func(s string) string {
-
 		m := re.FindStringSubmatch(s)[1]
-		if m == "project" {
+		switch {
+		case m == "project_id_or_project" && projectID != "":
+			return projectID
+		case (m == "project" || m == "project_id_or_project") && project != "":
 			return project
-		}
-		if m == "project_id_or_project" {
-			if projectID != "" {
-				return projectID
-			}
-			return project
-		}
-		if m == "region" {
+		case m == "region" && region != "":
 			return region
-		}
-		if m == "zone" {
+		case m == "zone" && zone != "":
 			return zone
 		}
 		if string(m[0]) == "%" {
@@ -820,7 +812,7 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 				return f.String()
 			}
 		}
-		return ""
+		return s
 	}
 
 	return f, nil
