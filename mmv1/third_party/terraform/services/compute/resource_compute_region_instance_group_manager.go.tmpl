@@ -14,12 +14,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
-{{ if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
@@ -991,35 +985,44 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		return err
 	}
 
-	manager := &compute.InstanceGroupManager{
-		Name:                        d.Get("name").(string),
-		Description:                 d.Get("description").(string),
-		BaseInstanceName:            d.Get("base_instance_name").(string),
-		TargetSize:                  int64(d.Get("target_size").(int)),
-		ListManagedInstancesResults: d.Get("list_managed_instances_results").(string),
-		NamedPorts:                  getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
-		TargetPools:                 tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)),
-		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
-		Versions:                    expandVersions(d.Get("version").([]interface{})),
-		StandbyPolicy:               expandStandbyPolicy(d),
-		TargetSuspendedSize:         int64(d.Get("target_suspended_size").(int)),
-		TargetStoppedSize:           int64(d.Get("target_stopped_size").(int)),
-		InstanceFlexibilityPolicy:   flexibilityPolicy,
-		UpdatePolicy:                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
-		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
-		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
-		DistributionPolicy:          expandDistributionPolicyForCreate(d),
-		StatefulPolicy:              expandStatefulPolicy(d),
-		TargetSizePolicy:            expandTargetSizePolicy(d.Get("target_size_policy").([]interface{})),
-		{{- if ne $.TargetVersionName "ga" }}
-		Params:                      expandInstanceGroupManagerParams(d),
-		{{- end }}
-		// Force send TargetSize to allow size of 0.
-		ForceSendFields: []string{"TargetSize"},
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers")
+	if err != nil {
+		return fmt.Errorf("Error constructing URL for RegionInstanceGroupManager: %s", err)
 	}
 
-	op, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Insert(project, region, manager).Do()
+	body := map[string]interface{}{
+		"name":                        d.Get("name").(string),
+		"description":                 d.Get("description").(string),
+		"baseInstanceName":            d.Get("base_instance_name").(string),
+		"targetSize":                  int64(d.Get("target_size").(int)),
+		"listManagedInstancesResults": d.Get("list_managed_instances_results").(string),
+		"namedPorts":                  getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
+		"targetPools":                 tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)),
+		"autoHealingPolicies":         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
+		"versions":                    expandVersions(d.Get("version").([]interface{})),
+		"standbyPolicy":               expandStandbyPolicy(d),
+		"targetSuspendedSize":         int64(d.Get("target_suspended_size").(int)),
+		"targetStoppedSize":           int64(d.Get("target_stopped_size").(int)),
+		"instanceFlexibilityPolicy":   flexibilityPolicy,
+		"updatePolicy":                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
+		"instanceLifecyclePolicy":     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
+		"allInstancesConfig":          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
+		"distributionPolicy":          expandDistributionPolicyForCreate(d),
+		"statefulPolicy":              expandStatefulPolicy(d),
+		"targetSizePolicy":            expandTargetSizePolicy(d.Get("target_size_policy").([]interface{})),
+	}
+	{{- if ne $.TargetVersionName "ga" }}
+	body["params"] = expandInstanceGroupManagerParams(d)
+	{{- end }}
 
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      body,
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating RegionInstanceGroupManager: %s", err)
 	}
@@ -1031,7 +1034,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 	d.SetId(id)
 
 	// Wait for the operation to complete
-	err = ComputeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, res, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -1061,9 +1064,9 @@ func computeRIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-type getInstanceManagerFunc func(*schema.ResourceData, interface{}) (*compute.InstanceGroupManager, error)
+type getInstanceManagerFunc func(*schema.ResourceData, interface{}) (map[string]interface{}, error)
 
-func getRegionalManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGroupManager, error) {
+func getRegionalManager(d *schema.ResourceData, meta interface{}) (map[string]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 
 	project, err := tpgresource.GetProject(d, config)
@@ -1082,12 +1085,22 @@ func getRegionalManager(d *schema.ResourceData, meta interface{}) (*compute.Inst
 	}
 
 	name := d.Get("name").(string)
-	manager, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Get(project, region, name).Do()
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}name{{"}}"}}")
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Region Instance Manager %q", name))
 	}
-
-	return manager, nil
+	return res, nil
 }
 
 func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, d *schema.ResourceData, meta interface{}) retry.StateRefreshFunc {
@@ -1103,28 +1116,41 @@ func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, 
 			// error so that we can parse it later on and handle it there
 			return nil, "error", fmt.Errorf("instance manager not found")
 		}
-		if m.Status.IsStable {
+		status, _ := m["status"].(map[string]interface{})
+		if status == nil {
+			return false, "creating", nil
+		}
+		if isStable, _ := status["isStable"].(bool); isStable {
 			if waitForUpdates {
 				// waitForUpdates waits for versions to be reached and per instance configs to be updated (if present)
-				if m.Status.Stateful.HasStatefulConfig {
-					if !m.Status.Stateful.PerInstanceConfigs.AllEffective {
-						return false, "updating per instance configs", nil
+				if stateful, _ := status["stateful"].(map[string]interface{}); stateful != nil {
+					if hasStatefulConfig, _ := stateful["hasStatefulConfig"].(bool); hasStatefulConfig {
+						if pic, _ := stateful["perInstanceConfigs"].(map[string]interface{}); pic != nil {
+							if allEffective, _ := pic["allEffective"].(bool); !allEffective {
+								return false, "updating per instance configs", nil
+							}
+						}
 					}
 				}
-				if !m.Status.VersionTarget.IsReached {
-					return false, "reaching version target", nil
+				if vt, _ := status["versionTarget"].(map[string]interface{}); vt != nil {
+					if isReached, _ := vt["isReached"].(bool); !isReached {
+						return false, "reaching version target", nil
+					}
 				}
-				if !m.Status.VersionTarget.IsReached {
-					return false, "reaching version target", nil
+				if vt, _ := status["versionTarget"].(map[string]interface{}); vt != nil {
+					if isReached, _ := vt["isReached"].(bool); !isReached {
+						return false, "reaching version target", nil
+					}
 				}
-				if !m.Status.AllInstancesConfig.Effective {
-					return false, "updating all instances config", nil
+				if aic, _ := status["allInstancesConfig"].(map[string]interface{}); aic != nil {
+					if effective, _ := aic["effective"].(bool); !effective {
+						return false, "updating all instances config", nil
+					}
 				}
 			}
 			return true, "created", nil
-		} else {
-			return false, "creating", nil
 		}
+		return false, "creating", nil
 	}
 }
 
@@ -1146,97 +1172,114 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 		return err
 	}
 
-	if err := d.Set("base_instance_name", manager.BaseInstanceName); err != nil {
+	if err := d.Set("base_instance_name", manager["baseInstanceName"]); err != nil {
 		return fmt.Errorf("Error setting base_instance_name: %s", err)
 	}
-	if err := d.Set("name", manager.Name); err != nil {
+	if err := d.Set("name", manager["name"]); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("region", tpgresource.GetResourceNameFromSelfLink(manager.Region)); err != nil {
-		return fmt.Errorf("Error setting region: %s", err)
+	if region, ok := manager["region"].(string); ok {
+		if err := d.Set("region", tpgresource.GetResourceNameFromSelfLink(region)); err != nil {
+			return fmt.Errorf("Error setting region: %s", err)
+		}
 	}
-	if err := d.Set("creation_timestamp", manager.CreationTimestamp); err != nil {
+	if err := d.Set("creation_timestamp", manager["creationTimestamp"]); err != nil {
 		return fmt.Errorf("Error reading creation_timestamp: %s", err)
 	}
-	if err := d.Set("description", manager.Description); err != nil {
+	if err := d.Set("description", manager["description"]); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
-	if err := d.Set("instance_group_manager_id", manager.Id); err != nil {
+	if err := d.Set("instance_group_manager_id", manager["id"]); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("target_size", manager.TargetSize); err != nil {
+	if err := d.Set("target_size", manager["targetSize"]); err != nil {
 		return fmt.Errorf("Error setting target_size: %s", err)
 	}
-	if err := d.Set("list_managed_instances_results", manager.ListManagedInstancesResults); err != nil {
+	if err := d.Set("list_managed_instances_results", manager["listManagedInstancesResults"]); err != nil {
 		return fmt.Errorf("Error setting list_managed_instances_results: %s", err)
 	}
-	if err := d.Set("target_pools", tpgresource.MapStringArr(manager.TargetPools, tpgresource.ConvertSelfLinkToV1)); err != nil {
+	rawTP, _ := manager["targetPools"].([]interface{})
+	targetPools := make([]string, 0, len(rawTP))
+	for _, v := range rawTP {
+		if s, ok := v.(string); ok {
+			targetPools = append(targetPools, tpgresource.ConvertSelfLinkToV1(s))
+		}
+	}
+	if err := d.Set("target_pools", targetPools); err != nil {
 		return fmt.Errorf("Error setting target_pools in state: %s", err.Error())
 	}
-	if err := d.Set("named_port", flattenNamedPortsBeta(manager.NamedPorts)); err != nil {
+	if err := d.Set("named_port", flattenRegionNamedPorts(manager["namedPorts"])); err != nil {
 		return fmt.Errorf("Error setting named_port in state: %s", err.Error())
 	}
-	if err := d.Set("fingerprint", manager.Fingerprint); err != nil {
+	if err := d.Set("fingerprint", manager["fingerprint"]); err != nil {
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
-	if err := d.Set("instance_group", tpgresource.ConvertSelfLinkToV1(manager.InstanceGroup)); err != nil {
-		return fmt.Errorf("Error setting instance_group: %s", err)
+	if ig, ok := manager["instanceGroup"].(string); ok {
+		if err := d.Set("instance_group", tpgresource.ConvertSelfLinkToV1(ig)); err != nil {
+			return fmt.Errorf("Error setting instance_group: %s", err)
+		}
 	}
-	if err := d.Set("distribution_policy_zones", flattenDistributionPolicy(manager.DistributionPolicy)); err != nil {
+	dp, _ := manager["distributionPolicy"].(map[string]interface{})
+	if err := d.Set("distribution_policy_zones", flattenDistributionPolicy(dp)); err != nil {
 		return err
 	}
-	if err := d.Set("distribution_policy_target_shape", manager.DistributionPolicy.TargetShape); err != nil {
-		return err
+	if dp != nil {
+		if err := d.Set("distribution_policy_target_shape", dp["targetShape"]); err != nil {
+			return err
+		}
 	}
-	if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(manager.SelfLink)); err != nil {
-		return fmt.Errorf("Error setting self_link: %s", err)
+	if sl, ok := manager["selfLink"].(string); ok {
+		if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(sl)); err != nil {
+			return fmt.Errorf("Error setting self_link: %s", err)
+		}
 	}
-
-	if err := d.Set("auto_healing_policies", flattenAutoHealingPolicies(manager.AutoHealingPolicies)); err != nil {
+	if err := d.Set("auto_healing_policies", flattenRegionAutoHealingPolicies(manager["autoHealingPolicies"])); err != nil {
 		return fmt.Errorf("Error setting auto_healing_policies in state: %s", err.Error())
 	}
-	if err := d.Set("version", flattenVersions(manager.Versions)); err != nil {
+	if err := d.Set("version", flattenRegionVersions(manager["versions"])); err != nil {
 		return err
 	}
-	if err = d.Set("standby_policy", flattenStandbyPolicy(manager.StandbyPolicy)); err != nil {
+	if err = d.Set("standby_policy", flattenRegionStandbyPolicy(manager["standbyPolicy"])); err != nil {
 		return fmt.Errorf("Error setting standby_policy in state: %s", err.Error())
 	}
-	if err := d.Set("target_suspended_size", manager.TargetSuspendedSize); err != nil {
+	if err := d.Set("target_suspended_size", manager["targetSuspendedSize"]); err != nil {
 		return fmt.Errorf("Error setting target_suspended_size: %s", err)
 	}
-	if err := d.Set("target_stopped_size", manager.TargetStoppedSize); err != nil {
+	if err := d.Set("target_stopped_size", manager["targetStoppedSize"]); err != nil {
 		return fmt.Errorf("Error setting target_stopped_size: %s", err)
 	}
-	if err := d.Set("instance_flexibility_policy", flattenInstanceFlexibilityPolicy(manager.InstanceFlexibilityPolicy)); err != nil {
+	flexPolicy, _ := manager["instanceFlexibilityPolicy"].(map[string]interface{})
+	if err := d.Set("instance_flexibility_policy", flattenInstanceFlexibilityPolicy(flexPolicy)); err != nil {
 		return err
 	}
-	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
+	updatePolicy, _ := manager["updatePolicy"].(map[string]interface{})
+	if err := d.Set("update_policy", flattenRegionUpdatePolicy(updatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
-	if err = d.Set("instance_lifecycle_policy", flattenInstanceLifecyclePolicy(manager.InstanceLifecyclePolicy)); err != nil {
+	if err = d.Set("instance_lifecycle_policy", flattenRegionInstanceLifecyclePolicy(manager["instanceLifecyclePolicy"])); err != nil {
 		return fmt.Errorf("Error setting instance lifecycle policy in state: %s", err.Error())
 	}
-	if manager.AllInstancesConfig != nil {
-		if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
+	if manager["allInstancesConfig"] != nil {
+		if err = d.Set("all_instances_config", flattenRegionAllInstancesConfig(manager["allInstancesConfig"])); err != nil {
 			return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
 		}
 	}
-	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
+	if err = d.Set("stateful_disk", flattenRegionStatefulPolicy(manager["statefulPolicy"])); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
-	if err = d.Set("status", flattenStatus(manager.Status)); err != nil {
+	if err = d.Set("status", flattenRegionStatus(manager["status"])); err != nil {
 		return fmt.Errorf("Error setting status in state: %s", err.Error())
 	}
-	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(d, manager.StatefulPolicy)); err != nil {
+	if err = d.Set("stateful_internal_ip", flattenRegionStatefulPolicyStatefulInternalIps(d, manager["statefulPolicy"])); err != nil {
 		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
 	}
-	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(d, manager.StatefulPolicy)); err != nil {
+	if err = d.Set("stateful_external_ip", flattenRegionStatefulPolicyStatefulExternalIps(d, manager["statefulPolicy"])); err != nil {
 		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
 	}
-	if err = d.Set("target_size_policy", flattenTargetSizePolicy(manager.TargetSizePolicy)); err != nil {
+	if err = d.Set("target_size_policy", flattenRegionTargetSizePolicy(manager["targetSizePolicy"])); err != nil {
 		return fmt.Errorf("Error setting target_size_policy in state: %s", err.Error())
 	}
 	// If unset in state set to default value
@@ -1267,25 +1310,23 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		return err
 	}
 
-	updatedManager := &compute.InstanceGroupManager{
-		Fingerprint: d.Get("fingerprint").(string),
+	body := map[string]interface{}{
+		"fingerprint": d.Get("fingerprint").(string),
 	}
 	var change bool
 
 	if d.HasChange("target_pools") {
-		updatedManager.TargetPools = tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set))
-		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetPools")
+		body["targetPools"] = tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set))
 		change = true
 	}
 
 	if d.HasChange("auto_healing_policies") {
-		updatedManager.AutoHealingPolicies = expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{}))
-		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "AutoHealingPolicies")
+		body["autoHealingPolicies"] = expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{}))
 		change = true
 	}
 
 	if d.HasChange("version") {
-		updatedManager.Versions = expandVersions(d.Get("version").([]interface{}))
+		body["versions"] = expandVersions(d.Get("version").([]interface{}))
 		change = true
 	}
 
@@ -1296,76 +1337,84 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 			return err
 		}
 
-		updatedManager.InstanceFlexibilityPolicy = flexibilityPolicy
+		body["instanceFlexibilityPolicy"] = flexibilityPolicy
 		change = true
 
 		// target size update should be done by patch instead of using resize
 		if d.HasChange("target_size") {
-			updatedManager.TargetSize = int64(d.Get("target_size").(int))
-			updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetSize")
+			body["targetSize"] = int64(d.Get("target_size").(int))
 			targetSizePatchUpdate = true
 		}
 	}
 
 	if d.HasChange("distribution_policy_target_shape") {
-		updatedManager.DistributionPolicy = expandDistributionPolicyForUpdate(d)
+		body["distributionPolicy"] = expandDistributionPolicyForUpdate(d)
 		change = true
 	}
 
 	if d.HasChange("standby_policy") {
-		updatedManager.StandbyPolicy = expandStandbyPolicy(d)
+		body["standbyPolicy"] = expandStandbyPolicy(d)
 		change = true
 	}
 
 	if d.HasChange("target_suspended_size") {
-		updatedManager.TargetSuspendedSize = int64(d.Get("target_suspended_size").(int))
-		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetSuspendedSize")
+		body["targetSuspendedSize"] = int64(d.Get("target_suspended_size").(int))
 		change = true
 	}
 
 	if d.HasChange("target_stopped_size") {
-		updatedManager.TargetStoppedSize = int64(d.Get("target_stopped_size").(int))
-		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetStoppedSize")
+		body["targetStoppedSize"] = int64(d.Get("target_stopped_size").(int))
 		change = true
 	}
 
 	if d.HasChange("update_policy") {
-		updatedManager.UpdatePolicy = expandRegionUpdatePolicy(d.Get("update_policy").([]interface{}))
+		body["updatePolicy"] = expandRegionUpdatePolicy(d.Get("update_policy").([]interface{}))
 		change = true
 	}
 
 	if d.HasChange("instance_lifecycle_policy") {
-		updatedManager.InstanceLifecyclePolicy = expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{}))
+		body["instanceLifecyclePolicy"] = expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{}))
 		change = true
 	}
 
 	if d.HasChange("stateful_internal_ip") || d.HasChange("stateful_external_ip") || d.HasChange("stateful_disk") {
-		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
+		body["statefulPolicy"] = expandStatefulPolicy(d)
 		change = true
 	}
 
 	if d.HasChange("all_instances_config") {
 		oldAic, newAic := d.GetChange("all_instances_config")
 		if newAic == nil || len(newAic.([]interface{})) == 0 {
-			updatedManager.NullFields = append(updatedManager.NullFields, "AllInstancesConfig")
+			body["allInstancesConfig"] = nil
 		} else {
-			updatedManager.AllInstancesConfig = expandAllInstancesConfig(oldAic.([]interface{}), newAic.([]interface{}))
+			body["allInstancesConfig"] = expandAllInstancesConfig(oldAic.([]interface{}), newAic.([]interface{}))
 		}
 		change = true
 	}
 
 	if d.HasChange("list_managed_instances_results") {
-		updatedManager.ListManagedInstancesResults = d.Get("list_managed_instances_results").(string)
+		body["listManagedInstancesResults"] = d.Get("list_managed_instances_results").(string)
 		change = true
 	}
 
 	if change {
-		op, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Patch(project, region, d.Get("name").(string), updatedManager).Do()
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}name{{"}}"}}")
+		if err != nil {
+			return fmt.Errorf("Error constructing URL for RegionInstanceGroupManager: %s", err)
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "PATCH",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      body,
+		})
 		if err != nil {
 			return fmt.Errorf("Error updating region managed group instances: %s", err)
 		}
 
-		err = ComputeOperationWaitTime(config, op, project, "Updating region managed group instances", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, res, project, "Updating region managed group instances", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -1375,19 +1424,26 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	// so we call the update method on the region instance group, instead of the rigm
 	if d.HasChange("named_port") {
 		d.Partial(true)
-		namedPorts := getNamedPortsBeta(d.Get("named_port").(*schema.Set).List())
-		setNamedPorts := &compute.RegionInstanceGroupsSetNamedPortsRequest{
-			NamedPorts: namedPorts,
+		namedPortsUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroups/{{"{{"}}name{{"}}"}}/setNamedPorts")
+		if err != nil {
+			return fmt.Errorf("Error constructing URL for RegionInstanceGroupManager setNamedPorts: %s", err)
 		}
-
-		op, err := NewClient(config, userAgent).RegionInstanceGroups.SetNamedPorts(
-			project, region, d.Get("name").(string), setNamedPorts).Do()
-
+		namedPortsBody := map[string]interface{}{
+			"namedPorts": getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    namedPortsUrl,
+			UserAgent: userAgent,
+			Body:      namedPortsBody,
+		})
 		if err != nil {
 			return fmt.Errorf("Error updating RegionInstanceGroupManager: %s", err)
 		}
 
-		err = ComputeOperationWaitTime(config, op, project, "Updating RegionInstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, res, project, "Updating RegionInstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -1397,14 +1453,28 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	if d.HasChange("target_size") && !targetSizePatchUpdate {
 		d.Partial(true)
 		targetSize := int64(d.Get("target_size").(int))
-		op, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Resize(
-			project, region, d.Get("name").(string), targetSize).Do()
-
+		resizeUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}name{{"}}"}}/resize")
+		if err != nil {
+			return fmt.Errorf("Error constructing URL for RegionInstanceGroupManager resize: %s", err)
+		}
+		resizeUrl, err = transport_tpg.AddQueryParams(resizeUrl, map[string]string{
+			"size": fmt.Sprintf("%d", targetSize),
+		})
+		if err != nil {
+			return fmt.Errorf("Error adding size param for RegionInstanceGroupManager resize: %s", err)
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    resizeUrl,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Error resizing RegionInstanceGroupManager: %s", err)
 		}
 
-		err = ComputeOperationWaitTime(config, op, project, "Resizing RegionInstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, res, project, "Resizing RegionInstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -1442,14 +1512,24 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 
 	name := d.Get("name").(string)
 
-	op, err := NewClient(config, userAgent).RegionInstanceGroupManagers.Delete(project, region, name).Do()
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}name{{"}}"}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing URL for RegionInstanceGroupManager: %s", err)
+	}
 
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error deleting region instance group manager: %s", err)
 	}
 
 	// Wait for the operation to complete
-	err = ComputeOperationWaitTime(config, op, project, "Deleting RegionInstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, res, project, "Deleting RegionInstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return fmt.Errorf("Error waiting for delete to complete: %s", err)
 	}
@@ -1458,121 +1538,119 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 	return nil
 }
 
-func expandRegionUpdatePolicy(configured []interface{}) *compute.InstanceGroupManagerUpdatePolicy {
-	updatePolicy := &compute.InstanceGroupManagerUpdatePolicy{}
+func expandRegionUpdatePolicy(configured []interface{}) map[string]interface{} {
+	result := map[string]interface{}{}
 
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
 
-		updatePolicy.MinimalAction = data["minimal_action"].(string)
+		result["minimalAction"] = data["minimal_action"].(string)
 		mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string)
 		if mostDisruptiveAllowedAction != "" {
-			updatePolicy.MostDisruptiveAllowedAction = mostDisruptiveAllowedAction
+			result["mostDisruptiveAllowedAction"] = mostDisruptiveAllowedAction
 		} else {
-			updatePolicy.NullFields = append(updatePolicy.NullFields, "MostDisruptiveAllowedAction")
+			result["mostDisruptiveAllowedAction"] = nil
 		}
-		updatePolicy.Type = data["type"].(string)
-		updatePolicy.InstanceRedistributionType = data["instance_redistribution_type"].(string)
-		updatePolicy.ReplacementMethod = data["replacement_method"].(string)
+		result["type"] = data["type"].(string)
+		result["instanceRedistributionType"] = data["instance_redistribution_type"].(string)
+		result["replacementMethod"] = data["replacement_method"].(string)
 {{- if ne $.TargetVersionName "ga" }}
-		updatePolicy.MinReadySec = int64(data["min_ready_sec"].(int))
-		updatePolicy.ForceSendFields = []string{"MinReadySec"}
+		result["minReadySec"] = int64(data["min_ready_sec"].(int))
 {{- end }}
 
 		// percent and fixed values are conflicting
 		// when the percent values are set, the fixed values will be ignored
 		if v := data["max_surge_percent"]; v.(int) > 0 {
-			updatePolicy.MaxSurge = &compute.FixedOrPercent{
-				Percent:    int64(v.(int)),
-				NullFields: []string{"Fixed"},
+			result["maxSurge"] = map[string]interface{}{
+				"percent": int64(v.(int)),
+				"fixed":   nil,
 			}
 		} else {
-			updatePolicy.MaxSurge = &compute.FixedOrPercent{
-				Fixed: int64(data["max_surge_fixed"].(int)),
-				// allow setting this value to 0
-				ForceSendFields: []string{"Fixed"},
-				NullFields:      []string{"Percent"},
+			result["maxSurge"] = map[string]interface{}{
+				"fixed":   int64(data["max_surge_fixed"].(int)),
+				"percent": nil,
 			}
 		}
 
 		if v := data["max_unavailable_percent"]; v.(int) > 0 {
-			updatePolicy.MaxUnavailable = &compute.FixedOrPercent{
-				Percent:    int64(v.(int)),
-				NullFields: []string{"Fixed"},
+			result["maxUnavailable"] = map[string]interface{}{
+				"percent": int64(v.(int)),
+				"fixed":   nil,
 			}
 		} else {
-			updatePolicy.MaxUnavailable = &compute.FixedOrPercent{
-				Fixed: int64(data["max_unavailable_fixed"].(int)),
-				// allow setting this value to 0
-				ForceSendFields: []string{"Fixed"},
-				NullFields:      []string{"Percent"},
+			result["maxUnavailable"] = map[string]interface{}{
+				"fixed":   int64(data["max_unavailable_fixed"].(int)),
+				"percent": nil,
 			}
 		}
 	}
-	return updatePolicy
+	return result
 }
 
-func flattenRegionUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
+func flattenRegionUpdatePolicy(updatePolicy map[string]interface{}) []map[string]interface{} {
 	results := []map[string]interface{}{}
-	if updatePolicy != nil {
-		up := map[string]interface{}{}
-		if updatePolicy.MaxSurge != nil {
-			up["max_surge_fixed"] = updatePolicy.MaxSurge.Fixed
-			up["max_surge_percent"] = updatePolicy.MaxSurge.Percent
-		} else {
-			up["max_surge_fixed"] = 0
-			up["max_surge_percent"] = 0
-		}
-		if updatePolicy.MaxUnavailable != nil {
-			up["max_unavailable_fixed"] = updatePolicy.MaxUnavailable.Fixed
-			up["max_unavailable_percent"] = updatePolicy.MaxUnavailable.Percent
-		} else {
-			up["max_unavailable_fixed"] = 0
-			up["max_unavailable_percent"] = 0
-		}
-{{- if ne $.TargetVersionName "ga" }}
-		up["min_ready_sec"] = updatePolicy.MinReadySec
-{{- end }}
-		up["minimal_action"] = updatePolicy.MinimalAction
-		up["most_disruptive_allowed_action"] = updatePolicy.MostDisruptiveAllowedAction
-		up["type"] = updatePolicy.Type
-		up["instance_redistribution_type"] = updatePolicy.InstanceRedistributionType
-		up["replacement_method"] = updatePolicy.ReplacementMethod
-
-		results = append(results, up)
+	if updatePolicy == nil {
+		return results
 	}
+	up := map[string]interface{}{}
+	if maxSurge, ok := updatePolicy["maxSurge"].(map[string]interface{}); ok && maxSurge != nil {
+		up["max_surge_fixed"] = maxSurge["fixed"]
+		up["max_surge_percent"] = maxSurge["percent"]
+	} else {
+		up["max_surge_fixed"] = 0
+		up["max_surge_percent"] = 0
+	}
+	if maxUnavail, ok := updatePolicy["maxUnavailable"].(map[string]interface{}); ok && maxUnavail != nil {
+		up["max_unavailable_fixed"] = maxUnavail["fixed"]
+		up["max_unavailable_percent"] = maxUnavail["percent"]
+	} else {
+		up["max_unavailable_fixed"] = 0
+		up["max_unavailable_percent"] = 0
+	}
+{{- if ne $.TargetVersionName "ga" }}
+	up["min_ready_sec"] = updatePolicy["minReadySec"]
+{{- end }}
+	up["minimal_action"] = updatePolicy["minimalAction"]
+	up["most_disruptive_allowed_action"] = updatePolicy["mostDisruptiveAllowedAction"]
+	up["type"] = updatePolicy["type"]
+	up["instance_redistribution_type"] = updatePolicy["instanceRedistributionType"]
+	up["replacement_method"] = updatePolicy["replacementMethod"]
+	results = append(results, up)
 	return results
 }
 
-func expandInstanceFlexibilityPolicy(d *schema.ResourceData) (*compute.InstanceGroupManagerInstanceFlexibilityPolicy, error) {
-	instanceFlexibilityPolicy := &compute.InstanceGroupManagerInstanceFlexibilityPolicy{}
+func expandInstanceFlexibilityPolicy(d *schema.ResourceData) (map[string]interface{}, error) {
+	instanceSelections := map[string]interface{}{}
 	oldFlexibilityPolicy, newFlexibilityPolicy := d.GetChange("instance_flexibility_policy")
 
 	for _, flexibilityPolicy := range newFlexibilityPolicy.([]any) {
 		flexibilityPolicyData := flexibilityPolicy.(map[string]any)
-		instanceSelections, err := expandInstanceSelections(flexibilityPolicyData["instance_selections"].(*schema.Set).List())
+		selections, err := expandInstanceSelections(flexibilityPolicyData["instance_selections"].(*schema.Set).List())
 		if err != nil {
 			return nil, err
 		}
-		instanceFlexibilityPolicy.InstanceSelections = instanceSelections
+		for k, v := range selections {
+			instanceSelections[k] = v
+		}
 	}
 
 	for _, flexibilityPolicy := range oldFlexibilityPolicy.([]any) {
 		flexibilityPolicyData := flexibilityPolicy.(map[string]any)
 		for _, instanceSelection := range flexibilityPolicyData["instance_selections"].(*schema.Set).List() {
-			instanceSelectionData := instanceSelection.(map[string] any)
+			instanceSelectionData := instanceSelection.(map[string]any)
 			name := instanceSelectionData["name"].(string)
-			if _, exist := instanceFlexibilityPolicy.InstanceSelections[name]; !exist {
-				instanceFlexibilityPolicy.NullFields = append(instanceFlexibilityPolicy.NullFields, "InstanceSelections." + name)
+			if _, exist := instanceSelections[name]; !exist {
+				instanceSelections[name] = nil
 			}
 		}
-		instanceFlexibilityPolicy.ForceSendFields = append(instanceFlexibilityPolicy.ForceSendFields, "InstanceSelections")
 	}
-	return instanceFlexibilityPolicy, nil
+	return map[string]interface{}{
+		"instanceSelections": instanceSelections,
+	}, nil
 }
 
-func expandInstanceSelections(instanceSelections []any) (map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection, error) {
-	instanceSelectionsMap := make(map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection)
+func expandInstanceSelections(instanceSelections []any) (map[string]map[string]interface{}, error) {
+	instanceSelectionsMap := make(map[string]map[string]interface{})
 	for _, instanceSelectionRaw := range instanceSelections {
 		instanceSelectionData := instanceSelectionRaw.(map[string]any)
 
@@ -1583,12 +1661,12 @@ func expandInstanceSelections(instanceSelections []any) (map[string]compute.Inst
 		}
 		{{- end }}
 
-		instanceSelection := compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection{
-			Rank:         int64(instanceSelectionData["rank"].(int)),
-			MachineTypes: tpgresource.ConvertStringSet(instanceSelectionData["machine_types"].(*schema.Set)),
+		instanceSelection := map[string]interface{}{
+			"rank":         int64(instanceSelectionData["rank"].(int)),
+			"machineTypes": tpgresource.ConvertStringSet(instanceSelectionData["machine_types"].(*schema.Set)),
 			{{- if ne $.TargetVersionName `ga` }}
-			MinCpuPlatform: instanceSelectionData["min_cpu_platform"].(string),
-			Disks:          disks,
+			"minCpuPlatform": instanceSelectionData["min_cpu_platform"].(string),
+			"disks":          disks,
 			{{- end }}
 		}
 		instanceSelectionsMap[instanceSelectionData["name"].(string)] = instanceSelection
@@ -1597,40 +1675,39 @@ func expandInstanceSelections(instanceSelections []any) (map[string]compute.Inst
 }
 
 {{- if ne $.TargetVersionName `ga` }}
-func expandInstanceSelectionDisks(disks []any) ([]*compute.AttachedDisk, error) {
-  attachedDisks := make([]*compute.AttachedDisk, 0, len(disks))
+func expandInstanceSelectionDisks(disks []any) ([]map[string]interface{}, error) {
+  attachedDisks := make([]map[string]interface{}, 0, len(disks))
   for _, diskRaw := range disks {
       diskData := diskRaw.(map[string]any)
-      disk := &compute.AttachedDisk{
-          AutoDelete:   diskData["auto_delete"].(bool),
-          Boot:         diskData["boot"].(bool),
-          DeviceName:   diskData["device_name"].(string),
-          Interface:    diskData["interface"].(string),
-          Mode:         diskData["mode"].(string),
-          Type:         diskData["type"].(string),
-          Architecture: diskData["architecture"].(string),
+      disk := map[string]interface{}{
+          "autoDelete":   diskData["auto_delete"].(bool),
+          "boot":         diskData["boot"].(bool),
+          "deviceName":   diskData["device_name"].(string),
+          "interface":    diskData["interface"].(string),
+          "mode":         diskData["mode"].(string),
+          "type":         diskData["type"].(string),
+          "architecture": diskData["architecture"].(string),
       }
 
-      // Assign disk.DiskSizeGb and disk.InitializeParams.DiskSizeGb the same value
-      if v, exists := diskData["disk_size_gb"]; exists  && v.(int) != 0 {
-        disk.DiskSizeGb = int64(v.(int))
+      if v, exists := diskData["disk_size_gb"]; exists && v.(int) != 0 {
+          disk["diskSizeGb"] = int64(v.(int))
       }
 
       if v, exists := diskData["disk_encryption_key"]; exists && v != nil {
           keys := v.([]any)
           if len(keys) > 0 && keys[0] != nil {
               keyData := keys[0].(map[string]any)
-              disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-                  RawKey:               keyData["raw_key"].(string),
-                  RsaEncryptedKey:      keyData["rsa_encrypted_key"].(string),
-                  KmsKeyServiceAccount: keyData["kms_key_service_account"].(string),
-                  KmsKeyName:           keyData["kms_key_self_link"].(string),
+              disk["diskEncryptionKey"] = map[string]interface{}{
+                  "rawKey":               keyData["raw_key"].(string),
+                  "rsaEncryptedKey":      keyData["rsa_encrypted_key"].(string),
+                  "kmsKeyServiceAccount": keyData["kms_key_service_account"].(string),
+                  "kmsKeyName":           keyData["kms_key_self_link"].(string),
               }
           }
       }
 
       if v, exists := diskData["source"]; exists && v.(string) != "" {
-            disk.Source = v.(string)
+            disk["source"] = v.(string)
             conflicts := []string{"disk_size_gb", "disk_name", "disk_type", "provisioned_iops", "provisioned_throughput", "source_image", "source_snapshot", "labels"}
             var foundConflicts []string
             for _, conflict := range conflicts {
@@ -1642,32 +1719,31 @@ func expandInstanceSelectionDisks(disks []any) ([]*compute.AttachedDisk, error) 
                   return nil, fmt.Errorf("Cannot use `source` with conflicting fields: [%s]", strings.Join(foundConflicts, ", "))
             }
       } else {
-            initializeParams := &compute.AttachedDiskInitializeParams{}
+            initializeParams := map[string]interface{}{}
             hasInitializeParams := false
 
             if v, exists := diskData["disk_name"]; exists && v.(string) != "" {
-                initializeParams.DiskName = v.(string)
+                initializeParams["diskName"] = v.(string)
                 hasInitializeParams = true
             }
 
-            // Assign disk.DiskSizeGb and disk.InitializeParams.DiskSizeGb the same value
             if v, exists := diskData["disk_size_gb"]; exists && v.(int) != 0 {
-                initializeParams.DiskSizeGb = int64(v.(int))
+                initializeParams["diskSizeGb"] = int64(v.(int))
                 hasInitializeParams = true
             }
 
             if v, exists := diskData["disk_type"]; exists && v.(string) != "" {
-                initializeParams.DiskType = v.(string)
+                initializeParams["diskType"] = v.(string)
                 hasInitializeParams = true
             }
 
             if v, exists := diskData["provisioned_iops"]; exists && v.(int) != 0 {
-                initializeParams.ProvisionedIops = int64(v.(int))
+                initializeParams["provisionedIops"] = int64(v.(int))
                 hasInitializeParams = true
             }
 
             if v, exists := diskData["provisioned_throughput"]; exists && v.(int) != 0 {
-                initializeParams.ProvisionedThroughput = int64(v.(int))
+                initializeParams["provisionedThroughput"] = int64(v.(int))
                 hasInitializeParams = true
             }
 
@@ -1677,7 +1753,7 @@ func expandInstanceSelectionDisks(disks []any) ([]*compute.AttachedDisk, error) 
                     rmTag := rmTagRaw.(map[string]any)
                     rmTags[rmTag["key"].(string)] = rmTag["value"].(string)
                 }
-                initializeParams.ResourceManagerTags = rmTags
+                initializeParams["resourceManagerTags"] = rmTags
                 hasInitializeParams = true
             }
 
@@ -1687,12 +1763,12 @@ func expandInstanceSelectionDisks(disks []any) ([]*compute.AttachedDisk, error) 
                     label := labelRaw.(map[string]any)
                     labels[label["key"].(string)] = label["value"].(string)
                 }
-                initializeParams.Labels = labels
+                initializeParams["labels"] = labels
                 hasInitializeParams = true
             }
 
             if v, exists := diskData["source_image"]; exists && v.(string) != "" {
-                initializeParams.SourceImage = v.(string)
+                initializeParams["sourceImage"] = v.(string)
                 hasInitializeParams = true
             }
 
@@ -1700,18 +1776,18 @@ func expandInstanceSelectionDisks(disks []any) ([]*compute.AttachedDisk, error) 
                 keys := v.([]any)
                 if len(keys) > 0 && keys[0] != nil {
                     keyData := keys[0].(map[string]any)
-                    initializeParams.SourceImageEncryptionKey = &compute.CustomerEncryptionKey{
-                        RawKey:              keyData["raw_key"].(string),
-                        RsaEncryptedKey:     keyData["rsa_encrypted_key"].(string),
-                        KmsKeyServiceAccount: keyData["kms_key_service_account"].(string),
-                        KmsKeyName:          keyData["kms_key_self_link"].(string),
+                    initializeParams["sourceImageEncryptionKey"] = map[string]interface{}{
+                        "rawKey":               keyData["raw_key"].(string),
+                        "rsaEncryptedKey":      keyData["rsa_encrypted_key"].(string),
+                        "kmsKeyServiceAccount": keyData["kms_key_service_account"].(string),
+                        "kmsKeyName":           keyData["kms_key_self_link"].(string),
                     }
                     hasInitializeParams = true
                 }
             }
 
             if v, exists := diskData["source_snapshot"]; exists && v.(string) != "" {
-                initializeParams.SourceSnapshot = v.(string)
+                initializeParams["sourceSnapshot"] = v.(string)
                 hasInitializeParams = true
             }
 
@@ -1719,38 +1795,37 @@ func expandInstanceSelectionDisks(disks []any) ([]*compute.AttachedDisk, error) 
                 keys := v.([]any)
                 if len(keys) > 0 && keys[0] != nil {
                     keyData := keys[0].(map[string]any)
-                    initializeParams.SourceSnapshotEncryptionKey = &compute.CustomerEncryptionKey{
-                        RawKey:              keyData["raw_key"].(string),
-                        RsaEncryptedKey:     keyData["rsa_encrypted_key"].(string),
-                        KmsKeyServiceAccount: keyData["kms_key_service_account"].(string),
-                        KmsKeyName:          keyData["kms_key_self_link"].(string),
+                    initializeParams["sourceSnapshotEncryptionKey"] = map[string]interface{}{
+                        "rawKey":               keyData["raw_key"].(string),
+                        "rsaEncryptedKey":      keyData["rsa_encrypted_key"].(string),
+                        "kmsKeyServiceAccount": keyData["kms_key_service_account"].(string),
+                        "kmsKeyName":           keyData["kms_key_self_link"].(string),
                     }
                     hasInitializeParams = true
                 }
             }
 
-
             if v, exists := diskData["architecture"]; exists && v.(string) != "" {
-                initializeParams.Architecture = v.(string)
+                initializeParams["architecture"] = v.(string)
                 hasInitializeParams = true
             }
 
             if v, exists := diskData["guest_os_features"]; exists && v != nil {
-                features := make([]*compute.GuestOsFeature, 0)
+                features := make([]map[string]interface{}, 0)
                 for _, feature := range v.([]any) {
-                    features = append(features, &compute.GuestOsFeature{Type: feature.(string)})
+                    features = append(features, map[string]interface{}{"type": feature.(string)})
                 }
-                initializeParams.GuestOsFeatures = features
+                initializeParams["guestOsFeatures"] = features
                 hasInitializeParams = true
             }
 
             if v, exists := diskData["resource_policies"]; exists && v != nil {
-                initializeParams.ResourcePolicies = tpgresource.ConvertStringArr(v.([]any))
+                initializeParams["resourcePolicies"] = tpgresource.ConvertStringArr(v.([]any))
                 hasInitializeParams = true
             }
 
             if hasInitializeParams {
-                disk.InitializeParams = initializeParams
+                disk["initializeParams"] = initializeParams
             }
       }
       attachedDisks = append(attachedDisks, disk)
@@ -1772,61 +1847,61 @@ func hasFieldSet(d any) bool {
 }
 {{- end }}
 
-func expandDistributionPolicyForUpdate(d *schema.ResourceData) *compute.DistributionPolicy {
+func expandDistributionPolicyForUpdate(d *schema.ResourceData) map[string]interface{} {
 	dpts := d.Get("distribution_policy_target_shape").(string)
 	if dpts == "" {
 		return nil
 	}
-  // distributionPolicy.Zones is NOT updateable.
-  return &compute.DistributionPolicy{TargetShape: dpts}
+	// distributionPolicy.Zones is NOT updateable.
+	return map[string]interface{}{"targetShape": dpts}
 }
 
-func expandDistributionPolicyForCreate(d *schema.ResourceData) *compute.DistributionPolicy {
+func expandDistributionPolicyForCreate(d *schema.ResourceData) map[string]interface{} {
 	dpz := d.Get("distribution_policy_zones").(*schema.Set)
 	dpts := d.Get("distribution_policy_target_shape").(string)
 	if dpz.Len() == 0 && dpts == "" {
 		return nil
 	}
-	distributionPolicy := &compute.DistributionPolicy{}
-
-  if dpz.Len() > 0 {
-    distributionPolicyZoneConfigs := make([]*compute.DistributionPolicyZoneConfiguration, 0, dpz.Len())
-    for _, raw := range dpz.List() {
-      data := raw.(string)
-      distributionPolicyZoneConfig := compute.DistributionPolicyZoneConfiguration{
-        Zone: "zones/" + data,
-      }
-
-      distributionPolicyZoneConfigs = append(distributionPolicyZoneConfigs, &distributionPolicyZoneConfig)
-    }
-    distributionPolicy.Zones=distributionPolicyZoneConfigs
-  }
-  if dpts != "" {
-    distributionPolicy.TargetShape = dpts
-  }
-  return distributionPolicy
-}
-
-func flattenInstanceFlexibilityPolicy(instanceFlexibilityPolicy *compute.InstanceGroupManagerInstanceFlexibilityPolicy) []any {
-	flattenedInstanceFlexibilityPolicy := []any{}
-	if instanceFlexibilityPolicy != nil {
-		instanceSelectionsMap := map[string]any{}
-		instanceSelectionsMap["instance_selections"] = flattenInstanceSelections(instanceFlexibilityPolicy.InstanceSelections)
-		flattenedInstanceFlexibilityPolicy = append(flattenedInstanceFlexibilityPolicy, instanceSelectionsMap)
+	distributionPolicy := map[string]interface{}{}
+	if dpz.Len() > 0 {
+		zoneConfigs := make([]map[string]interface{}, 0, dpz.Len())
+		for _, raw := range dpz.List() {
+			zoneConfigs = append(zoneConfigs, map[string]interface{}{"zone": "zones/" + raw.(string)})
+		}
+		distributionPolicy["zones"] = zoneConfigs
 	}
-	return flattenedInstanceFlexibilityPolicy
+	if dpts != "" {
+		distributionPolicy["targetShape"] = dpts
+	}
+	return distributionPolicy
 }
 
-func flattenInstanceSelections(instanceSelections map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection) []map[string]any {
+func flattenInstanceFlexibilityPolicy(raw map[string]interface{}) []any {
+	if raw == nil {
+		return []any{}
+	}
+	instanceSelections, _ := raw["instanceSelections"].(map[string]interface{})
+	return []any{
+		map[string]any{
+			"instance_selections": flattenInstanceSelections(instanceSelections),
+		},
+	}
+}
+
+func flattenInstanceSelections(instanceSelections map[string]interface{}) []map[string]any {
 	instanceSelectionsMap := make([]map[string]any, 0, len(instanceSelections))
-	for instanceSelectionName, instanceSelection := range instanceSelections {
+	for instanceSelectionName, rawSel := range instanceSelections {
+		instanceSelection, _ := rawSel.(map[string]interface{})
+		if instanceSelection == nil {
+			continue
+		}
 		instanceSelectionData := make(map[string]any)
 		instanceSelectionData["name"] = instanceSelectionName
-		instanceSelectionData["rank"] = instanceSelection.Rank
-		instanceSelectionData["machine_types"] = instanceSelection.MachineTypes
+		instanceSelectionData["rank"] = instanceSelection["rank"]
+		instanceSelectionData["machine_types"] = instanceSelection["machineTypes"]
 		{{- if ne $.TargetVersionName `ga` }}
-		instanceSelectionData["min_cpu_platform"] = instanceSelection.MinCpuPlatform
-		instanceSelectionData["disks"] = flattenInstanceSelectionDisks(instanceSelection.Disks)
+		instanceSelectionData["min_cpu_platform"] = instanceSelection["minCpuPlatform"]
+		instanceSelectionData["disks"] = flattenInstanceSelectionDisks(instanceSelection["disks"])
 		{{- end }}
 		instanceSelectionsMap = append(instanceSelectionsMap, instanceSelectionData)
 	}
@@ -1834,128 +1909,109 @@ func flattenInstanceSelections(instanceSelections map[string]compute.InstanceGro
 }
 
 {{- if ne $.TargetVersionName `ga` }}
-func flattenInstanceSelectionDisks(disks []*compute.AttachedDisk) []map[string]any {
-    flattenedDisks := make([]map[string]any, 0, len(disks))
-    for _, disk := range disks {
+func flattenInstanceSelectionDisks(raw interface{}) []map[string]any {
+    rawDisks, _ := raw.([]interface{})
+    flattenedDisks := make([]map[string]any, 0, len(rawDisks))
+    for _, diskRaw := range rawDisks {
+        disk, _ := diskRaw.(map[string]interface{})
+        if disk == nil {
+            continue
+        }
         diskData := make(map[string]any)
 
-        diskData["auto_delete"] = disk.AutoDelete
-        diskData["boot"] = disk.Boot
-        diskData["device_name"] = disk.DeviceName
-        diskData["interface"] = disk.Interface
-        diskData["mode"] = disk.Mode
-        diskData["type"] = disk.Type
-        diskData["architecture"] = disk.Architecture
+        diskData["auto_delete"] = disk["autoDelete"]
+        diskData["boot"] = disk["boot"]
+        diskData["device_name"] = disk["deviceName"]
+        diskData["interface"] = disk["interface"]
+        diskData["mode"] = disk["mode"]
+        diskData["type"] = disk["type"]
+        diskData["architecture"] = disk["architecture"]
 
-        if disk.DiskSizeGb != 0 {
-          diskData["disk_size_gb"] = disk.DiskSizeGb
+        if v := disk["diskSizeGb"]; v != nil {
+            diskData["disk_size_gb"] = v
         }
 
-        if disk.DiskEncryptionKey != nil {
-          encryption := make([]map[string]any, 1)
-          encryption[0] = make(map[string]any)
-          encryption[0]["raw_key"] = disk.DiskEncryptionKey.RawKey
-          encryption[0]["rsa_encrypted_key"] = disk.DiskEncryptionKey.RsaEncryptedKey
-          encryption[0]["kms_key_self_link"] = disk.DiskEncryptionKey.KmsKeyName
-          encryption[0]["kms_key_service_account"] = disk.DiskEncryptionKey.KmsKeyServiceAccount
-          diskData["disk_encryption_key"] = encryption
+        if encRaw, ok := disk["diskEncryptionKey"].(map[string]interface{}); ok && encRaw != nil {
+            encKey := map[string]any{
+                "raw_key":               encRaw["rawKey"],
+                "rsa_encrypted_key":     encRaw["rsaEncryptedKey"],
+                "kms_key_self_link":     encRaw["kmsKeyName"],
+                "kms_key_service_account": encRaw["kmsKeyServiceAccount"],
+            }
+            diskData["disk_encryption_key"] = []map[string]any{encKey}
         }
 
-        if disk.Source != "" {
-          diskData["source"] = disk.Source
-        } else {
-          if disk.InitializeParams != nil {
-
-            if disk.InitializeParams.DiskName != "" {
-              diskData["disk_name"] = disk.InitializeParams.DiskName
+        if source, ok := disk["source"].(string); ok && source != "" {
+            diskData["source"] = source
+        } else if initParams, ok := disk["initializeParams"].(map[string]interface{}); ok && initParams != nil {
+            if v, ok := initParams["diskName"].(string); ok && v != "" {
+                diskData["disk_name"] = v
             }
-
-            if disk.InitializeParams.DiskSizeGb != 0 {
-              diskData["disk_size_gb"] = disk.InitializeParams.DiskSizeGb
+            if v := initParams["diskSizeGb"]; v != nil {
+                diskData["disk_size_gb"] = v
             }
-
-            if disk.InitializeParams.DiskType != "" {
-              diskData["disk_type"] = disk.InitializeParams.DiskType
+            if v, ok := initParams["diskType"].(string); ok && v != "" {
+                diskData["disk_type"] = v
             }
-
-            if disk.InitializeParams.ProvisionedIops != 0 {
-              diskData["provisioned_iops"] = disk.InitializeParams.ProvisionedIops
+            if v := initParams["provisionedIops"]; v != nil {
+                diskData["provisioned_iops"] = v
             }
-
-            if disk.InitializeParams.ProvisionedThroughput != 0 {
-              diskData["provisioned_throughput"] = disk.InitializeParams.ProvisionedThroughput
+            if v := initParams["provisionedThroughput"]; v != nil {
+                diskData["provisioned_throughput"] = v
             }
-
-            if disk.InitializeParams.ResourceManagerTags != nil {
-                rmTags := make([]any, 0, len(disk.InitializeParams.ResourceManagerTags))
-                for k, v := range disk.InitializeParams.ResourceManagerTags {
-                  rmTag := make(map[string]any)
-                  rmTag["key"] = k
-                  rmTag["value"] = v
-                  rmTags = append(rmTags, rmTag)
+            if rmTagsRaw, ok := initParams["resourceManagerTags"].(map[string]interface{}); ok && rmTagsRaw != nil {
+                rmTags := make([]any, 0, len(rmTagsRaw))
+                for k, v := range rmTagsRaw {
+                    rmTags = append(rmTags, map[string]any{"key": k, "value": v})
                 }
                 diskData["resource_manager_tags"] = rmTags
             }
-
-            if disk.InitializeParams.Labels != nil {
-              labels := make([]any, 0, len(disk.InitializeParams.Labels))
-              for k, v := range disk.InitializeParams.Labels {
-                label := make(map[string]any)
-                label["key"] = k
-                label["value"] = v
-                labels = append(labels, label)
-              }
-              diskData["labels"] = labels
+            if labelsRaw, ok := initParams["labels"].(map[string]interface{}); ok && labelsRaw != nil {
+                labels := make([]any, 0, len(labelsRaw))
+                for k, v := range labelsRaw {
+                    labels = append(labels, map[string]any{"key": k, "value": v})
+                }
+                diskData["labels"] = labels
             }
-
-            if disk.InitializeParams.ResourcePolicies != nil {
-              diskData["resource_policies"] = disk.InitializeParams.ResourcePolicies
+            if v, ok := initParams["resourcePolicies"]; ok && v != nil {
+                diskData["resource_policies"] = v
             }
-
-            if disk.InitializeParams.SourceImage != "" {
-              diskData["source_image"] = disk.InitializeParams.SourceImage
+            if v, ok := initParams["sourceImage"].(string); ok && v != "" {
+                diskData["source_image"] = v
             }
-
-            if disk.InitializeParams.SourceImageEncryptionKey != nil {
-              encryption := make([]map[string]any, 1)
-              encryption[0] = make(map[string]any)
-              encryption[0]["raw_key"] = disk.InitializeParams.SourceImageEncryptionKey.RawKey
-              encryption[0]["rsa_encrypted_key"] = disk.InitializeParams.SourceImageEncryptionKey.RsaEncryptedKey
-              encryption[0]["kms_key_service_account"] = disk.InitializeParams.SourceImageEncryptionKey.KmsKeyServiceAccount
-              encryption[0]["kms_key_self_link"] = disk.InitializeParams.SourceImageEncryptionKey.KmsKeyName
-              diskData["source_image_encryption_key"] = encryption
+            if encRaw, ok := initParams["sourceImageEncryptionKey"].(map[string]interface{}); ok && encRaw != nil {
+                encKey := map[string]any{
+                    "raw_key":               encRaw["rawKey"],
+                    "rsa_encrypted_key":     encRaw["rsaEncryptedKey"],
+                    "kms_key_service_account": encRaw["kmsKeyServiceAccount"],
+                    "kms_key_self_link":     encRaw["kmsKeyName"],
+                }
+                diskData["source_image_encryption_key"] = []map[string]any{encKey}
             }
-
-            if disk.InitializeParams.SourceSnapshot != "" {
-              diskData["source_snapshot"] = disk.InitializeParams.SourceSnapshot
+            if v, ok := initParams["sourceSnapshot"].(string); ok && v != "" {
+                diskData["source_snapshot"] = v
             }
-
-            if disk.InitializeParams.SourceSnapshotEncryptionKey != nil {
-              encryption := make([]map[string]any, 1)
-              encryption[0] = make(map[string]any)
-              encryption[0]["raw_key"] = disk.InitializeParams.SourceSnapshotEncryptionKey.RawKey
-              encryption[0]["rsa_encrypted_key"] = disk.InitializeParams.SourceSnapshotEncryptionKey.RsaEncryptedKey
-              encryption[0]["kms_key_service_account"] = disk.InitializeParams.SourceSnapshotEncryptionKey.KmsKeyServiceAccount
-              encryption[0]["kms_key_self_link"] = disk.InitializeParams.SourceSnapshotEncryptionKey.KmsKeyName
-              diskData["source_snapshot_encryption_key"] = encryption
+            if encRaw, ok := initParams["sourceSnapshotEncryptionKey"].(map[string]interface{}); ok && encRaw != nil {
+                encKey := map[string]any{
+                    "raw_key":               encRaw["rawKey"],
+                    "rsa_encrypted_key":     encRaw["rsaEncryptedKey"],
+                    "kms_key_service_account": encRaw["kmsKeyServiceAccount"],
+                    "kms_key_self_link":     encRaw["kmsKeyName"],
+                }
+                diskData["source_snapshot_encryption_key"] = []map[string]any{encKey}
             }
-
-            if disk.InitializeParams.Architecture != "" {
-              diskData["architecture"] = disk.InitializeParams.Architecture
+            if v, ok := initParams["architecture"].(string); ok && v != "" {
+                diskData["architecture"] = v
             }
-
-            if disk.InitializeParams.GuestOsFeatures != nil {
-              features := make([]any, 0, len(disk.InitializeParams.GuestOsFeatures))
-              for _, feature := range disk.InitializeParams.GuestOsFeatures {
-                features = append(features, feature.Type)
-              }
-              diskData["guest_os_features"] = features
+            if featuresRaw, ok := initParams["guestOsFeatures"].([]interface{}); ok && featuresRaw != nil {
+                features := make([]any, 0, len(featuresRaw))
+                for _, f := range featuresRaw {
+                    if fm, ok := f.(map[string]interface{}); ok {
+                        features = append(features, fm["type"])
+                    }
+                }
+                diskData["guest_os_features"] = features
             }
-
-            if disk.InitializeParams.ResourcePolicies != nil {
-              diskData["resource_policies"] = disk.InitializeParams.ResourcePolicies
-            }
-          }
         }
         flattenedDisks = append(flattenedDisks, diskData)
     }
@@ -1963,16 +2019,280 @@ func flattenInstanceSelectionDisks(disks []*compute.AttachedDisk) []map[string]a
 }
 {{- end }}
 
-func flattenDistributionPolicy(distributionPolicy *compute.DistributionPolicy) []string {
+func flattenDistributionPolicy(distributionPolicy map[string]interface{}) []string {
 	zones := make([]string, 0)
-
-	if distributionPolicy != nil {
-		for _, zone := range distributionPolicy.Zones {
-			zones = append(zones, tpgresource.GetResourceNameFromSelfLink(zone.Zone))
+	if distributionPolicy == nil {
+		return zones
+	}
+	if rawZones, ok := distributionPolicy["zones"].([]interface{}); ok {
+		for _, rawZone := range rawZones {
+			if zoneMap, ok := rawZone.(map[string]interface{}); ok {
+				if zone, ok := zoneMap["zone"].(string); ok {
+					zones = append(zones, tpgresource.GetResourceNameFromSelfLink(zone))
+				}
+			}
 		}
 	}
-
 	return zones
+}
+
+func flattenRegionNamedPorts(raw interface{}) []map[string]interface{} {
+	rawPorts, _ := raw.([]interface{})
+	result := make([]map[string]interface{}, 0, len(rawPorts))
+	for _, item := range rawPorts {
+		np, _ := item.(map[string]interface{})
+		if np == nil {
+			continue
+		}
+		result = append(result, map[string]interface{}{
+			"name": np["name"],
+			"port": np["port"],
+		})
+	}
+	return result
+}
+
+func flattenRegionAutoHealingPolicies(raw interface{}) []map[string]interface{} {
+	rawPolicies, _ := raw.([]interface{})
+	result := make([]map[string]interface{}, 0, len(rawPolicies))
+	for _, item := range rawPolicies {
+		ahp, _ := item.(map[string]interface{})
+		if ahp == nil {
+			continue
+		}
+		result = append(result, map[string]interface{}{
+			"health_check":      ahp["healthCheck"],
+			"initial_delay_sec": ahp["initialDelaySec"],
+		})
+	}
+	return result
+}
+
+func flattenRegionFixedOrPercent(raw interface{}) []map[string]interface{} {
+	fpMap, _ := raw.(map[string]interface{})
+	if fpMap == nil {
+		return []map[string]interface{}{}
+	}
+	result := map[string]interface{}{}
+	if p, _ := fpMap["percent"].(float64); p > 0 {
+		result["percent"] = int(p)
+	} else if f, _ := fpMap["fixed"].(float64); f > 0 {
+		result["fixed"] = int(f)
+	} else {
+		return []map[string]interface{}{}
+	}
+	return []map[string]interface{}{result}
+}
+
+func flattenRegionVersions(raw interface{}) []map[string]interface{} {
+	rawVersions, _ := raw.([]interface{})
+	result := make([]map[string]interface{}, 0, len(rawVersions))
+	for _, item := range rawVersions {
+		v, _ := item.(map[string]interface{})
+		if v == nil {
+			continue
+		}
+		instTemplate, _ := v["instanceTemplate"].(string)
+		result = append(result, map[string]interface{}{
+			"name":              v["name"],
+			"instance_template": tpgresource.ConvertSelfLinkToV1(instTemplate),
+			"target_size":       flattenRegionFixedOrPercent(v["targetSize"]),
+		})
+	}
+	return result
+}
+
+func flattenRegionStandbyPolicy(raw interface{}) []map[string]any {
+	spMap, _ := raw.(map[string]interface{})
+	if spMap == nil {
+		return []map[string]any{}
+	}
+	sp := map[string]any{
+		"initial_delay_sec": spMap["initialDelaySec"],
+		"mode":              spMap["mode"],
+	}
+	return []map[string]any{sp}
+}
+
+func flattenRegionInstanceLifecyclePolicy(raw interface{}) []map[string]interface{} {
+	ilpMap, _ := raw.(map[string]interface{})
+	if ilpMap == nil {
+		return []map[string]interface{}{}
+	}
+	ilp := map[string]interface{}{
+		"force_update_on_repair":    ilpMap["forceUpdateOnRepair"],
+		"default_action_on_failure": ilpMap["defaultActionOnFailure"],
+	}
+{{ if ne $.TargetVersionName `ga` -}}
+	ilp["on_failed_health_check"] = ilpMap["onFailedHealthCheck"]
+	if onRepair, ok := ilpMap["onRepair"].(map[string]interface{}); ok && onRepair != nil {
+		onRepairEntry := map[string]any{"allow_changing_zone": onRepair["allowChangingZone"]}
+		ilp["on_repair"] = []map[string]any{onRepairEntry}
+	} else {
+		ilp["on_repair"] = []map[string]any{}
+	}
+{{- end }}
+	return []map[string]interface{}{ilp}
+}
+
+func flattenRegionAllInstancesConfig(raw interface{}) []map[string]interface{} {
+	aicMap, _ := raw.(map[string]interface{})
+	if aicMap == nil {
+		return []map[string]interface{}{}
+	}
+	props := map[string]interface{}{}
+	if propsMap, ok := aicMap["properties"].(map[string]interface{}); ok && propsMap != nil {
+		if meta, ok := propsMap["metadata"].(map[string]interface{}); ok && len(meta) > 0 {
+			props["metadata"] = meta
+		}
+		if labels, ok := propsMap["labels"].(map[string]interface{}); ok && len(labels) > 0 {
+			props["labels"] = labels
+		}
+	}
+	return []map[string]interface{}{props}
+}
+
+func flattenRegionStatefulPolicy(raw interface{}) []map[string]interface{} {
+	spMap, _ := raw.(map[string]interface{})
+	if spMap == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	psMap, _ := spMap["preservedState"].(map[string]interface{})
+	if psMap == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	disksMap, _ := psMap["disks"].(map[string]interface{})
+	if disksMap == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	result := make([]map[string]interface{}, 0, len(disksMap))
+	for deviceName, diskRaw := range disksMap {
+		disk, _ := diskRaw.(map[string]interface{})
+		result = append(result, map[string]interface{}{
+			"device_name": deviceName,
+			"delete_rule": disk["autoDelete"],
+		})
+	}
+	return result
+}
+
+func flattenRegionStatefulPolicyStatefulIps(d *schema.ResourceData, ipfieldName string, raw interface{}) []map[string]interface{} {
+	ipsMap, _ := raw.(map[string]interface{})
+	if ipsMap == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	configData := []map[string]interface{}{}
+	for _, item := range d.Get(ipfieldName).([]interface{}) {
+		configData = append(configData, item.(map[string]interface{}))
+	}
+	apiData := []map[string]interface{}{}
+	for interfaceName, ipRaw := range ipsMap {
+		ip, _ := ipRaw.(map[string]interface{})
+		apiData = append(apiData, map[string]interface{}{
+			"interface_name": interfaceName,
+			"delete_rule":    ip["autoDelete"],
+		})
+	}
+	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "interface_name")
+	if err != nil {
+		log.Printf("[ERROR] Could not sort API response for %s: %s", ipfieldName, err)
+		return apiData
+	}
+	return sorted
+}
+
+func flattenRegionStatefulPolicyStatefulInternalIps(d *schema.ResourceData, raw interface{}) []map[string]interface{} {
+	spMap, _ := raw.(map[string]interface{})
+	if spMap == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	psMap, _ := spMap["preservedState"].(map[string]interface{})
+	if psMap == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	if psMap["internalIPs"] == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	return flattenRegionStatefulPolicyStatefulIps(d, "stateful_internal_ip", psMap["internalIPs"])
+}
+
+func flattenRegionStatefulPolicyStatefulExternalIps(d *schema.ResourceData, raw interface{}) []map[string]interface{} {
+	spMap, _ := raw.(map[string]interface{})
+	if spMap == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	psMap, _ := spMap["preservedState"].(map[string]interface{})
+	if psMap == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	if psMap["externalIPs"] == nil {
+		return make([]map[string]interface{}, 0)
+	}
+	return flattenRegionStatefulPolicyStatefulIps(d, "stateful_external_ip", psMap["externalIPs"])
+}
+
+func flattenRegionStatusStatefulConfigs(raw interface{}) []map[string]interface{} {
+	picMap, _ := raw.(map[string]interface{})
+	if picMap == nil {
+		return []map[string]interface{}{}
+	}
+	pic := map[string]interface{}{"all_effective": picMap["allEffective"]}
+	return []map[string]interface{}{pic}
+}
+
+func flattenRegionStatusStateful(raw interface{}) []map[string]interface{} {
+	statefulMap, _ := raw.(map[string]interface{})
+	if statefulMap == nil {
+		return []map[string]interface{}{}
+	}
+	stateful := map[string]interface{}{
+		"has_stateful_config":  statefulMap["hasStatefulConfig"],
+		"per_instance_configs": flattenRegionStatusStatefulConfigs(statefulMap["perInstanceConfigs"]),
+	}
+	return []map[string]interface{}{stateful}
+}
+
+func flattenRegionStatusVersionTarget(raw interface{}) []map[string]interface{} {
+	vtMap, _ := raw.(map[string]interface{})
+	if vtMap == nil {
+		return []map[string]interface{}{}
+	}
+	vt := map[string]interface{}{"is_reached": vtMap["isReached"]}
+	return []map[string]interface{}{vt}
+}
+
+func flattenRegionStatusAllInstancesConfig(raw interface{}) []map[string]interface{} {
+	aicMap, _ := raw.(map[string]interface{})
+	if aicMap == nil {
+		return []map[string]interface{}{}
+	}
+	aic := map[string]interface{}{"effective": aicMap["effective"], "current_revision": aicMap["currentRevision"]}
+	return []map[string]interface{}{aic}
+}
+
+func flattenRegionStatus(raw interface{}) []map[string]interface{} {
+	statusMap, _ := raw.(map[string]interface{})
+	if statusMap == nil {
+		return []map[string]interface{}{}
+	}
+	data := map[string]interface{}{
+		"is_stable":      statusMap["isStable"],
+		"stateful":       flattenRegionStatusStateful(statusMap["stateful"]),
+		"version_target": flattenRegionStatusVersionTarget(statusMap["versionTarget"]),
+	}
+	if statusMap["allInstancesConfig"] != nil {
+		data["all_instances_config"] = flattenRegionStatusAllInstancesConfig(statusMap["allInstancesConfig"])
+	}
+	return []map[string]interface{}{data}
+}
+
+func flattenRegionTargetSizePolicy(raw interface{}) []map[string]interface{} {
+	tspMap, _ := raw.(map[string]interface{})
+	if tspMap == nil {
+		return nil
+	}
+	tsp := map[string]interface{}{"mode": tspMap["mode"]}
+	return []map[string]interface{}{tsp}
 }
 
 func hashZoneFromSelfLinkOrResourceName(value interface{}) int {
