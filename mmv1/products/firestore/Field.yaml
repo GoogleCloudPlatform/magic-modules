@@ -189,6 +189,7 @@ properties:
     description: |
       The TTL configuration for this Field. If set to an empty (i.e. `ttl_config {}`) or non-empty block, a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
     send_empty_value: true
+    custom_expand: 'templates/terraform/custom_expand/firestore_field_ttl_config.go.tmpl'
     properties:
       - name: 'state'
         type: Enum
@@ -202,5 +203,6 @@ properties:
       - name: 'expirationOffset'
         type: String
         description: |
-          The offset, relative to the timestamp value from the field, used to determine the document's expiration time. Formatted as the number of seconds followed by 's'. For example, "60s" represents an offset of one minute. The number of seconds must be between 0 and 2147483647 inclusive.
+          The offset, relative to the timestamp value from the field, used to determine the document's expiration time. Formatted as the number of seconds followed by 's'. For example, "60s" represents an offset of one minute. The number of seconds must be between 1 and 2147483647 inclusive. To configure no offset, omit this field.
         immutable: true
+        default_from_api: true
