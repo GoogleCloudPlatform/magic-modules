@@ -273,24 +273,11 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 		return
 	}
 
-	eligibleExample := false
-	for _, example := range object.Examples {
-		if !example.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
-				eligibleExample = true
-				break
-			}
-		}
-	}
-	if !eligibleExample {
+	if !t.hasEligibleExample(object) {
 		return
 	}
 
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateQueryTestFile(targetFilePath, object)
 }
