@@ -24,7 +24,6 @@ func TestAccServiceAccountListResource_queryIdentity(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
 	listDisplayName := acctest.ListDisplayName{}
-
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
