@@ -51,6 +51,9 @@ func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
 		{{ $.ResourceName }}IamUpdaterProducer,
 		tpgiamresource.IamMemberListCallConfig{
 			ResourceNameField: "{{ $.IamParentResourceName }}",
+			EnableRoleFilter: true,
+			EnableMemberFilter: true,
+			{{- if ne $.TerraformName "google_project" }}
 			ItemName: "{{ $.CollectionUrlKey }}",
 			ListUrlFunc: func(rd *schema.ResourceData, config *transport_tpg.Config) (string, error) {
 				return tpgresource.ReplaceVars(rd, config, "{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}{{ $.BaseUrl }}")
@@ -61,6 +64,7 @@ func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
 				}
 				return fmt.Errorf("list item missing 'name' field")
 			},
+			{{- end }}
 		},
 	)
 }
