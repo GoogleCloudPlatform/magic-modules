@@ -1040,7 +1040,7 @@ func TestAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(t *testing.T) {
 
 func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 	// Uses time.Now
-	acctest.SkipIfVcr(t)
+	// acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	rnd := acctest.RandString(t, 10)
