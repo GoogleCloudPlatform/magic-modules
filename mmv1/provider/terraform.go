@@ -269,11 +269,7 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	if object.Samples != nil && object.Examples != nil {
 		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
 	}
-	if object.Examples == nil {
-		return
-	}
-
-	if !t.hasEligibleExample(object) {
+	if object.Examples == nil || !t.hasEligibleExample(object) {
 		return
 	}
 
