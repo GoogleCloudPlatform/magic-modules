@@ -359,54 +359,9 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
-		var attemptedTests []string
-		for _, t := range replayingResult.FailedTests {
-			prefix := t + "__"
-			hasSubtests := false
-			for _, st := range recordingResult.PassedSubtests {
-				if strings.HasPrefix(st, prefix) {
-					attemptedTests = append(attemptedTests, st)
-					hasSubtests = true
-				}
-			}
-			for _, st := range recordingResult.FailedSubtests {
-				if strings.HasPrefix(st, prefix) {
-					attemptedTests = append(attemptedTests, st)
-					hasSubtests = true
-				}
-			}
-			if !hasSubtests {
-				attemptedTests = append(attemptedTests, t)
-			}
-		}
-
 		// Expand compound tests to subtests for accurate status matching
 		expandedRecordingResult := subtestResult(recordingResult)
 		expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
-
-		// Group tests by status to list them in order:
-		// 1. Passed in both Recording and Re-replaying
-		// 2. Passed in Recording but Failing in Re-replaying
-		// 3. Failing in Recording
-		// 4. Terminated
-		var passedInBoth, failingInReplayingAfterRecording, failingInRecording, terminated []string
-
-		for _, t := range attemptedTests {
-			if !contains(expandedRecordingResult.PassedTests, t) && !contains(expandedRecordingResult.FailedTests, t) {
-				terminated = append(terminated, t)
-			} else if contains(expandedRecordingResult.FailedTests, t) {
-				failingInRecording = append(failingInRecording, t)
-			} else if contains(expandedReplayingAfterRecordingResult.FailedTests, t) {
-				failingInReplayingAfterRecording = append(failingInReplayingAfterRecording, t)
-			} else {
-				passedInBoth = append(passedInBoth, t)
-			}
-		}
-
-		sort.Strings(passedInBoth)
-		sort.Strings(failingInReplayingAfterRecording)
-		sort.Strings(failingInRecording)
-		sort.Strings(terminated)
 
 		logBasePath := fmt.Sprintf("ci-vcr-logs/%s/refs/heads/%s/artifacts/%s", provider.Beta.String(), newBranch, buildID)
 		if buildID == "" {
@@ -414,19 +369,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 		logBaseUrl := fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
 
-		var testRows []VCRTestTableRow
-		for _, t := range passedInBoth {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
-		}
-		for _, t := range failingInReplayingAfterRecording {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
-		}
-		for _, t := range failingInRecording {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
-		}
-		for _, t := range terminated {
-			testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
-		}
+		testRows := buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult, logBaseUrl)
 
 		recordReplayData := recordReplay{
 			TestRows:                      testRows,
@@ -804,4 +747,71 @@ func createTableRow(t string, logBaseUrl string, recordingResult, replayingResul
 	}
 
 	return row
+}
+
+func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult vcr.Result, logBaseUrl string) []VCRTestTableRow {
+	// Expand compound tests to subtests for accurate status matching
+	expandedRecordingResult := subtestResult(recordingResult)
+	expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
+
+	var attemptedTests []string
+	for _, t := range replayingResult.FailedTests {
+		prefix := t + "__"
+		hasSubtests := false
+		for _, st := range recordingResult.PassedSubtests {
+			if strings.HasPrefix(st, prefix) {
+				attemptedTests = append(attemptedTests, st)
+				hasSubtests = true
+			}
+		}
+		for _, st := range recordingResult.FailedSubtests {
+			if strings.HasPrefix(st, prefix) {
+				attemptedTests = append(attemptedTests, st)
+				hasSubtests = true
+			}
+		}
+		if !hasSubtests {
+			attemptedTests = append(attemptedTests, t)
+		}
+	}
+
+	// Group tests by status to list them in order:
+	// 1. Passed in both Recording and Re-replaying
+	// 2. Passed in Recording but Failing in Re-replaying
+	// 3. Failing in Recording
+	// 4. Terminated
+	var passedInBoth, failingInReplayingAfterRecording, failingInRecording, terminated []string
+
+	for _, t := range attemptedTests {
+		if !contains(expandedRecordingResult.PassedTests, t) && !contains(expandedRecordingResult.FailedTests, t) {
+			terminated = append(terminated, t)
+		} else if contains(expandedRecordingResult.FailedTests, t) {
+			failingInRecording = append(failingInRecording, t)
+		} else if contains(expandedReplayingAfterRecordingResult.FailedTests, t) {
+			failingInReplayingAfterRecording = append(failingInReplayingAfterRecording, t)
+		} else {
+			passedInBoth = append(passedInBoth, t)
+		}
+	}
+
+	sort.Strings(passedInBoth)
+	sort.Strings(failingInReplayingAfterRecording)
+	sort.Strings(failingInRecording)
+	sort.Strings(terminated)
+
+	var testRows []VCRTestTableRow
+	for _, t := range passedInBoth {
+		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+	}
+	for _, t := range failingInReplayingAfterRecording {
+		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+	}
+	for _, t := range failingInRecording {
+		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+	}
+	for _, t := range terminated {
+		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+	}
+
+	return testRows
 }
