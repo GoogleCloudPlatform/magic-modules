@@ -3,6 +3,7 @@ package compute
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1212,16 +1213,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("description", manager["description"]); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
-	var idStr string
-	switch v := manager["id"].(type) {
-	case string:
-		idStr = v
-	case float64:
-		idStr = fmt.Sprintf("%.0f", v)
-	default:
-		idStr = fmt.Sprintf("%v", v)
-	}
-	if err := d.Set("instance_group_manager_id", idStr); err != nil {
+	if err := d.Set("instance_group_manager_id", getInt(manager["id"])); err != nil {
 		return fmt.Errorf("Error setting instance_group_manager_id: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
@@ -1598,10 +1590,14 @@ func expandRegionUpdatePolicy(configured []interface{}) map[string]interface{} {
 		mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string)
 		if mostDisruptiveAllowedAction != "" {
 			updatePolicy["mostDisruptiveAllowedAction"] = mostDisruptiveAllowedAction
+		} else {
+			updatePolicy["mostDisruptiveAllowedAction"] = nil
 		}
 		updatePolicy["type"] = data["type"].(string)
 		updatePolicy["instanceRedistributionType"] = data["instance_redistribution_type"].(string)
-		updatePolicy["replacementMethod"] = data["replacement_method"].(string)
+		if rm := data["replacement_method"].(string); rm != "" {
+			updatePolicy["replacementMethod"] = rm
+		}
 {{- if ne $.TargetVersionName "ga" }}
 		updatePolicy["minReadySec"] = int64(data["min_ready_sec"].(int))
 {{- end }}
@@ -2113,6 +2109,9 @@ func getInt(v interface{}) int64 {
 		return t
 	case float64:
 		return int64(t)
+	case string:
+		i, _ := strconv.ParseInt(t, 10, 64)
+		return i
 	default:
 		return 0
 	}
