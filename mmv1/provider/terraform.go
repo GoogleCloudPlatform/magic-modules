@@ -209,6 +209,18 @@ func (t *Terraform) hasEligibleExample(object api.Resource) bool {
 	return false
 }
 
+func (t *Terraform) hasEligibleSample(object api.Resource) bool {
+	for _, sample := range object.Samples {
+		if sample.ExcludeTest {
+			continue
+		}
+		if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
 	if !t.hasEligibleExample(object) {
 		return
@@ -228,16 +240,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 		return
 	}
 
-	eligibleSample := false
-	for _, sample := range object.Samples {
-		if !sample.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
-				eligibleSample = true
-				break
-			}
-		}
-	}
-	if !eligibleSample {
+	if !t.hasEligibleSample(object) {
 		return
 	}
 
