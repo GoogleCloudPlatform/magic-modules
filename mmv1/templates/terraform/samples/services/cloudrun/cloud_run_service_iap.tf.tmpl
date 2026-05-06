@@ -1,5 +1,5 @@
 resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
-  name     = "{{index $.Vars "cloud_run_service_name"}}"
+  name     = "{{index $.ResourceIdVars "cloud_run_service_name"}}"
   location = "us-central1"
 
   metadata {

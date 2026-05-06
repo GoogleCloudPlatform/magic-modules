@@ -68,95 +68,118 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west1"
     - region: "europe-north1"
-examples:
+samples:
   - name: 'cloud_run_service_basic'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'cloud_run_service_basic'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_gpu'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'cloud_run_service_gpu'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_sql'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-      cloud_run_sql_name: 'cloudrun-sql'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'autogenerate_revision_name'
+    steps:
+      - name: 'cloud_run_service_sql'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+          cloud_run_sql_name: 'cloudrun-sql'
+        vars:
+          deletion_protection: 'true'
+        test_vars_overrides:
+          'deletion_protection': 'false'
+        oics_vars_overrides:
+          'deletion_protection': 'false'
+        ignore_read_extra:
+          - 'autogenerate_revision_name'
   - name: 'cloud_run_service_noauth'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'cloud_run_service_noauth'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multiple_environment_variables'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'autogenerate_revision_name'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'cloud_run_service_multiple_environment_variables'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'autogenerate_revision_name'
   - name: 'cloud_run_service_secret_environment_variables'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-      secret_id: 'secret'
-    test_vars_overrides:
-      # for backward compatible
-      secret_id: '"secret" + randomSuffix'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'autogenerate_revision_name'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'cloud_run_service_secret_environment_variables'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+          secret_id: 'secret'
+        test_vars_overrides:
+          # for backward compatible
+          secret_id: '"secret" + randomSuffix'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'autogenerate_revision_name'
   - name: 'cloud_run_service_secret_volumes'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-      secret_id: 'secret'
-    test_vars_overrides:
-      # for backward compatible
-      secret_id: '"secret" + randomSuffix'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'autogenerate_revision_name'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'cloud_run_service_secret_volumes'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+          secret_id: 'secret'
+        test_vars_overrides:
+          # for backward compatible
+          secret_id: '"secret" + randomSuffix'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'autogenerate_revision_name'
   - name: 'cloud_run_service_probes'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
+    steps:
+      - name: 'cloud_run_service_probes'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
   - name: 'cloud_run_service_readiness_probe'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv-rp'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'cloud_run_service_readiness_probe'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv-rp'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multicontainer'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'cloud_run_service_multicontainer'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_iap'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'cloud_run_service_iap'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 virtual_fields:
   - name: 'autogenerate_revision_name'
     description: |
