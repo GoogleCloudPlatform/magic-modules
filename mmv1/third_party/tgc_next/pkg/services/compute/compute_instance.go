@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
@@ -12,6 +13,29 @@ import (
 
 	"google.golang.org/api/compute/v1"
 )
+
+// typedToMap converts a typed API struct to map[string]interface{} via JSON so
+// it can be passed to flatten functions that now operate on raw REST responses.
+func typedToMap(v interface{}) map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	b, _ := json.Marshal(v)
+	var m map[string]interface{}
+	json.Unmarshal(b, &m)
+	return m
+}
+
+// typedToSlice converts a typed API slice to []interface{} via JSON.
+func typedToSlice(v interface{}) []interface{} {
+	if v == nil {
+		return nil
+	}
+	b, _ := json.Marshal(v)
+	var s []interface{}
+	json.Unmarshal(b, &s)
+	return s
+}
 
 func init() {
 	registry.Schema{
@@ -1463,15 +1487,15 @@ func flattenSchedulingTgc(resp *compute.Scheduling) []map[string]interface{} {
 	}
 
 	if resp.MaxRunDuration != nil {
-		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(resp.MaxRunDuration)
+		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(typedToMap(resp.MaxRunDuration))
 	}
 
 	if resp.OnInstanceStopAction != nil {
-		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
+		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(typedToMap(resp.OnInstanceStopAction))
 	}
 
 	if resp.LocalSsdRecoveryTimeout != nil {
-		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(resp.LocalSsdRecoveryTimeout)
+		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(typedToMap(resp.LocalSsdRecoveryTimeout))
 	}
 
 	if len(schedulingMap) == 0 {
@@ -1487,7 +1511,7 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 
 	for i, iface := range networkInterfaces {
 		var ac []map[string]interface{}
-		ac, externalIP = flattenAccessConfigs(iface.AccessConfigs)
+		ac, externalIP = flattenAccessConfigs(typedToSlice(iface.AccessConfigs))
 
 		flattened[i] = map[string]interface{}{
 			"network_ip":                  iface.NetworkIP,
@@ -1495,7 +1519,7 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 			"alias_ip_range":              flattenAliasIpRangeTgc(iface.AliasIpRanges),
 			"nic_type":                    iface.NicType,
 			"stack_type":                  iface.StackType,
-			"ipv6_access_config":          flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
+			"ipv6_access_config":          flattenIpv6AccessConfigs(typedToSlice(iface.Ipv6AccessConfigs)),
 			"ipv6_address":                iface.Ipv6Address,
 			"network":                     tpgresource.ConvertSelfLinkToV1(iface.Network),
 			"subnetwork":                  tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),

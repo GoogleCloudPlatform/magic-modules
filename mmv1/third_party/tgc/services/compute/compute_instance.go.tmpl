@@ -18,6 +18,7 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/cai"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
@@ -134,7 +135,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
-	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	networkInterfaces, err := expandNetworkInterfacesTgc(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
@@ -142,6 +143,64 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	accels, err := expandInstanceGuestAccelerators(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
+	}
+
+	// Build typed tags
+	var tags *compute.Tags
+	if v := d.Get("tags"); v != nil {
+		vs := v.(*schema.Set)
+		tags = &compute.Tags{
+			Items:       tpgresource.ConvertStringSet(vs),
+			Fingerprint: d.Get("tags_fingerprint").(string),
+		}
+	}
+
+	// Build typed service accounts
+	saConfigs := d.Get("service_account").([]interface{})
+	serviceAccounts := make([]*compute.ServiceAccount, len(saConfigs))
+	for i, raw := range saConfigs {
+		data := raw.(map[string]interface{})
+		email := data["email"].(string)
+		if email == "" {
+			email = "default"
+		}
+		serviceAccounts[i] = &compute.ServiceAccount{
+			Email:  email,
+			Scopes: tpgresource.CanonicalizeServiceScopes(tpgresource.ConvertStringSet(data["scopes"].(*schema.Set))),
+		}
+	}
+
+	// Build typed shielded instance config
+	var shieldedConfig *compute.ShieldedInstanceConfig
+	if _, ok := d.GetOk("shielded_instance_config"); ok {
+		prefix := "shielded_instance_config.0"
+		shieldedConfig = &compute.ShieldedInstanceConfig{
+			EnableSecureBoot:          d.Get(prefix + ".enable_secure_boot").(bool),
+			EnableVtpm:                d.Get(prefix + ".enable_vtpm").(bool),
+			EnableIntegrityMonitoring: d.Get(prefix + ".enable_integrity_monitoring").(bool),
+		}
+	}
+
+	// Build typed display device
+	var displayDevice *compute.DisplayDevice
+	if _, ok := d.GetOk("enable_display"); ok {
+		displayDevice = &compute.DisplayDevice{
+			EnableDisplay: d.Get("enable_display").(bool),
+		}
+	}
+
+	// Build typed advanced machine features
+	var advancedMachineFeatures *compute.AdvancedMachineFeatures
+	if _, ok := d.GetOk("advanced_machine_features"); ok {
+		prefix := "advanced_machine_features.0"
+		advancedMachineFeatures = &compute.AdvancedMachineFeatures{
+			EnableNestedVirtualization: d.Get(prefix + ".enable_nested_virtualization").(bool),
+			ThreadsPerCore:             int64(d.Get(prefix + ".threads_per_core").(int)),
+			TurboMode:                  d.Get(prefix + ".turbo_mode").(string),
+			VisibleCoreCount:           int64(d.Get(prefix + ".visible_core_count").(int)),
+			PerformanceMonitoringUnit:  d.Get(prefix + ".performance_monitoring_unit").(string),
+			EnableUefiNetworking:       d.Get(prefix + ".enable_uefi_networking").(bool),
+		}
 	}
 
 	// Create the instance information
@@ -154,18 +213,18 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Name:                    d.Get("name").(string),
 		Zone:                    d.Get("zone").(string),
 		NetworkInterfaces:       networkInterfaces,
-		Tags:                    resourceInstanceTags(d),
+		Tags:                    tags,
 		Labels:                  tpgresource.ExpandLabels(d),
-		ServiceAccounts:         expandServiceAccounts(d.Get("service_account").([]interface{})),
+		ServiceAccounts:         serviceAccounts,
 		GuestAccelerators:       accels,
 		MinCpuPlatform:          d.Get("min_cpu_platform").(string),
 		Scheduling:              scheduling,
 		DeletionProtection:      d.Get("deletion_protection").(bool),
 		Hostname:                d.Get("hostname").(string),
 		ForceSendFields:         []string{"CanIpForward", "DeletionProtection"},
-		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
-		DisplayDevice:           expandDisplayDevice(d),
-		AdvancedMachineFeatures: expandAdvancedMachineFeatures(d),
+		ShieldedInstanceConfig:  shieldedConfig,
+		DisplayDevice:           displayDevice,
+		AdvancedMachineFeatures: advancedMachineFeatures,
 	}, nil
 }
 
@@ -348,3 +407,80 @@ func expandScratchDisks(d tpgresource.TerraformResourceData, config *transport_t
 
 	return scratchDisks, nil
 }
+
+func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
+	configs := d.Get("network_interface").([]interface{})
+	ifaces := make([]*compute.NetworkInterface, len(configs))
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+
+		network := data["network"].(string)
+		subnetwork := data["subnetwork"].(string)
+
+		nf, err := tpgresource.ParseNetworkFieldValue(network, d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot determine self_link for network %q: %s", network, err)
+		}
+		subnetProjectField := fmt.Sprintf("network_interface.%d.subnetwork_project", i)
+		sf, err := tpgresource.ParseSubnetworkFieldValueWithProjectField(subnetwork, subnetProjectField, d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
+		}
+
+		acRaws := data["access_config"].([]interface{})
+		accessConfigs := make([]*compute.AccessConfig, len(acRaws))
+		for j, acRaw := range acRaws {
+			ac := &compute.AccessConfig{Type: "ONE_TO_ONE_NAT"}
+			if acRaw != nil {
+				acData := acRaw.(map[string]interface{})
+				ac.NatIP = acData["nat_ip"].(string)
+				ac.NetworkTier = acData["network_tier"].(string)
+				if ptr, ok := acData["public_ptr_domain_name"]; ok && ptr != "" {
+					ac.SetPublicPtr = true
+					ac.PublicPtrDomainName = ptr.(string)
+				}
+			}
+			accessConfigs[j] = ac
+		}
+
+		arRaws := data["alias_ip_range"].([]interface{})
+		aliasIpRanges := make([]*compute.AliasIpRange, len(arRaws))
+		for j, arRaw := range arRaws {
+			arData := arRaw.(map[string]interface{})
+			aliasIpRanges[j] = &compute.AliasIpRange{
+				IpCidrRange:         arData["ip_cidr_range"].(string),
+				SubnetworkRangeName: arData["subnetwork_range_name"].(string),
+			}
+		}
+
+		iacRaws := data["ipv6_access_config"].([]interface{})
+		ipv6AccessConfigs := make([]*compute.AccessConfig, len(iacRaws))
+		for j, iacRaw := range iacRaws {
+			iac := &compute.AccessConfig{Type: "DIRECT_IPV6"}
+			if iacRaw != nil {
+				iacData := iacRaw.(map[string]interface{})
+				iac.NetworkTier = iacData["network_tier"].(string)
+				if ptr, ok := iacData["public_ptr_domain_name"]; ok && ptr != "" {
+					iac.PublicPtrDomainName = ptr.(string)
+				}
+			}
+			ipv6AccessConfigs[j] = iac
+		}
+
+		ifaces[i] = &compute.NetworkInterface{
+			NetworkIP:                data["network_ip"].(string),
+			Network:                  nf.RelativeLink(),
+			Subnetwork:               sf.RelativeLink(),
+			AccessConfigs:            accessConfigs,
+			AliasIpRanges:            aliasIpRanges,
+			NicType:                  data["nic_type"].(string),
+			StackType:                data["stack_type"].(string),
+			QueueCount:               int64(data["queue_count"].(int)),
+			Ipv6AccessConfigs:        ipv6AccessConfigs,
+			Ipv6Address:              data["ipv6_address"].(string),
+			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+		}
+	}
+	return ifaces, nil
+}
+

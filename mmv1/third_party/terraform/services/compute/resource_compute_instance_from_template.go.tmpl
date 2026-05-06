@@ -1,7 +1,6 @@
 package compute
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -13,12 +12,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func ResourceComputeInstanceFromTemplate() *schema.Resource {
@@ -110,10 +103,6 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := NewClient(config, userAgent).Zones.Get(project, z).Do()
-	if err != nil {
-		return fmt.Errorf("Error loading zone '%s': %s", z, err)
-	}
 
 	instance, err := expandComputeInstance(project, d, config)
 	if err != nil {
@@ -126,22 +115,33 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	it := compute.InstanceTemplate{}
+	var it map[string]interface{}
 	var relativeUrl string
+	zoneName := z
 
 	if strings.Contains(sourceInstanceTemplate, "global/instanceTemplates") {
-		instanceTemplate, err := NewClient(config, userAgent).InstanceTemplates.Get(project, tpl.Name).Do()
+		itUrl := fmt.Sprintf("%sprojects/%s/global/instanceTemplates/%s", config.ComputeBasePath, project, tpl.Name)
+
+		itRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    itUrl,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		it = *instanceTemplate
+		it = itRes
+
 		relativeUrl = tpl.RelativeLink()
 
-		instance.Disks, err = adjustInstanceFromTemplateDisks(d, config, &it, zone, project, false)
+		adjustedDisks, err := adjustInstanceFromTemplateDisks(d, config, it, z, project, false)
 		if err != nil {
 			return err
 		}
+		instance["disks"] = adjustedDisks
 	} else {
 		relativeUrl, err = tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceTemplates/"+tpl.Name)
 		if err != nil {
@@ -164,75 +164,78 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 			return err
 		}
 
-		instancePropertiesObj, err := json.Marshal(instanceTemplate)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
+		it = instanceTemplate
 
-		if err := json.Unmarshal(instancePropertiesObj, &it); err != nil {
-			fmt.Println(err)
-			return err
-		}
-
-		instance.Disks, err = adjustInstanceFromTemplateDisks(d, config, &it, zone, project, true)
+		adjustedDisks, err := adjustInstanceFromTemplateDisks(d, config, it, z, project, true)
 		if err != nil {
 			return err
 		}
+		instance["disks"] = adjustedDisks
 	}
 
 	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
 	// However, we want the values to be read from the template instead.
 	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
-		instance.Scheduling = it.Properties.Scheduling
-	}
-
-	// Force send all top-level fields that have been set in case they're overridden to zero values.
-	// Initialize ForceSendFields to empty so we don't get things that the instance resource
-	// always force-sends.
-	instance.ForceSendFields = []string{}
-	for f, s := range computeInstanceFromTemplateSchema() {
-		// It seems that GetOkExists always returns true for sets.
-		// TODO: confirm this and file issue against Terraform core.
-		// In the meantime, don't force send sets.
-		if s.Type == schema.TypeSet {
-			continue
-		}
-
-		if _, exists := d.GetOkExists(f); exists {
-			// Assume for now that all fields are exact snake_case versions of the API fields.
-			// This won't necessarily always be true, but it serves as a good approximation and
-			// can be adjusted later as we discover issues.
-			instance.ForceSendFields = append(instance.ForceSendFields,  tpgresource.SnakeToPascalCase(f))
+		if props, ok := it["properties"].(map[string]interface{}); ok {
+			if sched, ok := props["scheduling"].(map[string]interface{}); ok {
+				instance["scheduling"] = sched
+			}
 		}
 	}
+
+	instanceName, _ := instance["name"].(string)
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := NewClient(config, userAgent).Instances.Insert(project, zone.Name, instance).SourceInstanceTemplate(relativeUrl).Do()
+	insertUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
+	if err != nil {
+		return err
+	}
+	insertUrl, err = transport_tpg.AddQueryParams(insertUrl, map[string]string{"sourceInstanceTemplate": relativeUrl})
+	if err != nil {
+		return err
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    insertUrl,
+		UserAgent: userAgent,
+		Body:      instance,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
 
 	// Store the ID now
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instance.Name))
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instanceName))
 
 	// Wait for the operation to complete
-	waitErr := ComputeOperationWaitTime(config, op, project,
+	err = ComputeOperationWaitTime(config, res, project,
 		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
-	if waitErr != nil {
+	if err != nil {
 		// The resource didn't actually create
 		d.SetId("")
-		return waitErr
+		return err
 	}
 
+	_ = zoneName // used above
 	return resourceComputeInstanceRead(d, meta)
 }
 
 // Instances have disks spread across multiple schema properties. This function
 // ensures that overriding one of these properties does not override the others.
-func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_tpg.Config, it *compute.InstanceTemplate, zone *compute.Zone, project string, isFromRegionalTemplate bool) ([]*compute.AttachedDisk, error) {
-	disks := []*compute.AttachedDisk{}
+func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_tpg.Config, it map[string]interface{}, zoneName string, project string, isFromRegionalTemplate bool) ([]interface{}, error) {
+	disks := []interface{}{}
 	re := regexp.MustCompile(`projects/[^/]+/regions/[^/]+/disks/[^/]+$`)
+
+	var templateDisks []interface{}
+	if props, ok := it["properties"].(map[string]interface{}); ok {
+		if d, ok := props["disks"].([]interface{}); ok {
+			templateDisks = d
+		}
+	}
+
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
 		bootDisk, err := expandBootDisk(d, config, project)
 		if err != nil {
@@ -241,26 +244,32 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 		disks = append(disks, bootDisk)
 	} else {
 		// boot disk was not overridden, so use the one from the instance template
-		for _, disk := range it.Properties.Disks {
-			if disk.Boot {
-				if disk.Source != "" && !isFromRegionalTemplate && !re.MatchString(disk.Source){
+		for _, diskRaw := range templateDisks {
+			disk := diskRaw.(map[string]interface{})
+			boot, _ := disk["boot"].(bool)
+			if boot {
+				source, _ := disk["source"].(string)
+				if source != "" && !isFromRegionalTemplate && !re.MatchString(source) {
 					// Instances need a URL for the disk, but instance templates only have the name
-					disk.Source = fmt.Sprintf("projects/%s/zones/%s/disks/%s", project, zone.Name, disk.Source)
+					disk["source"] = fmt.Sprintf("projects/%s/zones/%s/disks/%s", project, zoneName, source)
 				}
-				if disk.InitializeParams != nil {
-					if dt := disk.InitializeParams.DiskType; dt != "" {
+				if initParams, ok := disk["initializeParams"].(map[string]interface{}); ok {
+					if dt, ok := initParams["diskType"].(string); ok && dt != "" {
 						// Instances need a URL for the disk type, but instance templates
 						// only have the name (since they're global).
-						disk.InitializeParams.DiskType = fmt.Sprintf("zones/%s/diskTypes/%s", zone.Name, dt)
+						initParams["diskType"] = fmt.Sprintf("zones/%s/diskTypes/%s", zoneName, dt)
 					}
-					if rp := disk.InitializeParams.ResourcePolicies; len(rp) > 0 {
+					if rpRaw, ok := initParams["resourcePolicies"].([]interface{}); ok && len(rpRaw) > 0 {
 						// Instances need a URL for the resource policy, but instance templates
 						// only have the name (since they're global).
-						for i := range rp {
-							rp[i], _ = parseUniqueId(rp[i]) // in some cases the API translation doesn't work and returns entire url when only name is provided. And allows for id to be passed as well
-							rp[i] = fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, regionFromUrl(zone.Region), rp[i])
+						diskType, _ := initParams["diskType"].(string)
+						rp := make([]interface{}, len(rpRaw))
+						for i, v := range rpRaw {
+							name, _ := v.(string)
+							name, _ = parseUniqueId(name) // in some cases the API translation doesn't work and returns entire url when only name is provided. And allows for id to be passed as well
+							rp[i] = fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, regionFromUrl(diskType), name)
 						}
-						disk.InitializeParams.ResourcePolicies = rp
+						initParams["resourcePolicies"] = rp
 					}
 				}
 				disks = append(disks, disk)
@@ -277,13 +286,15 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 		disks = append(disks, scratchDisks...)
 	} else {
 		// scratch disks were not overridden, so use the ones from the instance template
-		for _, disk := range it.Properties.Disks {
-			if disk.Type == "SCRATCH" {
-				if disk.InitializeParams != nil {
-					if dt := disk.InitializeParams.DiskType; dt != "" {
+		for _, diskRaw := range templateDisks {
+			disk := diskRaw.(map[string]interface{})
+			diskType, _ := disk["type"].(string)
+			if diskType == "SCRATCH" {
+				if initParams, ok := disk["initializeParams"].(map[string]interface{}); ok {
+					if dt, ok := initParams["diskType"].(string); ok && dt != "" {
 						// Instances need a URL for the disk type, but instance templates
 						// only have the name (since they're global).
-						disk.InitializeParams.DiskType = fmt.Sprintf("zones/%s/diskTypes/%s", zone.Name, dt)
+						initParams["diskType"] = fmt.Sprintf("zones/%s/diskTypes/%s", zoneName, dt)
 					}
 				}
 				disks = append(disks, disk)
@@ -304,18 +315,22 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 		}
 	} else {
 		// attached disks were not overridden, so use the ones from the instance template
-		for _, disk := range it.Properties.Disks {
-			if !disk.Boot && disk.Type != "SCRATCH" {
-				if s := disk.Source; s != ""  && !isFromRegionalTemplate && !re.MatchString(disk.Source){
+		for _, diskRaw := range templateDisks {
+			disk := diskRaw.(map[string]interface{})
+			boot, _ := disk["boot"].(bool)
+			diskType, _ := disk["type"].(string)
+			if !boot && diskType != "SCRATCH" {
+				source, _ := disk["source"].(string)
+				if source != "" && !isFromRegionalTemplate && !re.MatchString(source) {
 					// Instances need a URL for the disk source, but instance templates
 					// only have the name (since they're global).
-					disk.Source = fmt.Sprintf("zones/%s/disks/%s", zone.Name, s)
+					disk["source"] = fmt.Sprintf("zones/%s/disks/%s", zoneName, source)
 				}
-				if disk.InitializeParams != nil {
-					if dt := disk.InitializeParams.DiskType; dt != "" {
+				if initParams, ok := disk["initializeParams"].(map[string]interface{}); ok {
+					if dt, ok := initParams["diskType"].(string); ok && dt != "" {
 						// Instances need a URL for the disk type, but instance templates
 						// only have the name (since they're global).
-						disk.InitializeParams.DiskType = fmt.Sprintf("zones/%s/diskTypes/%s", zone.Name, dt)
+						initParams["diskType"] = fmt.Sprintf("zones/%s/diskTypes/%s", zoneName, dt)
 					}
 				}
 				disks = append(disks, disk)
