@@ -3,18 +3,18 @@
 package gemini_test
 
 import (
-  "fmt"
-  "log"
-  "net/http"
-  "os"
-  "testing"
-  "time"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"testing"
+	"time"
 
-  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/services/gemini"
-  transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/gemini"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // BootstrapSharedCodeRepositoryIndex will create a code repository index
@@ -29,133 +29,133 @@ import (
 const SharedCodeRepositoryIndexPrefix = "tf-bootstrap-cri-"
 
 func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, location, kmsKey string, labels map[string]string) string {
-  codeRepositoryIndexId = SharedCodeRepositoryIndexPrefix + codeRepositoryIndexId
+	codeRepositoryIndexId = SharedCodeRepositoryIndexPrefix + codeRepositoryIndexId
 
-  config := transport_tpg.BootstrapConfig(t)
-  if config == nil {
-    t.Fatal("Could not bootstrap config.")
-  }
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
 
-  log.Printf("[DEBUG] Getting shared code repository index %q", codeRepositoryIndexId)
+	log.Printf("[DEBUG] Getting shared code repository index %q", codeRepositoryIndexId)
 
-  getURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes/%s", transport_tpg.BaseUrl(gemini.Product, config), config.Project, location, codeRepositoryIndexId)
+	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes/%s", transport_tpg.BaseUrl(gemini.Product, config), config.Project, location, codeRepositoryIndexId)
 
-  headers := make(http.Header)
-  _, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-    Config:    config,
-    Method:    "GET",
-    Project:   config.Project,
-    RawURL:    getURL,
-    UserAgent: config.UserAgent,
-    Timeout:   90 * time.Minute,
-    Headers:   headers,
-  })
+	headers := make(http.Header)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   90 * time.Minute,
+		Headers:   headers,
+	})
 
-  // CRI not found responds with 404 not found
-  if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-    log.Printf("[DEBUG] Code repository index %q not found, bootstrapping", codeRepositoryIndexId)
-    postURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes?codeRepositoryIndexId=%s", transport_tpg.BaseUrl(gemini.Product, config), config.Project, location, codeRepositoryIndexId)
-    obj := make(map[string]interface{})
-    if labels != nil {
-      obj["labels"] = labels
-    }
-    if kmsKey != "" {
-      obj["kmsKey"] = kmsKey
-    }
+	// CRI not found responds with 404 not found
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Code repository index %q not found, bootstrapping", codeRepositoryIndexId)
+		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes?codeRepositoryIndexId=%s", transport_tpg.BaseUrl(gemini.Product, config), config.Project, location, codeRepositoryIndexId)
+		obj := make(map[string]interface{})
+		if labels != nil {
+			obj["labels"] = labels
+		}
+		if kmsKey != "" {
+			obj["kmsKey"] = kmsKey
+		}
 
-    headers := make(http.Header)
-    _, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-      Config:    config,
-      Method:    "POST",
-      Project:   config.Project,
-      RawURL:    postURL,
-      UserAgent: config.UserAgent,
-      Body:      obj,
-      Timeout:   90 * time.Minute,
-      Headers:   headers,
-    })
-    if err != nil {
-      t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
-    }
+		headers := make(http.Header)
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      obj,
+			Timeout:   90 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
+		}
 
-    _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-      Config:    config,
-      Method:    "GET",
-      Project:   config.Project,
-      RawURL:    getURL,
-      UserAgent: config.UserAgent,
-      Timeout:   90 * time.Minute,
-      Headers:   headers,
-    })
-    if err != nil {
-      t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
-    }
-  } else if err != nil {
-    t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
-  }
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    getURL,
+			UserAgent: config.UserAgent,
+			Timeout:   90 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
+		}
+	} else if err != nil {
+		t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
+	}
 
-  return codeRepositoryIndexId
+	return codeRepositoryIndexId
 }
 
 func TestAccGeminiRepositoryGroup_update(t *testing.T) {
-  codeRepositoryIndexId := BootstrapSharedCodeRepositoryIndex(t, "basic", "us-central1", "", map[string]string{"ccfe_debug_note": "terraform_e2e_do_not_delete"})
-  context := map[string]interface{}{
-    "random_suffix":         acctest.RandString(t, 10),
-    "project_id":            os.Getenv("GOOGLE_PROJECT"),
-    "code_repository_index": codeRepositoryIndexId,
-  }
+	codeRepositoryIndexId := BootstrapSharedCodeRepositoryIndex(t, "basic", "us-central1", "", map[string]string{"ccfe_debug_note": "terraform_e2e_do_not_delete"})
+	context := map[string]interface{}{
+		"random_suffix":         acctest.RandString(t, 10),
+		"project_id":            os.Getenv("GOOGLE_PROJECT"),
+		"code_repository_index": codeRepositoryIndexId,
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccGeminiRepositoryGroup_basic(context),
-      },
-      {
-        ResourceName:            "google_gemini_repository_group.example",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"code_repository_index", "labels", "location", "repository_group_id", "terraform_labels"},
-      },
-      {
-        Config: testAccGeminiRepositoryGroup_update(context),
-      },
-      {
-        ResourceName:            "google_gemini_repository_group.example",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"code_repository_index", "labels", "location", "repository_group_id", "terraform_labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGeminiRepositoryGroup_basic(context),
+			},
+			{
+				ResourceName:            "google_gemini_repository_group.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"code_repository_index", "labels", "location", "repository_group_id", "terraform_labels"},
+			},
+			{
+				Config: testAccGeminiRepositoryGroup_update(context),
+			},
+			{
+				ResourceName:            "google_gemini_repository_group.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"code_repository_index", "labels", "location", "repository_group_id", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func TestAccGeminiRepositoryGroup_noBootstrap(t *testing.T) {
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-    "project_id":    os.Getenv("GOOGLE_PROJECT"),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    os.Getenv("GOOGLE_PROJECT"),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccGeminiRepositoryGroup_noBootstrap(context),
-      },
-      {
-        ResourceName:            "google_gemini_repository_group.example_e",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"code_repository_index", "labels", "location", "repository_group_id", "terraform_labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGeminiRepositoryGroup_noBootstrap(context),
+			},
+			{
+				ResourceName:            "google_gemini_repository_group.example_e",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"code_repository_index", "labels", "location", "repository_group_id", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func testAccGeminiRepositoryGroup_basic(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_gemini_repository_group" "example" {
   location = "us-central1"
   code_repository_index = "%{code_repository_index}"
@@ -192,7 +192,7 @@ resource "google_developer_connect_connection" "github_conn" {
 `, context)
 }
 func testAccGeminiRepositoryGroup_update(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_gemini_repository_group" "example" {
   location = "us-central1"
   code_repository_index = "%{code_repository_index}"
@@ -230,7 +230,7 @@ resource "google_developer_connect_connection" "github_conn" {
 }
 
 func testAccGeminiRepositoryGroup_noBootstrap(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_gemini_code_repository_index" "cri" {
   labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted"}
   location = "us-central1"
