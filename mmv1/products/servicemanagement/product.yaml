@@ -15,7 +15,6 @@
 name: 'ServiceManagement'
 legacy_name: 'endpoints'
 display_name: 'Cloud Endpoints'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://servicemanagement.googleapis.com/v1/'

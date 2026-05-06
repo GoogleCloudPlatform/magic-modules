@@ -14,7 +14,6 @@
 ---
 name: 'Monitoring'
 display_name: 'Cloud (Stackdriver) Monitoring'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://monitoring.googleapis.com/'

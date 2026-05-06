@@ -104,7 +104,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
         Create: resource{{ $.ResourceName -}}Create,
         Read: resource{{ $.ResourceName -}}Read,
-{{- if or (or $.Updatable $.RootLabels (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn)) $.VirtualFields }}
+{{- if or (or $.Updatable $.RootLabels (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude))) $.VirtualFields }}
         Update: resource{{ $.ResourceName -}}Update,
 {{- end}}
         Delete: resource{{ $.ResourceName -}}Delete,
@@ -162,7 +162,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
             tpgresource.DefaultProviderZone,
 {{- end }}
-{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
             tpgresource.DefaultProviderDeletionPolicy("{{$.DeletionPolicyDefault}}"),
 {{- end }}
         ),
@@ -236,7 +236,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 Computed: true,
             },
 {{- end}}
-{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
             "deletion_policy": {
                 Type:     schema.TypeString,
                 Optional: true,
@@ -800,7 +800,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return nil
     }
 {{ end}}
-{{- if or $.VirtualFields (and (not $.ExcludeDelete)  (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn) }}
+{{- if or $.VirtualFields (and (not $.ExcludeDelete)  (not $.DeletionPolicyExclude)) }}
 
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
@@ -812,7 +812,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 {{- end}}
 {{- end}}
-{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
     if _, ok := d.GetOkExists("deletion_policy"); !ok {
         //prioritize config's value if present
         if config.DeletionPolicy != ""{
@@ -887,7 +887,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{-     if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
+{{-     if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
     clientSideFields := map[string]bool{"deletion_policy": true}
     clientSideOnly := true
     for field := range Resource{{ $.ResourceName -}}().Schema {
@@ -1282,7 +1282,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{-      end }}{{/*if CustomUpdate*/}}
 }
-{{  else if or $.RootLabels $.VirtualFields (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn ) -}}{{/*if not immutable*/}}
+{{  else if or $.RootLabels $.VirtualFields (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)) -}}{{/*if not immutable*/}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
     // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
     return resource{{ $.ResourceName -}}Read(d, meta)
@@ -1298,7 +1298,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     return nil
 {{- else }}
-{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
     if d.Get("deletion_policy").(string) == "PREVENT" {
         return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
     }

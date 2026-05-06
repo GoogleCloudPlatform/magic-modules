@@ -14,7 +14,6 @@
 ---
 name: 'Bigtable'
 display_name: 'Cloud Bigtable'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://bigtableadmin.googleapis.com/v2/'

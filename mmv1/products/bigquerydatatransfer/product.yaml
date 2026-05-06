@@ -14,7 +14,6 @@
 ---
 name: 'BigqueryDataTransfer'
 display_name: 'BigQuery Data Transfer'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://bigquerydatatransfer.googleapis.com/v1/'

@@ -14,7 +14,6 @@
 ---
 name: 'Looker'
 display_name: 'Looker (Google Cloud core)'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://looker.googleapis.com/v1/'

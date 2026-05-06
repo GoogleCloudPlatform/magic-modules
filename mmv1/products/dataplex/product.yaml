@@ -14,7 +14,6 @@
 ---
 name: 'Dataplex'
 display_name: 'Dataplex'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://dataplex.googleapis.com/v1/'

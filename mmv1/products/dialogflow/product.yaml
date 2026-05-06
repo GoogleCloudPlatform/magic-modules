@@ -14,7 +14,6 @@
 ---
 name: 'Dialogflow'
 display_name: 'Dialogflow'
-deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://dialogflow.googleapis.com/v2beta1/'

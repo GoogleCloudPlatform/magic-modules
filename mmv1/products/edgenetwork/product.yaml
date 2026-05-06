@@ -14,7 +14,6 @@
 ---
 name: 'Edgenetwork'
 display_name: 'Distributed Cloud Edge Network'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://edgenetwork.googleapis.com/v1/'

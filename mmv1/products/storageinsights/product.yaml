@@ -14,7 +14,6 @@
 ---
 name: 'StorageInsights'
 display_name: 'Cloud Storage Insights'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://storageinsights.googleapis.com/v1/'

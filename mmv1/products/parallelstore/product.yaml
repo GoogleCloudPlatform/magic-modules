@@ -14,7 +14,6 @@
 ---
 name: 'Parallelstore'
 display_name: 'Parallelstore'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://parallelstore.googleapis.com/v1/'

@@ -14,7 +14,6 @@
 ---
 name: 'NetworkManagement'
 display_name: 'Network Management'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://networkmanagement.googleapis.com/v1/'

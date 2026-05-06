@@ -14,7 +14,6 @@
 ---
 name: 'DataLossPrevention'
 display_name: 'Data Loss Prevention'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://dlp.googleapis.com/v2/'

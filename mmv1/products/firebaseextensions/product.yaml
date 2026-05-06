@@ -14,7 +14,6 @@
 ---
 name: 'FirebaseExtensions'
 display_name: 'Firebase Extensions'
-deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://firebaseextensions.googleapis.com/v1beta/'

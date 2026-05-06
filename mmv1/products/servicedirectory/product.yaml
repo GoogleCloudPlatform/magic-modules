@@ -14,7 +14,6 @@
 ---
 name: 'ServiceDirectory'
 display_name: 'Service Directory'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://servicedirectory.googleapis.com/v1/'

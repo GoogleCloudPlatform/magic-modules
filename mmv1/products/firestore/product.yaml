@@ -14,7 +14,6 @@
 ---
 name: 'Firestore'
 display_name: 'Firestore'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://firestore.googleapis.com/v1/'

@@ -14,7 +14,6 @@
 ---
 name: 'Beyondcorp'
 display_name: 'BeyondCorp'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://beyondcorp.googleapis.com/v1/'

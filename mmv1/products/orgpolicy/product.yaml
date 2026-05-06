@@ -14,7 +14,6 @@
 ---
 name: 'OrgPolicy'
 display_name: 'Organization Policy'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://orgpolicy.googleapis.com/v2/'

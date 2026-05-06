@@ -14,7 +14,6 @@
 ---
 name: 'BinaryAuthorization'
 display_name: 'Binary Authorization'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://binaryauthorization.googleapis.com/v1/'

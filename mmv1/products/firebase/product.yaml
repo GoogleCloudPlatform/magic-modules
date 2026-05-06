@@ -14,7 +14,6 @@
 ---
 name: 'Firebase'
 display_name: 'Firebase'
-deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://firebase.googleapis.com/v1beta1/'

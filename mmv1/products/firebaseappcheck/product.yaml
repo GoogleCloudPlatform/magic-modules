@@ -14,7 +14,6 @@
 ---
 name: 'FirebaseAppCheck'
 display_name: 'Firebase App Check'
-deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://firebaseappcheck.googleapis.com/v1/'
