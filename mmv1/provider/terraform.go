@@ -279,7 +279,7 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	if object.Samples != nil && object.Examples != nil {
 		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
 	}
-	if object.Examples == nil || !t.hasEligibleExample(object) {
+	if object.Samples == nil || !t.hasEligibleSample(object) {
 		return
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))

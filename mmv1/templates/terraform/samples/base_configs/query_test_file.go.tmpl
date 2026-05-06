@@ -21,17 +21,18 @@ var (
 	_ = envvar.TestEnvVar
 )
 
-{{ $example := $.FirstTestExample }}
+{{ $sample := $.FirstTestConfig.Sample }}
+{{ $step := $.FirstTestConfig.Step }}
 func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	t.Parallel()
 
-	{{- if $example.SkipVcr }}
+	{{- if $sample.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}
 
-	{{- if $example.BootstrapIam }}
+	{{- if $sample.BootstrapIam }}
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
-	{{- range $iam := $example.BootstrapIam }}
+	{{- range $iam := $sample.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",
 			Role:   "{{$iam.Role}}",
@@ -42,8 +43,8 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 
 	randomSuffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-	{{- template "EnvVarContext" dict "TestEnvVars" $example.TestEnvVars "HasNewLine" false}}
-	{{- range $varKey, $varVal := $example.TestContextVars }}
+	{{- template "EnvVarContext" dict "TestEnvVars" $step.TestEnvVars "HasNewLine" false}}
+	{{- range $varKey, $varVal := $step.TestContextVars }}
 		"{{$varKey}}": {{$varVal}},
 	{{- end }}
 	{{- range $scope := $.ListScopeProperties }}
@@ -57,21 +58,19 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 		"random_suffix": randomSuffix,
 	}
 
-	// Captured at create-step time and asserted against list-query results.
 	var listDisplayName acctest.ListDisplayName
-
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-{{- if $.VersionedProvider $example.MinVersion }}
+{{- if $.VersionedProvider $sample.MinVersion }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 {{- else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-	{{- if $example.ExternalProviders }}
+	{{- if $sample.ExternalProviders }}
 		ExternalProviders: map[string]resource.ExternalProvider{
-		{{- range $provider := $example.ExternalProviders }}
+		{{- range $provider := $sample.ExternalProviders }}
 			"{{$provider}}": {},
 		{{- end }}
 		},
@@ -82,10 +81,10 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 {{- end }}
 		Steps: []resource.TestStep{
 			{
-				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}(context),
+				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}(context),
 				Check: resource.ComposeTestCheckFunc(
 					listDisplayName.Capture(
-						"{{ $example.ResourceType $.TerraformName }}.{{ $example.PrimaryResourceId }}",
+						"{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
 						[]string{
 						{{- range $key := $.ListResultDisplayNameKeyStrings }}
 							"{{ $key }}",
@@ -96,11 +95,11 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
+				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLengthAtLeast("{{ $example.ResourceType $.TerraformName }}.list_query", 1),
+					querycheck.ExpectLengthAtLeast("{{ $sample.ResourceType $.TerraformName }}.list_query", 1),
 					querycheck.ExpectResourceDisplayName(
-						"{{ $example.ResourceType $.TerraformName }}.list_query",
+						"{{ $sample.ResourceType $.TerraformName }}.list_query",
 						queryfilter.ByDisplayName(listDisplayName.CheckValue()),
 						listDisplayName.CheckValue(),
 					),
@@ -110,10 +109,10 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	})
 }
 
-func testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}ListQuery(context map[string]interface{}) string {
+func testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-list "{{ $example.ResourceType $.TerraformName }}" "list_query" {
-    provider = {{ if $.VersionedProvider $example.MinVersion }}google-beta{{ else }}google{{ end }}
+list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
+    provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
     config {
 {{- range $scope := $.ListScopeProperties }}
         {{ underscore $scope.Name }} = "%{{"{"}}{{ underscore $scope.Name }}{{"}"}}"
