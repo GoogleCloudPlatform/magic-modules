@@ -18,7 +18,7 @@ if err != nil {
 } else if v, ok := d.GetOkExists("ttl"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, ttlProp)) {
     obj["ttl"] = ttlProp
 }
-if d.HasChange("ingest_on_write") {
+if d.HasChange("ingest_on_write") { // use haschange
     v := d.Get("ingest_on_write")
     ingestOnWriteProp, err := expandStorageAnywhereCacheIngestOnWrite(v, d, config)
     if err != nil {
