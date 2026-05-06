@@ -122,3 +122,4 @@ The following should be added to a resource's documentation markdown file, or mo
     When set to "DELETE", deleting the resource is allowed.
 ```
 {{< /tab >}}
+{{% /tabs %}}
