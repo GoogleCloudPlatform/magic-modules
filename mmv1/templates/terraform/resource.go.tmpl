@@ -1023,6 +1023,9 @@ if len(updateMask) > 0 {
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutUpdate),
 		Headers:   headers,
+{{- if $.HasSupportsRequestId }}
+        SendRequestId: {{ $.HasSupportsRequestId }},
+{{- end }}
 {{-              if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{-             end}}
@@ -1208,6 +1211,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
             UserAgent: userAgent,
             Body: obj,
             Timeout: d.Timeout(schema.TimeoutUpdate),
+{{- if $.HasSupportsRequestId }}
+            SendRequestId: {{ $.HasSupportsRequestId }},
+{{- end }}
 {{-                  if $.ErrorRetryPredicates -}}
         	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{-                 end}}
