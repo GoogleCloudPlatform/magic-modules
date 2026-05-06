@@ -253,6 +253,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 	resourceConverters := map[string]string{
 		// common
+		"pkg/envvar/envvar_utils.go":              "third_party/terraform/envvar/envvar_utils.go",
 		"pkg/transport/base_url.go":               "third_party/terraform/transport/base_url.go",
 		"pkg/transport/batcher.go":                "third_party/terraform/transport/batcher.go",
 		"pkg/transport/error_retry_predicates.go": "third_party/terraform/transport/error_retry_predicates.go",
