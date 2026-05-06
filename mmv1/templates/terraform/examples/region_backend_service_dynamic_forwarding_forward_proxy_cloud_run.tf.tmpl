@@ -1,0 +1,13 @@
+resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "region_backend_service_name"}}"
+  region                = "us-central1"
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+  protocol = "HTTP2"
+  dynamic_forwarding {
+    forward_proxy {
+      enabled = true
+      proxy_mode = "CLOUD_RUN"
+    }
+  }
+}

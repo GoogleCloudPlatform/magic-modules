@@ -1,0 +1,17 @@
+// If password_wo_version changed, the user wants to update the password.
+// Write-only fields aren't in state, so d.HasChange("password_wo") is always
+// false and the value is never added to obj by the generated code. Handle
+// both the update mask and the request body here.
+if d.HasChange("password_wo_version") {
+	if pw := tpgresource.GetRawConfigAttributeAsString(d, "password_wo"); pw != "" {
+		obj["password"] = pw
+	}
+	updateMask = append(updateMask, "password")
+
+	// Rebuild the updateMask query parameter.
+	url = strings.Split(url, "?updateMask=")[0]
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	if err != nil {
+		return err
+	}
+}

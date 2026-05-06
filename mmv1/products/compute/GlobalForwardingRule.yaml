@@ -17,6 +17,7 @@ api_resource_type_kind: ForwardingRule
 api_variant_patterns:
   - 'projects/{project}/global/forwardingRules/{forwardingRule}'
 kind: 'compute#forwardingRule'
+cai_resource_kind: 'GlobalForwardingRule'
 description: |
   Represents a GlobalForwardingRule resource. Global forwarding rules are
   used to forward traffic to the correct load balancer for HTTP load
@@ -42,6 +43,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
@@ -109,6 +111,9 @@ examples:
       forwarding_rule_name: 'global-rule'
       http_proxy_name: 'target-proxy'
       backend_service_name: 'backend'
+    test_vars_overrides:
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
     ignore_read_extra:
       - 'port_range'
       - 'target'
@@ -120,6 +125,9 @@ examples:
       http_proxy_name: 'target-proxy'
       backend_service_name: 'backend'
       igm_name: 'igm-internal'
+    test_vars_overrides:
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
     ignore_read_extra:
       - 'port_range'
       - 'target'
@@ -129,6 +137,9 @@ examples:
       forwarding_rule_name: 'global-rule'
       http_proxy_name: 'target-proxy'
       backend_service_name: 'backend'
+    test_vars_overrides:
+      # for backward compatible
+      backend_service_name: '"backend" + randomSuffix'
     ignore_read_extra:
       - 'port_range'
       - 'target'
@@ -142,7 +153,7 @@ examples:
       subnetwork_name: 'my-subnetwork'
       default_backend_service_name: 'backend-default'
       hybrid_backend_service_name: 'backend-hybrid'
-      internal_backend_service_name": 'backend-internal'
+      internal_backend_service_name: 'backend-internal'
       default_neg_name: 'default-neg'
       hybrid_neg_name: 'hybrid-neg'
       internal_neg_name: 'internal-neg'
@@ -178,6 +189,9 @@ examples:
       subnetwork_name: 'my-subnetwork'
       global_address_name: 'global-psconnect-ip'
       forwarding_rule_name: 'globalrule'
+    test_vars_overrides:
+      # for backward compatible
+      forwarding_rule_name: '"globalrule" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
     ignore_read_extra:
@@ -190,6 +204,9 @@ examples:
       subnetwork_name: 'my-subnetwork'
       global_address_name: 'global-psconnect-ip'
       forwarding_rule_name: 'globalrule'
+    test_vars_overrides:
+      # for backward compatible
+      forwarding_rule_name: '"globalrule" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
     ignore_read_extra:
@@ -499,6 +516,7 @@ properties:
       networkTier of the Address.
     immutable: true
     default_from_api: true
+    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/global_forwarding_rule_network_tier.go.tmpl'
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'

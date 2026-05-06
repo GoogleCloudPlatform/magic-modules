@@ -24,6 +24,7 @@ import (
 	"strings"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 
 {{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
      set of imports, which will never guess the major version correctly. */ -}}
@@ -68,6 +69,7 @@ var (
     _ = transport_tpg.Config{}
     _ = verify.ProjectRegex
     _ = googleapi.Error{}
+    _ = json.Unmarshal
 )
 
 type {{ $.ResourceName -}}Cai2hclConverter struct {
@@ -131,7 +133,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 {{ end}}
 
-{{ if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) -}}
+{{ if and $.CustomCode.Decoder (not $.CustomCode.TGCIgnoreTerraformDecoder) -}}
 	res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
 	if err != nil {
 		return nil, err
@@ -178,7 +180,7 @@ func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interf
 }
 {{- end }}
 
-{{- if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) }}
+{{- if and $.CustomCode.Decoder (not $.CustomCode.TGCIgnoreTerraformDecoder) }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
 	{{ customTemplate $ $.CustomCode.Decoder false -}}
 }

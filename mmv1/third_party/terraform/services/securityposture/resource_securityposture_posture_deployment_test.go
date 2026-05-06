@@ -63,6 +63,14 @@ resource "google_securityposture_posture" "posture_one" {
                     policy_rules {
                         enforce = true
                     }
+                    policy_rules {
+                        enforce = false
+                        condition {
+                            title = "Disable constraint for test"
+                            description = "Disable constraint for test"
+                            expression = "resource.matchTagId('tagKeys/123', 'tagValues/345')"
+                        }
+                    }
                 }
             }
         }
@@ -106,6 +114,14 @@ resource "google_securityposture_posture" "posture_one" {
                     canned_constraint_id = "storage.publicAccessPrevention"
                     policy_rules {
                         enforce = true
+                    }
+                    policy_rules {
+                        enforce = false
+                        condition {
+                            title = "Disable constraint for test"
+                            description = "Disable constraint for test"
+                            expression = "resource.matchTagId('tagKeys/123', 'tagValues/345')"
+                        }
                     }
                 }
             }

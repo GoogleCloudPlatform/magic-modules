@@ -10,53 +10,53 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 name: Deployment
 description: Description
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments
+update_mask: true
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments/{{name}}
-examples:
-  - name: "ces_deployment_basic"
-    primary_resource_id: "my-deployment"
-    vars:
-      deployment_display_name: 'my-deployment'
-      app_display_name: 'my-app'
-      app_id: 'app-id'
 autogen_status: RGVwbG95bWVudA==
+examples:
+  - name: ces_deployment_basic
+    primary_resource_id: my-deployment
+    vars:
+      app_display_name: my-app
+      app_id: app-id
+      deployment_display_name: my-deployment
 parameters:
   - name: location
     type: String
+    required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: app
     type: String
+    required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
 properties:
   - name: appVersion
     type: String
+    required: true
     description: |-
       The resource name of the app version to deploy.
       Format:
       projects/{project}/locations/{location}/apps/{app}/versions/{version}
-    required: true
     ignore_read: true
   - name: channelProfile
     type: NestedObject
+    required: true
     description: |-
       A ChannelProfile configures the agent's behavior for a specific communication
       channel, such as web UI or telephony.
-    required: true
     properties:
       - name: channelType
         type: String
@@ -124,8 +124,8 @@ properties:
     output: true
   - name: displayName
     type: String
-    description: Display name of the deployment.
     required: true
+    description: Display name of the deployment.
   - name: etag
     type: String
     description: |-
@@ -140,7 +140,7 @@ properties:
       Format:
       projects/{project}/locations/{location}/apps/{app}/deployments/{deployment}
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: updateTime
     type: String
     description: Timestamp when this deployment was last updated.

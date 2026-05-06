@@ -1,0 +1,12 @@
+// The standard Read has already fetched the PromptTemplate and stored it in the 'res' map.
+// We just need to check the 'locked' field to see if our virtual "Lock Resource" still exists.
+locked, ok := res["locked"].(bool)
+if !ok || !locked {
+	log.Printf("[DEBUG] PromptTemplate %q is NOT locked, removing lock resource from state", d.Get("template_id"))
+	d.SetId("")
+	return nil
+}
+
+// Note: The standard Read logic will automatically handle d.Set("locked", ...) 
+// and d.Set("name", ...) after this block because those fields are defined 
+// as output properties in the YAML and match the keys in 'res'.

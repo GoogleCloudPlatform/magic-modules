@@ -52,6 +52,11 @@ examples:
       service_id: 'default'
       split.allocations.v1: '1'
       bucket_name: 'appengine-static-content'
+    test_vars_overrides:
+      # for backward compatible
+      service_id: '"default" + randomSuffix'
+      # for backward compatible
+      split.allocations.v1: '"1" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:

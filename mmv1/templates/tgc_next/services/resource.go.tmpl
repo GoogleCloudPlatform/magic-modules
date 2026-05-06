@@ -19,6 +19,7 @@ package {{ lower $.ProductMetadata.Name }}
 import (
   "bytes"
   "context"
+  "encoding/json"
   "fmt"
   "log"
   "reflect"
@@ -26,12 +27,14 @@ import (
   "sort"
   "strconv"
   "strings"
+  "time"
 
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 
 
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
   transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
@@ -46,12 +49,14 @@ var (
     _ = bytes.Clone
     _ = context.WithCancel
     _ = fmt.Sprintf
+    _ = json.Unmarshal
     _ = log.Print
     _ = reflect.ValueOf
     _ = regexp.Match
     _ = sort.IntSlice{}
     _ = strconv.Atoi
     _ = strings.Trim
+    _ = time.Now
     _ = schema.Noop
     _ = structure.NormalizeJsonString
     _ = validation.All
@@ -60,6 +65,15 @@ var (
     _ = transport_tpg.Config{}
     _ = verify.ProjectRegex
 )
+
+func init() {
+    registry.Schema{
+        Name: "{{ $.TerraformName }}",
+        ProductName: "{{ lower $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeResource,
+        Schema: Resource{{ $.ResourceName -}}(),
+    }.Register()
+}
 
 {{ if $.DefineAssetTypeForResourceInProduct -}}
 const {{ $.CaiResourceType -}}AssetType string = "{{ $.CaiAssetType }}"

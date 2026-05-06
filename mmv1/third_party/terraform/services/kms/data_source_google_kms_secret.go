@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -61,7 +62,7 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 		kmsDecryptRequest.AdditionalAuthenticatedData = aad.(string)
 	}
 
-	decryptResponse, err := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId.CryptoKeyId(), kmsDecryptRequest).Do()
+	decryptResponse, err := NewClient(config, userAgent).Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId.CryptoKeyId(), kmsDecryptRequest).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error decrypting ciphertext: %s", err)
@@ -81,4 +82,13 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 	d.SetId(fmt.Sprintf("%s:%s", d.Get("crypto_key").(string), ciphertext))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_kms_secret",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsSecret(),
+	}.Register()
 }

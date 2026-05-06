@@ -55,6 +55,7 @@ virtual_fields:
     default_value: false
 parameters:
   - name: 'bucket'
+    type: String
     resource: 'Bucket'
     imports: 'name'
     description: 'The name of the bucket that contains the folder.'
@@ -62,6 +63,7 @@ parameters:
     immutable: true
     url_param_only: true
   - name: 'name'
+    type: String
     description: |
       The name of the folder expressed as a path. Must include
       trailing '/'. For example, `example_dir/example_dir2/`, `example@#/`, `a-b/d-f/`.

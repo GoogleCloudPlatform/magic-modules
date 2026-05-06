@@ -1,0 +1,67 @@
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = "organizations/{{index $.Vars "org_id"}}"
+  short_name = "{{index $.Vars "key_short_name"}}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "{{index $.Vars "value_short_name"}}"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "{{index $.Vars "workstation_cluster_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.Vars "workstation_cluster_name"}}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+resource "google_compute_disk" "my_source_disk" {
+  name  = "{{index $.Vars "workstation_config_name"}}-source-disk"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "my_source_snapshot" {
+  name        = "{{index $.Vars "workstation_config_name"}}-source-snapshot"
+  source_disk = google_compute_disk.my_source_disk.name
+  zone        = "us-central1-a"
+}
+
+resource "google_workstations_workstation_cluster" "default" {
+  workstation_cluster_id = "{{index $.Vars "workstation_cluster_name"}}"
+  network                = google_compute_network.default.id
+  subnetwork             = google_compute_subnetwork.default.id
+  location               = "us-central1"
+}
+
+resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
+  workstation_config_id  = "{{index $.Vars "workstation_config_name"}}"
+  workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+  location               = "us-central1"
+
+  host {
+      gce_instance {
+        machine_type                = "c3-standard-22"
+        boot_disk_size_gb           = 35
+        disable_public_ip_addresses = true
+        vm_tags = {
+          (google_tags_tag_key.tag_key1.id) = google_tags_tag_value.tag_value1.id
+        }
+      }
+    }
+
+  persistent_directories {
+    mount_path = "/home"
+    gce_hd {
+      source_snapshot = google_compute_snapshot.my_source_snapshot.id
+      reclaim_policy  = "DELETE"
+      archive_timeout = "3600s"
+    }
+  }
+}

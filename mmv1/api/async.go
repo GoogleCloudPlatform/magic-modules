@@ -14,7 +14,6 @@
 package api
 
 import (
-	"log"
 	"reflect"
 	"strings"
 
@@ -49,7 +48,7 @@ func (a Async) IsA(asyncType string) bool {
 // The main implementation of Operation,
 // corresponding to common GCP Operation resources.
 type Operation struct {
-	Timeouts         *Timeouts
+	Timeouts         *Timeouts `yaml:"timeouts,omitempty"`
 	OpAsyncOperation `yaml:",inline"`
 }
 
@@ -80,9 +79,6 @@ type OpAsync struct {
 
 type OpAsyncOperation struct {
 	BaseUrl string `yaml:"base_url,omitempty"`
-
-	// Use this if the resource includes the full operation url.
-	FullUrl string `yaml:"full_url,omitempty"`
 }
 
 // Represents the results of an Operation request
@@ -160,16 +156,4 @@ func (a *Async) MarshalYAML() (interface{}, error) {
 	}
 
 	return (*asyncAlias)(clonePtr), nil
-}
-
-func (a *Async) Validate() {
-	if a.Type == "OpAsync" {
-		if a.Operation == nil {
-			log.Fatalf("Missing `Operation` for OpAsync")
-		} else {
-			if a.Operation.BaseUrl != "" && a.Operation.FullUrl != "" {
-				log.Fatalf("`base_url` and `full_url` cannot be set at the same time in OpAsync operation.")
-			}
-		}
-	}
 }

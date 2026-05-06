@@ -9,8 +9,10 @@ description: |-
 Creates a new Google SQL User on a Google SQL User Instance. For more information, see the [official documentation](https://cloud.google.com/sql/), or the [JSON API](https://cloud.google.com/sql/docs/admin-api/v1beta4/users).
 
 ~> **Note:** All arguments including the username and password will be stored in the raw state as plain-text.
-[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data). Passwords will not be retrieved when running
+[Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data). Passwords will not be retrieved when running
 "terraform import".
+
+-> **Note:** Write-Only argument `password_wo` is available to use in place of `password`. Write-Only arguments are supported in HashiCorp Terraform 1.11.0 and later. [Learn more](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments).
 
 ## Example Usage
 
@@ -35,6 +37,32 @@ resource "google_sql_user" "users" {
   instance = google_sql_database_instance.main.name
   host     = "me.com"
   password = "changeme"
+}
+```
+
+Example creating a SQL User with database roles(applicable for Postgres/MySQL
+only).
+
+```hcl
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
+
+resource "google_sql_database_instance" "main" {
+  name             = "main-instance-${random_id.db_name_suffix.hex}"
+  database_version = "POSTGRES_15"
+
+  settings {
+    tier = "db-f1-micro"
+  }
+}
+
+resource "google_sql_user" "users" {
+  name     = "me"
+  instance = google_sql_database_instance.main.name
+  host     = "me.com"
+  password = "changeme"
+  database_roles = ["cloudsqlsuperuser"]
 }
 ```
 
@@ -117,6 +145,15 @@ The following arguments are supported:
     or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
     and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
 
+* `password_wo` - (Optional, write-only) The password for the user. Can be updated. For Postgres
+    instances this is a Required field, unless type is set to either CLOUD_IAM_USER
+    or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
+    and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
+
+* ~> **Note:** One of `value` or `value_wo` can only be set.
+
+* `password_wo_version` - (Optional) An integer value used to trigger an update for `password_wo`. This property should be incremented when updating `password_wo`. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes).
+
 * `type` - (Optional) The user type. It determines the method to authenticate the
     user during login. The default is the database's built-in user type. Flags
     include "BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", "CLOUD_IAM_GROUP",
@@ -130,8 +167,6 @@ The following arguments are supported:
 
     Possible values are: `ABANDON`.
 
-* `password_wo_version` - (Optional) The version of the password_wo. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes).
-
 - - -
 
 * `host` - (Optional) The host the user can connect from. This is only supported
@@ -140,6 +175,17 @@ The following arguments are supported:
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
+
+* `iam_email` - (read only) IAM email address for MySQL IAM database users.
+
+* `database_roles` - (Optional) A list of database roles to be assigned to the user.
+    This option is only available for MySQL 8+ and PostgreSQL instances. You
+    can include predefined Cloud SQL roles, like cloudsqlsuperuser, or your
+    own custom roles. Custom roles must be created in the database before
+    you can assign them. You can create roles using the CREATE ROLE
+    statement for both MySQL and PostgreSQL.
+  **Note**: This property is write-only and will not be read from the API.
+  **Caution**: Existing database roles will be overwriten with new values from this field.
 
 The optional `password_policy` block is only supported for creating MySQL and Postgres users. The `password_policy` block supports:
 
@@ -156,16 +202,6 @@ The read only `password_policy.status` subblock supports:
 * `locked` - (read only) If true, user does not have login privileges.
 
 * `password_expiration_time` - (read only) Password expiration duration with one week grace period.
-
-## Ephemeral Attributes Reference
-
-The following write-only attributes are supported:
-
-* `password_wo` - (Optional) The password for the user. Can be updated. For Postgres
-    instances this is a Required field, unless type is set to either CLOUD_IAM_USER
-    or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
-    and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
-  **Note**: This property is write-only and will not be read from the API.
 
 ## Attributes Reference
 

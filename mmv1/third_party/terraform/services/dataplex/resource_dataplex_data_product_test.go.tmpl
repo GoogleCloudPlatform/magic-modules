@@ -1,0 +1,90 @@
+package dataplex_test
+
+{{- if ne $.TargetVersionName "ga" }}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccDataplexDataProduct_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"data_product_id": "tf-test-dp-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// STEP 1: Initial Creation
+				Config: testAccDataplexDataProduct_basic(context),
+			},
+			{
+				ResourceName:      "google_dataplex_data_product.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"labels",
+					"terraform_labels",
+					"effective_labels",
+				},
+			},
+			{
+				// STEP 2: Update fields in-place
+				Config: testAccDataplexDataProduct_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataplex_data_product.example", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_dataplex_data_product.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"labels",
+					"terraform_labels",
+					"effective_labels",
+				},
+			},
+		},
+	})
+}
+
+func testAccDataplexDataProduct_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_data_product" "example" {
+  location        = "us-central1"
+  data_product_id = "%{data_product_id}"
+  display_name    = "initial display name"
+  owner_emails    = ["terraform-test@google.com"]
+
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccDataplexDataProduct_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_data_product" "example" {
+  location        = "us-central1"
+  data_product_id = "%{data_product_id}"
+  display_name    = "updated display name"
+  description     = "updated description"
+  owner_emails    = ["updated-owner@google.com"]
+
+  labels = {
+    env = "test"
+  }
+
+  provider = google-beta
+}
+`, context)
+}
+{{- end }}

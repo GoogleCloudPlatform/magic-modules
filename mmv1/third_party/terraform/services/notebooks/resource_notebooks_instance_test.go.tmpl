@@ -1,0 +1,319 @@
+package notebooks_test
+
+import (
+	"fmt"
+	"strconv"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccNotebooksInstance_create_vm_image(t *testing.T) {
+	t.Parallel()
+
+	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-%s", prefix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNotebooksInstance_create_vm_image(name),
+			},
+			{
+				ResourceName:            "google_notebooks_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"vm_image", "metadata", "update_time"},
+			},
+		},
+	})
+}
+
+func TestAccNotebooksInstance_update(t *testing.T) {
+	t.Skip()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNotebooksInstance_basic(context),
+			},
+			{
+				ResourceName:            "google_notebooks_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"vm_image", "metadata", "update_time", "proxy_uri", "state"},
+			},
+			{
+				Config: testAccNotebooksInstance_update(context, true),
+			},
+			{
+				ResourceName:            "google_notebooks_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"vm_image", "metadata", "labels", "terraform_labels", "update_time", "proxy_uri", "state"},
+			},
+			{
+				Config: testAccNotebooksInstance_update(context, false),
+			},
+			{
+				ResourceName:            "google_notebooks_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"vm_image", "metadata", "labels", "terraform_labels", "update_time", "proxy_uri", "state"},
+			},
+		},
+	})
+}
+
+func testAccNotebooksInstance_create_vm_image(name string) string {
+	return fmt.Sprintf(`
+
+resource "google_notebooks_instance" "test" {
+  name = "%s"
+  location = "us-west1-a"
+  machine_type = "e2-medium"
+  metadata = {
+    proxy-mode = "service_account"
+    terraform  = "true"
+  }
+
+  nic_type = "VIRTIO_NET"
+
+  reservation_affinity {
+    consume_reservation_type = "NO_RESERVATION"
+  }
+
+  vm_image {
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
+  }
+}
+`, name)
+}
+
+func testAccNotebooksInstance_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_notebooks_instance" "instance" {
+  name = "tf-test-notebooks-instance%{random_suffix}"
+  location = "us-central1-a"
+  machine_type = "e2-medium"
+
+  vm_image {
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
+  }
+
+  metadata = {
+    proxy-mode = "service_account"
+    terraform  = "true"
+  }
+
+  lifecycle {
+  	prevent_destroy = true
+  }
+}
+`, context)
+}
+
+func testAccNotebooksInstance_update(context map[string]interface{}, preventDestroy bool) string {
+	context["prevent_destroy"] = strconv.FormatBool(preventDestroy)
+
+	return acctest.Nprintf(`
+resource "google_notebooks_instance" "instance" {
+  name = "tf-test-notebooks-instance%{random_suffix}"
+  location = "us-central1-a"
+  machine_type = "e2-medium"
+
+  vm_image {
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
+  }
+
+  metadata = {
+    proxy-mode = "service_account"
+    terraform  = "true"
+    notebook-upgrade-schedule = "0 * * * *"
+  }
+
+  labels = {
+    key = "value"
+  }
+
+  lifecycle {
+  	prevent_destroy = %{prevent_destroy}
+  }
+}
+`, context)
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+
+func TestAccNotebooksInstance_create_gpu(t *testing.T) {
+	t.Parallel()
+
+	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-%s", prefix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNotebooksInstance_create_gpu(name),
+			},
+			{
+				ResourceName:      "google_notebooks_instance.test",
+				ImportState:        true,
+				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image", "update_time"},
+			},
+		},
+	})
+}
+
+func testAccNotebooksInstance_create_gpu(name string) string {
+	return fmt.Sprintf(`
+
+resource "google_notebooks_instance" "test" {
+  name = "%s"
+  location = "us-west1-a"
+  machine_type = "n1-standard-1"  // can't be e2 because of accelerator
+  metadata = {
+    proxy-mode = "service_account"
+    terraform  = "true"
+  }
+  vm_image {
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
+  }
+  install_gpu_driver = true
+  accelerator_config {
+    type         = "NVIDIA_TESLA_T4"
+    core_count   = 1
+  }
+}
+`, name)
+}
+
+func TestAccNotebooksInstance_state(t *testing.T) {
+	t.Parallel()
+
+	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-%s", prefix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNotebooksInstance_basic_active(name),
+			},
+			{
+				ResourceName:      "google_notebooks_instance.test",
+				ImportState:        true,
+				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state", "update_time"},
+			},
+      {
+				Config: testAccNotebooksInstance_basic_stopped(name),
+			},
+			{
+				ResourceName:      "google_notebooks_instance.test",
+				ImportState:        true,
+				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state", "update_time"},
+			},
+      {
+				Config: testAccNotebooksInstance_basic_active(name),
+			},
+			{
+				ResourceName:      "google_notebooks_instance.test",
+				ImportState:        true,
+				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state", "update_time"},
+			},
+		},
+	})
+}
+
+func testAccNotebooksInstance_basic_active(name string) string {
+	return fmt.Sprintf(`
+resource "google_notebooks_instance" "test" {
+  name = "%s"
+  location = "us-west1-a"
+  machine_type = "e2-medium"
+  vm_image {
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
+  }
+  desired_state = "ACTIVE"
+}
+`, name)
+}
+
+func testAccNotebooksInstance_basic_stopped(name string) string {
+	return fmt.Sprintf(`
+resource "google_notebooks_instance" "test" {
+  name = "%s"
+  location = "us-west1-a"
+  machine_type = "e2-medium"
+  vm_image {
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
+  }
+  desired_state = "STOPPED"
+}
+`, name)
+}
+
+func TestAccNotebooksInstance_create_container(t *testing.T) {
+	t.Parallel()
+
+	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-%s", prefix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNotebooksInstance_create_container(name),
+			},
+			{
+				ResourceName:      "google_notebooks_instance.test",
+				ImportState:        true,
+				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image", "update_time"},
+			},
+		},
+	})
+}
+
+func testAccNotebooksInstance_create_container(name string) string {
+	return fmt.Sprintf(`
+
+resource "google_notebooks_instance" "test" {
+  name = "%s"
+  location = "us-west1-a"
+  machine_type = "e2-medium"
+  metadata = {
+    proxy-mode = "service_account"
+    terraform  = "true"
+  }
+  container_image {
+    repository = "gcr.io/deeplearning-platform-release/base-cpu"
+    tag = "latest"
+  }
+}
+`, name)
+}
+{{- end }}

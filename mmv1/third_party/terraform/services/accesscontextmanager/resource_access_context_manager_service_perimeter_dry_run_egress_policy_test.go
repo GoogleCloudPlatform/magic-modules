@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/accesscontextmanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -52,7 +53,7 @@ func testAccCheckAccessContextManagerServicePerimeterDryRunEgressPolicyDestroyPr
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(accesscontextmanager.Product, config)+"{{perimeter}}")
 			if err != nil {
 				return err
 			}
@@ -137,7 +138,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 		resources = ["*"]
 		roles = ["roles/bigquery.admin"]
 	}
-  	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access1]
+	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access1]
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-access3" {
@@ -148,6 +149,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 		}
 		source_restriction = "SOURCE_RESTRICTION_ENABLED"
 	}
+	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access2]
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-identity1" {
@@ -163,6 +165,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 			}
 		}
 	}
+	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access3]
 }
 
 `, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber, strings.ToUpper(serviceAccount))

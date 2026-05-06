@@ -34,7 +34,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'certificate_manager_certificate_map_entry_full'
     primary_resource_id: 'default'
@@ -44,6 +44,11 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_map_entry_name: 'cert-map-entry'
+    test_vars_overrides:
+      # for backward compatible
+      dns_auth_subdomain: '"subdomain" + randomSuffix'
+      # for backward compatible
+      dns_auth_subdomain2: '"subdomain2" + randomSuffix'
 parameters:
   - name: 'name'
     type: String

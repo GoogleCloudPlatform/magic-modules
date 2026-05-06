@@ -1,5 +1,5 @@
 # Stage 1: Download go module cache for builds
-FROM golang:1.25-trixie AS builder
+FROM golang:1.26-trixie AS builder
 ENV GOCACHE=/go/cache
 
 RUN apt-get update && apt-get install -y unzip
@@ -12,7 +12,7 @@ WORKDIR /app1/magic-modules-main/.ci/magician
 RUN go build -o /dev/null .
 
 # Stage 2: Creating the final image
-FROM golang:1.25-trixie
+FROM golang:1.26-trixie
 SHELL ["/bin/bash", "-c"]
 ENV GOCACHE=/go/cache
 
@@ -29,7 +29,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget https://releases.hashicorp.com/terraform/1.11.0/terraform_1.11.0_linux_amd64.zip \
-    && unzip terraform_1.11.0_linux_amd64.zip \
-    && rm terraform_1.11.0_linux_amd64.zip \
+RUN wget https://releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_linux_amd64.zip \
+    && unzip terraform_1.14.3_linux_amd64.zip \
+    && rm terraform_1.14.3_linux_amd64.zip \
     && mv ./terraform /bin/terraform

@@ -1,0 +1,109 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AutoLabelingRule
+description: |
+  The CCAI Insights project wide auto labeling rule. This rule will be applied
+  to all conversations that match the filter defined in the rule.
+references:
+  guides:
+    'Configure auto labeling rules using the API': 'https://cloud.google.com/contact-center/insights/docs/auto-labeling-rule'
+  api: 'https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.autoLabelingRules'
+base_url: projects/{{project}}/locations/{{location}}/autoLabelingRules
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/autoLabelingRules/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/autoLabelingRules?autoLabelingRuleId={{auto_labeling_rule_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/autoLabelingRules/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/autoLabelingRules/{{name}}
+examples:
+  - name: 'contact_center_insights_auto_labeling_rule_basic'
+    primary_resource_id: 'auto_labeling_rule_basic'
+    vars:
+      resource_name: 'autolabelingrulebasic'
+    test_vars_overrides:
+      'id_suffix': 'strings.ToLower(acctest.RandString(t, 10))'
+      # for backward compatible
+      resource_name: '"autolabelingrulebasic" + randomSuffix'
+autogen_status: QXV0b0xhYmVsaW5nUnVsZQ==
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Location of the resource.
+    immutable: true
+    url_param_only: true
+  - name: autoLabelingRuleId
+    type: String
+    description: |-
+      A unique ID for the new AutoLabelingRule. This ID will become the final
+      component of the AutoLabelingRule's resource name. If no ID is specified,
+      a server-generated ID will be used.
+
+      This value should be 4-64 characters and must match the regular
+      expression `^[A-Za-z0-9]{4,64}$`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: active
+    type: Boolean
+    description: |-
+      Whether the rule is active.
+  - name: createTime
+    type: String
+    description: The time at which this rule was created.
+    output: true
+  - name: displayName
+    type: String
+    description: Display Name of the auto labeling rule.
+  - name: description
+    type: String
+    description: The description of the rule.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the auto labeling rule.
+      Format:
+      projects/{project}/locations/{location}/autoLabelingRules/{auto_labeling_rule}
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: labelKeyType
+    type: Enum
+    description: The type of the label key.
+    enum_values:
+      - 'LABEL_KEY_TYPE_UNSPECIFIED'
+      - 'LABEL_KEY_TYPE_CUSTOM'
+  - name: labelKey
+    type: String
+    description: The label key.
+  - name: conditions
+    type: Array
+    description: Conditions to apply for auto-labeling the label_key.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: condition
+          type: String
+          description: |-
+            A optional CEL expression to be evaluated as a boolean value.
+            Once evaluated as true, then we will proceed with the value evaluation.
+            An empty condition will be auto evaluated as true.
+        - name: value
+          type: String
+          description: CEL expression to be evaluated as the value.
+  - name: updateTime
+    type: String
+    description: The most recent time at which this rule was updated.
+    output: true

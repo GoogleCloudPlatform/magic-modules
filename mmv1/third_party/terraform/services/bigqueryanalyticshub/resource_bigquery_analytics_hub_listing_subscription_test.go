@@ -2,6 +2,7 @@ package bigqueryanalyticshub_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -9,6 +10,12 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
+
+// Always include dummy usages
+var _ = fmt.Sprintf
+var _ = terraform.State{}
+var _ = envvar.GetTestProjectFromEnv
+var _ = os.Getenv
 
 func TestAccBigqueryAnalyticsHubListingSubscription_differentProject(t *testing.T) {
 	t.Parallel()
@@ -30,8 +37,52 @@ func TestAccBigqueryAnalyticsHubListingSubscription_differentProject(t *testing.
 				ResourceName:      "google_bigquery_analytics_hub_listing_subscription.subscription",
 				ImportStateIdFunc: testAccBigqueryAnalyticsHubListingSubscription_stateId,
 				ImportState:       true,
-				// skipping ImportStateVerify as the resource ID won't match original
-				// since the user cannot input the project and destination projects simultaneously
+			},
+		},
+	})
+}
+
+func TestAccBigqueryAnalyticsHubListingSubscription_multiregion(t *testing.T) {
+	if v := os.Getenv("TF_ACC"); v == "" {
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+	}
+
+	t.Parallel()
+
+	randomDatasetSuffix := acctest.RandString(t, 10)
+	datasetID := fmt.Sprintf("tf_test_sub_replica_%s", randomDatasetSuffix)
+
+	bqdataset, err := acctest.AddBigQueryDatasetReplica(t, envvar.GetTestProjectFromEnv(), datasetID, "us", "eu")
+	if err != nil {
+		t.Fatalf("Failed to create BigQuery dataset and add replica: %v", err)
+	}
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"bqdataset":     bqdataset,
+	}
+
+	t.Cleanup(func() {
+		acctest.CleanupBigQueryDatasetAndReplica(t, envvar.GetTestProjectFromEnv(), datasetID, "eu")
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryAnalyticsHubListingSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryAnalyticsHubListingSubscription_multiregion(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "destination_dataset.0.replica_locations.#", "1"),
+					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "destination_dataset.0.replica_locations.0", "eu"),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_analytics_hub_listing_subscription.subscription",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"data_exchange_id", "destination_dataset", "listing_id", "location"},
 			},
 		},
 	})
@@ -53,45 +104,22 @@ func testAccBigqueryAnalyticsHubListingSubscription_stateId(state *terraform.Sta
 
 func testAccBigqueryAnalyticsHubListingSubscription_differentProject(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
-
-# Dataset created in default project
 resource "google_bigquery_dataset" "subscription" {
-	dataset_id                  = "tf_test_my_listing%{random_suffix}"
-	friendly_name               = "tf_test_my_listing%{random_suffix}"
-	description                 = ""
+	dataset_id                  = "tf_test_sub_ds_%{random_suffix}"
 	location                    = "US"
 }
 
-resource "google_project" "project" {
-	project_id      = "tf-test-%{random_suffix}"
-	name            = "tf-test-%{random_suffix}"
-	org_id          = "%{org_id}"
-	deletion_policy = "DELETE"
-}
-
-
-resource "google_project_service" "analyticshub" {
-	project  = google_project.project.project_id
-	service  = "analyticshub.googleapis.com"
-}
-
 resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
-  project          = google_project.project.project_id
   location         = "US"
-  data_exchange_id = "tf_test_my_data_exchange%{random_suffix}"
-  display_name     = "tf_test_my_data_exchange%{random_suffix}"
-  description      = ""
-  depends_on = [google_project_service.analyticshub]
+  data_exchange_id = "tf_test_de_%{random_suffix}"
+  display_name     = "tf_test_de_%{random_suffix}"
 }
 
 resource "google_bigquery_analytics_hub_listing" "subscription" {
-  project          = google_project.project.project_id
   location         = "US"
   data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
-  listing_id       = "tf_test_my_listing%{random_suffix}"
-  display_name     = "tf_test_my_listing%{random_suffix}"
-  description      = ""
+  listing_id       = "tf_test_listing_%{random_suffix}"
+  display_name     = "tf_test_listing_%{random_suffix}"
 
   bigquery_dataset {
     dataset = google_bigquery_dataset.subscription.id
@@ -99,21 +127,52 @@ resource "google_bigquery_analytics_hub_listing" "subscription" {
 }
 
 resource "google_bigquery_analytics_hub_listing_subscription" "subscription" {
-  project          = google_project.project.project_id
   location = "US"
   data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
-  listing_id       = google_bigquery_analytics_hub_listing.subscription.listing_id
+  listing_id = google_bigquery_analytics_hub_listing.subscription.listing_id
   destination_dataset {
-    description = "A test subscription"
-    friendly_name = "👋"
-    labels = {
-      testing = "123"
-    }
     location = "US"
     dataset_reference {
-      dataset_id = "tf_test_destination_dataset%{random_suffix}"
+      dataset_id = "tf_test_dest_ds_%{random_suffix}"
       project_id = google_bigquery_dataset.subscription.project
     }
+  }
+}
+`, context)
+}
+
+func testAccBigqueryAnalyticsHubListingSubscription_multiregion(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
+  location         = "us"
+  data_exchange_id = "tf_test_de_%{random_suffix}"
+  display_name     = "tf_test_de_%{random_suffix}"
+}
+
+resource "google_bigquery_analytics_hub_listing" "subscription" {
+  location         = "us"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id       = "tf_test_listing_%{random_suffix}"
+  display_name     = "tf_test_listing_%{random_suffix}"
+
+  bigquery_dataset {
+    dataset = "%{bqdataset}"
+    replica_locations = ["eu"]
+  }
+}
+
+resource "google_bigquery_analytics_hub_listing_subscription" "subscription" {
+  location         = "us"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id       = google_bigquery_analytics_hub_listing.subscription.listing_id
+
+  destination_dataset {
+    location = "us"
+    dataset_reference {
+      project_id = google_bigquery_analytics_hub_data_exchange.subscription.project
+      dataset_id = "tf_test_sub_dest_ds_%{random_suffix}"
+    }
+    replica_locations = ["eu"]
   }
 }
 `, context)

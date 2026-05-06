@@ -16,11 +16,12 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -35,11 +36,11 @@ type Step struct {
 	// Defaults to `templates/terraform/samples/{{service}}/{{name}}.tf.erb`
 	ConfigPath string `yaml:"config_path,omitempty"`
 
-	// PrefixedVars is a Hash from template variable names to output variable names.
+	// ResourceIdVars is a Hash from template variable names to output variable names.
 	// It is used for values that must be unique across test runs (e.g., resource names).
 	// In generated tests, the value will be prefixed (e.g., "tf-test-") and have a
 	// random suffix appended. In documentation, the value is used verbatim.
-	PrefixedVars map[string]string `yaml:"prefixed_vars,omitempty"`
+	ResourceIdVars map[string]string `yaml:"resource_id_vars,omitempty"`
 
 	// Vars is a Hash from template variable names to output variable names.
 	// It is used for values that should be inserted into the template as literal,
@@ -87,10 +88,12 @@ type Step struct {
 	//         "network": nameOfVpc
 	//         ...
 	//       }
+	// NOTE: Keys in TestVarsOverrides will apply to a matching key in EITHER Vars or ResourceIdVars.
 	TestVarsOverrides map[string]string `yaml:"test_vars_overrides,omitempty"`
 
 	// Hash to provider custom override values for generating oics config
 	// See test_vars_overrides for more details
+	// NOTE: Keys in OicsVarsOverrides will apply to a matching key in EITHER Vars or ResourceIdVars for OiCS generation.
 	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides,omitempty"`
 
 	// The version name of the test step's version if it's different than the
@@ -104,13 +107,14 @@ type Step struct {
 	// Whether to skip import tests for this test step
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
-	// Whether to skip generating docs for this test step
-	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
+	// Whether to generate docs for this test step (override sample's exclude_basic_doc)
+	IncludeStepDoc bool `yaml:"include_step_doc,omitempty"`
 
-	DocumentationHCLText string `yaml:"-"`
-	TestHCLText          string `yaml:"-"`
-	OicsHCLText          string `yaml:"-"`
-	PrimaryResourceId    string `yaml:"-"`
+	DocumentationHCLText string            `yaml:"-"`
+	TestHCLText          string            `yaml:"-"`
+	OicsHCLText          string            `yaml:"-"`
+	PrimaryResourceId    string            `yaml:"-"`
+	TestContextVars      map[string]string `yaml:"-"`
 }
 
 func (s *Step) TestStepSlug(productName, resourceName string) string {
@@ -118,12 +122,17 @@ func (s *Step) TestStepSlug(productName, resourceName string) string {
 	return ret
 }
 
-func (s *Step) Validate(rName, sName string) {
-	// TODO: Add check identifier when it's implemented
+func (s *Step) Validate(rName, sName string) (es []error) {
+	for k := range s.Vars {
+		if _, exists := s.ResourceIdVars[k]; exists {
+			es = append(es, fmt.Errorf("variable key '%s' cannot exist in both 'vars' and 'resource_id_vars' for step '%s' in sample '%s' of resource '%s'", k, s.Name, sName, rName))
+		}
+	}
 	if s.Name == "" {
-		log.Fatalf("Missing `name` for one step in test sample %s in resource %s", sName, rName)
+		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
 	}
 
+	return es
 }
 
 func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
@@ -143,9 +152,9 @@ func validateRegexForContents(r *regexp.Regexp, contents string, configPath stri
 }
 
 // Executes step configuration templates for documentation and tests
-func (s *Step) SetHCLText() {
-	originalPrefixedVars := s.PrefixedVars
-	// originalVars := s.Vars
+func (s *Step) SetHCLText(sysfs fs.FS) {
+	originalResourceIdVars := s.ResourceIdVars
+	originalVars := s.Vars
 	originalTestEnvVars := s.TestEnvVars
 	docTestEnvVars := make(map[string]string)
 	docs_defaults := map[string]string{
@@ -171,7 +180,7 @@ func (s *Step) SetHCLText() {
 		docTestEnvVars[key] = docs_defaults[s.TestEnvVars[key]]
 	}
 	s.TestEnvVars = docTestEnvVars
-	s.DocumentationHCLText = s.ExecuteTemplate()
+	s.DocumentationHCLText = s.ExecuteTemplate(sysfs)
 	s.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -180,42 +189,53 @@ func (s *Step) SetHCLText() {
 	s.DocumentationHCLText = re1.ReplaceAllString(s.DocumentationHCLText, "")
 	s.DocumentationHCLText = re2.ReplaceAllString(s.DocumentationHCLText, "")
 
-	testPrefixedVars := make(map[string]string)
+	testResourceIdVars := make(map[string]string)
 	testVars := make(map[string]string)
 	testTestEnvVars := make(map[string]string)
-	// Override prefixed_vars to inject test values into configs - will have
+	testContextVars := make(map[string]string)
+	// Override resource_id_vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
-	for key, value := range originalPrefixedVars {
+	for key, value := range originalResourceIdVars {
 		var newVal string
-		if strings.Contains(value, "-") {
-			newVal = fmt.Sprintf("tf-test-%s", value)
-		} else if strings.Contains(value, "_") {
+		if strings.Contains(value, "_") {
 			newVal = fmt.Sprintf("tf_test_%s", value)
 		} else {
-			// Some vars like descriptions shouldn't have prefix
-			newVal = value
+			newVal = fmt.Sprintf("tf-test-%s", value)
 		}
 		// Random suffix is 10 characters and standard name length <= 64
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		testPrefixedVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testResourceIdVars[key] = fmt.Sprintf("%%{%s}", key)
+		testContextVars[key] = fmt.Sprintf("\"%s\"+randomSuffix", newVal)
+	}
+
+	for key, value := range originalVars {
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+		if _, err := strconv.ParseBool(value); err == nil {
+			testContextVars[key] = value
+		} else if _, err := strconv.ParseInt(value, 10, 64); err == nil {
+			testContextVars[key] = value
+		} else {
+			testContextVars[key] = fmt.Sprintf("%#v", value)
+		}
 	}
 
 	// Apply overrides from YAML
-	for key := range s.TestVarsOverrides {
-		testPrefixedVars[key] = fmt.Sprintf("%%{%s}", key)
-		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	for key, value := range s.TestVarsOverrides {
+		testContextVars[key] = fmt.Sprintf("%s", value)
 	}
 
 	for key := range originalTestEnvVars {
 		testTestEnvVars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	s.PrefixedVars = testPrefixedVars
+	s.ResourceIdVars = testResourceIdVars
 	s.TestEnvVars = testTestEnvVars
-	s.TestHCLText = s.ExecuteTemplate()
+	s.Vars = testVars
+	s.TestContextVars = testContextVars
+	s.TestHCLText = s.ExecuteTemplate(sysfs)
 	s.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.TestHCLText, "\n")
 	// Remove region tags
 	s.TestHCLText = re1.ReplaceAllString(s.TestHCLText, "")
@@ -223,29 +243,30 @@ func (s *Step) SetHCLText() {
 	s.TestHCLText = SubstituteTestPaths(s.TestHCLText)
 
 	// Reset the step
-	s.PrefixedVars = originalPrefixedVars
+	s.ResourceIdVars = originalResourceIdVars
+	s.Vars = originalVars
 	s.TestEnvVars = originalTestEnvVars
 }
 
-func (s *Step) ExecuteTemplate() string {
-	templateContent, err := os.ReadFile(s.ConfigPath)
+func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
+	templateContent, err := fs.ReadFile(sysfs, s.ConfigPath)
 	if err != nil {
 		glog.Exit(err)
 	}
 
 	fileContentString := string(templateContent)
 
-	// Check that any variables in PrefixedVars, Vars or TestEnvVars used in the step are defined via YAML
+	// Check that any variables in ResourceIdVars, Vars or TestEnvVars used in the step are defined via YAML
 	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
 	validateRegexForContents(envVarRegex, fileContentString, s.ConfigPath, "test_env_vars", s.TestEnvVars)
 	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
 	validateRegexForContents(varRegex, fileContentString, s.ConfigPath, "vars", s.Vars)
-	prefixedVarRegex := regexp.MustCompile(`{{index \$\.PrefixedVars "([a-zA-Z_]*)"}}`)
-	validateRegexForContents(prefixedVarRegex, fileContentString, s.ConfigPath, "prefixed_vars", s.PrefixedVars)
+	prefixedVarRegex := regexp.MustCompile(`{{index \$\.ResourceIdVars "([a-zA-Z_]*)"}}`)
+	validateRegexForContents(prefixedVarRegex, fileContentString, s.ConfigPath, "resource_id_vars", s.ResourceIdVars)
 
 	templateFileName := filepath.Base(s.ConfigPath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -300,25 +321,37 @@ func SubstituteTestPaths(config string) string {
 }
 
 // Executes step configuration templates for documentation and tests
-func (s *Step) SetOiCSHCLText() {
-	originalPrefixedVars := s.PrefixedVars
+func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
+	originalResourceIdVars := s.ResourceIdVars
+	originalVars := s.Vars
 
 	// // Remove region tags
 	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
 	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
 
-	testPrefixedVars := make(map[string]string)
-	for key, value := range originalPrefixedVars {
-		testPrefixedVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
+	testResourceIdVars := make(map[string]string)
+	testVars := make(map[string]string)
+	for key, value := range originalResourceIdVars {
+		testResourceIdVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
+	}
+
+	for key, value := range originalVars {
+		testVars[key] = value
+	}
+
+	for key, value := range originalVars {
+		testVars[key] = value
 	}
 
 	// Apply overrides from YAML
 	for key, value := range s.OicsVarsOverrides {
-		testPrefixedVars[key] = value
+		testResourceIdVars[key] = value
+		testVars[key] = value
 	}
 
-	s.PrefixedVars = testPrefixedVars
-	s.OicsHCLText = s.ExecuteTemplate()
+	s.ResourceIdVars = testResourceIdVars
+	s.Vars = testVars
+	s.OicsHCLText = s.ExecuteTemplate(sysfs)
 	s.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.OicsHCLText, "\n")
 
 	// Remove region tags
@@ -327,5 +360,10 @@ func (s *Step) SetOiCSHCLText() {
 	s.OicsHCLText = SubstituteExamplePaths(s.OicsHCLText)
 
 	// Reset the step
-	s.PrefixedVars = originalPrefixedVars
+	s.ResourceIdVars = originalResourceIdVars
+	s.Vars = originalVars
+}
+
+func (s *Step) ShouldGenerateDoc(index int, sample *Sample) bool {
+	return s.IncludeStepDoc || (index == 0 && !sample.ExcludeBasicDoc)
 }

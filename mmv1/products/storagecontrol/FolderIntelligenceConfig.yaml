@@ -51,7 +51,7 @@ import_format:
 # the resource. If false, that code is not generated.
 autogen_async: false
 
-datasource:
+datasource_experimental:
   generate: true
   exclude_test: true
 
@@ -60,6 +60,9 @@ examples:
     primary_resource_id: example
     vars:
       folder_id: "12345678"
+    test_vars_overrides:
+      # for backward compatible
+      folder_id: '"12345678" + randomSuffix'
     exclude_test: true
     exclude_import_test: true
 
@@ -69,7 +72,7 @@ properties:
     type: String
     required: true
     immutable: true
-    url_param_only: true
+    ignore_read: true
     description: |
       Identifier of the GCP Folder. For GCP Folder, this field can be folder number.
   - name: 'editionConfig'

@@ -19,39 +19,35 @@ update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
 create_url: projects/{{project}}/locations/{{location}}/accountConnectors?accountConnectorId={{account_connector_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
 examples:
   - name: developer_connect_account_connector_github
     primary_resource_id: 'my-account-connector'
-    primary_resource_name: 'fmt.Sprintf("tf-test-account-connector%s", context["random_suffix"])'
     vars:
-      account_connector_name: tf-test-ac
+      account_connector_name: my-ac
   - name: developer_connect_account_connector_gitlab
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_google
+      account_connector_name: my-ac
+  - name: developer_connect_account_connector_ghe
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_sentry
+      account_connector_name: my-ac
+      client_id_secret_name: ghe-ac-id
+      client_secret_secret_name: ghe-ac-sec
+  - name: developer_connect_account_connector_gle
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_rovo
+      account_connector_name: my-ac
+      client_id_secret_name: gle-ac-id
+      client_secret_secret_name: gle-ac-sec
+  - name: developer_connect_account_connector_bbdc
     primary_resource_id: 'my-account-connector'
     vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_new_relic
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_datastax
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
+      account_connector_name: my-ac
+      client_id_secret_name: bbdc-ac-id
+      client_secret_secret_name: bbdc-ac-sec
 autogen_async: true
 async:
   operation:
@@ -62,45 +58,139 @@ async:
     base_url: '{{op_id}}'
   actions:
     - create
-    - delete
     - update
-  type: OpAsync
+    - delete
   result:
     resource_inside_response: true
-  include_project: false
 autogen_status: QWNjb3VudENvbm5lY3Rvcg==
 parameters:
   - name: location
     type: String
-    description: The location of the resource.
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: accountConnectorId
     type: String
+    required: true
     description: |-
-      Required. The ID to use for the AccountConnector, which will become the final
+      The ID to use for the AccountConnector, which will become the final
       component of the AccountConnector's resource name. Its format should adhere
       to https://google.aip.dev/122#resource-id-segments Names must be unique
       per-project per-location.
     immutable: true
     url_param_only: true
-    required: true
 properties:
+  - name: annotations
+    type: KeyValueAnnotations
+    description: Allows users to store small amounts of arbitrary data.
+  - name: createTime
+    type: String
+    description: The timestamp when the accountConnector was created.
+    output: true
+  - name: customOauthConfig
+    type: NestedObject
+    description: Message for a customized OAuth config.
+    properties:
+      - name: authUri
+        type: String
+        required: true
+        description: The OAuth2 authrization server URL.
+        immutable: true
+      - name: clientId
+        type: String
+        required: true
+        description: The client ID of the OAuth application.
+      - name: clientSecret
+        type: String
+        required: true
+        description: |-
+          Input only. The client secret of the OAuth application.
+          It will be provided as plain text, but encrypted and stored in developer
+          connect. As INPUT_ONLY field, it will not be included in the output.
+      - name: hostUri
+        type: String
+        required: true
+        description: The host URI of the OAuth application.
+      - name: pkceDisabled
+        type: Boolean
+        description: Disable PKCE for this OAuth config. PKCE is enabled by default.
+      - name: scmProvider
+        type: String
+        required: true
+        description: |-
+          The type of the SCM provider.
+          Possible values:
+          SCM_PROVIDER_UNKNOWN
+          GITHUB_ENTERPRISE
+          GITLAB_ENTERPRISE
+          BITBUCKET_DATA_CENTER
+      - name: scopes
+        type: Array
+        required: true
+        description: The scopes to be requested during OAuth.
+        item_type:
+          type: String
+      - name: serverVersion
+        type: String
+        description: SCM server version installed at the host URI.
+        output: true
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: |-
+          ServiceDirectoryConfig represents Service Directory configuration for a
+          connection.
+        properties:
+          - name: service
+            type: String
+            required: true
+            description: |-
+              The Service Directory service name.
+              Format:
+              projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
+      - name: sslCaCertificate
+        type: String
+        description: SSL certificate to use for requests to a private service.
+      - name: tokenUri
+        type: String
+        required: true
+        description: The OAuth2 token request URL.
+        immutable: true
+  - name: etag
+    type: String
+    description: |-
+      This checksum is computed by the server based on the value of other
+      fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the accountConnector, in the format
+      `projects/{project}/locations/{location}/accountConnectors/{account_connector_id}`.
+    output: true
   - name: oauthStartUri
     type: String
-    description: Output only. Start OAuth flow by clicking on this URL.
+    description: Start OAuth flow by clicking on this URL.
     output: true
   - name: providerOauthConfig
     type: NestedObject
     description: ProviderOAuthConfig is the OAuth config for a provider.
     properties:
+      - name: scopes
+        type: Array
+        required: true
+        description: |-
+          User selected scopes to apply to the Oauth config
+          In the event of changing scopes, user records under AccountConnector will
+          be deleted and users will re-auth again.
+        item_type:
+          type: String
       - name: systemProviderId
         type: String
-        immutable: true
-        description: |2-
-          List of providers that are owned by Developer Connect.
-
+        description: |-
           Possible values:
           GITHUB
           GITLAB
@@ -109,32 +199,17 @@ properties:
           ROVO
           NEW_RELIC
           DATASTAX
-      - name: scopes
-        type: Array
+          DYNATRACE
+  - name: proxyConfig
+    type: NestedObject
+    description: The proxy configuration.
+    properties:
+      - name: enabled
+        type: Boolean
         description: |-
-          Required. User selected scopes to apply to the Oauth config
-          In the event of changing scopes, user records under AccountConnector will
-          be deleted and users will re-auth again.
-        required: true
-        item_type:
-          type: String
-  - name: name
-    type: String
-    description: |-
-      Identifier. The resource name of the userConnection, in the format
-      `projects/{project}/locations/{location}/accountConnectors/{account_connector_id}`.
-    output: true
-  - name: createTime
-    type: String
-    description: Output only. The timestamp when the userConnection was created.
-    output: true
+          Setting this to true allows the git and http proxies to perform actions on
+          behalf of the user configured under the account connector.
   - name: updateTime
     type: String
-    description: Output only. The timestamp when the userConnection was updated.
+    description: The timestamp when the accountConnector was updated.
     output: true
-  - name: annotations
-    type: KeyValueAnnotations
-    description: Optional. Allows users to store small amounts of arbitrary data.
-  - name: labels
-    type: KeyValueLabels
-    description: Optional. Labels as key value pairs

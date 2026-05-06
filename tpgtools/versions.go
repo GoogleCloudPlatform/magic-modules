@@ -28,6 +28,12 @@ func fromString(v string) *Version {
 			return &version
 		}
 	}
+	switch v {
+	case "nightly":
+		return &BETA_VERSION
+	case "private", "internal":
+		return &ALPHA_VERSION
+	}
 	glog.Infof("Failed finding version: %s", v)
 	return nil
 }

@@ -28,6 +28,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
         flattenVertexAIIndexEndpointPrivateServiceConnectConfigEnablePrivateServiceConnect(original["enablePrivateServiceConnect"], d, config)
     transformed["project_allowlist"] =
         flattenVertexAIIndexEndpointPrivateServiceConnectConfigProjectAllowlist(original["projectAllowlist"], d, config)
+    transformed["psc_automation_configs"] = d.Get("private_service_connect_config.0.psc_automation_configs")
     return []interface{}{transformed}
 }
 

@@ -1,0 +1,90 @@
+package acctest
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestGetServiceDomain(t *testing.T) {
+	tests := []struct {
+		name string
+		cai  string
+		want string
+	}{
+		{
+			name: "valid cai",
+			cai:  "//container.googleapis.com/projects/foo",
+			want: "container.googleapis.com",
+		},
+		{
+			name: "valid cai with deeper path",
+			cai:  "//storage.googleapis.com/projects/foo/buckets/bar",
+			want: "storage.googleapis.com",
+		},
+		{
+			name: "invalid cai - too short",
+			cai:  "foo",
+			want: "",
+		},
+		{
+			name: "empty",
+			cai:  "",
+			want: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getServiceDomain(tt.cai); got != tt.want {
+				t.Errorf("getServiceDomain() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestResolveContainerCaiAssetName(t *testing.T) {
+	formats := []string{
+		"//container.googleapis.com/projects/{{project}}/zones/{{location}}/clusters/{{cluster}}",
+	}
+
+	tests := []struct {
+		name     string
+		rName    string
+		location string
+		want     []string
+	}{
+		{
+			name:     "zonal location replacement",
+			rName:    "projects/p/locations/us-central1-a/clusters/c",
+			location: "us-central1-a",
+			want: []string{
+				"//container.googleapis.com/projects/p/zones/us-central1-a/clusters/c",
+			},
+		},
+		{
+			name:     "regional location no change",
+			rName:    "projects/p/locations/us-central1/clusters/c",
+			location: "us-central1",
+			want: []string{
+				"//container.googleapis.com/projects/p/locations/us-central1/clusters/c",
+			},
+		},
+		{
+			name:     "unknown location type defaults to no change",
+			rName:    "projects/p/locations/global/clusters/c",
+			location: "global",
+			want: []string{
+				"//container.googleapis.com/projects/p/locations/global/clusters/c",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := resolveContainerCaiAssetName(formats, tt.rName, tt.location)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("resolveContainerCaiAssetName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

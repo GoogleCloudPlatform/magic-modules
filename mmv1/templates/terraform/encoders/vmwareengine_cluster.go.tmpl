@@ -1,0 +1,4 @@
+// datastoreMountConfig is sent as post_create and post_update but not sent during create and update methods.
+delete(obj, "datastoreMountConfig")
+log.Printf("[DEBUG] After removal of datastoreMountConfig Cluster request %q: %#v", d.Id(), obj)
+return obj, nil

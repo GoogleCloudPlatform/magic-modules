@@ -12,88 +12,82 @@
 # limitations under the License.
 
 ---
-name: 'Mesh'
+name: Mesh
 description: |
   Mesh represents a logical configuration grouping for workload to workload communication within a
   service mesh. Routes that point to mesh dictate how requests are routed within this logical
   mesh boundary.
 references:
-  guides:
-  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes'
-docs:
-base_url: 'projects/{{project}}/locations/{{location}}/meshes'
-self_link: 'projects/{{project}}/locations/{{location}}/meshes/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/meshes?meshId={{name}}'
-update_verb: 'PATCH'
+  guides: {}
+  api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes
+base_url: projects/{{project}}/locations/{{location}}/meshes
+self_link: projects/{{project}}/locations/{{location}}/meshes/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/meshes?meshId={{name}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/meshes/{{name}}'
+  - projects/{{project}}/locations/{{location}}/meshes/{{name}}
 timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
+sweeper:
+  url_substitutions:
+    - region: global
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result:
-    resource_inside_response: false
-custom_code:
+    base_url: '{{op_id}}'
 schema_version: 1
 state_upgraders: true
-sweeper:
-  url_substitutions:
-    - region: "global"
+autogen_async: true
 examples:
-  - name: 'network_services_mesh_basic'
-    primary_resource_id: 'default'
+  - name: network_services_mesh_basic
+    primary_resource_id: default
     vars:
-      resource_name: 'my-mesh'
-  - name: 'network_services_mesh_no_port'
-    primary_resource_id: 'default'
+      resource_name: my-mesh
+  - name: network_services_mesh_no_port
+    primary_resource_id: default
     vars:
-      resource_name: 'my-mesh-noport'
-  - name: 'network_services_mesh_location'
-    primary_resource_id: 'default'
+      resource_name: my-mesh-noport
+  - name: network_services_mesh_location
+    primary_resource_id: default
     vars:
-      resource_name: 'my-mesh'
+      resource_name: my-mesh
 parameters:
-  - name: 'name'
+  - name: name
     type: String
+    required: true
     description: |
       Short name of the Mesh resource to be created.
     url_param_only: true
-    required: true
 properties:
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       Server-defined URL of this resource.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the Mesh was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the Mesh was updated in UTC.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Set of label tags associated with the Mesh resource.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - name: 'interceptionPort'
+  - name: interceptionPort
     type: Integer
     description: |
       Optional. If set to a valid TCP port (1-65535), instructs the SIDECAR proxy to listen on the
@@ -101,12 +95,12 @@ properties:
       be redirected to this port regardless of its actual ip:port destination. If unset, a port
       '15001' is used as the interception port. This will is applicable only for sidecar proxy
       deployments.
-  - name: 'location'
+  - name: location
     type: String
+    default_value: global
     description: |
       Location (region) of the Mesh resource to be created. Only the value 'global' is currently allowed; defaults to 'global' if omitted.
-    url_param_only: true
     immutable: true
-    default_value: 'global'
+    url_param_only: true
     validation:
-      regex: '^global$'
+      regex: ^global$

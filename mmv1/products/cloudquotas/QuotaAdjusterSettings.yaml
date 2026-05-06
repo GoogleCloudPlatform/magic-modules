@@ -45,6 +45,11 @@ examples:
     vars:
       parent: "projects/104740170505"
       enablement: "ENABLED"
+    test_vars_overrides:
+      # for backward compatible
+      parent: '"projects/104740170505" + randomSuffix'
+      # for backward compatible
+      enablement: '"ENABLED" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'parent'

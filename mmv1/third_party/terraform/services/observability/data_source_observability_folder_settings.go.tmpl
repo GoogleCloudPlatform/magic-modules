@@ -1,0 +1,49 @@
+package observability
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+func DataSourceObservabilityFolderSettings() *schema.Resource {
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceObservabilityFolderSettings().Schema)
+
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "folder")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
+
+	return &schema.Resource{
+		Read:   dataSourceObservabilityFolderSettingsRead,
+		Schema: dsSchema,
+	}
+}
+
+func dataSourceObservabilityFolderSettingsRead(d *schema.ResourceData, meta interface{}) error {
+	folder := d.Get("folder").(string)
+	location := d.Get("location").(string)
+
+	id := fmt.Sprintf("folders/%s/locations/%s/settings", folder, location)
+	d.SetId(id)
+
+	err := resourceObservabilityFolderSettingsRead(d, meta)
+	if err != nil {
+		return nil
+	}
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_observability_folder_settings",
+		ProductName: "observability",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceObservabilityFolderSettings(),
+	}.Register()
+}
+{{- end }}

@@ -35,6 +35,7 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+include_in_tgc_next: true
 examples:
   - name: eventarc_pipeline_with_topic_destination
     primary_resource_id: primary

@@ -19,12 +19,13 @@ references:
   guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.tlsRoutes'
 docs:
-base_url: 'projects/{{project}}/locations/global/tlsRoutes'
-self_link: 'projects/{{project}}/locations/global/tlsRoutes/{{name}}'
-create_url: 'projects/{{project}}/locations/global/tlsRoutes?tlsRouteId={{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/tlsRoutes'
+self_link: 'projects/{{project}}/locations/{{location}}/tlsRoutes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/tlsRoutes?tlsRouteId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
+  - 'projects/{{project}}/locations/{{location}}/tlsRoutes/{{name}}'
   - 'projects/{{project}}/locations/global/tlsRoutes/{{name}}'
 timeouts:
   insert_minutes: 30
@@ -42,6 +43,8 @@ async:
       delete_minutes: 30
   result:
     resource_inside_response: false
+schema_version: 1
+state_upgraders: true
 custom_code:
 examples:
   - name: 'network_services_tls_route_basic'
@@ -49,19 +52,41 @@ examples:
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
+  - name: 'network_services_tls_route_regional_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'backend-service-health-check'
   - name: 'network_services_tls_route_mesh_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
   - name: 'network_services_tls_route_gateway_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
+  - name: 'network_services_tls_route_target_tcp_proxy_basic'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      target_tcp_proxy_name: 'my-target-tcp-proxy'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'my-health-check'
+  - name: 'network_services_tls_route_region_target_tcp_proxy_basic'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      target_tcp_proxy_name: 'my-target-tcp-proxy'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'my-health-check'
 parameters:
   - name: 'name'
     type: String
@@ -70,6 +95,13 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: 'location'
+    type: 'String'
+    description: |
+      Location (region) of the TLS Route.
+    immutable: true
+    default_value: 'global'
+    url_param_only: true
 properties:
   - name: 'selfLink'
     type: String
@@ -94,7 +126,7 @@ properties:
     type: Array
     description: |
       Meshes defines a list of meshes this TlsRoute is attached to, as one of the routing rules to route the requests served by the mesh.
-      Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>
+      Each mesh reference should match the pattern: projects/*/locations/*/meshes/<mesh_name>
       The attached Mesh should be of a type SIDECAR
     send_empty_value: true
     item_type:
@@ -103,7 +135,15 @@ properties:
     type: Array
     description: |
       Gateways defines a list of gateways this TlsRoute is attached to, as one of the routing rules to route the requests served by the gateway.
-      Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
+      Each gateway reference should match the pattern: projects/*/locations/*/gateways/<gateway_name>
+    send_empty_value: true
+    item_type:
+      type: String
+  - name: 'targetProxies'
+    type: Array
+    description: |
+      TargetProxies defines a list of target proxies this TlsRoute is attached to, as one of the routing rules to route the requests served by the load balancer.
+      Each target proxy reference should match the pattern: projects/*/locations/global/targetTcpProxies/<target_tcp_proxy_name>
     send_empty_value: true
     item_type:
       type: String

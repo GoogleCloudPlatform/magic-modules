@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -31,7 +32,7 @@ func dataSourceGoogleLoggingSinkRead(d *schema.ResourceData, meta interface{}) e
 
 	sinkId := d.Get("id").(string)
 
-	sink, err := config.NewLoggingClient(userAgent).Sinks.Get(sinkId).Do()
+	sink, err := NewClient(config, userAgent).Sinks.Get(sinkId).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Logging Sink %s", d.Id()), sinkId)
 	}
@@ -43,4 +44,13 @@ func dataSourceGoogleLoggingSinkRead(d *schema.ResourceData, meta interface{}) e
 	d.SetId(sinkId)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_logging_sink",
+		ProductName: "logging",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleLoggingSink(),
+	}.Register()
 }

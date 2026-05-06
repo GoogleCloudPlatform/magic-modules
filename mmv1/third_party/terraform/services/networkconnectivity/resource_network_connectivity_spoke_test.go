@@ -783,6 +783,10 @@ resource "google_network_connectivity_spoke" "primary" {
         ip_address = "10.0.0.2"
     }
     site_to_site_data_transfer = true
+    include_import_ranges      = ["ALL_IPV4_RANGES"]
+    exclude_import_ranges      = ["10.0.0.0/8"]
+    include_export_ranges      = ["10.0.0.0/8", "172.0.0.0/8"]
+    exclude_export_ranges      = ["172.1.0.0/16"]
   }
 }
 `, context)
@@ -1056,7 +1060,10 @@ resource "google_network_connectivity_spoke" "primary" {
   linked_vpn_tunnels {
     uris                       = [google_compute_vpn_tunnel.tunnel.self_link]
     site_to_site_data_transfer = true
-    include_import_ranges = ["ALL_IPV4_RANGES"]
+    include_import_ranges      = ["ALL_IPV4_RANGES"]
+    exclude_import_ranges      = ["10.0.0.0/8"]
+    include_export_ranges      = ["10.0.0.0/8", "172.0.0.0/8"]
+    exclude_export_ranges      = ["172.1.0.0/16"]
   }
 }
 `, context)
@@ -1159,6 +1166,9 @@ resource "google_network_connectivity_spoke" "primary" {
     uris                       = [google_compute_interconnect_attachment.interconnect_attachment.self_link]
     site_to_site_data_transfer = true
     include_import_ranges      = ["ALL_IPV4_RANGES"]
+    exclude_import_ranges      = ["10.0.0.0/8"]
+    include_export_ranges      = ["10.0.0.0/8", "172.0.0.0/8"]
+    exclude_export_ranges      = ["172.1.0.0/16"]
   }
 }
 `, context)

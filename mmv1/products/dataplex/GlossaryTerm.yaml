@@ -28,14 +28,13 @@ import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossa
 examples:
   - name: 'dataplex_glossary_term_basic'
     primary_resource_id: 'term_test_id'
-    primary_resource_name: 'fmt.Sprintf("tf-test-term-basic%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
       term_name: 'term-basic'
   - name: 'dataplex_glossary_term_full'
     primary_resource_id: 'term_test_id_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-term-full%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
       term_name: 'term-full'
+    external_providers: ["time"]
 parameters:
   - name: 'location'
     type: String
@@ -83,12 +82,12 @@ properties:
       System generated unique id for the GlossaryTerm. This ID will be different if the GlossaryTerm is deleted and re-created with the same name.
     output: true
   - name: 'createTime'
-    type: Timestamp
+    type: Time
     description: |
       The time at which the GlossaryTerm was created.
     output: true
   - name: 'updateTime'
-    type: Timestamp
+    type: Time
     description: |
       The time at which the GlossaryTerm was last updated.
     output: true

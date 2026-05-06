@@ -1,7 +1,7 @@
 {{- define "IamTestSetupSample" }}
-{{ $config := $.FirstTestConfig }}
-{{ $sample := $config.Sample }}
-{{ $step := $config.Step }}
+{{- $config := $.FirstTestConfig }}
+{{- $sample := $config.Sample }}
+{{- $step := $config.Step }}
 {{- if $sample.BootstrapIam }}
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 {{- range $iam := $sample.BootstrapIam }}
@@ -12,8 +12,10 @@
 {{- end}}
 	})
 {{- end }}
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randomSuffix,
 		"role":          "{{ $.IamPolicy.AllowedIamRole }}",
 {{- if $.IamPolicy.AdminIamRole }}
 		"admin_role":    "{{ $.IamPolicy.AdminIamRole }}",
@@ -22,8 +24,8 @@
 		"project_id" :   fmt.Sprintf("{{ $.IamPolicy.TestProjectName }}%s", acctest.RandString(t, 10)),
 {{- end }}
 {{- template "EnvVarContext" dict "TestEnvVars" $step.TestEnvVars "HasNewLine" true}}
-{{- if $step.TestVarsOverrides }}
-{{-    range $varName, $override := $step.TestVarsOverrides }}
+{{- if $step.TestContextVars }}
+{{-    range $varName, $override := $step.TestContextVars }}
 		"{{ $varName }}": {{ $override }},
 {{-   end }}
 {{- end }}

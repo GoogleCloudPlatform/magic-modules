@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -47,7 +48,7 @@ func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, me
 		return err
 	}
 
-	serviceAccountGetRequest := config.NewStorageClient(userAgent).Projects.ServiceAccount.Get(project)
+	serviceAccountGetRequest := NewClient(config, userAgent).Projects.ServiceAccount.Get(project)
 
 	if v, ok := d.GetOk("user_project"); ok {
 		serviceAccountGetRequest = serviceAccountGetRequest.UserProject(v.(string))
@@ -71,4 +72,13 @@ func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, me
 	d.SetId(serviceAccount.EmailAddress)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_project_service_account",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageProjectServiceAccount(),
+	}.Register()
 }

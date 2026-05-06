@@ -1,0 +1,103 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Cluster
+description: Container Cluster
+include_in_tgc_next: true
+exclude_resource: true
+properties:
+  - name: removeDefaultNodePool
+    type: Boolean
+    is_missing_in_cai: true
+  - name: nodePool
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'nodeCount'
+          type: 'Integer'
+          description: 'The node count for the pool.'
+          # Node pools don't expose the current node count in CAI asset
+          # Field node_count will not be present in converted HCL
+          ignore_read: true
+        - name: 'NamePrefix'
+          type: 'String'
+          description: 'The prefix of the node pool name.'
+          # Field "name" and "name_prefix" conflicts. Convert name_prefix during cai2hcl
+          ignore_read: true
+        - name: 'nodeConfig'
+          type: 'NestedObject'
+          description: 'Configuration for the nodes in the pool.'
+          properties:
+            - name: 'guest_accelerator'
+              type: 'Array'
+              api_name: 'accelerators'
+              description: 'A list of hardware accelerators to be attached to each node.'
+              ignore_read: true
+              item_type:
+                type: 'NestedObject'
+                properties:
+                  - name: 'count'
+                    type: 'Integer'
+                    description: 'The number of the accelerator cards exposed to an instance.'
+                    ignore_read: true
+                  - name: 'type'
+                    type: 'String'
+                    description: 'The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.'
+                    ignore_read: true
+                  - name: 'gpuPartitionSize'
+                    type: 'String'
+                    description: 'Size of partitions to create on the GPU. Supported values are described in the NVIDIA mig user guide.'
+                    ignore_read: true
+                  - name: 'gpuDriverInstallationConfig'
+                    type: 'NestedObject'
+                    description: 'Configuration for GPU driver installation.'
+                    ignore_read: true
+                    properties:
+                      - name: 'gpuDriverVersion'
+                        type: 'String'
+                        description: 'Mode for how the GPU driver is installed.'
+  - name: 'ipAllocationPolicy'
+    type: 'NestedObject'
+    properties:
+      - name: 'clusterIpv4CidrBlock'
+        type: 'String'
+        # test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset
+        ignore_read: true
+      - name: 'servicesIpv4CidrBlock'
+        type: 'String'
+        # test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset
+        ignore_read: true
+  - name: 'networkPolicy'
+    type: Array
+    is_missing_in_cai: true
+    item_type:
+      type: 'NestedObject'
+      properties:
+        - name: 'enabled'
+          type: 'Boolean'
+          description: 'Whether network policy is enabled on the cluster.'
+          is_missing_in_cai: true
+          required: true
+        - name: 'provider'
+          type: 'String'
+          description: 'The selected network policy provider.'
+          is_missing_in_cai: true
+tgc_tests:
+  - name: TestAccContainerCluster_withDatabaseEncryption
+    skip: Bug in the API, https://github.com/hashicorp/terraform-provider-google/issues/26882
+  - name: TestAccContainerCluster_withSandboxConfigType
+    skip: Need to fix the testing framework to handle the order of array items (map) node_config.taint
+  - name: TestAccContainerCluster_withLoggingConfig
+    skip: Need to fix the testing framework to handle logging_config.enable_components is empty array

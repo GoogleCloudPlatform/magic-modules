@@ -1,0 +1,85 @@
+# A Native Dashboard is required to create a Dashboard Chart.
+resource "google_chronicle_native_dashboard" "my_dashboard" {
+  provider     = google-beta
+  location     = "us" 
+  instance     = "%{chronicle_id}"
+  display_name = "tf-test-dashboard-1%{random_suffix}"
+  description  = "tf-test-dashboard-description%{random_suffix}"
+  access       = "DASHBOARD_PRIVATE"
+  type         = "CUSTOM"
+
+
+  filters {
+    id                                    = "GlobalTimeFilter"
+    display_name                          = "Global Time Filter"
+    data_source                           = "GLOBAL"
+    is_standard_time_range_filter         = true
+    is_standard_time_range_filter_enabled = true
+    filter_operator_and_field_values {
+      filter_operator = "PAST"
+      field_values    = ["1", "DAY"]
+    }
+  }
+}
+
+resource "google_chronicle_dashboard_chart" "my_chart" {
+  provider         = google-beta
+  location         = "us" # Example region, adjust as necessary
+  instance         = "{{index $.TestEnvVars "chronicle_id"}}"
+  # This parameter creates an implicit dependency: Terraform will create
+  # 'google_chronicle_native_dashboard.my_dashboard' before creating this chart.
+  native_dashboard = google_chronicle_native_dashboard.my_dashboard.name
+
+  # These fields are passed to the NativeDashboardService.AddChart RPC.
+  chart_layout {
+    span_x  = 42
+    span_y  = 27
+    start_x = 0
+    start_y = 0
+  }
+
+  dashboard_chart {
+    display_name = "{{index $.Vars "chart_display_name"}}"
+    description  = "Managed by Terraform AccTest"
+    tile_type    = "TILE_TYPE_VISUALIZATION"
+    chart_datasource {
+      data_sources = ["INGESTION_METRICS"]
+    }
+    visualization {
+      # The query produces a single outcome variable: $event_count.
+      # The visualization is configured to display this.
+      column_defs {
+        field  = "event_count"
+        header = "event_count"
+      }
+      x_axes {
+        axis_type = "VALUE"
+      }
+      y_axes {
+        axis_type = "VALUE"
+      }
+      # The 'series' block is omitted because the input JSON had an empty series array.
+      table_config {
+        enable_text_wrap = false
+      }
+      legends {
+        legend_orient = "HORIZONTAL"
+      }
+      series_column = []
+      grouping_type = "Off"
+      threshold_coloring_enabled = false
+    }
+  }
+
+  dashboard_query {
+    # The Malachite Query Language (MQL) query, with double quotes escaped.
+    query = "ingestion.component = \"Ingestion API\" \ningestion.log_type != \"\" \noutcome: $event_count = math.round(sum(ingestion.log_count)/(1000*1000), 2)\n"
+    input {
+      # Matches the relativeTime from the provided JSON.
+      relative_time {
+        time_unit      = "SECOND"
+        start_time_val = "1"
+      }
+    }
+  }
+}

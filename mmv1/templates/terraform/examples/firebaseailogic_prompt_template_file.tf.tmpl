@@ -1,0 +1,6 @@
+resource "google_firebase_ai_logic_prompt_template" "file" {
+  provider = google-beta
+  location = "global"
+  template_id = "{{index $.Vars "template_id"}}"
+  template_string = file("test-fixtures/hello_world.prompt")
+}

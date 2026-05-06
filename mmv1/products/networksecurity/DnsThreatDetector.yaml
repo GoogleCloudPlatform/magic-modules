@@ -15,7 +15,6 @@
 name: "DnsThreatDetector"
 description: |
   DNS Armor is a fully-managed service that provides DNS-layer security for your Google Cloud workloads.
-min_version: "beta"
 references:
   guides:
     "DNS Threat Detector": "https://cloud.google.com/dns/docs/threat-detection"
@@ -37,7 +36,6 @@ timeouts:
 custom_code:
 examples:
   - name: "network_security_dns_threat_detector_basic"
-    min_version: "beta"
     primary_resource_id: "default"
     vars:
       resource_name: "my-threat-detector"

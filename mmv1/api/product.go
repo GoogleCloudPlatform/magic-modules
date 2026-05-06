@@ -36,7 +36,7 @@ type Product struct {
 	Name string
 
 	// This is the name of the package path relative to mmv1 root repo
-	PackagePath string
+	PackagePath string `yaml:"package_path,omitempty"`
 
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
@@ -54,19 +54,11 @@ type Product struct {
 	// The API versions of this product
 	Versions []*product.Version
 
-	// The base URL for the service API endpoint
-	// For example: `https://www.googleapis.com/compute/v1/`
-	BaseUrl string `yaml:"base_url,omitempty"`
-
-	// The validator "relative URI" of a resource, relative to the product
-	// base URL. Specific to defining the resource as a CAI asset.
-	CaiBaseUrl string `yaml:"caibaseurl,omitempty"`
-
 	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
 	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
-	ResourcesWithCaiAssetType map[string]struct{} `yaml:"resourceswithcaiassettype,omitempty"`
+	ResourcesWithCaiAssetType map[string]struct{} `yaml:"-"`
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
@@ -80,8 +72,18 @@ type Product struct {
 
 	ClientName string `yaml:"client_name,omitempty"`
 
+	// The version of the product which is currently being generated.
+	Version *product.Version `yaml:"-"`
+
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
+
+	// ImportPath contains the prefix used for importing packages in generated files.
+	ImportPath string `yaml:"-"`
+
+	// RepByDefault is if this product should default to REP endpoints if
+	// available. Changing this requires REP to be supported in *ALL* regions
+	RepByDefault bool `yaml:"rep_by_default,omitempty"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {
@@ -124,10 +126,6 @@ func (p *Product) Validate() {
 	for _, v := range p.Versions {
 		v.Validate(p.Name)
 	}
-
-	if p.Async != nil {
-		p.Async.Validate()
-	}
 }
 
 // ====================
@@ -148,7 +146,22 @@ func (p *Product) SetDisplayName() {
 }
 
 func (p *Product) SetCompiler(t string) {
-	p.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
+	switch t {
+	case "tgc":
+		p.Compiler = "terraformgoogleconversion-codegen"
+	case "tgc_next":
+		p.Compiler = "terraformgoogleconversionnext-codegen"
+	case "tgc_cai2hcl":
+		p.Compiler = "caitoterraformconversion-codegen"
+	case "terraform", "oics", "bics":
+		p.Compiler = "terraform-codegen"
+	default:
+		p.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
+	}
+}
+
+func (p Product) IsTgcCompiler() bool {
+	return p.Compiler == "terraformgoogleconversionnext-codegen"
 }
 
 // ====================
@@ -234,11 +247,6 @@ func (p *Product) ExistsAtVersion(name string) bool {
 	return false
 }
 
-func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
-	p.BaseUrl = version.BaseUrl
-	p.CaiBaseUrl = version.CaiBaseUrl
-}
-
 func (p *Product) TerraformName() string {
 	if p.LegacyName != "" {
 		return google.Underscore(p.LegacyName)
@@ -247,10 +255,10 @@ func (p *Product) TerraformName() string {
 }
 
 func (p *Product) ServiceBaseUrl() string {
-	if p.CaiBaseUrl != "" {
-		return p.CaiBaseUrl
+	if p.Version.CaiBaseUrl != "" {
+		return p.Version.CaiBaseUrl
 	}
-	return p.BaseUrl
+	return p.Version.BaseUrl
 }
 
 func (p *Product) ServiceName() string {
@@ -319,6 +327,13 @@ func Merge(self, otherObj reflect.Value, version string) {
 
 		if selfObj.Field(i).Kind() == reflect.Slice {
 			DeepMerge(selfObj.Field(i), otherObj.Field(i), version)
+		} else if selfObj.Field(i).Kind() == reflect.Pointer {
+			// merge the objects that are being pointed to, if both exist (namely, ItemTypes)
+			if reflect.Indirect(selfObj.Field(i)).IsValid() && reflect.Indirect(otherObj.Field(i)).IsValid() {
+				Merge(selfObj.Field(i), reflect.Indirect(otherObj.Field(i)), version)
+			} else {
+				selfObj.Field(i).Set(otherObj.Field(i))
+			}
 		} else {
 			selfObj.Field(i).Set(otherObj.Field(i))
 		}

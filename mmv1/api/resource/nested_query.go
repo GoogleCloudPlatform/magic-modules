@@ -13,7 +13,9 @@
 
 package resource
 
-import "log"
+import (
+	"fmt"
+)
 
 // Metadata for resources that are nested within a parent resource, as
 // a list of resources or single object within the parent.
@@ -43,8 +45,10 @@ type NestedQuery struct {
 	ModifyByPatch bool `yaml:"modify_by_patch"`
 }
 
-func (q *NestedQuery) Validate(rName string) {
+func (q *NestedQuery) Validate(rName string) (es []error) {
 	if len(q.Keys) == 0 {
-		log.Fatalf("Missing `keys` for `nested_query` in resource %s", rName)
+		es = append(es, fmt.Errorf("missing `keys` for `nested_query` in resource %s", rName))
 	}
+
+	return es
 }

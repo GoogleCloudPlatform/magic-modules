@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -72,7 +73,13 @@ func dataSourceGoogleFoldersRead(d *schema.ResourceData, meta interface{}) error
 
 	for {
 		params["parent"] = d.Get("parent_id").(string)
-		url := "https://cloudresourcemanager.googleapis.com/v3/folders"
+		url := ""
+		universeDomain := config.UniverseDomain
+		if universeDomain != "" && universeDomain != "googleapis.com" {
+			url = fmt.Sprintf("https://cloudresourcemanager.%s/v3/folders", universeDomain)
+		} else {
+			url = fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/folders")
+		}
 
 		url, err := transport_tpg.AddQueryParams(url, params)
 		if err != nil {
@@ -157,4 +164,13 @@ func flattenDataSourceGoogleFoldersList(v interface{}) []map[string]interface{} 
 	}
 
 	return folders
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_folders",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleFolders(),
+	}.Register()
 }

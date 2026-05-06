@@ -103,7 +103,7 @@ to default to the backend value. See [structure below](#nested_cluster).
   When the field is set to true or unset in Terraform state, a `terraform apply` or `terraform destroy` that would delete
   the instance will fail. When the field is set to false, deleting the instance is allowed.
 
-* `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
+* `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
 
   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
   Please refer to the field 'effective_labels' for all of the labels present on the resource.
@@ -113,6 +113,8 @@ to default to the backend value. See [structure below](#nested_cluster).
 
 * `effective_labels` -
   All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
+
+* `tags` - (Optional) A set of key/value label pairs to assign to the resource. Tags must follow the requirements at [create and manage tags](https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing).
 
 -----
 

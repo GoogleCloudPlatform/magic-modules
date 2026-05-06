@@ -48,6 +48,7 @@ mmv1/build/*
 
 # vscode workspace settings
 .vscode
+*.code-workspace
 
 # ignore serialization generation build data
 tpgtools/temp.serial
@@ -66,3 +67,4 @@ tpgtools/serialization.go
 MODULE.bazel.lock
 go.work
 go.work.sum
+terraform-provider-google/

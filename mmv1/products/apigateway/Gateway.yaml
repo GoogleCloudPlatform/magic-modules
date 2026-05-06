@@ -55,7 +55,6 @@ custom_code:
 examples:
   - name: 'apigateway_gateway_basic'
     primary_resource_id: 'api_gw'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       api_id: 'my-api'
@@ -63,7 +62,6 @@ examples:
       gateway_id: 'my-gateway'
   - name: 'apigateway_gateway_full'
     primary_resource_id: 'api_gw'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       api_id: 'my-api'

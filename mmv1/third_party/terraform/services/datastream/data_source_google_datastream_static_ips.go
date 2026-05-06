@@ -3,6 +3,7 @@ package datastream
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -75,4 +76,13 @@ func flattenStaticIpsList(resp map[string]interface{}) []interface{} {
 		staticIps[i] = u
 	}
 	return staticIps
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_datastream_static_ips",
+		ProductName: "datastream",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleDatastreamStaticIps(),
+	}.Register()
 }

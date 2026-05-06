@@ -124,6 +124,7 @@ properties:
             validation:
               function: 'validation.StringIsJSON'
           - name: default
+            type: String
             description: |-
               Default value of the data. Represents a dynamically typed value
               which can be either null, a number, a string, a boolean, a struct,
@@ -261,6 +262,7 @@ properties:
             validation:
               function: 'validation.StringIsJSON'
           - name: default
+            type: String
             description: |-
               Default value of the data. Represents a dynamically typed value
               which can be either null, a number, a string, a boolean, a struct,
@@ -590,6 +592,7 @@ properties:
         description: |-
           Number of search results to return per query.
           The default value is 10. The maximum allowed value is 10.
+        deprecation_message: '`max_results` is deprecated and will be removed in a future release.'
       - name: modalityConfigs
         type: Array
         description: The modality configs for the data store.

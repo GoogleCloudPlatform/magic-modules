@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/url"
 	"reflect"
 	"regexp"
@@ -16,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
@@ -40,9 +42,11 @@ type TerraformResourceData interface {
 	GetOkExists(string) (interface{}, bool)
 	GetOk(string) (interface{}, bool)
 	Get(string) interface{}
+	GetRawConfig() cty.Value
 	Set(string, interface{}) error
 	SetId(string)
 	Id() string
+	Identity() (*schema.IdentityData, error)
 	GetProviderMeta(interface{}) error
 	Timeout(key string) time.Duration
 }
@@ -188,9 +192,18 @@ func IsQuotaError(err error) bool {
 }
 
 func IsConflictError(err error) bool {
-	var gerr *googleapi.Error
-	if errors.As(err, &gerr) {
-		return gerr.Code == 409 || gerr.Code == 412
+	if e, ok := err.(*googleapi.Error); ok && (e.Code == 409 || e.Code == 412) {
+		return true
+	} else if !ok && errwrap.ContainsType(err, &googleapi.Error{}) {
+		e := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
+		if e.Code == 409 || e.Code == 412 {
+			return true
+		}
+	} else if gErr := (*googleapi.Error)(nil); errors.As(err, &gErr) {
+		// For cases where the error is not wrapped by errwrap such in 409 IAM concurrency errors.
+		if gErr.Code == 409 || gErr.Code == 412 {
+			return true
+		}
 	}
 	return false
 }
@@ -515,19 +528,6 @@ func PaginatedListRequest(project, baseUrl, userAgent string, config *transport_
 	return ls, nil
 }
 
-func GetInterconnectAttachmentLink(config *transport_tpg.Config, project, region, ic, userAgent string) (string, error) {
-	if !strings.Contains(ic, "/") {
-		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
-			project, region, ic).Do()
-		if err != nil {
-			return "", fmt.Errorf("Error reading interconnect attachment: %s", err)
-		}
-		ic = icData.SelfLink
-	}
-
-	return ic, nil
-}
-
 // Given two sets of references (with "from" values in self link form),
 // determine which need to be added or removed // during an update using
 // addX/removeX APIs.
@@ -810,7 +810,12 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 
 		// terraform-google-conversion doesn't provide a provider config in tests.
 		if config != nil {
-			// Attempt to draw values from the provider config if it's present.
+			// Draw base path values from the provider config. For other config fields, fall back to reflection.
+			if pName, found := strings.CutSuffix(m, "BasePath"); found {
+				// the field will look like ComputeBasePath, but the product name will be like compute (just lowercase, no underscores)
+				p := registry.GetProduct(strings.ToLower(pName))
+				return transport_tpg.BaseUrl(p, config)
+			}
 			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
 				return f.String()
 			}
@@ -980,4 +985,47 @@ func NormalizeIamPrincipalCasing(principal string) string {
 		principal = strings.Join(pieces, ":")
 	}
 	return principal
+}
+
+// hash based normalized IP addresses in CIDR notation
+func IpAddrSetHashFunc(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+
+	m := v.(string)
+	log.Printf("[DEBUG] hashing %v", m)
+	_, ipnet, err := net.ParseCIDR(m)
+	if err != nil {
+		//if invalid cidr, hash based on the direct value without standardizing.
+		return Hashcode(m)
+	}
+	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(ipnet.String()), ipnet.String())
+	return Hashcode(ipnet.String())
+}
+
+func LocationFromId(id string) string {
+	re := regexp.MustCompile(`/locations/([^/]+)/`)
+
+	match := re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+	re = regexp.MustCompile(`/regions/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+
+	re = regexp.MustCompile(`/zones/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return GetRegionFromZone(match[1])
+	}
+	return ""
 }

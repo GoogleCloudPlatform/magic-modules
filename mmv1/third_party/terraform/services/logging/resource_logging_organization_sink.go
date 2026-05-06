@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -59,7 +60,7 @@ func resourceLoggingOrganizationSinkCreate(d *schema.ResourceData, meta interfac
 
 	// Must use a unique writer, since all destinations are in projects.
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err = config.NewLoggingClient(userAgent).Organizations.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(true).Do()
+	_, err = NewClient(config, userAgent).Organizations.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
 	}
@@ -75,7 +76,7 @@ func resourceLoggingOrganizationSinkRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	sink, err := config.NewLoggingClient(userAgent).Organizations.Sinks.Get(d.Id()).Do()
+	sink, err := NewClient(config, userAgent).Organizations.Sinks.Get(d.Id()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Organization Logging Sink %s", d.Get("name").(string)))
 	}
@@ -105,7 +106,7 @@ func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interfac
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err = config.NewLoggingClient(userAgent).Organizations.Sinks.Patch(d.Id(), sink).
+	_, err = NewClient(config, userAgent).Organizations.Sinks.Patch(d.Id(), sink).
 		UpdateMask(updateMask).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
@@ -121,10 +122,19 @@ func resourceLoggingOrganizationSinkDelete(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Delete(d.Id()).Do()
+	_, err = NewClient(config, userAgent).Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_logging_organization_sink",
+		ProductName: "logging",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceLoggingOrganizationSink(),
+	}.Register()
 }

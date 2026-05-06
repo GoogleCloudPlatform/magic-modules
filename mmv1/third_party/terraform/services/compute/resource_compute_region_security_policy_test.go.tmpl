@@ -907,6 +907,9 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatc
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -944,17 +947,27 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch(context map[string]inte
 		deletion_policy = "DELETE"
 	}
 
+	resource "time_sleep" "wait_60_seconds" {
+		create_duration = "60s"
+		depends_on = [google_project.project]
+	}
+
 	resource "google_project_service" "compute_api" {
 		project = google_project.project.project_id
 		service = "compute.googleapis.com"
 
-		depends_on = [google_project.project]
+		depends_on = [time_sleep.wait_60_seconds]
+	}
+
+	resource "time_sleep" "wait_120_seconds" {
+		create_duration = "120s"
+		depends_on = [google_project_service.compute_api]
 	}
 
 	resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
 		project          = google_project.project.project_id  
 		cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
-		depends_on       = [google_project_service.compute_api]
+		depends_on       = [time_sleep.wait_120_seconds]
 	}
 
 	resource "google_compute_region_security_policy" "policy_ddos_enable" {
@@ -1036,17 +1049,27 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 		deletion_policy = "DELETE"
 	}
 
+	resource "time_sleep" "wait_60_seconds" {
+		create_duration = "60s"
+		depends_on = [google_project.project]
+	}
+
 	resource "google_project_service" "compute_api" {
 		project = google_project.project.project_id
 		service = "compute.googleapis.com"
 
-		depends_on = [google_project.project]
+		depends_on = [time_sleep.wait_60_seconds]
+	}
+
+	resource "time_sleep" "wait_120_seconds" {
+		create_duration = "120s"
+		depends_on = [google_project_service.compute_api]
 	}
 
 	resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
 		project          = google_project.project.project_id  
 		cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
-		depends_on       = [google_project_service.compute_api]
+		depends_on       = [time_sleep.wait_120_seconds]
 	}
 
 	resource "google_compute_region_security_policy" "policy_ddos_enable" {
@@ -1188,3 +1211,116 @@ resource "google_compute_region_security_policy" "policy" {
 `, context)
 }
 {{- end }}
+
+func TestAccComputeRegionSecurityPolicy_ruleActionUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_ruleActionThrottle(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_ruleActionDeny(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_ruleActionThrottle(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_security_policy" "policy" {
+  name = "tf-test%{random_suffix}"
+  region = "us-central1"
+  type   = "CLOUD_ARMOR"
+
+  rules {
+    action   = "throttle"
+    priority = "1000"
+    match {
+      expr {
+        expression = "request.path == 'my-path' && token.recaptcha_action.score <= 0.5"
+      }
+    }
+
+    rate_limit_options {
+      conform_action = "allow"
+      exceed_action = "deny(403)"
+
+      rate_limit_threshold {
+        count = 10
+        interval_sec = 10
+      }
+    }
+    description = "Block requests if their reCAPTCHA Enterprise score is too low"
+    preview = true
+  }
+
+  rules {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+    preview 	= false
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_ruleActionDeny(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_security_policy" "policy" {
+  name = "tf-test%{random_suffix}"
+  region = "us-central1"
+  type   = "CLOUD_ARMOR"
+
+  rules {
+    action   = "deny(403)"
+    priority = "1000"
+    match {
+      expr {
+        expression = "request.path == 'my-path' && token.recaptcha_action.score <= 0.5"
+      }
+    }
+    description = "Block requests if their reCAPTCHA Enterprise score is too low"
+    preview = true
+  }
+
+  rules {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+    preview 	= false
+  }
+}
+`, context)
+}
+

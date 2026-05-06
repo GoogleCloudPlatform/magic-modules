@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -87,7 +89,7 @@ func resourceGoogleProjectOrganizationPolicyRead(d *schema.ResourceData, meta in
 	var policy *cloudresourcemanager.OrgPolicy
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (readErr error) {
-			policy, readErr = config.NewResourceManagerClient(userAgent).Projects.GetOrgPolicy(project, &cloudresourcemanager.GetOrgPolicyRequest{
+			policy, readErr = rmClient.NewClient(config, userAgent).Projects.GetOrgPolicy(project, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 			}).Do()
 			return readErr
@@ -145,7 +147,7 @@ func resourceGoogleProjectOrganizationPolicyDelete(d *schema.ResourceData, meta 
 
 	return transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			_, err := config.NewResourceManagerClient(userAgent).Projects.ClearOrgPolicy(project, &cloudresourcemanager.ClearOrgPolicyRequest{
+			_, err := rmClient.NewClient(config, userAgent).Projects.ClearOrgPolicy(project, &cloudresourcemanager.ClearOrgPolicyRequest{
 				Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 			}).Do()
 			return err
@@ -175,7 +177,7 @@ func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) erro
 
 	return transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			_, err := config.NewResourceManagerClient(userAgent).Projects.SetOrgPolicy(project, &cloudresourcemanager.SetOrgPolicyRequest{
+			_, err := rmClient.NewClient(config, userAgent).Projects.SetOrgPolicy(project, &cloudresourcemanager.SetOrgPolicyRequest{
 				Policy: &cloudresourcemanager.OrgPolicy{
 					Constraint:     CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 					BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),
@@ -189,4 +191,13 @@ func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) erro
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
 	})
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_project_organization_policy",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProjectOrganizationPolicy(),
+	}.Register()
 }

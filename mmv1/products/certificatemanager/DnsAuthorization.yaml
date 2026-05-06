@@ -35,13 +35,13 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
 schema_version: 1
 state_upgraders: true
 sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "global"
+include_in_tgc_next: true
 examples:
   - name: 'certificate_manager_dns_authorization_basic'
     primary_resource_id: 'default'
@@ -49,12 +49,18 @@ examples:
       dns_auth_name: 'dns-auth'
       zone_name: 'my-zone'
       subdomain: 'subdomain'
+    test_vars_overrides:
+      # for backward compatible
+      subdomain: '"subdomain" + randomSuffix'
   - name: 'certificate_manager_dns_authorization_regional'
     primary_resource_id: 'default'
     vars:
       dns_auth_name: 'dns-auth'
       zone_name: 'my-zone'
       subdomain: 'subdomain'
+    test_vars_overrides:
+      # for backward compatible
+      subdomain: '"subdomain" + randomSuffix'
 parameters:
   - name: 'name'
     type: String

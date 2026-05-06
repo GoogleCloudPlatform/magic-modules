@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -88,7 +89,7 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 	}
 
 	location = fmt.Sprintf("projects/%s/locations/%s", project, location)
-	resp, err := config.NewContainerClient(userAgent).Projects.Locations.GetServerConfig(location).Do()
+	resp, err := NewClient(config, userAgent).Projects.Locations.GetServerConfig(location).Do()
 	if err != nil {
 		return fmt.Errorf("Error retrieving available container cluster versions: %s", err.Error())
 	}
@@ -155,4 +156,13 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 
 	d.SetId(time.Now().UTC().String())
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_engine_versions",
+		ProductName: "container",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerEngineVersions(),
+	}.Register()
 }

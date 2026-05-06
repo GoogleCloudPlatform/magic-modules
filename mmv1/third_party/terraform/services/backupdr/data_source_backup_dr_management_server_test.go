@@ -2,13 +2,14 @@ package backupdr_test
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"strings"
-	"testing"
 )
 
 func TestAccDataSourceGoogleBackupDRManagementServer_basic(t *testing.T) {
@@ -25,7 +26,8 @@ func TestAccDataSourceGoogleBackupDRManagementServer_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckBackupDRManagementServerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleBackupDRManagementServer_basic(context),
+				Config:             testAccDataSourceGoogleBackupDRManagementServer_basic(context),
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_management_server.foo", "google_backup_dr_management_server.foo"),
 				),
@@ -46,7 +48,7 @@ func testAccCheckBackupDRManagementServerDestroyProducer(t *testing.T) func(s *t
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, `{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/managementServers`)
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, `{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/managementServers/{{name}}`)
 			if err != nil {
 				return err
 			}

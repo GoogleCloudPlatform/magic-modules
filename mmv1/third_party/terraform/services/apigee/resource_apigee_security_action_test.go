@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/apigee"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -26,7 +27,7 @@ func testAccCheckApigeeSecurityActionDestroyProducer(t *testing.T) func(s *terra
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(apigee.Product, config)+"organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}")
 			if err != nil {
 				return err
 			}
@@ -211,14 +212,14 @@ resource "google_project_service" "servicenetworking" {
   depends_on = [google_project_service.compute]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_300_seconds" {
+  create_duration = "300s"
   depends_on = [google_project_service.servicenetworking]
 }
 
 resource "google_compute_network" "apigee_network" {
     name = "tf-test-network-%{random_suffix}"
-    depends_on = [time_sleep.wait_120_seconds]
+    depends_on = [time_sleep.wait_300_seconds]
 }
 
 resource "google_compute_global_address" "apigee_range" {

@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -55,9 +56,15 @@ func plus(a, b int) int {
 	return a + b
 }
 
-var TemplateFunctions = templateFunctions()
+func TemplateFunctions(templateFs fs.FS) template.FuncMap {
+	return functionsData{templateFS: templateFs}.templateFunctions()
+}
 
-func templateFunctions() template.FuncMap {
+type functionsData struct {
+	templateFS fs.FS
+}
+
+func (t functionsData) templateFunctions() template.FuncMap {
 	return template.FuncMap{
 		"title":          SpaceSeparatedTitle,
 		"replace":        strings.Replace,
@@ -76,8 +83,8 @@ func templateFunctions() template.FuncMap {
 		"sub":            subtract,
 		"plus":           plus,
 		"firstSentence":  FirstSentence,
-		"trimTemplate":   TrimTemplate,
-		"customTemplate": executeCustomTemplate,
+		"trimTemplate":   t.trimTemplate,
+		"customTemplate": t.customTemplate,
 	}
 }
 
@@ -95,38 +102,36 @@ func structToPtr(e any) reflect.Value {
 
 // Temporary function to simulate how Ruby MMv1's lines() function works
 // for nested documentation. Can replace with normal "template" after switchover
-func TrimTemplate(templatePath string, e any) string {
+func (t *functionsData) trimTemplate(templatePath string, e any) (string, error) {
 	templates := []string{
 		fmt.Sprintf("templates/terraform/%s", templatePath),
 		"templates/terraform/expand_resource_ref.tmpl",
 	}
 	templateFileName := filepath.Base(templatePath)
 
-	// Need to remake TemplateFunctions, referencing it directly here
-	// causes a declaration loop
-	tmpl, err := template.New(templateFileName).Funcs(templateFunctions()).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(t.templateFunctions()).ParseFS(t.templateFS, templates...)
 	if err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, structToPtr(e)); err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	rs := contents.String()
 
 	if rs == "" {
-		return rs
+		return "", nil
 	}
 
 	for strings.HasSuffix(rs, "\n") {
 		rs = strings.TrimSuffix(rs, "\n")
 	}
-	return fmt.Sprintf("%s\n", rs)
+	return fmt.Sprintf("%s\n", rs), nil
 }
 
-func executeCustomTemplate(e any, templatePath string, appendNewline bool) string {
+func (t functionsData) customTemplate(e any, templatePath string, appendNewline bool) (string, error) {
 	templates := []string{
 		templatePath,
 		"templates/terraform/expand_resource_ref.tmpl",
@@ -139,9 +144,9 @@ func executeCustomTemplate(e any, templatePath string, appendNewline bool) strin
 	}
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(templateFunctions()).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(t.templateFunctions()).ParseFS(t.templateFS, templates...)
 	if err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	contents := bytes.Buffer{}
@@ -157,5 +162,5 @@ func executeCustomTemplate(e any, templatePath string, appendNewline bool) strin
 	if !appendNewline {
 		rs = strings.TrimSuffix(rs, "\n")
 	}
-	return rs
+	return rs, nil
 }

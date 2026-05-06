@@ -60,8 +60,11 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 func TestAccDataprocMetastoreService_dataprocMetastoreServiceScheduledBackupExampleUpdate(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"metastore_service_name": "tf-test-backup-1" + randomSuffix,
+		"random_suffix":          randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -140,7 +143,7 @@ resource "google_dataproc_metastore_service" "default" {
 func testAccDataprocMetastoreService_dataprocMetastoreServiceScheduledBackupExampleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataproc_metastore_service" "backup" {
-  service_id = "tf-test-backup%{random_suffix}"
+  service_id = "%{metastore_service_name}"
   location   = "us-central1"
   port       = 9080
   tier       = "DEVELOPER"
@@ -167,7 +170,7 @@ resource "google_dataproc_metastore_service" "backup" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "tf-test-backup%{random_suffix}"
+  name     = "%{metastore_service_name}"
   location = "us-central1"
 }
 `, context)

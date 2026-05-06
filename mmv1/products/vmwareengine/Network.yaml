@@ -28,7 +28,6 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -45,6 +44,7 @@ custom_code:
 collection_url_key: "vmwareEngineNetworks"
 sweeper:
   dependencies:
+    - "google_vmwareengine_private_cloud"
     - "google_vmwareengine_network_policy"
   url_substitutions:
     - region: 'global'

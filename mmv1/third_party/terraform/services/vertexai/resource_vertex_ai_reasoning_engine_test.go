@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -19,8 +20,9 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) 
 	})
 
 	context := map[string]interface{}{
-		"bucket_name":  acctest.TestBucketName(t),
-		"kms_key_name": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name,
+		"random_suffix": acctest.RandString(t, 10),
+		"bucket_name":   acctest.TestBucketName(t),
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -106,6 +108,9 @@ locals {
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine"
   description  = "A sample reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
   region       = "us-central1"
 
   encryption_spec {
@@ -174,7 +179,7 @@ resource "time_sleep" "wait_5_minutes" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "secret"
+  secret_id = "tf-test-secret-%{random_suffix}"
 
   replication {
     auto {}
@@ -218,7 +223,7 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id = "reasoning-sa"
+  account_id = "tf-test-re-sa-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer" {
@@ -285,6 +290,9 @@ locals {
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine-updated"
   description  = "A sample reasoning engine updated"
+  labels       = {
+    "key" = "updated"
+  }
   region       = "us-central1"
 
   encryption_spec {
@@ -364,7 +372,7 @@ resource "time_sleep" "wait_5_minutes" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "secret"
+  secret_id = "tf-test-secret-%{random_suffix}"
 
   replication {
     auto {}
@@ -386,10 +394,12 @@ resource "google_secret_manager_secret_iam_member" "secret_access_new" {
   secret_id  = google_secret_manager_secret.secret.id
   role       = "roles/secretmanager.secretAccessor"
   member     = google_service_account.service_account_new.member
+
+  depends_on = [google_secret_manager_secret_iam_member.secret_access]
 }
 
 resource "google_secret_manager_secret" "secret_new" {
-  secret_id = "secret-new"
+  secret_id = "tf-test-secret-new-%{random_suffix}"
 
   replication {
     auto {}
@@ -460,7 +470,7 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_langchain" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id = "reasoning-sa"
+  account_id = "tf-test-re-sa-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer" {
@@ -482,7 +492,7 @@ resource "google_project_iam_member" "sa_iam_viewer" {
 }
 
 resource "google_service_account" "service_account_new" {
-  account_id = "reasoning-sa-new"
+  account_id = "tf-test-re-sa-new-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer_new" {
@@ -512,6 +522,9 @@ func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic() string 
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine"
   description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
   region       = "us-central1"
 
   spec {
@@ -537,6 +550,9 @@ func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate() string
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine"
   description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "updated"
+  }
   region       = "us-central1"
 
   spec {
@@ -555,4 +571,140 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   }
 }
 `)
+}
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineIdentityTypeUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_identityTypeServiceAccount(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.effective_identity"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_identityTypeAgentIdentity(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.effective_identity"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_identityTypeServiceAccount(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "tf-test-sample-reasoning-engine%{random_suffix}"
+  description  = "A reasoning engine for identity type testing"
+  region       = "us-central1"
+
+  spec {
+    identity_type = "SERVICE_ACCOUNT"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIReasoningEngine_identityTypeAgentIdentity(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "tf-test-sample-reasoning-engine%{random_suffix}"
+  description  = "A reasoning engine for identity type testing"
+  region       = "us-central1"
+
+  spec {
+    identity_type = "AGENT_IDENTITY"
+  }
+}
+`, context)
+}
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"name":          "tf-test-reasoning-engine" + randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecExample(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_reasoning_engine.reasoning_engine", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecExample(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_reasoning_engine.reasoning_engine", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineImageSpecUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "%{name}"
+  description  = "Deployed with BYOC Dockerfile through Terraform (Updated)"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/agent_src2.tar.gz")
+      }
+
+      image_spec {
+        build_args = {
+          "tag" = "latest"
+        }
+      }
+    }
+  }
+}
+`, context)
 }

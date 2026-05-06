@@ -16,9 +16,9 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -106,7 +106,7 @@ type Examples struct {
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
 	// insert it into the docs verbatim.
-	Vars map[string]string
+	Vars map[string]string `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
 	// be inferred by Open in Cloud Shell.  For instance, org_id
@@ -164,14 +164,18 @@ type Examples struct {
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
 
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
+
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
 	ExternalProviders []string `yaml:"external_providers,omitempty"`
 
-	DocumentationHCLText string `yaml:"-"`
-	TestHCLText          string `yaml:"-"`
-	OicsHCLText          string `yaml:"-"`
+	DocumentationHCLText string            `yaml:"-"`
+	TestHCLText          string            `yaml:"-"`
+	OicsHCLText          string            `yaml:"-"`
+	TestContextVars      map[string]string `yaml:"-"`
 
 	// ====================
 	// TGC
@@ -250,14 +254,14 @@ func (e *Examples) ValidateExternalProviders() error {
 	}
 
 	if len(unallowedProviders) > 0 {
-		return fmt.Errorf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		return fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
 	}
 
 	return nil
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) LoadHCLText(baseDir string) (err error) {
+func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
@@ -284,7 +288,7 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText, err = e.ExecuteTemplate(baseDir)
+	e.DocumentationHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		return err
 	}
@@ -298,6 +302,7 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 
 	testVars := make(map[string]string)
 	testTestEnvVars := make(map[string]string)
+	testContextVars := make(map[string]string)
 	// Override vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
@@ -315,12 +320,14 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		// testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+		testContextVars[key] = fmt.Sprintf("\"%s\"+randomSuffix", newVal)
 	}
 
 	// Apply overrides from YAML
-	for key := range e.TestVarsOverrides {
-		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	for key, value := range e.TestVarsOverrides {
+		testContextVars[key] = fmt.Sprintf("%s", value)
 	}
 	for key := range originalTestEnvVars {
 		testTestEnvVars[key] = fmt.Sprintf("%%{%s}", key)
@@ -328,7 +335,8 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText, err = e.ExecuteTemplate(baseDir)
+	e.TestContextVars = testContextVars
+	e.TestHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		return err
 	}
@@ -344,8 +352,8 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 	return nil
 }
 
-func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
-	templateContent, err := os.ReadFile(filepath.Join(baseDir, e.ConfigPath))
+func (e *Examples) ExecuteTemplate(sysfs fs.FS) (string, error) {
+	templateContent, err := fs.ReadFile(sysfs, e.ConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -359,7 +367,7 @@ func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
 		return "", err
 	}
@@ -408,7 +416,7 @@ func (e *Examples) ResourceType(terraformName string) string {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) SetOiCSHCLText() {
+func (e *Examples) SetOiCSHCLText(sysfs fs.FS) {
 	var err error
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
@@ -430,7 +438,7 @@ func (e *Examples) SetOiCSHCLText() {
 	e.Vars = testVars
 	// SetOiCSHCLText is generated from the provider, assume base directory is
 	// always relative for this case
-	e.OicsHCLText, err = e.ExecuteTemplate("")
+	e.OicsHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		log.Fatal(err)
 	}

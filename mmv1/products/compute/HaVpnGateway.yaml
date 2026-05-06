@@ -40,6 +40,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
 schema_version: 1
 state_upgraders: true
@@ -49,11 +50,17 @@ examples:
     vars:
       ha_vpn_gateway1_name: 'ha-vpn-1'
       network1_name: 'network1'
+    test_vars_overrides:
+      # for backward compatible
+      network1_name: '"network1" + randomSuffix'
   - name: 'ha_vpn_gateway_ipv6'
     primary_resource_id: 'ha_gateway1'
     vars:
       ha_vpn_gateway1_name: 'ha-vpn-1'
       network1_name: 'network1'
+    test_vars_overrides:
+      # for backward compatible
+      network1_name: '"network1" + randomSuffix'
   - name: 'ha_vpn_gateway_gcp_to_gcp'
     primary_resource_id: 'ha_gateway1'
     vars:
@@ -63,6 +70,11 @@ examples:
       ha_vpn_gateway2_name: 'ha-vpn-2'
       network2_name: 'network2'
       router2_name: 'ha-vpn-router2'
+    test_vars_overrides:
+      # for backward compatible
+      network1_name: '"network1" + randomSuffix'
+      # for backward compatible
+      network2_name: '"network2" + randomSuffix'
     exclude_test: true
     exclude_docs: true
       # Multiple fine-grained resources
@@ -187,3 +199,17 @@ properties:
       You must always provide an up-to-date fingerprint hash in order to update or change labels,
       otherwise the request will fail with error 412 conditionNotMet.
     output: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the HaVpnGateway. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        ignore_read: true

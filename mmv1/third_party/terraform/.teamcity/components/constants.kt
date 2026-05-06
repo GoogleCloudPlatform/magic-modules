@@ -1,5 +1,5 @@
 /*
- * Copyright (c) HashiCorp, Inc.
+ * Copyright IBM Corp. 2014, 2026
  * SPDX-License-Identifier: MPL-2.0
  */
 
@@ -18,7 +18,7 @@ const val DefaultParallelism = 6
 
 // specifies the default version of Terraform Core which should be used for testing
 // this is updated semi-regularly
-const val DefaultTerraformCoreVersion = "1.11.0"
+const val DefaultTerraformCoreVersion = "1.14.3"
 
 // This represents a cron view of days of the week
 const val DefaultDaysOfWeek = "*"
@@ -41,7 +41,7 @@ const val SharedResourceNameVcr = "ci-test-project-188019 Service Lock"
 const val ServiceSweeperName = "Service Sweeper"
 const val ServiceSweeperCronName = "$ServiceSweeperName - Cron"
 const val ServiceSweeperManualName = "$ServiceSweeperName - Manual"
-const val ProjectSweeperName = "Project Sweeper"
+const val GlobalSweepersProjectName = "Global Sweepers"
 const val NightlyTestsProjectId = "NightlyTests"
 const val WeeklyDiffTestsProjectId = "WeeklyDiffTests"
 const val MMUpstreamProjectId = "MMUpstreamTests"

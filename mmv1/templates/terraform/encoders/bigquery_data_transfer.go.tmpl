@@ -39,7 +39,7 @@ for _, sp := range sensitiveParams {
 		params[sp] = auth.(string)
 	}
 }
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 for _, sp := range sensitiveWoParams {
 	if auth, _ := d.GetRawConfigAt(cty.GetAttrPath("sensitive_params").IndexInt(0).GetAttr(sp)); !auth.IsNull() && auth.Type().Equals(cty.String) {
 		sp = sp[:len(sp)-3] // _wo is convention for write-only params and are removed here

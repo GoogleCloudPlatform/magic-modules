@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storagetransfer_test
 
 import (
@@ -10,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/storagetransfer"
 )
 
 func TestAccStorageTransferJob_basic(t *testing.T) {
@@ -748,7 +747,7 @@ func testAccStorageTransferJobDestroyProducer(t *testing.T) func(s *terraform.St
 				return err
 			}
 
-			res, err := config.NewStorageTransferClient(config.UserAgent).TransferJobs.Get(name, project).Do()
+			res, err := storagetransfer.NewClient(config, config.UserAgent).TransferJobs.Get(name, project).Do()
 			if err != nil {
 				return fmt.Errorf("Transfer Job does not exist, should exist and be DELETED")
 			}

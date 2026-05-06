@@ -1,5 +1,4 @@
 resource "google_compute_subnetwork" "subnetwork-resolve-subnet-mask" {
-  provider         = google-beta
 
   name             = "{{index $.Vars "subnetwork_name"}}"
   region           = "us-west2"
@@ -10,9 +9,7 @@ resource "google_compute_subnetwork" "subnetwork-resolve-subnet-mask" {
 }
 
 resource "google_compute_network" "custom-test" {
-  provider                = google-beta
 
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
-

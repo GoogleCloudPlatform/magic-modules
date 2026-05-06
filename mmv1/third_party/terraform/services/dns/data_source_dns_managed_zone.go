@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -75,7 +76,7 @@ func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) erro
 	name := d.Get("name").(string)
 	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, name))
 
-	zone, err := config.NewDnsClient(userAgent).ManagedZones.Get(
+	zone, err := NewClient(config, userAgent).ManagedZones.Get(
 		project, name).Do()
 	if err != nil {
 		return err
@@ -104,4 +105,13 @@ func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_dns_managed_zone",
+		ProductName: "dns",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceDnsManagedZone(),
+	}.Register()
 }

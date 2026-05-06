@@ -23,6 +23,5 @@ custom_code:
 examples:
   - name: 'instance_template_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance-template%s", context["random_suffix"])'
     vars:
       instance_name: 'my-instance-template'

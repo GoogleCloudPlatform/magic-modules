@@ -1,19 +1,16 @@
 resource "google_folder" "security_policy_target" {
-  provider     = google-beta
   display_name = "tf-test-secpol-%{random_suffix}"
   parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }
 
 resource "google_compute_organization_security_policy" "policy" {
-  provider     = google-beta
-  display_name = "tf-test%{random_suffix}"
+  short_name   = "tf-test%{random_suffix}"
   parent       = google_folder.security_policy_target.name
-  type         = "FIREWALL"
+  type         = "CLOUD_ARMOR"
 }
 
 resource "google_compute_organization_security_policy_association" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name          = "tf-test%{random_suffix}"
   attachment_id = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.parent
   policy_id     = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.id

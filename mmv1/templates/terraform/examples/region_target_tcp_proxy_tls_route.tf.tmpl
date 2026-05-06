@@ -1,0 +1,49 @@
+resource "google_compute_region_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
+  provider              = google-beta
+  name                  = "{{index $.Vars "region_target_tcp_proxy_name"}}"
+  region                = "europe-west4"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+}
+
+resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "{{index $.Vars "region_backend_service_name"}}"
+  protocol    = "TCP"
+  timeout_sec = 10
+  region      = "europe-west4"
+
+  health_checks         = [google_compute_region_health_check.{{$.PrimaryResourceId}}.id]
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+}
+
+resource "google_compute_region_health_check" "{{$.PrimaryResourceId}}" {
+  provider           = google-beta
+  name               = "{{index $.Vars "health_check_name"}}"
+  region             = "europe-west4"
+  timeout_sec        = 1
+  check_interval_sec = 1
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_network_services_tls_route" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name     = "{{index $.Vars "tls_route_name"}}"
+  location = "europe-west4"
+
+  target_proxies = [
+    google_compute_region_target_tcp_proxy.{{$.PrimaryResourceId}}.self_link
+  ]
+
+  rules {
+    matches {
+      sni_host = ["example.com"]
+    }
+    action {
+      destinations {
+        service_name = google_compute_region_backend_service.{{$.PrimaryResourceId}}.self_link
+      }
+    }
+  }
+}

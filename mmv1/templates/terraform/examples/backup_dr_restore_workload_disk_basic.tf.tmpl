@@ -1,0 +1,24 @@
+resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
+  location         = "us-central1"
+  backup_vault_id  = "{{index $.Vars "backup_vault_id"}}"
+  data_source_id   = "{{index $.Vars "data_source_id"}}"
+  backup_id        = "{{index $.Vars "backup_id"}}"
+
+  disk_target_environment {
+    project = "{{index $.TestEnvVars "project"}}"
+    zone    = "us-central1-a"
+  }
+
+  disk_restore_properties {
+    name    = "{{index $.Vars "disk_name"}}"
+    size_gb = 100
+    type    = "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-a/diskTypes/pd-standard"
+    
+    description = "Restored persistent disk from backup"
+    
+    labels = {
+      environment = "production"
+      restored    = "true"
+    }
+  }
+}

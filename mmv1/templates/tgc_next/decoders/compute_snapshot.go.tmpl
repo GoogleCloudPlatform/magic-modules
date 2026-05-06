@@ -1,0 +1,7 @@
+// sourceInstantSnapshot and sourceDisk are mutually exclusive in the Terraform schema.
+// When a snapshot is created from a sourceInstantSnapshot, we delete the sourceDisk
+// attribute to prevent "Invalid combination of arguments" errors during cai2hcl conversion.
+if _, ok := res["sourceInstantSnapshot"]; ok {
+	delete(res, "sourceDisk")
+}
+return res, hclData, nil

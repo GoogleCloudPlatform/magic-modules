@@ -65,6 +65,7 @@ async:
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_managed_ssl_certificate.go.tmpl'
+include_in_tgc_next: true
 examples:
   - name: 'managed_ssl_certificate_basic'
     primary_resource_id: 'default'
@@ -76,6 +77,9 @@ examples:
       dns_zone_name: 'dnszone'
       forwarding_rule_name: 'forwarding-rule'
       http_health_check_name: 'http-health-check'
+    test_vars_overrides:
+      # for backward compatible
+      dns_zone_name: '"dnszone" + randomSuffix'
   - name: 'managed_ssl_certificate_recreation'
     primary_resource_id: 'cert'
     external_providers: ["random", "time"]

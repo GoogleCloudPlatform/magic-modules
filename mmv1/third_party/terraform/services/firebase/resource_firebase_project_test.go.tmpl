@@ -12,9 +12,13 @@ import (
 func TestAccFirebaseProject_destroyAndReapply(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
+		"instance_name": "tf-test-memory-cache" + randomSuffix,
+		"project_name":  "tf-test-my-project" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -44,8 +48,8 @@ func testAccFirebaseProject_firebaseProjectBasicExampleDestroyed(context map[str
 resource "google_project" "default" {
   provider = google-beta
 
-  project_id = "tf-test-my-project%{random_suffix}"
-  name       = "tf-test-my-project%{random_suffix}"
+  project_id = "%{project_name}"
+  name       = "%{project_name}"
   org_id     = "%{org_id}"
   deletion_policy = "DELETE"
 

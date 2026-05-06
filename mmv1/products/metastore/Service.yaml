@@ -53,12 +53,10 @@ custom_code:
 examples:
   - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     vars:
       metastore_service_name: 'metastore-srv'
   - name: 'dataproc_metastore_service_deletion_protection'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     vars:
       metastore_service_name: 'metastore-srv'
       deletion_protection: 'true'
@@ -103,7 +101,6 @@ examples:
       metastore_service_name: 'metastore-srv'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-    exclude_test: true
   - name: 'dataproc_metastore_service_private_service_connect_custom_routes'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -133,7 +130,7 @@ examples:
   - name: 'dataproc_metastore_service_scheduled_backup'
     primary_resource_id: 'backup'
     vars:
-      metastore_service_name: 'backup'
+      metastore_service_name: 'backup-1'
   - name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
     primary_resource_id: 'test_resource'
     vars:
@@ -419,10 +416,7 @@ properties:
           The key is the auxiliary service name and it must match the regular expression a-z?.
           This means that the first character must be a lowercase letter, and all the following characters must be hyphens, lowercase letters, or digits, except the last character, which cannot be a hyphen.
         key_name: 'key'
-        key_description: |
-          The auxiliary service name
         value_type:
-          name: auxiliaryVersions
           type: NestedObject
           properties:
             - name: 'version'

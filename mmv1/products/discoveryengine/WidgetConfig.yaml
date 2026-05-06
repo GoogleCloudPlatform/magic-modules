@@ -225,9 +225,6 @@ properties:
                 and can be added or removed.
                 `title`, `thumbnail`, `url` are required UI components that cannot be removed.
               key_name: 'ui_component'
-              key_description: |
-                'The UI component. Currently supported `title`, `thumbnail`, `url`,
-                `custom1`, `custom2`, `custom3`.
               value_type:
                 type: NestedObject
                 description: |

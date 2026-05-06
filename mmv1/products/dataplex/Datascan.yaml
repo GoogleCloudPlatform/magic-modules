@@ -59,7 +59,6 @@ custom_code:
 examples:
   - name: 'dataplex_datascan_basic_profile'
     primary_resource_id: 'basic_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataprofile-basic%s", context["random_suffix"])'
     vars:
       datascan_name: 'dataprofile-basic'
     test_env_vars:
@@ -79,6 +78,14 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     exclude_docs: true
+  - name: 'dataplex_datascan_onetime_profile'
+    primary_resource_id: 'onetime_profile'
+    vars:
+      datascan_name: 'dataprofile-onetime'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
   - name: 'dataplex_datascan_basic_quality'
     primary_resource_id: 'basic_quality'
     vars:
@@ -99,6 +106,15 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     exclude_docs: true
+  - name: 'dataplex_datascan_onetime_quality'
+    primary_resource_id: 'onetime_quality'
+    vars:
+      datascan_name: 'dataquality-onetime'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
+    exclude_test: true
   - name: 'dataplex_datascan_basic_discovery'
     primary_resource_id: 'basic_discovery'
     vars:
@@ -113,13 +129,66 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
+  - name: 'dataplex_datascan_onetime_discovery'
+    primary_resource_id: 'onetime_discovery'
+    vars:
+      datascan_name: 'datadiscovery-onetime'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
+    exclude_test: true
   - name: 'dataplex_datascan_documentation'
     primary_resource_id: 'documentation'
     vars:
       datascan_name: 'datadocumentation'
+    test_vars_overrides:
+      # for backward compatible
+      datascan_name: '"datadocumentation" + randomSuffix'
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
+  - name: 'dataplex_datascan_onetime_documentation'
+    primary_resource_id: 'onetime_documentation'
+    vars:
+      datascan_name: 'datadocumentation-onetime'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
+  - name: 'dataplex_datascan_execution_identity_user_credential'
+    primary_resource_id: 'identity_user_credential'
+    vars:
+      datascan_name: 'dataplex-id-user-cred'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+    ignore_read_extra:
+      - 'execution_status.0.latest_job_end_time'
+  - name: 'dataplex_datascan_execution_identity_service_account'
+    primary_resource_id: 'identity_service_account'
+    vars:
+      datascan_name: 'dataplex-id-sa'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+    external_providers: ["time"]
+  - name: 'dataplex_datascan_quality_reusable_rules_catalog_based'
+    primary_resource_id: 'reusable_rules_catalog_based'
+    vars:
+      datascan_name: 'dataquality-catalog'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    external_providers: ["time"]
+  - name: 'dataplex_datascan_data_quality_template_reference'
+    primary_resource_id: 'data_quality_template_reference'
+    vars:
+      datascan_name: 'dataquality-template'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    external_providers: ["time"]
 parameters:
   - name: 'location'
     type: String
@@ -224,6 +293,7 @@ properties:
             exactly_one_of:
               - 'execution_spec.0.trigger.0.on_demand'
               - 'execution_spec.0.trigger.0.schedule'
+              - 'execution_spec.0.trigger.0.one_time'
             properties:
               []
           - name: 'schedule'
@@ -233,6 +303,7 @@ properties:
             exactly_one_of:
               - 'execution_spec.0.trigger.0.on_demand'
               - 'execution_spec.0.trigger.0.schedule'
+              - 'execution_spec.0.trigger.0.one_time'
             properties:
               - name: 'cron'
                 type: String
@@ -240,6 +311,22 @@ properties:
                   Cron schedule for running scans periodically. This field is
                   required for Schedule scans.
                 required: true
+          - name: oneTime
+            type: NestedObject
+            description: |
+              The scan runs once upon DataScan creation.
+            send_empty_value: true
+            allow_empty_object: true
+            immutable: true
+            exactly_one_of:
+              - 'execution_spec.0.trigger.0.on_demand'
+              - 'execution_spec.0.trigger.0.schedule'
+              - 'execution_spec.0.trigger.0.one_time'
+            properties:
+              - name: ttlAfterScanCompletion
+                type: String
+                description: |
+                  Time to live for the DataScan and its results after the one-time run completes. Accepts a string with a unit suffix 's' (e.g., '7200s'). Default is 24 hours. Ranges between 0 and 31536000 seconds (1 year).
       - name: 'field'
         type: String
         description: |
@@ -254,13 +341,55 @@ properties:
       - name: 'latestJobEndTime'
         type: String
         description: |
-          The time when the latest DataScanJob started.
+          The time when the latest DataScanJob ended.
         output: true
       - name: 'latestJobStartTime'
         type: String
         description: |
-          The time when the latest DataScanJob ended.
+          The time when the latest DataScanJob started.
         output: true
+  - name: 'executionIdentity'
+    type: NestedObject
+    immutable: true
+    description: |
+      The identity to run the datascan. If not specified, defaults to the Dataplex Service Agent.
+    properties:
+      - name: 'dataplexServiceAgent'
+        type: NestedObject
+        description: |
+          The Dataplex service agent associated with the user's project.
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of:
+          - 'execution_identity.0.dataplex_service_agent'
+          - 'execution_identity.0.user_credential'
+          - 'execution_identity.0.service_account'
+        properties: []
+      - name: 'userCredential'
+        type: NestedObject
+        description: |
+          The credential of the calling user. Supports only ONE_TIME trigger type.
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of:
+          - 'execution_identity.0.dataplex_service_agent'
+          - 'execution_identity.0.user_credential'
+          - 'execution_identity.0.service_account'
+        properties: []
+      - name: 'serviceAccount'
+        type: NestedObject
+        description: |
+          Service account to use to execute a datascan.
+        exactly_one_of:
+          - 'execution_identity.0.dataplex_service_agent'
+          - 'execution_identity.0.user_credential'
+          - 'execution_identity.0.service_account'
+        properties:
+          - name: 'email'
+            type: String
+            description: |
+              Service account email.
+            required: true
   - name: 'type'
     type: Enum
     description: |
@@ -391,6 +520,10 @@ properties:
               description: |
                 Description of the rule.
                 The maximum length is 1,024 characters.
+            - name: 'attributes'
+              type: KeyValuePairs
+              description: |
+                Map of attribute name and value linked to the rule.
             - name: 'rangeExpectation'
               type: NestedObject
               description: |
@@ -521,11 +654,42 @@ properties:
                   description: |
                     The SQL statement.
                   required: true
+            - name: 'templateReference'
+              type: NestedObject
+              description: |
+                Aggregate rule which references a rule template and provides the parameters to be substituted in the template.
+              properties:
+                - name: 'name'
+                  type: String
+                  description: |
+                    The resource name of the template entry.
+                  required: true
+                - name: 'values'
+                  type: Map
+                  key_name: 'name'
+                  description: |
+                    The map of parameter name and value.
+                  value_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'value'
+                        type: String
+                        required: true
+                        description: |
+                          The string representation of the parameter value.
         min_size: 1
       - name: 'catalogPublishingEnabled'
         type: Boolean
         description: |
           If set, the latest DataScan job result will be published to Dataplex Catalog.
+      - name: 'enableCatalogBasedRules'
+        type: Boolean
+        description: |
+          If set to true, the scan will retrieve rules defined in Data Catalog for the resource.
+      - name: 'filter'
+        type: String
+        description: |
+          A filter to selectively run a subset of rules.
   - name: 'dataProfileSpec'
     type: NestedObject
     description: |

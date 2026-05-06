@@ -1,0 +1,14 @@
+resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
+  location = "us-central1"
+
+  protocols = ["MCP"]
+
+  self_managed {
+    resource_uri = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/gateways/my-gateway"
+  }
+
+  registries = [
+    "//agentregistry.googleapis.com/projects/{{index $.TestEnvVars "project"}}/locations/us-central1"
+  ]
+}

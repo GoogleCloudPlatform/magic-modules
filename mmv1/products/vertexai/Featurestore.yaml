@@ -50,7 +50,6 @@ exclude_sweeper: true
 examples:
   - name: 'vertex_ai_featurestore'
     primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform'
       project: 'appeng-flex'
@@ -60,11 +59,12 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      name: '"terraform" + randomSuffix'
     ignore_read_extra:
       - 'force_destroy'
   - name: 'vertex_ai_featurestore_with_beta_fields'
     primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       name: 'terraform2'
@@ -75,11 +75,12 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      name: '"terraform2" + randomSuffix'
     ignore_read_extra:
       - 'force_destroy'
   - name: 'vertex_ai_featurestore_scaling'
     primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform3'
       project: 'appeng-flex'
@@ -89,6 +90,8 @@ examples:
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      name: '"terraform3" + randomSuffix'
     ignore_read_extra:
       - 'force_destroy'
 virtual_fields:

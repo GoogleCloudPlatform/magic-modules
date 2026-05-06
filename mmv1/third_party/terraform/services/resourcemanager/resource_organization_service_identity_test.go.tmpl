@@ -1,0 +1,57 @@
+package resourcemanager_test
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"fmt"
+	"strings"
+	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+)
+
+func TestAccOrganizationServiceIdentity_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":         envvar.GetTestOrgFromEnv(t),
+		"random_suffix ":  acctest.RandString(t, 5),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleOrganizationServiceIdentity_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Email field should be non-empty and contain at least an "@".
+					resource.TestCheckResourceAttrWith("google_organization_service_identity.osconfig_sa", "email", func(value string) error {
+						if strings.Contains(value, "@") {
+							return nil
+						}
+						return fmt.Errorf("osconfig_sa service identity email value was %s, expected a valid email", value)
+					}),
+					// Member field should start with "serviceAccount:"
+					resource.TestCheckResourceAttrWith("google_organization_service_identity.osconfig_sa", "member", func(value string) error {
+						if !strings.HasPrefix(value, "serviceAccount:") {
+							return fmt.Errorf("osconfig_sa organization service identity member value %q does not start with 'serviceAccount:'", value)
+						}
+						return nil
+					}),
+				),
+			},
+		},
+	})
+}
+
+func testGoogleOrganizationServiceIdentity_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_organization_service_identity" "osconfig_sa" {
+  organization = "%{org_id}"
+  service      = "osconfig.googleapis.com"
+}
+`, context)
+}
+{{- end }}

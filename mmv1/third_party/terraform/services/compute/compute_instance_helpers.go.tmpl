@@ -195,6 +195,15 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.SkipGuestOsShutdown = v.(bool)
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "SkipGuestOsShutdown")
 	}
+
+	if v, ok := original["preemption_notice_duration"]; ok {
+		transformedPreemptionNoticeDuration, err := expandComputePreemptionNoticeDuration(v)
+		if err != nil {
+			return nil, err
+		}
+		scheduling.PreemptionNoticeDuration = transformedPreemptionNoticeDuration
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "PreemptionNoticeDuration")
+	}
 {{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
@@ -381,6 +390,10 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	if resp.GracefulShutdown != nil {
 		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(resp.GracefulShutdown)
 	}
+
+	if resp.PreemptionNoticeDuration != nil {
+		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(resp.PreemptionNoticeDuration)
+	}
 {{- end }}
 
 	if resp.LocalSsdRecoveryTimeout != nil {
@@ -441,6 +454,36 @@ func flattenGracefulShutdown(v *compute.SchedulingGracefulShutdown) []interface{
 }
 
 func flattenGracefulShutdownMaxDuration(v *compute.Duration) []interface{} {
+	if v == nil {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["nanos"] = v.Nanos
+	transformed["seconds"] = v.Seconds
+	return []interface{}{transformed}
+}
+
+func expandComputePreemptionNoticeDuration(v interface{}) (*compute.Duration, error) {
+	l := v.([]interface{})
+	duration := compute.Duration{}
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+
+	if transformedNanos, ok := original["nanos"]; ok && transformedNanos != nil {
+		duration.Nanos = int64(transformedNanos.(int))
+	}
+
+	if transformedSeconds, ok := original["seconds"]; ok && transformedSeconds != nil {
+		duration.Seconds = int64(transformedSeconds.(int))
+	}
+
+	return &duration, nil
+}
+
+func flattenComputePreemptionNoticeDuration(v *compute.Duration) []interface{} {
 	if v == nil {
 		return nil
 	}
@@ -510,6 +553,8 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		flattened[i] = map[string]interface{}{
 			"network_ip":          iface.NetworkIP,
 			"network":             tpgresource.ConvertSelfLinkToV1(iface.Network),
+			"parent_nic_name":     iface.ParentNicName,
+			"vlan":                iface.Vlan,
 			"subnetwork":          tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
 			"subnetwork_project":  subnet.Project,
 			"access_config":       ac,
@@ -520,6 +565,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"ipv6_address":        iface.Ipv6Address,
 			"queue_count":         iface.QueueCount,
 			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
+			"igmp_query":          iface.IgmpQuery,
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -528,6 +574,11 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		if iface.Name != "" {
 			flattened[i]["name"] = iface.Name
 		}
+		{{- if ne $.TargetVersionName "ga" }}
+		if iface.MacAddress != "" {
+			flattened[i]["mac_address"] = iface.MacAddress
+		}
+		{{- end }}
 		if internalIP == "" {
 			internalIP = iface.NetworkIP
 		}
@@ -627,10 +678,18 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 		}
 
+		{{- if ne $.TargetVersionName "ga" }}
+		var macAddress = ""
+		if macAddressObj, ok := data["mac_address"]; ok {
+			macAddress = macAddressObj.(string)
+		}
+		{{- end }}
+
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
 			NetworkAttachment: networkAttachment,
+			Vlan:              int64(data["vlan"].(int)),
 			Subnetwork:        sf.RelativeLink(),
 			AccessConfigs:     expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
@@ -640,6 +699,10 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			Ipv6AccessConfigs: expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
 			Ipv6Address:       data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+			IgmpQuery:         data["igmp_query"].(string),
+			{{- if ne $.TargetVersionName "ga" }}
+			MacAddress: macAddress,
+			{{- end }}
 		}
 	}
 	return ifaces, nil

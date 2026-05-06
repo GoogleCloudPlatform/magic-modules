@@ -27,6 +27,9 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/multicastGroupConsumerActivations/{{multicast_group_consumer_activation_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupConsumerActivations/{{multicast_group_consumer_activation_id}}
+sweeper:
+  url_substitutions:
+    - location: "us-central1-b"
 examples:
   - name: network_services_multicast_group_consumer_activation_basic
     primary_resource_id: mgca_test

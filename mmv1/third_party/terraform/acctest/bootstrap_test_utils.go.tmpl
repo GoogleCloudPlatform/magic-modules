@@ -16,16 +16,23 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	backupdr_tpg "github.com/hashicorp/terraform-provider-google/google/services/backupdr"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
+	tpgcloudbilling "github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	tpgiamcredentials "github.com/hashicorp/terraform-provider-google/google/services/iamcredentials"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	tpgservicenetworking "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
+	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	
+
 	"google.golang.org/api/cloudbilling/v1"
 	cloudkms "google.golang.org/api/cloudkms/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
@@ -35,6 +42,9 @@ import (
 	"google.golang.org/api/serviceusage/v1"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 	backupdr "google.golang.org/api/backupdr/v1"
+	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/option"
+	"google.golang.org/api/googleapi"
 )
 
 var SharedKeyRing = "tftest-shared-keyring-1"
@@ -105,7 +115,7 @@ func BootstrapKMSAutokeyKeyHandleWithLocation(t *testing.T, locationID string) B
 	autokeyFolder, kmsProject, resourceProject := setupAutokeyTestResources(t, config)
 
 	// Enable autokey on autokey test folder
-	kmsClient := config.NewKmsClient(config.UserAgent)
+	kmsClient := kms.NewClient(config, config.UserAgent)
 	autokeyConfigID := fmt.Sprintf("%s/autokeyConfig", autokeyFolder.Name)
 	autokeyConfig, err := kmsClient.Folders.UpdateAutokeyConfig(autokeyConfigID, &cloudkms.AutokeyConfig{
 		KeyProject: fmt.Sprintf("projects/%s", kmsProject.ProjectId),
@@ -184,15 +194,15 @@ func setupAutokeyTestResources(t *testing.T, config *transport_tpg.Config) (*res
 	if err != nil {
 		t.Errorf("unable to bootstrap KMS keyHandle. Cannot create cloudkms service identity: %s", err)
 	}
-	err = addFolderBinding2(config.NewResourceManagerV3Client(config.UserAgent), autokeyFolder.Name, fmt.Sprintf("user:%s", curUserEmail), []string{"roles/cloudkms.admin"})
+	err = addFolderBinding2(resourcemanagerv3.NewClient(config, config.UserAgent), autokeyFolder.Name, fmt.Sprintf("user:%s", curUserEmail), []string{"roles/cloudkms.admin"})
 	if err != nil {
 		t.Errorf("unable to bootstrap KMS keyHandle. Cannot assign cloudkms.admin role to current user on autokey test folder: %s", err)
 	}
-	err = addProjectBinding(config.NewResourceManagerV3Client(config.UserAgent), kmsProjectID, fmt.Sprintf("user:%s", curUserEmail), []string{"roles/resourcemanager.projectIamAdmin", "roles/cloudkms.admin"})
+	err = addProjectBinding(resourcemanagerv3.NewClient(config, config.UserAgent), kmsProjectID, fmt.Sprintf("user:%s", curUserEmail), []string{"roles/resourcemanager.projectIamAdmin", "roles/cloudkms.admin"})
 	if err != nil {
 		t.Errorf("unable to bootstrap KMS keyHandle. Cannot assign cloudkms.admin and projectIamAdmin role to current user on kms project: %s", err)
 	}
-	err = addProjectBinding(config.NewResourceManagerV3Client(config.UserAgent), kmsProjectID, fmt.Sprintf("serviceAccount:%s", kmsSAEmail), []string{"roles/cloudkms.admin"})
+	err = addProjectBinding(resourcemanagerv3.NewClient(config, config.UserAgent), kmsProjectID, fmt.Sprintf("serviceAccount:%s", kmsSAEmail), []string{"roles/cloudkms.admin"})
 	if err != nil {
 		t.Errorf("unable to bootstrap KMS keyHandle. Cannot assign cloudkms.admin role to cloudkms service identity on kms project: %s", err)
 	}
@@ -335,7 +345,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 	keyName := fmt.Sprintf("%s/cryptoKeys/%s", keyParent, keyShortName)
 
 	// Get or Create the hard coded shared keyring for testing
-	kmsClient := config.NewKmsClient(config.UserAgent)
+	kmsClient := kms.NewClient(config, config.UserAgent)
 	keyRing, err := kmsClient.Projects.Locations.KeyRings.Get(keyRingName).Do()
 	if err != nil {
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
@@ -409,7 +419,7 @@ func getOrCreateServiceAccount(config *transport_tpg.Config, project, serviceAcc
 	name := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, serviceAccountEmail, project)
 	log.Printf("[DEBUG] Verifying %s as bootstrapped service account.\n", name)
 
-	sa, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Get(name).Do()
+	sa, err := iambeta.NewClient(config, config.UserAgent).Projects.ServiceAccounts.Get(name).Do()
 	if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		return nil, fmt.Errorf("encountered a non-404 error when looking for bootstrapped service account %s: %w", name, err)
 	}
@@ -424,7 +434,7 @@ func getOrCreateServiceAccount(config *transport_tpg.Config, project, serviceAcc
 			AccountId:      serviceAccountEmail,
 			ServiceAccount: sa,
 		}
-		sa, err = config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+		sa, err = iambeta.NewClient(config, config.UserAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 		if err != nil {
 			return nil, fmt.Errorf("error when creating bootstrapped service account %s: %w", name, err)
 		}
@@ -452,7 +462,7 @@ func impersonationServiceAccountPermissions(config *transport_tpg.Config, sa *ia
 	// Overwrite the roles each time on this service account. This is because this account is
 	// only created for the test suite and will stop snowflaking of permissions to get tests
 	// to run. Overwriting permissions on 1 service account shouldn't affect others.
-	_, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.SetIamPolicy(sa.Name, &iam.SetIamPolicyRequest{
+	_, err := iambeta.NewClient(config, config.UserAgent).Projects.ServiceAccounts.SetIamPolicy(sa.Name, &iam.SetIamPolicyRequest{
 		Policy: &policy,
 	}).Do()
 	if err != nil {
@@ -584,7 +594,7 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 	}
 
 	log.Printf("[DEBUG] Getting shared test network %q", networkName)
-	_, err := config.NewComputeClient(config.UserAgent).Networks.Get(project, networkName).Do()
+	_, err := tpgcompute.NewClient(config, config.UserAgent).Networks.Get(project, networkName).Do()
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Network %q not found, bootstrapping", networkName)
 		url := fmt.Sprintf("%sprojects/%s/global/networks", config.ComputeBasePath, project)
@@ -613,7 +623,7 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 		}
 	}
 
-	network, err := config.NewComputeClient(config.UserAgent).Networks.Get(project, networkName).Do()
+	network, err := tpgcompute.NewClient(config, config.UserAgent).Networks.Get(project, networkName).Do()
 	if err != nil {
 		t.Errorf("Error getting shared test network %q: %s", networkName, err)
 	}
@@ -659,7 +669,7 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...fun
 	}
 
 	log.Printf("[DEBUG] Getting shared test global address %q", addressName)
-	_, err := config.NewComputeClient(config.UserAgent).GlobalAddresses.Get(project, addressName).Do()
+	_, err := tpgcompute.NewClient(config, config.UserAgent).GlobalAddresses.Get(project, addressName).Do()
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Global address %q not found, bootstrapping", addressName)
 		url := fmt.Sprintf("%sprojects/%s/global/addresses", config.ComputeBasePath, project)
@@ -694,7 +704,7 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...fun
 		}
 	}
 
-	address, err := config.NewComputeClient(config.UserAgent).GlobalAddresses.Get(project, addressName).Do()
+	address, err := tpgcompute.NewClient(config, config.UserAgent).GlobalAddresses.Get(project, addressName).Do()
 	if err != nil {
 		t.Errorf("Error getting shared test global address %q: %s", addressName, err)
 	}
@@ -762,7 +772,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, par
 	}
 
 	// Get project number by calling the API
-	crmClient := config.NewResourceManagerClient(config.UserAgent)
+	crmClient := rmClient.NewClient(config, config.UserAgent)
 	project, err := crmClient.Projects.Get(projectId).Do()
 	if err != nil {
 		t.Fatalf("Error getting project: %s", err)
@@ -772,7 +782,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, par
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project.ProjectNumber, networkName)
 	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, AddressWithPrefixLength(settings.PrefixLength))
 
-	readCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkId)
+	readCall := tpgservicenetworking.NewClient(config, config.UserAgent).Services.Connections.List(parentService).Network(networkId)
 	if config.UserProjectOverride {
 		readCall.Header().Add("X-Goog-User-Project", projectId)
 	}
@@ -797,7 +807,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, par
 			ReservedPeeringRanges: []string{globalAddressName},
 		}
 
-		createCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.Create(parentService, connection)
+		createCall := tpgservicenetworking.NewClient(config, config.UserAgent).Services.Connections.Create(parentService, connection)
 		if config.UserProjectOverride {
 			createCall.Header().Add("X-Goog-User-Project", projectId)
 		}
@@ -831,7 +841,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
 	// that API behavior changes.
 	prefixFilter := fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)
-	res, err := config.NewResourceManagerClient(config.UserAgent).Projects.List().Filter(prefixFilter).Do()
+	res, err := rmClient.NewClient(config, config.UserAgent).Projects.List().Filter(prefixFilter).Do()
 	if err != nil {
 		t.Fatalf("Error getting shared test projects: %s", err)
 	}
@@ -847,7 +857,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 				Id:   org,
 			},
 		}
-		op, err := config.NewResourceManagerClient(config.UserAgent).Projects.Create(project).Do()
+		op, err := rmClient.NewClient(config, config.UserAgent).Projects.Create(project).Do()
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
@@ -862,7 +872,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
 
-		p, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
+		p, err := rmClient.NewClient(config, config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
 			t.Fatalf("Error getting shared test project: %s", err)
 		}
@@ -879,7 +889,7 @@ func BootstrapFolder(t *testing.T, folderDisplayName string) *resourceManagerV3.
 		return nil
 	}
 
-	crmClient := config.NewResourceManagerV3Client(config.UserAgent)
+	crmClient := resourcemanagerv3.NewClient(config, config.UserAgent)
 	searchQuery := fmt.Sprintf("displayName=%s", folderDisplayName)
 	folderSearchResp, err := crmClient.Folders.Search().Query(searchQuery).Do()
 	if err != nil {
@@ -944,7 +954,7 @@ func BootstrapProjectWithParent(t *testing.T, projectID string, billingAccount s
 	if config == nil {
 		return nil
 	}
-	crmClient := config.NewResourceManagerClient(config.UserAgent)
+	crmClient := rmClient.NewClient(config, config.UserAgent)
 
 	project, err := crmClient.Projects.Get(projectID).Do()
 	if err != nil {
@@ -985,7 +995,7 @@ func BootstrapProjectWithParent(t *testing.T, projectID string, billingAccount s
 	}
 
 	if billingAccount != "" {
-		billingClient := config.NewBillingClient(config.UserAgent)
+		billingClient := tpgcloudbilling.NewClient(config, config.UserAgent)
 		var pbi *cloudbilling.ProjectBillingInfo
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
@@ -1002,7 +1012,7 @@ func BootstrapProjectWithParent(t *testing.T, projectID string, billingAccount s
 			pbi.BillingAccountName = "billingAccounts/" + billingAccount
 			err := transport_tpg.Retry(transport_tpg.RetryOptions{
 				RetryFunc: func() error {
-					_, err := config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(projectID), pbi).Do()
+					_, err := tpgcloudbilling.NewClient(config, config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(projectID), pbi).Do()
 					return err
 				},
 				Timeout: 2 * time.Minute,
@@ -1075,7 +1085,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 
 	log.Printf("[DEBUG] Getting list of existing sql instances")
 
-	instances, err := config.NewSqlAdminClient(config.UserAgent).Instances.List(project).Do()
+	instances, err := sql.NewClient(config, config.UserAgent).Instances.List(project).Do()
 	if err != nil {
 		t.Fatalf("Unable to bootstrap SQL Instance. Cannot retrieve instance list: %s", err)
 	}
@@ -1112,7 +1122,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		var op *sqladmin.Operation
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (operr error) {
-				op, operr = config.NewSqlAdminClient(config.UserAgent).Instances.Insert(project, bootstrapInstance).Do()
+				op, operr = sql.NewClient(config, config.UserAgent).Instances.Insert(project, bootstrapInstance).Do()
 				return operr
 			},
 			Timeout:              20 * time.Minute,
@@ -1128,7 +1138,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 	}
 
 	// Look for backups in bootstrap instance
-	res, err := config.NewSqlAdminClient(config.UserAgent).BackupRuns.List(project, bootstrapInstance.Name).Do()
+	res, err := sql.NewClient(config, config.UserAgent).BackupRuns.List(project, bootstrapInstance.Name).Do()
 	if err != nil {
 		t.Fatalf("Unable to bootstrap SQL Instance. Cannot retrieve backup list: %s", err)
 	}
@@ -1142,7 +1152,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		var op *sqladmin.Operation
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (operr error) {
-				op, operr = config.NewSqlAdminClient(config.UserAgent).BackupRuns.Insert(project, bootstrapInstance.Name, backupRun).Do()
+				op, operr = sql.NewClient(config, config.UserAgent).BackupRuns.Insert(project, bootstrapInstance.Name, backupRun).Do()
 				return operr
 			},
 			Timeout:              20 * time.Minute,
@@ -1205,12 +1215,12 @@ func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
     }
 
    // Create a backupdr client and check if the vault exists, if not create a vault
-   // backupdrClient := config.NewBackupDRClient(config.UserAgent)
+   // backupdrClient := backupdr_tpg.NewClient(config, config.UserAgent)
 	vaultName := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s", project, location, vaultID)
 	projectAndLocation := fmt.Sprintf("projects/%s/locations/%s", project, location)
 
 	log.Printf("[DEBUG] Getting BackupDR vault %q", vaultName)
-	backupdrService := config.NewBackupDRClient(config.UserAgent)
+	backupdrService := backupdr_tpg.NewClient(config, config.UserAgent)
 	_, err := backupdrService.Projects.Locations.BackupVaults.Get(vaultName).Do()
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] BackupDR vault %q not found, bootstrapping", vaultName)
@@ -1226,11 +1236,11 @@ func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
 			EffectiveTime:                          effectiveTime.Format(time.RFC3339),
 			Description:                            "Created by BootstrapBackupDRVault function",
 		}
-		{{/* _, err = config.NewBackupDRClient(config.UserAgent).Projects.Locations.BackupVaults.Create(projectAndLocation, backupVault).Do() */}}
+		{{/* _, err = backupdr_tpg.NewClient(config, config.UserAgent).Projects.Locations.BackupVaults.Create(projectAndLocation, backupVault).Do() */}}
 		createCall := backupdrService.Projects.Locations.BackupVaults.Create(projectAndLocation, backupVault)
 		createCall.BackupVaultId(vaultID) // *** This is REQUIRED for the query parameter ***
 		// createCall.ValidateOnly(false) // Optional: explicit validate only flag
-		op, err := createCall.Do()	
+		op, err := createCall.Do()
 		if err != nil {
 			t.Fatalf("Error calling Create BackupDR vault %q: %s", vaultName, err)
 		}
@@ -1333,7 +1343,7 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 		t.Fatal("Could not bootstrap config.")
 	}
 
-	computeService := config.NewComputeClient(config.UserAgent)
+	computeService := tpgcompute.NewClient(config, config.UserAgent)
 	if computeService == nil {
 		t.Fatal("Could not create compute client.")
 	}
@@ -1400,7 +1410,7 @@ func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subn
 		return ""
 	}
 
-	computeService := config.NewComputeClient(config.UserAgent)
+	computeService := tpgcompute.NewClient(config, config.UserAgent)
 	if computeService == nil {
 		return ""
 	}
@@ -1469,7 +1479,7 @@ func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string
 	}
 
 	log.Printf("[DEBUG] Getting Firewall %q for Network %q", firewallName, networkName)
-	_, err := config.NewComputeClient(config.UserAgent).Firewalls.Get(project, firewallName).Do()
+	_, err := tpgcompute.NewClient(config, config.UserAgent).Firewalls.Get(project, firewallName).Do()
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] firewallName %q not found, bootstrapping", firewallName)
 		url := fmt.Sprintf("%sprojects/%s/global/firewalls", config.ComputeBasePath, project)
@@ -1515,7 +1525,7 @@ func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string
 		}
 	}
 
-	firewall, err := config.NewComputeClient(config.UserAgent).Firewalls.Get(project, firewallName).Do()
+	firewall, err := tpgcompute.NewClient(config, config.UserAgent).Firewalls.Get(project, firewallName).Do()
 	if err != nil {
 		t.Errorf("Error getting Firewall %q: %s", firewallName, err)
 	}
@@ -1538,7 +1548,7 @@ func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType 
 		t.Fatal("Could not bootstrap config.")
 	}
 
-	computeService := config.NewComputeClient(config.UserAgent)
+	computeService := tpgcompute.NewClient(config, config.UserAgent)
 	if computeService == nil {
 		t.Fatal("Could not create compute client.")
 	}
@@ -1606,7 +1616,7 @@ func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType 
 
 func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport_tpg.Config) (string, error) {
 	// Create project-1 and project-2
-	rmService := config.NewResourceManagerClient(config.UserAgent)
+	rmService := rmClient.NewClient(config, config.UserAgent)
 
 	project := &cloudresourcemanager.Project{
 		ProjectId: pid,
@@ -1643,7 +1653,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	ba := &cloudbilling.ProjectBillingInfo{
 		BillingAccountName: fmt.Sprintf("billingAccounts/%s", billing),
 	}
-	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(pid), ba).Do()
+	_, err = tpgcloudbilling.NewClient(config, config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(pid), ba).Do()
 	if err != nil {
 		return "", fmt.Errorf("error updating billing info for 'project-1' with project id %s: %w", pid, err)
 	}
@@ -1674,13 +1684,13 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 		return "", waitErr
 	}
 
-	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(p2), ba).Do()
+	_, err = tpgcloudbilling.NewClient(config, config.UserAgent).Projects.UpdateBillingInfo(resourcemanager.PrefixedProject(p2), ba).Do()
 	if err != nil {
 		return "", fmt.Errorf("error updating billing info for 'project-2' with project id %s: %w", p2, err)
 	}
 
 	// Enable the appropriate service in project-2 only
-	suService := config.NewServiceUsageClient(config.UserAgent)
+	suService := tpgserviceusage.NewClient(config, config.UserAgent)
 
 	serviceReq := &serviceusage.BatchEnableServicesRequest{
 		ServiceIds: []string{fmt.Sprintf("%s.googleapis.com", service)},
@@ -1721,7 +1731,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	}
 
 	p.Bindings = tpgiamresource.MergeBindings(append(p.Bindings, bindings...))
-	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(pid,
+	_, err = rmClient.NewClient(config, config.UserAgent).Projects.SetIamPolicy(pid,
 		&cloudresourcemanager.SetIamPolicyRequest{
 			Policy:     p,
 			UpdateMask: "bindings,etag,auditConfigs",
@@ -1792,7 +1802,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	}
 
 	p.Bindings = tpgiamresource.MergeBindings(append(p.Bindings, bindings...))
-	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(p2,
+	_, err = rmClient.NewClient(config, config.UserAgent).Projects.SetIamPolicy(p2,
 		&cloudresourcemanager.SetIamPolicyRequest{
 			Policy:     p,
 			UpdateMask: "bindings,etag,auditConfigs",
@@ -1805,7 +1815,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	// actually usable. Wait a solid 2 minutes to ensure we can use it.
 	time.Sleep(2 * time.Minute)
 
-	iamCredsService := config.NewIamCredentialsClient(config.UserAgent)
+	iamCredsService := tpgiamcredentials.NewClient(config, config.UserAgent)
 	tokenRequest := &iamcredentials.GenerateAccessTokenRequest{
 		Lifetime: "300s",
 		Scope:    []string{"https://www.googleapis.com/auth/cloud-platform"},
@@ -2397,5 +2407,125 @@ func BootstrapIntegrationsClient(t *testing.T, locationID string) BootstrapClien
 		ProjectID: projectID,
 		Region:    locationID,
 		IsGMEK:    true,
+	}
+}
+func AddBigQueryDatasetReplica(t *testing.T, projectID string, datasetID string, primaryLocation string, replicaLocation string) (string, error) {
+	ctx := context.Background()
+	config := BootstrapConfig(t)
+	if config == nil {
+		return "", fmt.Errorf("failed to bootstrap config")
+	}
+
+	client, err := bigquery.NewClient(ctx, projectID, option.WithTokenSource(config.TokenSource), option.WithUserAgent(config.UserAgent))
+	if err != nil {
+		return "", fmt.Errorf("failed to create BigQuery client: %w", err)
+	}
+	defer client.Close()
+
+	log.Printf("INFO: Attempting to create dataset '%s' in project '%s' at location '%s'", datasetID, projectID, primaryLocation)
+	datasetRef := client.Dataset(datasetID)
+	datasetMetadata := &bigquery.DatasetMetadata{
+		Location: primaryLocation,
+	}
+
+	err = datasetRef.Create(ctx, datasetMetadata)
+	if err != nil {
+		if ge, ok := err.(*googleapi.Error); ok && ge.Code == 409 {
+			log.Printf("INFO: BigQuery dataset '%s' already exists in project '%s' at location '%s'. Continuing.", datasetID, projectID, primaryLocation)
+		} else {
+			return "", fmt.Errorf("failed to create BigQuery dataset '%s': %w", datasetID, err)
+		}
+	} else {
+		log.Printf("INFO: Successfully created BigQuery dataset '%s' at location '%s'.", datasetID, primaryLocation)
+	}
+
+	sqlQuery := fmt.Sprintf(
+		"ALTER SCHEMA `%s` ADD REPLICA `%s` OPTIONS(location=`%s`)",
+		datasetID,
+		replicaLocation,
+		replicaLocation,
+	)
+
+	log.Printf("INFO: Executing BigQuery DDL query: %s", sqlQuery)
+
+	query := client.Query(sqlQuery)
+
+	job, err := query.Run(ctx)
+	if err != nil {
+		// Check if the error is an "Already Exists" error on submission
+		if ge, ok := err.(*googleapi.Error); ok && ge.Code == 409 && (strings.Contains(ge.Message, "Duplicate") || strings.Contains(ge.Message, "Already Exists")) {
+			log.Printf("INFO: Replica '%s' already exists for dataset '%s' (error on job submission). Continuing.", replicaLocation, datasetID)
+		} else {
+			return "", fmt.Errorf("failed to submit BigQuery DDL job for adding replica: %w", err)
+		}
+	} else {
+		status, waitErr := job.Wait(ctx)
+		if waitErr != nil {
+			// Check if the error is an "Already Exists" error after waiting
+			if ge, ok := waitErr.(*googleapi.Error); ok && ge.Code == 409 && (strings.Contains(ge.Message, "Duplicate") || strings.Contains(ge.Message, "Already Exists")) {
+				log.Printf("INFO: Replica '%s' already exists for dataset '%s' (error on job wait). Continuing.", replicaLocation, datasetID)
+			} else {
+				return "", fmt.Errorf("failed to wait for BigQuery job completion for adding replica: %w", waitErr)
+			}
+		} else if status != nil && status.Err() != nil {
+			// Check if the status error is an "Already Exists" error
+			if ge, ok := status.Err().(*googleapi.Error); ok && ge.Code == 409 && (strings.Contains(ge.Message, "Duplicate") || strings.Contains(ge.Message, "Already Exists")) {
+				 log.Printf("INFO: Replica '%s' already exists for dataset '%s' (error in job status). Continuing.", replicaLocation, datasetID)
+			} else {
+				return "", fmt.Errorf("BigQuery job for adding replica completed with an error: %w", status.Err())
+			}
+		} else {
+			log.Printf("INFO: Successfully added BigQuery dataset replica '%s' for dataset '%s'.", replicaLocation, datasetID)
+		}
+	}
+
+	fullDatasetLocation := fmt.Sprintf("projects/%s/datasets/%s", projectID, datasetID)
+	return fullDatasetLocation, nil
+}
+
+func CleanupBigQueryDatasetAndReplica(t *testing.T, projectID, datasetID, replicaLocation string) {
+	log.Printf("[DEBUG] Cleanup: Starting cleanup for BigQuery dataset: projects/%s/datasets/%s", projectID, datasetID)
+	cleanupCtx := context.Background()
+	config := BootstrapConfig(t)
+	if config == nil {
+		return
+	}
+
+	client, cerr := bigquery.NewClient(cleanupCtx, projectID, option.WithTokenSource(config.TokenSource), option.WithUserAgent(config.UserAgent))
+	if cerr != nil {
+		log.Printf("[ERROR] Cleanup: Failed to create BigQuery client for dataset %s: %v", datasetID, cerr)
+		return
+	}
+	defer client.Close()
+
+	// Attempt to remove the replica first
+	dropReplicaSQL := fmt.Sprintf(
+		"ALTER SCHEMA `%s` DROP REPLICA `%s`",
+		datasetID,
+		replicaLocation,
+	)
+	log.Printf("[DEBUG] Cleanup: Dropping replica with SQL: %s", dropReplicaSQL)
+	dropQuery := client.Query(dropReplicaSQL)
+	dropJob, dropErr := dropQuery.Run(cleanupCtx)
+	if dropErr != nil {
+		log.Printf("[ERROR] Cleanup: Failed to submit BigQuery DDL job for dropping replica %s of dataset %s: %v", replicaLocation, datasetID, dropErr)
+	} else {
+		dropStatus, dropWaitErr := dropJob.Wait(cleanupCtx)
+		if dropWaitErr != nil {
+			log.Printf("[ERROR] Cleanup: Failed to wait for BigQuery job completion for dropping replica %s of dataset %s: %v", replicaLocation, datasetID, dropWaitErr)
+		} else if dropStatus.Err() != nil {
+			log.Printf("[ERROR] Cleanup: BigQuery job for dropping replica %s of dataset %s completed with an error: %v", replicaLocation, datasetID, dropStatus.Err())
+		} else {
+			log.Printf("[INFO] Cleanup: Successfully dropped BigQuery dataset replica: %s for dataset %s", replicaLocation, datasetID)
+		}
+	}
+
+	// Delete the main dataset (including any remaining contents)
+	log.Printf("[DEBUG] Cleanup: Deleting main BigQuery dataset: %s", datasetID)
+	err := client.Dataset(datasetID).DeleteWithContents(cleanupCtx)
+	if err != nil {
+		log.Printf("[ERROR] Cleanup: Failed to delete BigQuery dataset %s: %v", datasetID, err)
+	} else {
+		log.Printf("[INFO] Cleanup: Successfully deleted BigQuery dataset: %s", datasetID)
 	}
 }

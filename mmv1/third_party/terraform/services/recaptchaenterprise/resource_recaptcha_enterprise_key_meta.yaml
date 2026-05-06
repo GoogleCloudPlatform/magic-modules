@@ -1,5 +1,5 @@
 resource: 'google_recaptcha_enterprise_key'
-generation_type: 'dcl'
+generation_type: 'handwritten'
 api_service_name: 'recaptchaenterprise.googleapis.com'
 api_version: 'v1'
 api_resource_type_kind: 'Key'
@@ -26,3 +26,7 @@ fields:
   - api_field: 'webSettings.allowedDomains'
   - api_field: 'webSettings.challengeSecurityPreference'
   - api_field: 'webSettings.integrationType'
+  - api_field: 'webSettings.challengeSettings.defaultSettings.scoreThreshold'
+  - field: 'web_settings.challenge_settings.action_settings.action'
+    provider_only: true
+  - api_field: 'webSettings.challengeSettings.actionSettings.scoreThreshold'

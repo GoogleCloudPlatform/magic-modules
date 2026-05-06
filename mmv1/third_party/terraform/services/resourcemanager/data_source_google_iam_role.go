@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -41,7 +43,7 @@ func dataSourceGoogleIamRoleRead(d *schema.ResourceData, meta interface{}) error
 	}
 
 	roleName := d.Get("name").(string)
-	role, err := config.NewIamClient(userAgent).Roles.Get(roleName).Do()
+	role, err := iambeta.NewClient(config, userAgent).Roles.Get(roleName).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Error reading IAM Role %s: %s", roleName, err), roleName)
 	}
@@ -58,4 +60,13 @@ func dataSourceGoogleIamRoleRead(d *schema.ResourceData, meta interface{}) error
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_iam_role",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleIamRole(),
+	}.Register()
 }

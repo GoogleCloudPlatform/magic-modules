@@ -1,0 +1,19 @@
+# use existing network with connectivity to the thirdparty datastore
+data "google_compute_network" "default" {
+  name      = "default"
+}
+
+# create a thirdparty datastore
+resource "google_vmwareengine_datastore" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "resource_name"}}"
+  location    = "{{index $.TestEnvVars "region"}}-a"
+  description = "example thirdparty datastore."
+
+  nfs_datastore {
+    third_party_file_service {
+      file_share  = "/share1"
+      network     = data.google_compute_network.default.id
+      servers     = ["10.0.0.4"]
+    }
+  }
+}

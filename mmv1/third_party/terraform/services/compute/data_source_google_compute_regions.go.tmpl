@@ -5,6 +5,7 @@ import (
 	"log"
 	"sort"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -56,7 +57,7 @@ func dataSourceGoogleComputeRegionsRead(d *schema.ResourceData, meta interface{}
 		filter = fmt.Sprintf(" (status eq %s)", s)
 	}
 
-	call := config.NewComputeClient(userAgent).Regions.List(project).Filter(filter)
+	call := NewClient(config, userAgent).Regions.List(project).Filter(filter)
 
 	resp, err := call.Do()
 	if err != nil {
@@ -84,4 +85,13 @@ func flattenRegions(regions []*compute.Region) []string {
 	}
 	sort.Strings(result)
 	return result
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_regions",
+		ProductName: "compute",
+		Type: registry.SchemaTypeDataSource,
+		Schema: DataSourceGoogleComputeRegions(),
+	}.Register()
 }

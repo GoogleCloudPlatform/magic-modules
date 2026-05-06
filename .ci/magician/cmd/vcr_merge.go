@@ -20,7 +20,7 @@ var vcrMergeCmd = &cobra.Command{
 
 	It then performs the following operations:
 	1. Get the latest closed PR matching the reference commit SHA.
-	2. Run gsutil to list, copy, and remove the vcr cassettes fixtures.
+	2. Run gcloud storage to list, copy, and remove the vcr cassettes fixtures.
 	`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -88,11 +88,12 @@ func mergeCassettes(basePath, baseBranch, prPath string, runner source.Runner) {
 
 func listCassettes(path string, runner source.Runner) error {
 	lsArgs := []string{
+		"storage",
 		"ls",
 		path,
 	}
-	fmt.Println("Running command: ", "gsutil", lsArgs)
-	ret, err := runner.Run("gsutil", lsArgs, nil)
+	fmt.Println("Running command: ", "gcloud", lsArgs)
+	ret, err := runner.Run("gcloud", lsArgs, nil)
 	if err != nil {
 		return err
 	}
@@ -102,26 +103,26 @@ func listCassettes(path string, runner source.Runner) error {
 
 func cpCassettes(src, dest string, runner source.Runner) {
 	cpArgs := []string{
-		"-m",
+		"storage",
 		"cp",
 		src,
 		dest,
 	}
-	fmt.Println("Running command: ", "gsutil", cpArgs)
-	if _, err := runner.Run("gsutil", cpArgs, nil); err != nil {
+	fmt.Println("Running command: ", "gcloud", cpArgs)
+	if _, err := runner.Run("gcloud", cpArgs, nil); err != nil {
 		fmt.Println("Error in copy: ", err)
 	}
 }
 
 func rmCassettes(dest string, runner source.Runner) {
 	rmArgs := []string{
-		"-m",
+		"storage",
 		"rm",
-		"-r",
+		"--recursive",
 		dest,
 	}
-	fmt.Println("Running command: ", "gsutil", rmArgs)
-	if _, err := runner.Run("gsutil", rmArgs, nil); err != nil {
+	fmt.Println("Running command: ", "gcloud", rmArgs)
+	if _, err := runner.Run("gcloud", rmArgs, nil); err != nil {
 		fmt.Println("Error in remove: ", err)
 	}
 }

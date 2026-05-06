@@ -53,7 +53,6 @@ sweeper:
 examples:
   - name: 'discoveryengine_cmekconfig_default'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf_test_cmek_config%s", context["random_suffix"])'
     vars:
       cmek_config_id: 'cmek-config-id'
       kms_key_name: 'kms-key-name'

@@ -103,7 +103,7 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "hashicorp", env["GITHUB_TOKEN_CLASSIC"], rnr)
 
-		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "", rnr, false)
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "", rnr, true)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -123,8 +123,8 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	// main cassettes backup
 	// incase nightly run goes wrong. this will be used to restore the cassettes
 	cassettePath := vt.CassettePath(provider.Beta)
-	args := []string{"-m", "-q", "cp", filepath.Join(cassettePath, "*"), bucketPrefix + "/main_cassettes_backup/fixtures/"}
-	if _, err := rnr.Run("gsutil", args, nil); err != nil {
+	args := []string{"storage", "cp", filepath.Join(cassettePath, "*"), bucketPrefix + "/main_cassettes_backup/fixtures/"}
+	if _, err := rnr.Run("gcloud", args, nil); err != nil {
 		return fmt.Errorf("error backup cassettes: %w", err)
 	}
 
@@ -167,6 +167,10 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 
 	if len(replayingResult.Panics) != 0 {
 		return fmt.Errorf("provider crashed while running the VCR tests in REPLAYING mode: %v", replayingResult.Panics)
+	}
+
+	if len(replayingResult.BuildFailures) != 0 {
+		return fmt.Errorf("provider failed to build during VCR tests in REPLAYING mode: %v", replayingResult.BuildFailures)
 	}
 
 	if len(replayingResult.FailedTests) != 0 {
@@ -217,23 +221,27 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		if len(recordingResult.Panics) != 0 {
 			return fmt.Errorf("provider crashed while running the VCR tests in RECORDING mode: %v", recordingResult.Panics)
 		}
+
+		if len(recordingResult.BuildFailures) != 0 {
+			return fmt.Errorf("provider failed to build during VCR tests in RECORDING mode: %v", recordingResult.BuildFailures)
+		}
 	}
 	return nil
 }
 
 func uploadLogsToGCS(src, dest string, rnr ExecRunner) (string, error) {
-	return uploadToGCS(src, dest, []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r"}, rnr)
+	return uploadToGCS(src, dest, []string{"storage", "cp", "--recursive", "--content-type=text/plain"}, rnr)
 }
 
 func uploadCassettesToGCS(src, dest string, rnr ExecRunner) (string, error) {
-	return uploadToGCS(src, dest, []string{"-m", "-q", "cp"}, rnr)
+	return uploadToGCS(src, dest, []string{"storage", "cp"}, rnr)
 }
 
 func uploadToGCS(src, dest string, opts []string, rnr ExecRunner) (string, error) {
 	fmt.Printf("uploading from %s to %s\n", src, dest)
 	args := append(opts, src, dest)
-	fmt.Println("gsutil", args)
-	return rnr.Run("gsutil", args, nil)
+	fmt.Println("gcloud", args)
+	return rnr.Run("gcloud", args, nil)
 }
 
 func formatVCRCassettesUpdateReplaying(data vcrCassetteUpdateReplayingResult) (string, error) {

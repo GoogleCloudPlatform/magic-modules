@@ -63,6 +63,8 @@ examples:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'display_name': '"tf-test Display Name Basic"'
+      # for backward compatible
+      bundle_id: '"apple.app.12345" + randomSuffix'
   - name: 'firebase_apple_app_full'
     primary_resource_id: 'full'
     min_version: 'beta'
@@ -79,6 +81,8 @@ examples:
       'app_store_id': '12345'
       'team_id': '9987654321'
       'display_name': '"tf-test Display Name Full"'
+      # for backward compatible
+      bundle_id: '"apple.app.12345" + randomSuffix'
     ignore_read_extra:
       - 'project'
       - 'deletion_policy'
