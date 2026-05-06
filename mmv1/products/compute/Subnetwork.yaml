@@ -181,6 +181,7 @@ examples:
       subnetwork_name: subnet-with-secondary-ranges
       pap_name: pap-for-secondary-ranges
       pdp_name: pdp-for-secondary-ranges
+      sub_pdp_name: sub-pdp-for-secondary-ranges
     min_version: 'beta'
 virtual_fields:
   - name: send_secondary_ip_range_if_empty
@@ -346,7 +347,7 @@ properties:
           description: |
             The IP version of the secondary range. If not specified, IPV4 is used.
           min_version: 'beta'
-          enum_values:
+          enum_values:  
             - IPV4
             - IPV6
         - name: ipCollection
