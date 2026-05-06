@@ -244,7 +244,7 @@ context := map[string]interface{}{
 		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeForwardingRule_forwardingRulePscTargetUpdateRecreate(randomSuffix, false),
+				Config: testAccComputeForwardingRule_forwardingRulePscTargetUpdateRecreate(context, false),
 			},
 			{
 				ResourceName:      "google_compute_forwarding_rule.default",
@@ -252,7 +252,7 @@ context := map[string]interface{}{
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeForwardingRule_forwardingRulePscTargetUpdateRecreate(randomSuffix, true),
+				Config: testAccComputeForwardingRule_forwardingRulePscTargetUpdateRecreate(context, true),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_forwarding_rule.default", plancheck.ResourceActionReplace),
