@@ -1008,21 +1008,37 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		"baseInstanceName":            d.Get("base_instance_name").(string),
 		"targetSize":                  int64(d.Get("target_size").(int)),
 		"listManagedInstancesResults": d.Get("list_managed_instances_results").(string),
-		"namedPorts":                  getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
-		"targetPools":                 tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)),
-		"autoHealingPolicies":         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		"versions":                    expandVersions(d.Get("version").([]interface{})),
 		"standbyPolicy":               expandStandbyPolicy(d),
-		"targetSuspendedSize":         int64(d.Get("target_suspended_size").(int)),
-		"targetStoppedSize":           int64(d.Get("target_stopped_size").(int)),
 		"instanceFlexibilityPolicy":   flexibilityPolicy,
 		"updatePolicy":                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 		"instanceLifecyclePolicy":     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
-		"allInstancesConfig":          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
-		"distributionPolicy":          expandDistributionPolicyForCreate(d),
 		"statefulPolicy":              expandStatefulPolicy(d),
 		"resourcePolicies":            expandResourcePolicies(d.Get("resource_policies").([]interface{})),
-		"targetSizePolicy":            expandTargetSizePolicy(d.Get("target_size_policy").([]interface{})),
+	}
+	if namedPorts := getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()); len(namedPorts) > 0 {
+		body["namedPorts"] = namedPorts
+	}
+	if tp := tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)); len(tp) > 0 {
+		body["targetPools"] = tp
+	}
+	if ahp := expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})); len(ahp) > 0 {
+		body["autoHealingPolicies"] = ahp
+	}
+	if ts := d.Get("target_suspended_size").(int); ts > 0 {
+		body["targetSuspendedSize"] = int64(ts)
+	}
+	if ts := d.Get("target_stopped_size").(int); ts > 0 {
+		body["targetStoppedSize"] = int64(ts)
+	}
+	if aic := expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})); aic != nil {
+		body["allInstancesConfig"] = aic
+	}
+	if dp := expandDistributionPolicyForCreate(d); dp != nil {
+		body["distributionPolicy"] = dp
+	}
+	if tsp := expandTargetSizePolicy(d.Get("target_size_policy").([]interface{})); tsp != nil {
+		body["targetSizePolicy"] = tsp
 	}
 	{{- if ne $.TargetVersionName "ga" }}
 	body["params"] = expandInstanceGroupManagerParams(d)
@@ -1679,6 +1695,9 @@ func expandInstanceFlexibilityPolicy(d *schema.ResourceData) (map[string]interfa
 		}
 	}
 
+	if len(instanceSelections) == 0 {
+		return map[string]interface{}{}, nil
+	}
 	return map[string]interface{}{
 		"instanceSelections": instanceSelections,
 	}, nil
