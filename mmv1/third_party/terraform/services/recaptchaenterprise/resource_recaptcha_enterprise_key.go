@@ -458,20 +458,19 @@ func resourceRecaptchaEnterpriseKeyRead(d *schema.ResourceData, meta interface{}
 	if err = d.Set("terraform_labels", flattenRecaptchaEnterpriseKeyTerraformLabels(res.Labels, d)); err != nil {
 		return fmt.Errorf("error setting terraform_labels in state: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 func resourceRecaptchaEnterpriseKeyUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceRecaptchaEnterpriseKey) {
 		return ResourceRecaptchaEnterpriseKey().Read(d, meta)
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -523,13 +522,13 @@ func resourceRecaptchaEnterpriseKeyUpdate(d *schema.ResourceData, meta interface
 }
 
 func resourceRecaptchaEnterpriseKeyDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {

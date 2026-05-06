@@ -187,11 +187,10 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("continue_on_error", flattenApigeeFlowhookContinueOnError(res["continueOnError"], d, config)); err != nil {
 		return fmt.Errorf("Error reading Flowhook: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
@@ -205,13 +204,13 @@ func resourceApigeeFlowhookUpdate(d *schema.ResourceData, meta interface{}) erro
 //UDP update end
 
 func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

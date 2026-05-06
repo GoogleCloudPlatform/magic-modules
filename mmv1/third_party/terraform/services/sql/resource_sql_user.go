@@ -443,11 +443,11 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -491,11 +491,11 @@ func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
 }
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceSqlUser) {
 		return ResourceSqlUser().Read(d, meta)
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -578,7 +578,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {

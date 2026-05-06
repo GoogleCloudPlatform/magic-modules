@@ -68,21 +68,20 @@ func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interfac
 	if err := flattenResourceLoggingSink(d, sink); err != nil {
 		return err
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 
 func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingBillingAccountSink) {
 		return ResourceLoggingBillingAccountSink().Read(d, meta)
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -102,13 +101,13 @@ func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceLoggingBillingAccountSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

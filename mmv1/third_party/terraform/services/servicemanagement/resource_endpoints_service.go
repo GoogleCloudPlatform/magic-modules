@@ -291,11 +291,11 @@ func expandEndpointServiceConfigSource(d *schema.ResourceData, meta interface{})
 }
 
 func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceEndpointsService) {
 		return ResourceEndpointsService().Read(d, meta)
 	}
-	
+
 	// This update is not quite standard for a terraform resource.  Instead of
 	// using the go client library to send an HTTP request to update something
 	// serverside, we have to push a new configuration, wait for it to be
@@ -366,13 +366,13 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -416,11 +416,10 @@ func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("endpoints", flattenServiceManagementEndpoints(service.Endpoints)); err != nil {
 		return fmt.Errorf("Error setting endpoints: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }

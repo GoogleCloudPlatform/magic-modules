@@ -340,20 +340,18 @@ func resourceApikeysKeyRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error setting uid in state: %s", err)
 	}
 
-	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 func resourceApikeysKeyUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceApikeysKey) {
 		return ResourceApikeysKey().Read(d, meta)
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -401,13 +399,13 @@ func resourceApikeysKeyUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceApikeysKeyDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {

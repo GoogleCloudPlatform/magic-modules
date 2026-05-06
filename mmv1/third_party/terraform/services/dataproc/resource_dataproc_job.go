@@ -417,22 +417,22 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error setting presto_config: %s", err)
 		}
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

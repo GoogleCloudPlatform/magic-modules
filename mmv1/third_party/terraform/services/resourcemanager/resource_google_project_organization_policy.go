@@ -129,21 +129,20 @@ func resourceGoogleProjectOrganizationPolicyRead(d *schema.ResourceData, meta in
 	if err := d.Set("update_time", policy.UpdateTime); err != nil {
 		return fmt.Errorf("Error setting update_time: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 
 func resourceGoogleProjectOrganizationPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleProjectOrganizationPolicy) {
 		return ResourceGoogleProjectOrganizationPolicy().Read(d, meta)
 	}
-	
+
 	if isOrganizationPolicyUnset(d) {
 		return resourceGoogleProjectOrganizationPolicyDelete(d, meta)
 	}
@@ -156,13 +155,13 @@ func resourceGoogleProjectOrganizationPolicyUpdate(d *schema.ResourceData, meta 
 }
 
 func resourceGoogleProjectOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

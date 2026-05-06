@@ -97,21 +97,20 @@ func resourceLoggingFolderSinkRead(d *schema.ResourceData, meta interface{}) err
 	if err := d.Set("intercept_children", sink.InterceptChildren); err != nil {
 		return fmt.Errorf("Error setting intercept_children: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 
 func resourceLoggingFolderSinkUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingFolderSink) {
 		return ResourceLoggingFolderSink().Read(d, meta)
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -131,13 +130,13 @@ func resourceLoggingFolderSinkUpdate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceLoggingFolderSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

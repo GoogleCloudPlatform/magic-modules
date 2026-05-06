@@ -210,11 +210,11 @@ func resourceApigeeApiCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceApigeeApiUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceApigeeApi) {
 		return ResourceApigeeApi().Read(d, meta)
 	}
-	
+
 	//For how API proxy api is implemented, just treat an update as create, when the name is same, it will create a new revision
 	return resourceApigeeApiCreate(d, meta)
 }
@@ -271,11 +271,11 @@ func resourceApigeeApiRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("md5hash", "UNKNOWN")
 		d.Set("detect_md5hash", "UNKNOWN")
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -298,13 +298,13 @@ func getApigeeApiLastModifiedAt(d *schema.ResourceData) string {
 }
 
 func resourceApigeeApiDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

@@ -208,11 +208,10 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("management_project", folder.ManagementProject); err != nil {
 		return fmt.Errorf("Error setting management_project: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
@@ -287,13 +286,13 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

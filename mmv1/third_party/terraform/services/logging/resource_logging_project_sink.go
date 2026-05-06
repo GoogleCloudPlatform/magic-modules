@@ -175,20 +175,20 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("Error setting unique_writer_identity: %s", err)
 		}
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingProjectSink) {
 		return ResourceLoggingProjectSink().Read(d, meta)
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -219,13 +219,13 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	name := d.Get("name")
 	for _, restrictedName := range []string{"_Required", "_Default"} {
 		if name == restrictedName {

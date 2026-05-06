@@ -281,11 +281,11 @@ func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error setting secondary_disk: %s", err)
 	}
 	d.SetId(resourceId)
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -298,13 +298,13 @@ func resourceDiskAsyncReplicationUpdate(d *schema.ResourceData, meta interface{}
 //UDP update end
 
 func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config, userAgent, err := asyncReplicationGetConfigAndUserAgent(d, meta)
 	if err != nil {
 		return err

@@ -251,11 +251,10 @@ func resourceFirebaserulesRulesetRead(d *schema.ResourceData, meta interface{}) 
 	if err = d.Set("name", res.Name); err != nil {
 		return fmt.Errorf("error setting name in state: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
@@ -269,13 +268,13 @@ func resourceFirebaserulesRulesetUpdate(d *schema.ResourceData, meta interface{}
 //UDP update end
 
 func resourceFirebaserulesRulesetDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {

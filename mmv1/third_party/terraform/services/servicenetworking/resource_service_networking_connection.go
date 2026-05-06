@@ -238,20 +238,20 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 	if err := d.Set("reserved_peering_ranges", connection.ReservedPeeringRanges); err != nil {
 		return fmt.Errorf("Error setting reserved_peering_ranges: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceServiceNetworkingConnection) {
 		return ResourceServiceNetworkingConnection().Read(d, meta)
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -309,13 +309,11 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
 
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

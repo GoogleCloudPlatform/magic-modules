@@ -183,11 +183,10 @@ func resourceSiteVerificationOwnerRead(d *schema.ResourceData, meta interface{})
 		d.SetId("")
 		return nil
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
@@ -201,13 +200,13 @@ func resourceSiteVerificationOwnerUpdate(d *schema.ResourceData, meta interface{
 //UDP update end
 
 func resourceSiteVerificationOwnerDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

@@ -242,21 +242,20 @@ func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface
 	if err := d.Set("restore_policy", flattenRestoreOrganizationPolicy(policy.RestoreDefault)); err != nil {
 		return fmt.Errorf("Error setting restore_policy: %s", err)
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 
 func resourceGoogleOrganizationPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleOrganizationPolicy) {
 		return ResourceGoogleOrganizationPolicy().Read(d, meta)
 	}
-	
+
 	if isOrganizationPolicyUnset(d) {
 		return resourceGoogleOrganizationPolicyDelete(d, meta)
 	}
@@ -269,13 +268,13 @@ func resourceGoogleOrganizationPolicyUpdate(d *schema.ResourceData, meta interfa
 }
 
 func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

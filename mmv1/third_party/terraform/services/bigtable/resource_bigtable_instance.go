@@ -395,21 +395,20 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("Error setting force_destroy: %s", err)
 		}
 	}
-	
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 
 func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceBigtableInstance) {
 		return ResourceBigtableInstance().Read(d, meta)
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -477,13 +476,13 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Deleting BigTable instance %q", d.Id())
-	
+
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	
+
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
