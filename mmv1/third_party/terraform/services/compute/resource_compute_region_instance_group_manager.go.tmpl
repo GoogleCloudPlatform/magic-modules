@@ -1072,7 +1072,7 @@ func computeRIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) 
 	conf := retry.StateChangeConf{
 		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
 		Target:  []string{"created"},
-		Refresh: waitForInstancesRefreshFunc(getRegionalManager, waitForUpdates, d, meta),
+		Refresh: waitForRegionInstancesRefreshFunc(getRegionalManager, waitForUpdates, d, meta),
 		Timeout: d.Timeout(schema.TimeoutCreate),
 	}
 	_, err := conf.WaitForState()
@@ -1082,7 +1082,7 @@ func computeRIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-type getInstanceManagerFunc func(*schema.ResourceData, interface{}) (map[string]interface{}, error)
+type getRegionInstanceManagerFunc func(*schema.ResourceData, interface{}) (map[string]interface{}, error)
 
 func getRegionalManager(d *schema.ResourceData, meta interface{}) (map[string]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
@@ -1118,7 +1118,7 @@ func getRegionalManager(d *schema.ResourceData, meta interface{}) (map[string]in
 	return res, nil
 }
 
-func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, d *schema.ResourceData, meta interface{}) retry.StateRefreshFunc {
+func waitForRegionInstancesRefreshFunc(f getRegionInstanceManagerFunc, waitForUpdates bool, d *schema.ResourceData, meta interface{}) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		m, err := f(d, meta)
 		if err != nil {
