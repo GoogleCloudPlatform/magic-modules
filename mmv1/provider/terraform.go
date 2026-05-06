@@ -124,13 +124,17 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 	t.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
 }
 
+func (t *Terraform) makeFolder(filePath ...string) string {
+	targetFolder := path.Join(filePath...)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	return targetFolder
+}
+
 func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
 	if generateCode {
-		productName := t.Product.ApiName
-		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-		}
+		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 		if object.FrameworkResource {
 			fmt.Printf("\n\x1b[1;33mWARNING:\x1b[0m\n")
 			fmt.Printf("The plugin framework generation code is considered a WIP and experimental.\nAre you sure you want to use it for %s? (y/n) ", t.ResourceGoFilename(object))
@@ -154,10 +158,7 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 	}
 
 	if generateDocs {
-		targetFolder := path.Join(outputFolder, "website", "docs", "r")
-		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-		}
+		targetFolder := t.makeFolder(outputFolder, "website", "docs", "r")
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
 		templateData.GenerateDocumentationFile(targetFilePath, object)
 	}
@@ -178,15 +179,11 @@ func (t *Terraform) GenerateResourceFile(object api.Resource, targetFilePath str
 }
 
 func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData TemplateData, outputFolder string) {
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	target := fmt.Sprintf("resource_%s_generated_meta.yaml", t.FullResourceName(object))
 	targetFilePath := path.Join(targetFolder, target)
 	templateData.GenerateMetadataFile(targetFilePath, object)
-	t.addHashicorpCopyRightHeader(outputFolder, path.Join(t.FolderName(), "services", productName, target))
+	t.addHashicorpCopyRightHeader(outputFolder, path.Join(t.FolderName(), "services", t.Product.ApiName, target))
 }
 
 // GenerateResourceMetadataFile is used by the Bazel version of the MM compiler to generate the specified
@@ -214,11 +211,7 @@ func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateDat
 		return
 	}
 
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateTestFileLegacy(targetFilePath, object)
 }
@@ -245,11 +238,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 		return
 	}
 
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateTestFile(targetFilePath, object)
 }
@@ -259,11 +248,7 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 		return
 	}
 
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.ResourceGoFilename(object)))
 	templateData.GenerateSweeperFile(targetFilePath, object)
 }
@@ -287,11 +272,7 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 		return
 	}
 
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
 	templateData.GenerateDataSourceFile(targetFilePath, object)
 }
@@ -301,11 +282,7 @@ func (t *Terraform) GenerateSingularDataSourceTestsLegacy(object api.Resource, t
 		return
 	}
 
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateDataSourceTestFileLegacy(targetFilePath, object)
 
@@ -324,11 +301,7 @@ func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templat
 		return
 	}
 
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateDataSourceTestFile(targetFilePath, object)
 
@@ -338,11 +311,7 @@ func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templat
 // This will be used to seed the directory and add a package-level comment
 // specific to the product.
 func (t *Terraform) GenerateProduct(outputFolder string) {
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
-
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, "product.go")
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	templateData.GenerateProductFile(targetFilePath, *t.Product)
@@ -368,10 +337,7 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 		return
 	}
 
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
+	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
@@ -394,11 +360,7 @@ func (t *Terraform) GenerateIamPolicyLegacy(object api.Resource, templateData Te
 		object.IamPolicy.ExampleConfigBody = "templates/terraform/iam/iam_attributes_legacy.go.tmpl"
 	}
 	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
-		productName := t.Product.ApiName
-		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-		}
+		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
 
@@ -430,11 +392,7 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 	}
 
 	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
-		productName := t.Product.ApiName
-		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-		}
+		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
 
@@ -453,17 +411,11 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 }
 
 func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	resourceDocFolder := path.Join(outputFolder, "website", "docs", "r")
-	if err := os.MkdirAll(resourceDocFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", resourceDocFolder, err))
-	}
+	resourceDocFolder := t.makeFolder(outputFolder, "website", "docs", "r")
 	targetFilePath := path.Join(resourceDocFolder, fmt.Sprintf("%s_iam.html.markdown", t.FullResourceName(object)))
 	templateData.GenerateIamResourceDocumentationFile(targetFilePath, object)
 
-	datasourceDocFolder := path.Join(outputFolder, "website", "docs", "d")
-	if err := os.MkdirAll(datasourceDocFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", datasourceDocFolder, err))
-	}
+	datasourceDocFolder := t.makeFolder(outputFolder, "website", "docs", "d")
 	targetFilePath = path.Join(datasourceDocFolder, fmt.Sprintf("%s_iam_policy.html.markdown", t.FullResourceName(object)))
 	templateData.GenerateIamDatasourceDocumentationFile(targetFilePath, object)
 }

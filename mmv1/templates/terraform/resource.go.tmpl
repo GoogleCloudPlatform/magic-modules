@@ -292,27 +292,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.CreateUri}}"))
+    if err != nil {
+        return err
+    }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
-    if err != nil {
-        return err
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
-    loc := tpgresource.LocationFromId(urlFormatted)
-
-    basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
-    if err != nil {
-        return fmt.Errorf("Error qualifying Create base path for {{ $.Name -}}: %s", err)
-    }
-    
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.CreateUri}}")
-    url = fmt.Sprintf("%s%s", basePath, url)
-{{ else }}
-
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
 {{- end }}
-    if err != nil {
-        return err
-    }
 
     log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
 {{- if $.NestedQuery -}}
@@ -564,27 +552,15 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
 
-{{ if $.ProductMetadata.Version.RepEnabled }}
-        urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
-        if err != nil {
-            return err
-        }
-        loc := tpgresource.LocationFromId(urlFormatted)
-
-        basePath := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
-        if err != nil {
-            return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
-        }
-
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}")
-        url = fmt.Sprintf("%s%s", basePath, url)
-{{ else }}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
-{{- end }}
-
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}"))
         if err != nil {
             return nil, err
         }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+        }
+{{- end }}
 
         billingProject := ""
 
@@ -672,26 +648,15 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}{{$.ReadQueryParams}}"))
+    if err != nil {
+        return err
+    }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
-    if err != nil {
-        return err
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
-    loc := tpgresource.LocationFromId(urlFormatted)
-
-    basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
-    if err != nil {
-        return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
-    }
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
-    url = fmt.Sprintf("%s%s", basePath, url)
-{{ else }}
-
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
 {{- end }}
-    if err != nil {
-        return err
-    }
 
     billingProject := ""
 
@@ -815,34 +780,11 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-{{ range $prop := $.GettableProperties }}
-{{if $prop.FlattenObject -}}
-// Terraform must set the top level schema field, but since this object contains collapsed properties
-// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
-    if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
-        if gerr, ok := flattenedProp.(*googleapi.Error); ok {
-            return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
-        }
-        casted := flattenedProp.([]interface{})[0]
-        if casted != nil {
-            for k, v := range casted.(map[string]interface{}) {
-                if err := d.Set(k, v); err != nil {
-                    return fmt.Errorf("Error setting %s: %s", k, err)
-                }
-            }
-        }
+    err = Resource{{ $.ResourceName -}}Flatten(d, meta, res, config, {{- if $.HasProject }}project,{{ end }} userAgent, billingProject, url, headers)
+    if err != nil {
+        return err
     }
-{{-    else -}}
-    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-    }
-{{- end}}
-{{- end}}
-{{if $.HasSelfLink -}}
-    if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-    }
-{{- end}}
+
 {{ if and (not $.ExcludeIdentityGeneration) (not $.ExcludeRead) }}
     identity, err := d.Identity()
     if err == nil && identity != nil {
@@ -962,22 +904,15 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{-             end}}
 
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    loc := tpgresource.LocationFromId(d.Id())
-
-    basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
-    if err != nil {
-        return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
-    }
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.UpdateUri }}")
-    url = fmt.Sprintf("%s%s", basePath, url)
-{{ else }}
-
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUri }}")
-{{- end }}
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{ $.UpdateUri }}"))
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+        return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
 
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
@@ -1072,22 +1007,15 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $group.FingerprintName }}
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        loc := tpgresource.LocationFromId(d.Id())
-
-        basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
-        if err != nil {
-            return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
-        }
-        getUrl, err := tpgresource.ReplaceVars(d, config, "{{ $.UpdateUri }}")
-        getUrl = fmt.Sprintf("%s%s", basePath, getUrl)
-{{ else }}
-
-        getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
-{{- end }}
+        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}"))
         if err != nil {
             return err
         }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(getUrl, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", getUrl)
+        }
+{{- end }}
 {{		                if $.SupportsIndirectUserProjectOverride -}}
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
@@ -1166,21 +1094,15 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         transport_tpg.MutexStore.Lock(lockName)
         defer transport_tpg.MutexStore.Unlock(lockName)
 {{-                 end}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        loc := tpgresource.LocationFromId(d.Id())
-
-        basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
-        if err != nil {
-            return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
-        }
-        url, err := tpgresource.ReplaceVars(d, config, "{{ $group.UpdateUrl }}")
-        url = fmt.Sprintf("%s%s", basePath, url)
-{{ else }}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $group.UpdateUrl }}"){{- end }}
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{ $group.UpdateUrl }}"))
         if err != nil {
             return err
         }
-
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+        }
+{{- end }}
 
         headers := make(http.Header)
 {{                  if $.CustomCode.PreUpdate -}}
@@ -1303,22 +1225,15 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     transport_tpg.MutexStore.Lock(lockName)
     defer transport_tpg.MutexStore.Unlock(lockName)
     {{- end }}
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    loc := tpgresource.LocationFromId(d.Id())
-
-    basePath, err := transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config, loc)
-    if err != nil {
-        return fmt.Errorf("Error qualifying base path for {{ $.Name -}}: %s", err)
-    }
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.DeleteUri}}")
-    url = fmt.Sprintf("%s%s", basePath, url)
-{{ else }}
-
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
-{{- end }}
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.DeleteUri}}"))
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
     {{/*If the deletion of the object requires sending a request body, the custom code will set 'obj' */}}
     var obj map[string]interface{}
     {{- if and $.NestedQuery $.NestedQuery.ModifyByPatch }}
@@ -1541,3 +1456,40 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     return nil
 }
 {{- end }}
+
+{{ if not $.ExcludeRead }}
+func Resource{{ $.ResourceName -}}Flatten(d *schema.ResourceData, meta interface{}, res map[string]interface{}, config *transport_tpg.Config,{{if $.HasProject -}}project string, {{end -}}userAgent string, billingProject string, url string, headers http.Header) error {
+{{- if or $.GettableProperties $.HasSelfLink }}
+var err error
+{{- end }}
+{{ range $prop := $.GettableProperties }}
+{{if $prop.FlattenObject -}}
+// Terraform must set the top level schema field, but since this object contains collapsed properties
+// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
+if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
+    if gerr, ok := flattenedProp.(*googleapi.Error); ok {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
+    }
+    casted := flattenedProp.([]interface{})[0]
+    if casted != nil {
+        for k, v := range casted.(map[string]interface{}) {
+            if err := d.Set(k, v); err != nil {
+                return fmt.Errorf("Error setting %s: %s", k, err)
+            }
+        }
+    }
+}
+{{- else -}}
+    if err = d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end}}
+{{- end}}
+{{if $.HasSelfLink -}}
+    if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end }}
+    return nil
+}
+{{- end -}}

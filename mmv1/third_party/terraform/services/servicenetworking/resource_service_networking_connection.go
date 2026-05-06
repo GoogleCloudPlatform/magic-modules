@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -62,10 +65,11 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 				Description: `Provider peering service that is managing peering connectivity for a service provider organization. For Google services that support this functionality it is 'servicenetworking.googleapis.com'.`,
 			},
 			"reserved_peering_ranges": {
-				Type:        schema.TypeList,
-				Required:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `Named IP address range(s) of PEERING type reserved for this service provider. Note that invoking this method with a different range when connection is already established will not reallocate already provisioned service producer subnetworks.`,
+				Type:             schema.TypeList,
+				Required:         true,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				DiffSuppressFunc: stringListDiffSuppress,
+				Description:      `Named IP address range(s) of PEERING type reserved for this service provider. Note that invoking this method with a different range when connection is already established will not reallocate already provisioned service producer subnetworks.`,
 			},
 			"deletion_policy": {
 				Type:         schema.TypeString,
@@ -123,7 +127,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			createCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Create(parentService, connection)
+			createCall := NewClient(config, userAgent).Services.Connections.Create(parentService, connection)
 			if config.UserProjectOverride {
 				createCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -140,7 +144,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Cannot modify allocated ranges in CreateConnection.") && d.Get("update_on_creation_fail").(bool) {
-			patchCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
+			patchCall := NewClient(config, userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
 			if config.UserProjectOverride {
 				patchCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -195,7 +199,7 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 	}
 
 	parentService := formatParentService(connectionId.Service)
-	readCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.List(parentService).Network(serviceNetworkingNetworkName)
+	readCall := NewClient(config, userAgent).Services.Connections.List(parentService).Network(serviceNetworkingNetworkName)
 	if config.UserProjectOverride {
 		readCall.Header().Add("X-Goog-User-Project", project)
 	}
@@ -227,9 +231,14 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 	if err := d.Set("peering", connection.Peering); err != nil {
 		return fmt.Errorf("Error setting peering: %s", err)
 	}
+
+	// removed the intermediate `ranges` variable — it was a
+	// leftover from when sort.Strings() lived here. The DiffSuppressFunc
+	// already handles ordering, so we write the API response directly to state.
 	if err := d.Set("reserved_peering_ranges", connection.ReservedPeeringRanges); err != nil {
 		return fmt.Errorf("Error setting reserved_peering_ranges: %s", err)
 	}
+
 	return nil
 }
 
@@ -273,7 +282,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 			project = bp
 		}
 
-		patchCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
+		patchCall := NewClient(config, userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
 		if config.UserProjectOverride {
 			patchCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -323,7 +332,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 		ConsumerNetwork: serviceNetworkingNetworkName,
 	}
 
-	deleteCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.DeleteConnection(parentService+"/connections/servicenetworking-googleapis-com", deleteConnectionRequest)
+	deleteCall := NewClient(config, userAgent).Services.Connections.DeleteConnection(parentService+"/connections/servicenetworking-googleapis-com", deleteConnectionRequest)
 	if config.UserProjectOverride {
 		deleteCall.Header().Add("X-Goog-User-Project", project)
 	}
@@ -415,7 +424,7 @@ func RetrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *transp
 		billingProject = bp
 	}
 
-	getProjectCall := config.NewResourceManagerClient(userAgent).Projects.Get(pid)
+	getProjectCall := rmClient.NewClient(config, userAgent).Projects.Get(pid)
 	if config.UserProjectOverride {
 		getProjectCall.Header().Add("X-Goog-User-Project", billingProject)
 	}
@@ -433,7 +442,6 @@ func RetrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *transp
 
 	// return the network name formatting unique to this API
 	return fmt.Sprintf("projects/%v/global/networks/%v", project.ProjectNumber, networkName), nil
-
 }
 
 const parentServicePattern = "^services/.+$"
@@ -456,4 +464,38 @@ func init() {
 		Type:        registry.SchemaTypeResource,
 		Schema:      ResourceServiceNetworkingConnection(),
 	}.Register()
+}
+
+// stringListDiffSuppress suppresses diffs for TypeList fields where the
+// order of elements does not matter. It derives the root key from k by
+// stripping the element index suffix.
+func stringListDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	root := k
+	if idx := strings.IndexByte(k, '.'); idx != -1 {
+		root = k[:idx]
+	}
+
+	o, n := d.GetChange(root)
+
+	oldList, ok1 := o.([]interface{})
+	newList, ok2 := n.([]interface{})
+
+	if !ok1 || !ok2 || len(oldList) != len(newList) {
+		return false
+	}
+
+	oldStrs := make([]string, len(oldList))
+	for i, v := range oldList {
+		oldStrs[i] = fmt.Sprintf("%v", v)
+	}
+
+	newStrs := make([]string, len(newList))
+	for i, v := range newList {
+		newStrs[i] = fmt.Sprintf("%v", v)
+	}
+
+	sort.Strings(oldStrs)
+	sort.Strings(newStrs)
+
+	return reflect.DeepEqual(oldStrs, newStrs)
 }

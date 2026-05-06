@@ -1,18 +1,24 @@
 package dataproc
 
 import (
-	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+	"log"
+
+	"google.golang.org/api/dataproc/v1"
+	"google.golang.org/api/option"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// The Client is the base struct of all operations.  This will receive the
-// Get, Delete, List, and Apply operations on all resources.
-type Client struct {
-	Config *dcl.Config
-}
-
-// NewClient creates a client that retries all operations a few times each.
-func NewClient(c *dcl.Config) *Client {
-	return &Client{
-		Config: c,
+func NewClient(c *transport_tpg.Config, userAgent string) *dataproc.Service {
+	dataprocClientBasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c))
+	log.Printf("[INFO] Instantiating Google Cloud Dataproc client for path %s", dataprocClientBasePath)
+	clientDataproc, err := dataproc.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client dataproc: %s", err)
+		return nil
 	}
+	clientDataproc.UserAgent = userAgent
+	clientDataproc.BasePath = dataprocClientBasePath
+
+	return clientDataproc
 }

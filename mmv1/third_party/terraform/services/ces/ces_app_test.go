@@ -136,7 +136,7 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   model_settings {
-    model       = "gemini-2.5-flash-001"
+    model       = "gemini-3.0-flash-001"
     temperature = 0.5
   }
 
@@ -229,7 +229,6 @@ resource "google_ces_app" "ces_app_basic" {
   client_certificate_settings {
     tls_certificate = file("test-fixtures/cert.pem")
     private_key = google_secret_manager_secret_version.fake_secret_version.name
-    passphrase = "fakepassphrase"
   }
 
 
@@ -271,7 +270,7 @@ resource "google_ces_app" "ces_app_basic" {
 
   language_settings {
     default_language_code    = "en-ES"
-    supported_language_codes = ["en-US", "fr-FR"]
+    supported_language_codes = ["en-US", "fr-FR", "es-ES"]
     enable_multilingual_support = false
     fallback_action          = "escalate"
   }
@@ -328,7 +327,7 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   model_settings {
-    model       = "gemini-2.0-flash"
+    model       = "gemini-3.0-flash-001"
     temperature = 1.0
   }
 
@@ -420,7 +419,6 @@ resource "google_ces_app" "ces_app_basic" {
   client_certificate_settings {
     tls_certificate = file("test-fixtures/cert.pem")
     private_key = google_secret_manager_secret_version.fake_secret_version.name
-    passphrase = "fakepassphraseupdated"
   }
 
   # Root agent should not be specified when creating an app

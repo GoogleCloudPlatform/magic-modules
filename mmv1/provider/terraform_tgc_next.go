@@ -112,7 +112,9 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 		log.Printf("Error adding examples from handwritten tests: %v", err)
 	}
 
-	tgc.GenerateResourceTests(object, *templateData, outputFolder)
+	if err := tgc.GenerateResourceTests(object, *templateData, outputFolder); err != nil {
+		log.Fatalf("Error generating resource tests: %v", err)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -130,16 +132,24 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 	}
 
 	templatePath := "templates/tgc_next/services/resource.go.tmpl"
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
+	fileName := fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name))
+	targetFilePath := path.Join(targetFolder, fileName)
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+	tgc.replaceImportPath(targetFolder, fileName)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
-func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) error {
 	if len(object.TGCTests) == 0 {
-		return
+		return fmt.Errorf("No TGC tests for resource %s", object.Name)
+	}
+
+	for _, test := range object.TGCTests {
+		if !strings.HasPrefix(test.Name, "TestAcc") {
+			return fmt.Errorf("TGC test name %s for resource %s does not start with TestAcc", test.Name, object.Name)
+		}
 	}
 
 	productName := tgc.Product.ApiName
@@ -149,6 +159,7 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
 	templateData.GenerateTGCNextTestFile(targetFilePath, object)
+	return nil
 }
 
 // GenerateProduct creates the product.go file for a given service directory.
@@ -171,17 +182,18 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 
 	resourceConverters := map[string]string{
 		// common
-		"pkg/transport/config.go":                        "third_party/terraform/transport/config.go.tmpl",
-		"pkg/transport/provider_handwritten_endpoint.go": "third_party/terraform/transport/provider_handwritten_endpoint.go",
-		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go",
-		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
-		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
-		"pkg/provider/provider_register_services.go":     "templates/tgc_next/provider/provider_register_services.go.tmpl",
-		"pkg/registry/registry.go":                       "third_party/terraform/registry/registry.go",
+		"pkg/transport/config.go":                    "third_party/terraform/transport/config.go.tmpl",
+		"pkg/tpgresource/common_diff_suppress.go":    "third_party/terraform/tpgresource/common_diff_suppress.go",
+		"pkg/provider/provider.go":                   "third_party/terraform/provider/provider.go.tmpl",
+		"pkg/provider/provider_validators.go":        "third_party/terraform/provider/provider_validators.go",
+		"pkg/provider/provider_register_services.go": "templates/tgc_next/provider/provider_register_services.go.tmpl",
+		"pkg/registry/registry.go":                   "third_party/terraform/registry/registry.go",
 
 		// services
+		"pkg/services/compute/client.go":                   "third_party/terraform/services/compute/client.go.tmpl",
 		"pkg/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"pkg/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
+		"pkg/services/container/client.go":                 "third_party/terraform/services/container/client.go.tmpl",
 
 		// tfplan2cai
 		"pkg/tfplan2cai/converters/resource_converters.go": "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
@@ -241,30 +253,34 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 	resourceConverters := map[string]string{
 		// common
-		"pkg/transport/batcher.go":                 "third_party/terraform/transport/batcher.go",
-		"pkg/transport/retry_transport.go":         "third_party/terraform/transport/retry_transport.go",
-		"pkg/transport/retry_utils.go":             "third_party/terraform/transport/retry_utils.go",
-		"pkg/transport/header_transport.go":        "third_party/terraform/transport/header_transport.go",
-		"pkg/transport/error_retry_predicates.go":  "third_party/terraform/transport/error_retry_predicates.go",
-		"pkg/transport/bigtable_client_factory.go": "third_party/terraform/transport/bigtable_client_factory.go",
-		"pkg/transport/transport.go":               "third_party/terraform/transport/transport.go",
-		"pkg/tpgresource/utils.go":                 "third_party/terraform/tpgresource/utils.go",
-		"pkg/tpgresource/self_link_helpers.go":     "third_party/terraform/tpgresource/self_link_helpers.go",
-		"pkg/tpgresource/hashcode.go":              "third_party/terraform/tpgresource/hashcode.go",
-		"pkg/tpgresource/regional_utils.go":        "third_party/terraform/tpgresource/regional_utils.go",
-		"pkg/tpgresource/field_helpers.go":         "third_party/terraform/tpgresource/field_helpers.go",
-		"pkg/tpgresource/service_scope.go":         "third_party/terraform/tpgresource/service_scope.go",
-		"pkg/provider/mtls_util.go":                "third_party/terraform/provider/mtls_util.go",
-		"pkg/verify/validation.go":                 "third_party/terraform/verify/validation.go",
-		"pkg/verify/path_or_contents.go":           "third_party/terraform/verify/path_or_contents.go",
-		"pkg/version/version.go":                   "third_party/terraform/version/version.go",
+		"pkg/transport/base_url.go":               "third_party/terraform/transport/base_url.go",
+		"pkg/transport/batcher.go":                "third_party/terraform/transport/batcher.go",
+		"pkg/transport/error_retry_predicates.go": "third_party/terraform/transport/error_retry_predicates.go",
+		"pkg/transport/header_transport.go":       "third_party/terraform/transport/header_transport.go",
+		"pkg/transport/mtls_util.go":              "third_party/terraform/transport/mtls_util.go",
+		"pkg/transport/retry_transport.go":        "third_party/terraform/transport/retry_transport.go",
+		"pkg/transport/retry_utils.go":            "third_party/terraform/transport/retry_utils.go",
+		"pkg/transport/transport.go":              "third_party/terraform/transport/transport.go",
+		"pkg/tpgresource/utils.go":                "third_party/terraform/tpgresource/utils.go",
+		"pkg/tpgresource/self_link_helpers.go":    "third_party/terraform/tpgresource/self_link_helpers.go",
+		"pkg/tpgresource/hashcode.go":             "third_party/terraform/tpgresource/hashcode.go",
+		"pkg/tpgresource/regional_utils.go":       "third_party/terraform/tpgresource/regional_utils.go",
+		"pkg/tpgresource/field_helpers.go":        "third_party/terraform/tpgresource/field_helpers.go",
+		"pkg/tpgresource/service_scope.go":        "third_party/terraform/tpgresource/service_scope.go",
+		"pkg/verify/validation.go":                "third_party/terraform/verify/validation.go",
+		"pkg/verify/path_or_contents.go":          "third_party/terraform/verify/path_or_contents.go",
+		"pkg/version/version.go":                  "third_party/terraform/version/version.go",
 
 		// services
-		"pkg/services/compute/image.go":             "third_party/terraform/services/compute/image.go",
-		"pkg/services/compute/disk_type.go":         "third_party/terraform/services/compute/disk_type.go",
-		"pkg/services/kms/kms_utils.go":             "third_party/terraform/services/kms/kms_utils.go",
-		"pkg/services/privateca/privateca_utils.go": "third_party/terraform/services/privateca/privateca_utils.go",
-		"pkg/services/eventarc/eventarc_utils.go":   "third_party/terraform/services/eventarc/eventarc_utils.go",
+		"pkg/services/compute/image.go":                 "third_party/terraform/services/compute/image.go",
+		"pkg/services/compute/disk_type.go":             "third_party/terraform/services/compute/disk_type.go",
+		"pkg/services/kms/client.go":                    "third_party/terraform/services/kms/client.go",
+		"pkg/services/kms/kms_utils.go":                 "third_party/terraform/services/kms/kms_utils.go",
+		"pkg/services/privateca/privateca_utils.go":     "third_party/terraform/services/privateca/privateca_utils.go",
+		"pkg/services/eventarc/eventarc_utils.go":       "third_party/terraform/services/eventarc/eventarc_utils.go",
+		"pkg/services/resourcemanager/client/client.go": "third_party/terraform/services/resourcemanager/client/client.go",
+		"pkg/services/resourcemanagerv3/client.go":      "third_party/terraform/services/resourcemanagerv3/client.go",
+		"pkg/services/storage/client.go":                "third_party/terraform/services/storage/client.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }

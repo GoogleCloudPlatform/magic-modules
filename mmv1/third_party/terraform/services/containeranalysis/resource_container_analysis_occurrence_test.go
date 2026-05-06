@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -38,7 +39,7 @@ func getSignedTestOccurrenceAttestationPayload(
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)
 	hashed := base64.StdEncoding.EncodeToString(ssum[:])
-	signed, err := config.NewKmsClient(config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.
+	signed, err := kms.NewClient(config, config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.
 		CryptoKeyVersions.AsymmetricSign(
 		fmt.Sprintf("%s/cryptoKeyVersions/1", signingKey.CryptoKey.Name),
 		&cloudkms.AsymmetricSignRequest{

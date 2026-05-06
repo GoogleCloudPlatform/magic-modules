@@ -1,0 +1,618 @@
+package compute
+
+import (
+	"fmt"
+	"log"
+	neturl "net/url"
+	"strconv"
+	"strings"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+)
+
+func ResourceComputeInstanceMigrateState(
+	v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
+	if is.Empty() {
+		log.Println("[DEBUG] Empty InstanceState; nothing to migrate.")
+		return is, nil
+	}
+
+	var err error
+
+	switch v {
+	case 0:
+		log.Println("[INFO] Found Compute Instance State v0; migrating to v1")
+		is, err = migrateStateV0toV1(is)
+		if err != nil {
+			return is, err
+		}
+		fallthrough
+	case 1:
+		log.Println("[INFO] Found Compute Instance State v1; migrating to v2")
+		is, err = migrateStateV1toV2(is)
+		if err != nil {
+			return is, err
+		}
+		fallthrough
+	case 2:
+		log.Println("[INFO] Found Compute Instance State v2; migrating to v3")
+		is, err = migrateStateV2toV3(is)
+		if err != nil {
+			return is, err
+		}
+		fallthrough
+	case 3:
+		log.Println("[INFO] Found Compute Instance State v3; migrating to v4")
+		is, err = migrateStateV3toV4(is, meta)
+		if err != nil {
+			return is, err
+		}
+		fallthrough
+	case 4:
+		log.Println("[INFO] Found Compute Instance State v4; migrating to v5")
+		is, err = migrateStateV4toV5(is, meta)
+		if err != nil {
+			return is, err
+		}
+		fallthrough
+	case 5:
+		log.Println("[INFO] Found Compute Instance State v5; migrating to v6")
+		is, err = migrateStateV5toV6(is)
+		if err != nil {
+			return is, err
+		}
+		// when adding case 6, make sure to turn this into a fallthrough
+		return is, err
+	default:
+		return is, fmt.Errorf("Unexpected schema version: %d", v)
+	}
+}
+
+func migrateStateV0toV1(is *terraform.InstanceState) (*terraform.InstanceState, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", is.Attributes)
+
+	// Delete old count
+	delete(is.Attributes, "metadata.#")
+
+	newMetadata := make(map[string]string)
+
+	for k, v := range is.Attributes {
+		if !strings.HasPrefix(k, "metadata.") {
+			continue
+		}
+
+		// We have a key that looks like "metadata.*" and we know it's not
+		// metadata.# because we deleted it above, so it must be metadata.<N>.<key>
+		// from the List of Maps. Just need to convert it to a single Map by
+		// ditching the '<N>' field.
+		kParts := strings.SplitN(k, ".", 3)
+
+		// Sanity check: all three parts should be there and <N> should be a number
+		badFormat := false
+		if len(kParts) != 3 {
+			badFormat = true
+		} else if _, err := strconv.Atoi(kParts[1]); err != nil {
+			badFormat = true
+		}
+
+		if badFormat {
+			return is, fmt.Errorf(
+				"migration error: found metadata key in unexpected format: %s", k)
+		}
+
+		// Rejoin as "metadata.<key>"
+		newK := strings.Join([]string{kParts[0], kParts[2]}, ".")
+		newMetadata[newK] = v
+		delete(is.Attributes, k)
+	}
+
+	for k, v := range newMetadata {
+		is.Attributes[k] = v
+	}
+
+	log.Printf("[DEBUG] Attributes after migration: %#v", is.Attributes)
+	return is, nil
+}
+
+func migrateStateV1toV2(is *terraform.InstanceState) (*terraform.InstanceState, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", is.Attributes)
+
+	// Maps service account index to list of scopes for that account
+	newScopesMap := make(map[string][]string)
+
+	for k, v := range is.Attributes {
+		if !strings.HasPrefix(k, "service_account.") {
+			continue
+		}
+
+		if k == "service_account.#" {
+			continue
+		}
+
+		if strings.HasSuffix(k, ".scopes.#") {
+			continue
+		}
+
+		if strings.HasSuffix(k, ".email") {
+			continue
+		}
+
+		// Key is now of the form service_account.%d.scopes.%d
+		kParts := strings.Split(k, ".")
+
+		// Sanity check: all three parts should be there and <N> should be a number
+		badFormat := false
+		if len(kParts) != 4 {
+			badFormat = true
+		} else if _, err := strconv.Atoi(kParts[1]); err != nil {
+			badFormat = true
+		}
+
+		if badFormat {
+			return is, fmt.Errorf(
+				"migration error: found scope key in unexpected format: %s", k)
+		}
+
+		newScopesMap[kParts[1]] = append(newScopesMap[kParts[1]], v)
+
+		delete(is.Attributes, k)
+	}
+
+	for service_acct_index, newScopes := range newScopesMap {
+		for _, newScope := range newScopes {
+			hash := tpgresource.Hashcode(tpgresource.CanonicalizeServiceScope(newScope))
+			newKey := fmt.Sprintf("service_account.%s.scopes.%d", service_acct_index, hash)
+			is.Attributes[newKey] = newScope
+		}
+	}
+
+	log.Printf("[DEBUG] Attributes after migration: %#v", is.Attributes)
+	return is, nil
+}
+
+func migrateStateV2toV3(is *terraform.InstanceState) (*terraform.InstanceState, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", is.Attributes)
+	is.Attributes["create_timeout"] = "4"
+	log.Printf("[DEBUG] Attributes after migration: %#v", is.Attributes)
+	return is, nil
+}
+
+func migrateStateV3toV4(is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", is.Attributes)
+
+	// Read instance from GCP. Since disks are not necessarily returned from the API in the order they were set,
+	// we have no other way to know which source belongs to which attached disk.
+	// Also note that the following code modifies the returned instance- if you need immutability, please change
+	// this to make a copy of the needed data.
+	config := meta.(*transport_tpg.Config)
+	instance, err := getInstanceFromInstanceState(config, is)
+	if err != nil {
+		return is, fmt.Errorf("migration error: %s", err)
+	}
+	diskList, err := getAllDisksFromInstanceState(config, is)
+	if err != nil {
+		return is, fmt.Errorf("migration error: %s", err)
+	}
+	allDisks := make(map[string]map[string]interface{})
+	for _, disk := range diskList {
+		if name, ok := disk["name"].(string); ok {
+			allDisks[name] = disk
+		}
+	}
+
+	hasBootDisk := is.Attributes["boot_disk.#"] == "1"
+
+	scratchDisks := 0
+	if v := is.Attributes["scratch_disk.#"]; v != "" {
+		scratchDisks, err = strconv.Atoi(v)
+		if err != nil {
+			return is, fmt.Errorf("migration error: found scratch_disk.# value in unexpected format: %s", err)
+		}
+	}
+
+	attachedDisks := 0
+	if v := is.Attributes["attached_disk.#"]; v != "" {
+		attachedDisks, err = strconv.Atoi(v)
+		if err != nil {
+			return is, fmt.Errorf("migration error: found attached_disk.# value in unexpected format: %s", err)
+		}
+	}
+
+	disks := 0
+	if v := is.Attributes["disk.#"]; v != "" {
+		disks, err = strconv.Atoi(is.Attributes["disk.#"])
+		if err != nil {
+			return is, fmt.Errorf("migration error: found disk.# value in unexpected format: %s", err)
+		}
+	}
+
+	for i := 0; i < disks; i++ {
+		if !hasBootDisk && i == 0 {
+			is.Attributes["boot_disk.#"] = "1"
+
+			// Note: the GCP API does not allow for scratch disks to be boot disks, so this situation
+			// should never occur.
+			if is.Attributes["disk.0.scratch_disk"] == "true" {
+				return is, fmt.Errorf("migration error: found scratch disk at index 0")
+			}
+
+			if rawDisks, ok := instance["disks"].([]interface{}); ok {
+				for _, rawDisk := range rawDisks {
+					disk, ok := rawDisk.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					if boot, ok := disk["boot"].(bool); ok && boot {
+						if source, ok := disk["source"].(string); ok {
+							is.Attributes["boot_disk.0.source"] = tpgresource.GetResourceNameFromSelfLink(source)
+						}
+						if deviceName, ok := disk["deviceName"].(string); ok {
+							is.Attributes["boot_disk.0.device_name"] = deviceName
+						}
+						break
+					}
+				}
+			}
+			is.Attributes["boot_disk.0.auto_delete"] = is.Attributes["disk.0.auto_delete"]
+			is.Attributes["boot_disk.0.disk_encryption_key_raw"] = is.Attributes["disk.0.disk_encryption_key_raw"]
+			is.Attributes["boot_disk.0.disk_encryption_key_sha256"] = is.Attributes["disk.0.disk_encryption_key_sha256"]
+
+			if is.Attributes["disk.0.size"] != "" && is.Attributes["disk.0.size"] != "0" {
+				is.Attributes["boot_disk.0.initialize_params.#"] = "1"
+				is.Attributes["boot_disk.0.initialize_params.0.size"] = is.Attributes["disk.0.size"]
+			}
+			if is.Attributes["disk.0.type"] != "" {
+				is.Attributes["boot_disk.0.initialize_params.#"] = "1"
+				is.Attributes["boot_disk.0.initialize_params.0.type"] = is.Attributes["disk.0.type"]
+			}
+			if is.Attributes["disk.0.image"] != "" {
+				is.Attributes["boot_disk.0.initialize_params.#"] = "1"
+				is.Attributes["boot_disk.0.initialize_params.0.image"] = is.Attributes["disk.0.image"]
+			}
+		} else if is.Attributes[fmt.Sprintf("disk.%d.scratch", i)] == "true" {
+			// Note: the GCP API does not allow for scratch disks without auto_delete, so this situation
+			// should never occur.
+			if is.Attributes[fmt.Sprintf("disk.%d.auto_delete", i)] != "true" {
+				return is, fmt.Errorf("migration error: attempted to migrate scratch disk where auto_delete is not true")
+			}
+
+			is.Attributes[fmt.Sprintf("scratch_disk.%d.interface", scratchDisks)] = "SCSI"
+
+			scratchDisks++
+		} else {
+			// If disk is neither boot nor scratch, then it is attached.
+
+			disk, err := getDiskFromAttributes(config, instance, allDisks, is.Attributes, i)
+			if err != nil {
+				return is, fmt.Errorf("migration error: %s", err)
+			}
+
+			if source, ok := disk["source"].(string); ok {
+				is.Attributes[fmt.Sprintf("attached_disk.%d.source", attachedDisks)] = source
+			}
+			if deviceName, ok := disk["deviceName"].(string); ok {
+				is.Attributes[fmt.Sprintf("attached_disk.%d.device_name", attachedDisks)] = deviceName
+			}
+			is.Attributes[fmt.Sprintf("attached_disk.%d.disk_encryption_key_raw", attachedDisks)] = is.Attributes[fmt.Sprintf("disk.%d.disk_encryption_key_raw", i)]
+			is.Attributes[fmt.Sprintf("attached_disk.%d.disk_encryption_key_sha256", attachedDisks)] = is.Attributes[fmt.Sprintf("disk.%d.disk_encryption_key_sha256", i)]
+
+			attachedDisks++
+		}
+	}
+
+	for k := range is.Attributes {
+		if !strings.HasPrefix(k, "disk.") {
+			continue
+		}
+
+		delete(is.Attributes, k)
+	}
+	if scratchDisks > 0 {
+		is.Attributes["scratch_disk.#"] = strconv.Itoa(scratchDisks)
+	}
+	if attachedDisks > 0 {
+		is.Attributes["attached_disk.#"] = strconv.Itoa(attachedDisks)
+	}
+
+	log.Printf("[DEBUG] Attributes after migration: %#v", is.Attributes)
+	return is, nil
+}
+
+func migrateStateV4toV5(is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
+	if v := is.Attributes["disk.#"]; v != "" {
+		return migrateStateV3toV4(is, meta)
+	}
+	return is, nil
+}
+
+func getInstanceFromInstanceState(config *transport_tpg.Config, is *terraform.InstanceState) (map[string]interface{}, error) {
+	project, ok := is.Attributes["project"]
+	if !ok {
+		if config.Project == "" {
+			return nil, fmt.Errorf("could not determine 'project'")
+		} else {
+			project = config.Project
+		}
+	}
+
+	zone, ok := is.Attributes["zone"]
+	if !ok {
+		if config.Zone == "" {
+			return nil, fmt.Errorf("could not determine 'zone'")
+		} else {
+			zone = config.Zone
+		}
+	}
+
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, is.ID)
+	instance, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error reading instance: %s", err)
+	}
+
+	return instance, nil
+}
+
+func getAllDisksFromInstanceState(config *transport_tpg.Config, is *terraform.InstanceState) ([]map[string]interface{}, error) {
+	project, ok := is.Attributes["project"]
+	if !ok {
+		if config.Project == "" {
+			return nil, fmt.Errorf("could not determine 'project'")
+		} else {
+			project = config.Project
+		}
+	}
+
+	zone, ok := is.Attributes["zone"]
+	if !ok {
+		if config.Zone == "" {
+			return nil, fmt.Errorf("could not determine 'zone'")
+		} else {
+			zone = config.Zone
+		}
+	}
+
+	diskList := []map[string]interface{}{}
+	token := ""
+	for {
+		params := neturl.Values{}
+		if token != "" {
+			params.Set("pageToken", token)
+		}
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/disks", config.ComputeBasePath, project, zone)
+		if len(params) > 0 {
+			url = fmt.Sprintf("%s?%s", url, params.Encode())
+		}
+		disks, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error reading disks: %s", err)
+		}
+		if rawItems, ok := disks["items"].([]interface{}); ok {
+			for _, rawItem := range rawItems {
+				if disk, ok := rawItem.(map[string]interface{}); ok {
+					diskList = append(diskList, disk)
+				}
+			}
+		}
+		token, _ = disks["nextPageToken"].(string)
+		if token == "" {
+			break
+		}
+	}
+
+	return diskList, nil
+}
+
+func getDiskFromAttributes(config *transport_tpg.Config, instance map[string]interface{}, allDisks map[string]map[string]interface{}, attributes map[string]string, i int) (map[string]interface{}, error) {
+	if diskSource := attributes[fmt.Sprintf("disk.%d.disk", i)]; diskSource != "" {
+		return getDiskFromSource(instance, diskSource)
+	}
+
+	if deviceName := attributes[fmt.Sprintf("disk.%d.device_name", i)]; deviceName != "" {
+		return getDiskFromDeviceName(instance, deviceName)
+	}
+
+	if encryptionKey := attributes[fmt.Sprintf("disk.%d.disk_encryption_key_raw", i)]; encryptionKey != "" {
+		return getDiskFromEncryptionKey(instance, encryptionKey)
+	}
+
+	autoDelete, err := strconv.ParseBool(attributes[fmt.Sprintf("disk.%d.auto_delete", i)])
+	if err != nil {
+		return nil, fmt.Errorf("error parsing auto_delete attribute of disk %d", i)
+	}
+	image := attributes[fmt.Sprintf("disk.%d.image", i)]
+
+	// We know project and zone are set because we used them to read the instance
+	project, ok := attributes["project"]
+	if !ok {
+		project = config.Project
+	}
+	zone := attributes["zone"]
+	return getDiskFromAutoDeleteAndImage(config, instance, allDisks, autoDelete, image, project, zone)
+}
+
+func getDiskFromSource(instance map[string]interface{}, source string) (map[string]interface{}, error) {
+	rawDisks, _ := instance["disks"].([]interface{})
+	for _, rawDisk := range rawDisks {
+		disk, ok := rawDisk.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		boot, _ := disk["boot"].(bool)
+		diskType, _ := disk["type"].(string)
+		if boot || diskType == "SCRATCH" {
+			// Ignore boot/scratch disks since this is just for finding attached disks
+			continue
+		}
+		// we can just compare suffixes because terraform only allows setting "disk" by name and uses
+		// the zone of the instance so we know there can be no duplicate names.
+		diskSource, _ := disk["source"].(string)
+		if strings.HasSuffix(diskSource, "/"+source) {
+			return disk, nil
+		}
+	}
+	return nil, fmt.Errorf("could not find attached disk with source %q", source)
+}
+
+func getDiskFromDeviceName(instance map[string]interface{}, deviceName string) (map[string]interface{}, error) {
+	rawDisks, _ := instance["disks"].([]interface{})
+	for _, rawDisk := range rawDisks {
+		disk, ok := rawDisk.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		boot, _ := disk["boot"].(bool)
+		diskType, _ := disk["type"].(string)
+		if boot || diskType == "SCRATCH" {
+			// Ignore boot/scratch disks since this is just for finding attached disks
+			continue
+		}
+		dn, _ := disk["deviceName"].(string)
+		if dn == deviceName {
+			return disk, nil
+		}
+	}
+	return nil, fmt.Errorf("could not find attached disk with deviceName %q", deviceName)
+}
+
+func getDiskFromEncryptionKey(instance map[string]interface{}, encryptionKey string) (map[string]interface{}, error) {
+	encryptionSha, err := hash256(encryptionKey)
+	if err != nil {
+		return nil, err
+	}
+	rawDisks, _ := instance["disks"].([]interface{})
+	for _, rawDisk := range rawDisks {
+		disk, ok := rawDisk.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		boot, _ := disk["boot"].(bool)
+		diskType, _ := disk["type"].(string)
+		if boot || diskType == "SCRATCH" {
+			// Ignore boot/scratch disks since this is just for finding attached disks
+			continue
+		}
+		if keyMap, ok := disk["diskEncryptionKey"].(map[string]interface{}); ok {
+			sha, _ := keyMap["sha256"].(string)
+			if sha == encryptionSha {
+				return disk, nil
+			}
+		}
+	}
+	return nil, fmt.Errorf("could not find attached disk with encryption hash %q", encryptionSha)
+}
+
+func getDiskFromAutoDeleteAndImage(config *transport_tpg.Config, instance map[string]interface{}, allDisks map[string]map[string]interface{}, autoDelete bool, image, project, zone string) (map[string]interface{}, error) {
+	img, err := ResolveImage(config, project, image, config.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+	imgParts := strings.Split(img, "/projects/")
+	canonicalImage := imgParts[len(imgParts)-1]
+
+	rawDisks, _ := instance["disks"].([]interface{})
+	for i, rawDisk := range rawDisks {
+		disk, ok := rawDisk.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		boot, _ := disk["boot"].(bool)
+		diskType, _ := disk["type"].(string)
+		if boot || diskType == "SCRATCH" {
+			// Ignore boot/scratch disks since this is just for finding attached disks
+			continue
+		}
+		diskAutoDelete, _ := disk["autoDelete"].(bool)
+		if diskAutoDelete == autoDelete {
+			// Read the disk to check if its image matches
+			diskSource, _ := disk["source"].(string)
+			fullDisk := allDisks[tpgresource.GetResourceNameFromSelfLink(diskSource)]
+			if fullDisk == nil {
+				continue
+			}
+			diskSourceImage, _ := fullDisk["sourceImage"].(string)
+			sourceImage, err := tpgresource.GetRelativePath(diskSourceImage)
+			if err != nil {
+				return nil, err
+			}
+			if canonicalImage == sourceImage {
+				// Delete this disk because there might be multiple that match
+				instance["disks"] = append(rawDisks[:i], rawDisks[i+1:]...)
+				return disk, nil
+			}
+		}
+	}
+
+	// We're not done! It's possible the disk was created with an image family rather than the image itself.
+	// Now, do the exact same iteration but do some prefix matching to check if the families match.
+	// This assumes that all disks with a given family have a sourceImage whose name starts with the name of
+	// the image family.
+	canonicalImage = strings.Replace(canonicalImage, "/family/", "/", -1)
+	rawDisks, _ = instance["disks"].([]interface{})
+	for i, rawDisk := range rawDisks {
+		disk, ok := rawDisk.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		boot, _ := disk["boot"].(bool)
+		diskType, _ := disk["type"].(string)
+		if boot || diskType == "SCRATCH" {
+			// Ignore boot/scratch disks since this is just for finding attached disks
+			continue
+		}
+		diskAutoDelete, _ := disk["autoDelete"].(bool)
+		if diskAutoDelete == autoDelete {
+			// Read the disk to check if its image matches
+			diskSource, _ := disk["source"].(string)
+			fullDisk := allDisks[tpgresource.GetResourceNameFromSelfLink(diskSource)]
+			if fullDisk == nil {
+				continue
+			}
+			diskSourceImage, _ := fullDisk["sourceImage"].(string)
+			sourceImage, err := tpgresource.GetRelativePath(diskSourceImage)
+			if err != nil {
+				return nil, err
+			}
+
+			if strings.Contains(sourceImage, "/"+canonicalImage+"-") {
+				// Delete this disk because there might be multiple that match
+				instance["disks"] = append(rawDisks[:i], rawDisks[i+1:]...)
+				return disk, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("could not find attached disk with image %q", image)
+}
+
+func migrateStateV5toV6(is *terraform.InstanceState) (*terraform.InstanceState, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", is.Attributes)
+	if is.Attributes["boot_disk.0.initialize_params.#"] == "1" {
+		if (is.Attributes["boot_disk.0.initialize_params.0.size"] == "0" ||
+			is.Attributes["boot_disk.0.initialize_params.0.size"] == "") &&
+			is.Attributes["boot_disk.0.initialize_params.0.type"] == "" &&
+			is.Attributes["boot_disk.0.initialize_params.0.image"] == "" {
+			is.Attributes["boot_disk.0.initialize_params.#"] = "0"
+			delete(is.Attributes, "boot_disk.0.initialize_params.0.size")
+			delete(is.Attributes, "boot_disk.0.initialize_params.0.type")
+			delete(is.Attributes, "boot_disk.0.initialize_params.0.image")
+		}
+	}
+	log.Printf("[DEBUG] Attributes after migration: %#v", is.Attributes)
+	return is, nil
+}
