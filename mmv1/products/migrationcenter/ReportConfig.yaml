@@ -13,7 +13,7 @@
 
 ---
 name: ReportConfig
-description: Description
+description: ReportConfig defines the configuration and criteria used to generate Migration Center reports.
 base_url: projects/{{project}}/locations/{{location}}/reportConfigs
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config_id}}

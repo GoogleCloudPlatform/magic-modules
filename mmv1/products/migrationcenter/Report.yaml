@@ -13,7 +13,7 @@
 
 ---
 name: Report
-description: Description
+description: Report represents an analytical assessment report summarizing infrastructure size, costs, and target suggestions.
 base_url: projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config}}/reports
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config}}/reports/{{report_id}}

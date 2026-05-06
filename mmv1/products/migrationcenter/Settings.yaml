@@ -13,7 +13,7 @@
 
 ---
 name: Settings
-description: Description
+description: Settings represents the global or regional settings configuration for a Migration Center project.
 base_url: projects/{{project}}/locations/{{location}}/settings
 self_link: projects/{{project}}/locations/{{location}}/settings
 create_url: projects/{{project}}/locations/{{location}}/settings?updateMask=*

@@ -13,7 +13,7 @@
 
 ---
 name: ImportDataFile
-description: Description
+description: ImportDataFile represents a user-uploaded data payload file containing infrastructure discovery data.
 base_url: projects/{{project}}/locations/{{location}}/importJobs/{{import_job}}/importDataFiles
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/importJobs/{{import_job}}/importDataFiles/{{import_data_file_id}}

@@ -13,7 +13,7 @@
 
 ---
 name: AssetsExportJob
-description: Description
+description: AssetsExportJob represents a batch job that exports Migration Center assets to external destinations such as Cloud Storage.
 base_url: projects/{{project}}/locations/{{location}}/assetsExportJobs
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/assetsExportJobs/{{assets_export_job_id}}

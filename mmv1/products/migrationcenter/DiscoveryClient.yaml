@@ -13,7 +13,7 @@
 
 ---
 name: DiscoveryClient
-description: Description
+description: DiscoveryClient represents an on-premise discovery agent that scans infrastructure and uploads discovery data to Migration Center.
 base_url: projects/{{project}}/locations/{{location}}/discoveryClients
 self_link: projects/{{project}}/locations/{{location}}/discoveryClients/{{discovery_client_id}}
 create_url: projects/{{project}}/locations/{{location}}/discoveryClients?discoveryClientId={{discovery_client_id}}

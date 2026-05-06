@@ -13,7 +13,7 @@
 
 ---
 name: ImportJob
-description: Description
+description: ImportJob represents a batch data import task that processes uploaded data files and populates Migration Center assets.
 base_url: projects/{{project}}/locations/{{location}}/importJobs
 self_link: projects/{{project}}/locations/{{location}}/importJobs/{{import_job_id}}
 create_url: projects/{{project}}/locations/{{location}}/importJobs?importJobId={{import_job_id}}

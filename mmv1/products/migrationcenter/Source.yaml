@@ -13,7 +13,7 @@
 
 ---
 name: Source
-description: Description
+description: Source represents a data source from which asset discovery data is ingested into Migration Center.
 base_url: projects/{{project}}/locations/{{location}}/sources
 self_link: projects/{{project}}/locations/{{location}}/sources/{{source_id}}
 create_url: projects/{{project}}/locations/{{location}}/sources?sourceId={{source_id}}
