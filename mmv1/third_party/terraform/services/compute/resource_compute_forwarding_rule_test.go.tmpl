@@ -234,7 +234,9 @@ func TestAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(t *testing.T
 func TestAccComputeForwardingRule_forwardingRulePscTargetUpdateRecreate(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := acctest.RandString(t, 10)
+context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -907,11 +909,14 @@ resource "google_compute_health_check" "producer_service_health_check" {
 `, context)
 }
 
-func testAccComputeForwardingRule_forwardingRulePscTargetUpdateRecreate(randomSuffix string, useSecondTarget bool) string {
-	targetAttachment := "producer_service_attachment_one"
+func testAccComputeForwardingRule_forwardingRulePscTargetUpdateRecreate(context map[string]interface{}, useSecondTarget bool) string {
+	var targetService string
 	if useSecondTarget {
-		targetAttachment = "producer_service_attachment_two"
+		targetService = "google_compute_service_attachment.producer_service_attachment_two.self_link"
+	} else {
+		targetService = "google_compute_service_attachment.producer_service_attachment_one.self_link"
 	}
+	context["target_service"] = targetService
 
 	return acctest.Nprintf(`
 // Consumer side
@@ -919,7 +924,7 @@ resource "google_compute_forwarding_rule" "default" {
   name                    = "tf-test-psc-endpoint%{random_suffix}"
   region                  = "us-central1"
   load_balancing_scheme   = ""
-  target                  = google_compute_service_attachment.%{target_attachment}.id
+  target                  = %{target_service}
   network                 = google_compute_network.consumer_net.name
   ip_address              = google_compute_address.consumer_address.id
   allow_psc_global_access = true
@@ -1037,10 +1042,7 @@ resource "google_compute_health_check" "producer_service_health_check" {
     port = "80"
   }
 }
-`, map[string]interface{}{
-	"random_suffix":    randomSuffix,
-	"target_attachment": targetAttachment,
-})
+`, context)
 }
 
 func testAccComputeForwardingRule_forwardingRuleRegionalSteeringExampleUpdate(context map[string]interface{}) string {
