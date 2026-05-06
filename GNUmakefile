@@ -35,13 +35,13 @@ endif
 TEMP_DIR := $(shell mktemp -d)
 export TEMP_DIR
 
-terraform build provider: validate_environment clean-provider mmv1 clean-temp
+terraform build provider: validate_environment clean-provider mmv1
 	@echo "Provider generation process finished for $(VERSION) in $(OUTPUT_PATH)"
 
 
-mmv1: prepare-temp
+mmv1:
 	@echo "Executing mmv1 build for $(OUTPUT_PATH)"; 
-	@cd $(TEMP_DIR)/mmv1;\
+	@cd mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
 			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
 			&& go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
