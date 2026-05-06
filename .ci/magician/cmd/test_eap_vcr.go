@@ -255,9 +255,20 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir string, rnr ExecRu
 		}
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
+
+		// Expand compound tests to subtests for accurate status matching
+		expandedRecordingResult := subtestResult(recordingResult)
+		expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
+
+		logBasePath := fmt.Sprintf("ci-vcr-logs/%s/refs/heads/%s", provider.Private.String(), head)
+		logBaseUrl := fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
+
+		testRows := buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult, logBaseUrl)
+
 		recordReplayData := recordReplay{
-			RecordingResult:               recordingResult,
-			ReplayingAfterRecordingResult: replayingAfterRecordingResult,
+			TestRows:                      testRows,
+			RecordingResult:               expandedRecordingResult,
+			ReplayingAfterRecordingResult: expandedReplayingAfterRecordingResult,
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
