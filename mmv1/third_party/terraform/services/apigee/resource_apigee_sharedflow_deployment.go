@@ -148,11 +148,11 @@ func resourceApigeeSharedflowDeploymentRead(d *schema.ResourceData, meta interfa
 	}
 	log.Printf("[DEBUG] ApigeeSharedflowDeployment deployStartTime %s", res["deployStartTime"])
 
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 	return nil
 }
 
@@ -162,11 +162,11 @@ func resourceApigeeSharedflowDeploymentUpdate(d *schema.ResourceData, meta inter
 	if err != nil {
 		return err
 	}
-	//UDP update shortcircuit start
+	
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceApigeeSharedFlowDeployment) {
 		return ResourceApigeeSharedFlowDeployment().Read(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments?override=true&serviceAccount={{service_account}}")
 	if err != nil {
@@ -206,13 +206,13 @@ func resourceApigeeSharedflowDeploymentUpdate(d *schema.ResourceData, meta inter
 }
 
 func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

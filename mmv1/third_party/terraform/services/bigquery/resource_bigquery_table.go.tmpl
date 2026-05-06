@@ -2386,11 +2386,11 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error setting external_catalog_table_options: %s", err)
 		}
 	}
-                //UDP default read start
+                
     if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
         return err
     }
-    //UDP default read end
+    
 
 	return nil
 }
@@ -2562,13 +2562,13 @@ func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent str
 }
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
-        //UDP pre-delete start
+        
     if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
         return err
     }else if ok{
         return nil
     }
-    //UDP pre-delete end
+    
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("cannot destroy table %v without setting deletion_protection=false and running `terraform apply`", d.Id())
 	}

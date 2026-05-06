@@ -449,11 +449,11 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.SetId(job.Id)
 
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 	return nil
 }
 
@@ -463,11 +463,11 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 	if resourceDataflowJobIsVirtualUpdate(d, ResourceDataflowJob().Schema) {
 		return nil
 	}
-	//UDP update shortcircuit start
+	
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceDataflowJob) {
 		return ResourceDataflowJob().Read(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 
 	if jobHasUpdate(d, ResourceDataflowJob().Schema) {
 		config := meta.(*transport_tpg.Config)
@@ -525,13 +525,13 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 }
 
 func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

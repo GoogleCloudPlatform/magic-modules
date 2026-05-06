@@ -68,21 +68,21 @@ func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interfac
 	if err := flattenResourceLoggingSink(d, sink); err != nil {
 		return err
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 
 	return nil
 }
 
 func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interface{}) error {
-	//UDP update shortcircuit start
+	
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingBillingAccountSink) {
 		return ResourceLoggingBillingAccountSink().Read(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -102,13 +102,13 @@ func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceLoggingBillingAccountSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

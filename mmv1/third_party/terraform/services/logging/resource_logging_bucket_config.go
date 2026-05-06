@@ -322,17 +322,17 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("index_configs", flattenIndexConfigs(res["indexConfigs"])); err != nil {
 		return fmt.Errorf("Error setting index_configs: %s", err)
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 
 	return nil
 }
 
 func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{}) error {
-	//UDP update shortcircuit start
+	
 	//due to non standard resource function, Universal Deletion Policy pre-update code is included here in entirety
 	clientSideFields := map[string]bool{"deletion_policy": true}
 	clientSideOnly := true
@@ -346,7 +346,7 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 		log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
 		return resourceLoggingBucketConfigRead(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -400,13 +400,13 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceLoggingBucketConfigDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	name := d.Get("bucket_id")
 	for _, restrictedName := range []string{"_Required", "_Default"} {
 		if name == restrictedName {

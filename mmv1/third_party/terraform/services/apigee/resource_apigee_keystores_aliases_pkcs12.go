@@ -263,11 +263,11 @@ func ResourceApigeeKeystoresAliasesPkcs12Read(d *schema.ResourceData, meta inter
 	if err := d.Set("type", flattenApigeeKeystoreAliasesPkcsType(res["type"], d, config)); err != nil {
 		return fmt.Errorf("Error reading KeystoreAliasesPkcs: %s", err)
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 
 	return nil
 }
@@ -281,13 +281,13 @@ func ResourceApigeeKeystoresAliasesPkcs12Update(d *schema.ResourceData, meta int
 //UDP update end
 
 func ResourceApigeeKeystoresAliasesPkcs12Delete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

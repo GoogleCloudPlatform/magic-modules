@@ -322,11 +322,11 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	// Explicitly set client-side fields to default values if unset
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "PREVENT"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 	if err := d.Set("project_id", pid); err != nil {
 		return fmt.Errorf("Error setting project_id: %s", err)
 	}

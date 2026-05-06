@@ -359,20 +359,20 @@ func resourceDataplexLakeRead(d *schema.ResourceData, meta interface{}) error {
 	if err = d.Set("update_time", res.UpdateTime); err != nil {
 		return fmt.Errorf("error setting update_time in state: %s", err)
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 
 	return nil
 }
 func resourceDataplexLakeUpdate(d *schema.ResourceData, meta interface{}) error {
-	//UDP update shortcircuit start
+	
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceDataplexLake) {
 		return ResourceDataplexLake().Read(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -422,13 +422,13 @@ func resourceDataplexLakeUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceDataplexLakeDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {

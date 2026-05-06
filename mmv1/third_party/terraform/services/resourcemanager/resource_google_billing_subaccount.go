@@ -115,21 +115,21 @@ func resourceBillingSubaccountRead(d *schema.ResourceData, meta interface{}) err
 	if err := d.Set("billing_account_id", strings.TrimPrefix(d.Get("name").(string), "billingAccounts/")); err != nil {
 		return fmt.Errorf("Error setting billing_account_id: %s", err)
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, ""); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 
 	return nil
 }
 
 func resourceBillingSubaccountUpdate(d *schema.ResourceData, meta interface{}) error {
-	//UDP update shortcircuit start
+	
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceBillingSubaccount) {
 		return ResourceBillingSubaccount().Read(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -149,13 +149,13 @@ func resourceBillingSubaccountUpdate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceBillingSubaccountDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

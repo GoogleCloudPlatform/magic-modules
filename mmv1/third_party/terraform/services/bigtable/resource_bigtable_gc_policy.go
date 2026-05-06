@@ -231,11 +231,11 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 }
 
 func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) error {
-	//UDP update shortcircuit start
+	
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceBigtableGCPolicy) {
 		return ResourceBigtableGCPolicy().Read(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -372,11 +372,11 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 
 	return nil
 }
@@ -445,13 +445,13 @@ func GcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]int
 }
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)

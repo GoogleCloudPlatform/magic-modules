@@ -119,21 +119,21 @@ func resourceRuntimeconfigVariableRead(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
 	    return err
 	}
-	//UDP default read end
+	
 
 	return setRuntimeConfigVariableToResourceData(d, *createdVariable)
 }
 
 func resourceRuntimeconfigVariableUpdate(d *schema.ResourceData, meta interface{}) error {
-	//UDP update shortcircuit start
+	
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceRuntimeconfigVariable) {
 	    return ResourceRuntimeconfigVariable().Read(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -162,13 +162,13 @@ func resourceRuntimeconfigVariableUpdate(d *schema.ResourceData, meta interface{
 }
 
 func resourceRuntimeconfigVariableDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
 	    return err
 	}else if ok{
 	    return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

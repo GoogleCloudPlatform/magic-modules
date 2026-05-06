@@ -96,21 +96,21 @@ func resourceLoggingOrganizationSinkRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("intercept_children", sink.InterceptChildren); err != nil {
 		return fmt.Errorf("Error setting intercept_children: %s", err)
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 
 	return nil
 }
 
 func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interface{}) error {
-	//UDP update shortcircuit start
+	
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingOrganizationSink) {
 		return ResourceLoggingOrganizationSink().Read(d, meta)
 	}
-	//UDP update shortcircuit end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -130,13 +130,13 @@ func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceLoggingOrganizationSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

@@ -188,11 +188,11 @@ func resourceFirebaserulesReleaseRead(d *schema.ResourceData, meta interface{}) 
 	if err = d.Set("update_time", res.UpdateTime); err != nil {
 		return fmt.Errorf("error setting update_time in state: %s", err)
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
-	//UDP default read end
+	
 
 	return nil
 }
@@ -206,13 +206,13 @@ func resourceFirebaserulesReleaseUpdate(d *schema.ResourceData, meta interface{}
 //UDP update end
 
 func resourceFirebaserulesReleaseDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
 		return err
 	} else if ok {
 		return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {

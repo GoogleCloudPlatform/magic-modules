@@ -1004,11 +1004,11 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 			return fmt.Errorf("Error setting wait_for_instances_status in state: %s", err.Error())
 		}
 	}
-                //UDP default read start
+                
     if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
         return err
     }
-    //UDP default read end
+    
 
 	return nil
 }

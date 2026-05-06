@@ -99,11 +99,11 @@ func resourceProjectUsageBucketRead(d *schema.ResourceData, meta interface{}) er
 	if err := d.Set("bucket_name", p.UsageExportLocation.BucketName); err != nil {
 		return fmt.Errorf("Error setting bucket_name: %s", err)
 	}
-	//UDP default read start
+	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
 	    return err
 	}
-	//UDP default read end
+	
 	return nil
 }
 
@@ -148,13 +148,13 @@ func resourceProjectUsageBucketUpdate(d *schema.ResourceData, meta interface{}) 
 //UDP update end
 
 func resourceProjectUsageBucketDelete(d *schema.ResourceData, meta interface{}) error {
-	//UDP pre-delete start
+	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
 	    return err
 	}else if ok{
 	    return nil
 	}
-	//UDP pre-delete end
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
