@@ -20,23 +20,23 @@ type IamMember struct {
 }
 
 type Step struct {
-	Name                  string            `yaml:"name,omitempty"`
-	ConfigPath            string            `yaml:"config_path,omitempty"`
-	MinVersion            string            `yaml:"min_version,omitempty"`
-	GenerateDoc           bool              `yaml:"generate_doc,omitempty"`
-	ResourceIdVars        map[string]string `yaml:"resource_id_vars,omitempty"`
-	Vars                  map[string]string `yaml:"vars,omitempty"`
-	TestEnvVars           map[string]string `yaml:"test_env_vars,omitempty"`
-	TestVarsOverrides     map[string]string `yaml:"test_vars_overrides,omitempty"`
-	OicsVarsOverrides     map[string]string `yaml:"oics_vars_overrides,omitempty"`
-	IgnoreReadExtra       []string          `yaml:"ignore_read_extra,omitempty"`
-	ExcludeImportTest     bool              `yaml:"exclude_import_test,omitempty"`
-	IncludeStepDoc        bool              `yaml:"include_step_doc,omitempty"` // Opt-in for ANY step
-	DocumentationHCLText  string            `yaml:"-"`
-	TestHCLText           string            `yaml:"-"`
-	OicsHCLText           string            `yaml:"-"`
-	PrimaryResourceId     string            `yaml:"-"`
-	ProductName           string            `yaml:"-"`
+	Name                 string            `yaml:"name,omitempty"`
+	ConfigPath           string            `yaml:"config_path,omitempty"`
+	MinVersion           string            `yaml:"min_version,omitempty"`
+	GenerateDoc          bool              `yaml:"generate_doc,omitempty"`
+	ResourceIdVars       map[string]string `yaml:"resource_id_vars,omitempty"`
+	Vars                 map[string]string `yaml:"vars,omitempty"`
+	TestEnvVars          map[string]string `yaml:"test_env_vars,omitempty"`
+	TestVarsOverrides    map[string]string `yaml:"test_vars_overrides,omitempty"`
+	OicsVarsOverrides    map[string]string `yaml:"oics_vars_overrides,omitempty"`
+	IgnoreReadExtra      []string          `yaml:"ignore_read_extra,omitempty"`
+	ExcludeImportTest    bool              `yaml:"exclude_import_test,omitempty"`
+	IncludeStepDoc       bool              `yaml:"include_step_doc,omitempty"` // Opt-in for ANY step
+	DocumentationHCLText string            `yaml:"-"`
+	TestHCLText          string            `yaml:"-"`
+	OicsHCLText          string            `yaml:"-"`
+	PrimaryResourceId    string            `yaml:"-"`
+	ProductName          string            `yaml:"-"`
 }
 
 type Sample struct {
@@ -59,26 +59,26 @@ type Sample struct {
 }
 
 type OldExample struct {
-	Name                  string            `yaml:"name"`
-	PrimaryResourceId     string            `yaml:"primary_resource_id"`
-	PrimaryResourceType   string            `yaml:"primary_resource_type,omitempty"`
-	BootstrapIam          []IamMember       `yaml:"bootstrap_iam,omitempty"`
-	Vars                  map[string]string `yaml:"vars"`
-	TestEnvVars           map[string]string `yaml:"test_env_vars,omitempty"`
-	TestVarsOverrides     map[string]string `yaml:"test_vars_overrides,omitempty"`
-	OicsVarsOverrides     map[string]string `yaml:"oics_vars_overrides,omitempty"`
-	MinVersion            string            `yaml:"min_version,omitempty"`
-	IgnoreReadExtra       []string          `yaml:"ignore_read_extra,omitempty"`
-	ExcludeTest           bool              `yaml:"exclude_test,omitempty"`
-	ExcludeDocs           bool              `yaml:"exclude_docs,omitempty"`
-	ExcludeImportTest     bool              `yaml:"exclude_import_test,omitempty"`
-	RegionOverride        string            `yaml:"region_override,omitempty"`
-	ConfigPath            string            `yaml:"config_path,omitempty"`
-	SkipVcr               bool              `yaml:"skip_vcr,omitempty"`
-	SkipFunc              string            `yaml:"skip_func,omitempty"`
-	SkipTest              string            `yaml:"skip_test,omitempty"`
-	ExternalProviders     []string          `yaml:"external_providers,omitempty"`
-	TGCSkipTest           string            `yaml:"tgc_skip_test,omitempty"`
+	Name                string            `yaml:"name"`
+	PrimaryResourceId   string            `yaml:"primary_resource_id"`
+	PrimaryResourceType string            `yaml:"primary_resource_type,omitempty"`
+	BootstrapIam        []IamMember       `yaml:"bootstrap_iam,omitempty"`
+	Vars                map[string]string `yaml:"vars"`
+	TestEnvVars         map[string]string `yaml:"test_env_vars,omitempty"`
+	TestVarsOverrides   map[string]string `yaml:"test_vars_overrides,omitempty"`
+	OicsVarsOverrides   map[string]string `yaml:"oics_vars_overrides,omitempty"`
+	MinVersion          string            `yaml:"min_version,omitempty"`
+	IgnoreReadExtra     []string          `yaml:"ignore_read_extra,omitempty"`
+	ExcludeTest         bool              `yaml:"exclude_test,omitempty"`
+	ExcludeDocs         bool              `yaml:"exclude_docs,omitempty"`
+	ExcludeImportTest   bool              `yaml:"exclude_import_test,omitempty"`
+	RegionOverride      string            `yaml:"region_override,omitempty"`
+	ConfigPath          string            `yaml:"config_path,omitempty"`
+	SkipVcr             bool              `yaml:"skip_vcr,omitempty"`
+	SkipFunc            string            `yaml:"skip_func,omitempty"`
+	SkipTest            string            `yaml:"skip_test,omitempty"`
+	ExternalProviders   []string          `yaml:"external_providers,omitempty"`
+	TGCSkipTest         string            `yaml:"tgc_skip_test,omitempty"`
 }
 
 // PATCH-END: existing structs
@@ -265,14 +265,14 @@ func transformExamplesToSamples(oldExamples []OldExample, filePath, serviceName 
 			TGCSkipTest:         old.TGCSkipTest,
 			Steps: []Step{
 				{
-					Name:                  old.Name,
-					ConfigPath:            newConfigPath,
-					ResourceIdVars:        old.Vars,
-					TestEnvVars:           old.TestEnvVars,
-					TestVarsOverrides:     old.TestVarsOverrides,
-					OicsVarsOverrides:     old.OicsVarsOverrides,
-					IgnoreReadExtra:       old.IgnoreReadExtra,
-					ExcludeImportTest:     old.ExcludeImportTest,
+					Name:              old.Name,
+					ConfigPath:        newConfigPath,
+					ResourceIdVars:    old.Vars,
+					TestEnvVars:       old.TestEnvVars,
+					TestVarsOverrides: old.TestVarsOverrides,
+					OicsVarsOverrides: old.OicsVarsOverrides,
+					IgnoreReadExtra:   old.IgnoreReadExtra,
+					ExcludeImportTest: old.ExcludeImportTest,
 				},
 			},
 		}

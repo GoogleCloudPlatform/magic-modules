@@ -349,7 +349,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 			if e.ConfigPath == "" {
 				e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
 			}
-			
+
 			// Precompute TestVarsOverrides to guarantee exact legacy behavior.
 			// In the new Step framework, all ResourceIdVars apply a tf-test- prefix automatically.
 			// The legacy framework omitted this prefix for variables without "-" or "_"
@@ -364,18 +364,18 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 			// 		}
 			// 	}
 			// }
-			
+
 			steps := []*apiresource.Step{
 				{
-					Name:                  e.Name,
-					ConfigPath:            e.ConfigPath,
-					ResourceIdVars:        e.Vars,
-					TestEnvVars:           e.TestEnvVars,
-					TestVarsOverrides:     e.TestVarsOverrides,
-					OicsVarsOverrides:     e.OicsVarsOverrides,
-					MinVersion:            e.MinVersion,
-					IgnoreReadExtra:       e.IgnoreReadExtra,
-					ExcludeImportTest:     e.ExcludeImportTest,
+					Name:              e.Name,
+					ConfigPath:        e.ConfigPath,
+					ResourceIdVars:    e.Vars,
+					TestEnvVars:       e.TestEnvVars,
+					TestVarsOverrides: e.TestVarsOverrides,
+					OicsVarsOverrides: e.OicsVarsOverrides,
+					MinVersion:        e.MinVersion,
+					IgnoreReadExtra:   e.IgnoreReadExtra,
+					ExcludeImportTest: e.ExcludeImportTest,
 				},
 			}
 			sample := &apiresource.Sample{
