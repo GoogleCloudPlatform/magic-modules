@@ -914,7 +914,7 @@ func testAccComputeForwardingRule_forwardingRulePscTargetUpdateRecreate(randomSu
 	}
 
 	return acctest.Nprintf(`
-// Forwarding rule for VPC private service connect
+// Consumer side
 resource "google_compute_forwarding_rule" "default" {
   name                    = "tf-test-psc-endpoint%{random_suffix}"
   region                  = "us-central1"
@@ -924,8 +924,6 @@ resource "google_compute_forwarding_rule" "default" {
   ip_address              = google_compute_address.consumer_address.id
   allow_psc_global_access = true
 }
-
-// Consumer service endpoint
 
 resource "google_compute_network" "consumer_net" {
   name                    = "tf-test-consumer-net%{random_suffix}"
@@ -961,9 +959,18 @@ resource "google_compute_subnetwork" "producer_subnet" {
   network       = google_compute_network.producer_net.id
 }
 
-resource "google_compute_subnetwork" "psc_producer_subnet" {
-  name          = "tf-test-producer-psc-net%{random_suffix}"
+resource "google_compute_subnetwork" "psc_producer_subnet_one" {
+  name          = "tf-test-producer-psc-net-one%{random_suffix}"
   ip_cidr_range = "10.1.0.0/16"
+  region        = "us-central1"
+
+  purpose       = "PRIVATE_SERVICE_CONNECT"
+  network       = google_compute_network.producer_net.id
+}
+
+resource "google_compute_subnetwork" "psc_producer_subnet_two" {
+  name          = "tf-test-producer-psc-net-two%{random_suffix}"
+  ip_cidr_range = "10.2.0.0/16"
   region        = "us-central1"
 
   purpose       = "PRIVATE_SERVICE_CONNECT"
@@ -977,7 +984,7 @@ resource "google_compute_service_attachment" "producer_service_attachment_one" {
 
   enable_proxy_protocol = true
   connection_preference = "ACCEPT_AUTOMATIC"
-  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet.name]
+  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet_one.name]
   target_service        = google_compute_forwarding_rule.producer_target_service_one.id
 }
 
@@ -988,7 +995,7 @@ resource "google_compute_service_attachment" "producer_service_attachment_two" {
 
   enable_proxy_protocol = true
   connection_preference = "ACCEPT_AUTOMATIC"
-  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet.name]
+  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet_two.name]
   target_service        = google_compute_forwarding_rule.producer_target_service_two.id
 }
 
