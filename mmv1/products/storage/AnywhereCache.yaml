@@ -100,4 +100,4 @@ properties:
     description: The current state of the cache instance.
   - name: 'ingestOnWrite'
     type: Boolean
-    description: Whether or not the cache ingests data as the data is written to the bucket.  
+    description: Whether or not the cache ingests data as the data is written to the bucket.
