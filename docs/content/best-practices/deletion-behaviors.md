@@ -4,6 +4,8 @@ weight: 20
 ---
 
 # Deletion behaviors
+> [!NOTE]
+> **Note:** The guidance on this page has largely been superceded by the implementation of [Universal Deletion Policy]({{< ref "/reference/universal-deletion-policy" >}}). Please refer to that page for details on how to modify the standard implementation of these fields going forward. Any new specifically `deletion_protection` fields should be handled on a case by case basis.
 
 > [!NOTE]
 > **Note:** This page covers best practices guidance for the Terraform provider for Google Cloud, which is used to ensure a consistent UX for Terraform users across providers or GCP users across the Google provider. Generally, this guidance should be followed and exceptions should be clearly demarcated / discussed.
@@ -20,8 +22,6 @@ Some resources, such as databases, have a significant risk of unrecoverable data
 If the API has a deletion protection field, the corresponding Terraform field name should match the API field's name and type. For example, if the API has an enum field called `what_to_do_on_delete` with values `DELETE` and `PROTECT`, the Terraform field should do the same.
 
 A resource can have up to two `deletion_protection` fields (with different names): one that represents a field in the API, and one that is only in Terraform. This could happen because the API added its field after `deletion_protection` already existed in Terraform; it could also happen because a separate field was added in Terraform to make sure that `deletion_protection` is enabled by default. In either case, they should be reconciled into a single field (that defaults to enabled and whose name matches the API field) in the next major release.
-
-Resources that do not have a significant risk of unrecoverable data loss or similar critical concern will not be given `deletion_protection` fields.
 
 See [Client-side fields]({{< ref "/develop/client-side-fields" >}}) for information about adding `deletion_protection` fields.
 
