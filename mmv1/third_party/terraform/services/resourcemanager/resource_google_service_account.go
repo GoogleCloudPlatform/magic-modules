@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -144,7 +145,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		ServiceAccount: sa,
 	}
 
-	iamClient := config.NewIamClient(userAgent)
+	iamClient := iambeta.NewClient(config, userAgent)
 	sa, err = iamClient.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 	if err != nil {
 		gerr, ok := err.(*googleapi.Error)
@@ -208,7 +209,7 @@ func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) tr
 		}
 
 		// Confirm the service account exists
-		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+		_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 
 		if err != nil {
 			return nil, err
@@ -225,7 +226,7 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	// Confirm the service account exists
-	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+	sa, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
 	}
@@ -286,7 +287,7 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 		return err
 	}
 	name := d.Id()
-	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Delete(name).Do()
+	_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Delete(name).Do()
 	if err != nil {
 		gerr, ok := err.(*googleapi.Error)
 		notFound := ok && gerr.Code == 404
@@ -309,7 +310,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return err
 	}
-	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+	sa, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return fmt.Errorf("Error retrieving service account %q: %s", d.Id(), err)
 	}
@@ -323,13 +324,13 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 
 	// We want to skip the Patch Call below if only the disabled field has been changed
 	if d.HasChange("disabled") && !d.Get("disabled").(bool) {
-		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Enable(d.Id(),
+		_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Enable(d.Id(),
 			&iam.EnableServiceAccountRequest{}).Do()
 		if err != nil {
 			return err
 		}
 	} else if d.HasChange("disabled") && d.Get("disabled").(bool) {
-		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Disable(d.Id(),
+		_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Disable(d.Id(),
 			&iam.DisableServiceAccountRequest{}).Do()
 		if err != nil {
 			return err
@@ -340,7 +341,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		return nil
 	}
 
-	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Patch(d.Id(),
+	_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Patch(d.Id(),
 		&iam.PatchServiceAccountRequest{
 			UpdateMask: strings.Join(updateMask, ","),
 			ServiceAccount: &iam.ServiceAccount{

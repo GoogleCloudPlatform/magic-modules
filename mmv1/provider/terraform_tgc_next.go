@@ -132,8 +132,10 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 	}
 
 	templatePath := "templates/tgc_next/services/resource.go.tmpl"
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
+	fileName := fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name))
+	targetFilePath := path.Join(targetFolder, fileName)
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+	tgc.replaceImportPath(targetFolder, fileName)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
@@ -270,13 +272,15 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/version/version.go":                  "third_party/terraform/version/version.go",
 
 		// services
-		"pkg/services/compute/image.go":             "third_party/terraform/services/compute/image.go",
-		"pkg/services/compute/disk_type.go":         "third_party/terraform/services/compute/disk_type.go",
-		"pkg/services/kms/client.go":                "third_party/terraform/services/kms/client.go",
-		"pkg/services/kms/kms_utils.go":             "third_party/terraform/services/kms/kms_utils.go",
-		"pkg/services/privateca/privateca_utils.go": "third_party/terraform/services/privateca/privateca_utils.go",
-		"pkg/services/eventarc/eventarc_utils.go":   "third_party/terraform/services/eventarc/eventarc_utils.go",
-		"pkg/services/storage/client.go":            "third_party/terraform/services/storage/client.go",
+		"pkg/services/compute/image.go":                 "third_party/terraform/services/compute/image.go",
+		"pkg/services/compute/disk_type.go":             "third_party/terraform/services/compute/disk_type.go",
+		"pkg/services/kms/client.go":                    "third_party/terraform/services/kms/client.go",
+		"pkg/services/kms/kms_utils.go":                 "third_party/terraform/services/kms/kms_utils.go",
+		"pkg/services/privateca/privateca_utils.go":     "third_party/terraform/services/privateca/privateca_utils.go",
+		"pkg/services/eventarc/eventarc_utils.go":       "third_party/terraform/services/eventarc/eventarc_utils.go",
+		"pkg/services/resourcemanager/client/client.go": "third_party/terraform/services/resourcemanager/client/client.go",
+		"pkg/services/resourcemanagerv3/client.go":      "third_party/terraform/services/resourcemanagerv3/client.go",
+		"pkg/services/storage/client.go":                "third_party/terraform/services/storage/client.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }

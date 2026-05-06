@@ -67,6 +67,12 @@ type CustomCode struct {
 	// exported (e.g. "fooBarValidationRegex").
 	Constants string `yaml:"constants,omitempty"`
 
+	// TestConstants go above everything else in the test file, and include
+	// things like methods that will be referred to by name elsewhere
+	// (e.g. "fooBarDiffSuppress") and regexes that are necessarily
+	// exported (e.g. "fooBarValidationRegex").
+	TestConstants string `yaml:"test_constants,omitempty"`
+
 	// This code is run before the Create call happens.  It's placed
 	// in the Create function, just before the Create call is made.
 	PreCreate string `yaml:"pre_create,omitempty"`

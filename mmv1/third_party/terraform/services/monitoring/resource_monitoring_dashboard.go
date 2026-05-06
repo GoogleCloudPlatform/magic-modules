@@ -157,7 +157,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -225,7 +225,7 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:               config,
 		Method:               "PATCH",
@@ -257,7 +257,7 @@ func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {

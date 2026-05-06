@@ -53,7 +53,7 @@ if d.Get("create_snapshot_before_destroy").(bool) {
 		snapshotObj["snapshotEncryptionKey"] = snapshotEncryptionKey
 	}
 
-	snapshotUrl := fmt.Sprintf("%sprojects/%s/global/snapshots", config.ComputeBasePath, project)
+	snapshotUrl := fmt.Sprintf("%sprojects/%s/global/snapshots", transport_tpg.BaseUrl(Product, config), project)
 	
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
@@ -89,7 +89,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 		}
 
 		// Get instance details using REST API
-		instanceUrl, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, instanceProject, instanceZone, instanceName))
+		instanceUrl, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, config), instanceProject, instanceZone, instanceName))
 		if err != nil {
 			return err
 		}
@@ -127,7 +127,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 
 	for _, call := range detachCalls {
 		detachUrl := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/detachDisk?deviceName=%s", 
-			config.ComputeBasePath, call.project, call.zone, call.instance, call.deviceName)
+			transport_tpg.BaseUrl(Product, config), call.project, call.zone, call.instance, call.deviceName)
 		
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,

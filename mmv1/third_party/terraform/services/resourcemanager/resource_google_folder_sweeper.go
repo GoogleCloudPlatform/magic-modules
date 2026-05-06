@@ -10,10 +10,11 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
+	cloudresourcemanagerv3 "google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/googleapi"
 )
 
@@ -53,9 +54,9 @@ func testSweepFolder(region string) error {
 	parent := "organizations/" + org
 
 	token := ""
-	svc := config.NewResourceManagerV3Client(config.UserAgent)
+	svc := resourcemanagerv3.NewClient(config, config.UserAgent)
 	for paginate := true; paginate; {
-		found, err := config.NewResourceManagerV3Client(config.UserAgent).Folders.List().Parent(parent).PageToken(token).Do()
+		found, err := resourcemanagerv3.NewClient(config, config.UserAgent).Folders.List().Parent(parent).PageToken(token).Do()
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error listing folders: %s", err)
 			return nil
@@ -67,13 +68,13 @@ func testSweepFolder(region string) error {
 			}
 			log.Printf("[INFO][SWEEPER_LOG] Sweeping Folder id: %s, name: %s", folder.Name, folder.DisplayName)
 			cleanupFolderContent(config, folder.Name)
-			_, err := config.NewResourceManagerV3Client(config.UserAgent).Folders.Delete(folder.Name).Do()
+			_, err := resourcemanagerv3.NewClient(config, config.UserAgent).Folders.Delete(folder.Name).Do()
 			if err != nil {
 				if isCapabilityError(err) {
 					log.Println("[INFO][SWEEPER_LOG]Detected 'configured capability' violation. Starting cleanup...")
 
 					// 2. Get Folder to find ManagementProject
-					folder, err := config.NewResourceManagerV3Client(config.UserAgent).Folders.Get(folder.Name).Do()
+					folder, err := resourcemanagerv3.NewClient(config, config.UserAgent).Folders.Get(folder.Name).Do()
 					if err != nil {
 						log.Printf("[INFO][SWEEPER_LOG] Error, failed to delete folder %s: %s", folder.Name, err)
 						continue
@@ -89,7 +90,7 @@ func testSweepFolder(region string) error {
 
 					// 5. Retry Delete
 					log.Println("[INFO][SWEEPER_LOG]Retrying folder deletion...")
-					_, err = config.NewResourceManagerV3Client(config.UserAgent).Folders.Delete(folder.Name).Do()
+					_, err = resourcemanagerv3.NewClient(config, config.UserAgent).Folders.Delete(folder.Name).Do()
 					if err != nil {
 						log.Printf("[INFO][SWEEPER_LOG] Error, failed to delete folder %s: %s", folder.Name, err)
 						continue
@@ -130,7 +131,7 @@ func isCapabilityError(err error) bool {
 	return false
 }
 
-func cleanupLiens(svc *resourceManagerV3.Service, project string, config *transport_tpg.Config) {
+func cleanupLiens(svc *cloudresourcemanagerv3.Service, project string, config *transport_tpg.Config) {
 	log.Printf("[INFO][SWEEPER_LOG]Checking liens on %s...\n", project)
 	resp, err := svc.Liens.List().Parent(project).Do()
 	if err != nil {
@@ -209,8 +210,8 @@ func cleanupFolderContent(config *transport_tpg.Config, folderName string) {
 	folderId := strings.TrimPrefix(folderName, "folders/")
 
 	// 1. Delete projects in folder
-	pSvc := config.NewResourceManagerClient(config.UserAgent)
-	fSvc := config.NewResourceManagerV3Client(config.UserAgent)
+	pSvc := rmClient.NewClient(config, config.UserAgent)
+	fSvc := resourcemanagerv3.NewClient(config, config.UserAgent)
 	projectFilter := fmt.Sprintf("parent.id:%s -lifecycleState:DELETE_REQUESTED", folderId)
 
 	token := ""

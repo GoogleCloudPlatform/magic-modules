@@ -28,6 +28,7 @@ var Product = registry.Product{
     BaseUrl: "{{ $.Version.BaseUrl }}",
     {{- if $.Version.RepUrl }}
     RepUrl: "{{ $.Version.RepUrl }}",
+    RepByDefault: {{ $.RepByDefault }},
     {{- end }}
     CustomEndpointField: "{{ underscore $.Name }}_custom_endpoint",
     CustomEndpointEnvVar: "GOOGLE_{{ upper (underscore $.Name) }}_CUSTOM_ENDPOINT",
