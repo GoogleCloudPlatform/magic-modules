@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -81,7 +82,7 @@ func testAccCheckComputeTargetSslProxyExists(t *testing.T, n string, proxy *map[
 		config := acctest.GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		url := fmt.Sprintf("%sprojects/%s/global/targetSslProxies/%s", config.ComputeBasePath, config.Project, name)
+		url := fmt.Sprintf("%sprojects/%s/global/targetSslProxies/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project, name)
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
