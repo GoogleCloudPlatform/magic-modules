@@ -4681,7 +4681,7 @@ resource "google_container_node_pool" "with_upgrade_settings" {
 
 func testAccContainerNodePool_withRDMA(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
-data "google_container_engine_versions" "central1c" {
+data "google_container_engine_versions" "central1b" {
   location = "us-central1-b"
 }
 
