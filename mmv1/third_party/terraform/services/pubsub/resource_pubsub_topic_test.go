@@ -351,7 +351,7 @@ func TestAccPubsubTopic_tags(t *testing.T) {
 		"topic":    topic,
 		"org":      envvar.GetTestOrgFromEnv(t),
 		"tagKey":   tagKey,
-		"tagValue": tags.BootstrapSharedTestProjectTagValue(t, "pubsub-topic-tagvalue", tagKey),
+		"tagValue": tags.BootstrapSharedTestOrganizationTagValue(t, "pubsub-topic-tagvalue", tagKey),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

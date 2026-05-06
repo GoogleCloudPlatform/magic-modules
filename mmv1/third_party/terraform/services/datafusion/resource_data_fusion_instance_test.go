@@ -162,7 +162,7 @@ func TestAccDatafusionInstance_tags(t *testing.T) {
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      tags.BootstrapSharedTestProjectTagValue(t, "datafusion-instances-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "datafusion-instances-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

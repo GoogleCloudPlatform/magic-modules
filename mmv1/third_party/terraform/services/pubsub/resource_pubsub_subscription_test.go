@@ -626,7 +626,7 @@ func TestAccPubsubSubscription_tags(t *testing.T) {
 		"subscription": subscription,
 		"org":          envvar.GetTestOrgFromEnv(t),
 		"tagKey":       tagKey,
-		"tagValue":     tags.BootstrapSharedTestProjectTagValue(t, "pubsub-subscription-tagvalue", tagKey),
+		"tagValue":     tags.BootstrapSharedTestOrganizationTagValue(t, "pubsub-subscription-tagvalue", tagKey),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

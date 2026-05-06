@@ -99,7 +99,7 @@ func TestAccFolder_tags(t *testing.T) {
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      tags.BootstrapSharedTestProjectTagValue(t, "crm-folder-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "crm-folder-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

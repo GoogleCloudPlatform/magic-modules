@@ -594,7 +594,7 @@ func TestAccSecretManagerRegionalRegionalSecret_tags(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      tags.BootstrapSharedTestProjectTagValue(t, "secretmanager_regional_regionalsecret-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "secretmanager_regional_regionalsecret-tagvalue", tagKey),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -252,7 +252,7 @@ func TestAccProject_tags(t *testing.T) {
 		"pid":           pid,
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      tags.BootstrapSharedTestProjectTagValue(t, "crm-projects-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "crm-projects-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 	acctest.VcrTest(t, resource.TestCase{

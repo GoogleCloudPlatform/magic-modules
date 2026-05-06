@@ -123,7 +123,7 @@ func TestAccFilestoreBackup_tags(t *testing.T) {
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      tags.BootstrapSharedTestProjectTagValue(t, "filestore-backups-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "filestore-backups-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
