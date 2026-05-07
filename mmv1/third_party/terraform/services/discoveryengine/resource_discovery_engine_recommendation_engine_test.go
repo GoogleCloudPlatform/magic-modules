@@ -11,7 +11,7 @@ func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationeng
 	t.Parallel()
 
 	// Skip in VCR until the test issue is resolved
-	// TODO(shuyama): Add GH issue link
+	// TODO: Add GH issue link
 	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{

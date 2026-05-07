@@ -463,7 +463,7 @@ func (c *Client) keyDiffsForRawDesired(ctx context.Context, rawDesired *Key, opt
 }
 
 func canonicalizeKeyInitialState(rawInitial, rawDesired *Key) (*Key, error) {
-	// TODO(magic-modules-eng): write canonicalizer once relevant traits are added.
+	// TODO: write canonicalizer once relevant traits are added.
 
 	if !dcl.IsZeroValue(rawInitial.WebSettings) {
 		// Check if anything else is set.
@@ -1458,7 +1458,7 @@ func canonicalizeNewKeyWafSettingsSlice(c *Client, des, nw []KeyWafSettings) []K
 // Diffs on some fields will be ignored if the `desired` state has an empty (nil)
 // value. This empty value indicates that the user does not care about the state for
 // the field. Empty fields on the actual object will cause diffs.
-// TODO(magic-modules-eng): for efficiency in some resources, add batching.
+// TODO: for efficiency in some resources, add batching.
 func diffKey(c *Client, desired, actual *Key, opts ...dcl.ApplyOption) ([]*dcl.FieldDiff, error) {
 	if desired == nil || actual == nil {
 		return nil, fmt.Errorf("nil resource passed to diff - always a programming error: %#v, %#v", desired, actual)

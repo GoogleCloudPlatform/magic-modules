@@ -16,7 +16,7 @@ package product
 import (
 	"log"
 
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 var ORDER = []string{"ga", "beta", "nightly", "alpha", "private", "internal"}

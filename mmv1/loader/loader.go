@@ -12,8 +12,8 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
-	"golang.org/x/exp/slices"
+	glog "google3/base/go/log"
+	"slices"
 )
 
 type Loader struct {

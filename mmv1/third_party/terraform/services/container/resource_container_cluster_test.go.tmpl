@@ -7651,7 +7651,7 @@ func TestAccContainerCluster_autopilot_privileged_admission(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// TODO(diamondburned): uncomment and test once upstream cluster
+			// TODO: uncomment and test once upstream cluster
 			// server API fix is rolled out.
 			// {
 			// 	Config: testAccContainerCluster_autopilot_privileged_admission(clusterName, networkName, subnetworkName, nil),

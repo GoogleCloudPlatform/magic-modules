@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/otiai10/copy"
+	"google3/third_party/golang/dircopy/copy"
 )
 
 // Code generator for a library converting GCP CAI objects to Terraform state.

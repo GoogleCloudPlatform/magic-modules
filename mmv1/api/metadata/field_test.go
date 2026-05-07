@@ -5,7 +5,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/google/go-cmp/cmp"
+	"google3/third_party/golang/cmp/cmp"
 )
 
 func TestFromProperties(t *testing.T) {

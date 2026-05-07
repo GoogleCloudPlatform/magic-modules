@@ -331,7 +331,7 @@ func (c *Client) clientDiffsForRawDesired(ctx context.Context, rawDesired *Azure
 }
 
 func canonicalizeClientInitialState(rawInitial, rawDesired *AzureClient) (*AzureClient, error) {
-	// TODO(magic-modules-eng): write canonicalizer once relevant traits are added.
+	// TODO: write canonicalizer once relevant traits are added.
 	return rawInitial, nil
 }
 
@@ -439,7 +439,7 @@ func canonicalizeClientNewState(c *Client, rawNew, rawDesired *AzureClient) (*Az
 // Diffs on some fields will be ignored if the `desired` state has an empty (nil)
 // value. This empty value indicates that the user does not care about the state for
 // the field. Empty fields on the actual object will cause diffs.
-// TODO(magic-modules-eng): for efficiency in some resources, add batching.
+// TODO: for efficiency in some resources, add batching.
 func diffClient(c *Client, desired, actual *AzureClient, opts ...dcl.ApplyOption) ([]*dcl.FieldDiff, error) {
 	if desired == nil || actual == nil {
 		return nil, fmt.Errorf("nil resource passed to diff - always a programming error: %#v, %#v", desired, actual)

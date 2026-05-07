@@ -19,10 +19,10 @@ tpg_product(
 
 mm_resource(
     name = "backup",
-    product = ":alloydb",
     src = "Backup.yaml",
     has_operation = True,
     has_sweeper = True,
+    product = ":alloydb",
 )
 
 tpg_resource(
@@ -32,9 +32,9 @@ tpg_resource(
 
 mm_resource(
     name = "cluster",
-    product = ":alloydb",
     src = "Cluster.yaml",
     has_operation = True,
+    product = ":alloydb",
 )
 
 tpg_resource(
@@ -44,9 +44,9 @@ tpg_resource(
 
 mm_resource(
     name = "instance",
-    product = ":alloydb",
     src = "Instance.yaml",
     has_operation = True,
+    product = ":alloydb",
 )
 
 tpg_resource(
@@ -56,9 +56,9 @@ tpg_resource(
 
 mm_resource(
     name = "user",
-    product = ":alloydb",
     src = "User.yaml",
     has_operation = True,
+    product = ":alloydb",
 )
 
 tpg_resource(

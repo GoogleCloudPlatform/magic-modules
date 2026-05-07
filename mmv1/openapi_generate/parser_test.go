@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/getkin/kin-openapi/openapi3"
+	"google3/third_party/golang/kin_openapi/current/openapi3/openapi3"
 )
 
 //go:embed test_data/test_api.yaml

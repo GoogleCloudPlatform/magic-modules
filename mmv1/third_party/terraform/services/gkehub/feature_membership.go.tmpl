@@ -1520,7 +1520,7 @@ func applyFeatureMembershipHelper(c *Client, ctx context.Context, rawDesired *Fe
 		return nil, err
 	}
 
-	// TODO(magic-modules-eng): 2.2 Feasibility check (all updates are feasible so far).
+	// TODO: 2.2 Feasibility check (all updates are feasible so far).
 
 	// 2.3: Lifecycle Directive Check
 	var create bool
@@ -1608,7 +1608,7 @@ func applyFeatureMembershipDiff(c *Client, ctx context.Context, desired *Feature
 
 	c.Config.Logger.InfoWithContextf(ctx, "Created canonical new state: %v", newState)
 	// 3.3 Comparison of the new state and raw desired state.
-	// TODO(magic-modules-eng): EVENTUALLY_CONSISTENT_UPDATE
+	// TODO: EVENTUALLY_CONSISTENT_UPDATE
 	newDesired, err := canonicalizeFeatureMembershipDesiredState(rawDesired, newState)
 	if err != nil {
 		return newState, err

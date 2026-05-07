@@ -326,7 +326,7 @@ func (c *Client) rulesetDiffsForRawDesired(ctx context.Context, rawDesired *Rule
 }
 
 func canonicalizeRulesetInitialState(rawInitial, rawDesired *Ruleset) (*Ruleset, error) {
-	// TODO(magic-modules-eng): write canonicalizer once relevant traits are added.
+	// TODO: write canonicalizer once relevant traits are added.
 	return rawInitial, nil
 }
 
@@ -768,7 +768,7 @@ func canonicalizeNewRulesetMetadataSlice(c *Client, des, nw []RulesetMetadata) [
 // Diffs on some fields will be ignored if the `desired` state has an empty (nil)
 // value. This empty value indicates that the user does not care about the state for
 // the field. Empty fields on the actual object will cause diffs.
-// TODO(magic-modules-eng): for efficiency in some resources, add batching.
+// TODO: for efficiency in some resources, add batching.
 func diffRuleset(c *Client, desired, actual *Ruleset, opts ...dcl.ApplyOption) ([]*dcl.FieldDiff, error) {
 	if desired == nil || actual == nil {
 		return nil, fmt.Errorf("nil resource passed to diff - always a programming error: %#v, %#v", desired, actual)

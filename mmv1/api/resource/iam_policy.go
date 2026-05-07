@@ -18,7 +18,7 @@ import (
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
-	"gopkg.in/yaml.v3"
+	"google3/third_party/golang/yamlv3/yaml"
 )
 
 // Information about the IAM policy for this resource
