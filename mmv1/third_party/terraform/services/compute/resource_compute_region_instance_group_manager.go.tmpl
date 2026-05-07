@@ -1005,7 +1005,6 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 
 	body := map[string]interface{}{
 		"name":                        d.Get("name").(string),
-		"description":                 d.Get("description").(string),
 		"baseInstanceName":            d.Get("base_instance_name").(string),
 		"targetSize":                  int64(d.Get("target_size").(int)),
 		"listManagedInstancesResults": d.Get("list_managed_instances_results").(string),
@@ -1016,6 +1015,9 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		"instanceLifecyclePolicy":     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		"statefulPolicy":              expandStatefulPolicy(d),
 		"resourcePolicies":            expandResourcePolicies(d.Get("resource_policies").([]interface{})),
+	}
+	if desc := d.Get("description").(string); desc != "" {
+		body["description"] = desc
 	}
 	if namedPorts := getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()); len(namedPorts) > 0 {
 		body["namedPorts"] = namedPorts
