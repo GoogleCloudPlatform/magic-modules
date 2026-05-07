@@ -69,6 +69,7 @@ func TestAccNetworkConnectivityTransport_networkConnectivityTransportBasicExampl
 
 func testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
 
 resource "google_compute_network" "primary-network" {
   name                    = "tf-test-my-vpc-network%{random_suffix}"
@@ -92,6 +93,8 @@ resource "google_network_connectivity_transport" "primary"  {
 
 func testAccNetworkConnectivityTransport_networkConnectivityTransportBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_compute_network" "primary-network" {
   name                    = "tf-test-my-vpc-network%{random_suffix}"
   auto_create_subnetworks = false
