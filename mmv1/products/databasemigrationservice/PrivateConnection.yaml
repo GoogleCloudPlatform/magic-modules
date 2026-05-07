@@ -53,23 +53,15 @@ examples:
     test_vars_overrides:
       # for backward compatible
       create_without_validation: '"false" + randomSuffix'
-      network_name: '"my-network" + randomSuffix'
-      private_connection_id: '"my-connection" + randomSuffix'
   - name: 'database_migration_service_private_connection_psc'
     primary_resource_id: 'default'
     vars:
       private_connection_id: 'my-connection'
       attachment_name: 'my-attachment'
       create_without_validation: 'false'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork'
     test_vars_overrides:
       # for backward compatible
       create_without_validation: '"false" + randomSuffix'
-      attachment_name: '"my-attachment" + randomSuffix'
-      private_connection_id: '"my-connection" + randomSuffix'
-      network_name: '"my-network" + randomSuffix'
-      subnetwork_name: '"my-subnetwork" + randomSuffix'
 parameters:
   - name: 'privateConnectionId'
     type: String

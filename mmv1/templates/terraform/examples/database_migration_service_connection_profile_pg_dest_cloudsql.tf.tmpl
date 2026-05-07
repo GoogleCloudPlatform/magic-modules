@@ -1,0 +1,21 @@
+resource "google_sql_database_instance" "postgres" {
+  name             = "{{index $.Vars "sqldb"}}"
+  database_version = "POSTGRES_12"
+  settings {
+    tier = "db-f1-micro"
+  }
+  deletion_protection =  false
+}
+
+resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
+	location = "us-central1"
+	connection_profile_id = "{{index $.Vars "profile_id"}}"
+	display_name          = "my-profile-display"
+	role                  = "DESTINATION"
+
+	postgresql {
+	  username = "username"
+	  password = "password"
+	  cloud_sql_id = google_sql_database_instance.postgres.name
+	}
+}
