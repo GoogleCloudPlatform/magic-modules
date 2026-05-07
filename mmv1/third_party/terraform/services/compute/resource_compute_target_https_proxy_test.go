@@ -2,8 +2,9 @@ package compute_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
+
 	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/networksecurity"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -15,7 +16,7 @@ import (
 
 const (
 	canonicalSslCertificateTemplate  = "https://www.googleapis.com/compute/v1/projects/%s/global/sslCertificates/%s"
-	canonicalSslPolicyTemplate  = "https://www.googleapis.com/compute/v1/projects/%s/global/sslPolicies/%s"
+	canonicalSslPolicyTemplate       = "https://www.googleapis.com/compute/v1/projects/%s/global/sslPolicies/%s"
 	canonicalCertificateMapTemplate  = "//certificatemanager.googleapis.com/projects/%s/locations/global/certificateMaps/%s"
 	canonicalServerTlsPolicyTemplate = "//networksecurity.googleapis.com/projects/%s/locations/global/serverTlsPolicies/%s"
 )
@@ -64,22 +65,22 @@ func TestAccComputeTargetHttpsProxy_certificateMap(t *testing.T) {
 	var proxy map[string]interface{}
 	resourceSuffix := acctest.RandString(t, 10)
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy:             testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
-        Steps: []resource.TestStep{
-            {
-                Config: testAccComputeTargetHttpsProxy_certificateMap(resourceSuffix),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckComputeTargetHttpsProxyExists(
-                        t, "google_compute_target_https_proxy.foobar", &proxy),
-                    testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
-                    testAccComputeTargetHttpsProxyHasCertificateMap(t, "tf-test-certmap-"+resourceSuffix, &proxy),
-                ),
-            },
-        },
-    })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeTargetHttpsProxy_certificateMap(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetHttpsProxyExists(
+						t, "google_compute_target_https_proxy.foobar", &proxy),
+					testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
+					testAccComputeTargetHttpsProxyHasCertificateMap(t, "tf-test-certmap-"+resourceSuffix, &proxy),
+				),
+			},
+		},
+	})
 }
 
 func TestAccComputeTargetHttpsProxyServerTlsPolicy_update(t *testing.T) {
@@ -88,37 +89,37 @@ func TestAccComputeTargetHttpsProxyServerTlsPolicy_update(t *testing.T) {
 	var proxy map[string]interface{}
 	resourceSuffix := acctest.RandString(t, 10)
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy:             testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
-        Steps: []resource.TestStep{
-            {
-                Config: testAccComputeTargetHttpsProxyWithoutServerTlsPolicy(resourceSuffix),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckComputeTargetHttpsProxyExists(
-                        t, "google_compute_target_https_proxy.foobar", &proxy),
-										testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
-                ),
-            },
-            {
-                Config: testAccComputeTargetHttpsProxyWithServerTlsPolicy(resourceSuffix),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckComputeTargetHttpsProxyExists(
-                        t, "google_compute_target_https_proxy.foobar", &proxy),
-										testAccComputeTargetHttpsProxyHasServerTlsPolicy(t, "tf-test-server-tls-policy-"+resourceSuffix, &proxy),
-                ),
-            },
-            {
-                Config: testAccComputeTargetHttpsProxyWithoutServerTlsPolicy(resourceSuffix),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckComputeTargetHttpsProxyExists(
-                        t, "google_compute_target_https_proxy.foobar", &proxy),
-										testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
-                ),
-            },
-        },
-    })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeTargetHttpsProxyWithoutServerTlsPolicy(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetHttpsProxyExists(
+						t, "google_compute_target_https_proxy.foobar", &proxy),
+					testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
+				),
+			},
+			{
+				Config: testAccComputeTargetHttpsProxyWithServerTlsPolicy(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetHttpsProxyExists(
+						t, "google_compute_target_https_proxy.foobar", &proxy),
+					testAccComputeTargetHttpsProxyHasServerTlsPolicy(t, "tf-test-server-tls-policy-"+resourceSuffix, &proxy),
+				),
+			},
+			{
+				Config: testAccComputeTargetHttpsProxyWithoutServerTlsPolicy(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetHttpsProxyExists(
+						t, "google_compute_target_https_proxy.foobar", &proxy),
+					testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
+				),
+			},
+		},
+	})
 }
 
 func testAccCheckComputeTargetHttpsProxyExists(t *testing.T, n string, proxy *map[string]interface{}) resource.TestCheckFunc {
