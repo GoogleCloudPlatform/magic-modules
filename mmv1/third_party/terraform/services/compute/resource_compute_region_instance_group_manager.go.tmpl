@@ -1734,29 +1734,49 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
   for _, diskRaw := range disks {
       diskData := diskRaw.(map[string]any)
       disk := map[string]interface{}{
-          "autoDelete":   diskData["auto_delete"].(bool),
-          "boot":         diskData["boot"].(bool),
-          "deviceName":   diskData["device_name"].(string),
-          "interface":    diskData["interface"].(string),
-          "mode":         diskData["mode"].(string),
-          "type":         diskData["type"].(string),
-          "architecture": diskData["architecture"].(string),
+          "autoDelete": diskData["auto_delete"].(bool),
+          "deviceName": diskData["device_name"].(string),
+      }
+      if v := diskData["boot"].(bool); v {
+          disk["boot"] = v
+      }
+      if v := diskData["interface"].(string); v != "" {
+          disk["interface"] = v
+      }
+      if v := diskData["mode"].(string); v != "" {
+          disk["mode"] = v
+      }
+      if v := diskData["type"].(string); v != "" {
+          disk["type"] = v
+      }
+      if v := diskData["architecture"].(string); v != "" {
+          disk["architecture"] = v
       }
 
-      // Assign diskSizeGb at the disk level (same as initializeParams.diskSizeGb)
+      // Assign diskSizeGb at the disk level as a string (matches API serialization)
       if v, exists := diskData["disk_size_gb"]; exists && v.(int) != 0 {
-          disk["diskSizeGb"] = int64(v.(int))
+          disk["diskSizeGb"] = strconv.Itoa(v.(int))
       }
 
       if v, exists := diskData["disk_encryption_key"]; exists && v != nil {
           keys := v.([]any)
           if len(keys) > 0 && keys[0] != nil {
               keyData := keys[0].(map[string]any)
-              disk["diskEncryptionKey"] = map[string]interface{}{
-                  "rawKey":               keyData["raw_key"].(string),
-                  "rsaEncryptedKey":      keyData["rsa_encrypted_key"].(string),
-                  "kmsKeyServiceAccount": keyData["kms_key_service_account"].(string),
-                  "kmsKeyName":           keyData["kms_key_self_link"].(string),
+              encKey := map[string]interface{}{}
+              if k := keyData["raw_key"].(string); k != "" {
+                  encKey["rawKey"] = k
+              }
+              if k := keyData["rsa_encrypted_key"].(string); k != "" {
+                  encKey["rsaEncryptedKey"] = k
+              }
+              if k := keyData["kms_key_service_account"].(string); k != "" {
+                  encKey["kmsKeyServiceAccount"] = k
+              }
+              if k := keyData["kms_key_self_link"].(string); k != "" {
+                  encKey["kmsKeyName"] = k
+              }
+              if len(encKey) > 0 {
+                  disk["diskEncryptionKey"] = encKey
               }
           }
       }
@@ -1782,9 +1802,9 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               hasInitializeParams = true
           }
 
-          // Assign diskSizeGb at both levels
+          // Assign diskSizeGb at both levels as a string (matches API serialization)
           if v, exists := diskData["disk_size_gb"]; exists && v.(int) != 0 {
-              initializeParams["diskSizeGb"] = int64(v.(int))
+              initializeParams["diskSizeGb"] = strconv.Itoa(v.(int))
               hasInitializeParams = true
           }
 
@@ -1794,12 +1814,12 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
           }
 
           if v, exists := diskData["provisioned_iops"]; exists && v.(int) != 0 {
-              initializeParams["provisionedIops"] = int64(v.(int))
+              initializeParams["provisionedIops"] = strconv.Itoa(v.(int))
               hasInitializeParams = true
           }
 
           if v, exists := diskData["provisioned_throughput"]; exists && v.(int) != 0 {
-              initializeParams["provisionedThroughput"] = int64(v.(int))
+              initializeParams["provisionedThroughput"] = strconv.Itoa(v.(int))
               hasInitializeParams = true
           }
 
@@ -1832,13 +1852,23 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               keys := v.([]any)
               if len(keys) > 0 && keys[0] != nil {
                   keyData := keys[0].(map[string]any)
-                  initializeParams["sourceImageEncryptionKey"] = map[string]interface{}{
-                      "rawKey":               keyData["raw_key"].(string),
-                      "rsaEncryptedKey":      keyData["rsa_encrypted_key"].(string),
-                      "kmsKeyServiceAccount": keyData["kms_key_service_account"].(string),
-                      "kmsKeyName":           keyData["kms_key_self_link"].(string),
+                  encKey := map[string]interface{}{}
+                  if k := keyData["raw_key"].(string); k != "" {
+                      encKey["rawKey"] = k
                   }
-                  hasInitializeParams = true
+                  if k := keyData["rsa_encrypted_key"].(string); k != "" {
+                      encKey["rsaEncryptedKey"] = k
+                  }
+                  if k := keyData["kms_key_service_account"].(string); k != "" {
+                      encKey["kmsKeyServiceAccount"] = k
+                  }
+                  if k := keyData["kms_key_self_link"].(string); k != "" {
+                      encKey["kmsKeyName"] = k
+                  }
+                  if len(encKey) > 0 {
+                      initializeParams["sourceImageEncryptionKey"] = encKey
+                      hasInitializeParams = true
+                  }
               }
           }
 
