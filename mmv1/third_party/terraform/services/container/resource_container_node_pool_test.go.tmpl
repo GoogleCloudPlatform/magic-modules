@@ -4694,9 +4694,10 @@ resource "google_container_cluster" "cluster" {
   subnetwork          = "%s"
   initial_node_count  = 1
   enable_multi_networking = true
-  network_config = { accelerator_network_profile = "auto" }
 
   node_pool {
+  	network_config = { accelerator_network_profile = "auto" }
+
   	node_config {
    	  machine_type = "a3-ultragpu-8g"
 
