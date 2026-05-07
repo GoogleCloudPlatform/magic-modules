@@ -17,8 +17,8 @@ description: |
   The Transport resource is a top-level resource used by customers to control Partner Cross-Cloud Interconnect (CCI) connections.
 references:
   guides:
-    'Official Documentation': 'https://docs.cloud.google.com/sdk/gcloud/reference/beta/network-connectivity/transports'
-  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.transport'
+    'Official Documentation': 'https://docs.cloud.google.com/sdk/gcloud/reference/network-connectivity/transports'
+  api: 'https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.transports'
 docs:
 base_url: 'projects/{{project}}/locations/{{region}}/transports'
 self_link: 'projects/{{project}}/locations/{{region}}/transports/{{name}}'
@@ -36,7 +36,6 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-min_version: 'beta'
 examples:
   - name: 'network_connectivity_transport_basic'
     primary_resource_id: 'primary'
