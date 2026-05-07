@@ -4708,6 +4708,7 @@ resource "google_container_cluster" "cluster" {
       gpudirect_strategy = "rdma"
     }
   }
+}
 
 resource "google_container_node_pool" "np_with_gpudirect" {
   name     = "%s"
