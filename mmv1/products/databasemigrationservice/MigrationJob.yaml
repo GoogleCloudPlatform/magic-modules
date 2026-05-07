@@ -75,26 +75,6 @@ examples:
       source_sqldb_pass: '"password" + randomSuffix'
       # for backward compatible
       source_sqldb_user: '"username" + randomSuffix'
-  - name: database_migration_service_migration_job_postgres_quickstart
-    primary_resource_id: psqlquickstart
-    vars:
-      destination_cp: destination-cp
-      migration_id: my-migrationid
-      source_cp: source-cp
-      dest_sql: dest-instance
-      attachment_name: my-attachment
-      private_connection_id: my-connection
-      network_name: my-network
-      subnetwork_name: my-subnetwork
-    test_vars_overrides:
-      migration_id: '"my-migrationid" + randomSuffix'
-      source_cp: '"source-cp" + randomSuffix'
-      destination_cp: '"destination-cp" + randomSuffix'
-      dest_sql: '"dest-instance" + randomSuffix'
-      attachment_name: '"my-attachment" + randomSuffix'
-      private_connection_id: '"my-connection" + randomSuffix'
-      network_name: '"my-network" + randomSuffix'
-      subnetwork_name: '"my-subnetwork" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_postgres_objects
     primary_resource_id: psqltopsqlobjects
     vars:
@@ -303,7 +283,7 @@ properties:
       Cloud SQL console or using Cloud SQL APIs.
     send_empty_value: true
     allow_empty_object: true
-    at_most_one_of:
+    conflicts:
       - reverseSshConnectivity
       - vpcPeeringConnectivity
     properties: []
@@ -311,7 +291,7 @@ properties:
     type: NestedObject
     description: |
       The details of the VPC network that the source database is located in.
-    at_most_one_of:
+    conflicts:
       - staticIpConnectivity
       - vpcPeeringConnectivity
     properties:
@@ -338,7 +318,7 @@ properties:
     type: NestedObject
     description: |
       The details of the VPC network that the source database is located in.
-    at_most_one_of:
+    conflicts:
       - staticIpConnectivity
       - reverseSshConnectivity
     properties:
