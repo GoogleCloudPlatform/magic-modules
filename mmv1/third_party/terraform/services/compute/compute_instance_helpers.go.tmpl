@@ -1676,3 +1676,56 @@ func expandScheduling_v2(v interface{}) (map[string]interface{}, error) {
 	}
 	return scheduling, nil
 }
+
+func expandNetworkInterfaces_v2(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]interface{}, error) {
+	configs := d.Get("network_interface").([]interface{})
+	ifaces := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+
+		var networkAttachment string
+		network := data["network"].(string)
+		subnetwork := data["subnetwork"].(string)
+		if networkAttachmentObj, ok := data["network_attachment"]; ok {
+			networkAttachment = networkAttachmentObj.(string)
+		}
+		if networkAttachment == "" && network == "" && subnetwork == "" {
+			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
+		}
+
+		nf, err := tpgresource.ParseNetworkFieldValue(network, d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot determine self_link for network %q: %s", network, err)
+		}
+
+		subnetProjectField := fmt.Sprintf("network_interface.%d.subnetwork_project", i)
+		sf, err := tpgresource.ParseSubnetworkFieldValueWithProjectField(subnetwork, subnetProjectField, d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
+		}
+
+		iface := map[string]interface{}{
+			"networkIP":                data["network_ip"].(string),
+			"network":                  nf.RelativeLink(),
+			"networkAttachment":        networkAttachment,
+			"vlan":                     int64(data["vlan"].(int)),
+			"subnetwork":               sf.RelativeLink(),
+			"accessConfigs":            expandAccessConfigs_v2(data["access_config"].([]interface{})),
+			"aliasIpRanges":            expandAliasIpRanges_v2(data["alias_ip_range"].([]interface{})),
+			"nicType":                  data["nic_type"].(string),
+			"stackType":                data["stack_type"].(string),
+			"queueCount":               int64(data["queue_count"].(int)),
+			"ipv6AccessConfigs":        expandIpv6AccessConfigs_v2(data["ipv6_access_config"].([]interface{})),
+			"ipv6Address":              data["ipv6_address"].(string),
+			"internalIpv6PrefixLength": int64(data["internal_ipv6_prefix_length"].(int)),
+			"igmpQuery":                data["igmp_query"].(string),
+		}
+{{- if ne $.TargetVersionName "ga" }}
+		if macAddress, ok := data["mac_address"]; ok {
+			iface["macAddress"] = macAddress.(string)
+		}
+{{- end }}
+		ifaces[i] = iface
+	}
+	return ifaces, nil
+}
