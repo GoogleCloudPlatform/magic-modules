@@ -83,7 +83,7 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
     test_vars_overrides:
-      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
+      'address_name': 'tpgcompute.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", tpgcompute.AddressWithPrefixLength(8))'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
     exclude_docs: true
@@ -119,6 +119,7 @@ virtual_fields:
       nested resources will return an error. Possible values: DEFAULT, FORCE
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
+  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
 parameters:
   - name: 'region'
     type: String

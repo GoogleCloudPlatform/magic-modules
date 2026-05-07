@@ -1,52 +1,53 @@
 package gkebackup_test
 
 import (
-	"testing"
+    "testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+    "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+    "github.com/hashicorp/terraform-provider-google/google/acctest"
+    "github.com/hashicorp/terraform-provider-google/google/envvar"
+    tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccGKEBackupRestorePlan_update(t *testing.T) {
-	t.Parallel()
+    t.Parallel()
 
-	context := map[string]interface{}{
-		"project":             envvar.GetTestProjectFromEnv(),
-		"deletion_protection": false,
-		"network_name":        acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
-		"subnetwork_name":     acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
-		"random_suffix":       acctest.RandString(t, 10),
-	}
+    context := map[string]interface{}{
+        "project":             envvar.GetTestProjectFromEnv(),
+        "deletion_protection": false,
+        "network_name":        tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"),
+        "subnetwork_name":     tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")),
+        "random_suffix":       acctest.RandString(t, 10),
+    }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccGKEBackupRestorePlan_full(context),
-			},
-			{
-				ResourceName:            "google_gke_backup_restore_plan.restore_plan",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
-			},
-			{
-				Config: testAccGKEBackupRestorePlan_update(context),
-			},
-			{
-				ResourceName:            "google_gke_backup_restore_plan.restore_plan",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
-			},
-		},
-	})
+    acctest.VcrTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+        Steps: []resource.TestStep{
+            {
+                Config: testAccGKEBackupRestorePlan_full(context),
+            },
+            {
+                ResourceName:            "google_gke_backup_restore_plan.restore_plan",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+            },
+            {
+                Config: testAccGKEBackupRestorePlan_update(context),
+            },
+            {
+                ResourceName:            "google_gke_backup_restore_plan.restore_plan",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+            },
+        },
+    })
 }
 
 func testAccGKEBackupRestorePlan_full(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+    return acctest.Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "tf-test-restore-plan%{random_suffix}-cluster"
   location           = "us-central1"
@@ -120,7 +121,7 @@ resource "google_gke_backup_restore_plan" "restore_plan" {
 }
 
 func testAccGKEBackupRestorePlan_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+    return acctest.Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "tf-test-restore-plan%{random_suffix}-cluster"
   location           = "us-central1"
