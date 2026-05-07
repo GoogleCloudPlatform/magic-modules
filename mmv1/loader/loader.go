@@ -225,11 +225,16 @@ func (v varsReplacingFS) ReadFile(name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if strings.Contains(name, "examples/") {
 		modified := strings.ReplaceAll(string(content), "$.Vars", "$.ResourceIdVars")
 		return []byte(modified), nil
 	}
 	return content, nil
+}
+
+func NewVarsReplacingFS(inner google.ReadDirReadFileFS) google.ReadDirReadFileFS {
+	return varsReplacingFS{inner}
 }
 
 // loadResources loads all resources for a product
@@ -302,7 +307,6 @@ func (l *Loader) reconcileOverrideResources(product *api.Product, resources []*a
 // loadResource loads a single resource with optional override
 // baseResourcePath and overrideResourcePath are expected to be absolute paths.
 func (l *Loader) loadResource(product *api.Product, baseResourcePath string, overrideResourcePath string) *api.Resource {
-	l.sysfs = varsReplacingFS{l.sysfs}
 	resource := &api.Resource{}
 
 	// Check if base resource exists
