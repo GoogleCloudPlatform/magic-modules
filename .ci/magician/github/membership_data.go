@@ -1,4 +1,4 @@
-package github
+ package github
 
 import "time"
 
@@ -166,12 +166,8 @@ var (
 		"slevenick": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 5, 22),
-					endDate:   newDate(2025, 6, 7),
-				},
-				{
-					startDate: newDate(2026, 4, 13),
-					endDate:   newDate(2026, 4, 19),
+					startDate: newDate(2026, 5, 7),
+					endDate:   newDate(2026, 5, 12),
 				},
 			},
 		},
