@@ -16,7 +16,7 @@ name: 'BiglakeHive'
 legacy_name: 'biglake'
 display_name: 'Biglake'
 versions:
-  - name: 'beta'
+  - name: 'ga'
     base_url: 'https://biglake.googleapis.com/'
 scopes:
   - 'https://www.googleapis.com/auth/bigquery'

@@ -12,11 +12,9 @@
 # limitations under the License.
 
 ---
-# API resource name
 name: 'HiveCatalog'
-# Resource description for the provider documentation.
 description: |
-  RESOURCE_DESCRIPTION
+  Hive Catalogs in Biglake Metastore
 references:
   guides:
    # Link to quickstart in the API's Guides section. 
@@ -26,71 +24,41 @@ references:
   api: 'API_REFERENCE_URL'
 # Marks the resource as beta-only. Ensure a beta version block is present in
 # provider.yaml.
-min_version: beta
-
-# URL for the resource's standard List method. https://google.aip.dev/132
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
+# min_version: beta
 base_url: 'hive/v1beta/projects/{{project}}/catalogs'
-# URL for the resource's standard Get method. https://google.aip.dev/131
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog_id}}'
-
-# If true, the resource and all its fields are considered immutable - that is,
-# only creatable, not updatable. Individual fields can override this if they
-# have a custom update method in the API.
+self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{name}}'
 immutable: false
-
-# URL for the resource's standard Create method, including query parameters.
-# https://google.aip.dev/133
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-create_url: 'hive/v1beta/projects/{{project}}/catalogs?hiveCatalogId={{catalog_id}}&primary_location={{primary_location}}'
-
-# Overrides the URL for the resource's standard Update method. (If unset, the
-# self_link URL is used by default.) https://google.aip.dev/134
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
+create_url: 'hive/v1beta/projects/{{project}}/catalogs?hiveCatalogId={{name}}&primary_location={{primary_location}}'
 update_verb: 'PATCH'
-# If true, the resource sets an `updateMask` query parameter listing modified
-# fields when updating the resource. If false, it does not.
 update_mask: true
 
-# If true, code for handling long-running operations is generated along with
-# the resource. If false, that code is not generated.
-autogen_async: true
-# Sets parameters for handling operations returned by the API.
-async:
-  # Overrides which API calls return operations. Default: ['create',
-  # 'update', 'delete']
-  # actions: ['create', 'update', 'delete']
-  operation:
-    base_url: '{{op_id}}'
-
-# The IAM policy is shared with IcebergCatalog.
+# The IAM policy is shared with Iceberg Catalog (biglakeiceberg).
 iam_policy:
-  base_url: 'v1/projects/{{project}}/catalogs/{{catalog_id}}'
-  parent_resource_attribute: 'catalog_id'
+  base_url: 'v1/projects/{{project}}/catalogs/{{name}}'
+  parent_resource_attribute: 'name'
   method_name_separator: ":"
   fetch_iam_policy_verb: 'GET'
   import_format:
-    - 'projects/{{project}}/catalogs/{{catalog_id}}'
-    - '{{catalog_id}}'
+    - 'projects/{{project}}/catalogs/{{name}}'
+    - '{{name}}'
   allowed_iam_role: 'roles/biglake.editor'
 examples:
   - name: 'biglake_hive_catalog'
     primary_resource_id: 'my_hive_catalog'
     vars:
-      catalog_id: 'my_hive_catalog'
+      name: 'my_hive_catalog'
     test_env_vars:
       GOOGLE_BILLING_PROJECT: 'PROJECT'
       USER_PROJECT_OVERRIDE: 'true'
-    min_version: beta
+  - name: 'biglake_hive_catalog_full'
+    primary_resource_id: 'my_hive_catalog'
+    vars:
+      name: 'my_hive_catalog'
+    test_env_vars:
+      GOOGLE_BILLING_PROJECT: 'PROJECT'
+      USER_PROJECT_OVERRIDE: 'true'
 parameters:
-  - name: 'catalog_id'
+  - name: 'name'
     type: String
     required: true
     immutable: true
@@ -107,12 +75,8 @@ parameters:
       a BigLake-supported location, and it should be proximate to the remote
       catalog's location.
 properties:
-  - name: name
-    type: String
-    description: The full resource name returned by the API.
-    ignore_read: true
-    output: true
   - name: 'location_uri'
+    api_name: 'locationUri'
     type: String
     required: true
     description: | 
@@ -122,10 +86,12 @@ properties:
     description: |
       Description of the Hive catalog.
   - name: 'create_time'
+    api_name: 'createTime'
     type: String
     description: Output only. The creation time of the catalog.
     output: true
   - name: 'update_time'
+    api_name: 'updateTime'
     type: String
     description: Output only. The update time of the catalog.
     output: true
