@@ -1455,3 +1455,224 @@ func expandReservationAffinity_v2(d tpgresource.TerraformResourceData) (map[stri
 
 	return affinity, nil
 }
+
+func expandComputeMaxRunDuration_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	duration := map[string]interface{}{}
+
+	if nanos := original["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		duration["nanos"] = int64(nanos.(int))
+	}
+	if seconds := original["seconds"]; reflect.ValueOf(seconds).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(seconds)) {
+		duration["seconds"] = int64(seconds.(int))
+	}
+	return duration, nil
+}
+
+func expandComputeOnInstanceStopAction_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	d, ok := original["discard_local_ssd"]
+	if !ok {
+		return nil, nil
+	}
+	return map[string]interface{}{
+		"discardLocalSsd": d.(bool),
+	}, nil
+}
+
+func expandComputeLocalSsdRecoveryTimeout_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	duration := map[string]interface{}{}
+
+	if nanos := original["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		duration["nanos"] = int64(nanos.(int))
+	}
+	if seconds := original["seconds"]; reflect.ValueOf(seconds).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(seconds)) {
+		duration["seconds"] = int64(seconds.(int))
+	}
+	return duration, nil
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func expandGracefulShutdownMaxDuration_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	maxDurationMap := l[0].(map[string]interface{})
+	// Always include seconds to mirror ForceSendFields["Seconds"] in the Apiary version.
+	duration := map[string]interface{}{
+		"seconds": int64(maxDurationMap["seconds"].(int)),
+	}
+	if nanos := maxDurationMap["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		duration["nanos"] = int64(nanos.(int))
+	}
+	return duration, nil
+}
+
+func expandGracefulShutdown_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	gracefulShutdown := map[string]interface{}{
+		"enabled": original["enabled"].(bool),
+	}
+	maxDuration, err := expandGracefulShutdownMaxDuration_v2(original["max_duration"].([]interface{}))
+	if err != nil {
+		return nil, err
+	}
+	if maxDuration != nil {
+		gracefulShutdown["maxDuration"] = maxDuration
+	}
+	return gracefulShutdown, nil
+}
+
+func expandComputePreemptionNoticeDuration_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	duration := map[string]interface{}{}
+	if nanos, ok := original["nanos"]; ok && nanos != nil {
+		duration["nanos"] = int64(nanos.(int))
+	}
+	if seconds, ok := original["seconds"]; ok && seconds != nil {
+		duration["seconds"] = int64(seconds.(int))
+	}
+	return duration, nil
+}
+{{- end }}
+
+func expandScheduling_v2(v interface{}) (map[string]interface{}, error) {
+	if v == nil {
+		return map[string]interface{}{"automaticRestart": true}, nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return map[string]interface{}{"automaticRestart": true}, nil
+	}
+	if len(ls) > 1 || ls[0] == nil {
+		return nil, fmt.Errorf("expected exactly one scheduling block")
+	}
+
+	original := ls[0].(map[string]interface{})
+	scheduling := map[string]interface{}{}
+
+	if v, ok := original["automatic_restart"]; ok {
+		scheduling["automaticRestart"] = v.(bool)
+	}
+	if v, ok := original["preemptible"]; ok {
+		scheduling["preemptible"] = v.(bool)
+	}
+	if v, ok := original["on_host_maintenance"]; ok {
+		scheduling["onHostMaintenance"] = v.(string)
+	}
+	if v, ok := original["node_affinities"]; ok && v != nil {
+		naSet := v.(*schema.Set).List()
+		nodeAffinities := make([]interface{}, 0, len(naSet))
+		for _, nodeAffRaw := range naSet {
+			if nodeAffRaw == nil {
+				continue
+			}
+			nodeAff := nodeAffRaw.(map[string]interface{})
+			nodeAffinities = append(nodeAffinities, map[string]interface{}{
+				"key":      nodeAff["key"].(string),
+				"operator": nodeAff["operator"].(string),
+				"values":   tpgresource.ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
+			})
+		}
+		scheduling["nodeAffinities"] = nodeAffinities
+	}
+	if v, ok := original["min_node_cpus"]; ok {
+		scheduling["minNodeCpus"] = int64(v.(int))
+	}
+	if v, ok := original["provisioning_model"]; ok {
+		scheduling["provisioningModel"] = v.(string)
+	}
+	if v, ok := original["instance_termination_action"]; ok {
+		scheduling["instanceTerminationAction"] = v.(string)
+	}
+	if v, ok := original["availability_domain"]; ok && v != nil {
+		scheduling["availabilityDomain"] = int64(v.(int))
+	}
+	if v, ok := original["max_run_duration"]; ok {
+		transformed, err := expandComputeMaxRunDuration_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["maxRunDuration"] = transformed
+		}
+	}
+	if v, ok := original["on_instance_stop_action"]; ok {
+		transformed, err := expandComputeOnInstanceStopAction_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["onInstanceStopAction"] = transformed
+		}
+	}
+{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := original["host_error_timeout_seconds"]; ok {
+		// API bug: SetScheduling doesn't clear this field when set to 0; send null explicitly.
+		if v == 0 || v == nil {
+			scheduling["hostErrorTimeoutSeconds"] = nil
+		} else {
+			scheduling["hostErrorTimeoutSeconds"] = int64(v.(int))
+		}
+	}
+	if v, ok := original["maintenance_interval"]; ok {
+		scheduling["maintenanceInterval"] = v.(string)
+	}
+	if v, ok := original["graceful_shutdown"]; ok {
+		transformed, err := expandGracefulShutdown_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["gracefulShutdown"] = transformed
+		}
+	}
+	if v, ok := original["skip_guest_os_shutdown"]; ok {
+		scheduling["skipGuestOsShutdown"] = v.(bool)
+	}
+	if v, ok := original["preemption_notice_duration"]; ok {
+		transformed, err := expandComputePreemptionNoticeDuration_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["preemptionNoticeDuration"] = transformed
+		}
+	}
+{{- end }}
+	if v, ok := original["local_ssd_recovery_timeout"]; ok {
+		transformed, err := expandComputeLocalSsdRecoveryTimeout_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["localSsdRecoveryTimeout"] = transformed
+		}
+	}
+	if v, ok := original["termination_time"]; ok {
+		scheduling["terminationTime"] = v.(string)
+	}
+	return scheduling, nil
+}
