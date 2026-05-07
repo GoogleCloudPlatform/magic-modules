@@ -1919,11 +1919,14 @@ func getAllStatusBut(status string) []string {
 }
 
 func changeInstanceStatusOnCreation(config *transport_tpg.Config, d *schema.ResourceData, project, zone, status, userAgent string) error {
-	name := d.Get("name").(string)
 	var res map[string]interface{}
 	var err error
 	if status == "TERMINATED" {
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/stop?prettyPrint=false", config.ComputeBasePath, project, zone, name)
+		var url string
+		url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/stop")
+		if err != nil {
+			return fmt.Errorf("Error changing instance status after creation: %s", err)
+		}
 		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -1932,7 +1935,11 @@ func changeInstanceStatusOnCreation(config *transport_tpg.Config, d *schema.Reso
 			UserAgent: userAgent,
 		})
 	} else if status == "SUSPENDED" {
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/suspend?prettyPrint=false", config.ComputeBasePath, project, zone, name)
+		var url string
+		url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/suspend")
+		if err != nil {
+			return fmt.Errorf("Error changing instance status after creation: %s", err)
+		}
 		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -2029,7 +2036,10 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return fmt.Errorf("Error converting instance: %s", err)
 	}
-	insertUrl := fmt.Sprintf("%sprojects/%s/zones/%s/instances?prettyPrint=false", config.ComputeBasePath, project, zone.Name)
+	insertUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
+	if err != nil {
+		return fmt.Errorf("Error generating URL: %s", err)
+	}
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",
@@ -2550,7 +2560,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if err != nil {
 			return fmt.Errorf("Error converting tags: %s", err)
 		}
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setTags?prettyPrint=false", config.ComputeBasePath, project, zone, d.Get("name").(string))
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setTags")
+		if err != nil {
+			return fmt.Errorf("Error generating URL: %s", err)
+		}
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -2578,7 +2591,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if err != nil {
 			return fmt.Errorf("Error converting labels: %s", err)
 		}
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setLabels?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setLabels")
+		if err != nil {
+			return fmt.Errorf("Error generating URL: %s", err)
+		}
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -2639,7 +2655,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting remove resource policies request: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/removeResourcePolicies?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/removeResourcePolicies")
+			if err != nil {
+				return fmt.Errorf("Error generating URL: %s", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
@@ -2666,7 +2685,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting add resource policies request: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/addResourcePolicies?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/addResourcePolicies")
+			if err != nil {
+				return fmt.Errorf("Error generating URL: %s", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
@@ -2698,7 +2720,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if err != nil {
 			return fmt.Errorf("Error converting scheduling: %s", err)
 		}
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setScheduling?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setScheduling")
+		if err != nil {
+			return fmt.Errorf("Error generating URL: %s", err)
+		}
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -2848,7 +2873,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if err != nil {
 					return errwrap.Wrapf("Error converting network interface: {{"{{"}}err{{"}}"}}", err)
 				}
-				url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateNetworkInterface?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+				url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")
+				if err != nil {
+					return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+				}
 				url, err = transport_tpg.AddQueryParams(url, map[string]string{"networkInterface": networkName})
 				if err != nil {
 					return err
@@ -2884,7 +2912,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return errwrap.Wrapf("Error converting network interface: {{"{{"}}err{{"}}"}}", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateNetworkInterface?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")
+			if err != nil {
+				return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+			}
 			url, err = transport_tpg.AddQueryParams(url, map[string]string{"networkInterface": networkName})
 			if err != nil {
 				return err
@@ -2916,7 +2947,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return errwrap.Wrapf("Error converting network interface: {{"{{"}}err{{"}}"}}", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateNetworkInterface?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")
+			if err != nil {
+				return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+			}
 			url, err = transport_tpg.AddQueryParams(url, map[string]string{"networkInterface": networkName})
 			if err != nil {
 				return err
@@ -2948,7 +2982,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return errwrap.Wrapf("Error converting network interface: {{"{{"}}err{{"}}"}}", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateNetworkInterface?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")
+			if err != nil {
+				return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+			}
 			url, err = transport_tpg.AddQueryParams(url, map[string]string{"networkInterface": networkName})
 			if err != nil {
 				return err
@@ -2980,7 +3017,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return errwrap.Wrapf("Error converting network interface: {{"{{"}}err{{"}}"}}", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateNetworkInterface?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")
+			if err != nil {
+				return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+			}
 			url, err = transport_tpg.AddQueryParams(url, map[string]string{"networkInterface": networkName})
 			if err != nil {
 				return err
@@ -3012,7 +3052,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return errwrap.Wrapf("Error converting network interface: {{"{{"}}err{{"}}"}}", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateNetworkInterface?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")
+			if err != nil {
+				return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+			}
 			url, err = transport_tpg.AddQueryParams(url, map[string]string{"networkInterface": networkName})
 			if err != nil {
 				return err
@@ -3184,8 +3227,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		// Detach the old disks.
 		for hash, deviceName := range oDisks {
 			if _, ok := nDisks[hash]; !ok {
-				url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/detachDisk?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
-				url, err := transport_tpg.AddQueryParams(url, map[string]string{"deviceName": deviceName})
+				url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/detachDisk")
+				if err != nil {
+					return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+				}
+				url, err = transport_tpg.AddQueryParams(url, map[string]string{"deviceName": deviceName})
 				if err != nil {
 					return err
 				}
@@ -3214,7 +3260,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting attached disk: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/attachDisk?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/attachDisk")
+			if err != nil {
+				return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
@@ -3237,8 +3286,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 	// if any other boot_disk fields will be added here this should be wrapped in if d.HasChange("boot_disk")
 	if d.HasChange("boot_disk.0.auto_delete") {
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setDiskAutoDelete?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
-		url, err := transport_tpg.AddQueryParams(url, map[string]string{
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setDiskAutoDelete")
+		if err != nil {
+			return fmt.Errorf("Error generating URL: %s", err)
+		}
+		url, err = transport_tpg.AddQueryParams(url, map[string]string{
 			"autoDelete": strconv.FormatBool(d.Get("boot_disk.0.auto_delete").(bool)),
 			"deviceName": d.Get("boot_disk.0.device_name").(string),
 		})
@@ -3280,8 +3332,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("deletion_protection") {
 		nDeletionProtection := d.Get("deletion_protection").(bool)
 
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setDeletionProtection?prettyPrint=false", config.ComputeBasePath, project, zone, d.Get("name").(string))
-		url, err := transport_tpg.AddQueryParams(url, map[string]string{
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setDeletionProtection")
+		if err != nil {
+			return fmt.Errorf("Error generating URL: %s", err)
+		}
+		url, err = transport_tpg.AddQueryParams(url, map[string]string{
 			"deletionProtection": strconv.FormatBool(nDeletionProtection),
 		})
 		if err != nil {
@@ -3391,7 +3446,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if statusBeforeUpdate != "TERMINATED" {
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/stop?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/stop")
+			if err != nil {
+				return errwrap.Wrapf("Error generating URL: {{"{{"}}err{{"}}"}}", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
@@ -3418,7 +3476,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting min cpu platform request: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setMinCpuPlatform?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setMinCpuPlatform")
+			if err != nil {
+				return fmt.Errorf("Error generating URL: %s", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
@@ -3448,7 +3509,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting machine type request: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setMachineType?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setMachineType")
+			if err != nil {
+				return fmt.Errorf("Error generating URL: %s", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
@@ -3478,7 +3542,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting service account request: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setServiceAccount?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setServiceAccount")
+			if err != nil {
+				return fmt.Errorf("Error generating URL: %s", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
@@ -3505,7 +3572,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting display device request: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateDisplayDevice?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateDisplayDevice")
+			if err != nil {
+				return fmt.Errorf("Error generating URL: %s", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "PATCH",
@@ -3530,7 +3600,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting shielded vm config: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/updateShieldedInstanceConfig?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateShieldedInstanceConfig")
+			if err != nil {
+				return fmt.Errorf("Error generating URL: %s", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "PATCH",
@@ -3560,7 +3633,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error converting scheduling: %s", err)
 			}
-			url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setScheduling?prettyPrint=false", config.ComputeBasePath, project, zone, instance.Name)
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setScheduling")
+			if err != nil {
+				return fmt.Errorf("Error generating URL: %s", err)
+			}
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
