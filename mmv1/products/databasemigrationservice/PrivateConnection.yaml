@@ -122,7 +122,6 @@ properties:
       The VPC Peering configuration is used to create VPC peering
       between databasemigrationservice and the consumer's VPC.
     exactly_one_of:
-      - 'vpcPeeringConfig'
       - 'pscInterfaceConfig'
     properties:
       - name: 'vpcName'
@@ -143,7 +142,6 @@ properties:
       between DMS's internal VPC and the consumer's PSC.
     exactly_one_of:
       - 'vpcPeeringConfig'
-      - 'pscInterfaceConfig'
     properties:
       - name: 'networkAttachment'
         type: String
