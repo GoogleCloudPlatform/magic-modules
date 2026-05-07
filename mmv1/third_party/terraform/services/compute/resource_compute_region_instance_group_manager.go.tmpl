@@ -1714,11 +1714,15 @@ func expandInstanceSelections(instanceSelections []any) (map[string]interface{},
 		instanceSelection := map[string]interface{}{
 			"rank":         int64(instanceSelectionData["rank"].(int)),
 			"machineTypes": tpgresource.ConvertStringSet(instanceSelectionData["machine_types"].(*schema.Set)),
-			{{- if ne $.TargetVersionName `ga` }}
-			"minCpuPlatform": instanceSelectionData["min_cpu_platform"].(string),
-			"disks":          disks,
-			{{- end }}
 		}
+		{{- if ne $.TargetVersionName `ga` }}
+		if mcp := instanceSelectionData["min_cpu_platform"].(string); mcp != "" {
+			instanceSelection["minCpuPlatform"] = mcp
+		}
+		if len(disks) > 0 {
+			instanceSelection["disks"] = disks
+		}
+		{{- end }}
 		instanceSelectionsMap[instanceSelectionData["name"].(string)] = instanceSelection
 	}
 	return instanceSelectionsMap, nil
