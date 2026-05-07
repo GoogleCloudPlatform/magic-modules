@@ -225,7 +225,7 @@ func (v varsReplacingFS) ReadFile(name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if strings.HasPrefix(name, "templates/terraform/examples/") {
+	if strings.Contains(name, "examples/") {
 		modified := strings.ReplaceAll(string(content), "$.Vars", "$.ResourceIdVars")
 		return []byte(modified), nil
 	}
@@ -349,21 +349,6 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 			if e.ConfigPath == "" {
 				e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
 			}
-
-			// Precompute TestVarsOverrides to guarantee exact legacy behavior.
-			// In the new Step framework, all ResourceIdVars apply a tf-test- prefix automatically.
-			// The legacy framework omitted this prefix for variables without "-" or "_"
-			// testVarsOverrides := make(map[string]string)
-			// for k, v := range e.TestVarsOverrides {
-			// 	testVarsOverrides[k] = v
-			// }
-			// for k, v := range e.Vars {
-			// 	if !strings.Contains(v, "-") && !strings.Contains(v, "_") {
-			// 		if _, ok := testVarsOverrides[k]; !ok {
-			// 			testVarsOverrides[k] = fmt.Sprintf("\"%s\"+randomSuffix", v)
-			// 		}
-			// 	}
-			// }
 
 			steps := []*apiresource.Step{
 				{
