@@ -99,7 +99,7 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(typedToMap(instance.AdvancedMachineFeatures))
 	hclData["reservation_affinity"] = flattenReservationAffinityTgc(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = strings.TrimSuffix(instance.KeyRevocationActionType, "_ON_KEY_REVOCATION")
-	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)
+	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(typedToMap(instance.InstanceEncryptionKey))
 
 	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl?
 	// It needs to integrate the disk assets into instance assets with the resolver.
@@ -206,7 +206,7 @@ func flattenBootDisk(disk *compute.AttachedDisk, instanceName string) []map[stri
 	result["interface"] = disk.Interface
 	// "source" field is converted and "initialize_params" is not converted as these two fields conflict with each other.
 	result["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
-	result["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(disk.GuestOsFeatures)
+	result["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(typedToSlice(disk.GuestOsFeatures))
 
 	if len(result) == 0 {
 		return nil

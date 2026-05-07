@@ -152,6 +152,65 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
 	}
 
+	// Convert map-based expand results to typed compute structs.
+	var npc *compute.NetworkPerformanceConfig
+	if networkPerformanceConfig != nil {
+		npc = &compute.NetworkPerformanceConfig{}
+		mapToStruct(networkPerformanceConfig, npc)
+	}
+
+	var tags *compute.Tags
+	if tagsMap := resourceInstanceTags(d); tagsMap != nil {
+		tags = &compute.Tags{}
+		mapToStruct(tagsMap, tags)
+	}
+
+	saList := expandServiceAccounts(d.Get("service_account").([]interface{}))
+	serviceAccounts := make([]*compute.ServiceAccount, 0, len(saList))
+	for _, raw := range saList {
+		if m, ok := raw.(map[string]interface{}); ok {
+			sa := &compute.ServiceAccount{}
+			mapToStruct(m, sa)
+			serviceAccounts = append(serviceAccounts, sa)
+		}
+	}
+
+	var confidentialConfig *compute.ConfidentialInstanceConfig
+	if m := expandConfidentialInstanceConfig(d); m != nil {
+		confidentialConfig = &compute.ConfidentialInstanceConfig{}
+		mapToStruct(m, confidentialConfig)
+	}
+
+	var advMachineFeatures *compute.AdvancedMachineFeatures
+	if m := expandAdvancedMachineFeatures(d); m != nil {
+		advMachineFeatures = &compute.AdvancedMachineFeatures{}
+		mapToStruct(m, advMachineFeatures)
+	}
+
+	var shieldedConfig *compute.ShieldedInstanceConfig
+	if m := expandShieldedVmConfigs(d); m != nil {
+		shieldedConfig = &compute.ShieldedInstanceConfig{}
+		mapToStruct(m, shieldedConfig)
+	}
+
+	var displayDevice *compute.DisplayDevice
+	if m := expandDisplayDevice(d); m != nil {
+		displayDevice = &compute.DisplayDevice{}
+		mapToStruct(m, displayDevice)
+	}
+
+	var resAffinity *compute.ReservationAffinity
+	if reservationAffinity != nil {
+		resAffinity = &compute.ReservationAffinity{}
+		mapToStruct(reservationAffinity, resAffinity)
+	}
+
+	var instanceEncKey *compute.CustomerEncryptionKey
+	if m := expandComputeInstanceEncryptionKey(d); m != nil {
+		instanceEncKey = &compute.CustomerEncryptionKey{}
+		mapToStruct(m, instanceEncKey)
+	}
+
 	// Create the instance information
 	return &compute.Instance{
 		CanIpForward:               d.Get("can_ip_forward").(bool),
@@ -162,24 +221,24 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Name:                       d.Get("name").(string),
 		Zone:                       d.Get("zone").(string),
 		NetworkInterfaces:          networkInterfaces,
-		NetworkPerformanceConfig:   networkPerformanceConfig,
-		Tags:                       resourceInstanceTags(d),
+		NetworkPerformanceConfig:   npc,
+		Tags:                       tags,
 		Params:                     params,
 		Labels:                     tpgresource.ExpandLabels(d),
-		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		ServiceAccounts:            serviceAccounts,
 		GuestAccelerators:          accels,
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Scheduling:                 scheduling,
 		DeletionProtection:         d.Get("deletion_protection").(bool),
 		Hostname:                   d.Get("hostname").(string),
-		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
-		DisplayDevice:              expandDisplayDevice(d),
+		ConfidentialInstanceConfig: confidentialConfig,
+		AdvancedMachineFeatures:    advMachineFeatures,
+		ShieldedInstanceConfig:     shieldedConfig,
+		DisplayDevice:              displayDevice,
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
-		ReservationAffinity:        reservationAffinity,
+		ReservationAffinity:        resAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
+		InstanceEncryptionKey:      instanceEncKey,
 	}, nil
 }
 

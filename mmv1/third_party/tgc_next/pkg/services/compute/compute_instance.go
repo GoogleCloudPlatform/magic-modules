@@ -37,6 +37,16 @@ func typedToSlice(v interface{}) []interface{} {
 	return s
 }
 
+// mapToStruct unmarshals a map[string]interface{} into a typed struct pointer via JSON.
+// v must be a non-nil pointer to the target struct.
+func mapToStruct(m map[string]interface{}, v interface{}) {
+	if m == nil {
+		return
+	}
+	b, _ := json.Marshal(m)
+	json.Unmarshal(b, v)
+}
+
 func init() {
 	registry.Schema{
 		Name:        "google_compute_instance",
