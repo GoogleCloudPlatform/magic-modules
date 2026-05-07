@@ -61,16 +61,40 @@ examples:
     primary_resource_id: psqltopsql
     vars:
       destination_cp: destination-cp
+      destination_csql: destination-csql
       migration_id: my-migrationid
       source_cp: source-cp
-      source_sql: source-instance
+      source_csql: source-csql
+      source_sqldb_cert: cert
+      source_sqldb_pass: password
+      source_sqldb_user: username
+    test_vars_overrides:
+      # for backward compatible
+      source_sqldb_cert: '"cert" + randomSuffix'
+      # for backward compatible
+      source_sqldb_pass: '"password" + randomSuffix'
+      # for backward compatible
+      source_sqldb_user: '"username" + randomSuffix'
+  - name: database_migration_service_migration_job_postgres_quickstart
+    primary_resource_id: psqlquickstart
+    vars:
+      destination_cp: destination-cp
+      migration_id: my-migrationid
+      source_cp: source-cp
       dest_sql: dest-instance
+      attachment_name: my-attachment
+      private_connection_id: my-connection
+      network_name: my-network
+      subnetwork_name: my-subnetwork
     test_vars_overrides:
       migration_id: '"my-migrationid" + randomSuffix'
       source_cp: '"source-cp" + randomSuffix'
       destination_cp: '"destination-cp" + randomSuffix'
-      source_sql: '"source-instance" + randomSuffix'
       dest_sql: '"dest-instance" + randomSuffix'
+      attachment_name: '"my-attachment" + randomSuffix'
+      private_connection_id: '"my-connection" + randomSuffix'
+      network_name: '"my-network" + randomSuffix'
+      subnetwork_name: '"my-subnetwork" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_postgres_objects
     primary_resource_id: psqltopsqlobjects
     vars:

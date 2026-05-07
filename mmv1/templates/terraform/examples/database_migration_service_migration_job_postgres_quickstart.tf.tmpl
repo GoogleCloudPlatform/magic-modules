@@ -1,0 +1,83 @@
+resource "google_compute_network" "default" {
+  name = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_network_attachment" "default" {
+  name                  = "{{index $.Vars "attachment_name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_AUTOMATIC"
+  subnetworks           = [google_compute_subnetwork.default.id]
+}
+
+resource "google_database_migration_service_private_connection" "default" {
+	display_name          = "dbms_pc"
+	location              = "us-central1"
+	private_connection_id = "{{index $.Vars "private_connection_id"}}"
+
+	psc_interface_config {
+		network_attachment = google_compute_network_attachment.default.id
+	}
+}
+
+resource "google_database_migration_service_connection_profile" "source" {
+  location              = "us-central1"
+  connection_profile_id = "{{index $.Vars "source_cp"}}"
+  display_name          = "Source Connection Profile"
+  role                  = "SOURCE"
+  postgresql {
+    host     = "10.0.0.1"
+    port     = 5432
+    username = "postgres"
+    password = "password"
+    ssl {
+      type = "REQUIRED"
+    }
+    private_connectivity {
+      private_connection = google_database_migration_service_private_connection.default.id
+    }
+  }
+}
+
+resource "google_sql_database_instance" "dest" {
+  name             = "{{index $.Vars "dest_sql"}}"
+  database_version = "POSTGRES_12"
+  settings {
+    tier = "db-f1-micro"
+  }
+  deletion_protection = false
+}
+
+resource "google_database_migration_service_connection_profile" "dest" {
+  location              = "us-central1"
+  connection_profile_id = "{{index $.Vars "destination_cp"}}"
+  display_name          = "Destination Connection Profile"
+  role                  = "DESTINATION"
+  postgresql {
+    username     = "postgres"
+    password     = "password"
+    cloud_sql_id = google_sql_database_instance.dest.name
+  }
+}
+
+resource "google_database_migration_service_migration_job" "{{$.PrimaryResourceId}}" {
+  location              = "us-central1"
+  migration_job_id      = "{{index $.Vars "migration_id"}}"
+  display_name          = "Postgres Quickstart Migration Job"
+  
+  source          = google_database_migration_service_connection_profile.source.name
+  destination     = google_database_migration_service_connection_profile.dest.name
+  type            = "CONTINUOUS"
+
+  postgres_homogeneous_config {
+    is_native_logical = true
+    max_additional_subscriptions = 10
+  }
+}

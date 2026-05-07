@@ -125,28 +125,6 @@ examples:
     vars:
       destination_alloydb: destination-alloydb
       destination_cp: destination-cp
-  - name: database_migration_service_connection_profile_pg_source_connectivity
-    primary_resource_id: pg-source-connectivity
-    vars:
-      private_connection_id: pc-pg-source-connectivity
-      attachment_name: attachment-pg-source-connectivity
-      profile_id: profile-pg-source-connectivity
-      network_name: network-pg-source-connectivity
-      subnetwork_name: subnetwork-pg-source-connectivity
-    test_vars_overrides:
-      private_connection_id: '"pc-pg-source-connectivity" + randomSuffix'
-      attachment_name: '"attachment-pg-source-connectivity" + randomSuffix'
-      profile_id: '"profile-pg-source-connectivity" + randomSuffix'
-      network_name: '"network-pg-source-connectivity" + randomSuffix'
-      subnetwork_name: '"subnetwork-pg-source-connectivity" + randomSuffix'
-  - name: database_migration_service_connection_profile_pg_dest_cloudsql
-    primary_resource_id: pg-dest-cloudsql
-    vars:
-      profile_id: profile-pg-dest-cloudsql
-      sqldb: db-pg-dest-cloudsql
-    test_vars_overrides:
-      profile_id: '"profile-pg-dest-cloudsql" + randomSuffix'
-      sqldb: '"db-pg-dest-cloudsql" + randomSuffix'
 parameters:
   - name: connectionProfileId
     type: String
