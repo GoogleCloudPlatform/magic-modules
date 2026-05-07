@@ -57,6 +57,15 @@ examples:
     test_env_vars:
       project: PROJECT_NAME
     skip_vcr: true
+  - name: tpu_v2_queued_resource_provisioning_options
+    primary_resource_id: qr
+    min_version: beta
+    vars:
+      qr_name: test-qr
+      tpu_name: test-tpu
+    test_env_vars:
+      project: PROJECT_NAME
+    skip_vcr: true
 parameters:
   - name: zone
     type: String
@@ -155,3 +164,11 @@ properties:
                       description: |
                         Specifies networking queue count for TPU VM instance's network interface.
                       immutable: true
+  - name: provisioningModel
+    type: Enum
+    description: The provisioning model for the resource.
+    enum_values:
+      - STANDARD
+      - SPOT
+      - RESERVATION_BOUND
+      - FLEX_START
