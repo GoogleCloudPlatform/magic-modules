@@ -303,7 +303,7 @@ properties:
       Cloud SQL console or using Cloud SQL APIs.
     send_empty_value: true
     allow_empty_object: true
-    exactly_one_of:
+    at_most_one_of:
       - reverseSshConnectivity
       - vpcPeeringConnectivity
     properties: []
@@ -311,7 +311,7 @@ properties:
     type: NestedObject
     description: |
       The details of the VPC network that the source database is located in.
-    exactly_one_of:
+    at_most_one_of:
       - staticIpConnectivity
       - vpcPeeringConnectivity
     properties:
@@ -338,7 +338,7 @@ properties:
     type: NestedObject
     description: |
       The details of the VPC network that the source database is located in.
-    exactly_one_of:
+    at_most_one_of:
       - staticIpConnectivity
       - reverseSshConnectivity
     properties:
