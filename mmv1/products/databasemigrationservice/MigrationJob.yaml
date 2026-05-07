@@ -61,20 +61,16 @@ examples:
     primary_resource_id: psqltopsql
     vars:
       destination_cp: destination-cp
-      destination_csql: destination-csql
       migration_id: my-migrationid
       source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
+      source_sql: source-instance
+      dest_sql: dest-instance
     test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+      migration_id: '"my-migrationid" + randomSuffix'
+      source_cp: '"source-cp" + randomSuffix'
+      destination_cp: '"destination-cp" + randomSuffix'
+      source_sql: '"source-instance" + randomSuffix'
+      dest_sql: '"dest-instance" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_postgres_objects
     primary_resource_id: psqltopsqlobjects
     vars:
@@ -246,6 +242,20 @@ properties:
           - MIN
           - OPTIMAL
           - MAX
+  - name: postgresHomogeneousConfig
+    type: NestedObject
+    description: |
+      PostgreSQL to PostgreSQL configuration.
+    properties:
+      - name: isNativeLogical
+        type: Boolean
+        required: true
+        description: |
+          Whether the migration uses native logical replication.
+      - name: maxAdditionalSubscriptions
+        type: Integer
+        description: |
+          Maximum number of additional subscriptions to use for the migration job.
   - name: dumpPath
     type: String
     description: |
