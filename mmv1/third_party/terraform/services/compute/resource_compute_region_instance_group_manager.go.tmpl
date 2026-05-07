@@ -1712,8 +1712,10 @@ func expandInstanceSelections(instanceSelections []any) (map[string]interface{},
 		{{- end }}
 
 		instanceSelection := map[string]interface{}{
-			"rank":         int64(instanceSelectionData["rank"].(int)),
 			"machineTypes": tpgresource.ConvertStringSet(instanceSelectionData["machine_types"].(*schema.Set)),
+		}
+		if rank := int64(instanceSelectionData["rank"].(int)); rank != 0 {
+			instanceSelection["rank"] = rank
 		}
 		{{- if ne $.TargetVersionName `ga` }}
 		if mcp := instanceSelectionData["min_cpu_platform"].(string); mcp != "" {
@@ -1881,13 +1883,23 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               keys := v.([]any)
               if len(keys) > 0 && keys[0] != nil {
                   keyData := keys[0].(map[string]any)
-                  initializeParams["sourceSnapshotEncryptionKey"] = map[string]interface{}{
-                      "rawKey":               keyData["raw_key"].(string),
-                      "rsaEncryptedKey":      keyData["rsa_encrypted_key"].(string),
-                      "kmsKeyServiceAccount": keyData["kms_key_service_account"].(string),
-                      "kmsKeyName":           keyData["kms_key_self_link"].(string),
+                  encKey := map[string]interface{}{}
+                  if k := keyData["raw_key"].(string); k != "" {
+                      encKey["rawKey"] = k
                   }
-                  hasInitializeParams = true
+                  if k := keyData["rsa_encrypted_key"].(string); k != "" {
+                      encKey["rsaEncryptedKey"] = k
+                  }
+                  if k := keyData["kms_key_service_account"].(string); k != "" {
+                      encKey["kmsKeyServiceAccount"] = k
+                  }
+                  if k := keyData["kms_key_self_link"].(string); k != "" {
+                      encKey["kmsKeyName"] = k
+                  }
+                  if len(encKey) > 0 {
+                      initializeParams["sourceSnapshotEncryptionKey"] = encKey
+                      hasInitializeParams = true
+                  }
               }
           }
 
