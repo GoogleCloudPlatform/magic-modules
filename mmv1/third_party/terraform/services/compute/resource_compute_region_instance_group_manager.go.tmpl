@@ -1737,7 +1737,9 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
       diskData := diskRaw.(map[string]any)
       disk := map[string]interface{}{
           "autoDelete": diskData["auto_delete"].(bool),
-          "deviceName": diskData["device_name"].(string),
+      }
+      if v := diskData["device_name"].(string); v != "" {
+          disk["deviceName"] = v
       }
       if v := diskData["boot"].(bool); v {
           disk["boot"] = v
