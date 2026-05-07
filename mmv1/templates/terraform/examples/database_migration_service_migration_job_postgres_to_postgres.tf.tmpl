@@ -1,91 +1,55 @@
-data "google_project" "project" {
-}
-
-resource "google_sql_database_instance" "source_csql" {
-  name             = "{{index $.Vars "source_csql"}}"
-  database_version = "POSTGRES_15"
+resource "google_sql_database_instance" "source" {
+  name             = "{{index $.Vars "source_sql"}}"
+  database_version = "POSTGRES_12"
   settings {
-    tier = "db-custom-2-13312"
-    deletion_protection_enabled = false
+    tier = "db-f1-micro"
   }
   deletion_protection = false
 }
 
-resource "google_sql_ssl_cert" "source_sql_client_cert" {
-  common_name = "{{index $.Vars "source_sqldb_cert"}}"
-  instance    = google_sql_database_instance.source_csql.name
-
-  depends_on = [google_sql_database_instance.source_csql]
-}
-
-resource "google_sql_user" "source_sqldb_user" {
-  name     = "{{index $.Vars "source_sqldb_user"}}"
-  instance = google_sql_database_instance.source_csql.name
-  password = "{{index $.Vars "source_sqldb_pass"}}"
-
-  depends_on = [google_sql_ssl_cert.source_sql_client_cert]
-}
-
-resource "google_database_migration_service_connection_profile" "source_cp" {
+resource "google_database_migration_service_connection_profile" "source" {
   location              = "us-central1"
   connection_profile_id = "{{index $.Vars "source_cp"}}"
-  display_name          = "{{index $.Vars "source_cp"}}_display"
-  labels = {
-    foo = "bar"
-  }
+  display_name          = "Source Connection Profile"
   postgresql {
-    host     = google_sql_database_instance.source_csql.ip_address.0.ip_address
-    port     = 3306
-    username = google_sql_user.source_sqldb_user.name
-    password = google_sql_user.source_sqldb_user.password
-    ssl {
-      client_key         = google_sql_ssl_cert.source_sql_client_cert.private_key
-      client_certificate = google_sql_ssl_cert.source_sql_client_cert.cert
-      ca_certificate     = google_sql_ssl_cert.source_sql_client_cert.server_ca_cert
-      type = "SERVER_CLIENT"
-    }
-    cloud_sql_id = "{{index $.Vars "source_csql"}}"
+    host     = google_sql_database_instance.source.ip_address.0.ip_address
+    port     = 5432
+    username = "postgres"
+    password = "password"
   }
-
-  depends_on = [google_sql_user.source_sqldb_user]
 }
 
-resource "google_sql_database_instance" "destination_csql" {
-  name             = "{{index $.Vars "destination_csql"}}"
-  database_version = "POSTGRES_15"
+resource "google_sql_database_instance" "dest" {
+  name             = "{{index $.Vars "dest_sql"}}"
+  database_version = "POSTGRES_12"
   settings {
-    tier = "db-custom-2-13312"
-    deletion_protection_enabled = false
+    tier = "db-f1-micro"
   }
   deletion_protection = false
 }
 
-resource "google_database_migration_service_connection_profile" "destination_cp" {
+resource "google_database_migration_service_connection_profile" "dest" {
   location              = "us-central1"
   connection_profile_id = "{{index $.Vars "destination_cp"}}"
-  display_name          = "{{index $.Vars "destination_cp"}}_display"
-  labels = {
-    foo = "bar"
-  }
+  display_name          = "Destination Connection Profile"
   postgresql {
-    cloud_sql_id = "{{index $.Vars "destination_csql"}}"
+    cloud_sql_id = google_sql_database_instance.dest.name
   }
-  depends_on = [google_sql_database_instance.destination_csql]
 }
 
 resource "google_database_migration_service_migration_job" "{{$.PrimaryResourceId}}" {
   location              = "us-central1"
-  migration_job_id = "{{index $.Vars "migration_id"}}"
-  display_name = "{{index $.Vars "migration_id"}}_display"
-  labels = {
-    foo = "bar"
-  }
-  static_ip_connectivity {
-  }
-  source          = google_database_migration_service_connection_profile.source_cp.name
-  destination     = google_database_migration_service_connection_profile.destination_cp.name
+  migration_job_id      = "{{index $.Vars "migration_id"}}"
+  display_name          = "Postgres to Postgres Migration Job"
+  
+  source          = google_database_migration_service_connection_profile.source.name
+  destination     = google_database_migration_service_connection_profile.dest.name
   type            = "CONTINUOUS"
+
+  postgres_homogeneous_config {
+    is_native_logical = true
+    max_additional_subscriptions = 10
+  }
+
+  static_ip_connectivity {}
 }
-
-
-
