@@ -1221,3 +1221,237 @@ func flattenComputeInstanceSourceEncryptionKey(v *compute.CustomerEncryptionKey)
 		},
 	}
 }
+
+// _v2 expand functions return map[string]interface{} / []interface{} for direct
+// HTTP JSON serialization via transport_tpg.SendRequest, replacing Apiary struct usage.
+
+func expandAliasIpRanges_v2(ranges []interface{}) []interface{} {
+	ipRanges := make([]interface{}, 0, len(ranges))
+	for _, raw := range ranges {
+		data := raw.(map[string]interface{})
+		ipRanges = append(ipRanges, map[string]interface{}{
+			"ipCidrRange":         data["ip_cidr_range"].(string),
+			"subnetworkRangeName": data["subnetwork_range_name"].(string),
+		})
+	}
+	return ipRanges
+}
+
+func expandAccessConfigs_v2(configs []interface{}) []interface{} {
+	acs := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		ac := map[string]interface{}{
+			"type": "ONE_TO_ONE_NAT",
+		}
+		if raw != nil {
+			data := raw.(map[string]interface{})
+			ac["natIP"] = data["nat_ip"].(string)
+			ac["networkTier"] = data["network_tier"].(string)
+			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
+				ac["setPublicPtr"] = true
+				ac["publicPtrDomainName"] = ptr.(string)
+			}
+		}
+		acs[i] = ac
+	}
+	return acs
+}
+
+func expandIpv6AccessConfigs_v2(configs []interface{}) []interface{} {
+	iacs := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		iac := map[string]interface{}{
+			"type": "DIRECT_IPV6",
+		}
+		if raw != nil {
+			data := raw.(map[string]interface{})
+			iac["networkTier"] = data["network_tier"].(string)
+			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
+				iac["publicPtrDomainName"] = ptr.(string)
+			}
+			if eip, ok := data["external_ipv6"]; ok && eip != "" {
+				iac["externalIpv6"] = eip.(string)
+			}
+			if eipl, ok := data["external_ipv6_prefix_length"]; ok && eipl != "" {
+				if strVal, ok := eipl.(string); ok {
+					if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+						iac["externalIpv6PrefixLength"] = intVal
+					}
+				}
+			}
+			if name, ok := data["name"]; ok && name != "" {
+				iac["name"] = name.(string)
+			}
+		}
+		iacs[i] = iac
+	}
+	return iacs
+}
+
+func expandServiceAccounts_v2(configs []interface{}) []interface{} {
+	accounts := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+		email := data["email"].(string)
+		if email == "" {
+			email = "default"
+		}
+		accounts[i] = map[string]interface{}{
+			"email":  email,
+			"scopes": tpgresource.CanonicalizeServiceScopes(tpgresource.ConvertStringSet(data["scopes"].(*schema.Set))),
+		}
+	}
+	return accounts
+}
+
+func resourceInstanceTags_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if v := d.Get("tags"); v != nil {
+		vs := v.(*schema.Set)
+		items := make([]string, vs.Len())
+		for i, v := range vs.List() {
+			items[i] = v.(string)
+		}
+		return map[string]interface{}{
+			"items":       items,
+			"fingerprint": d.Get("tags_fingerprint").(string),
+		}
+	}
+	return nil
+}
+
+func expandShieldedVmConfigs_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("shielded_instance_config"); !ok {
+		return nil
+	}
+	prefix := "shielded_instance_config.0"
+	return map[string]interface{}{
+		"enableSecureBoot":          d.Get(prefix + ".enable_secure_boot").(bool),
+		"enableVtpm":                d.Get(prefix + ".enable_vtpm").(bool),
+		"enableIntegrityMonitoring": d.Get(prefix + ".enable_integrity_monitoring").(bool),
+	}
+}
+
+func expandConfidentialInstanceConfig_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("confidential_instance_config"); !ok {
+		return nil
+	}
+	prefix := "confidential_instance_config.0"
+	return map[string]interface{}{
+		"enableConfidentialCompute": d.Get(prefix + ".enable_confidential_compute").(bool),
+		"confidentialInstanceType":  d.Get(prefix + ".confidential_instance_type").(string),
+	}
+}
+
+func expandAdvancedMachineFeatures_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("advanced_machine_features"); !ok {
+		return nil
+	}
+	prefix := "advanced_machine_features.0"
+	return map[string]interface{}{
+		"enableNestedVirtualization": d.Get(prefix + ".enable_nested_virtualization").(bool),
+		"threadsPerCore":             int64(d.Get(prefix + ".threads_per_core").(int)),
+		"turboMode":                  d.Get(prefix + ".turbo_mode").(string),
+		"visibleCoreCount":           int64(d.Get(prefix + ".visible_core_count").(int)),
+		"performanceMonitoringUnit":  d.Get(prefix + ".performance_monitoring_unit").(string),
+		"enableUefiNetworking":       d.Get(prefix + ".enable_uefi_networking").(bool),
+	}
+}
+
+func expandDisplayDevice_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("enable_display"); !ok {
+		return nil
+	}
+	return map[string]interface{}{
+		"enableDisplay": d.Get("enable_display").(bool),
+	}
+}
+
+func expandNetworkPerformanceConfig_v2(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+	configs, ok := d.GetOk("network_performance_config")
+	if !ok {
+		return nil, nil
+	}
+	npcSlice := configs.([]interface{})
+	if len(npcSlice) > 1 {
+		return nil, fmt.Errorf("cannot specify multiple network_performance_configs")
+	}
+	if len(npcSlice) == 0 || npcSlice[0] == nil {
+		return nil, nil
+	}
+	npc := npcSlice[0].(map[string]interface{})
+	return map[string]interface{}{
+		"totalEgressBandwidthTier": npc["total_egress_bandwidth_tier"].(string),
+	}, nil
+}
+
+func expandComputeInstanceEncryptionKey_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	iek, ok := d.GetOk("instance_encryption_key")
+	if !ok {
+		return nil
+	}
+	iekRes := iek.([]interface{})[0].(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyName":           iekRes["kms_key_self_link"].(string),
+		"sha256":               iekRes["sha256"].(string),
+		"kmsKeyServiceAccount": iekRes["kms_key_service_account"].(string),
+	}
+}
+
+func expandComputeInstanceSourceEncryptionKey_v2(d tpgresource.TerraformResourceData, field string) map[string]interface{} {
+	cek, ok := d.GetOk(field)
+	if !ok {
+		return nil
+	}
+	cekRes := cek.([]interface{})[0].(map[string]interface{})
+	return map[string]interface{}{
+		"rsaEncryptedKey":      cekRes["rsa_encrypted_key"].(string),
+		"rawKey":               cekRes["raw_key"].(string),
+		"kmsKeyName":           cekRes["kms_key_self_link"].(string),
+		"sha256":               cekRes["sha256"].(string),
+		"kmsKeyServiceAccount": cekRes["kms_key_service_account"].(string),
+	}
+}
+
+func expandComputeInstanceGuestOsFeatures_v2(v interface{}) []interface{} {
+	if v == nil {
+		return nil
+	}
+	var result []interface{}
+	for _, feature := range v.([]interface{}) {
+		result = append(result, map[string]interface{}{
+			"type": feature.(string),
+		})
+	}
+	return result
+}
+
+func expandReservationAffinity_v2(d tpgresource.TerraformResourceData) (map[string]interface{}, error) {
+	_, ok := d.GetOk("reservation_affinity")
+	if !ok {
+		return nil, nil
+	}
+
+	prefix := "reservation_affinity.0"
+	reservationAffinityType := d.Get(prefix + ".type").(string)
+
+	affinity := map[string]interface{}{
+		"consumeReservationType": reservationAffinityType,
+	}
+
+	_, hasSpecificReservation := d.GetOk(prefix + ".specific_reservation")
+	if (reservationAffinityType == "SPECIFIC_RESERVATION") != hasSpecificReservation {
+		return nil, fmt.Errorf("specific_reservation must be set when reservation_affinity is SPECIFIC_RESERVATION, and not set otherwise")
+	}
+
+	if hasSpecificReservation {
+		specificPrefix := prefix + ".specific_reservation.0"
+		var values []string
+		for _, v := range d.Get(specificPrefix + ".values").([]interface{}) {
+			values = append(values, v.(string))
+		}
+		affinity["key"] = d.Get(specificPrefix + ".key").(string)
+		affinity["values"] = values
+	}
+
+	return affinity, nil
+}
