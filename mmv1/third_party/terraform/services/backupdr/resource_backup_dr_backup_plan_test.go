@@ -185,7 +185,9 @@ resource "google_backup_dr_backup_plan" "bp" {
   resource_type  = "compute.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
   max_custom_on_demand_retention_days = 45
-
+  compute_instance_backup_plan_properties {
+    guest_flush = true
+  }
   backup_rules {
     rule_id                = "rule-1"
     backup_retention_days  = 366
