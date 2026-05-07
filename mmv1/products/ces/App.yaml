@@ -153,6 +153,7 @@ properties:
   - name: dataStoreSettings
     type: NestedObject
     description: Data store related settings for the app.
+    default_from_api: true
     properties:
       - name: engines
         type: Array
