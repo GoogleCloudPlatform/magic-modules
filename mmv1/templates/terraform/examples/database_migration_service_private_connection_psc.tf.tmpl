@@ -22,13 +22,13 @@ resource "google_compute_network_attachment" "default" {
 }
 
 resource "google_compute_network" "default" {
-  name = "my-network"
+  name = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "my-subnet"
+  name          = "{{index $.Vars "subnetwork_name"}}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
-  network       = resource.google_compute_network.default.id
+  network       = google_compute_network.default.id
 }
