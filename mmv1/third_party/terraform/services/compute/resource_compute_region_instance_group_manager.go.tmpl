@@ -1825,7 +1825,7 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               hasInitializeParams = true
           }
 
-          if v, exists := diskData["resource_manager_tags"]; exists && v != nil {
+          if v, exists := diskData["resource_manager_tags"]; exists && v != nil && v.(*schema.Set).Len() > 0 {
               rmTags := make(map[string]string)
               for _, rmTagRaw := range v.(*schema.Set).List() {
                   rmTag := rmTagRaw.(map[string]any)
@@ -1835,7 +1835,7 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               hasInitializeParams = true
           }
 
-          if v, exists := diskData["labels"]; exists && v != nil {
+          if v, exists := diskData["labels"]; exists && v != nil && v.(*schema.Set).Len() > 0 {
               labels := make(map[string]string)
               for _, labelRaw := range v.(*schema.Set).List() {
                   label := labelRaw.(map[string]any)
@@ -1908,7 +1908,7 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               hasInitializeParams = true
           }
 
-          if v, exists := diskData["guest_os_features"]; exists && v != nil {
+          if v, exists := diskData["guest_os_features"]; exists && len(v.([]any)) > 0 {
               features := make([]interface{}, 0)
               for _, feature := range v.([]any) {
                   features = append(features, map[string]interface{}{"type": feature.(string)})
@@ -1917,7 +1917,7 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               hasInitializeParams = true
           }
 
-          if v, exists := diskData["resource_policies"]; exists && v != nil {
+          if v, exists := diskData["resource_policies"]; exists && len(v.([]any)) > 0 {
               initializeParams["resourcePolicies"] = tpgresource.ConvertStringArr(v.([]any))
               hasInitializeParams = true
           }
