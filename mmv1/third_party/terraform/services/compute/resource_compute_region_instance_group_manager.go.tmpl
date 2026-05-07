@@ -1757,7 +1757,6 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
           disk["architecture"] = v
       }
 
-      // Assign diskSizeGb at the disk level as a string (matches API serialization)
       if v, exists := diskData["disk_size_gb"]; exists && v.(int) != 0 {
           disk["diskSizeGb"] = strconv.Itoa(v.(int))
       }
@@ -1806,7 +1805,6 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               hasInitializeParams = true
           }
 
-          // Assign diskSizeGb at both levels as a string (matches API serialization)
           if v, exists := diskData["disk_size_gb"]; exists && v.(int) != 0 {
               initializeParams["diskSizeGb"] = strconv.Itoa(v.(int))
               hasInitializeParams = true
@@ -1952,7 +1950,7 @@ func expandDistributionPolicyForUpdate(d *schema.ResourceData) map[string]interf
 	if dpts == "" {
 		return nil
 	}
-	// distributionPolicy.Zones is NOT updateable.
+
 	return map[string]interface{}{"targetShape": dpts}
 }
 
