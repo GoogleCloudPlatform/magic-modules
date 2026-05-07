@@ -86,6 +86,8 @@ resource "google_database_migration_service_migration_job" "{{$.PrimaryResourceI
   destination = google_database_migration_service_connection_profile.destination_cp.name
   type        = "CONTINUOUS"
 
+  create_without_validation = true
+
   objects_config {
     source_objects_config {
       objects_selection_type = "SPECIFIED_OBJECTS"

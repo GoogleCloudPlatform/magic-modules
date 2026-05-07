@@ -37,6 +37,9 @@ async:
       delete_minutes: 60
     base_url: '{{op_id}}'
 autogen_async: true
+custom_code:
+  custom_create: templates/terraform/custom_create/dms_migration_job.go.tmpl
+  custom_update: templates/terraform/custom_update/dms_migration_job.go.tmpl
 include_in_tgc_next: true
 examples:
   - name: database_migration_service_migration_job_mysql_to_mysql
@@ -144,18 +147,23 @@ properties:
     type: KeyValueLabels
     description: |
       The resource labels for migration job to use to annotate any related underlying resources such as Compute Engine VMs.
+  - name: createWithoutValidation
+    type: Boolean
+    description: |
+      If set to true, will skip validations for the migration job.
+    url_param_only: true
+    default_value: false
   - name: state
     type: Enum
     description: |
       The current migration job state.
-    output: true
+    updatable: true
+    default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/dms_migration_job_state.go.tmpl
+    default_value: NOT_STARTED
     enum_values:
-      - DRAFT
       - NOT_STARTED
       - RUNNING
-      - COMPLETED
-      - STOPPED
-      - FAILED
   - name: phase
     type: Enum
     description: |
