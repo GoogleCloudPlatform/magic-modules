@@ -9,6 +9,7 @@ resource "google_biglake_hive_catalog" "{{$.PrimaryResourceId}}" {
     name = "{{index $.Vars "name"}}"
     primary_location="us-central1"
     location_uri="gs://${google_storage_bucket.bucket_for_{{$.PrimaryResourceId}}.name}"
+    description="terraform test hive catalog"
     depends_on = [
       google_storage_bucket.bucket_for_{{$.PrimaryResourceId}}
     ]
