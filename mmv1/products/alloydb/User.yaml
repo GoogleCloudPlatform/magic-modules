@@ -141,3 +141,15 @@ properties:
       List of database roles this database user has.
     item_type:
       type: String
+  - name: 'keepExtraRoles'
+    type: Boolean
+    description: |
+      If true and the user already exists and has additional database roles
+      that aren't tracked in the `database_roles` argument, keep those roles
+      granted. Useful when other tools (e.g. PostgreSQL `GRANT` statements
+      run out-of-band) have granted roles to the user that Terraform doesn't
+      manage. The field is input-only — the API does not return it on read —
+      so it must be set on every apply that should preserve out-of-band
+      grants. Defaults to false (Terraform reconciles `database_roles`
+      exactly with the configured set).
+    ignore_read: true
