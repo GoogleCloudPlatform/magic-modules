@@ -2524,7 +2524,11 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	}
 
 	d.SetId(res.Id)
-	return nil
+
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+    "name":    res.Name,
+    "project": d.Get("project").(string),
+})
 }
 
 func hierachicalNamespaceDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
