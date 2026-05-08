@@ -68,7 +68,6 @@ resource "time_sleep" "wait_for_project" {
 resource "google_project_service" "datalineage_api" {
   project            = google_project.project.project_id
   service            = "datalineage.googleapis.com"
-  disable_on_destroy = false
   depends_on         = [time_sleep.wait_for_project]
 }
 
@@ -116,7 +115,6 @@ resource "time_sleep" "wait_for_project" {
 resource "google_project_service" "datalineage_api" {
   project            = google_project.project.project_id
   service            = "datalineage.googleapis.com"
-  disable_on_destroy = false
   depends_on         = [time_sleep.wait_for_project]
 }
 
