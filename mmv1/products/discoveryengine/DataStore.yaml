@@ -177,6 +177,17 @@ properties:
       - 'NO_CONTENT'
       - 'CONTENT_REQUIRED'
       - 'PUBLIC_WEBSITE'
+  - name: 'aclEnabled'
+    type: Boolean
+    description: |
+      Immutable. Whether data in the DataStore has ACL information. If set to true,
+      the source data must have ACL. ACL will be ingested when data is ingested by
+      DocumentService.ImportDocuments methods. When ACL is enabled for the DataStore,
+      Document can't be accessed by calling DocumentService.GetDocument or
+      DocumentService.ListDocuments. Currently ACL is only supported in the GENERIC
+      industry vertical with non-PUBLIC_WEBSITE content config.
+    required: false
+    immutable: true
   - name: 'advancedSiteSearchConfig'
     type: NestedObject
     description: |
