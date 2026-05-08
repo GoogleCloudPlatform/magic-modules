@@ -22,7 +22,9 @@ func TestFromResource(t *testing.T) {
 	}{
 		{
 			name:     "empty resource",
-			resource: api.Resource{},
+			resource: api.Resource{
+				DeletionPolicyExclude: true
+			},
 			wantMetadata: Metadata{
 				Resource:       "google_product_",
 				GenerationType: "mmv1",
@@ -55,6 +57,10 @@ func TestFromResource(t *testing.T) {
 					{
 						ApiField: "field",
 					},
+					{
+						Field: "deletion_policy", 
+						ProviderOnly: true
+					},
 				},
 			},
 		},
@@ -86,6 +92,10 @@ func TestFromResource(t *testing.T) {
 					},
 					{
 						ApiField: "selfLink",
+					},
+					{
+						Field: "deletion_policy", 
+						ProviderOnly: true
 					},
 				},
 			},
