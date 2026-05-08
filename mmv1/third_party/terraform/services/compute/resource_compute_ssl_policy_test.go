@@ -3,23 +3,17 @@ package compute_test
 import (
 	"fmt"
 	"testing"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeSslPolicy_update(t *testing.T) {
 	t.Parallel()
 
-	var sslPolicy compute.SslPolicy
+	var sslPolicy map[string]interface{}
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -98,7 +92,7 @@ func TestAccComputeSslPolicy_update(t *testing.T) {
 func TestAccComputeSslPolicy_update_to_custom(t *testing.T) {
 	t.Parallel()
 
-	var sslPolicy compute.SslPolicy
+	var sslPolicy map[string]interface{}
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -145,7 +139,7 @@ func TestAccComputeSslPolicy_update_to_custom(t *testing.T) {
 func TestAccComputeSslPolicy_update_from_custom(t *testing.T) {
 	t.Parallel()
 
-	var sslPolicy compute.SslPolicy
+	var sslPolicy map[string]interface{}
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -189,7 +183,7 @@ func TestAccComputeSslPolicy_update_from_custom(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *compute.SslPolicy) resource.TestCheckFunc {
+func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -209,17 +203,23 @@ func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *compu
 
 		name := rs.Primary.Attributes["name"]
 
-		found, err := compute_tpg.NewClient(config, config.UserAgent).SslPolicies.Get(
-			project, name).Do()
+		url := fmt.Sprintf("%sprojects/%s/global/sslPolicies/%s", config.ComputeBasePath, project, name)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Error Reading SSL Policy %s: %s", name, err)
 		}
 
-		if found.Name != name {
+		if found["name"].(string) != name {
 			return fmt.Errorf("SSL Policy not found")
 		}
 
-		*sslPolicy = *found
+		*sslPolicy = found
 
 		return nil
 	}
