@@ -37,16 +37,17 @@ timeouts:
   delete_minutes: 1
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_custom_report.go.tmpl'
-exclude_sweeper: true
 examples:
   - name: 'apigee_custom_report_basic'
     vars:
+      network_name: 'apigee-network'
+      range_name: 'apigee-range'
       display_name: 'my_custom_report'
     exclude_test: true
   - name: 'apigee_custom_report_basic_test'
     primary_resource_id: 'apigee_custom_report'
     vars:
-      project_id: 'my-project'
+      project_id: 'proj'
       network_name: 'apigee-network'
       range_name: 'apigee-range'
       display_name: 'my_custom_report'
@@ -57,12 +58,14 @@ examples:
     external_providers: ["time"]
   - name: 'apigee_custom_report_full'
     vars:
+      network_name: 'apigee-network'
+      range_name: 'apigee-range'
       display_name: 'my_detailed_report'
     exclude_test: true
   - name: 'apigee_custom_report_full_test'
     primary_resource_id: 'apigee_custom_report'
     vars:
-      project_id: 'my-project'
+      project_id: 'proj'
       network_name: 'apigee-network'
       range_name: 'apigee-range'
       display_name: 'my_detailed_report'

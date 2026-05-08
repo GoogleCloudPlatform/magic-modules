@@ -1,11 +1,11 @@
 data "google_client_config" "current" {}
 
 resource "google_compute_network" "apigee_network" {
-  name = "apigee-network"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_global_address" "apigee_range" {
-  name          = "apigee-range"
+  name          = "{{index $.Vars "range_name"}}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
