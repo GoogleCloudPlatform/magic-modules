@@ -1,123 +1,123 @@
 package privateca_test
 
 import (
-  "fmt"
-  "log"
-  "testing"
-  "time"
+	"fmt"
+	"log"
+	"testing"
+	"time"
 
-  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-provider-google/google/services/privateca"
-  transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
-  project := envvar.GetTestProjectFromEnv()
-  poolName := "static-ca-pool"
+	project := envvar.GetTestProjectFromEnv()
+	poolName := "static-ca-pool"
 
-  config := transport_tpg.BootstrapConfig(t)
-  if config == nil {
-    return ""
-  }
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
 
-  log.Printf("[DEBUG] Getting shared CA pool %q", poolName)
-  url := fmt.Sprintf("%sprojects/%s/locations/%s/caPools/%s", transport_tpg.BaseUrl(privateca.Product, config), project, location, poolName)
-  _, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-    Config:    config,
-    Method:    "GET",
-    Project:   project,
-    RawURL:    url,
-    UserAgent: config.UserAgent,
-  })
-  if err != nil {
-    log.Printf("[DEBUG] CA pool %q not found, bootstrapping", poolName)
-    poolObj := map[string]interface{}{
-      "tier": "ENTERPRISE",
-    }
-    createUrl := fmt.Sprintf("%sprojects/%s/locations/%s/caPools?caPoolId=%s", transport_tpg.BaseUrl(privateca.Product, config), project, location, poolName)
-    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-      Config:    config,
-      Method:    "POST",
-      Project:   project,
-      RawURL:    createUrl,
-      UserAgent: config.UserAgent,
-      Body:      poolObj,
-      Timeout:   4 * time.Minute,
-    })
-    if err != nil {
-      t.Fatalf("Error bootstrapping shared CA pool %q: %s", poolName, err)
-    }
+	log.Printf("[DEBUG] Getting shared CA pool %q", poolName)
+	url := fmt.Sprintf("%sprojects/%s/locations/%s/caPools/%s", transport_tpg.BaseUrl(privateca.Product, config), project, location, poolName)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
+	if err != nil {
+		log.Printf("[DEBUG] CA pool %q not found, bootstrapping", poolName)
+		poolObj := map[string]interface{}{
+			"tier": "ENTERPRISE",
+		}
+		createUrl := fmt.Sprintf("%sprojects/%s/locations/%s/caPools?caPoolId=%s", transport_tpg.BaseUrl(privateca.Product, config), project, location, poolName)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    createUrl,
+			UserAgent: config.UserAgent,
+			Body:      poolObj,
+			Timeout:   4 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared CA pool %q: %s", poolName, err)
+		}
 
-    log.Printf("[DEBUG] Waiting for CA pool creation to finish")
-    var opRes map[string]interface{}
-    err = privateca.PrivatecaOperationWaitTimeWithResponse(
-      config, res, &opRes, project, "Creating CA pool", config.UserAgent,
-      4*time.Minute)
-    if err != nil {
-      t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
-    }
-    _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-      Config:    config,
-      Method:    "GET",
-      Project:   project,
-      RawURL:    url,
-      UserAgent: config.UserAgent,
-    })
-    if err != nil {
-      t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
-    }
-  }
-  return poolName
+		log.Printf("[DEBUG] Waiting for CA pool creation to finish")
+		var opRes map[string]interface{}
+		err = privateca.PrivatecaOperationWaitTimeWithResponse(
+			config, res, &opRes, project, "Creating CA pool", config.UserAgent,
+			4*time.Minute)
+		if err != nil {
+			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
+		}
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
+		}
+	}
+	return poolName
 }
 
 func TestAccPrivatecaCaPool_privatecaCapoolUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolStart(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
-      },
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolEnd(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
-      },
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolStart(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolStart(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolEnd(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolStart(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolStart(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
@@ -199,7 +199,7 @@ resource "google_privateca_ca_pool" "default" {
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolEnd(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
@@ -281,32 +281,32 @@ resource "google_privateca_ca_pool" "default" {
 }
 
 func TestAccPrivatecaCaPool_privatecaCapoolEmptyBaseline(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolEmptyBaseline(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolEmptyBaseline(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolEmptyBaseline(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
@@ -345,32 +345,32 @@ resource "google_privateca_ca_pool" "default" {
 }
 
 func TestAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
@@ -387,50 +387,50 @@ resource "google_privateca_ca_pool" "default" {
 }
 
 func TestAccPrivatecaCaPool_updateCaOption(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsTrueAndMaxPathIsPositive(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location"},
-      },
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsFalse(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location"},
-      },
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionMaxIssuerPathLenghIsZero(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsTrueAndMaxPathIsPositive(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsFalse(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionMaxIssuerPathLenghIsZero(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+		},
+	})
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsTrueAndMaxPathIsPositive(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
@@ -457,7 +457,7 @@ resource "google_privateca_ca_pool" "default" {
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsFalse(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
@@ -484,7 +484,7 @@ resource "google_privateca_ca_pool" "default" {
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolCaOptionMaxIssuerPathLenghIsZero(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
@@ -511,50 +511,50 @@ resource "google_privateca_ca_pool" "default" {
 }
 
 func TestAccPrivatecaCaPool_CmekKeyUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  acctest.BootstrapIamMembers(t, []acctest.IamMember{
-    {
-      Member: "serviceAccount:service-{project_number}@gcp-sa-privateca.iam.gserviceaccount.com",
-      Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-    },
-  })
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-privateca.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
-  context := map[string]interface{}{
-    "kms_key1":      acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name,
-    "kms_key2":      acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name,
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"kms_key1":      acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name,
+		"kms_key2":      acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name,
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolWithCmek(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "labels"},
-      },
-      {
-        Config: testAccPrivatecaCaPool_privatecaCapoolWithCmekUpdate0(context),
-      },
-      {
-        ResourceName:            "google_privateca_ca_pool.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolWithCmek(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels"},
+			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolWithCmekUpdate0(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels"},
+			},
+		},
+	})
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolWithCmek(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
@@ -596,7 +596,7 @@ resource "google_privateca_ca_pool" "default" {
 }
 
 func testAccPrivatecaCaPool_privatecaCapoolWithCmekUpdate0(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
