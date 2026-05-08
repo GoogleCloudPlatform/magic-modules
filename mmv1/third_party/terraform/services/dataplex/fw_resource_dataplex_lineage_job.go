@@ -26,9 +26,10 @@ import (
 	"time"
 
 	lineage "cloud.google.com/go/datacatalog/lineage/apiv1"
-	lineagepb "cloud.google.com/go/datacatalog/lineage/apiv1/lineagepb"
+	"cloud.google.com/go/datacatalog/lineage/apiv1/lineagepb"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 
-	ol "github.com/OpenLineage/openlineage/byool/terraform/openlineage-base-resource/ol"
+	"github.com/OpenLineage/openlineage/byool/terraform/openlineage-base-resource/ol"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -40,6 +41,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Compile-time interface checks.
@@ -47,6 +50,18 @@ var (
 	_ resource.Resource              = &DataplexLineageJobResource{}
 	_ resource.ResourceWithConfigure = &DataplexLineageJobResource{}
 )
+
+const (
+	producer = "https://github.com/hashicorp/terraform-provider-google/google/services/dataplex/dataplex_lineage_job"
+)
+
+func init() {
+	registry.FrameworkResource{
+		Name:        "dataplex_lineage_job",
+		ProductName: "dataplex",
+		Func:        NewDataplexLineageJobResource,
+	}.Register()
+}
 
 // NewDataplexLineageJobResource is the constructor registered in the framework
 // provider's Resources() function.
@@ -192,7 +207,7 @@ func (r *DataplexLineageJobResource) Create(ctx context.Context, req resource.Cr
 
 	// ol.BuildRunEvent is reused without change.  It takes *ol.JobResourceModel
 	// (promoted into DataplexLineageJobModel via embedding) and the capability.
-	event := ol.NewJobEventBuilder(&resp.Diagnostics, dataplexLineageJobCapability()).BuildRunEvent(&model.JobResourceModel)
+	event := ol.NewJobEventBuilder(&resp.Diagnostics, dataplexLineageJobCapability(), producer).BuildRunEvent(&model.JobResourceModel)
 
 	if err := r.emitEvent(ctx, &model, event); err != nil {
 		resp.Diagnostics.AddError("Emission Error",
@@ -212,7 +227,7 @@ func (r *DataplexLineageJobResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	event := ol.NewJobEventBuilder(&resp.Diagnostics, dataplexLineageJobCapability()).BuildRunEvent(&model.JobResourceModel)
+	event := ol.NewJobEventBuilder(&resp.Diagnostics, dataplexLineageJobCapability(), producer).BuildRunEvent(&model.JobResourceModel)
 
 	if err := r.emitEvent(ctx, &model, event); err != nil {
 		resp.Diagnostics.AddError("Emission Error",
@@ -293,13 +308,13 @@ func (r *DataplexLineageJobResource) Delete(ctx context.Context, req resource.De
 func dataplexLineageJobCapability() ol.JobCapability {
 	return ol.EmptyJobCapability().
 		WithFacetEnabled(
-			ol.FacetJobType,
-			ol.FacetJobOwnership,
+			ol.JobTypeJobFacet,
+			ol.OwnershipJobFacet,
 		).
 		WithDatasetFacetEnabled(
-			ol.FacetDatasetSymlinks,
-			ol.FacetDatasetCatalog,
-			ol.FacetDatasetColumnLineage,
+			ol.SymlinksDatasetFacet,
+			ol.CatalogDatasetFacet,
+			ol.ColumnLineageDatasetFacet,
 		)
 }
 
