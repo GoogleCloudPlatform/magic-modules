@@ -313,6 +313,7 @@ resource "google_service_networking_connection" "vpc_connection" {
   network                 = google_compute_network.default.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+  deletion_policy         = "ABANDON"
 }
 
 resource "google_compute_network_attachment" "default" {
@@ -330,6 +331,10 @@ resource "google_database_migration_service_private_connection" "default" {
 	psc_interface_config {
 		network_attachment = google_compute_network_attachment.default.id
 	}
+
+	# Ensures the VPC peering for Cloud SQL exists before we try to use the network
+	# and is the last to be deleted.
+	depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_sql_database_instance" "source" {
