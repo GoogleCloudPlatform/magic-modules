@@ -73,7 +73,7 @@ resource "google_sql_user" "source_sqldb_user" {
 }
 
 resource "google_database_migration_service_connection_profile" "source_cp" {
-  location              = "us-central1"
+  location              = "us-east1"
   connection_profile_id = "tf-test-source-cp%{random_suffix}"
   display_name          = "tf-test-source-cp%{random_suffix}_display"
   labels = {
@@ -107,7 +107,7 @@ resource "google_sql_database_instance" "destination_csql" {
 }
 
 resource "google_database_migration_service_connection_profile" "destination_cp" {
-  location              = "us-central1"
+  location              = "us-east1"
   connection_profile_id = "tf-test-destination-cp%{random_suffix}"
   display_name          = "tf-test-destination-cp%{random_suffix}_display"
   labels = {
@@ -124,7 +124,7 @@ resource "google_compute_network" "default" {
 }
 
 resource "google_database_migration_service_migration_job" "mysqltomysql" {
-  location              = "us-central1"
+  location              = "us-east1"
   migration_job_id = "tf-test-my-migrationid%{random_suffix}"
   display_name = "tf-test-my-migrationid%{random_suffix}_display"
   labels = {
@@ -181,7 +181,7 @@ resource "google_sql_user" "source_sqldb_user" {
 }
 
 resource "google_database_migration_service_connection_profile" "source_cp" {
-  location              = "us-central1"
+  location              = "us-east1"
   connection_profile_id = "tf-test-source-cp%{random_suffix}"
   display_name          = "tf-test-source-cp%{random_suffix}_display"
   labels = {
@@ -215,7 +215,7 @@ resource "google_sql_database_instance" "destination_csql" {
 }
 
 resource "google_database_migration_service_connection_profile" "destination_cp" {
-  location              = "us-central1"
+  location              = "us-east1"
   connection_profile_id = "tf-test-destination-cp%{random_suffix}"
   display_name          = "tf-test-destination-cp%{random_suffix}_display"
   labels = {
@@ -232,7 +232,7 @@ resource "google_compute_network" "default" {
 }
 
 resource "google_database_migration_service_migration_job" "mysqltomysql" {
-  location              = "us-central1"
+  location              = "us-east1"
   migration_job_id = "tf-test-my-migrationid%{random_suffix}"
   display_name = "tf-test-my-migrationid%{random_suffix}_display"
   labels = {
@@ -263,6 +263,7 @@ func TestAccDatabaseMigrationServiceMigrationJob_postgresQuickstart(t *testing.T
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
+	t.Logf("Running test with random suffix: %s", context["random_suffix"])
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -296,7 +297,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "tf-test-subnet%{random_suffix}"
   ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
+  region        = "us-east1"
   network       = google_compute_network.default.id
 }
 
@@ -316,14 +317,14 @@ resource "google_service_networking_connection" "vpc_connection" {
 
 resource "google_compute_network_attachment" "default" {
   name                  = "tf-test-attachment%{random_suffix}"
-  region                = "us-central1"
+  region                = "us-east1"
   connection_preference = "ACCEPT_AUTOMATIC"
   subnetworks           = [google_compute_subnetwork.default.id]
 }
 
 resource "google_database_migration_service_private_connection" "default" {
-	display_name          = "dbms_pc"
-	location              = "us-central1"
+	display_name          = "tf-test-pc%{random_suffix}"
+	location              = "us-east1"
 	private_connection_id = "tf-test-pc%{random_suffix}"
 
 	psc_interface_config {
@@ -334,7 +335,7 @@ resource "google_database_migration_service_private_connection" "default" {
 resource "google_sql_database_instance" "source" {
   name             = "tf-test-src-psql%{random_suffix}"
   database_version = "POSTGRES_12"
-  region           = "us-central1"
+  region           = "us-east1"
   settings {
     tier = "db-f1-micro"
     ip_configuration {
@@ -353,7 +354,7 @@ resource "google_sql_user" "source_postgres" {
 }
 
 resource "google_database_migration_service_connection_profile" "source" {
-  location              = "us-central1"
+  location              = "us-east1"
   connection_profile_id = "tf-test-src-cp%{random_suffix}"
   display_name          = "Source Connection Profile"
   role                  = "SOURCE"
@@ -375,7 +376,7 @@ resource "google_database_migration_service_connection_profile" "source" {
 resource "google_sql_database_instance" "dest" {
   name             = "tf-test-dest-psql%{random_suffix}"
   database_version = "POSTGRES_12"
-  region           = "us-central1"
+  region           = "us-east1"
   settings {
     tier = "db-f1-micro"
   }
@@ -389,7 +390,7 @@ resource "google_sql_user" "dest_postgres" {
 }
 
 resource "google_database_migration_service_connection_profile" "dest" {
-  location              = "us-central1"
+  location              = "us-east1"
   connection_profile_id = "tf-test-dest-cp%{random_suffix}"
   display_name          = "Destination Connection Profile"
   role                  = "DESTINATION"
@@ -402,7 +403,7 @@ resource "google_database_migration_service_connection_profile" "dest" {
 }
 
 resource "google_database_migration_service_migration_job" "psql_to_psql" {
-  location              = "us-central1"
+  location              = "us-east1"
   migration_job_id      = "tf-test-mj-psql%{random_suffix}"
   display_name          = "Postgres Quickstart Migration Job"
   
@@ -420,4 +421,6 @@ resource "google_database_migration_service_migration_job" "psql_to_psql" {
       objects_selection_type = "ALL_OBJECTS"
     }
   }
+}
+`, context)
 }
