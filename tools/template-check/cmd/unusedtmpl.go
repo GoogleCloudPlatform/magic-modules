@@ -29,15 +29,8 @@ type tree struct {
 
 type resourceYaml struct {
 	Examples []struct {
-		Name string `yaml:"name"`
-	} `yaml:"examples,omitempty"`
-	Samples []struct {
-		Name  string `yaml:"name"`
-		Steps []struct {
-			Name       string `yaml:"name"`
-			ConfigPath string `yaml:"config_path,omitempty"`
-		} `yaml:"steps"`
-	} `yaml:"samples,omitempty"`
+		Name string
+	}
 }
 
 func newUnusedTmplCmd(rootOptions *rootOptions) *cobra.Command {
@@ -203,23 +196,6 @@ func findTmpls(yamlFiles []string) (map[string]bool, error) {
 		var m map[any]any
 		if err := yaml.Unmarshal(b, &m); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal yaml file %s: %s", yamlFile, err)
-		}
-
-		var r resourceYaml
-		if err := yaml.Unmarshal(b, &r); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal yaml file for samples %s: %s", yamlFile, err)
-		}
-		packageName := filepath.Base(filepath.Dir(yamlFile))
-		for _, sample := range r.Samples {
-			for _, step := range sample.Steps {
-				var tmplPath string
-				if step.ConfigPath != "" {
-					tmplPath = step.ConfigPath
-				} else {
-					tmplPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
-				}
-				allTmpls[tmplPath] = true
-			}
 		}
 
 		var resName string
