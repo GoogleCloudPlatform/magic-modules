@@ -3,15 +3,10 @@ package compute
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	"google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func DataSourceGoogleComputeRouterStatus() *schema.Resource {
@@ -65,7 +60,7 @@ func DataSourceGoogleComputeRouterStatus() *schema.Resource {
 
 func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -79,32 +74,44 @@ func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-
-	var name string
-	if n, ok := d.GetOk("name"); ok {
-		name = n.(string)
+	if err := d.Set("region", region); err != nil {
+		return fmt.Errorf("Error setting region: %s", err)
 	}
 
-	resp, err := NewClient(config, userAgent).Routers.GetRouterStatus(project, region, name).Do()
+	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{name}}/getRouterStatus")
 	if err != nil {
 		return err
 	}
 
-	status := resp.Result
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return err
+	}
 
-	if err := d.Set("network", status.Network); err != nil {
+	status, ok := res["result"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("Error parsing router status response: 'result' field not found or invalid")
+	}
+
+	if err := d.Set("network", status["network"]); err != nil {
 		return fmt.Errorf("Error setting network: %s", err)
 	}
 
-	if err := d.Set("best_routes", flattenRoutes(status.BestRoutes)); err != nil {
+	if err := d.Set("best_routes", flattenRoutes(status["bestRoutes"])); err != nil {
 		return fmt.Errorf("Error setting best_routes: %s", err)
 	}
 
-	if err := d.Set("best_routes_for_router", flattenRoutes(status.BestRoutesForRouter)); err != nil {
+	if err := d.Set("best_routes_for_router", flattenRoutes(status["bestRoutesForRouter"])); err != nil {
 		return fmt.Errorf("Error setting best_routes_for_router: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}name{{"}}"}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/routers/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -113,22 +120,32 @@ func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func flattenRoutes(routes []*compute.Route) []map[string]interface{} {
-	results := make([]map[string]interface{}, len(routes))
+func flattenRoutes(routes interface{}) []map[string]interface{} {
+	routeList, ok := routes.([]interface{})
+	if !ok {
+		return nil
+	}
 
-	for i, route := range routes {
+	results := make([]map[string]interface{}, len(routeList))
+
+	for i, route := range routeList {
+		routeMap, ok := route.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
 		results[i] = map[string]interface{}{
-			"dest_range":          route.DestRange,
-			"name":                route.Name,
-			"network":             route.Network,
-			"description":         route.Description,
-			"next_hop_gateway":    route.NextHopGateway,
-			"next_hop_ilb":        route.NextHopIlb,
-			"next_hop_ip":         route.NextHopIp,
-			"next_hop_vpn_tunnel": route.NextHopVpnTunnel,
-			"priority":            route.Priority,
-			"tags":                route.Tags,
-			"next_hop_network":    route.NextHopNetwork,
+			"dest_range":          routeMap["destRange"],
+			"name":                routeMap["name"],
+			"network":             routeMap["network"],
+			"description":         routeMap["description"],
+			"next_hop_gateway":    routeMap["nextHopGateway"],
+			"next_hop_ilb":        routeMap["nextHopIlb"],
+			"next_hop_ip":         routeMap["nextHopIp"],
+			"next_hop_vpn_tunnel": routeMap["nextHopVpnTunnel"],
+			"priority":            routeMap["priority"],
+			"tags":                routeMap["tags"],
+			"next_hop_network":    routeMap["nextHopNetwork"],
 		}
 	}
 
@@ -137,9 +154,9 @@ func flattenRoutes(routes []*compute.Route) []map[string]interface{} {
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_router_status",
+		Name:        "google_compute_router_status",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeRouterStatus(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRouterStatus(),
 	}.Register()
 }

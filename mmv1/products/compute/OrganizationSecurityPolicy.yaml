@@ -50,7 +50,7 @@ examples:
   - name: 'organization_security_policy_with_advanced_options'
     primary_resource_id: 'policy'
     vars:
-      sec_policy_name: 'policy'
+      sec_policy_name: 'security-policy'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:

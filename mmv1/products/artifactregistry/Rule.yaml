@@ -47,6 +47,8 @@ examples:
       desc: 'example docker repository'
       rule_id: 'my-repo-rule-id'
       name: 'my-repo-rule-name'
+    test_vars_overrides:
+      desc: '"example docker repository"'
   - name: "artifact_registry_rule_full"
     primary_resource_id: 'my-rule'
     exclude_from_docs: true
@@ -55,6 +57,8 @@ examples:
       desc: 'example docker repository'
       rule_id: 'my-repo-rule-full-id'
       name: 'my-repo-rule-name'
+    test_vars_overrides:
+      desc: '"example docker repository"'
 parameters:
   - name: 'repository_id'
     type: String

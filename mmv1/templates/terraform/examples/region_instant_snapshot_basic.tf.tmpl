@@ -1,0 +1,13 @@
+resource "google_compute_region_disk" "foo" {
+  name                      = "{{index $.Vars "disk_name"}}"
+  type                      = "pd-ssd"
+  region                    = "us-central1"
+  size                      = 10
+  replica_zones             = ["us-central1-a", "us-central1-f"]
+}
+
+resource "google_compute_region_instant_snapshot" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "instance_name"}}"
+  region       = "us-central1"
+  source_disk  = google_compute_region_disk.foo.self_link
+}
