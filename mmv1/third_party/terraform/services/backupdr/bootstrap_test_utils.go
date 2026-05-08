@@ -79,10 +79,7 @@ func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
 			EffectiveTime:                          effectiveTime.Format(time.RFC3339),
 			Description:                            "Created by BootstrapBackupDRVault function",
 		}
-		{
-			{ /* _, err = NewClient(config, config.UserAgent).Projects.Locations.BackupVaults.Create(projectAndLocation, backupVault).Do() */
-			}
-		}
+		/* _, err = NewClient(config, config.UserAgent).Projects.Locations.BackupVaults.Create(projectAndLocation, backupVault).Do() */
 		createCall := backupdrService.Projects.Locations.BackupVaults.Create(projectAndLocation, backupVault)
 		createCall.BackupVaultId(vaultID) // *** This is REQUIRED for the query parameter ***
 		// createCall.ValidateOnly(false) // Optional: explicit validate only flag

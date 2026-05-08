@@ -8,12 +8,11 @@ import (
 	"testing"
 	"time"
 
-	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
-	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcloudbilling "github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
@@ -21,6 +20,7 @@ import (
 	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 
 	"google.golang.org/api/cloudbilling/v1"
 	cloudkms "google.golang.org/api/cloudkms/v1"
@@ -77,7 +77,7 @@ func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID stri
 }
 
 type BootstrappedKMSAutokey struct {
-    *cloudkms.AutokeyConfig
+	*cloudkms.AutokeyConfig
 	*cloudkms.KeyHandle
 }
 
@@ -148,7 +148,7 @@ func BootstrapKMSAutokeyKeyHandleWithLocation(t *testing.T, locationID string) B
 	}
 
 	return BootstrappedKMSAutokey{
-	    autokeyConfig,
+		autokeyConfig,
 		keyHandle,
 	}
 }
