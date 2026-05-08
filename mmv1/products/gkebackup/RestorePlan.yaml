@@ -223,7 +223,7 @@ properties:
   - name: 'cluster'
     type: String
     description: |
-      The source cluster from which Restores will be created via this RestorePlan.
+      The name of the target cluster to which you want to Restore via this RestorePlan.
     required: true
     immutable: true
   - name: 'restoreConfig'
