@@ -44,6 +44,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/restorePlans/{{name}}'
     - '{{name}}'
 custom_code:
+  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
 include_in_tgc_next: true
 examples:
   - name: 'gkebackup_restoreplan_all_namespaces'
@@ -57,8 +58,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_restoreplan_rollback_namespace'
@@ -72,8 +73,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_restoreplan_protected_application'
@@ -87,8 +88,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_restoreplan_all_cluster_resources'
@@ -102,8 +103,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_restoreplan_rename_namespace'
@@ -117,8 +118,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_restoreplan_second_transformation'
@@ -132,8 +133,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_restoreplan_gitops_mode'
@@ -147,8 +148,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_restoreplan_restore_order'
@@ -162,8 +163,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_restoreplan_volume_res'
@@ -177,8 +178,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
 parameters:

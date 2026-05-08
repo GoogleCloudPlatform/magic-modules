@@ -55,7 +55,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")
   - name: dataproc_batch_spark_full
     primary_resource_id: example_batch_spark
     ignore_read_extra:
@@ -81,7 +81,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network", "dataproc-sparksql-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network", "dataproc-sparksql-test-subnetwork")
   - name: dataproc_batch_pyspark
     primary_resource_id: example_batch_pyspark
     ignore_read_extra:
@@ -93,7 +93,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
   - name: dataproc_batch_sparkr
     primary_resource_id: example_batch_sparkr
     ignore_read_extra:
@@ -105,7 +105,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
   - name: dataproc_batch_autotuning
     primary_resource_id: example_batch_autotuning
     ignore_read_extra:
@@ -117,7 +117,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network", "dataproc-autotuning-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network", "dataproc-autotuning-test-subnetwork")
 parameters:
   - name: location
     type: String
