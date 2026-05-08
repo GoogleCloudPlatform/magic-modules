@@ -859,6 +859,7 @@ func testAccCheckComputeSubnetworkHasSecondaryIpRange(subnetwork *compute.Subnet
 	}
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccCheckComputeSubnetworkHasSecondaryIpv6Range(subnetwork *compute.Subnetwork, rangeName, ipVersion, ipCollection string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, secondaryRange := range subnetwork.SecondaryIpRanges {
@@ -875,6 +876,7 @@ func testAccCheckComputeSubnetworkHasSecondaryIpv6Range(subnetwork *compute.Subn
 		return fmt.Errorf("Secondary IPv6 range %s not found", rangeName)
 	}
 }
+{{- end }}
 
 func testAccCheckComputeSubnetworkHasNotSecondaryIpRange(subnetwork *compute.Subnetwork, rangeName, ipCidrRange string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
