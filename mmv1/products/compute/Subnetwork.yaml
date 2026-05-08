@@ -332,6 +332,7 @@ properties:
             Ranges must be unique and non-overlapping with all primary and
             secondary IP ranges within a network. Only IPv4 is supported.
             Field is optional when `reserved_internal_range` is defined, otherwise required.
+          diff_suppress_func: IpDiffSuppress
           validation:
             function: verify.ValidateIpCidrRange
           default_from_api: true
@@ -347,7 +348,7 @@ properties:
           description: |
             The IP version of the secondary range. If not specified, IPV4 is used.
           min_version: 'beta'
-          enum_values:  
+          enum_values:
             - IPV4
             - IPV6
         - name: ipCollection
@@ -357,6 +358,7 @@ properties:
             This field should be specified for configuring BYOGUA internal IPv6 secondary range.
             When specified along with the ip_cidr_range, the ip_cidr_range must lie within the PDP referenced by the `ipCollection` field.
             When specified without the ip_cidr_range, the range is auto-allocated from the PDP referenced by the `ipCollection` field.
+          diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
           min_version: 'beta'
           resource: PublicDelegatedPrefix
           imports: selfLink

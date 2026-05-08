@@ -21,7 +21,7 @@ resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
     range_name    = "v6-byogua-manual"
     ip_version    = "IPV6"
     ip_collection = google_compute_public_delegated_prefix.ipv6_sub_pdp.self_link
-    ip_cidr_range = "2001:db8:2::/64"
+    ip_cidr_range = "2001:db8:0:2::/64"
   }
 }
 

@@ -496,8 +496,8 @@ func TestAccComputeSubnetwork_secondaryIpv6Ranges_beta(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
 					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-byoip-auto", "IPV6", ""),
-					testAccCheckComputeSubnetworkHasNotSecondaryIpv6Range(&subnetwork, "v6-ula"),
-					testAccCheckComputeSubnetworkHasNotSecondaryIpv6Range(&subnetwork, "v6-byoip-manual"),
+					testAccCheckComputeSubnetworkHasNotSecondaryIpRange(&subnetwork, "v6-ula", ""),
+					testAccCheckComputeSubnetworkHasNotSecondaryIpRange(&subnetwork, "v6-byoip-manual", ""),
 				),
 			},
 		},
@@ -871,18 +871,6 @@ func testAccCheckComputeSubnetworkHasSecondaryIpv6Range(subnetwork *compute.Subn
 			}
 		}
 		return fmt.Errorf("Secondary IPv6 range %s not found", rangeName)
-	}
-}
-
-func testAccCheckComputeSubnetworkHasNotSecondaryIpv6Range(subnetwork *compute.Subnetwork, rangeName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		for _, secondaryRange := range subnetwork.SecondaryIpRanges {
-			if secondaryRange.RangeName == rangeName {
-				return fmt.Errorf("Secondary IPv6 range %s should have been removed, but still exists in GCP state", rangeName)
-			}
-		}
-
-		return nil
 	}
 }
 
@@ -1530,8 +1518,8 @@ resource "google_compute_subnetwork" "test_subnet" {
   ip_collection    = google_compute_public_delegated_prefix.test_sub_pdp.id
 }
 `, context)
+}
 
-func testAccComputeSubnetwork_secondaryIpv6ULA_beta(cnName, subnetworkName string) string {
 // Shared base config (Network, PAP, PDP)
 func testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName, subPdpName string) string {
 	return fmt.Sprintf(`
