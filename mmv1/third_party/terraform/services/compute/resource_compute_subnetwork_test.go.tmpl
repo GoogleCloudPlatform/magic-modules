@@ -448,7 +448,8 @@ func TestAccComputeSubnetwork_secondaryIpRanges_sendEmpty(t *testing.T) {
 	})
 }
 
-func TestAccComputeSubnetwork_secondaryIpv6Ranges_beta(t *testing.T) {
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeSubnetwork_secondaryIpv6Ranges(t *testing.T) {
 	t.Parallel()
 
 	var subnetwork compute.Subnetwork
@@ -465,14 +466,14 @@ func TestAccComputeSubnetwork_secondaryIpv6Ranges_beta(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Step 1: Create a normal custom subnet
-				Config: testAccComputeSubnetwork_secondaryIpv6RangesBase_beta(cnName, subnetworkName, papName, pdpName, subPdpName),
+				Config: testAccComputeSubnetwork_secondaryIpv6RangesBase(cnName, subnetworkName, papName, pdpName, subPdpName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
 				),
 			},
 			{
 				// Step 2: Add 3 secondary ranges to the subnet: 1 ULA, 2 BYOGUA (1 auto, 1 manual)
-				Config: testAccComputeSubnetwork_secondaryIpv6RangesAdd_beta(cnName, subnetworkName, papName, pdpName, subPdpName),
+				Config: testAccComputeSubnetwork_secondaryIpv6RangesAdd(cnName, subnetworkName, papName, pdpName, subPdpName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
 					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-ula", "IPV6", ""),
@@ -482,7 +483,7 @@ func TestAccComputeSubnetwork_secondaryIpv6Ranges_beta(t *testing.T) {
 			},
 			{
 				// Step 3: Change the order of the secondary ranges (Verifies no-op/no re-creation)
-				Config: testAccComputeSubnetwork_secondaryIpv6RangesReorder_beta(cnName, subnetworkName, papName, pdpName, subPdpName),
+				Config: testAccComputeSubnetwork_secondaryIpv6RangesReorder(cnName, subnetworkName, papName, pdpName, subPdpName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
 					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-ula", "IPV6", ""),
@@ -492,7 +493,7 @@ func TestAccComputeSubnetwork_secondaryIpv6Ranges_beta(t *testing.T) {
 			},
 			{
 				// Step 4: Remove 2 ranges (ULA and Manual), leave 1 (Auto)
-				Config: testAccComputeSubnetwork_secondaryIpv6RangesRemove_beta(cnName, subnetworkName, papName, pdpName, subPdpName),
+				Config: testAccComputeSubnetwork_secondaryIpv6RangesRemove(cnName, subnetworkName, papName, pdpName, subPdpName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.ipv6-secondary-ranges", &subnetwork),
 					testAccCheckComputeSubnetworkHasSecondaryIpv6Range(&subnetwork, "v6-byoip-auto", "IPV6", ""),
@@ -503,6 +504,7 @@ func TestAccComputeSubnetwork_secondaryIpv6Ranges_beta(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 
 func TestAccComputeSubnetwork_flowLogs(t *testing.T) {
@@ -1520,8 +1522,9 @@ resource "google_compute_subnetwork" "test_subnet" {
 `, context)
 }
 
-// Shared base config (Network, PAP, PDP)
-func testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName, subPdpName string) string {
+// Shared base config for secondary IPv6 ranges (Network, PAP, PDP)
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccComputeSubnetwork_secondaryIpv6RangesShared(cnName, papName, pdpName, subPdpName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "custom-test" {
   name                     = "%s"
@@ -1554,9 +1557,10 @@ resource "google_compute_public_delegated_prefix" "ipv6_sub_pdp" {
 }
 `, cnName, papName, pdpName, subPdpName)
 }
+{{- end }}
 
-// Step 1: Creating a normal IPv6 Internal access type subnet
-func testAccComputeSubnetwork_secondaryIpv6RangesBase_beta(cnName, subnetworkName, papName, pdpName, subPdpName string) string {
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccComputeSubnetwork_secondaryIpv6RangesBase(cnName, subnetworkName, papName, pdpName, subPdpName string) string {
 	return fmt.Sprintf(`
 %s
 resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
@@ -1566,11 +1570,12 @@ resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
   stack_type       = "IPV6_ONLY"
   ipv6_access_type = "INTERNAL"
 }
-`, testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName, subPdpName), subnetworkName)
+`, testAccComputeSubnetwork_secondaryIpv6RangesShared(cnName, papName, pdpName, subPdpName), subnetworkName)
 }
+{{- end }}
 
-// Step 2: Add the 3 ranges
-func testAccComputeSubnetwork_secondaryIpv6RangesAdd_beta(cnName, subnetworkName, papName, pdpName, subPdpName string) string {
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccComputeSubnetwork_secondaryIpv6RangesAdd(cnName, subnetworkName, papName, pdpName, subPdpName string) string {
 	return fmt.Sprintf(`
 %s
 resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
@@ -1596,11 +1601,12 @@ resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
     ip_cidr_range = "2001:db8:abcd:2::/64" 
   }
 }
-`, testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName, subPdpName), subnetworkName)
+`, testAccComputeSubnetwork_secondaryIpv6RangesShared(cnName, papName, pdpName, subPdpName), subnetworkName)
 }
+{{- end }}
 
-// Step 3: Change order (Manual -> Auto -> ULA)
-func testAccComputeSubnetwork_secondaryIpv6RangesReorder_beta(cnName, subnetworkName, papName, pdpName, subPdpName string) string {
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccComputeSubnetwork_secondaryIpv6RangesReorder(cnName, subnetworkName, papName, pdpName, subPdpName string) string {
 	return fmt.Sprintf(`
 %s
 resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
@@ -1627,11 +1633,12 @@ resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
     ip_version    = "IPV6" 
   }
 }
-`, testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName, subPdpName), subnetworkName)
+`, testAccComputeSubnetwork_secondaryIpv6RangesShared(cnName, papName, pdpName, subPdpName), subnetworkName)
 }
+{{- end }}
 
-// Step 4: Remove ULA and Manual
-func testAccComputeSubnetwork_secondaryIpv6RangesRemove_beta(cnName, subnetworkName, papName, pdpName, subPdpName string) string {
+{{ if ne $.TargetVersionName "ga" -}}
+func testAccComputeSubnetwork_secondaryIpv6RangesRemove(cnName, subnetworkName, papName, pdpName, subPdpName string) string {
 	return fmt.Sprintf(`
 %s
 resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
@@ -1647,5 +1654,6 @@ resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
     ip_collection = google_compute_public_delegated_prefix.ipv6_sub_pdp.self_link 
   }
 }
-`, testAccComputeSubnetwork_secondaryIpv6RangesShared_beta(cnName, papName, pdpName, subPdpName), subnetworkName)
+`, testAccComputeSubnetwork_secondaryIpv6RangesShared(cnName, papName, pdpName, subPdpName), subnetworkName)
 }
+{{- end }}
