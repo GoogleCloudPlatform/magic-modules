@@ -1,8 +1,3 @@
-// Custom Create for MigrationJob to support Verify and Start RPCs
-if err := resourceDatabaseMigrationServiceMigrationJobCreate(d, meta); err != nil {
-	return err
-}
-
 // Stage 2: Verify (if NOT skipped)
 if !d.Get("create_without_validation").(bool) {
 	log.Printf("[DEBUG] Verifying Migration Job %q", d.Id())
@@ -27,8 +22,13 @@ if !d.Get("create_without_validation").(bool) {
 		return fmt.Errorf("Error verifying Migration Job %q: %s", d.Id(), err)
 	}
 
-	err = databasemigrationservice.DatabaseMigrationServiceOperationWaitTime(
-		config, res, "Verifying Migration Job", userAgent, d.Timeout(schema.TimeoutCreate))
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	err = DatabaseMigrationServiceOperationWaitTime(
+		config, res, project, "Verifying Migration Job", userAgent, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error waiting for Verify Migration Job operation: %s", err)
@@ -59,12 +59,15 @@ if d.Get("state").(string) == "RUNNING" {
 		return fmt.Errorf("Error starting Migration Job %q: %s", d.Id(), err)
 	}
 
-	err = databasemigrationservice.DatabaseMigrationServiceOperationWaitTime(
-		config, res, "Starting Migration Job", userAgent, d.Timeout(schema.TimeoutCreate))
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	err = DatabaseMigrationServiceOperationWaitTime(
+		config, res, project, "Starting Migration Job", userAgent, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error waiting for Start Migration Job operation: %s", err)
 	}
 }
-
-return resourceDatabaseMigrationServiceMigrationJobRead(d, meta)

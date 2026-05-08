@@ -34,12 +34,13 @@ if d.HasChange("state") {
 			UserAgent: userAgent,
 			Timeout:   d.Timeout(schema.TimeoutUpdate),
 		})
+		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
-			return fmt.Errorf("Error starting Migration Job %q during update: %s", d.Id(), err)
+			return err
 		}
 
-		err = databasemigrationservice.DatabaseMigrationServiceOperationWaitTime(
-			config, res, "Starting Migration Job Update", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = DatabaseMigrationServiceOperationWaitTime(
+			config, res, project, "Starting Migration Job Update", userAgent, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			return fmt.Errorf("Error waiting for Start Migration Job update operation: %s", err)

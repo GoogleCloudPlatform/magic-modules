@@ -278,6 +278,7 @@ func TestAccDatabaseMigrationServiceMigrationJob_postgresQuickstart(t *testing.T
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_database_migration_service_migration_job.psql_to_psql", "type", "CONTINUOUS"),
 					resource.TestCheckResourceAttr("google_database_migration_service_migration_job.psql_to_psql", "postgres_homogeneous_config.0.is_native_logical", "true"),
+					resource.TestCheckResourceAttr("google_database_migration_service_migration_job.psql_to_psql", "create_without_validation", "true"),
 				),
 			},
 			{
@@ -419,6 +420,8 @@ resource "google_database_migration_service_migration_job" "psql_to_psql" {
   source          = google_database_migration_service_connection_profile.source.name
   destination     = google_database_migration_service_connection_profile.dest.name
   type            = "CONTINUOUS"
+
+  create_without_validation = true
 
   postgres_homogeneous_config {
     is_native_logical = true
