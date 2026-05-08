@@ -38,10 +38,11 @@ timeouts:
   delete_minutes: 1
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_data_collector.go.tmpl'
-exclude_sweeper: true
 examples:
   - name: 'apigee_data_collector_basic'
     vars:
+      network_name: 'apigee-network'
+      range_name: 'apigee-range'
       data_collector_id: 'dc_my_data_collector'
     exclude_test: true
   - name: 'apigee_data_collector_basic_test'
