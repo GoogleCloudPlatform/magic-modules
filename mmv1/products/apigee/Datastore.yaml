@@ -38,10 +38,11 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/apigee_datastore.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_datastore.go.tmpl'
-exclude_sweeper: true
 examples:
   - name: 'apigee_datastore_basic'
     vars:
+      network_name: 'apigee-network'
+      range_name: 'apigee-range'
       display_name: 'my_datastore'
       bucket_name: 'my-analytics-bucket'
     exclude_test: true
@@ -54,6 +55,8 @@ examples:
     external_providers: ["time"]
   - name: 'apigee_datastore_bigquery'
     vars:
+      network_name: 'apigee-network'
+      range_name: 'apigee-range'
       display_name: 'my_bigquery_datastore'
       dataset_id: 'my_analytics_dataset'
     exclude_test: true
