@@ -1012,6 +1012,12 @@ properties:
                 If `allowFailure` is also specified, this field will take precedence.
               item_type:
                 type: Integer
+            - name: 'automapSubstitutions'
+              type: Boolean
+              description: |
+                Option to include built-in and custom substitutions as env variables for this build step.
+                This option will override the global option in BuildOption.
+              send_empty_value: true
       - name: 'artifacts'
         type: NestedObject
         description: |
@@ -1203,6 +1209,11 @@ properties:
               Option to specify whether or not to apply bash style string operations to the substitutions.
 
               NOTE this is always enabled for triggered builds and cannot be overridden in the build configuration file.
+            send_empty_value: true
+          - name: 'automapSubstitutions'
+            type: Boolean
+            description: |
+              Option to include built-in and custom substitutions as env variables for all build steps.
             send_empty_value: true
           - name: 'logStreamingOption'
             type: Enum
