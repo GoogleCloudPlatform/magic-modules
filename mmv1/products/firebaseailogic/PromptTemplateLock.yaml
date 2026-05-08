@@ -68,6 +68,7 @@ parameters:
       apply to the global region only. Otherwise, the operation will also
       propagate to all applicable regions.
     url_param_only: true
+    immutable: true
 properties:
   - name: name
     type: String
