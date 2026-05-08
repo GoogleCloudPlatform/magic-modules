@@ -1229,10 +1229,13 @@ func expandAliasIpRanges_v2(ranges []interface{}) []interface{} {
 	ipRanges := make([]interface{}, 0, len(ranges))
 	for _, raw := range ranges {
 		data := raw.(map[string]interface{})
-		ipRanges = append(ipRanges, map[string]interface{}{
-			"ipCidrRange":         data["ip_cidr_range"].(string),
-			"subnetworkRangeName": data["subnetwork_range_name"].(string),
-		})
+		entry := map[string]interface{}{
+			"ipCidrRange": data["ip_cidr_range"].(string),
+		}
+		if v := data["subnetwork_range_name"].(string); v != "" {
+			entry["subnetworkRangeName"] = v
+		}
+		ipRanges = append(ipRanges, entry)
 	}
 	return ipRanges
 }
@@ -1245,8 +1248,12 @@ func expandAccessConfigs_v2(configs []interface{}) []interface{} {
 		}
 		if raw != nil {
 			data := raw.(map[string]interface{})
-			ac["natIP"] = data["nat_ip"].(string)
-			ac["networkTier"] = data["network_tier"].(string)
+			if v := data["nat_ip"].(string); v != "" {
+				ac["natIP"] = v
+			}
+			if v := data["network_tier"].(string); v != "" {
+				ac["networkTier"] = v
+			}
 			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
 				ac["setPublicPtr"] = true
 				ac["publicPtrDomainName"] = ptr.(string)
@@ -1265,7 +1272,9 @@ func expandIpv6AccessConfigs_v2(configs []interface{}) []interface{} {
 		}
 		if raw != nil {
 			data := raw.(map[string]interface{})
-			iac["networkTier"] = data["network_tier"].(string)
+			if v := data["network_tier"].(string); v != "" {
+				iac["networkTier"] = v
+			}
 			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
 				iac["publicPtrDomainName"] = ptr.(string)
 			}
@@ -1336,10 +1345,13 @@ func expandConfidentialInstanceConfig_v2(d tpgresource.TerraformResourceData) ma
 		return nil
 	}
 	prefix := "confidential_instance_config.0"
-	return map[string]interface{}{
+	result := map[string]interface{}{
 		"enableConfidentialCompute": d.Get(prefix + ".enable_confidential_compute").(bool),
-		"confidentialInstanceType":  d.Get(prefix + ".confidential_instance_type").(string),
 	}
+	if v := d.Get(prefix + ".confidential_instance_type").(string); v != "" {
+		result["confidentialInstanceType"] = v
+	}
+	return result
 }
 
 func expandAdvancedMachineFeatures_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
@@ -1347,14 +1359,26 @@ func expandAdvancedMachineFeatures_v2(d tpgresource.TerraformResourceData) map[s
 		return nil
 	}
 	prefix := "advanced_machine_features.0"
-	return map[string]interface{}{
-		"enableNestedVirtualization": d.Get(prefix + ".enable_nested_virtualization").(bool),
-		"threadsPerCore":             int64(d.Get(prefix + ".threads_per_core").(int)),
-		"turboMode":                  d.Get(prefix + ".turbo_mode").(string),
-		"visibleCoreCount":           int64(d.Get(prefix + ".visible_core_count").(int)),
-		"performanceMonitoringUnit":  d.Get(prefix + ".performance_monitoring_unit").(string),
-		"enableUefiNetworking":       d.Get(prefix + ".enable_uefi_networking").(bool),
+	result := map[string]interface{}{}
+	if v := d.Get(prefix + ".enable_nested_virtualization").(bool); v {
+		result["enableNestedVirtualization"] = v
 	}
+	if v := int64(d.Get(prefix + ".threads_per_core").(int)); v > 0 {
+		result["threadsPerCore"] = v
+	}
+	if v := d.Get(prefix + ".turbo_mode").(string); v != "" {
+		result["turboMode"] = v
+	}
+	if v := int64(d.Get(prefix + ".visible_core_count").(int)); v > 0 {
+		result["visibleCoreCount"] = v
+	}
+	if v := d.Get(prefix + ".performance_monitoring_unit").(string); v != "" {
+		result["performanceMonitoringUnit"] = v
+	}
+	if v := d.Get(prefix + ".enable_uefi_networking").(bool); v {
+		result["enableUefiNetworking"] = v
+	}
+	return result
 }
 
 func expandDisplayDevice_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
@@ -1390,11 +1414,14 @@ func expandComputeInstanceEncryptionKey_v2(d tpgresource.TerraformResourceData) 
 		return nil
 	}
 	iekRes := iek.([]interface{})[0].(map[string]interface{})
-	return map[string]interface{}{
-		"kmsKeyName":           iekRes["kms_key_self_link"].(string),
-		"sha256":               iekRes["sha256"].(string),
-		"kmsKeyServiceAccount": iekRes["kms_key_service_account"].(string),
+	result := map[string]interface{}{}
+	if v := iekRes["kms_key_self_link"].(string); v != "" {
+		result["kmsKeyName"] = v
 	}
+	if v := iekRes["kms_key_service_account"].(string); v != "" {
+		result["kmsKeyServiceAccount"] = v
+	}
+	return result
 }
 
 func expandComputeInstanceSourceEncryptionKey_v2(d tpgresource.TerraformResourceData, field string) map[string]interface{} {
@@ -1403,13 +1430,20 @@ func expandComputeInstanceSourceEncryptionKey_v2(d tpgresource.TerraformResource
 		return nil
 	}
 	cekRes := cek.([]interface{})[0].(map[string]interface{})
-	return map[string]interface{}{
-		"rsaEncryptedKey":      cekRes["rsa_encrypted_key"].(string),
-		"rawKey":               cekRes["raw_key"].(string),
-		"kmsKeyName":           cekRes["kms_key_self_link"].(string),
-		"sha256":               cekRes["sha256"].(string),
-		"kmsKeyServiceAccount": cekRes["kms_key_service_account"].(string),
+	result := map[string]interface{}{}
+	if v := cekRes["rsa_encrypted_key"].(string); v != "" {
+		result["rsaEncryptedKey"] = v
 	}
+	if v := cekRes["raw_key"].(string); v != "" {
+		result["rawKey"] = v
+	}
+	if v := cekRes["kms_key_self_link"].(string); v != "" {
+		result["kmsKeyName"] = v
+	}
+	if v := cekRes["kms_key_service_account"].(string); v != "" {
+		result["kmsKeyServiceAccount"] = v
+	}
+	return result
 }
 
 func expandComputeInstanceGuestOsFeatures_v2(v interface{}) []interface{} {
@@ -1580,7 +1614,9 @@ func expandScheduling_v2(v interface{}) (map[string]interface{}, error) {
 		scheduling["preemptible"] = v.(bool)
 	}
 	if v, ok := original["on_host_maintenance"]; ok {
-		scheduling["onHostMaintenance"] = v.(string)
+		if s := v.(string); s != "" {
+			scheduling["onHostMaintenance"] = s
+		}
 	}
 	if v, ok := original["node_affinities"]; ok && v != nil {
 		naSet := v.(*schema.Set).List()
@@ -1599,16 +1635,24 @@ func expandScheduling_v2(v interface{}) (map[string]interface{}, error) {
 		scheduling["nodeAffinities"] = nodeAffinities
 	}
 	if v, ok := original["min_node_cpus"]; ok {
-		scheduling["minNodeCpus"] = int64(v.(int))
+		if n := int64(v.(int)); n > 0 {
+			scheduling["minNodeCpus"] = n
+		}
 	}
 	if v, ok := original["provisioning_model"]; ok {
-		scheduling["provisioningModel"] = v.(string)
+		if s := v.(string); s != "" {
+			scheduling["provisioningModel"] = s
+		}
 	}
 	if v, ok := original["instance_termination_action"]; ok {
-		scheduling["instanceTerminationAction"] = v.(string)
+		if s := v.(string); s != "" {
+			scheduling["instanceTerminationAction"] = s
+		}
 	}
 	if v, ok := original["availability_domain"]; ok && v != nil {
-		scheduling["availabilityDomain"] = int64(v.(int))
+		if n := int64(v.(int)); n > 0 {
+			scheduling["availabilityDomain"] = n
+		}
 	}
 	if v, ok := original["max_run_duration"]; ok {
 		transformed, err := expandComputeMaxRunDuration_v2(v)
@@ -1638,7 +1682,9 @@ func expandScheduling_v2(v interface{}) (map[string]interface{}, error) {
 		}
 	}
 	if v, ok := original["maintenance_interval"]; ok {
-		scheduling["maintenanceInterval"] = v.(string)
+		if s := v.(string); s != "" {
+			scheduling["maintenanceInterval"] = s
+		}
 	}
 	if v, ok := original["graceful_shutdown"]; ok {
 		transformed, err := expandGracefulShutdown_v2(v)
@@ -1672,7 +1718,9 @@ func expandScheduling_v2(v interface{}) (map[string]interface{}, error) {
 		}
 	}
 	if v, ok := original["termination_time"]; ok {
-		scheduling["terminationTime"] = v.(string)
+		if s := v.(string); s != "" {
+			scheduling["terminationTime"] = s
+		}
 	}
 	return scheduling, nil
 }
@@ -1705,20 +1753,44 @@ func expandNetworkInterfaces_v2(d tpgresource.TerraformResourceData, config *tra
 		}
 
 		iface := map[string]interface{}{
-			"networkIP":                data["network_ip"].(string),
-			"network":                  nf.RelativeLink(),
-			"networkAttachment":        networkAttachment,
-			"vlan":                     int64(data["vlan"].(int)),
-			"subnetwork":               sf.RelativeLink(),
-			"accessConfigs":            expandAccessConfigs_v2(data["access_config"].([]interface{})),
-			"aliasIpRanges":            expandAliasIpRanges_v2(data["alias_ip_range"].([]interface{})),
-			"nicType":                  data["nic_type"].(string),
-			"stackType":                data["stack_type"].(string),
-			"queueCount":               int64(data["queue_count"].(int)),
-			"ipv6AccessConfigs":        expandIpv6AccessConfigs_v2(data["ipv6_access_config"].([]interface{})),
-			"ipv6Address":              data["ipv6_address"].(string),
-			"internalIpv6PrefixLength": int64(data["internal_ipv6_prefix_length"].(int)),
-			"igmpQuery":                data["igmp_query"].(string),
+			"accessConfigs":     expandAccessConfigs_v2(data["access_config"].([]interface{})),
+			"aliasIpRanges":     expandAliasIpRanges_v2(data["alias_ip_range"].([]interface{})),
+			"ipv6AccessConfigs": expandIpv6AccessConfigs_v2(data["ipv6_access_config"].([]interface{})),
+		}
+		// Only include optional string/numeric fields when non-zero to match omitempty
+		// semantics of the Apiary struct — sending empty values can cause API validation errors.
+		if v := nf.RelativeLink(); v != "" {
+			iface["network"] = v
+		}
+		if v := sf.RelativeLink(); v != "" {
+			iface["subnetwork"] = v
+		}
+		if v := data["network_ip"].(string); v != "" {
+			iface["networkIP"] = v
+		}
+		if networkAttachment != "" {
+			iface["networkAttachment"] = networkAttachment
+		}
+		if v := int64(data["vlan"].(int)); v != 0 {
+			iface["vlan"] = v
+		}
+		if v := data["nic_type"].(string); v != "" {
+			iface["nicType"] = v
+		}
+		if v := data["stack_type"].(string); v != "" {
+			iface["stackType"] = v
+		}
+		if v := int64(data["queue_count"].(int)); v != 0 {
+			iface["queueCount"] = v
+		}
+		if v := data["ipv6_address"].(string); v != "" {
+			iface["ipv6Address"] = v
+		}
+		if v := int64(data["internal_ipv6_prefix_length"].(int)); v != 0 {
+			iface["internalIpv6PrefixLength"] = v
+		}
+		if v := data["igmp_query"].(string); v != "" {
+			iface["igmpQuery"] = v
 		}
 {{- if ne $.TargetVersionName "ga" }}
 		if macAddress, ok := data["mac_address"]; ok {

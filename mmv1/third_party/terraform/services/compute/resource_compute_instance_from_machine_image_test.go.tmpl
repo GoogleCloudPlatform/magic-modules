@@ -1246,6 +1246,14 @@ resource "google_project_service" "monitoring" {
 	depends_on = [google_project_service.service]
 }
 
+resource "google_compute_network" "vpc" {
+  provider                = google-beta
+  project                 = google_project.project.project_id
+  name                    = "tf-test-vpc"
+  auto_create_subnetworks = true
+  depends_on              = [google_project_service.service]
+}
+
 resource "google_compute_instance" "vm" {
   provider     = google-beta
   project = google_project.project.project_id
@@ -1259,7 +1267,7 @@ resource "google_compute_instance" "vm" {
   machine_type = "n1-standard-1"
 
   network_interface {
-    network = "default"
+    network = google_compute_network.vpc.name
   }
 
   metadata = {

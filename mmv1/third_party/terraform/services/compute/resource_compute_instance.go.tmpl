@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -1989,18 +1988,24 @@ func expandComputeInstance_v2(project string, d *schema.ResourceData, config *tr
 		"labels":                     tpgresource.ExpandEffectiveLabels(d),
 		"serviceAccounts":            expandServiceAccounts_v2(d.Get("service_account").([]interface{})),
 		"guestAccelerators":          accels,
-		"minCpuPlatform":             d.Get("min_cpu_platform").(string),
 		"scheduling":                 scheduling,
 		"deletionProtection":         d.Get("deletion_protection").(bool),
-		"hostname":                   d.Get("hostname").(string),
 		"confidentialInstanceConfig": expandConfidentialInstanceConfig_v2(d),
 		"advancedMachineFeatures":    expandAdvancedMachineFeatures_v2(d),
 		"shieldedInstanceConfig":     expandShieldedVmConfigs_v2(d),
 		"displayDevice":              expandDisplayDevice_v2(d),
 		"resourcePolicies":           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		"reservationAffinity":        reservationAffinity,
-		"keyRevocationActionType":    d.Get("key_revocation_action_type").(string),
 		"instanceEncryptionKey":      expandComputeInstanceEncryptionKey_v2(d),
+	}
+	if v := d.Get("min_cpu_platform").(string); v != "" {
+		instance["minCpuPlatform"] = v
+	}
+	if v := d.Get("hostname").(string); v != "" {
+		instance["hostname"] = v
+	}
+	if v := d.Get("key_revocation_action_type").(string); v != "" {
+		instance["keyRevocationActionType"] = v
 	}
 {{- if ne $.TargetVersionName `ga` }}
 	instance["eraseWindowsVssSignature"] = d.Get("erase_windows_vss_signature").(bool)
@@ -3943,12 +3948,16 @@ func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config
 	var encryptedDisks []interface{}
 	for _, disk := range instanceFromConfig.Disks {
 		if disk.DiskEncryptionKey != nil {
+			keyMap := map[string]interface{}{}
+			if v := disk.DiskEncryptionKey.RawKey; v != "" {
+				keyMap["rawKey"] = v
+			}
+			if v := disk.DiskEncryptionKey.KmsKeyName; v != "" {
+				keyMap["kmsKeyName"] = v
+			}
 			encryptedDisks = append(encryptedDisks, map[string]interface{}{
-				"source": disk.Source,
-				"diskEncryptionKey": map[string]interface{}{
-					"rawKey":     disk.DiskEncryptionKey.RawKey,
-					"kmsKeyName": disk.DiskEncryptionKey.KmsKeyName,
-				},
+				"source":            disk.Source,
+				"diskEncryptionKey": keyMap,
 			})
 		}
 	}
@@ -4201,7 +4210,13 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot delete instance %s: instance Deletion Protection is enabled. Set deletion_protection to false for this resource and run \"terraform apply\" before attempting to delete it.", d.Get("name").(string))
 	} else {
-		op, err := NewClient(config, userAgent).Instances.Delete(project, zone, d.Get("name").(string)).Do()
+		op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "DELETE",
+			Project:   project,
+			RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, d.Get("name").(string)),
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Error deleting instance: %s", err)
 		}
@@ -4210,9 +4225,16 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 		opErr := ComputeOperationWaitTime(config, op, project, "instance to delete", userAgent, d.Timeout(schema.TimeoutDelete))
 		if opErr != nil {
 			// Refresh operation to check status
-			op, _ = NewClient(config, userAgent).ZoneOperations.Get(project, zone, strconv.FormatUint(op.Id, 10)).Do()
+			opName, _ := op["name"].(string)
+			refreshedOp, _ := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/operations/%s", config.ComputeBasePath, project, zone, opName),
+				UserAgent: userAgent,
+			})
 			// Do not return an error if the operation actually completed
-			if op == nil || op.Status != "DONE" {
+			if status, ok := refreshedOp["status"].(string); !ok || status != "DONE" {
 				return opErr
 			}
 		}
@@ -4669,7 +4691,11 @@ func CheckForCommonAliasIp_v2(old *compute.NetworkInterface, newAliasIpRanges []
 	result := make([]interface{}, 0)
 	for _, val := range old.AliasIpRanges {
 		if newAliasIpMap[val.IpCidrRange] {
-			result = append(result, map[string]interface{}{"ipCidrRange": val.IpCidrRange})
+			entry := map[string]interface{}{"ipCidrRange": val.IpCidrRange}
+			if val.SubnetworkRangeName != "" {
+				entry["subnetworkRangeName"] = val.SubnetworkRangeName
+			}
+			result = append(result, entry)
 		}
 	}
 	return result
