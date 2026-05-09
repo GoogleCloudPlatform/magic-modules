@@ -25,6 +25,7 @@ fields:
   - api_field: 'addonsConfig.gkeBackupAgentConfig.enabled'
   - api_field: 'addonsConfig.horizontalPodAutoscaling.disabled'
   - api_field: 'addonsConfig.httpLoadBalancing.disabled'
+  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.istioConfig.auth'
 {{- end }}
@@ -33,7 +34,6 @@ fields:
 {{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.kalmConfig.enabled'
-  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- end }}
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enableLegacyLustrePort'
   - api_field: 'addonsConfig.lustreCsiDriverConfig.disableMultiNic'
