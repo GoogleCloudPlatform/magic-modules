@@ -40,6 +40,15 @@ docs:
     certificates may entail some downtime while the certificate provisions.
 
     In conclusion: Be extremely cautious.
+  optional_properties: |
+    * `name_prefix` - (Optional) Creates a unique name beginning with the
+     specified prefix. Conflicts with `name`. Max length is 54 characters.
+     Prefixes with lengths longer than 37 characters will use a shortened
+     UUID that will be more prone to collisions.
+     Resulting name for a `name_prefix` <= 37 characters:
+     `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+     Resulting name for a `name_prefix` 38 - 54 characters:
+     `name_prefix` + YYmmdd + 3 digit incremental counter
 base_url: 'projects/{{project}}/global/sslCertificates'
 has_self_link: true
 immutable: true
@@ -65,6 +74,7 @@ async:
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_managed_ssl_certificate.go.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
 include_in_tgc_next: true
 examples:
   - name: 'managed_ssl_certificate_basic'
@@ -80,11 +90,15 @@ examples:
     test_vars_overrides:
       # for backward compatible
       dns_zone_name: '"dnszone" + randomSuffix'
+    ignore_read_extra:
+      - 'name_prefix'
   - name: 'managed_ssl_certificate_recreation'
     primary_resource_id: 'cert'
     external_providers: ["random", "time"]
     # Random provider
     skip_vcr: true
+    ignore_read_extra:
+      - 'name_prefix'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -111,6 +125,8 @@ properties:
       character, which cannot be a dash.
 
       These are in the same namespace as the managed SSL certificates.
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.tmpl'
   - name: 'managed'
     type: NestedObject
     description: |
