@@ -137,6 +137,7 @@ properties:
                 - 'STRING'
                 - 'BOOL'
                 - 'TIMESTAMP'
+                - 'RICHTEXT'
             - name: 'enumType'
               type: NestedObject
               description: |
