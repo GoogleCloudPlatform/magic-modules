@@ -1,0 +1,76 @@
+// Copyright (c) IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+package storage_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccStorageBucketListResource_queryIdentity(t *testing.T) {
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	bucketName := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucketBasic(bucketName, project),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_storage_bucket.test", "project", project),
+					resource.TestCheckResourceAttr("google_storage_bucket.test", "name", bucketName),
+				),
+			},
+			{
+				Query:  true,
+				Config: testAccStorageBucketListQuery(project),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity("google_storage_bucket.all_in_project", map[string]knownvalue.Check{
+						"name":    knownvalue.StringExact(bucketName),
+						"project": knownvalue.StringExact(project),
+					}),
+					querycheck.ExpectLengthAtLeast("google_storage_bucket.all_in_project", 1),
+				},
+			},
+		},
+	})
+}
+
+func testAccStorageBucketBasic(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "test" {
+  name     = %q
+  location = "US"
+  project  = %q
+}
+`, name, project)
+}
+
+func testAccStorageBucketListQuery(project string) string {
+	return fmt.Sprintf(`
+provider "google" {}
+
+list "google_storage_bucket" "all_in_project" {
+  provider = google
+
+  config {
+    project = %q
+  }
+}
+`, project)
+}
