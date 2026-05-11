@@ -18,6 +18,10 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 )
 
+{{if $.CustomCode.TestConstants -}} 
+    {{- customTemplate $ $.CustomCode.TestConstants true -}}
+{{- end}}
+
 var (
     _ = fmt.Sprintf
     _ = strings.Trim

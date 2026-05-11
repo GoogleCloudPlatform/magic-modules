@@ -30,11 +30,17 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
+	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 
     "google.golang.org/api/googleapi"
 )
+
+{{if $.Res.CustomCode.TestConstants -}} 
+    {{- customTemplate $ $.Res.CustomCode.TestConstants true -}}
+{{- end}}
+
 
 var (
     _ = fmt.Sprintf
@@ -48,6 +54,7 @@ var (
     _ = tpgresource.SetLabels
     _ = transport_tpg.Config{}
     _ = googleapi.Error{}
+	_ = {{ lower $.Res.ProductMetadata.Name }}.Product
 )
 
 {{ range $e := $.Res.TestExamples }}
@@ -152,11 +159,15 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)
-
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}{{$.Res.ProductMetadata.Name}}{{"BasePath}}"}}{{$.Res.SelfLinkUri}}")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("%s%s", transport_tpg.BaseUrl({{ lower $.Res.ProductMetadata.Name }}.Product, config), "{{$.Res.SelfLinkUri}}"))
 		if err != nil {
 			return err
 		}
+{{- if $.Res.ProductMetadata.Version.RepEnabled }}
+		if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+			return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+		}
+{{- end }}
 
 		billingProject := ""
 

@@ -15,7 +15,7 @@
 name: 'Index'
 description: |
   Cloud Firestore indexes enable simple and complex queries against documents in a database.
-   Both Firestore Native and Datastore Mode indexes are supported.
+   Firestore Native, Firestore with MongoDB compatibility and Datastore Mode indexes are all supported.
    This resource manages composite indexes and not single field indexes.
    To manage single field indexes, use the `google_firestore_field` resource instead.
 references:
@@ -120,6 +120,24 @@ examples:
       'deletion_policy': '"DELETE"'
     ignore_read_extra:
       - 'deletion_policy'
+  - name: 'firestore_index_text_search'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'text-search-database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_suppress_geojson_indexing'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'suppress-geojson-indexing-database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_geo_search'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'geo-search-database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
 virtual_fields:
   - name: "skip_wait"
     type: Boolean
@@ -225,26 +243,68 @@ properties:
             Name of the field.
         - name: 'order'
           type: Enum
-          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, searchConfig or vectorConfig must be set
           description: |
             Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
-            Only one of `order`, `arrayConfig`, and `vectorConfig` can be specified.
+            Only one of `order`, `arrayConfig`, `searchConfig` and `vectorConfig` can be specified.
           enum_values:
             - 'ASCENDING'
             - 'DESCENDING'
         - name: 'arrayConfig'
           type: Enum
-          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, searchConfig or vectorConfig must be set
           description: |
-            Indicates that this field supports operations on arrayValues. Only one of `order`, `arrayConfig`, and
+            Indicates that this field supports operations on arrayValues. Only one of `order`, `arrayConfig`, `searchConfig` and
             `vectorConfig` can be specified.
           enum_values:
             - 'CONTAINS'
+        - name: 'searchConfig'
+          type: NestedObject
+          # TODO: Exactly one of order, arrayConfig, searchConfig or vectorConfig must be set
+          description: |
+            Indicates that this field supports text or geo-search operations. Only one of `order`, `arrayConfig`, `searchConfig` and
+            `vectorConfig` can be specified.
+          properties:
+            - name: 'textSpec'
+              type: NestedObject
+              description: |
+                The specification for building a text search index for a field.
+              properties:
+                - name: 'indexSpecs'
+                  type: Array
+                  description: |
+                    Specifications for how the field should be indexed. Repeated so that the field can be indexed in multiple ways.
+                  required: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'indexType'
+                        type: String
+                        description: |
+                          Ways to index the text field value.
+                      - name: 'matchType'
+                        type: String
+                        description: |
+                          How to match the text field value.
+            - name: 'geoSpec'
+              type: NestedObject
+              description: |
+                The specification for building a geo search index for a field.
+              send_empty_value: true
+              custom_flatten: 'templates/terraform/custom_flatten/firestore_index_geospec.go.tmpl'
+              properties:
+                - name: 'geoJsonIndexingDisabled'
+                  type: Boolean
+                  description: |
+                    If true, disables GeoJSON indexing for the field. By default, GeoJSON points are indexed.
+                    Firestore GeoPoints are indexed regardless of the value of this field.
+                  send_empty_value: true
+                  required: true
         - name: 'vectorConfig'
           type: NestedObject
-          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, searchConfig or vectorConfig must be set
           description: |
-            Indicates that this field supports vector search operations. Only one of `order`, `arrayConfig`, and
+            Indicates that this field supports vector search operations. Only one of `order`, `arrayConfig`, `searchConfig` and
             `vectorConfig` can be specified. Vector Fields should come after the field path `__name__`.
           properties:
             - name: 'dimension'

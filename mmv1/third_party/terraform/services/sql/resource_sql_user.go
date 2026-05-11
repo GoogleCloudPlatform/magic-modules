@@ -310,7 +310,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			var fetchedInstance *sqladmin.DatabaseInstance
 			err = transport_tpg.Retry(transport_tpg.RetryOptions{
 				RetryFunc: func() (rerr error) {
-					fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+					fetchedInstance, rerr = NewClient(config, userAgent).Instances.Get(project, instance).Do()
 					return rerr
 				},
 				Timeout:              d.Timeout(schema.TimeoutRead),
@@ -327,7 +327,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 
 	var op *sqladmin.Operation
 	insertFunc := func() error {
-		op, err = config.NewSqlAdminClient(userAgent).Users.Insert(project, instance,
+		op, err = NewClient(config, userAgent).Users.Insert(project, instance,
 			user).Do()
 		return err
 	}
@@ -370,7 +370,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	instance := d.Get("instance").(string)
 	name := d.Get("name").(string)
 	host := d.Get("host").(string)
-	databaseInstance, err := config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+	databaseInstance, err := NewClient(config, userAgent).Instances.Get(project, instance).Do()
 	if err != nil {
 		return err
 	}
@@ -382,7 +382,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	err = nil
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
+			users, err = NewClient(config, userAgent).Users.List(project, instance).Do()
 			return err
 		},
 		Timeout: 5 * time.Minute,
@@ -545,7 +545,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
-			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).DatabaseRoles(databaseRoles...).RevokeExistingRoles(revokeExistingRoles).Do()
+			op, err = NewClient(config, userAgent).Users.Update(project, instance, user).Host(host).Name(name).DatabaseRoles(databaseRoles...).RevokeExistingRoles(revokeExistingRoles).Do()
 			return err
 		}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -600,7 +600,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	var op *sqladmin.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
+			op, err = NewClient(config, userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
 			if err != nil {
 				return err
 			}

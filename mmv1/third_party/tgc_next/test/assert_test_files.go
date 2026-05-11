@@ -128,7 +128,14 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 				if allUnavailable {
 					t.Skipf("%s: Test skipped because data was unavailable after all %d attempts: %v", tName, len(attemptErrors), err)
 				} else {
-					t.Fatalf("%s: Failed after %d attempts. Last error: %v", tName, len(attemptErrors), err)
+					var firstRealError error
+					for _, e := range attemptErrors {
+						if !strings.Contains(e.Error(), "test data is unavailable") {
+							firstRealError = e
+							break
+						}
+					}
+					t.Fatalf("%s: Failed after %d attempts. First real error: %v", tName, len(attemptErrors), firstRealError)
 				}
 			}
 		})
@@ -181,7 +188,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		ErrorLogger: logger,
 	})
 	if err != nil {
-		return fmt.Errorf("error when converting the export assets into export config: %#v", err)
+		return fmt.Errorf("error when converting the export assets into export config: %v", err)
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
@@ -231,7 +238,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
 		log.Printf("%s: missing fields in resource %s after cai2hcl conversion:\n%s", testName, testData.ResourceAddress, missingKeys)
-		return retry.RetryableError(fmt.Errorf("missing fields"))
+		return retry.RetryableError(fmt.Errorf("missing fields: %v", missingKeys))
 	}
 	log.Printf("%s: Step 1 passes for resource %s. All of the fields in raw config are in export config", testName, testData.ResourceAddress)
 
@@ -245,7 +252,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	ancestryCache, defaultProject := getAncestryCache(assets)
 	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {
-		return fmt.Errorf("error when converting the round-trip config: %#v", err)
+		return retry.RetryableError(fmt.Errorf("error when converting the round-trip config: %v", err))
 	}
 
 	rtTfFile := fmt.Sprintf("%s_roundtrip.tf", strings.ReplaceAll(testName, "/", "_"))
@@ -268,7 +275,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 		reexportAssets, err := tfplan2caiConvert(t, tfFileName, jsonFileName, tfDir, ancestryCache, defaultProject, logger)
 		if err != nil {
-			return fmt.Errorf("error when converting the third round-trip config: %#v", err)
+			return fmt.Errorf("error when converting the third round-trip config: %v", err)
 		}
 
 		if err = compareCaiAssets(reexportAssets, roundtripAssets, ignoredFieldSet); err != nil {
@@ -291,7 +298,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 // Gets the ancestry cache for tfplan2cai conversion and the default project
 func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 	ancestryCache := make(map[string]string, 0)
-	defaultProject := ""
+	resolvedProject := ""
 
 	for _, asset := range assets {
 		ancestors := asset.Ancestors
@@ -308,9 +315,9 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 
 			if _, ok := ancestryCache[ancestors[0]]; !ok {
 				ancestryCache[ancestors[0]] = path
-				if defaultProject == "" {
+				if resolvedProject == "" {
 					if s, hasPrefix := strings.CutPrefix(ancestors[0], "projects/"); hasPrefix {
-						defaultProject = s
+						resolvedProject = s
 					}
 				}
 			}
@@ -324,13 +331,18 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 					}
 				}
 
-				if defaultProject == "" {
-					defaultProject = project
+				if resolvedProject == "" {
+					resolvedProject = project
 				}
 			}
 		}
 	}
-	return ancestryCache, defaultProject
+	if resolvedProject == "" {
+		resolvedProject = defaultProject
+	}
+	ancestryCache["projects/"+defaultProject] = "organizations/" + defaultOrganization
+
+	return ancestryCache, resolvedProject
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
@@ -565,7 +577,9 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 // Converts tf file to CAI assets
 func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, error) {
 	// Run terraform init and terraform apply to generate tfplan.json files
-	terraformWorkflow(t, tfDir, tfFileName, defaultProject)
+	if err := terraformWorkflow(tfDir, tfFileName, defaultProject); err != nil {
+		return nil, err
+	}
 
 	planFile := fmt.Sprintf("%s.tfplan.json", tfFileName)
 	planfilePath := filepath.Join(tfDir, planFile)

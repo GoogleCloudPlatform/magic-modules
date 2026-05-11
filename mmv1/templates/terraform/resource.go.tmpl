@@ -292,10 +292,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.CreateUri}}"))
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
 
     log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
 {{- if $.NestedQuery -}}
@@ -386,11 +391,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
-    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}}{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
@@ -464,8 +473,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 {{        else -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -539,12 +552,15 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
 
-
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
-
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}"))
         if err != nil {
             return nil, err
         }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+        }
+{{- end }}
 
         billingProject := ""
 
@@ -632,10 +648,15 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}{{$.ReadQueryParams}}"))
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
 
     billingProject := ""
 
@@ -759,34 +780,11 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-{{ range $prop := $.GettableProperties }}
-{{if $prop.FlattenObject -}}
-// Terraform must set the top level schema field, but since this object contains collapsed properties
-// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
-    if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
-        if gerr, ok := flattenedProp.(*googleapi.Error); ok {
-            return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
-        }
-        casted := flattenedProp.([]interface{})[0]
-        if casted != nil {
-            for k, v := range casted.(map[string]interface{}) {
-                if err := d.Set(k, v); err != nil {
-                    return fmt.Errorf("Error setting %s: %s", k, err)
-                }
-            }
-        }
+    err = Resource{{ $.ResourceName -}}Flatten(d, meta, res, config, {{- if $.HasProject }}project,{{ end }} userAgent, billingProject, url, headers)
+    if err != nil {
+        return err
     }
-{{-    else -}}
-    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-    }
-{{- end}}
-{{- end}}
-{{if $.HasSelfLink -}}
-    if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-    }
-{{- end}}
+
 {{ if and (not $.ExcludeIdentityGeneration) (not $.ExcludeRead) }}
     identity, err := d.Identity()
     if err == nil && identity != nil {
@@ -906,10 +904,15 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{-             end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUri }}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{ $.UpdateUri }}"))
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+        return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
 
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
@@ -968,8 +971,12 @@ if len(updateMask) > 0 {
 
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -1000,10 +1007,15 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $group.FingerprintName }}
-        getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}"))
         if err != nil {
             return err
         }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(getUrl, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", getUrl)
+        }
+{{- end }}
 {{		                if $.SupportsIndirectUserProjectOverride -}}
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
@@ -1082,11 +1094,15 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         transport_tpg.MutexStore.Lock(lockName)
         defer transport_tpg.MutexStore.Unlock(lockName)
 {{-                 end}}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $group.UpdateUrl }}")
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{ $group.UpdateUrl }}"))
         if err != nil {
             return err
         }
-
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+        }
+{{- end }}
 
         headers := make(http.Header)
 {{                  if $.CustomCode.PreUpdate -}}
@@ -1127,8 +1143,12 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 
 {{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
-	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
 	        return err
@@ -1205,11 +1225,15 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     transport_tpg.MutexStore.Lock(lockName)
     defer transport_tpg.MutexStore.Unlock(lockName)
     {{- end }}
-
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.DeleteUri}}"))
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
     {{/*If the deletion of the object requires sending a request body, the custom code will set 'obj' */}}
     var obj map[string]interface{}
     {{- if and $.NestedQuery $.NestedQuery.ModifyByPatch }}
@@ -1219,6 +1243,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
         {{- if $.UpdateMask }}
+
     url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{- join $.NestedQuery.Keys "." -}}"})
     if err != nil {
         return err
@@ -1272,8 +1297,12 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
             {{- end }}
     }
         {{- else }}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal }}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
@@ -1427,3 +1456,40 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     return nil
 }
 {{- end }}
+
+{{ if not $.ExcludeRead }}
+func Resource{{ $.ResourceName -}}Flatten(d *schema.ResourceData, meta interface{}, res map[string]interface{}, config *transport_tpg.Config,{{if $.HasProject -}}project string, {{end -}}userAgent string, billingProject string, url string, headers http.Header) error {
+{{- if or $.GettableProperties $.HasSelfLink }}
+var err error
+{{- end }}
+{{ range $prop := $.GettableProperties }}
+{{if $prop.FlattenObject -}}
+// Terraform must set the top level schema field, but since this object contains collapsed properties
+// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
+if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
+    if gerr, ok := flattenedProp.(*googleapi.Error); ok {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
+    }
+    casted := flattenedProp.([]interface{})[0]
+    if casted != nil {
+        for k, v := range casted.(map[string]interface{}) {
+            if err := d.Set(k, v); err != nil {
+                return fmt.Errorf("Error setting %s: %s", k, err)
+            }
+        }
+    }
+}
+{{- else -}}
+    if err = d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end}}
+{{- end}}
+{{if $.HasSelfLink -}}
+    if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end }}
+    return nil
+}
+{{- end -}}

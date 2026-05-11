@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
@@ -527,19 +528,6 @@ func PaginatedListRequest(project, baseUrl, userAgent string, config *transport_
 	return ls, nil
 }
 
-func GetInterconnectAttachmentLink(config *transport_tpg.Config, project, region, ic, userAgent string) (string, error) {
-	if !strings.Contains(ic, "/") {
-		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
-			project, region, ic).Do()
-		if err != nil {
-			return "", fmt.Errorf("Error reading interconnect attachment: %s", err)
-		}
-		ic = icData.SelfLink
-	}
-
-	return ic, nil
-}
-
 // Given two sets of references (with "from" values in self link form),
 // determine which need to be added or removed // during an update using
 // addX/removeX APIs.
@@ -822,7 +810,12 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 
 		// terraform-google-conversion doesn't provide a provider config in tests.
 		if config != nil {
-			// Attempt to draw values from the provider config if it's present.
+			// Draw base path values from the provider config. For other config fields, fall back to reflection.
+			if pName, found := strings.CutSuffix(m, "BasePath"); found {
+				// the field will look like ComputeBasePath, but the product name will be like compute (just lowercase, no underscores)
+				p := registry.GetProduct(strings.ToLower(pName))
+				return transport_tpg.BaseUrl(p, config)
+			}
 			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
 				return f.String()
 			}
@@ -1009,4 +1002,30 @@ func IpAddrSetHashFunc(v interface{}) int {
 	}
 	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(ipnet.String()), ipnet.String())
 	return Hashcode(ipnet.String())
+}
+
+func LocationFromId(id string) string {
+	re := regexp.MustCompile(`/locations/([^/]+)/`)
+
+	match := re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+	re = regexp.MustCompile(`/regions/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+
+	re = regexp.MustCompile(`/zones/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return GetRegionFromZone(match[1])
+	}
+	return ""
 }

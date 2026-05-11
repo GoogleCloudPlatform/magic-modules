@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -440,7 +441,7 @@ func testAccCheckBigtableInstanceDestroyProducer(t *testing.T) func(s *terraform
 			}
 
 			config := acctest.GoogleProviderConfig(t)
-			c, err := config.BigTableClientFactory(config.UserAgent).NewInstanceAdminClient(config.Project)
+			c, err := bigtable.NewClientFactory(config, config.UserAgent).NewInstanceAdminClient(config.Project)
 			if err != nil {
 				return fmt.Errorf("Error starting instance admin client. %s", err)
 			}
@@ -616,6 +617,36 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+		},
+	})
+}
+
+func TestAccBigtableInstance_tags(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	pid := envvar.GetTestProjectFromEnv()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigtableInstance_invalid(instanceName),
+				ExpectError: regexp.MustCompile("config is invalid: Too few cluster blocks: Should have at least 1 \"cluster\" block"),
+			},
+			{
+				Config: testAccBigtableInstance_tags(pid, instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_type", "deletion_protection", "tags"}, // we don't read tags back
 			},
 		},
 	})
@@ -1256,4 +1287,39 @@ resource "time_offset" "week-in-future" {
   offset_days = 7
 }
 `
+}
+
+func testAccBigtableInstance_tags(pid, instanceName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_tags_tag_key" "key" {
+  parent     = "projects/${data.google_project.project.project_id}"
+  short_name = "key-%s"
+}
+
+resource "google_tags_tag_value" "value" {
+  parent     = "tagKeys/${google_tags_tag_key.key.name}"
+  short_name = "value-%s"
+}
+
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id   = "%s-a"
+    zone         = "us-central1-a"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+  deletion_protection = false
+  tags = {
+	"${google_tags_tag_key.key.id}" = "${google_tags_tag_value.value.id}"
+  }
+  depends_on = [
+    google_tags_tag_value.value
+  ]
+}
+`, pid, instanceName, instanceName, instanceName, instanceName)
 }

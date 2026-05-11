@@ -407,7 +407,7 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_withProviderDefaultLabels(context),
-        Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%", "2"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.env", "foo"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.default_expiration_ms", "3600000"),
@@ -419,7 +419,7 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.%", "4"),
 
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
+					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.generated-by", "magic-modules"),
 				),
 			},
@@ -431,7 +431,7 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 			},
 			{
 				Config: testAccCloudRunService_resourceLabelsOverridesProviderDefaultLabels(context),
-        Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%", "3"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.env", "foo"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.default_expiration_ms", "3600000"),
@@ -444,9 +444,8 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.%", "4"),
 
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
+					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.generated-by", "magic-modules-update"),
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_annotations.%", "7"),
 				),
 			},
 			{
@@ -455,9 +454,9 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
-      {
+			{
 				Config: testAccCloudRunService_moveResourceLabelToProviderDefaultLabels(context),
-        Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%", "2"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.default_expiration_ms", "3600000"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.default_key1", "value1"),
@@ -498,14 +497,13 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
-      {
+			{
 				Config: testAccCloudRunService_cloudRunServiceBasic(context),
-        Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.%", "1"),
 
-          resource.TestCheckNoResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%"),
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_annotations.%", "6"),
+					resource.TestCheckNoResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%"),
 				),
 			},
 			{

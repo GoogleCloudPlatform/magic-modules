@@ -93,7 +93,7 @@ func resourceRuntimeconfigVariableCreate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	createdVariable, err := config.NewRuntimeconfigClient(userAgent).Projects.Configs.Variables.Create(resourceRuntimeconfigFullName(project, parent), variable).Do()
+	createdVariable, err := NewClient(config, userAgent).Projects.Configs.Variables.Create(resourceRuntimeconfigFullName(project, parent), variable).Do()
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func resourceRuntimeconfigVariableRead(d *schema.ResourceData, meta interface{})
 	}
 
 	fullName := d.Id()
-	createdVariable, err := config.NewRuntimeconfigClient(userAgent).Projects.Configs.Variables.Get(fullName).Do()
+	createdVariable, err := NewClient(config, userAgent).Projects.Configs.Variables.Get(fullName).Do()
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func resourceRuntimeconfigVariableUpdate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	createdVariable, err := config.NewRuntimeconfigClient(userAgent).Projects.Configs.Variables.Update(variable.Name, variable).Do()
+	createdVariable, err := NewClient(config, userAgent).Projects.Configs.Variables.Update(variable.Name, variable).Do()
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func resourceRuntimeconfigVariableDelete(d *schema.ResourceData, meta interface{
 
 	fullName := d.Id()
 
-	_, err = config.NewRuntimeconfigClient(userAgent).Projects.Configs.Variables.Delete(fullName).Do()
+	_, err = NewClient(config, userAgent).Projects.Configs.Variables.Delete(fullName).Do()
 	if err != nil {
 		return err
 	}

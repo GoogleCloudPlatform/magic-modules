@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 {{- if ne $.TargetVersionName "ga" }}
@@ -176,6 +177,50 @@ func TestAccSqlDatabaseInstance_sqlServer2025Enterprise(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_basicMSSQL_withEntraid(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := "sqlserver@123"
+	appId1 := "0de4a942-1697-4c1c-92be-90ded91b73a1"
+	tenantId1 := "177130ab-8a53-4be7-a2fd-c9b49cad95d1"
+	appId2 := "0de4a942-1697-4c1c-92be-90ded91b73a2"
+	tenantId2 := "177130ab-8a53-4be7-a2fd-c9b49cad95d2"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_basic_mssql_with_entraid, databaseName, rootPassword, appId1, tenantId1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.entraid_config.0.application_id", appId1),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.entraid_config.0.tenant_id", tenantId1),
+				),
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_basic_mssql_with_entraid, databaseName, rootPassword, appId2, tenantId2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.entraid_config.0.application_id", appId2),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.entraid_config.0.tenant_id", tenantId2),
+				),
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_basic_mssql_with_entraid, databaseName, rootPassword, "", ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_sql_database_instance.instance", "settings.0.entraid_config.0.application_id"),
+					resource.TestCheckNoResourceAttr("google_sql_database_instance.instance", "settings.0.entraid_config.0.tenant_id"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.entraid_config.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_basicMSSQL_passwordWo(t *testing.T) {
 	t.Parallel()
 
@@ -253,7 +298,7 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 						Host:     "%",
 						Password: acctest.RandString(t, 26),
 					}
-					op, err := config.NewSqlAdminClient(config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
+					op, err := sql.NewClient(config, config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
 					if err != nil {
 						t.Errorf("Error while inserting root@%% user: %s", err)
 						return
@@ -282,7 +327,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	testId := "sql-instance-clone-2"
-	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	// 1. Create an instance.
@@ -306,7 +351,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 						Host:     "%",
 						Password: acctest.RandString(t, 26),
 					}
-					op, err := config.NewSqlAdminClient(config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
+					op, err := sql.NewClient(config, config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
 					if err != nil {
 						t.Errorf("Error while inserting root@%% user: %s", err)
 						return
@@ -1192,7 +1237,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(t *testing
 	testId := "test-psc-auto-con-1"
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, testId)
 	network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1221,7 +1266,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddPscAutoConnections_thenRem
 	testId := "test-psc-auto-con-2"
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, testId)
 	network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1290,9 +1335,9 @@ func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUri_thenRemo
 	networkNameStr := "tf-test-cloud-sql-network-psc-1"
 	subnetworkNameStr := "tf-test-cloud-sql-subnetwork-psc-1"
 	networkAttachmentNameStr := "tf-test-cloud-sql-update-na-psc-1"
-	networkName := acctest.BootstrapSharedTestNetwork(t, networkNameStr)
-	subnetworkName := acctest.BootstrapSubnet(t, subnetworkNameStr, networkName)
-	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, networkNameStr)
+	subnetworkName := tpgcompute.BootstrapSubnet(t, subnetworkNameStr, networkName)
+	networkAttachmentName := tpgcompute.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
 	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
 
 
@@ -1341,9 +1386,9 @@ func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUriOnCreate(
 	networkNameStr := "tf-test-cloud-sql-network-psc-2"
 	subnetworkNameStr := "tf-test-cloud-sql-subnetwork-psc-2"
 	networkAttachmentNameStr := "tf-test-cloud-sql-update-na-psc-2"
-	networkName := acctest.BootstrapSharedTestNetwork(t, networkNameStr)
-	subnetworkName := acctest.BootstrapSubnet(t, subnetworkNameStr, networkName)
-	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, networkNameStr)
+	subnetworkName := tpgcompute.BootstrapSubnet(t, subnetworkNameStr, networkName)
+	networkAttachmentName := tpgcompute.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
 	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
 
 
@@ -1367,11 +1412,11 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	testId := "sql-instance-allocated-1"
-	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	updateTestId := "sql-instance-allocated-update-1"
-	addressName_update := acctest.BootstrapSharedTestGlobalAddress(t, updateTestId)
+	addressName_update := tpgcompute.BootstrapSharedTestGlobalAddress(t, updateTestId)
 	networkName_update := acctest.BootstrapSharedServiceNetworkingConnection(t, updateTestId)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1408,7 +1453,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	testId := "sql-instance-replica-1"
-	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1441,7 +1486,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	testId := "sql-instance-clone-1"
-	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1990,7 +2035,7 @@ func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			_, err := config.NewSqlAdminClient(config.UserAgent).Instances.Get(config.Project,
+			_, err := sql.NewClient(config, config.UserAgent).Instances.Get(config.Project,
 				rs.Primary.Attributes["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Database Instance still exists")
@@ -2005,7 +2050,7 @@ func testAccCheckGoogleSqlDatabaseRootUserDoesNotExist(t *testing.T, instance st
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		users, err := config.NewSqlAdminClient(config.UserAgent).Users.List(config.Project, instance).Do()
+		users, err := sql.NewClient(config, config.UserAgent).Users.List(config.Project, instance).Do()
 
 		if err != nil {
 			return fmt.Errorf("Could not list database users for %q: %s", instance, err)
@@ -5182,6 +5227,23 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-custom-1-3840"
     collation = "Polish_CI_AS"
   }
+}
+`
+
+var testGoogleSqlDatabaseInstance_basic_mssql_with_entraid = `
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-west2"
+  database_version = "SQLSERVER_2022_STANDARD"
+  root_password    = "%s"
+  settings {
+    tier = "db-custom-2-8192"
+    entraid_config {
+      application_id = "%s"
+      tenant_id      = "%s"
+    }
+  }
+  deletion_protection = false
 }
 `
 
@@ -9360,7 +9422,7 @@ func testGoogleSqlDatabaseInstanceResizeDisk(t *testing.T, instance string, addG
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		sqlAdminClient := config.NewSqlAdminClient(config.UserAgent)
+		sqlAdminClient := sql.NewClient(config, config.UserAgent)
 
 		inst, err := sqlAdminClient.Instances.Get(config.Project, instance).Do()
 		if err != nil {
@@ -9390,7 +9452,7 @@ func testGoogleSqlDatabaseInstanceCheckDiskSize(t *testing.T, instance string, s
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		sqlAdminClient := config.NewSqlAdminClient(config.UserAgent)
+		sqlAdminClient := sql.NewClient(config, config.UserAgent)
 
 		inst, err := sqlAdminClient.Instances.Get(config.Project, instance).Do()
 		if err != nil {
@@ -9409,7 +9471,7 @@ func testGoogleSqlDatabaseInstanceChangeNodeCount(t *testing.T, instance string,
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		sqlAdminClient := config.NewSqlAdminClient(config.UserAgent)
+		sqlAdminClient := sql.NewClient(config, config.UserAgent)
 
 		operation, err := sqlAdminClient.Instances.Patch(config.Project, instance, &sqladmin.DatabaseInstance{
 			NodeCount: newNodeCount,
@@ -9431,7 +9493,7 @@ func testGoogleSqlDatabaseInstanceCheckNodeCount(t *testing.T, instance string, 
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		sqlAdminClient := config.NewSqlAdminClient(config.UserAgent)
+		sqlAdminClient := sql.NewClient(config, config.UserAgent)
 
 		inst, err := sqlAdminClient.Instances.Get(config.Project, instance).Do()
 		if err != nil {

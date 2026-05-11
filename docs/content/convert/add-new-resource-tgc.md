@@ -72,14 +72,15 @@ func ResourceGoogleProject() *schema.Resource {
 		}
 	}
 }
-```
 
-You will also need to add an entry to [`tgc_next/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/templates/tgc_next/provider/provider_mmv1_resources.go.tmpl), which is used to generate [`pkg/provider/provider_mmv1_resources.go`](https://github.com/GoogleCloudPlatform/terraform-google-conversion/blob/main/pkg/provider/provider_mmv1_resources.go). Each entry in `provider_mmv1_resources.go.tmpl` maps a terraform resource name to a function that returns the resource schema - in this case:
-
-```golang
-// ...
-"google_product_resource": product.ResourceName(),
-// ...
+func init() {
+	registry.Schema{
+		Name:        "google_product_resource",
+		ProductName: "product",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProject(),
+	}.Register()
+}
 ```
 
 ##### Resource_tfplan2cai.go file

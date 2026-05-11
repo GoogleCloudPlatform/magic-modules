@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	apiresource "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
@@ -215,6 +216,27 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 	return p, nil
 }
 
+type varsReplacingFS struct {
+	google.ReadDirReadFileFS
+}
+
+func (v varsReplacingFS) ReadFile(name string) ([]byte, error) {
+	content, err := v.ReadDirReadFileFS.ReadFile(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.Contains(name, "examples/") {
+		modified := strings.ReplaceAll(string(content), "$.Vars", "$.ResourceIdVars")
+		return []byte(modified), nil
+	}
+	return content, nil
+}
+
+func NewVarsReplacingFS(inner google.ReadDirReadFileFS) google.ReadDirReadFileFS {
+	return varsReplacingFS{inner}
+}
+
 // loadResources loads all resources for a product
 func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 	var resources []*api.Resource = make([]*api.Resource, 0)
@@ -317,6 +339,55 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 
 	// Set resource defaults and validate
 	resource.TargetVersionName = l.version
+
+	if resource.IamPolicy != nil && resource.IamPolicy.SampleConfigBody == "" {
+		resource.IamPolicy.SampleConfigBody = resource.IamPolicy.ExampleConfigBody
+		resource.IamPolicy.ExampleConfigBody = ""
+	}
+
+	// Convert Examples to Samples in memory after overrides are applied
+	if len(resource.Examples) > 0 {
+
+		for _, e := range resource.Examples {
+			// Create an in-memory custom wrapper over the fs for legacy template files
+			if e.ConfigPath == "" {
+				e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
+			}
+
+			steps := []*apiresource.Step{
+				{
+					Name:              e.Name,
+					ConfigPath:        e.ConfigPath,
+					ResourceIdVars:    e.Vars,
+					TestEnvVars:       e.TestEnvVars,
+					TestVarsOverrides: e.TestVarsOverrides,
+					OicsVarsOverrides: e.OicsVarsOverrides,
+					MinVersion:        e.MinVersion,
+					IgnoreReadExtra:   e.IgnoreReadExtra,
+					ExcludeImportTest: e.ExcludeImportTest,
+				},
+			}
+			sample := &apiresource.Sample{
+				Name:                e.Name,
+				SkipVcr:             e.SkipVcr,
+				SkipTest:            e.SkipTest,
+				SkipFunc:            e.SkipFunc,
+				ExcludeTest:         e.ExcludeTest,
+				ExcludeBasicDoc:     e.ExcludeDocs,
+				ExternalProviders:   e.ExternalProviders,
+				BootstrapIam:        e.BootstrapIam,
+				MinVersion:          e.MinVersion,
+				PrimaryResourceId:   e.PrimaryResourceId,
+				PrimaryResourceType: e.PrimaryResourceType,
+				RegionOverride:      e.RegionOverride,
+				TGCSkipTest:         e.TGCSkipTest,
+				Steps:               steps,
+			}
+			resource.Samples = append(resource.Samples, sample)
+		}
+		resource.Examples = nil
+	}
+
 	// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
 	resource.SetDefault(product)
 	resource.TestSampleSetUp(l.sysfs)

@@ -225,7 +225,7 @@ cluster.
 
 * `subnetwork` - (Optional) The subnetwork path for the node pool. Format: `projects/{project}/regions/{region}/subnetworks/{subnetwork}`. If the cluster is associated with multiple subnetworks, the subnetwork for the node pool is picked based on the IP utilization during node pool creation and is immutable
 
-* `accelerator_network_profile` (Optional, [Beta](../guides/provider_versions.html.markdown)) - Specifies the accelerator network profile for nodes in this node pool. Setting to `"auto"` enables GKE to automatically configure high-performance networking settings for nodes with accelerators (like GPUs). GKE manages the underlying resources (like VPCs and subnets) for this configuration.
+* `accelerator_network_profile` (Optional, (../guides/provider_versions.html.markdown)) - Specifies the accelerator network profile for nodes in this node pool. Setting to `"auto"` enables GKE to automatically configure high-performance networking settings for nodes with accelerators (like GPUs). GKE manages the underlying resources (like VPCs and subnets) for this configuration.
 
 <a name="nested_additional_node_network_configs"></a>The `additional_node_network_configs` block supports:
 
@@ -329,9 +329,9 @@ In addition to the arguments listed above, the following computed attributes are
 `google_container_node_pool` provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
-- `create` - (Default `30 minutes`) Used for adding node pools
-- `update` - (Default `30 minutes`) Used for updates to node pools
-- `delete` - (Default `30 minutes`) Used for removing node pools.
+- `create` - (Default `60 minutes`) Used for adding node pools
+- `update` - (Default `60 minutes`) Used for updates to node pools
+- `delete` - (Default `60 minutes`) Used for removing node pools.
 
 ## Import
 
