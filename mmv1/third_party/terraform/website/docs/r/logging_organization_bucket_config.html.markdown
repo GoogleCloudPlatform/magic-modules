@@ -29,6 +29,9 @@ resource "google_logging_organization_bucket_config" "basic" {
     field_path = "jsonPayload.request.status"
     type       = "INDEX_TYPE_STRING"
   }
+  tags          = {
+    "tagKeys/123456789" = "tagValues/1123456789"
+  }
 }
 ```
 
@@ -54,6 +57,8 @@ The following arguments are supported:
   Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation](https://cloud.google.com/logging/docs/analyze/custom-index) for details.
 
 * `type` - The type of data in this index. Allowed types include `INDEX_TYPE_UNSPECIFIED`, `INDEX_TYPE_STRING` and `INDEX_TYPE_INTEGER`.
+
+* `tags` - A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
 
 ## Attributes Reference
 
