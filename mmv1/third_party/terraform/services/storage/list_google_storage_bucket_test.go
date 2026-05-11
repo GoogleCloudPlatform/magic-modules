@@ -92,6 +92,7 @@ provider "google" {}
 
 list "google_storage_bucket" "all_in_project" {
 	provider = google%s
+	limit    = 1000
 
   config {
     project = %q
