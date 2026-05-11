@@ -115,7 +115,7 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
       # for backward compatible
       secret_name: '"secret" + randomSuffix'
       # for backward compatible
@@ -140,6 +140,7 @@ examples:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
   post_update: 'templates/terraform/post_update/sleep_10s.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 virtual_fields:
   - name: 'deletion_policy'
     description: |

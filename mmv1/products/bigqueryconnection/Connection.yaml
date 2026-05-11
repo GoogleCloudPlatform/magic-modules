@@ -43,6 +43,7 @@ iam_policy:
     - '{{connection_id}}'
 custom_code:
   encoder: 'templates/terraform/encoders/bigquery_connection.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "US"
@@ -145,7 +146,7 @@ examples:
       kms_key_name: 'projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKey(t).CryptoKey.Name'
       # for backward compatible
       username: '"user" + randomSuffix'
     oics_vars_overrides:

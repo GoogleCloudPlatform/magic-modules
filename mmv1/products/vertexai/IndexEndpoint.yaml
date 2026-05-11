@@ -37,6 +37,8 @@ async:
     resource_inside_response: true
 sweeper:
   identifier_field: 'displayName'
+custom_code:
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'vertex_ai_index_endpoint'
     primary_resource_id: 'index_endpoint'
@@ -52,7 +54,7 @@ examples:
       index_endpoint_display_name: 'sample-endpoint'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     exclude_docs: true
     min_version: beta
   - name: 'vertex_ai_index_endpoint_with_psc'

@@ -28,7 +28,7 @@ references:
 description: |
   The Eventarc Pipeline resource
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_tpgcompute_and_kms.go.tmpl'
 async:
   actions: ['create', 'update', 'delete']
   operation:
@@ -95,7 +95,7 @@ examples:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'network_attachment_name': 'tpgcompute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", tpgcompute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", tpgcompute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name'
+      'key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name'
 parameters:
   - name: location
     type: String

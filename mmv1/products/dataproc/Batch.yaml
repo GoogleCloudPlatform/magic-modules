@@ -42,6 +42,7 @@ include_in_tgc_next: true
 custom_code:
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.tmpl
   constants: templates/terraform/constants/cloud_dataproc_batch.go.tmpl
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
   tgc_ignore_terraform_decoder: true
 examples:
   - name: dataproc_batch_spark
@@ -68,7 +69,7 @@ examples:
     test_env_vars:
       project_name: PROJECT_NAME
     test_vars_overrides:
-      kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
+      kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
       prevent_destroy: "false"
   - name: dataproc_batch_sparksql
     primary_resource_id: example_batch_sparsql

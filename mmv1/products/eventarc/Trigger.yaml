@@ -40,7 +40,7 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west1"
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_tpgcompute_and_kms.go.tmpl'
 examples:
   - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
@@ -73,7 +73,7 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
+      'key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
     exclude_docs: true
   - name: eventarc_trigger_with_workflow_destination
     primary_resource_id: primary

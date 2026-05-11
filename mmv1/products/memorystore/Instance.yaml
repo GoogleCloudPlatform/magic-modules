@@ -44,6 +44,7 @@ custom_code:
   encoder: 'templates/terraform/encoders/memorystore_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/memorystore_instance.go.tmpl'
   constants: 'templates/terraform/constants/memorystore_instance.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'memorystore_instance_basic'
     primary_resource_id: 'instance-basic'
@@ -71,7 +72,7 @@ examples:
       kms_key_name: 'my-key'
     test_vars_overrides:
       'prevent_destroy': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'update_time'
   - name: 'memorystore_instance_persistence_aof'

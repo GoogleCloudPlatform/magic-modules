@@ -32,6 +32,7 @@ import_format:
   - '{{name}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 collection_url_key: 'sessionTemplates'
 examples:
   - name: 'dataproc_session_templates_jupyter'
@@ -60,7 +61,7 @@ examples:
     test_vars_overrides:
       'subnetwork_name': 'BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")'
       'prevent_destroy': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name'
     ignore_read_extra:
       - 'runtime_config.0.properties'
   - name: 'dataproc_session_templates_spark_connect'

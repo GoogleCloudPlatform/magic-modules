@@ -53,6 +53,7 @@ iam_policy:
     - '{{instance_id}}'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 deletion_policy_default: "PREVENT"
 examples:
   - name: 'secure_source_manager_instance_basic'
@@ -75,7 +76,7 @@ examples:
       deletion_policy: 'PREVENT'
     test_vars_overrides:
       'deletion_policy': '"DELETE"'
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_policy': '"DELETE"'
     ignore_read_extra:
