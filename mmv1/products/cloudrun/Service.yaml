@@ -55,6 +55,7 @@ custom_code:
   constants: 'templates/terraform/constants/cloud_run_service.go.tmpl'
   encoder: 'templates/terraform/encoders/cloud_run_service.go.tmpl'
   decoder: 'templates/terraform/decoders/cloud_run.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/cloudrun_service.go.tmpl'
 custom_diff:
   - 'revisionNameCustomizeDiff'
 error_retry_predicates:

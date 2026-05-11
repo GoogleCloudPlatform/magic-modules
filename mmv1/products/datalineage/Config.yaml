@@ -47,7 +47,8 @@ examples:
   - name: 'data_lineage_config_project'
     primary_resource_id: 'default'
     test_env_vars:
-      project: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+    external_providers: ["time"]
   - name: 'data_lineage_config_folder'
     primary_resource_id: 'default'
     vars:

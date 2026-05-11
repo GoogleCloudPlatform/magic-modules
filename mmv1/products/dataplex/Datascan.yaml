@@ -55,7 +55,14 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
     - '{{data_scan_id}}'
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccDataplexDatascan_dataplexDatascanQualityReusableRulesCatalogBased_update'
+    skip: 'Test data unavailable in CAIS and requires long sleep times'
+  - name: 'TestAccDataplexDatascan_dataplexDatascanDataQualityTemplateReference_update'
+    skip: 'Test data unavailable in CAIS and requires long sleep times'
 custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/dataplex_datascan.go.tmpl'
 examples:
   - name: 'dataplex_datascan_basic_profile'
     primary_resource_id: 'basic_profile'
@@ -182,6 +189,7 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     external_providers: ["time"]
+    tgc_skip_test: 'Test data unavailable in CAIS and requires long sleep times'
   - name: 'dataplex_datascan_data_quality_template_reference'
     primary_resource_id: 'data_quality_template_reference'
     vars:
@@ -189,6 +197,7 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     external_providers: ["time"]
+    tgc_skip_test: 'Test data unavailable in CAIS and requires long sleep times'
 parameters:
   - name: 'location'
     type: String
@@ -351,6 +360,7 @@ properties:
   - name: 'executionIdentity'
     type: NestedObject
     immutable: true
+    is_missing_in_cai: true
     description: |
       The identity to run the datascan. If not specified, defaults to the Dataplex Service Agent.
     properties:
@@ -684,10 +694,12 @@ properties:
           If set, the latest DataScan job result will be published to Dataplex Catalog.
       - name: 'enableCatalogBasedRules'
         type: Boolean
+        is_missing_in_cai: true
         description: |
           If set to true, the scan will retrieve rules defined in Data Catalog for the resource.
       - name: 'filter'
         type: String
+        is_missing_in_cai: true
         description: |
           A filter to selectively run a subset of rules.
   - name: 'dataProfileSpec'

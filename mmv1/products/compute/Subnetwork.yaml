@@ -499,7 +499,10 @@ properties:
       Partial URL, as in:
         * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{sub-pdp-name}}`
         * `regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
-    ignore_read: true
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    fingerprint_name: fingerprint
     is_missing_in_cai: true
   - name: ipv6GceEndpoint
     type: Enum
@@ -560,3 +563,5 @@ properties:
     enum_values:
       - ARP_ALL_RANGES
       - ARP_PRIMARY_RANGE
+      - ARP_BROADCAST_PRIMARY_RANGE
+      - ARP_BROADCAST_PRIMARY_RANGE_WITH_LEARNING

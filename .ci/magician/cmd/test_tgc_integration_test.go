@@ -51,13 +51,28 @@ func TestShouldRunTests(t *testing.T) {
 			expected:     false,
 		},
 		{
-			name:         "pkg/services cai2hcl file (exception)",
+			name:         "pkg/services cai2hcl file (no longer exception)",
 			changedFiles: []string{"pkg/services/compute/compute_disk_cai2hcl.go"},
+			expected:     false,
+		},
+		{
+			name:         "pkg/services tfplan2cai file (no longer exception)",
+			changedFiles: []string{"pkg/services/compute/compute_disk_tfplan2cai.go"},
+			expected:     false,
+		},
+		{
+			name:         "pkg/cai2hcl file",
+			changedFiles: []string{"pkg/cai2hcl/converters/convert_resource.go"},
 			expected:     true,
 		},
 		{
-			name:         "pkg/services tfplan2cai file (exception)",
-			changedFiles: []string{"pkg/services/compute/compute_disk_tfplan2cai.go"},
+			name:         "pkg/tfplan2cai file",
+			changedFiles: []string{"pkg/tfplan2cai/converters/cai/convert.go"},
+			expected:     true,
+		},
+		{
+			name:         "pkg/caiasset file",
+			changedFiles: []string{"pkg/caiasset/asset.go"},
 			expected:     true,
 		},
 		{

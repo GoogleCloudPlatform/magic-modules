@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 )
 
 // Test that a service account key can be created and destroyed
@@ -95,7 +96,7 @@ func testAccCheckGoogleServiceAccountKeyExists(t *testing.T, r string) resource.
 		}
 		config := acctest.GoogleProviderConfig(t)
 
-		_, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Keys.Get(rs.Primary.ID).Do()
+		_, err := iambeta.NewClient(config, config.UserAgent).Projects.ServiceAccounts.Keys.Get(rs.Primary.ID).Do()
 		if err != nil {
 			return err
 		}

@@ -44,6 +44,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
     - '{{name}}'
 custom_code:
+  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
 include_in_tgc_next: true
 examples:
   - name: 'gkebackup_backupplan_basic'
@@ -58,8 +59,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_autopilot'
@@ -72,8 +73,8 @@ examples:
       subnetwork_name: 'default'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_cmek'
@@ -89,8 +90,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_nslabels'
@@ -105,8 +106,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_full'
@@ -121,8 +122,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_permissive'
@@ -137,8 +138,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_rpo_daily_window'
@@ -153,8 +154,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_rpo_weekly_window'
@@ -169,8 +170,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
 parameters:

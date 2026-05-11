@@ -113,7 +113,7 @@ parameters:
     type: String
     description: |
       The name of the parent this security profile belongs to.
-      Format: organizations/{organization_id}.
+      Format: `organizations/{organization_id}` or `projects/{project_id}`.
     url_param_only: true
     immutable: true
 properties:

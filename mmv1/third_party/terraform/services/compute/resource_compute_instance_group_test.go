@@ -3,24 +3,20 @@ package compute_test
 import (
 	"fmt"
 	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func TestAccComputeInstanceGroup_basic(t *testing.T) {
 	t.Parallel()
 
-	var instanceGroup compute.InstanceGroup
+	var instanceGroup map[string]interface{}
 	var resourceName = "google_compute_instance_group.basic"
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var zone = "us-central1-c"
@@ -90,7 +86,7 @@ func TestAccComputeInstanceGroup_rename(t *testing.T) {
 func TestAccComputeInstanceGroup_update(t *testing.T) {
 	t.Parallel()
 
-	var instanceGroup compute.InstanceGroup
+	var instanceGroup map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -131,7 +127,7 @@ func TestAccComputeInstanceGroup_update(t *testing.T) {
 func TestAccComputeInstanceGroup_outOfOrderInstances(t *testing.T) {
 	t.Parallel()
 
-	var instanceGroup compute.InstanceGroup
+	var instanceGroup map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -153,7 +149,7 @@ func TestAccComputeInstanceGroup_outOfOrderInstances(t *testing.T) {
 func TestAccComputeInstanceGroup_network(t *testing.T) {
 	t.Parallel()
 
-	var instanceGroup compute.InstanceGroup
+	var instanceGroup map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -186,8 +182,15 @@ func testAccComputeInstanceGroup_destroyProducer(t *testing.T) func(s *terraform
 			if rs.Type != "google_compute_instance_group" {
 				continue
 			}
-			_, err := compute_tpg.NewClient(config, config.UserAgent).InstanceGroups.Get(
-				config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
+			url := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
+				transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("InstanceGroup still exists")
 			}
@@ -197,7 +200,7 @@ func testAccComputeInstanceGroup_destroyProducer(t *testing.T) func(s *terraform
 	}
 }
 
-func testAccComputeInstanceGroup_exists(t *testing.T, n string, instanceGroup *compute.InstanceGroup) resource.TestCheckFunc {
+func testAccComputeInstanceGroup_exists(t *testing.T, n string, instanceGroup *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -210,19 +213,26 @@ func testAccComputeInstanceGroup_exists(t *testing.T, n string, instanceGroup *c
 
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := compute_tpg.NewClient(config, config.UserAgent).InstanceGroups.Get(
-			config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
+			transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		*instanceGroup = *found
+		*instanceGroup = found
 
 		return nil
 	}
 }
 
-func testAccComputeInstanceGroup_updated(t *testing.T, n string, size int64, instanceGroup *compute.InstanceGroup) resource.TestCheckFunc {
+func testAccComputeInstanceGroup_updated(t *testing.T, n string, size int64, instanceGroup *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -235,23 +245,32 @@ func testAccComputeInstanceGroup_updated(t *testing.T, n string, size int64, ins
 
 		config := acctest.GoogleProviderConfig(t)
 
-		instanceGroup, err := compute_tpg.NewClient(config, config.UserAgent).InstanceGroups.Get(
-			config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
+			transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+		instanceGroupRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		// Cannot check the target pool as the instance creation is asynchronous.  However, can
-		// check the target_size.
-		if instanceGroup.Size != size {
-			return fmt.Errorf("instance count incorrect. saw real value %v instead of expected value %v", instanceGroup.Size, size)
+		instanceGroupSize, ok := instanceGroupRes["size"].(float64)
+		if !ok {
+			return fmt.Errorf("size field missing or wrong type in instance group response")
+		}
+		if int64(instanceGroupSize) != size {
+			return fmt.Errorf("instance count incorrect. saw real value %v instead of expected value %v", int64(instanceGroupSize), size)
 		}
 
 		return nil
 	}
 }
 
-func testAccComputeInstanceGroup_named_ports(t *testing.T, n string, np map[string]int64, instanceGroup *compute.InstanceGroup) resource.TestCheckFunc {
+func testAccComputeInstanceGroup_named_ports(t *testing.T, n string, np map[string]int64, instanceGroup *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -264,17 +283,35 @@ func testAccComputeInstanceGroup_named_ports(t *testing.T, n string, np map[stri
 
 		config := acctest.GoogleProviderConfig(t)
 
-		instanceGroup, err := compute_tpg.NewClient(config, config.UserAgent).InstanceGroups.Get(
-			config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
+			transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+		instanceGroupRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
+		}
+
+		rawNamedPorts, ok := instanceGroupRes["namedPorts"].([]interface{})
+		if !ok {
+			return fmt.Errorf("namedPorts field missing or wrong type in instance group response")
 		}
 
 		var found bool
-		for _, namedPort := range instanceGroup.NamedPorts {
+		for _, rawPort := range rawNamedPorts {
+			namedPort, ok := rawPort.(map[string]interface{})
+			if !ok {
+				continue
+			}
 			found = false
+			portName, _ := namedPort["name"].(string)
+			portNum, _ := namedPort["port"].(float64)
 			for name, port := range np {
-				if namedPort.Name == name && namedPort.Port == port {
+				if portName == name && int64(portNum) == port {
 					found = true
 				}
 			}
@@ -287,7 +324,7 @@ func testAccComputeInstanceGroup_named_ports(t *testing.T, n string, np map[stri
 	}
 }
 
-func testAccComputeInstanceGroup_hasCorrectNetwork(t *testing.T, nInstanceGroup string, nNetwork string, instanceGroup *compute.InstanceGroup) resource.TestCheckFunc {
+func testAccComputeInstanceGroup_hasCorrectNetwork(t *testing.T, nInstanceGroup string, nNetwork string, instanceGroup *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
@@ -298,8 +335,14 @@ func testAccComputeInstanceGroup_hasCorrectNetwork(t *testing.T, nInstanceGroup 
 		if rsInstanceGroup.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		instanceGroup, err := compute_tpg.NewClient(config, config.UserAgent).InstanceGroups.Get(
-			config.Project, rsInstanceGroup.Primary.Attributes["zone"], rsInstanceGroup.Primary.Attributes["name"]).Do()
+		instanceGroupRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:  config,
+			Method:  "GET",
+			Project: config.Project,
+			RawURL: fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
+				transport_tpg.BaseUrl(compute.Product, config), config.Project, rsInstanceGroup.Primary.Attributes["zone"], rsInstanceGroup.Primary.Attributes["name"]),
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
@@ -311,14 +354,28 @@ func testAccComputeInstanceGroup_hasCorrectNetwork(t *testing.T, nInstanceGroup 
 		if rsNetwork.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		network, err := compute_tpg.NewClient(config, config.UserAgent).Networks.Get(
-			config.Project, rsNetwork.Primary.Attributes["name"]).Do()
+		networkRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:  config,
+			Method:  "GET",
+			Project: config.Project,
+			RawURL: fmt.Sprintf("%sprojects/%s/global/networks/%s",
+				transport_tpg.BaseUrl(compute.Product, config), config.Project, rsNetwork.Primary.Attributes["name"]),
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		if instanceGroup.Network != network.SelfLink {
-			return fmt.Errorf("network incorrect: actual=%s vs expected=%s", instanceGroup.Network, network.SelfLink)
+		instanceGroupNetwork, ok := instanceGroupRes["network"].(string)
+		if !ok {
+			return fmt.Errorf("network field missing or wrong type in instance group response")
+		}
+		networkSelfLink, ok := networkRes["selfLink"].(string)
+		if !ok {
+			return fmt.Errorf("selfLink field missing or wrong type in network response")
+		}
+		if instanceGroupNetwork != networkSelfLink {
+			return fmt.Errorf("network incorrect: actual=%s vs expected=%s", instanceGroupNetwork, networkSelfLink)
 		}
 
 		return nil

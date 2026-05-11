@@ -11,7 +11,7 @@ func NewDCLRecaptchaEnterpriseClient(config *transport_tpg.Config, userAgent, bi
 		dcl.WithHTTPClient(config.Client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dcl.DCLLogger{}),
-		dcl.WithBasePath(config.RecaptchaEnterpriseBasePath),
+		dcl.WithBasePath(transport_tpg.BaseUrl(Product, config)),
 	}
 
 	if timeout != 0 {

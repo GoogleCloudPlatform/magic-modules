@@ -2,10 +2,10 @@
 
 **Step 2: Recording Mode**
 
-| Test Name | Recording Mode | Replaying Rerun |
+| Recording Mode | Replaying Rerun | Test Name |
 | :--- | :--- | :--- |
-{{range .AttemptedTests -}}
-| `{{replace . "__" "/"}}` | {{if contains $.RecordingResult.PassedTests .}}{{color "green" "Passed"}} [[Debug log]({{$.LogBaseUrl}}/recording/{{.}}.log)]{{else if contains $.RecordingResult.FailedTests .}}{{color "red" "Failed"}} [[Error message]({{$.LogBaseUrl}}/build-log/recording_build/{{compoundTest .}}_recording_test.log)] [[Debug log]({{$.LogBaseUrl}}/recording/{{.}}.log)]{{else}}{{color "red" "Terminated"}}{{end}} | {{if contains $.ReplayingAfterRecordingResult.PassedTests .}}{{color "green" "Passed"}}{{else if contains $.ReplayingAfterRecordingResult.FailedTests .}}{{color "red" "Failed"}} [[Error message]({{$.LogBaseUrl}}/build-log/replaying_build_after_recording/{{compoundTest .}}_replaying_test.log)] [[Debug log]({{$.LogBaseUrl}}/replaying_after_recording/{{.}}.log)]{{else}}-{{end}} |
+{{range .TestRows -}}
+| {{symbol .RecordingStatus}}{{if .RecordingErrorUrl}}&nbsp;[Error]({{.RecordingErrorUrl}}){{end}}{{if .RecordingLogUrl}}{{if .RecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.RecordingLogUrl}}){{end}} | {{symbol .ReplayingAfterRecordingStatus}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;[Error]({{.ReplayingAfterRecordingErrorUrl}}){{end}}{{if .ReplayingAfterRecordingLogUrl}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.ReplayingAfterRecordingLogUrl}}){{end}} | {{.DisplayName}} |
 {{end}}
 
 {{ if or (gt (len .ReplayingAfterRecordingResult.FailedTests) 0) (gt (len .RecordingResult.FailedTests) 0) .HasTerminatedTests .RecordingErr (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0) }}

@@ -43,6 +43,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/private_connection.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/private_connection.go.tmpl'
   post_import: 'templates/terraform/post_import/private_connection.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/datastream_private_connection.go.tmpl'
 include_in_tgc_next: true
 schema_version: 1
 state_upgraders: true
@@ -165,6 +166,7 @@ properties:
           A free subnet for peering. (CIDR of /29)
         required: true
   - name: 'pscInterfaceConfig'
+    is_missing_in_cai: true
     type: NestedObject
     description: |
       The PSC Interface configuration is used to create PSC Interface

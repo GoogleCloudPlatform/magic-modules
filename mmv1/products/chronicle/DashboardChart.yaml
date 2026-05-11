@@ -19,7 +19,7 @@ description: >
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.dashboardCharts'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dashboardCharts'
 
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts/{{chart_id}}
@@ -40,11 +40,9 @@ custom_code:
   update_encoder: "templates/terraform/update_encoder/chronicle_dashboard_chart_edit_mask.go.tmpl"
   decoder: "templates/terraform/decoders/chronicle_dashboard_chart.go.tmpl"
 
-min_version: 'beta'
 examples:
   - name: chronicle_dashboardchart_basic
     primary_resource_id: my_chart
-    min_version: 'beta'
     ignore_read_extra:
       - "dashboardUserData.0.lastViewedTime"
     vars:
@@ -54,7 +52,6 @@ examples:
 
   - name: chronicle_dashboardchart_full
     primary_resource_id: my_chart
-    min_version: 'beta'
     ignore_read_extra:
       - "dashboardUserData.0.lastViewedTime"
     vars:

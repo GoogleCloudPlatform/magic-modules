@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"os"
 
 	"cloud.google.com/go/auth/credentials"
 	"cloud.google.com/go/auth/credentials/impersonate"
@@ -29,24 +28,13 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
 
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	googleoauth "golang.org/x/oauth2/google"
 	externalaccount "golang.org/x/oauth2/google/externalaccount"
-	"google.golang.org/api/bigquery/v2"
-	"google.golang.org/api/cloudbilling/v1"
-{{- if ne $.TargetVersionName "ga" }}
-	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
-{{- else }}
-	"google.golang.org/api/cloudidentity/v1"
-{{- end }}
-	"google.golang.org/api/cloudfunctions/v1"
-	"google.golang.org/api/iam/v1"
-	iamcredentials "google.golang.org/api/iamcredentials/v1"
-	runadminv2 "google.golang.org/api/run/v2"
-	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/transport"
 )
 
@@ -225,9 +213,6 @@ type Config struct {
 	CustomEndpoints map[string]string
 	{{ range $product := $.Products }}
 	{{ $product.Name }}BasePath string
-	{{- if ne $product.Version.RepUrl "" }}
-	{{ $product.Name }}RepBasePath string
-	{{- end -}}
 	{{- end }}
 
 	RequestBatcherServiceUsage *RequestBatcher
@@ -248,15 +233,6 @@ var DefaultBasePaths = map[string]string{
 {{- end }}
 }
 
-// Contains the REP status for each generated product. This allows us to track
-// default REP enablement across versions and have a central place to look up
-// product support
-var DefaultRepStatus = map[string]bool{
-{{- range $product := $.Products }}
-	{{ $product.Name }}BasePathKey : {{ $product.RepByDefault }},
-{{- end }}
-}
-
 var DefaultClientScopes = []string{
 	"https://www.googleapis.com/auth/cloud-platform",
 	"https://www.googleapis.com/auth/userinfo.email",
@@ -269,13 +245,13 @@ const ProactiveAttributionStrategy = "PROACTIVE"
 
 func HandleSDKDefaults(d *schema.ResourceData) error {
 	if d.Get("impersonate_service_account") == "" {
-		d.Set("impersonate_service_account", MultiEnvDefault([]string{
+		d.Set("impersonate_service_account", envvar.MultiEnvDefault([]string{
 			"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 		}, nil))
 	}
 
 	if d.Get("project") == "" {
-		d.Set("project", MultiEnvDefault([]string{
+		d.Set("project", envvar.MultiEnvDefault([]string{
 			"GOOGLE_PROJECT",
 			"GOOGLE_CLOUD_PROJECT",
 			"GCLOUD_PROJECT",
@@ -284,13 +260,13 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 	}
 
 	if d.Get("billing_project") == "" {
-		d.Set("billing_project", MultiEnvDefault([]string{
+		d.Set("billing_project", envvar.MultiEnvDefault([]string{
 			"GOOGLE_BILLING_PROJECT",
 		}, nil))
 	}
 
 	if d.Get("region") == "" {
-		d.Set("region", MultiEnvDefault([]string{
+		d.Set("region", envvar.MultiEnvDefault([]string{
 			"GOOGLE_REGION",
 			"GCLOUD_REGION",
 			"CLOUDSDK_COMPUTE_REGION",
@@ -298,7 +274,7 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 	}
 
 	if d.Get("zone") == "" {
-		d.Set("zone", MultiEnvDefault([]string{
+		d.Set("zone", envvar.MultiEnvDefault([]string{
 			"GOOGLE_ZONE",
 			"GCLOUD_ZONE",
 			"CLOUDSDK_COMPUTE_ZONE",
@@ -306,7 +282,7 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 	}
 
 	if _, ok := d.GetOkExists("user_project_override"); !ok {
-		override := MultiEnvDefault([]string{
+		override := envvar.MultiEnvDefault([]string{
 			"USER_PROJECT_OVERRIDE",
 		}, nil)
 
@@ -320,7 +296,7 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 	}
 
 	if d.Get("request_reason") == "" {
-		d.Set("request_reason", MultiEnvDefault([]string{
+		d.Set("request_reason", envvar.MultiEnvDefault([]string{
 			"CLOUDSDK_CORE_REQUEST_REASON",
 		}, nil))
 	}
@@ -551,125 +527,6 @@ func (c *Config) getTokenSource(ctx context.Context, clientScopes []string, init
 	return creds.TokenSource, nil
 }
 
-// Methods to create new services from config
-// Some base paths below need the version and possibly more of the path
-// set on them. The client libraries are inconsistent about which values they need;
-// while most only want the host URL, some older ones also want the version and some
-// of those "projects" as well. You can find out if this is required by looking at
-// the basePath value in the client library file.
-func (c *Config) NewIamClient(userAgent string) *iam.Service {
-	iamClientBasePath := RemoveBasePathVersion(c.IAMBetaBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud IAM client for path %s", iamClientBasePath)
-	clientIAM, err := iam.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client iam: %s", err)
-		return nil
-	}
-	clientIAM.UserAgent = userAgent
-	clientIAM.BasePath = iamClientBasePath
-
-	return clientIAM
-}
-
-func (c *Config) NewIamCredentialsClient(userAgent string) *iamcredentials.Service {
-	iamCredentialsClientBasePath := RemoveBasePathVersion(c.IamCredentialsBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud IAMCredentials client for path %s", iamCredentialsClientBasePath)
-	clientIamCredentials, err := iamcredentials.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client iam credentials: %s", err)
-		return nil
-	}
-	clientIamCredentials.UserAgent = userAgent
-	clientIamCredentials.BasePath = iamCredentialsClientBasePath
-
-	return clientIamCredentials
-}
-
-func (c *Config) NewServiceUsageClient(userAgent string) *serviceusage.Service {
-	serviceUsageClientBasePath := RemoveBasePathVersion(c.ServiceUsageBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Service Usage client for path %s", serviceUsageClientBasePath)
-	clientServiceUsage, err := serviceusage.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client service usage: %s", err)
-		return nil
-	}
-	clientServiceUsage.UserAgent = userAgent
-	clientServiceUsage.BasePath = serviceUsageClientBasePath
-
-	return clientServiceUsage
-}
-
-func (c *Config) NewBillingClient(userAgent string) *cloudbilling.APIService {
-	cloudBillingClientBasePath := RemoveBasePathVersion(c.CloudBillingBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Billing client for path %s", cloudBillingClientBasePath)
-	clientBilling, err := cloudbilling.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client billing: %s", err)
-		return nil
-	}
-	clientBilling.UserAgent = userAgent
-	clientBilling.BasePath = cloudBillingClientBasePath
-
-	return clientBilling
-}
-
-func (c *Config) NewCloudFunctionsClient(userAgent string) *cloudfunctions.Service {
-	cloudFunctionsClientBasePath := RemoveBasePathVersion(c.CloudFunctionsBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud CloudFunctions Client for path %s", cloudFunctionsClientBasePath)
-	clientCloudFunctions, err := cloudfunctions.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client cloud functions: %s", err)
-		return nil
-	}
-	clientCloudFunctions.UserAgent = userAgent
-	clientCloudFunctions.BasePath = cloudFunctionsClientBasePath
-
-	return clientCloudFunctions
-}
-
-func (c *Config) NewBigQueryClient(userAgent string) *bigquery.Service {
-	bigQueryClientBasePath := c.BigQueryBasePath
-	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
-	wrappedBigQueryClient := ClientWithAdditionalRetries(c.Client, IamMemberMissing)
-	clientBigQuery, err := bigquery.NewService(c.Context, option.WithHTTPClient(wrappedBigQueryClient))
-	if err != nil {
-		log.Printf("[WARN] Error creating client big query: %s", err)
-		return nil
-	}
-	clientBigQuery.UserAgent = userAgent
-	clientBigQuery.BasePath = bigQueryClientBasePath
-
-	return clientBigQuery
-}
-
-func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service {
-	cloudidentityClientBasePath := RemoveBasePathVersion(c.CloudIdentityBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud CloudIdentity client for path %s", cloudidentityClientBasePath)
-	clientCloudIdentity, err := cloudidentity.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client cloud identity: %s", err)
-		return nil
-	}
-	clientCloudIdentity.UserAgent = userAgent
-	clientCloudIdentity.BasePath = cloudidentityClientBasePath
-
-	return clientCloudIdentity
-}
-
-func (c *Config) NewCloudRunV2Client(userAgent string) *runadminv2.Service {
-	runAdminV2ClientBasePath := RemoveBasePathVersion(RemoveBasePathVersion(c.CloudRunV2BasePath))
-	log.Printf("[INFO] Instantiating Google Cloud Run Admin v2 client for path %s", runAdminV2ClientBasePath)
-	clientRunAdminV2, err := runadminv2.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client run admin: %s", err)
-		return nil
-	}
-	clientRunAdminV2.UserAgent = userAgent
-	clientRunAdminV2.BasePath = runAdminV2ClientBasePath
-
-	return clientRunAdminV2
-}
-
 // StaticTokenSource is used to be able to identify static token sources without reflection.
 type StaticTokenSource struct {
       oauth2.TokenSource
@@ -857,7 +714,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 
 // parse application default credentials to determine if they are X.509 certs
 func AreADCCredentialsX509() bool {
-	adcCreds := MultiEnvSearch([]string{
+	adcCreds := envvar.MultiEnvSearch([]string{
 		"GOOGLE_APPLICATION_CREDENTIALS",
 	})
 	if adcCreds != "" {
@@ -933,28 +790,6 @@ func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
 	return res["email"].(string), nil
 }
 
-func MultiEnvSearch(ks []string) string {
-	for _, k := range ks {
-		if v := os.Getenv(k); v != "" {
-			return v
-		}
-	}
-	return ""
-}
-
-// MultiEnvDefault is a helper function that returns the value of the first
-// environment variable in the given list that returns a non-empty value. If
-// none of the environment variables return a value, the default value is
-// returned.
-func MultiEnvDefault(ks []string, dv interface{}) interface{} {
-	for _, k := range ks {
-		if v := os.Getenv(k); v != "" {
-			return v
-		}
-	}
-	return dv
-}
-
 func CustomEndpointValidator() validator.String {
 	return stringvalidator.RegexMatches(regexp.MustCompile(`.*/[^/]+/$`), "")
 }
@@ -977,36 +812,4 @@ func GetUniverseDomainFromMeta(meta interface{}) string {
 		return "googleapis.com"
 	}
 	return config.UniverseDomain
-}
-
-// Returns the base path for a resource taking into account the following rules:
-// Overridden path takes precedence over everything
-// Regional endpoint should be returned if preferred
-// Global endpoint should be returned if preferred
-// If no preferences, return the product default based on DefaultRepStatus map
-func ResourceBasePath(basePath, repPath, basePathKey string, config *Config, location string) (string, error) {
-	var path string
-	// Set the default to the product-level default
-	if DefaultRepStatus[basePathKey] {
-		path = repPath
-	} else {
-		path = basePath
-	}
-    // If product default has been overridden, use override
-    if basePath != DefaultBasePaths[basePathKey] {
-        path = basePath
-    } else if config.PreferRegionalEndpoints {
-    	// If user has specified a preference, switch to that
-        path = repPath
-    } else if config.PreferGlobalEndpoints {
-    	// If user has specified a preference, switch to that
-        path = basePath
-    }
-		if strings.Contains(path, "{{"{{"}}location{{"}}"}}") && location == "" {
-			log.Printf("[WARN] Found base path with location but no location provided: %s", path)
-			return path, fmt.Errorf("failed to find location for a resource with a regionalized endpoint %s", path)
-		}
-    // Still try to replace location even if it may not exist, this allows
-    // for products that only support REP on their base_url
-    return strings.ReplaceAll(path, "{{"{{"}}location{{"}}"}}", location), nil
 }

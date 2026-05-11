@@ -344,7 +344,7 @@ properties:
     type: String
     description:
       "Optional. Machine type for individual nodes of the instance.
-      \n Possible values:\n SHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
+      \n Possible values:\n SHARED_CORE_NANO\nCUSTOM_PICO\nCUSTOM_MICRO\nCUSTOM_MINI\nHIGHMEM_MEDIUM\nHIGHCPU_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL\nSTANDARD_LARGE\nHIGHMEM_2XLARGE"
     default_from_api: true
   - name: 'persistenceConfig'
     type: NestedObject

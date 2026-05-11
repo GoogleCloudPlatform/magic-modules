@@ -394,7 +394,10 @@ properties:
     enum_values:
       - 'REDIS_SHARED_CORE_NANO'
       - 'REDIS_HIGHMEM_MEDIUM'
+      - 'REDIS_HIGHCPU_MEDIUM'
+      - 'REDIS_STANDARD_LARGE'
       - 'REDIS_HIGHMEM_XLARGE'
+      - 'REDIS_HIGHMEM_2XLARGE'
       - 'REDIS_STANDARD_SMALL'
   - name: 'zoneDistributionConfig'
     type: NestedObject

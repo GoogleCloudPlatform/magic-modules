@@ -61,6 +61,14 @@ examples:
       project: 'PROJECT_NAME'
  # update tests will take care of create and update. Firewall endpoint creation is too long.
     exclude_test: true
+  - name: 'network_security_firewall_endpoint_project'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-firewall-endpoint'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+ # update tests will take care of create and update. Firewall endpoint creation is too long.
+    exclude_test: true
 parameters:
   - name: 'name'
     type: String
@@ -80,7 +88,7 @@ parameters:
     type: String
     description: |
       The name of the parent this firewall endpoint belongs to.
-      Format: organizations/{organization_id}.
+      Format: `organizations/{organization_id}` or `projects/{project_id}`.
     url_param_only: true
     required: true
     immutable: true
@@ -124,8 +132,11 @@ properties:
   - name: 'billingProjectId'
     type: String
     description: |
-      Project to bill on endpoint uptime usage.
-    required: true
+      Project to charge for the deployed firewall endpoint.
+      This field is required for organization-scoped endpoints.
+      For project-scoped endpoints, it is optional but must match the
+      endpoint's project if specified.
+    default_from_api: true
   - name: 'endpointSettings'
     type: NestedObject
     description: |

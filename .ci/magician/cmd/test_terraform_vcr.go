@@ -70,8 +70,18 @@ type postReplay struct {
 	BuildID          string
 }
 
+type VCRTestTableRow struct {
+	DisplayName                     string
+	RecordingStatus                 string
+	ReplayingAfterRecordingStatus   string
+	RecordingErrorUrl               string
+	RecordingLogUrl                 string
+	ReplayingAfterRecordingErrorUrl string
+	ReplayingAfterRecordingLogUrl   string
+}
+
 type recordReplay struct {
-	AttemptedTests                []string
+	TestRows                      []VCRTestTableRow
 	RecordingResult               vcr.Result
 	ReplayingAfterRecordingResult vcr.Result
 	HasTerminatedTests            bool
@@ -349,31 +359,22 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
-		var attemptedTests []string
-		for _, t := range replayingResult.FailedTests {
-			prefix := t + "__"
-			hasSubtests := false
-			for _, st := range recordingResult.PassedSubtests {
-				if strings.HasPrefix(st, prefix) {
-					attemptedTests = append(attemptedTests, st)
-					hasSubtests = true
-				}
-			}
-			for _, st := range recordingResult.FailedSubtests {
-				if strings.HasPrefix(st, prefix) {
-					attemptedTests = append(attemptedTests, st)
-					hasSubtests = true
-				}
-			}
-			if !hasSubtests {
-				attemptedTests = append(attemptedTests, t)
-			}
+		// Expand compound tests to subtests for accurate status matching
+		expandedRecordingResult := subtestResult(recordingResult)
+		expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
+
+		logBasePath := fmt.Sprintf("ci-vcr-logs/%s/refs/heads/%s/artifacts/%s", provider.Beta.String(), newBranch, buildID)
+		if buildID == "" {
+			logBasePath = fmt.Sprintf("ci-vcr-logs/%s/refs/heads/%s", provider.Beta.String(), newBranch)
 		}
+		logBaseUrl := fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
+
+		testRows := buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult, logBaseUrl)
 
 		recordReplayData := recordReplay{
-			AttemptedTests:                attemptedTests,
-			RecordingResult:               subtestResult(recordingResult),
-			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
+			TestRows:                      testRows,
+			RecordingResult:               expandedRecordingResult,
+			ReplayingAfterRecordingResult: expandedReplayingAfterRecordingResult,
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
@@ -681,14 +682,8 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 		"color":        color,
 		"compoundTest": compoundTest,
 		"replace":      strings.ReplaceAll,
-		"contains": func(slice []string, item string) bool {
-			for _, s := range slice {
-				if s == item {
-					return true
-				}
-			}
-			return false
-		},
+		"symbol":       symbol,
+		"contains":     contains,
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
 	if err != nil {
@@ -714,4 +709,109 @@ func formatRecordReplay(data recordReplay) (string, error) {
 	data.LogBaseUrl = fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
 	data.BrowseLogBaseUrl = fmt.Sprintf("https://console.cloud.google.com/storage/browser/%s", logBasePath)
 	return formatComment("record_replay.tmpl", recordReplayTmplText, data)
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
+func createTableRow(t string, logBaseUrl string, recordingResult, replayingResult vcr.Result) VCRTestTableRow {
+	row := VCRTestTableRow{
+		DisplayName: strings.ReplaceAll(t, "__", "/"),
+	}
+
+	if contains(recordingResult.PassedTests, t) {
+		row.RecordingStatus = "Passed"
+		row.RecordingLogUrl = fmt.Sprintf("%s/recording/%s.log", logBaseUrl, t)
+	} else if contains(recordingResult.FailedTests, t) {
+		row.RecordingStatus = "Failed"
+		row.RecordingErrorUrl = fmt.Sprintf("%s/build-log/recording_build/%s_recording_test.log", logBaseUrl, compoundTest(t))
+		row.RecordingLogUrl = fmt.Sprintf("%s/recording/%s.log", logBaseUrl, t)
+	} else {
+		row.RecordingStatus = "Terminated"
+	}
+
+	if contains(replayingResult.PassedTests, t) {
+		row.ReplayingAfterRecordingStatus = "Passed"
+	} else if contains(replayingResult.FailedTests, t) {
+		row.ReplayingAfterRecordingStatus = "Failed"
+		row.ReplayingAfterRecordingErrorUrl = fmt.Sprintf("%s/build-log/replaying_build_after_recording/%s_replaying_test.log", logBaseUrl, compoundTest(t))
+		row.ReplayingAfterRecordingLogUrl = fmt.Sprintf("%s/replaying_after_recording/%s.log", logBaseUrl, t)
+	} else {
+		row.ReplayingAfterRecordingStatus = "-"
+	}
+
+	return row
+}
+
+func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult vcr.Result, logBaseUrl string) []VCRTestTableRow {
+	// Expand compound tests to subtests for accurate status matching
+	expandedRecordingResult := subtestResult(recordingResult)
+	expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
+
+	var attemptedTests []string
+	for _, t := range replayingResult.FailedTests {
+		prefix := t + "__"
+		hasSubtests := false
+		for _, st := range recordingResult.PassedSubtests {
+			if strings.HasPrefix(st, prefix) {
+				attemptedTests = append(attemptedTests, st)
+				hasSubtests = true
+			}
+		}
+		for _, st := range recordingResult.FailedSubtests {
+			if strings.HasPrefix(st, prefix) {
+				attemptedTests = append(attemptedTests, st)
+				hasSubtests = true
+			}
+		}
+		if !hasSubtests {
+			attemptedTests = append(attemptedTests, t)
+		}
+	}
+
+	// Group tests by status to list them in order:
+	// 1. Passed in both Recording and Re-replaying
+	// 2. Passed in Recording but Failing in Re-replaying
+	// 3. Failing in Recording
+	// 4. Terminated
+	var passedInBoth, failingInReplayingAfterRecording, failingInRecording, terminated []string
+
+	for _, t := range attemptedTests {
+		if !contains(expandedRecordingResult.PassedTests, t) && !contains(expandedRecordingResult.FailedTests, t) {
+			terminated = append(terminated, t)
+		} else if contains(expandedRecordingResult.FailedTests, t) {
+			failingInRecording = append(failingInRecording, t)
+		} else if contains(expandedReplayingAfterRecordingResult.FailedTests, t) {
+			failingInReplayingAfterRecording = append(failingInReplayingAfterRecording, t)
+		} else {
+			passedInBoth = append(passedInBoth, t)
+		}
+	}
+
+	sort.Strings(passedInBoth)
+	sort.Strings(failingInReplayingAfterRecording)
+	sort.Strings(failingInRecording)
+	sort.Strings(terminated)
+
+	var testRows []VCRTestTableRow
+	for _, t := range passedInBoth {
+		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+	}
+	for _, t := range failingInReplayingAfterRecording {
+		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+	}
+	for _, t := range failingInRecording {
+		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+	}
+	for _, t := range terminated {
+		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+	}
+
+	return testRows
 }

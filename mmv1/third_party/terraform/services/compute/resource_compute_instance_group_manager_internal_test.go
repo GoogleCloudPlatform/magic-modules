@@ -5,12 +5,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func TestInstanceGroupManager_parseUniqueId(t *testing.T) {
@@ -89,12 +83,12 @@ func TestInstanceGroupManager_convertUniqueId(t *testing.T) {
 func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 	cases := map[string]struct {
 		ConfigValues []interface{}
-		Ips          map[string]compute.StatefulPolicyPreservedStateNetworkIp
+		Ips          map[string]interface{}
 		Expected     []map[string]interface{}
 	}{
 		"No IPs in config nor API data": {
 			ConfigValues: []interface{}{},
-			Ips:          map[string]compute.StatefulPolicyPreservedStateNetworkIp{},
+			Ips:          map[string]interface{}{},
 			Expected:     []map[string]interface{}{},
 		},
 		"Single IP (nic0) in config and API data": {
@@ -104,9 +98,9 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 					"delete_rule":    "NEVER",
 				},
 			},
-			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
-				"nic0": {
-					AutoDelete: "NEVER",
+			Ips: map[string]interface{}{
+				"nic0": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
 			},
 			Expected: []map[string]interface{}{
@@ -127,12 +121,12 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 					"delete_rule":    "NEVER",
 				},
 			},
-			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
-				"nic0": {
-					AutoDelete: "NEVER",
+			Ips: map[string]interface{}{
+				"nic0": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic1": {
-					AutoDelete: "NEVER",
+				"nic1": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
 			},
 			Expected: []map[string]interface{}{
@@ -153,12 +147,12 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 					"delete_rule":    "NEVER",
 				},
 			},
-			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
-				"nic0": {
-					AutoDelete: "NEVER",
+			Ips: map[string]interface{}{
+				"nic0": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic1": {
-					AutoDelete: "NEVER",
+				"nic1": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
 			},
 			Expected: []map[string]interface{}{
@@ -174,22 +168,22 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 		},
 		"Five IPs (nic0 - nic4). None stored in config and all stored in API data": {
 			ConfigValues: []interface{}{},
-			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+			Ips: map[string]interface{}{
 				// Out of order here to encourage randomness
-				"nic3": {
-					AutoDelete: "NEVER",
+				"nic3": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic0": {
-					AutoDelete: "NEVER",
+				"nic0": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic1": {
-					AutoDelete: "NEVER",
+				"nic1": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic4": {
-					AutoDelete: "NEVER",
+				"nic4": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic2": {
-					AutoDelete: "NEVER",
+				"nic2": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
 			},
 			Expected: []map[string]interface{}{
@@ -226,15 +220,15 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 					"delete_rule":    "NEVER",
 				},
 			},
-			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
-				"nic0": {
-					AutoDelete: "NEVER",
+			Ips: map[string]interface{}{
+				"nic0": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic1": {
-					AutoDelete: "NEVER",
+				"nic1": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic2": {
-					AutoDelete: "NEVER",
+				"nic2": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
 			},
 			Expected: []map[string]interface{}{
@@ -263,12 +257,12 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 					"delete_rule":    "NEVER",
 				},
 			},
-			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
-				"nic1": {
-					AutoDelete: "NEVER",
+			Ips: map[string]interface{}{
+				"nic1": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
-				"nic2": {
-					AutoDelete: "NEVER",
+				"nic2": map[string]interface{}{
+					"autoDelete": "NEVER",
 				},
 			},
 			Expected: []map[string]interface{}{
@@ -296,24 +290,22 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 			d := tpgresource.SetupTestResourceDataFromConfigMap(t, schema, config)
 
 			// API response
-			statefulPolicyPreservedState := compute.StatefulPolicyPreservedState{
-				ExternalIPs: tc.Ips,
-				InternalIPs: tc.Ips,
-			}
-			statefulPolicy := compute.StatefulPolicy{
-				PreservedState: &statefulPolicyPreservedState,
+			statefulPolicy := map[string]interface{}{
+				"preservedState": map[string]interface{}{
+					"externalIPs": tc.Ips,
+					"internalIPs": tc.Ips,
+				},
 			}
 
-			outputExternal := flattenStatefulPolicyStatefulExternalIps(d, &statefulPolicy)
+			outputExternal := flattenStatefulPolicyStatefulExternalIps(d, statefulPolicy)
 			if !reflect.DeepEqual(tc.Expected, outputExternal) {
 				t.Fatalf("expected external IPs output to be %#v, but got %#v", tc.Expected, outputExternal)
 			}
 
-			outputInternal := flattenStatefulPolicyStatefulInternalIps(d, &statefulPolicy)
+			outputInternal := flattenStatefulPolicyStatefulInternalIps(d, statefulPolicy)
 			if !reflect.DeepEqual(tc.Expected, outputInternal) {
 				t.Fatalf("expected internal IPs output to be %#v, but got %#v", tc.Expected, outputInternal)
 			}
 		})
 	}
 }
-
