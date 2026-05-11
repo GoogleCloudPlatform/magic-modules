@@ -35,8 +35,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-custom_code:
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
 sweeper:
   identifier_field: 'displayName'
 examples:
