@@ -545,6 +545,10 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		return nil
 	}
 
+	if err := d.Set("create_ignore_already_exists", false); err != nil {
+		return fmt.Errorf("Error setting create_ignore_already_exists: %s", err)
+	}
+
 	return nil
 }
 
@@ -593,7 +597,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 		return nil
 	}
 
-	if jobHasUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
+	if flexTemplateJobHasUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
 		config := meta.(*transport_tpg.Config)
 		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
@@ -887,7 +891,7 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 }
 
 func findDataflowJobByName(config *transport_tpg.Config, project, region, userAgent, name string) (*dataflow.Job, error) {
-	client := config.NewDataflowClient(userAgent)
+	client := NewClient(userAgent)
 	
 	if region == "" {
 		return nil, fmt.Errorf("region is required to list dataflow jobs")
@@ -908,6 +912,23 @@ func findDataflowJobByName(config *transport_tpg.Config, project, region, userAg
 	}
 
 	return nil, nil
+}
+
+func flexTemplateJobHasUpdate(d *schema.ResourceData, resourceSchema map[string]*schema.Schema) bool {
+	if d.HasChange("on_delete") || d.HasChange("labels") || d.HasChange("terraform_labels") || d.HasChange("create_ignore_already_exists") {
+		for field := range resourceSchema {
+			if field == "on_delete" || field == "labels" || field == "terraform_labels" || field == "create_ignore_already_exists" {
+				continue
+			}
+
+			if d.HasChange(field) {
+				return true
+			}
+		}
+		return false
+	}
+
+	return true
 }
 
 func init() {
