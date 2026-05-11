@@ -35,8 +35,8 @@ type IamMemberListCallConfig struct {
 	Flattener         func(item map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error
 	ItemName          string // JSON key for items array (default "items")
 	ResourceNameField string // identity key filled by list API, excluded from list block
-	EnableRoleFilter
-	EnableMemberFilter
+	EnableRoleFilter bool
+	EnableMemberFilter bool
 
 }
 
