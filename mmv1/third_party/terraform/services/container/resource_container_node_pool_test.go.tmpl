@@ -4692,7 +4692,6 @@ resource "google_container_cluster" "cluster" {
   deletion_protection = false
   network             = "%s"
   subnetwork          = "%s"
-  initial_node_count  = 1
   enable_multi_networking = true
 
   node_pool {
