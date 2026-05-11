@@ -162,6 +162,72 @@ func (s *Step) TestServiceDependencies(resourcePrefixServiceMap map[string]strin
 	return deps
 }
 
+// ResolveScopeVarKey returns the Nprintf context key that supplies the value
+// for a list-query scope (e.g. "bucket"). It checks the step's vars,
+// resource_id_vars, test_env_vars, and test_vars_overrides for a key whose
+// underscore-separated tokens end with one of: [scope], [scope,"name"], or
+// [scope,"id"]. Returns scopeName unchanged when nothing matches.
+func (s *Step) ResolveScopeVarKey(scopeName string) string {
+	has := func(k string) bool {
+		if _, ok := s.Vars[k]; ok {
+			return true
+		}
+		if _, ok := s.ResourceIdVars[k]; ok {
+			return true
+		}
+		if _, ok := s.TestEnvVars[k]; ok {
+			return true
+		}
+		if _, ok := s.TestVarsOverrides[k]; ok {
+			return true
+		}
+		return false
+	}
+	endsWith := func(tokens, suffix []string) bool {
+		if len(tokens) < len(suffix) {
+			return false
+		}
+		off := len(tokens) - len(suffix)
+		for i, sfx := range suffix {
+			if tokens[off+i] != sfx {
+				return false
+			}
+		}
+		return true
+	}
+
+	suffixes := [][]string{{scopeName}, {scopeName, "name"}, {scopeName, "id"}}
+	// Prefer canonical exact-name matches before falling back to suffix scan.
+	for _, suf := range suffixes {
+		if k := strings.Join(suf, "_"); has(k) {
+			return k
+		}
+	}
+	for _, suf := range suffixes {
+		for k := range s.Vars {
+			if endsWith(strings.Split(k, "_"), suf) {
+				return k
+			}
+		}
+		for k := range s.ResourceIdVars {
+			if endsWith(strings.Split(k, "_"), suf) {
+				return k
+			}
+		}
+		for k := range s.TestEnvVars {
+			if endsWith(strings.Split(k, "_"), suf) {
+				return k
+			}
+		}
+		for k := range s.TestVarsOverrides {
+			if endsWith(strings.Split(k, "_"), suf) {
+				return k
+			}
+		}
+	}
+	return scopeName
+}
+
 func (s *Step) Validate(rName, sName string) (es []error) {
 	for k := range s.Vars {
 		if _, exists := s.ResourceIdVars[k]; exists {

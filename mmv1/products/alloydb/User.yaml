@@ -67,8 +67,6 @@ examples:
       'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
       # for backward compatible
       alloydb_user_name: '"user1" + randomSuffix'
-    list_query_scope_sources:
-      cluster: 'google_alloydb_cluster.default#name'
     ignore_read_extra:
       - 'password'
     exclude_docs: true

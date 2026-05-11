@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"log"
 	"slices"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -91,6 +92,12 @@ type Sample struct {
 	// for one reason or another
 	RegionOverride string `yaml:"region_override,omitempty"`
 
+	// ListQueryScopeSources maps a list-query scope field to "<resource_addr>"
+	// or "<resource_addr>#<attr>" (default attr is "name"). Used by the
+	// generated query test to capture scope values from previously-applied
+	// resources at runtime when no matching context var is available.
+	ListQueryScopeSources map[string]string `yaml:"list_query_scope_sources,omitempty"`
+
 	// ====================
 	// TGC
 	// ====================
@@ -137,6 +144,26 @@ func (s *Sample) ResourceType(terraformName string) string {
 		return s.PrimaryResourceType
 	}
 	return terraformName
+}
+
+// ListQueryScopeCapture parses the list_query_scope_sources entry for a
+// scope. Returns a non-nil ScopeCapture when the scope has an explicit
+// capture mapping; nil otherwise. The default attribute is "name".
+func (s *Sample) ListQueryScopeCapture(scopeName string) *ScopeCapture {
+	raw, ok := s.ListQueryScopeSources[scopeName]
+	if !ok {
+		return nil
+	}
+	if i := strings.IndexByte(raw, '#'); i >= 0 {
+		return &ScopeCapture{Resource: raw[:i], Attr: raw[i+1:]}
+	}
+	return &ScopeCapture{Resource: raw, Attr: "name"}
+}
+
+// ScopeCapture describes the source of a list-query scope value at runtime.
+type ScopeCapture struct {
+	Resource string
+	Attr     string
 }
 
 func (s *Sample) Validate(rName string) (es []error) {

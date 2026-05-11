@@ -80,7 +80,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 {{- $hasCapture := false }}
 {{- range $scope := $.ListScopeProperties }}
 	{{- if $scope.Required }}
-		{{- if $example.ListQueryScopeCapture (underscore $scope.Name) }}{{- $hasCapture = true }}{{- end }}
+		{{- if $sample.ListQueryScopeCapture (underscore $scope.Name) }}{{- $hasCapture = true }}{{- end }}
 	{{- end }}
 {{- end }}
 {{- if $hasCapture }}
@@ -125,7 +125,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 					{{- range $scope := $.ListScopeProperties }}
 						{{- if $scope.Required }}
 							{{- $n := underscore $scope.Name }}
-							{{- with $example.ListQueryScopeCapture $n }}
+							{{- with $sample.ListQueryScopeCapture $n }}
 						"{{ $n }}": {Resource: "{{ .Resource }}", Attr: "{{ .Attr }}"},
 							{{- end }}
 						{{- end }}
@@ -136,7 +136,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAcc{{ $example.TestSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
+				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
 {{- if $hasCapture }}
 				ConfigVariables: listScope.AsConfigVariables(),
 {{- end }}
@@ -158,21 +158,21 @@ func testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(cont
 {{- range $scope := $.ListScopeProperties }}
 	{{- if $scope.Required }}
 		{{- $n := underscore $scope.Name }}
-		{{- if $example.ListQueryScopeCapture $n }}
+		{{- if $sample.ListQueryScopeCapture $n }}
 variable "{{ $n }}" { type = string }
 		{{- end }}
 	{{- end }}
 {{- end }}
-list "{{ $example.ResourceType $.TerraformName }}" "list_query" {
-    provider = {{ if $.VersionedProvider $example.MinVersion }}google-beta{{ else }}google{{ end }}
+list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
+    provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
     config {
 {{- range $scope := $.ListScopeProperties }}
         {{- if $scope.Required }}
             {{- $n := underscore $scope.Name }}
-            {{- if $example.ListQueryScopeCapture $n }}
+            {{- if $sample.ListQueryScopeCapture $n }}
         {{ $n }} = var.{{ $n }}
             {{- else }}
-        {{ $n }} = "%{{"{"}}{{ $example.ResolveScopeVarKey $n }}{{"}"}}"
+        {{ $n }} = "%{{"{"}}{{ $step.ResolveScopeVarKey $n }}{{"}"}}"
             {{- end }}
         {{- end }}
 {{- end }}
