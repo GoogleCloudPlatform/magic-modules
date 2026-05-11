@@ -54,7 +54,6 @@ examples:
 
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/chronicle_rule.go.tmpl'
 
 virtual_fields:
   - name: 'deletion_policy'
