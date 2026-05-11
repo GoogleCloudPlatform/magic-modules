@@ -15,12 +15,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
@@ -95,31 +89,39 @@ func TestAccComputeInstanceMigrateState(t *testing.T) {
 	config := getInitializedConfig(t)
 
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
 		},
-		MachineType: "zones/" + config.Zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + config.Zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, config.Zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, config.Zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, config.Zone)
 
@@ -167,32 +169,40 @@ func TestAccComputeInstanceMigrateState_bootDisk(t *testing.T) {
 
 	// Seed test data
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -235,32 +245,40 @@ func TestAccComputeInstanceMigrateState_v4FixBootDisk(t *testing.T) {
 
 	// Seed test data
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -302,50 +320,66 @@ func TestAccComputeInstanceMigrateState_attachedDiskFromSource(t *testing.T) {
 
 	// Seed test data
 	diskName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	disk := &compute.Disk{
-		Name:        diskName,
-		SourceImage: "projects/debian-cloud/global/images/family/debian-11",
-		Zone:        zone,
+	disk := map[string]interface{}{
+		"name":        diskName,
+		"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
+		"zone":        zone,
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Disks.Insert(config.Project, zone, disk).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/disks", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      disk,
+	})
 	if err != nil {
 		t.Fatalf("Error creating disk: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "disk to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "disk to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpDisk(config, diskName, zone)
 
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				Source: "projects/" + config.Project + "/zones/" + zone + "/disks/" + diskName,
+			map[string]interface{}{
+				"source": "projects/" + config.Project + "/zones/" + zone + "/disks/" + diskName,
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err = tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url = fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr = tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -383,50 +417,66 @@ func TestAccComputeInstanceMigrateState_v4FixAttachedDiskFromSource(t *testing.T
 
 	// Seed test data
 	diskName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	disk := &compute.Disk{
-		Name:        diskName,
-		SourceImage: "projects/debian-cloud/global/images/family/debian-11",
-		Zone:        zone,
+	disk := map[string]interface{}{
+		"name":        diskName,
+		"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
+		"zone":        zone,
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Disks.Insert(config.Project, zone, disk).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/disks", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      disk,
+	})
 	if err != nil {
 		t.Fatalf("Error creating disk: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "disk to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "disk to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpDisk(config, diskName, zone)
 
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				Source: "projects/" + config.Project + "/zones/" + zone + "/disks/" + diskName,
+			map[string]interface{}{
+				"source": "projects/" + config.Project + "/zones/" + zone + "/disks/" + diskName,
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err = tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url = fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr = tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -462,40 +512,48 @@ func TestAccComputeInstanceMigrateState_attachedDiskFromEncryptionKey(t *testing
 	zone := "us-central1-f"
 
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+			map[string]interface{}{
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
-				DiskEncryptionKey: &compute.CustomerEncryptionKey{
-					RawKey: "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
+				"diskEncryptionKey": map[string]interface{}{
+					"rawKey": "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
 				},
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -531,40 +589,48 @@ func TestAccComputeInstanceMigrateState_v4FixAttachedDiskFromEncryptionKey(t *te
 	zone := "us-central1-f"
 
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+			map[string]interface{}{
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
-				DiskEncryptionKey: &compute.CustomerEncryptionKey{
-					RawKey: "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
+				"diskEncryptionKey": map[string]interface{}{
+					"rawKey": "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
 				},
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -599,43 +665,51 @@ func TestAccComputeInstanceMigrateState_attachedDiskFromAutoDeleteAndImage(t *te
 	zone := "us-central1-f"
 
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+			map[string]interface{}{
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/debian-11-bullseye-v20220719",
+			map[string]interface{}{
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/debian-11-bullseye-v20220719",
 				},
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -672,43 +746,51 @@ func TestAccComputeInstanceMigrateState_v4FixAttachedDiskFromAutoDeleteAndImage(
 	zone := "us-central1-f"
 
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+			map[string]interface{}{
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/debian-11-bullseye-v20220719",
+			map[string]interface{}{
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/debian-11-bullseye-v20220719",
 				},
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/e2-medium",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/e2-medium",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -745,39 +827,47 @@ func TestAccComputeInstanceMigrateState_scratchDisk(t *testing.T) {
 
 	// Seed test data
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				AutoDelete: true,
-				Type:       "SCRATCH",
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					DiskType: "zones/" + zone + "/diskTypes/local-ssd",
+			map[string]interface{}{
+				"autoDelete": true,
+				"type":       "SCRATCH",
+				"initializeParams": map[string]interface{}{
+					"diskType": "zones/" + zone + "/diskTypes/local-ssd",
 				},
 			},
 		},
 		// can't be e2 because of local-ssd
-		MachineType: "zones/" + zone + "/machineTypes/n1-standard-1",
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/n1-standard-1",
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -811,38 +901,46 @@ func TestAccComputeInstanceMigrateState_v4FixScratchDisk(t *testing.T) {
 
 	// Seed test data
 	instanceName := fmt.Sprintf("tf-test-instance-test-%s", acctest.RandString(t, 10))
-	instance := &compute.Instance{
-		Name: instanceName,
-		Disks: []*compute.AttachedDisk{
-			{
-				Boot:       true,
-				AutoDelete: true,
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: "projects/debian-cloud/global/images/family/debian-11",
+	instance := map[string]interface{}{
+		"name": instanceName,
+		"disks": []interface{}{
+			map[string]interface{}{
+				"boot":       true,
+				"autoDelete": true,
+				"initializeParams": map[string]interface{}{
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-11",
 				},
 			},
-			{
-				AutoDelete: true,
-				Type:       "SCRATCH",
-				InitializeParams: &compute.AttachedDiskInitializeParams{
-					DiskType: "zones/" + zone + "/diskTypes/local-ssd",
+			map[string]interface{}{
+				"autoDelete": true,
+				"type":       "SCRATCH",
+				"initializeParams": map[string]interface{}{
+					"diskType": "zones/" + zone + "/diskTypes/local-ssd",
 				},
 			},
 		},
-		MachineType: "zones/" + zone + "/machineTypes/n1-standard-1", // can't be e2 because of local-ssd
-		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				Network: "global/networks/default",
+		"machineType": "zones/" + zone + "/machineTypes/n1-standard-1", // can't be e2 because of local-ssd
+		"networkInterfaces": []interface{}{
+			map[string]interface{}{
+				"network": "global/networks/default",
 			},
 		},
 	}
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Insert(config.Project, zone, instance).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, config.Project, zone)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      instance,
+	})
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
-	if waitErr != nil {
-		t.Fatal(waitErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to create", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer cleanUpInstance(config, instanceName, zone)
 
@@ -912,30 +1010,44 @@ func runInstanceMigrateTest(t *testing.T, id, testName string, version int, attr
 }
 
 func cleanUpInstance(config *transport_tpg.Config, instanceName, zone string) {
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Delete(config.Project, zone, instanceName).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, config.Project, zone, instanceName)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		log.Printf("[WARNING] Error deleting instance %q, dangling resources may exist: %s", instanceName, err)
 		return
 	}
 
 	// Wait for the operation to complete
-	opErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "instance to delete", config.UserAgent, 4*time.Minute)
-	if opErr != nil {
-		log.Printf("[WARNING] Error deleting instance %q, dangling resources may exist: %s", instanceName, opErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "instance to delete", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		log.Printf("[WARNING] Error deleting instance %q, dangling resources may exist: %s", instanceName, err)
 	}
 }
 
 func cleanUpDisk(config *transport_tpg.Config, diskName, zone string) {
-	op, err := tpgcompute.NewClient(config, config.UserAgent).Disks.Delete(config.Project, zone, diskName).Do()
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s", config.ComputeBasePath, config.Project, zone, diskName)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		log.Printf("[WARNING] Error deleting disk %q, dangling resources may exist: %s", diskName, err)
 		return
 	}
 
 	// Wait for the operation to complete
-	opErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "disk to delete", config.UserAgent, 4*time.Minute)
-	if opErr != nil {
-		log.Printf("[WARNING] Error deleting disk %q, dangling resources may exist: %s", diskName, opErr)
+	err = tpgcompute.ComputeOperationWaitTime(config, res, config.Project, "disk to delete", config.UserAgent, 4*time.Minute)
+	if err != nil {
+		log.Printf("[WARNING] Error deleting disk %q, dangling resources may exist: %s", diskName, err)
 	}
 }
 

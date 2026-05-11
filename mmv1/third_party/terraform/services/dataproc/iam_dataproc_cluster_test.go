@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccDataprocClusterIamBinding(t *testing.T) {
@@ -16,9 +17,9 @@ func TestAccDataprocClusterIamBinding(t *testing.T) {
 	account := "tf-test-dpiam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
 
-	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
-	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s %s",
 		envvar.GetTestProjectFromEnv(), "us-central1", cluster, role)
@@ -62,9 +63,9 @@ func TestAccDataprocClusterIamMember(t *testing.T) {
 	account := "tf-test-dpiam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
 
-	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
-	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s %s serviceAccount:%s",
 		envvar.GetTestProjectFromEnv(),
@@ -104,9 +105,9 @@ func TestAccDataprocClusterIamPolicy(t *testing.T) {
 	account := "tf-test-dpiam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
 
-	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
-	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s",
 		envvar.GetTestProjectFromEnv(), "us-central1", cluster)

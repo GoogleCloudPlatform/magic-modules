@@ -163,8 +163,8 @@ examples:
       username: '"user" + randomSuffix'
       password: '"password"'
     ignore_read_extra:
-      # username and password are not returned by the API
-      - 'configuration.0.authentication.0.username_password.0.username'
+      # The plaintext password is redacted by the API on read, so it cannot
+      # be verified against the original config.
       - 'configuration.0.authentication.0.username_password.0.password'
     external_providers: ["random", "time"]
     # Random provider

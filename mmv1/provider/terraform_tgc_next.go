@@ -143,7 +143,7 @@ func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, r
 
 func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) error {
 	if len(object.TGCTests) == 0 {
-		return fmt.Errorf("No TGC tests for resource %s", object.Name)
+		return fmt.Errorf("No TGC tests generated for resource %s. This commonly happens when all examples in the YAML are excluded AND no matching handwritten tests were found (ensure handwritten test file names match the expected convention, e.g., resource_<product>_<resource_name>_test.go)", object.Name)
 	}
 
 	for _, test := range object.TGCTests {
@@ -382,6 +382,78 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		})
 	}
 }
+
+func (tgc TerraformGoogleConversionNext) addTestsByTestNameMatch(object *api.Resource) error {
+	if object.ProductMetadata == nil {
+		return nil
+	}
+	productName := strings.ToLower(tgc.Product.Name)
+	dirPath := fmt.Sprintf("third_party/terraform/services/%s", productName)
+
+	entries, err := fs.ReadDir(tgc.templateFS, dirPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return fmt.Errorf("error reading directory %s: %v", dirPath, err)
+	}
+
+	testNamesInYAML := make(map[string]struct{})
+	for _, test := range object.TGCTests {
+		if test.Name != "" {
+			testNamesInYAML[test.Name] = struct{}{}
+		}
+	}
+
+	testPrefix := strings.ToLower("TestAcc" + object.ProductMetadata.Name + object.Name)
+	tests := make([]resource.TGCTest, 0)
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if !strings.HasSuffix(name, "_test.go") && !strings.HasSuffix(name, "_test.go.tmpl") {
+			continue
+		}
+
+		filePath := path.Join(dirPath, name)
+		data, err := fs.ReadFile(tgc.templateFS, filePath)
+		if err != nil {
+			return fmt.Errorf("error reading handwritten test file %s: %v", filePath, err)
+		}
+
+		matches := testRegex.FindAllSubmatch(data, -1)
+		for _, match := range matches {
+			if len(match) == 2 {
+				testName := string(match[1])
+				lowercasedTestName := strings.ToLower(testName)
+				prefixWithUnderscore := testPrefix + "_"
+				prefixWithSUnderscore := testPrefix + "s_"
+
+				if !strings.HasPrefix(lowercasedTestName, prefixWithUnderscore) &&
+					!strings.HasPrefix(lowercasedTestName, prefixWithSUnderscore) &&
+					lowercasedTestName != testPrefix &&
+					lowercasedTestName != testPrefix+"s" {
+					continue
+				}
+
+				if _, ok := testNamesInYAML[testName]; ok {
+					continue
+				}
+
+				tests = append(tests, resource.TGCTest{
+					Name: testName,
+				})
+			}
+		}
+	}
+
+	object.TGCTests = append(object.TGCTests, tests...)
+
+	return nil
+}
+
 func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
 	if object.ProductMetadata == nil {
 		return nil
@@ -393,7 +465,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	for err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
-				log.Printf("no handwritten test file found for %s", resourceFullName)
+				log.Printf("no handwritten test file found at %s", handwrittenTestFilePath)
 				return nil
 			}
 			handwrittenTestFilePath += ".tmpl"
@@ -426,7 +498,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 
 	object.TGCTests = append(object.TGCTests, tests...)
 
-	return nil
+	return tgc.addTestsByTestNameMatch(object)
 }
 
 // Similar to FullResourceName, but override-aware to prevent things like ending in _test.

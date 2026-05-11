@@ -7,13 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeRegionSslPolicy_regionInherit(t *testing.T) {
@@ -49,7 +43,7 @@ func TestAccComputeRegionSslPolicy_regionInherit(t *testing.T) {
 func TestAccComputeRegionSslPolicy_update(t *testing.T) {
 	t.Parallel()
 
-	var sslPolicy compute.SslPolicy
+	var sslPolicy map[string]interface{}
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -128,7 +122,7 @@ func TestAccComputeRegionSslPolicy_update(t *testing.T) {
 func TestAccComputeRegionSslPolicy_update_to_custom(t *testing.T) {
 	t.Parallel()
 
-	var sslPolicy compute.SslPolicy
+	var sslPolicy map[string]interface{}
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -175,7 +169,7 @@ func TestAccComputeRegionSslPolicy_update_to_custom(t *testing.T) {
 func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
 	t.Parallel()
 
-	var sslPolicy compute.SslPolicy
+	var sslPolicy map[string]interface{}
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -219,7 +213,7 @@ func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeRegionSslPolicyExists(t *testing.T, n string, sslPolicy *compute.SslPolicy) resource.TestCheckFunc {
+func testAccCheckComputeRegionSslPolicyExists(t *testing.T, n string, sslPolicy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -239,17 +233,23 @@ func testAccCheckComputeRegionSslPolicyExists(t *testing.T, n string, sslPolicy 
 
 		name := rs.Primary.Attributes["name"]
 
-		found, err := compute_tpg.NewClient(config, config.UserAgent).RegionSslPolicies.Get(
-			project, "us-central1" , name).Do()
+		url := fmt.Sprintf("%sprojects/%s/regions/us-central1/sslPolicies/%s", config.ComputeBasePath, project, name)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Error Reading SSL Policy %s: %s", name, err)
 		}
 
-		if found.Name != name {
+		if foundName, ok := found["name"].(string); !ok || foundName != name {
 			return fmt.Errorf("SSL Policy not found")
 		}
 
-		*sslPolicy = *found
+		*sslPolicy = found
 
 		return nil
 	}
