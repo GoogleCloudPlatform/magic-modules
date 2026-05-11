@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -38,13 +40,31 @@ func TestAccStorageBucketListResource_queryIdentity(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAccStorageBucketListQuery(project),
+				Config: testAccStorageBucketListQuery(project, true),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity("google_storage_bucket.all_in_project", map[string]knownvalue.Check{
 						"name":    knownvalue.StringExact(bucketName),
 						"project": knownvalue.StringExact(project),
 					}),
 					querycheck.ExpectLengthAtLeast("google_storage_bucket.all_in_project", 1),
+					querycheck.ExpectResourceKnownValues(
+						"google_storage_bucket.all_in_project",
+						queryfilter.ByDisplayName(knownvalue.StringExact(bucketName)),
+						[]querycheck.KnownValueCheck{
+							{
+								Path:       tfjsonpath.New("name"),
+								KnownValue: knownvalue.StringExact(bucketName),
+							},
+							{
+								Path:       tfjsonpath.New("project"),
+								KnownValue: knownvalue.StringExact(project),
+							},
+							{
+								Path:       tfjsonpath.New("location"),
+								KnownValue: knownvalue.StringExact("US"),
+							},
+						},
+					),
 				},
 			},
 		},
@@ -61,16 +81,21 @@ resource "google_storage_bucket" "test" {
 `, name, project)
 }
 
-func testAccStorageBucketListQuery(project string) string {
+func testAccStorageBucketListQuery(project string, includeResource bool) string {
+	includeResourceBlock := ""
+	if includeResource {
+		includeResourceBlock = "\n  include_resource = true"
+	}
+
 	return fmt.Sprintf(`
 provider "google" {}
 
 list "google_storage_bucket" "all_in_project" {
-  provider = google
+	provider = google%s
 
   config {
     project = %q
   }
 }
-`, project)
+`, includeResourceBlock, project)
 }
