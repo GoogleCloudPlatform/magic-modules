@@ -3761,12 +3761,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
 	}
-{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(cluster.SecretSyncConfig)); err != nil {
 		return err
 	}
-{{- end }}
-
 	if err := tpgresource.SetLabels(cluster.ResourceLabels, d, "resource_labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
@@ -8265,7 +8262,6 @@ func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]i
 	return []map[string]interface{}{result}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interface{} {
 	if c == nil {
 		return []map[string]interface{}{
@@ -8292,8 +8288,6 @@ func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interfa
 	result["rotation_config"] = rotationList
 	return []map[string]interface{}{result}
 }
-{{- end }}
-
 
 func flattenResourceUsageExportConfig(c *container.ResourceUsageExportConfig) []map[string]interface{} {
 	if c == nil {
