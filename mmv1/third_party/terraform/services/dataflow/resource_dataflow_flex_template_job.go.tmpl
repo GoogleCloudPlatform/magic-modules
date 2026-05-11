@@ -891,7 +891,7 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 }
 
 func findDataflowJobByName(config *transport_tpg.Config, project, region, userAgent, name string) (*dataflow.Job, error) {
-	client := NewClient(userAgent)
+	client := NewClient(config, userAgent)
 	
 	if region == "" {
 		return nil, fmt.Errorf("region is required to list dataflow jobs")
