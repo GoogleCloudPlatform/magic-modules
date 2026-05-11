@@ -755,11 +755,11 @@ resource "google_backup_dr_backup_plan" "plan" {
 
 // Associate backup plan with AlloyDB cluster
 resource "google_backup_dr_backup_plan_association" "association" { 
-  location            = "%{location}" 
-  backup_plan_association_id  = "tf-test-bpa-test-%{random_suffix}"
-  resource            = "${google_alloydb_cluster.source.name}"
-  resource_type         = "alloydb.googleapis.com/Cluster"
-  backup_plan           = google_backup_dr_backup_plan.plan.name
+  location                   = "%{location}"
+  backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
+  resource                   = "${google_alloydb_cluster.source.name}"
+  resource_type              = "alloydb.googleapis.com/Cluster"
+  backup_plan                = google_backup_dr_backup_plan.plan.name
 
   depends_on = [ google_alloydb_instance.source ]
 }
@@ -772,9 +772,9 @@ resource "time_sleep" "wait_10_mins" {
 }
 
 data "google_backup_dr_backup" "alloydb_backups" {
-  project     = "%{project}"
+  project         = "%{project}"
   location        = "us-central1"
-  backup_vault_id   = "%{backup_vault_id}"
+  backup_vault_id = "%{backup_vault_id}"
   data_source_id  = element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
 
   depends_on = [time_sleep.wait_10_mins]
@@ -856,11 +856,11 @@ resource "google_backup_dr_backup_plan" "plan" {
 
 // Associate backup plan with AlloyDB cluster
 resource "google_backup_dr_backup_plan_association" "association" { 
-  location            = "%{location}" 
-  backup_plan_association_id  = "tf-test-bpa-test-%{random_suffix}"
-  resource            = "${google_alloydb_cluster.source.name}"
-  resource_type         = "alloydb.googleapis.com/Cluster"
-  backup_plan           = google_backup_dr_backup_plan.plan.name
+  location                   = "%{location}"
+  backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
+  resource                   = "${google_alloydb_cluster.source.name}"
+  resource_type              = "alloydb.googleapis.com/Cluster"
+  backup_plan                = google_backup_dr_backup_plan.plan.name
 
   depends_on = [ google_alloydb_instance.source ]
 }
@@ -873,9 +873,9 @@ resource "time_sleep" "wait_10_mins" {
 }
 
 data "google_backup_dr_backup" "alloydb_backups" {
-  project     = "%{project}"
+  project         = "%{project}"
   location        = "us-central1"
-  backup_vault_id   = "%{backup_vault_id}"
+  backup_vault_id = "%{backup_vault_id}"
   data_source_id  = element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
 
   depends_on = [time_sleep.wait_10_mins]
@@ -962,11 +962,11 @@ resource "google_backup_dr_backup_plan" "plan" {
 
 // Associate backup plan with AlloyDB cluster
 resource "google_backup_dr_backup_plan_association" "association" { 
-  location            = "%{location}" 
-  backup_plan_association_id  = "tf-test-bpa-test-%{random_suffix}"
-  resource            = "${google_alloydb_cluster.source.name}"
-  resource_type         = "alloydb.googleapis.com/Cluster"
-  backup_plan           = google_backup_dr_backup_plan.plan.name
+  location                   = "%{location}"
+  backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
+  resource                   = "${google_alloydb_cluster.source.name}"
+  resource_type              = "alloydb.googleapis.com/Cluster"
+  backup_plan                = google_backup_dr_backup_plan.plan.name
 
   depends_on = [ google_alloydb_instance.source ]
 }
