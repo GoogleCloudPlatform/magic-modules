@@ -7039,7 +7039,6 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 	return sc
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -7070,7 +7069,6 @@ func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig 
 	}
 	return sc
 }
-{{- end }}
 
 func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint {
 	if v == nil {
