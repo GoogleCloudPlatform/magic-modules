@@ -1811,7 +1811,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{ if ne $.TargetVersionName `ga` -}}
 			"secret_sync_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1850,7 +1849,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{- end }}
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -3029,9 +3027,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 {{- end }}
 		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
-{{- if ne $.TargetVersionName "ga" }}
 		SecretSyncConfig: 	 expandSecretSyncConfig(d.Get("secret_sync_config")),
-{{- end }}
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
@@ -3765,11 +3761,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
 	}
-{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(cluster.SecretSyncConfig)); err != nil {
 		return err
 	}
-{{- end }}
 
 	if err := tpgresource.SetLabels(cluster.ResourceLabels, d, "resource_labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
@@ -5035,7 +5029,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s secret manager csi add-on has been updated", d.Id())
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("secret_sync_config") {
 		req := &container.UpdateClusterRequest{}
 		if c, ok := d.GetOk("secret_sync_config"); !ok {
@@ -5055,7 +5048,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 		}
 	}
-{{- end }}
 
 	if d.HasChange("workload_identity_config") {
 		// Because GKE uses a non-RESTful update function, when removing the
@@ -8863,7 +8855,6 @@ func DatabaseEncryptionSuppress(k, old, new string, d *schema.ResourceData) bool
         return false
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "secret_sync_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("secret_sync_config"); ok {
@@ -8877,7 +8868,6 @@ func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	}
 	return false
 }
-{{- end }}
 
 func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
 	// if network_policy configuration is empty, we store it as populated and enabled=false, and
