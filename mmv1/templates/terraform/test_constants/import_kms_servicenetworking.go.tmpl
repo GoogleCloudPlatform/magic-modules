@@ -3,4 +3,7 @@ import (
     "{{ $.ImportPath }}/services/servicenetworking"
 )
 
-var _ = kms.Product
+var (
+    _ = kms.Product
+    _ = servicenetworking.Product
+)
