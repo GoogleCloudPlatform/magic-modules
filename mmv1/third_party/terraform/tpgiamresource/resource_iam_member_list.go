@@ -13,10 +13,12 @@ package tpgiamresource
 import (
 	"context"
 	"fmt"
+	"go/types"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -31,13 +33,12 @@ var _ list.ListResourceWithConfigure = &IamMemberListResource{}
 
 // IamMemberListCallConfig holds resource-specific pieces for transport.ListCall.
 type IamMemberListCallConfig struct {
-	ListUrlFunc       func(rd *schema.ResourceData, config *transport_tpg.Config) (string, error)
-	Flattener         func(item map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error
-	ItemName          string // JSON key for items array (default "items")
-	ResourceNameField string // identity key filled by list API, excluded from list block
-	EnableRoleFilter bool
+	ListUrlFunc        func(rd *schema.ResourceData, config *transport_tpg.Config) (string, error)
+	Flattener          func(item map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error
+	ItemName           string // JSON key for items array (default "items")
+	ResourceNameField  string // identity key filled by list API, excluded from list block
+	EnableRoleFilter   bool
 	EnableMemberFilter bool
-
 }
 
 // IamMemberListResource lists IAM member rows by reading IAM policies on one or more policy targets.
@@ -87,15 +88,15 @@ func (r *IamMemberListResource) ListResourceConfigSchema(_ context.Context, _ li
 
 	if r.listCallConfig.EnableRoleFilter {
 		s.Attributes["role"] = listschema.StringAttribute{
-			Optional: true,
-			Description: "Optional client-side filter for IAM role."
+			Optional:    true,
+			Description: "Optional client-side filter for IAM role.",
 		}
 	}
 
-	iif r.listCallConfig.EnableMemberFilter {
+	if r.listCallConfig.EnableMemberFilter {
 		s.Attributes["member"] = listschema.StringAttribute{
-			Optional: true,
-			Description: "Optional client-side filter for IAM member."
+			Optional:    true,
+			Description: "Optional client-side filter for IAM member.",
 		}
 	}
 	resp.Schema = s
@@ -275,17 +276,17 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 func (r *IamMemberListResource) readFilters(ctx context.Context, req list.ListRequest) (roleFilter string, memberFilter String, diags diag.Diagnostics) {
 	var diags diag.Diagnostics
 	roleFilter := ""
-	memberFilter:= ""
+	memberFilter := ""
 
 	if r.listCallConfig.EnableRoleFilter {
-		var v types.String 
-		diags.Append(req.Config.Get Attributes(ctx, path.Root("role"), &v)...)
+		var v types.String
+		diags.Append(req.Config.GetAttributes(ctx, path.Root("role"), &v)...)
 		if !v.IsNull() && !v.IsUnknown() {
 			roleFilter = v.ValueString()
 		}
 	}
 
-	If r.listCallConfig.EnableMemberFilter {
+	if r.listCallConfig.EnableMemberFilter {
 		var v types.String
 		diags.Append(req.Config.GetAttribute(ctx, path.Root("member"), &v)...)
 		if !v.IsNull() && !v.IsUnknown() {
