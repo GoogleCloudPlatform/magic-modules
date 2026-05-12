@@ -1,6 +1,7 @@
 package hypercomputecluster_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -785,6 +786,83 @@ resource "google_hypercomputecluster_cluster" "cluster" {
       partitions {
         id = "partition"
         node_set_ids = ["nodeset1"]
+      }
+      default_partition = "partition"
+    }
+  }
+}
+`, context)
+}
+
+func TestAccHypercomputeclusterCluster_networkValidation(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 3),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			// Test case: Expect error when network_resources is missing on create
+			{
+				Config:      testAccHypercomputeclusterCluster_missingNetwork(context),
+				ExpectError: regexp.MustCompile("network_resources: At least one network_resources entry must be specified for cluster creation"),
+			},
+		},
+	})
+}
+
+func testAccHypercomputeclusterCluster_missingNetwork(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+locals {
+  project_id = data.google_project.project.name
+}
+
+resource "google_hypercomputecluster_cluster" "cluster" {
+  cluster_id                  = "tf%{random_suffix}"
+  location                    = "us-central1"
+  description                 = "Cluster Director instance created through Terraform - Missing Network"
+  # network_resources IS INTENTIONALLY OMITTED
+  compute_resources {
+    id = "compute-spot"
+    config {
+      new_spot_instances {
+        machine_type = "n2-standard-2"
+        zone = "us-central1-a"
+        termination_action = "STOP"
+      }
+    }
+  }
+  orchestrator {
+    slurm {
+      login_nodes {
+        machine_type = "n2-standard-2"
+        count = 1
+        zone = "us-central1-a"
+        boot_disk {
+          size_gb = "100"
+          type = "pd-balanced"
+        }
+      }
+      node_sets {
+        id = "nodeset"
+        compute_id = "compute-spot"
+        static_node_count = 1
+        compute_instance {
+          boot_disk {
+            size_gb = "100"
+            type = "pd-balanced"
+          }
+        }
+      }
+      partitions {
+        id = "partition"
+        node_set_ids = ["nodeset"]
       }
       default_partition = "partition"
     }
