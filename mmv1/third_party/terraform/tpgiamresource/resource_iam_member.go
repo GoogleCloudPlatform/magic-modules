@@ -103,14 +103,14 @@ var IamMemberBaseIdentitySchema = map[string]*schema.Schema{
 	},
 }
 
-func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, resourceIdentityParser ResourceIdentityParserFunc) schema.StateFunc {
+func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, resourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.StateFunc {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
 
 		config := m.(*transport_tpg.Config)
-		if err := setIamMemberIdFromResourceIdentity(d, config, resourceIdentityParser); err != nil {
+		if err := setIamMemberIdFromParentResourceIdentity(d, config, resourceIdentityParser); err != nil {
 			return nil, err
 		}
 
@@ -190,11 +190,11 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 	}
 }
 
-// setIamMemberIdFromResourceIdentity converts a resource-identity import into
+// setIamMemberIdFromParentResourceIdentity converts a resource-identity import into
 // the canonical id (`{resource} {role} {member} [condition_title]`) consumed
 // by iamMemberImport. No-op if there is no identity parser or d already has
 // an id.
-func setIamMemberIdFromResourceIdentity(d *schema.ResourceData, config *transport_tpg.Config, resourceIdentityParser ResourceIdentityParserFunc) error {
+func setIamMemberIdFromParentResourceIdentity(d *schema.ResourceData, config *transport_tpg.Config, resourceIdentityParser ParentResourceIdFromIdentityParserFunc) error {
 	if resourceIdentityParser == nil || d.Id() != "" {
 		return nil
 	}
@@ -303,7 +303,7 @@ func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding 
 	return b
 }
 
-func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ResourceIdentityParserFunc) schema.CreateFunc {
+func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.CreateFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -349,7 +349,7 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 	}
 }
 
-func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ResourceIdentityParserFunc) schema.ReadFunc {
+func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -423,7 +423,7 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpeci
 	}
 }
 
-func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ResourceIdentityParserFunc) schema.DeleteFunc {
+func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, resourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
