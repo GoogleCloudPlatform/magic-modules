@@ -1,51 +1,52 @@
 package alloydb_test
 
 import (
-	"testing"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
+  tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+  "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 // This test passes if secondary instance's machine config can be updated
 func TestAccAlloydbInstance_secondaryInstanceUpdateMachineConfig(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbInstance_secondaryInstanceInitial(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccAlloydbInstance_secondaryInstanceUpdateMachineConfig(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccAlloydbInstance_secondaryInstanceInitial(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccAlloydbInstance_secondaryInstanceUpdateMachineConfig(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func testAccAlloydbInstance_secondaryInstanceInitial(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
@@ -112,7 +113,7 @@ data "google_compute_network" "default" {
 }
 
 func testAccAlloydbInstance_secondaryInstanceUpdateMachineConfig(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
@@ -180,33 +181,33 @@ data "google_compute_network" "default" {
 
 // This test passes if we are able to create a secondary instance with an associated read-pool instance
 func TestAccAlloydbInstance_secondaryInstanceWithReadPoolInstance(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbInstance_secondaryInstanceWithReadPoolInstance(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccAlloydbInstance_secondaryInstanceWithReadPoolInstance(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func testAccAlloydbInstance_secondaryInstanceWithReadPoolInstance(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
@@ -284,34 +285,34 @@ data "google_compute_network" "default" {
 
 // This test passes if we are able to create a secondary instance by specifying network_config.network and network_config.allocated_ip_range
 func TestAccAlloydbCluster_secondaryInstanceWithNetworkConfigAndAllocatedIPRange(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"address_name":  tpgcompute.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+    "address_name":  tpgcompute.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbCluster_secondaryInstanceWithNetworkConfigAndAllocatedIPRange(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccAlloydbCluster_secondaryInstanceWithNetworkConfigAndAllocatedIPRange(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func testAccAlloydbCluster_secondaryInstanceWithNetworkConfigAndAllocatedIPRange(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
@@ -385,42 +386,42 @@ data "google_compute_global_address" "private_ip_alloc" {
 
 // This test passes if secondary instance's database flag config can be updated
 func TestAccAlloydbInstance_secondaryInstanceUpdateDatabaseFlag(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbInstance_secondaryInstanceInitial(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccAlloydbInstance_secondaryInstanceUpdateDatabaseFlag(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccAlloydbInstance_secondaryInstanceInitial(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccAlloydbInstance_secondaryInstanceUpdateDatabaseFlag(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func testAccAlloydbInstance_secondaryInstanceUpdateDatabaseFlag(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
@@ -492,42 +493,42 @@ data "google_compute_network" "default" {
 
 // This test passes if secondary instance's query insight config can be updated
 func TestAccAlloydbInstance_secondaryInstanceUpdateQueryInsightConfig(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbInstance_secondaryInstanceInitial(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccAlloydbInstance_secondaryInstanceUpdateQueryInsightConfig(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccAlloydbInstance_secondaryInstanceInitial(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccAlloydbInstance_secondaryInstanceUpdateQueryInsightConfig(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func testAccAlloydbInstance_secondaryInstanceUpdateQueryInsightConfig(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
@@ -602,33 +603,33 @@ data "google_compute_network" "default" {
 
 // This test passes if we are able to create a secondary instance with maximum fields
 func TestAccAlloydbInstance_secondaryInstanceMaximumFields(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbInstance_secondaryInstanceMaximumFields(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.secondary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccAlloydbInstance_secondaryInstanceMaximumFields(context),
+      },
+      {
+        ResourceName:            "google_alloydb_instance.secondary",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func testAccAlloydbInstance_secondaryInstanceMaximumFields(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
