@@ -209,6 +209,41 @@ func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta
     }
   }
 
+  // For settable fields that are nested objects (maps), ensure that any
+  // sub-fields present in the old item but absent in the new obj are
+  // explicitly set to their empty value. This forces the API to clear
+  // those sub-fields instead of preserving them via protobuf merge
+  // semantics (where absent fields keep their previous values).
+  // For array/slice sub-fields, use an empty slice (JSON []) instead of
+  // nil (JSON null), because protobuf treats null as "not specified".
+  for k := range settableFields {
+    oldVal, oldOk := item[k]
+    newVal, newOk := obj[k]
+    if !oldOk || !newOk {
+      continue
+    }
+    oldMap, oldIsMap := oldVal.(map[string]interface{})
+    newMap, newIsMap := newVal.(map[string]interface{})
+    if !oldIsMap || !newIsMap {
+      continue
+    }
+    for subKey, oldSubVal := range oldMap {
+      if _, exists := newMap[subKey]; !exists {
+        if _, isSlice := oldSubVal.([]interface{}); isSlice {
+          newMap[subKey] = []interface{}{}
+        } else {
+          newMap[subKey] = nil
+        }
+      }
+    }
+  }
+
+{{- if $.CustomCode.UpdateEncoder }}
+  // Apply resource-specific update encoder logic (e.g. constraint enforcement,
+  // ResourceData sync) before overriding the old object.
+  {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
+{{- end }}
+
   // Override old object with new
   items[idx] = obj
 
