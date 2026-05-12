@@ -4,7 +4,7 @@
         return fmt.Errorf("network_resources: At least one network_resources entry must be specified for cluster creation")
     }
 
-    networkRes, ok := v.(map[stringinterface{})
+    networkRes, ok := v.(map[string]interface{})
     if !ok {
         return fmt.Errorf("network_resources: internal error - unexpected type: %T", v)
     }
