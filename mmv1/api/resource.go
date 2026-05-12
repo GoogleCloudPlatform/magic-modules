@@ -682,8 +682,9 @@ func (r Resource) IdentityProperties() []*Type {
 		}
 	}
 
+	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
 	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
-		if slices.Contains(importFormat, field) && !optionalValues[field] {
+		if slices.Contains(importFormat, field) && !optionalValues[field] && hasField[field] {
 			props = append(props, &Type{Name: field, Type: "string"})
 		}
 	}
