@@ -147,7 +147,7 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 	}
 
 	roleFilter, memberFilter, diags := r.readFilters(ctx, req)
-	if Diags.hasError() {
+	if diags.hasError() {
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
