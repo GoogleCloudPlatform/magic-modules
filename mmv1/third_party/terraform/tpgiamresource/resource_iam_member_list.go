@@ -13,13 +13,14 @@ package tpgiamresource
 import (
 	"context"
 	"fmt"
-	"go/types"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
+	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
@@ -148,7 +149,7 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 	}
 
 	roleFilter, memberFilter, diags := r.readFilters(ctx, req)
-	if diags.hasError() {
+	if diags.HasError() {
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
@@ -188,7 +189,7 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 // yieldPolicyMembers yields one list result per IAM binding member for a single policy target.
 func (r *IamMemberListResource) yieldPolicyMembers(ctx context.Context, req list.ListRequest, targetRd *schema.ResourceData, updater ResourceIamUpdater, p *cloudresourcemanager.Policy, roleFilter string, memberFilter string, yielded *int64, yield func(list.ListResult) bool) bool {
 	for _, binding := range p.Bindings {
-		if roleFilter != "" && Binding.Role != roleFilter {
+		if roleFilter != "" && binding.Role != roleFilter {
 			continue
 		}
 		for _, mem := range binding.Members {
@@ -273,14 +274,14 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 	return res, nil
 }
 
-func (r *IamMemberListResource) readFilters(ctx context.Context, req list.ListRequest) (roleFilter string, memberFilter String, diags diag.Diagnostics) {
+func (r *IamMemberListResource) readFilters(ctx context.Context, req list.ListRequest) (string, string, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	roleFilter := ""
 	memberFilter := ""
 
 	if r.listCallConfig.EnableRoleFilter {
 		var v types.String
-		diags.Append(req.Config.GetAttributes(ctx, path.Root("role"), &v)...)
+		diags.Append(req.Config.GetAttribute(ctx, path.Root("role"), &v)...)
 		if !v.IsNull() && !v.IsUnknown() {
 			roleFilter = v.ValueString()
 		}
