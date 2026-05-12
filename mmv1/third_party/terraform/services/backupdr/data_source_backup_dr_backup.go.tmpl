@@ -227,7 +227,7 @@ func flattenDataSourceBackupDRBackupsComputeInstanceBackupProperties(v interface
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["guest_flush"] = flattenDataSourceBackupDRBackupsComputeInstanceBackupPropertiesGuestFlush(original["guestFlush"], d, config)
+	transformed["guest_flush"] = original["guestFlush"]
 	return []interface{}{transformed}
 }
 
