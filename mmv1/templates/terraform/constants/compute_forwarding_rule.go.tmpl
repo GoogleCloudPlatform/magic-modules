@@ -19,8 +19,12 @@ func forwardingRuleCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 	// the existing target was also a PSC service attachment.
 	if diff.Id() != "" && diff.HasChange("target") {
 		oldTarget, newTarget := diff.GetChange("target")
-		if target, ok := newTarget.(string); ok && strings.Contains(target, "/serviceAttachments/") {
-			if oldTargetStr, ok := oldTarget.(string); ok && strings.Contains(oldTargetStr, "/serviceAttachments/") {
+		oldTargetStr, oldOk := oldTarget.(string)
+		newTargetStr, newOk := newTarget.(string)
+
+		// Check if there is an actual semantic change, ignoring v1 vs beta differences
+		if oldOk && newOk && !tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId("target", oldTargetStr, newTargetStr, nil) {
+			if strings.Contains(newTargetStr, "/serviceAttachments/") && strings.Contains(oldTargetStr, "/serviceAttachments/") {
 				diff.ForceNew("target")
 			}
 		}
