@@ -368,6 +368,7 @@ resource "google_database_migration_service_connection_profile" "source" {
     port     = 5432
     username = "postgres"
     password = "P@ssw0rd!"
+    database = "template1"
     ssl {
       type = "REQUIRED"
     }
