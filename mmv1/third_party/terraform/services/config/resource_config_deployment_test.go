@@ -118,6 +118,16 @@ resource "google_project_iam_member" "network_admin" {
   member  = "serviceAccount:${google_service_account.sa.email}"
 }
 
+resource "google_cloudbuild_worker_pool" "pool" {
+  name = "wp-%{random_suffix}"
+  location = "us-central1"
+  worker_config {
+    disk_size_gb = 100
+    machine_type = "e2-standard-8"
+    no_external_ip = false
+  }
+}
+
 resource "google_config_deployment" "basic" {
   name            = "basic-deployment-%{random_suffix}"
   location        = "us-central1"
@@ -130,6 +140,8 @@ resource "google_config_deployment" "basic" {
 
   quota_validation          = "ENABLED"
   import_existing_resources = true
+  tf_version_constraint     = "=1.5.7"
+  worker_pool               = google_cloudbuild_worker_pool.pool.id
 
   terraform_blueprint {
     git_source {
