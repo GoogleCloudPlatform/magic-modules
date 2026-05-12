@@ -36,9 +36,8 @@ func TestAccDataSourceGoogleCloudBackupDRBackup_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-                Config: testAccDataSourceGoogleCloudBackupDRBackup_basic(context),
-                Check:  resource.ComposeTestCheckFunc(
-                    resource.TestCheckResourceAttr("data.google_backup_dr_backup.foo", "name", name)),
+				Config: testAccDataSourceGoogleCloudBackupDRBackup_basic(context),
+				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("data.google_backup_dr_backup.foo", "name", name)),
 			},
 		},
 	})
