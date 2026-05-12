@@ -2544,7 +2544,8 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"min_cpu_platform":                   c["minCpuPlatform"],
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
 		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
-		"taint":                              flattenEffectiveTaints(c["taints"]),
+		// TODO: need to differentiate the new resource and existing resource
+		// "taint":                              flattenEffectiveTaints(c["taints"]),
 		"workload_metadata_config":           flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
 		"confidential_nodes":                 flattenConfidentialNodes(c["confidentialNodes"]),
 		"boot_disk_kms_key":                  c["bootDiskKmsKey"],
