@@ -4,12 +4,12 @@
         return fmt.Errorf("network_resources: At least one network_resources entry must be specified for cluster creation")
     }
 
-    networkRes, ok := v.(map[string]interface{})
+    networkSet, ok := v.(*schema.Set)
     if !ok {
         return fmt.Errorf("network_resources: internal error - unexpected type: %T", v)
     }
 
-    if len(networkRes) == 0 {
+    if networkSet.Len() == 0 {
         return fmt.Errorf("network_resources: At least one network_resources entry must be specified for cluster creation")
     }
     return nil
