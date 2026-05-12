@@ -1,0 +1,15 @@
+    v, ok := d.GetOk("network_resources")
+    // Check if the field is set and not empty
+    if !ok {
+        return fmt.Errorf("network_resources: At least one network_resources entry must be specified for cluster creation")
+    }
+
+    networkRes, ok := v.(map[string]interface{})
+    if !ok {
+        return fmt.Errorf("network_resources: internal error - unexpected type: %T", v)
+    }
+
+    if len(networkRes) == 0 {
+        return fmt.Errorf("network_resources: At least one network_resources entry must be specified for cluster creation")
+    }
+    return nil

@@ -1,3 +1,4 @@
+
 # Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +38,7 @@ async:
     resource_inside_response: true
 custom_code:
   constants: templates/terraform/custom_code/hypercomputecluster_cluster_storage_resources_hash.go.tmpl
+  pre_create: templates/terraform/custom_code/hypercomputecluster_cluster_pre_create.go.tmpl
 autogen_status: Q2x1c3Rlcg==
 parameters:
   - name: location
