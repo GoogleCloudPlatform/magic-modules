@@ -153,6 +153,12 @@ properties:
       If set to true, will skip validations for the migration job.
     url_param_only: true
     default_value: false
+  - name: stopOnWarnings
+    type: Boolean
+    description: |
+      If set to true, will stop the Terraform apply if there are validation warnings.
+    url_param_only: true
+    default_value: false
   - name: state
     type: Enum
     description: |
