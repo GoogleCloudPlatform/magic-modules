@@ -1,70 +1,70 @@
 package netapp_test
 
 import (
-  "testing"
+	"testing"
 
-  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 func TestAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_update(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckNetappVolumeReplicationDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_basic(context),
-      },
-      {
-        ResourceName:            "google_netapp_volume_replication.test_replication",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
-      },
-      {
-        Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_stop(context),
-      },
-      {
-        ResourceName:            "google_netapp_volume_replication.test_replication",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
-      },
-      {
-        Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_resume(context),
-      },
-      {
-        ResourceName:            "google_netapp_volume_replication.test_replication",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
-      },
-      {
-        Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_update(context),
-      },
-      {
-        ResourceName:            "google_netapp_volume_replication.test_replication",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappVolumeReplicationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_basic(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume_replication.test_replication",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_stop(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume_replication.test_replication",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_resume(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume_replication.test_replication",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_update(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume_replication.test_replication",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
+			},
+		},
+	})
 }
 
 // Basic replication
 func testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_basic(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -124,7 +124,7 @@ resource "google_netapp_volume_replication" "test_replication" {
 
 // Update parameters
 func testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_update(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -191,7 +191,7 @@ resource "google_netapp_volume_replication" "test_replication" {
 
 // Stop replication
 func testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_stop(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -258,7 +258,7 @@ resource "google_netapp_volume_replication" "test_replication" {
 
 // resume replication
 func testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_resume(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }

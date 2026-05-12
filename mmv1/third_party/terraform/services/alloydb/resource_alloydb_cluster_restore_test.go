@@ -1,14 +1,14 @@
 package alloydb_test
 
 import (
-  "regexp"
-  "testing"
+	"regexp"
+	"testing"
 
-  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-provider-google/google/services/backupdr"
-  "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/backupdr"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 /*
@@ -18,74 +18,74 @@ import (
 // Restore tests depend on instances and backups being taken, which can take up to 10 minutes. Since the instance doesn't change in between tests,
 // we condense everything into individual test cases.
 func TestAccAlloydbCluster_restore(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccAlloydbClusterAndInstanceAndBackup(context),
-      },
-      {
-        ResourceName:            "google_alloydb_cluster.source",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
-      },
-      {
-        // Invalid input check - cannot pass in both sources
-        Config:      testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context),
-        ExpectError: regexp.MustCompile("\"restore_continuous_backup_source\": conflicts with restore_backup_source"),
-      },
-      {
-        // Invalid input check - both source cluster and point in time are required
-        Config:      testAccAlloydbClusterAndInstanceAndBackup_SourceClusterAndPointInTimeRequired(context),
-        ExpectError: regexp.MustCompile("The argument \"point_in_time\" is required, but no definition was found."),
-      },
-      {
-        // Validate backup restore succeeds
-        Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackup(context),
-      },
-      {
-        ResourceName:            "google_alloydb_cluster.restored_from_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "restore_backup_source"},
-      },
-      {
-        // Validate PITR succeeds
-        Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime(context),
-      },
-      {
-        ResourceName:            "google_alloydb_cluster.restored_from_point_in_time",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "restore_continuous_backup_source"},
-      },
-      {
-        // Make sure updates work without recreating the clusters
-        Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowedUpdate(context),
-      },
-      {
-        Config:      testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_NotAllowedUpdate(context),
-        ExpectError: regexp.MustCompile("the plan calls for this resource to be\ndestroyed"),
-      },
-      {
-        Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowDestroy(context),
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbClusterAndInstanceAndBackup(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.source",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
+			},
+			{
+				// Invalid input check - cannot pass in both sources
+				Config:      testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context),
+				ExpectError: regexp.MustCompile("\"restore_continuous_backup_source\": conflicts with restore_backup_source"),
+			},
+			{
+				// Invalid input check - both source cluster and point in time are required
+				Config:      testAccAlloydbClusterAndInstanceAndBackup_SourceClusterAndPointInTimeRequired(context),
+				ExpectError: regexp.MustCompile("The argument \"point_in_time\" is required, but no definition was found."),
+			},
+			{
+				// Validate backup restore succeeds
+				Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackup(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.restored_from_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "restore_backup_source"},
+			},
+			{
+				// Validate PITR succeeds
+				Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.restored_from_point_in_time",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "restore_continuous_backup_source"},
+			},
+			{
+				// Make sure updates work without recreating the clusters
+				Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowedUpdate(context),
+			},
+			{
+				Config:      testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_NotAllowedUpdate(context),
+				ExpectError: regexp.MustCompile("the plan calls for this resource to be\ndestroyed"),
+			},
+			{
+				Config: testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowDestroy(context),
+			},
+		},
+	})
 }
 
 func testAccAlloydbClusterAndInstanceAndBackup(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
@@ -124,7 +124,7 @@ data "google_compute_network" "default" {
 
 // Cannot restore if multiple sources are present
 func testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
@@ -187,7 +187,7 @@ data "google_compute_network" "default" {
 
 // Cannot restore if multiple sources are present
 func testAccAlloydbClusterAndInstanceAndBackup_SourceClusterAndPointInTimeRequired(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
@@ -247,7 +247,7 @@ data "google_compute_network" "default" {
 }
 
 func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackup(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
@@ -307,7 +307,7 @@ data "google_compute_network" "default" {
 // The source cluster, instance, and backup should all exist prior to this being invoked. Otherwise the PITR restore will not succeed
 // due to the time being too early.
 func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
@@ -388,7 +388,7 @@ data "google_compute_network" "default" {
 // This updates the PITR and backup restored clusters by adding a continuous backup configuration. This can be done in place
 // and does not require re-creating the cluster from scratch.
 func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowedUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
@@ -479,7 +479,7 @@ data "google_compute_network" "default" {
 // Updating the source cluster, point in time, or source backup are not allowed. This type of operation would
 // require deleting and recreating the cluster
 func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_NotAllowedUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
@@ -579,7 +579,7 @@ data "google_compute_network" "default" {
 // The source cluster, instance, and backup should all exist prior to this being invoked. Otherwise the PITR restore will not succeed
 // due to the time being too early.
 func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFromPointInTime_AllowDestroy(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
   location     = "us-central1"
@@ -649,59 +649,59 @@ data "google_compute_network" "default" {
 }
 
 func TestAccAlloydbCluster_restoreFromBackupDrBackup(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  // Bootstrap the BackupDR vault
-  backupVaultID := "bv-test"
-  location := "us-central1"
-  project := envvar.GetTestProjectFromEnv()
+	// Bootstrap the BackupDR vault
+	backupVaultID := "bv-test"
+	location := "us-central1"
+	project := envvar.GetTestProjectFromEnv()
 
-  context := map[string]interface{}{
-    "random_suffix":   acctest.RandString(t, 10),
-    "project":         project,
-    "location":        location,
-    "backup_vault_id": backupVaultID,
-    "backup_vault":    backupdr.BootstrapBackupDRVault(t, backupVaultID, location),
-    "network_name":    servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-  }
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"project":         project,
+		"location":        location,
+		"backup_vault_id": backupVaultID,
+		"backup_vault":    backupdr.BootstrapBackupDRVault(t, backupVaultID, location),
+		"network_name":    servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccAlloydbCluster_restoreFromBackupDrBackup(context),
-        Check: resource.ComposeAggregateTestCheckFunc(
-          resource.TestCheckResourceAttr("google_alloydb_cluster.default", "backupdr_backup_source.#", "1"),
-          resource.TestCheckResourceAttrSet("google_alloydb_cluster.default", "backupdr_backup_source.0.backup"),
-        ),
-      },
-      {
-        ResourceName:            "google_alloydb_cluster.default",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"deletion_protection", "restore_backupdr_backup_source"},
-      },
-      {
-        Config: testAccAlloydbCluster_restoreFromBackupDrBackup_AllowedUpdate(context),
-        Check: resource.ComposeTestCheckFunc(
-          resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
-          resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "20"),
-        ),
-      },
-      {
-        Config: testAccAlloydbCluster_pointInTimeRestoreFromBackupDrDataSource(context),
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_restoreFromBackupDrBackup(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "backupdr_backup_source.#", "1"),
+					resource.TestCheckResourceAttrSet("google_alloydb_cluster.default", "backupdr_backup_source.0.backup"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "restore_backupdr_backup_source"},
+			},
+			{
+				Config: testAccAlloydbCluster_restoreFromBackupDrBackup_AllowedUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "continuous_backup_config.0.recovery_window_days", "20"),
+				),
+			},
+			{
+				Config: testAccAlloydbCluster_pointInTimeRestoreFromBackupDrDataSource(context),
+			},
+		},
+	})
 }
 
 func testAccAlloydbCluster_restoreFromBackupDrBackup(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -802,7 +802,7 @@ resource "google_alloydb_cluster" "default" {
 }
 
 func testAccAlloydbCluster_restoreFromBackupDrBackup_AllowedUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -908,7 +908,7 @@ resource "google_alloydb_cluster" "default" {
 }
 
 func testAccAlloydbCluster_pointInTimeRestoreFromBackupDrDataSource(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }

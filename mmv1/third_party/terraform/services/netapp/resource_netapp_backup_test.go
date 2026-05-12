@@ -1,51 +1,51 @@
 package netapp_test
 
 import (
-  "testing"
+	"testing"
 
-  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 func TestAccNetappBackup_NetappBackupFull_update(t *testing.T) {
-  context := map[string]interface{}{
-    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccNetappBackup_NetappBackupFromVolumeSnapshot(context),
-      },
-      {
-        ResourceName:            "google_netapp_backup.test_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      },
-      {
-        Config: testAccNetappBackup_NetappBackupFromVolumeSnapshot_update(context),
-      },
-      {
-        ResourceName:            "google_netapp_backup.test_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappBackup_NetappBackupFromVolumeSnapshot(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+			{
+				Config: testAccNetappBackup_NetappBackupFromVolumeSnapshot_update(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+		},
+	})
 }
 
 func testAccNetappBackup_NetappBackupFromVolumeSnapshot(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -109,7 +109,7 @@ resource "google_netapp_backup" "test_backup" {
 }
 
 func testAccNetappBackup_NetappBackupFromVolumeSnapshot_update(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -173,34 +173,34 @@ resource "google_netapp_backup" "test_backup" {
 }
 
 func TestAccNetappBackup_NetappFlexBackup(t *testing.T) {
-  context := map[string]interface{}{
-    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccNetappBackup_FlexBackup(context),
-      },
-      {
-        ResourceName:            "google_netapp_backup.test_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappBackup_FlexBackup(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+		},
+	})
 }
 
 func testAccNetappBackup_FlexBackup(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -266,34 +266,34 @@ resource "google_netapp_backup" "test_backup" {
 }
 
 func TestAccNetappBackup_NetappIntegratedBackup(t *testing.T) {
-  context := map[string]interface{}{
-    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccNetappBackup_IntegratedBackup(context),
-      },
-      {
-        ResourceName:            "google_netapp_backup.test_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappBackup_IntegratedBackup(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+		},
+	})
 }
 
 func testAccNetappBackup_IntegratedBackup(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -353,43 +353,43 @@ resource "google_netapp_backup" "test_backup" {
 }
 
 func TestAccNetappBackup_NetappImmutableBackup(t *testing.T) {
-  context := map[string]interface{}{
-    "network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccNetappBackup_ImmutableBackup(context),
-      },
-      {
-        ResourceName:            "google_netapp_backup.test_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      },
-      {
-        Config: testAccNetappBackup_ImmutableBackupUpdate(context),
-      },
-      {
-        ResourceName:            "google_netapp_backup.test_backup",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappBackup_ImmutableBackup(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+			{
+				Config: testAccNetappBackup_ImmutableBackupUpdate(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+		},
+	})
 }
 
 func testAccNetappBackup_ImmutableBackup(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -456,7 +456,7 @@ resource "google_netapp_backup" "test_backup" {
 }
 
 func testAccNetappBackup_ImmutableBackupUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
