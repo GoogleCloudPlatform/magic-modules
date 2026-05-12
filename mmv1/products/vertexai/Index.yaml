@@ -37,6 +37,8 @@ async:
     resource_inside_response: true
 custom_code:
   custom_update: 'templates/terraform/custom_update/vertex_ai_index.go.tmpl'
+sweeper:
+  identifier_field: 'displayName'
 examples:
   - name: 'vertex_ai_index'
     min_version: beta

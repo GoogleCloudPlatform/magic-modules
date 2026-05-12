@@ -1,7 +1,5 @@
 package chronicle_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
 
@@ -28,7 +26,7 @@ func TestAccChronicleDashboardChart_chronicleDashboardchartFullExample_update(t 
 			{
 				Config: testAccChronicleDashboardChart_full(context),
 			},
-      {
+			{
 				ResourceName:            "google_chronicle_dashboard_chart.my_chart",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -42,7 +40,7 @@ func TestAccChronicleDashboardChart_chronicleDashboardchartFullExample_update(t 
 					},
 				},
 			},
-      {
+			{
 				ResourceName:            "google_chronicle_dashboard_chart.my_chart",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -50,13 +48,13 @@ func TestAccChronicleDashboardChart_chronicleDashboardchartFullExample_update(t 
 			},
 			{
 				Config: testAccChronicleDashboardChart_update_map_chart(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_chronicle_dashboard_chart.my_chart", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
-      {
+			{
 				ResourceName:            "google_chronicle_dashboard_chart.my_chart",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -64,13 +62,13 @@ func TestAccChronicleDashboardChart_chronicleDashboardchartFullExample_update(t 
 			},
 			{
 				Config: testAccChronicleDashboardChart_update_pie_chart(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_chronicle_dashboard_chart.my_chart", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
-      {
+			{
 				ResourceName:            "google_chronicle_dashboard_chart.my_chart",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -78,13 +76,13 @@ func TestAccChronicleDashboardChart_chronicleDashboardchartFullExample_update(t 
 			},
 			{
 				Config: testAccChronicleDashboardChart_update_bar_chart_with_table(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_chronicle_dashboard_chart.my_chart", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
-      {
+			{
 				ResourceName:            "google_chronicle_dashboard_chart.my_chart",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -92,13 +90,13 @@ func TestAccChronicleDashboardChart_chronicleDashboardchartFullExample_update(t 
 			},
 			{
 				Config: testAccChronicleDashboardChart_update_gauge_chart(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_chronicle_dashboard_chart.my_chart", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
-      {
+			{
 				ResourceName:            "google_chronicle_dashboard_chart.my_chart",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -106,7 +104,7 @@ func TestAccChronicleDashboardChart_chronicleDashboardchartFullExample_update(t 
 			},
 			{
 				Config: testAccChronicleDashboardChart_update_text_tile_complete(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_chronicle_dashboard_chart.my_chart", plancheck.ResourceActionUpdate),
 					},
@@ -793,5 +791,3 @@ resource "google_chronicle_dashboard_chart" "my_chart" {
   }
 }`
 }
-
-{{- end }}

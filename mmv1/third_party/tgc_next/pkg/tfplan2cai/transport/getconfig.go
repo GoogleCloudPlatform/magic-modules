@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/envvar"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 )
 
@@ -19,7 +20,7 @@ func NewConfig(ctx context.Context, project, zone, region string, offline bool, 
 	}
 
 	if cfg.Project == "" {
-		cfg.Project = transport_tpg.MultiEnvSearch([]string{
+		cfg.Project = envvar.MultiEnvSearch([]string{
 			"GOOGLE_PROJECT",
 			"GOOGLE_CLOUD_PROJECT",
 			"GCLOUD_PROJECT",
@@ -28,17 +29,17 @@ func NewConfig(ctx context.Context, project, zone, region string, offline bool, 
 	}
 
 	// Search for default credentials
-	cfg.Credentials = transport_tpg.MultiEnvSearch([]string{
+	cfg.Credentials = envvar.MultiEnvSearch([]string{
 		"GOOGLE_CREDENTIALS",
 		"GOOGLE_CLOUD_KEYFILE_JSON",
 		"GCLOUD_KEYFILE_JSON",
 	})
 
-	cfg.AccessToken = transport_tpg.MultiEnvSearch([]string{
+	cfg.AccessToken = envvar.MultiEnvSearch([]string{
 		"GOOGLE_OAUTH_ACCESS_TOKEN",
 	})
 
-	cfg.ImpersonateServiceAccount = transport_tpg.MultiEnvSearch([]string{
+	cfg.ImpersonateServiceAccount = envvar.MultiEnvSearch([]string{
 		"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 	})
 
