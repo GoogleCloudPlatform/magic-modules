@@ -175,9 +175,6 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 func testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
-	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	serviceAccount := acctest.BootstrapServiceAccount(t, "acm-ingress-upd", initialServiceAccount)
-
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
@@ -190,7 +187,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest(t *test
 				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step1(org, policyTitle, perimeterTitle),
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitle, serviceAccount),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitle),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
@@ -244,9 +241,9 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 `, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
-// Step 2: Update to identities (service account) + sources (access_level), roles instead of operations
-// Covers update of: identities, sources.access_level, roles (replaces operations)
-func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitleName, serviceAccount string) string {
+// Step 2: Update to identity_type=ANY_USER_ACCOUNT + sources (access_level), roles instead of operations
+// Covers update of: identity_type (changed), sources.access_level, roles (replaces operations)
+func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -266,7 +263,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   title     = "ingress policy update test"
   ingress_from {
-    identities = ["serviceAccount:%s"]
+    identity_type = "ANY_USER_ACCOUNT"
     sources {
       access_level = google_access_context_manager_access_level.update-test.name
     }
@@ -276,7 +273,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
     roles     = ["roles/bigquery.admin"]
   }
 }
-`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName), serviceAccount)
+`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
 // Step 3: Update to sources.resource (project), operations with different service + method_selectors
@@ -284,6 +281,18 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step3(org, policyTitle, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 %s
+
+resource "google_access_context_manager_access_level" "update-test" {
+  parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/updatetestlevel"
+  title       = "updatetestlevel"
+  description = "Access level for ingress update test"
+  basic {
+    conditions {
+      ip_subnetworks = ["192.0.4.0/24"]
+    }
+  }
+}
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name

@@ -174,9 +174,6 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-i
 func testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
-	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	serviceAccount := acctest.BootstrapServiceAccount(t, "acm-egress-upd", initialServiceAccount)
-
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
@@ -189,7 +186,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest(t *testi
 				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step1(org, policyTitle, perimeterTitle),
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitle, projectNumber, serviceAccount),
+				Config: testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitle, projectNumber),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
@@ -242,9 +239,9 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 `, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
-// Step 2: Update to identities (service account) + source_restriction + sources (resource), roles + resources
-// Covers update of: identities, source_restriction, sources.resource, resources, roles
-func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitleName, projectNumber, serviceAccount string) string {
+// Step 2: Update to identity_type=ANY_SERVICE_ACCOUNT + source_restriction + sources (resource), roles + resources
+// Covers update of: identity_type (changed), source_restriction, sources.resource, resources, roles
+func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -252,7 +249,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   title     = "egress policy update test"
   egress_from {
-    identities = ["serviceAccount:%s"]
+    identity_type = "ANY_SERVICE_ACCOUNT"
     sources {
       resource = "projects/%s"
     }
@@ -263,13 +260,15 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
     roles     = ["roles/bigquery.admin"]
   }
 }
-`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), serviceAccount, projectNumber)
+`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber)
 }
 
-// Step 3: Update to sources (access_level) + operations (bigquery) + external_resources
-// Covers update of: sources.access_level, operations.service_name (changed), method_selectors.method,
+// Step 3: Update to sources (access_level) + external_resources + operations (bigquery, no selectors)
+// Covers update of: sources.access_level, external_resources, operations.service_name (changed)
 //
-//	method_selectors.permission, external_resources
+// Note: method_selectors.method is already covered in step 1. With external_resources,
+// the API requires service_name=bigquery.googleapis.com and only allows permission-based
+// method_selectors (BigQuery doesn't support any), so we omit method_selectors here.
 func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step3(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
@@ -300,12 +299,6 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
     external_resources = ["s3://bucket-update-test"]
     operations {
       service_name = "bigquery.googleapis.com"
-      method_selectors {
-        method = "BigQueryStorage.ReadRows"
-      }
-      method_selectors {
-        permission = "bigquery.jobs.get"
-      }
     }
   }
 }
