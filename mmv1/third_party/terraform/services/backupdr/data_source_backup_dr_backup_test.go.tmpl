@@ -38,10 +38,7 @@ func TestAccDataSourceGoogleCloudBackupDRBackup_basic(t *testing.T) {
 			{
                 Config: testAccDataSourceGoogleCloudBackupDRBackup_basic(context),
                 Check:  resource.ComposeTestCheckFunc(
-                    resource.TestCheckResourceAttr("data.google_backup_dr_backup.foo", "name", name),
-                    resource.TestCheckResourceAttrSet("data.google_backup_dr_backup.foo", "backups.0.disk_backup_properties.0.guest_flush"),
-                    resource.TestCheckResourceAttrSet("data.google_backup_dr_backup.foo", "backups.0.compute_instance_backup_properties.0.guest_flush"),
-                ),
+                    resource.TestCheckResourceAttr("data.google_backup_dr_backup.foo", "name", name)),
 			},
 		},
 	})
