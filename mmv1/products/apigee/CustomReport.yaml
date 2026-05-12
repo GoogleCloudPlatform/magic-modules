@@ -47,7 +47,6 @@ examples:
   - name: 'apigee_custom_report_basic_test'
     primary_resource_id: 'apigee_custom_report'
     vars:
-      project_id: 'proj'
       network_name: 'apigee-network'
       range_name: 'apigee-range'
       display_name: 'my_custom_report'
@@ -65,7 +64,6 @@ examples:
   - name: 'apigee_custom_report_full_test'
     primary_resource_id: 'apigee_custom_report'
     vars:
-      project_id: 'proj'
       network_name: 'apigee-network'
       range_name: 'apigee-range'
       display_name: 'my_detailed_report'
