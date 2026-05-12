@@ -6,3 +6,31 @@ func resourceHypercomputeclusterClusterResourceHash(v interface{}) int {
 	}
 	return schema.HashString(buf.String())
 }
+
+func hypercomputeclusterClusterCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	log.Printf("[DEBUG] Entering hypercomputeclusterClusterCustomizeDiff")
+	// We only want to run this validation on resource creation.
+	if d.Id() == "" {
+		log.Printf("[DEBUG] New resource, checking network_resources")
+		v, ok := d.GetOk("network_resources")
+		if !ok {
+			log.Printf("[DEBUG] network_resources not set or empty")
+			return fmt.Errorf("network_resources: At least one network_resources entry must be specified for cluster creation")
+		}
+
+		networkSet, ok := v.(*schema.Set)
+		if !ok {
+			log.Printf("[ERROR] network_resources type assertion failed, got %T", v)
+			return fmt.Errorf("network_resources: internal error - unexpected type: %T, expected *schema.Set", v)
+		}
+
+		if networkSet.Len() == 0 {
+			log.Printf("[DEBUG] network_resources set has 0 elements")
+			return fmt.Errorf("network_resources: network_resources set is empty, at least one entry must be specified for cluster creation")
+		}
+		log.Printf("[DEBUG] network_resources check passed with %d elements", networkSet.Len())
+	} else {
+		log.Printf("[DEBUG] Existing resource (ID: %s), skipping network_resources create check", d.Id())
+	}
+	return nil
+}
