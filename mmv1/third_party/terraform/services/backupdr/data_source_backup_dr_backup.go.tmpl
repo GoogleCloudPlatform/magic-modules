@@ -51,10 +51,19 @@ func DataSourceGoogleCloudBackupDRBackup() *schema.Resource {
                         Computed: true,
                         Description: `The time when the backup was created.`,
                     },
-                    "guest_flush": {
-                        Type:     schema.TypeBool,
+                    "disk_backup_properties": {
+                        Type:     schema.TypeList,
                         Computed: true,
-                        Description: `Indicates whether the backup is application-consistent.`,
+                        Description: `Disk related properties of the backup.`,
+                        Elem: &schema.Resource{
+                            Schema: map[string]*schema.Schema{
+                                "guest_flush": {
+                                    Type:     schema.TypeBool,
+                                    Computed: true,
+                                    Description: `Indicates whether the backup is application-consistent.`,
+                                },
+                            },
+                        },
                     },
                     "compute_instance_backup_properties": {
                         Type:     schema.TypeList,
@@ -178,7 +187,7 @@ func flattenDataSourceBackupDRBackups(v interface{}, d *schema.ResourceData, con
             "backup_vault_id": flattenDataSourceBackupDRBackupsBackupVaultId(original["backupVaultId"], d, config),
             "data_source_id": flattenDataSourceBackupDRBackupsDataSourceId(original["dataSourceId"], d, config),
             "create_time": flattenDataSourceBackupDRBackupsCreateTime(original["createTime"], d, config),
-            "guest_flush":     flattenDataSourceBackupDRBackupsGuestFlush(original["guestFlush"], d, config),
+            "disk_backup_properties":             flattenDataSourceBackupDRBackupsDiskBackupProperties(original["diskBackupProperties"], d, config),
             "compute_instance_backup_properties": flattenDataSourceBackupDRBackupsComputeInstanceBackupProperties(original["computeInstanceBackupProperties"], d, config),
         })
     }
@@ -222,13 +231,16 @@ func flattenDataSourceBackupDRBackupsComputeInstanceBackupProperties(v interface
 	return []interface{}{transformed}
 }
 
-func flattenDataSourceBackupDRBackupsComputeInstanceBackupPropertiesGuestFlush(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
+func flattenDataSourceBackupDRBackupsDiskBackupProperties(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	transformed := make(map[string]interface{})
+	transformed["guest_flush"] = original["guestFlush"]
+	return []interface{}{transformed}
 }
 
-func flattenDataSourceBackupDRBackupsGuestFlush(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-    return v
-}
 
 
 func init() {
