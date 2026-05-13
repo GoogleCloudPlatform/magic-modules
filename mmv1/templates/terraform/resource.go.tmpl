@@ -884,7 +884,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{-             end}}
 
 {{/*     We need to decide what encoder to use here - if there's an update encoder, use that! -*/}}
-{{              if and $.CustomCode.UpdateEncoder (not $.NestedQuery) -}}
+{{              if $.CustomCode.UpdateEncoder -}}
     obj, err = resource{{ $.ResourceName -}}UpdateEncoder(d, meta, obj)
     if err != nil {
         return err
@@ -1066,7 +1066,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         }
 {{-                  end -}}{{/*range propsByKey*/}}
 {{/*     We need to decide what encoder to use here - if there's an update encoder, use that! -*/}}
-{{                  if and $.CustomCode.UpdateEncoder (not $.NestedQuery) -}}
+{{                  if $.CustomCode.UpdateEncoder -}}
     obj, err = resource{{ $.ResourceName -}}UpdateEncoder(d, meta, obj)
     if err != nil {
         return err
@@ -1340,7 +1340,7 @@ func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface
 {{ customTemplate $ $.CustomCode.Encoder false -}}
 }
 {{ end -}}
-{{- if and $.CustomCode.UpdateEncoder (not $.NestedQuery) }}
+{{- if $.CustomCode.UpdateEncoder }}
 
 func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
     {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
