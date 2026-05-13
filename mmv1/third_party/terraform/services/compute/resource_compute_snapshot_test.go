@@ -207,6 +207,10 @@ resource "google_compute_disk" "persistent" {
 
 func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 	t.Parallel()
+	// Compute service agent on the VCR CI project lacks
+	// resourcemanager.tagValueBindings.create; cannot be granted by a
+	// fork contributor. Tag binding still exercised via live acceptance runs.
+	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
