@@ -1,6 +1,12 @@
 import (
+	"bytes"
+	"context"
+	"fmt"
+	"log"
 	"net"
 	"github.com/apparentlymart/go-cidr/cidr"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 )
 
 // Whether the IP CIDR change shrinks the block.
@@ -9,14 +15,12 @@ func IsShrinkageIpCidr(_ context.Context, old, new, _ interface{}) bool {
 	_, newCidr, newErr := net.ParseCIDR(new.(string))
 
 	if oldErr != nil || newErr != nil {
-		// This should never happen. The ValidateFunc on the field ensures it.
 		return false
 	}
 
 	oldStart, oldEnd := cidr.AddressRange(oldCidr)
 
 	if newCidr.Contains(oldStart) && newCidr.Contains(oldEnd) {
-		// This is a CIDR range expansion, no need to ForceNew, we have an update method for it.
 		return false
 	}
 
@@ -24,7 +28,6 @@ func IsShrinkageIpCidr(_ context.Context, old, new, _ interface{}) bool {
 }
 
 func sendSecondaryIpRangeIfEmptyDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	// on create, return immediately as we don't need to determine if the value is empty or not
 	if diff.Id() == "" {
 		return nil
 	}
@@ -67,7 +70,7 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	addr_netmask_old := strings.Split(old, "/")
 	addr_netmask_new := strings.Split(new, "/")
 
-	if (!((len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2))) {
+	if !((len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2)) {
 		return false
 	}
 
@@ -86,7 +89,7 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	return addr_equality && netmask_equality
 }
 
-{{ if strings.Contains $.Compiler "terraformgoogleconversion" }}
+{{ if contains $.Compiler "terraformgoogleconversion" }}
 // Dummy schema resource for tfplan2cai compilation
 func ResourceComputeSubnetwork() *schema.Resource {
 	return &schema.Resource{}
