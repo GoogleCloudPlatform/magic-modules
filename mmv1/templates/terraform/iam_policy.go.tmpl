@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
@@ -37,38 +36,6 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 	transport_tpg "{{ $.ImportPath }}/transport"
 )
-
-
-// New{{ $.ResourceName }}IamMemberListResource returns the Terraform list resource for {{ $.TerraformName }}_iam_member.
-func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
-	return tpgiamresource.NewIamMemberListResource(
-		"{{ $.TerraformName }}_iam_member",
-		tpgiamresource.ResourceIamMember(
-			{{ $.ResourceName }}IamSchema,
-			{{ $.ResourceName }}IamUpdaterProducer,
-			{{ $.ResourceName }}IdParseFunc,
-			tpgiamresource.IamWithResourceIdentity({{ $.ResourceName }}IamResourceIdentityParser),
-		),
-		{{ $.ResourceName }}IamUpdaterProducer,
-		tpgiamresource.IamMemberListCallConfig{
-			ResourceNameField: "{{ $.IamParentResourceName }}",
-			EnableRoleFilter: true,
-			EnableMemberFilter: true,
-			{{- if ne $.TerraformName "google_project" }}
-			ItemName: "{{ $.CollectionUrlKey }}",
-			ListUrlFunc: func(rd *schema.ResourceData, config *transport_tpg.Config) (string, error) {
-				return tpgresource.ReplaceVars(rd, config, "{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}{{ $.BaseUrl }}")
-			},
-			Flattener: func(item map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
-				if v, ok := item["name"].(string); ok {
-					return d.Set("{{ $.IamParentResourceName }}", v)
-				}
-				return fmt.Errorf("list item missing 'name' field")
-			},
-			{{- end }}
-		},
-	)
-}
 
 var (
     _ = regexp.Match
