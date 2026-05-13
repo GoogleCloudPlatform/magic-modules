@@ -43,6 +43,7 @@ references:
   api: https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
+deletion_policy_exclude: true
 has_self_link: true
 collection_url_key: items
 iam_policy:
@@ -194,6 +195,7 @@ virtual_fields:
       When true, the provider will treat removing secondary_ip_range as sending an
       empty list of secondary IP ranges to the API.
       Defaults to false.
+    client_side: true
 properties:
   - name: creationTimestamp
     type: Time
