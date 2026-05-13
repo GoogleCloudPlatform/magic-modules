@@ -614,6 +614,7 @@ func TestAccDNSRecordSet_importBlockWithResourceIdentity(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "project", project),
 					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "managed_zone", zoneName),
 					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "name", recordName),
+					resource.TestCheckResourceAttr("google_dns_record_set.foobar", "type", "A"),
 				),
 			},
 			{
