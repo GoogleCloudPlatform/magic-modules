@@ -221,8 +221,18 @@ func resourceComputeSubnetworkSecondaryIpRangeCustomDiff(_ context.Context, diff
 		normalizedNew = append(normalizedNew, normalizedItem)
 	}
 
-	oldSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), normalizedOld)
-	newSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), normalizedNew)
+	var hashFunc schema.SchemaSetFunc
+	if ResourceComputeSubnetwork().Schema != nil && ResourceComputeSubnetwork().Schema["secondary_ip_range"] != nil {
+		hashFunc = schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource))
+	} else {
+		hashFunc = func(v interface{}) int {
+			buf := &bytes.Buffer{}
+			json.NewEncoder(buf).Encode(v)
+			return schema.HashString(buf.String())
+		}
+	}
+	oldSet := schema.NewSet(hashFunc, normalizedOld)
+	newSet := schema.NewSet(hashFunc, normalizedNew)
 
 	if oldSet.Equal(newSet) {
 		if err := diff.Clear("secondary_ip_range"); err != nil {
