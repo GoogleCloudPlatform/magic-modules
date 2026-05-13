@@ -12,9 +12,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	googledns "google.golang.org/api/dns/v1"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+func init() {
+	registry.FrameworkListResource{
+		Name:        "google_dns_record_set",
+		ProductName: "dns",
+		Func:        NewGoogleDnsRecordSetListResource,
+	}.Register()
+}
 
 type GoogleDnsRecordSetResource struct {
 	tpgresource.ListResourceMetadata
