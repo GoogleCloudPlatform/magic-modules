@@ -62,7 +62,6 @@ examples:
     primary_resource_id: "my-encryption-spec"
     min_version: "beta"
     exclude_import_test: true
-    skip_vcr: true
     vars:
       project_id: 'my-proj'
       kms_keyring: 'my-keyring'

@@ -17,6 +17,7 @@ resource "google_project_service" "contactcenterinsights" {
   provider = google-beta
   project  = google_project.project.project_id
   service  = "contactcenterinsights.googleapis.com"
+  depends_on = [google_project_service.cloudkms]
 }
 
 resource "time_sleep" "wait_enable_service_api" {
