@@ -544,7 +544,6 @@ func missingBindingsMap(aMap, bMap map[iamBindingKey]map[string]struct{}) map[ia
 func MissingBindings(a, b []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
 	aMap := createIamBindingsMap(a)
 	bMap := createIamBindingsMap(b)
-
 	var results []*cloudresourcemanager.Binding
 	for key, membersSet := range missingBindingsMap(aMap, bMap) {
 		members := make([]string, 0, len(membersSet))
