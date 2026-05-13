@@ -168,18 +168,12 @@ func (s *Step) TestServiceDependencies(resourcePrefixServiceMap map[string]strin
 // underscore-separated tokens end with one of: [scope], [scope,"name"], or
 // [scope,"id"]. Returns scopeName unchanged when nothing matches.
 func (s *Step) ResolveScopeVarKey(scopeName string) string {
+	sources := []map[string]string{s.Vars, s.ResourceIdVars, s.TestEnvVars, s.TestVarsOverrides}
 	has := func(k string) bool {
-		if _, ok := s.Vars[k]; ok {
-			return true
-		}
-		if _, ok := s.ResourceIdVars[k]; ok {
-			return true
-		}
-		if _, ok := s.TestEnvVars[k]; ok {
-			return true
-		}
-		if _, ok := s.TestVarsOverrides[k]; ok {
-			return true
+		for _, m := range sources {
+			if _, ok := m[k]; ok {
+				return true
+			}
 		}
 		return false
 	}
@@ -204,24 +198,11 @@ func (s *Step) ResolveScopeVarKey(scopeName string) string {
 		}
 	}
 	for _, suf := range suffixes {
-		for k := range s.Vars {
-			if endsWith(strings.Split(k, "_"), suf) {
-				return k
-			}
-		}
-		for k := range s.ResourceIdVars {
-			if endsWith(strings.Split(k, "_"), suf) {
-				return k
-			}
-		}
-		for k := range s.TestEnvVars {
-			if endsWith(strings.Split(k, "_"), suf) {
-				return k
-			}
-		}
-		for k := range s.TestVarsOverrides {
-			if endsWith(strings.Split(k, "_"), suf) {
-				return k
+		for _, m := range sources {
+			for k := range m {
+				if endsWith(strings.Split(k, "_"), suf) {
+					return k
+				}
 			}
 		}
 	}
