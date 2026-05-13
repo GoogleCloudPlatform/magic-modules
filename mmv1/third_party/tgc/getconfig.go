@@ -33,7 +33,6 @@ func NewConfig(ctx context.Context, project, zone, region string, offline bool, 
 		"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 	})
 
-	transport_tpg.ConfigureBasePaths(cfg)
 	if !offline {
 		if err := cfg.LoadAndValidate(ctx); err != nil {
 			return nil, errors.Wrap(err, "load and validate config")

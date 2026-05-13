@@ -175,7 +175,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	tmp := strings.Split(src, "projects/")
 	mi_project := strings.Split(tmp[len(tmp)-1], "/")[0]
 
-	miURL := fmt.Sprintf("%sprojects/%s/global/machineImages/%s", config.ComputeBasePath, mi_project, tpl.Name)
+	miURL := fmt.Sprintf("%sprojects/%s/global/machineImages/%s", transport_tpg.BaseUrl(Product, config), mi_project, tpl.Name)
 	miRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
@@ -235,7 +235,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	if err = json.Unmarshal(instanceBytes, &instanceBody); err != nil {
 		return fmt.Errorf("Error processing instance body: %s", err)
 	}
-	insertURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, project, z)
+	insertURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances", transport_tpg.BaseUrl(Product, config), project, z)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",
