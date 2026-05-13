@@ -49,7 +49,7 @@ func sendSecondaryIpRangeIfEmptyDiff(_ context.Context, diff *schema.ResourceDif
 	if configValueIsEmpty && !stateValueIsEmpty {
 		log.Printf("[DEBUG] setting secondary_ip_range to newly empty")
 		diff.SetNew("secondary_ip_range", make([]interface{}, 0))
-		diff.SetNew("self_link", fmt.Sprintf("send_empty_bypass_%d", time.Now().UnixNano()))
+		diff.SetNew("self_link", "send_empty_bypass")
 	}
 
 	return nil
