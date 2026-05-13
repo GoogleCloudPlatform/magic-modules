@@ -69,7 +69,7 @@ resource "google_project_iam_member" "network_admin" {
 }
 
 resource "google_config_deployment" "basic" {
-  name            = "basic-deployment-%{random_suffix}"
+  name            = "tf-test-basic-deployment-%{random_suffix}"
   location        = "us-central1"
   service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
   force_destroy   = true
@@ -119,7 +119,7 @@ resource "google_project_iam_member" "network_admin" {
 }
 
 resource "google_cloudbuild_worker_pool" "pool" {
-  name = "wp-%{random_suffix}"
+  name = "tf-test-wp-%{random_suffix}"
   location = "us-central1"
   worker_config {
     disk_size_gb = 100
@@ -129,7 +129,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
 }
 
 resource "google_config_deployment" "basic" {
-  name            = "basic-deployment-%{random_suffix}"
+  name            = "tf-test-basic-deployment-%{random_suffix}"
   location        = "us-central1"
   service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
   force_destroy   = true
@@ -232,7 +232,7 @@ resource "google_storage_bucket" "artifacts_bucket" {
 }
 
 resource "google_config_deployment" "full" {
-  name            = "full-deployment-%{random_suffix}"
+  name            = "tf-test-full-deployment-%{random_suffix}"
   location        = "us-central1"
   service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
   force_destroy   = true
