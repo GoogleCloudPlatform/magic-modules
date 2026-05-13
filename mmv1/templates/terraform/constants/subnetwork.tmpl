@@ -86,6 +86,13 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	return addr_equality && netmask_equality
 }
 
+{{ if strings.Contains $.Compiler "terraformgoogleconversion" }}
+// Dummy schema resource for tfplan2cai compilation
+func ResourceComputeSubnetwork() *schema.Resource {
+	return &schema.Resource{}
+}
+{{ end }}
+
 func resourceComputeSubnetworkSecondaryIpRangeCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	keys := diff.GetChangedKeysPrefix("secondary_ip_range")
 	if len(keys) == 0 {
