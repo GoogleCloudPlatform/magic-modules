@@ -84,14 +84,15 @@ resource "google_storage_bucket" "test" {
 func testAccStorageBucketListQuery(project string, includeResource bool) string {
 	includeResourceBlock := ""
 	if includeResource {
-		includeResourceBlock = "\n  include_resource = true"
+		includeResourceBlock = "  include_resource = true"
 	}
 
 	return fmt.Sprintf(`
 provider "google" {}
 
 list "google_storage_bucket" "all_in_project" {
-	provider = google%s
+	provider = google
+%s
 	limit    = 1000
 
   config {
