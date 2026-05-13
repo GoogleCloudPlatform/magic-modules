@@ -673,6 +673,50 @@ properties:
               - SSML_VOICE_GENDER_FEMALE
               - SSML_VOICE_GENDER_NEUTRAL
   - type: NestedObject
+    name: 'sipConfig'
+    description: |
+      Configuration for SIP.
+    min_version: beta
+    properties:
+      - type: Boolean
+        name: 'createConversationOnTheFly'
+        description: |
+          Asks Dialogflow Telephony to create the conversation provided in the SIP header on the fly when the call comes in.
+      - type: Boolean
+        name: 'useMultiSdpPorts'
+        description: |
+          Uses multiple ports, each for one SDP media connection.
+      - type: Boolean
+        name: 'inactiveStart'
+        description: |
+          Starts the conversation with inactive SDP directives
+      - type: String
+        name: 'maxAudioRecordingDuration'
+        description: |
+          Max duration for audio recording. Overrides the default value of 15 min. Max value is 8 hours.
+      - type: Boolean
+        name: 'allowVirtualAgentInteraction'
+        description: |
+          Allows interactions with a Dialogflow virtual agent even if the call is connected for SIPREC purposes.
+      - type: Boolean
+        name: 'keepConversationRunning'
+        description: |
+          Keeps the conversation running even if the call is disconnected.
+      - type: Boolean
+        name: 'useProgress'
+        description: |
+          Use 183 Progress instead of 180 Ringing during SDP negotiation.
+      - type: Array
+        name: 'copyInboundCallLegHeaders'
+        description: |
+          List of inbound call leg headers to be copied to outbound call legs created later.
+        item_type:
+          type: String
+      - type: Boolean
+        name: 'ignoreReinviteMediaDirection'
+        description: |
+          Ingores any media direction in the reINVITE SDP offer. Reuse the previous media direction.
+  - type: NestedObject
     name: 'newRecognitionResultNotificationConfig'
     description: |
       Optional. Configuration for publishing transcription intermediate results. Event will be sent in format of ConversationEvent. If configured, the following information will be populated as ConversationEvent Pub/Sub message attributes: - "participant_id" - "participantRole" - "message_id"
