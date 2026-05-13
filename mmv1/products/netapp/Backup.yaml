@@ -60,6 +60,8 @@ async:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 include_in_tgc_next: true
+custom_code:
+  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 examples:
   - name: 'netapp_backup'
     primary_resource_id: 'test_backup'
@@ -70,7 +72,7 @@ examples:
       backup_name: 'test-backup'
       network_name: 'network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 parameters:
   - name: 'location'
     type: String
