@@ -83,7 +83,7 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	return addr_equality && netmask_equality
 }
 
-{{ if contains $.Compiler "terraformgoogleconversion" }}
+{{ if contains $.ProductMetadata.Compiler "terraformgoogleconversion" }}
 // Dummy schema resource for tfplan2cai compilation
 func ResourceComputeSubnetwork() *schema.Resource {
 	return &schema.Resource{}
