@@ -238,10 +238,10 @@ func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta
     }
   }
 
-{{- if $.CustomCode.UpdateEncoder }}
+{{- if $.CustomCode.PatchUpdateEncoder }}
   // Apply resource-specific update encoder logic (e.g. constraint enforcement,
   // ResourceData sync) before overriding the old object.
-  {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
+  {{ customTemplate $ $.CustomCode.PatchUpdateEncoder false -}}
 {{- end }}
 
   // Override old object with new
