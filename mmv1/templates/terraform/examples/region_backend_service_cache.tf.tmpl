@@ -14,7 +14,7 @@ resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
     signed_url_cache_max_age_sec = 7200
   }
 
-  load_balancing_scheme = "EXTERNAL"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
   protocol              = "HTTP"
 
 }
