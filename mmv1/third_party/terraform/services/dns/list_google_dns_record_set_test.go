@@ -45,7 +45,6 @@ func TestAccDNSRecordSetListResource_queryIdentity(t *testing.T) {
 						"project":      knownvalue.StringExact(project),
 						"managed_zone": knownvalue.StringExact(zoneName),
 						"name":         knownvalue.StringExact(recordName),
-						"type":         knownvalue.StringExact("A"),
 					}),
 					querycheck.ExpectLengthAtLeast("google_dns_record_set.all_in_zone", 1),
 				},

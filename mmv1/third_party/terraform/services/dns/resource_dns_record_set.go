@@ -117,10 +117,6 @@ func ResourceDnsRecordSet() *schema.Resource {
 						Type:              schema.TypeString,
 						RequiredForImport: true,
 					},
-					"type": {
-						Type:              schema.TypeString,
-						RequiredForImport: true,
-					},
 				}
 			},
 		},
@@ -512,7 +508,6 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 		"project":      project,
 		"managed_zone": zone,
 		"name":         rrset.Name,
-		"type":         rrset.Type,
 	}); err != nil {
 		return fmt.Errorf("Error setting resource identity: %s", err)
 	}
