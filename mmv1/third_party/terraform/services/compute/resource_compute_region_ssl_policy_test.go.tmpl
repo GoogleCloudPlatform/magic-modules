@@ -413,7 +413,7 @@ resource "google_compute_region_ssl_policy" "foobar" {
 `, resourceName)
 }
 
-func testAccComputeRegionSslPostQuantum(resourceName, pqke string) string {
+func testAccComputeRegionSslPostQuantum(resourceName string, pqke string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_ssl_policy" "postquantum" {
   name                         = "%s"
