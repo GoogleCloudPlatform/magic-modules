@@ -116,6 +116,8 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         min_version: beta
+        sensitive: true
+        is_missing_in_cai: true
       - name: sha256
         type: String
         description: |
