@@ -41,10 +41,17 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
+{{ range $s := $.Res.TestSamples }}
+  {{- if $s.BootstrapIam }}
+    "{{ $.ImportPath  }}/services/resourcemanager"
+    {{ break }}
+  {{- end }}
+{{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 
 	"google.golang.org/api/googleapi"
+
 )
 
 {{if $.Res.CustomCode.TestConstants -}} 
@@ -82,7 +89,7 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	t.Parallel()
 
 	{{- if $s.BootstrapIam }}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 	{{- range $iam := $s.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",

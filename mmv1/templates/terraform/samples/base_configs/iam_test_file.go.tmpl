@@ -16,6 +16,9 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
 	"{{ $.ImportPath }}/tpgresource"
+{{- if $.FirstTestConfig.Sample.BootstrapIam }}
+	"{{ $.ImportPath }}/services/resourcemanager"
+{{- end }}
 )
 
 {{if $.CustomCode.TestConstants -}} 
