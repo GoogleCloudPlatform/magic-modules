@@ -1381,6 +1381,35 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	if d.Id() == "" {
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("Error reading import identity: %s", err)
+		}
+		if identity == nil {
+			return nil, fmt.Errorf("import requires bucket name")
+		}
+
+		nameValue, ok := identity.GetOk("name")
+		if !ok || nameValue.(string) == "" {
+			return nil, fmt.Errorf("import requires bucket name")
+		}
+
+		name := nameValue.(string)
+		if err := d.Set("name", name); err != nil {
+			return nil, fmt.Errorf("Error setting name: %s", err)
+		}
+
+		if projectValue, ok := identity.GetOk("project"); ok && projectValue.(string) != "" {
+			if err := d.Set("project", projectValue.(string)); err != nil {
+				return nil, fmt.Errorf("Error setting project: %s", err)
+			}
+			d.SetId(fmt.Sprintf("%s/%s", projectValue.(string), name))
+		} else {
+			d.SetId(name)
+		}
+	}
+
 	// We need to support project/bucket_name and bucket_name formats. This will allow
 	// importing a bucket that is in a different project than the provider default.
 	// ParseImportID can't be used because having no project will cause an error but it
@@ -2475,11 +2504,23 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := tpgresource.SetLabels(res.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
-		return fmt.Errorf("Error setting terraform_labels: %s", err)
-	}
 	if err := d.Set("effective_labels", res.Labels); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	terraformLabels := make(map[string]string)
+	for key, value := range config.DefaultLabels {
+		terraformLabels[key] = value
+	}
+	if config.AddTerraformAttributionLabel {
+		if _, ok := res.Labels[transport_tpg.AttributionKey]; ok {
+			terraformLabels[transport_tpg.AttributionKey] = transport_tpg.AttributionValue
+		}
+	}
+	for key, value := range d.Get("labels").(map[string]interface{}) {
+		terraformLabels[key] = value.(string)
+	}
+	if err := d.Set("terraform_labels", terraformLabels); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("website", flattenBucketWebsite(res.Website)); err != nil {
 		return fmt.Errorf("Error setting website: %s", err)

@@ -22,8 +22,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-var errStorageBucketListStreamClosed = errors.New("stream closed")
-
 func init() {
 	registry.FrameworkListResource{
 		Name:        "google_storage_bucket",
@@ -52,6 +50,8 @@ func NewGoogleStorageBucketListResource() list.ListResource {
 }
 
 func (listR *GoogleStorageBucketListResource) List(ctx context.Context, listReq list.ListRequest, stream *list.ListResultsStream) {
+    errStorageBucketListStreamClosed := errors.New("stream closed")
+    
 	var data GoogleStorageBucketListModel
 	diags := listReq.Config.Get(ctx, &data)
 	if diags.HasError() {
