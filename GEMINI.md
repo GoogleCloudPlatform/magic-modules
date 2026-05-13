@@ -34,8 +34,7 @@ The repository operates on a triad:
 ---
 
 ## Standard Operating Procedure (SOP)
-
-Every session should follow this 5-step lifecycle. At the beginning of each session, ask the user if they would like to initiate the session setup. 
+The repository supports a structured 5-step lifecycle for formal implementation and debugging tasks. This workflow is **opt-in**. You are aware of the tools and skills listed below, but you should not initiate the lifecycle or ask the user to start it unless they explicitly request it.
 
 ### The 5 Steps:
 
