@@ -106,9 +106,6 @@ func execManageTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 	gaTestFailuresMap := make(map[string][]bool)
 	betaTestFailuresMap := make(map[string][]bool)
 
-	fmt.Println("Getting test status for past 14 days")
-	fmt.Println("date is", now)
-
 	err = lastNDaysTestNonSuccessMap(provider.GA, 14, now, gcs, gaTestFailuresMap)
 	if err != nil {
 		return err
@@ -183,9 +180,7 @@ func closeResolvedTickets(ctx context.Context, gh *github.Client, label string, 
 }
 
 func lastNDaysTestNonSuccessMap(pVersion provider.Version, n int, now time.Time, gcs CloudstorageClient, testFailuresMap map[string][]bool) error {
-	fmt.Println("Getting test status for past", n, "days")
 	for i := 0; i < n; i++ {
-		fmt.Println("Getting test status for date -", i)
 		date := now.AddDate(0, 0, -i)
 		testInfoList, err := getTestInfoList(pVersion, date, gcs)
 		if err != nil {
