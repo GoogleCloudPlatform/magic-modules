@@ -13,7 +13,9 @@
 
 ---
 name: App
-description: Description
+description: Customer Engagement Suite App
+references:
+  api: https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1/projects.locations.apps
 base_url: projects/{{project}}/locations/{{location}}/apps
 self_link: projects/{{project}}/locations/{{location}}/apps/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/apps?appId={{app_id}}
@@ -461,6 +463,13 @@ properties:
       - name: timeZone
         type: String
         description: The time zone of the app from the time zone database, e.g., America/Los_Angeles, Europe/Paris.
+  - name: toolExecutionMode
+    type: String
+    description: |-
+      The tool execution mode for the app.
+      Possible values:
+      PARALLEL
+      SEQUENTIAL
   - name: updateTime
     type: String
     description: Timestamp when the app was last updated.
