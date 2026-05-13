@@ -2880,8 +2880,29 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Fingerprint:     instNetworkInterface.Fingerprint,
 					ForceSendFields: []string{"AliasIpRanges"},
 				}
-				if commonAliasIpRanges := CheckForCommonAliasIp(instNetworkInterface, networkInterface); len(commonAliasIpRanges) > 0 {
-					ni.AliasIpRanges = commonAliasIpRanges
+				oldNiMap, err := tpgresource.ConvertToMap(instNetworkInterface)
+				if err != nil {
+					return fmt.Errorf("Error converting network interface to map: %w", err)
+				}
+				newNiMap, err := tpgresource.ConvertToMap(networkInterface)
+				if err != nil {
+					return fmt.Errorf("Error converting network interface to map: %w", err)
+				}
+				if commonAliasIpRanges := CheckForCommonAliasIp(oldNiMap, newNiMap); len(commonAliasIpRanges) > 0 {
+					typedRanges := make([]*compute.AliasIpRange, 0, len(commonAliasIpRanges))
+					for _, raw := range commonAliasIpRanges {
+						r, ok := raw.(map[string]interface{})
+						if !ok {
+							continue
+						}
+						cidr, _ := r["ipCidrRange"].(string)
+						subnet, _ := r["subnetworkRangeName"].(string)
+						typedRanges = append(typedRanges, &compute.AliasIpRange{
+							IpCidrRange:         cidr,
+							SubnetworkRangeName: subnet,
+						})
+					}
+					ni.AliasIpRanges = typedRanges
 				}
 				niBody, err := tpgresource.ConvertToMap(ni)
 				if err != nil {
@@ -4469,17 +4490,35 @@ func isEmptyServiceAccountBlock(d *schema.ResourceData) bool {
 }
 
 // Alias ip ranges cannot be removed and created at the same time. This checks if there are any unchanged alias ip ranges
-// to be kept in between the PATCH operations on Network Interface
-func CheckForCommonAliasIp(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
+// to be kept in between the PATCH operations on Network Interface.
+//
+// The arguments and return value use REST-shaped maps (camelCase keys) to keep this helper
+// independent of the typed compute client library; callers can convert via tpgresource.ConvertToMap
+// (or build maps inline) before invoking it.
+func CheckForCommonAliasIp(old, new map[string]interface{}) []interface{} {
 	newAliasIpMap := make(map[string]bool)
-	for _, ipRange := range new.AliasIpRanges {
-		newAliasIpMap[ipRange.IpCidrRange] = true
+	if newRanges, ok := new["aliasIpRanges"].([]interface{}); ok {
+		for _, raw := range newRanges {
+			ipRange, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			cidr, _ := ipRange["ipCidrRange"].(string)
+			newAliasIpMap[cidr] = true
+		}
 	}
 
-	resultAliasIpRanges := make([]*compute.AliasIpRange, 0)
-	for _, val := range old.AliasIpRanges {
-		if newAliasIpMap[val.IpCidrRange] {
-			resultAliasIpRanges = append(resultAliasIpRanges, val)
+	resultAliasIpRanges := make([]interface{}, 0)
+	if oldRanges, ok := old["aliasIpRanges"].([]interface{}); ok {
+		for _, raw := range oldRanges {
+			ipRange, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			cidr, _ := ipRange["ipCidrRange"].(string)
+			if newAliasIpMap[cidr] {
+				resultAliasIpRanges = append(resultAliasIpRanges, ipRange)
+			}
 		}
 	}
 	return resultAliasIpRanges
