@@ -213,26 +213,12 @@ type Config struct {
 	TokenSource oauth2.TokenSource
 
 	CustomEndpoints map[string]string
-	{{ range $product := $.Products }}
-	{{ $product.Name }}BasePath string
-	{{- end }}
 
 	RequestBatcherServiceUsage *RequestBatcher
 	RequestBatcherIam          *RequestBatcher
 
 	PreferGlobalEndpoints bool
 	PreferRegionalEndpoints bool
-}
-
-{{- range $product := $.Products }}
-const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
-{{- end }}
-
-// Generated product base paths
-var DefaultBasePaths = map[string]string{
-{{- range $product := $.Products }}
-	{{ $product.Name }}BasePathKey : "{{ $product.Version.BaseUrl }}",
-{{- end }}
 }
 
 var DefaultClientScopes = []string{
@@ -748,16 +734,6 @@ func AreADCCredentialsX509() bool {
 func RemoveBasePathVersion(url string) string {
 	re := regexp.MustCompile(`(?P<base>https?://.*)(?P<version>/[^/]+?/$)`)
 	return re.ReplaceAllString(url, "$1/")
-}
-
-// For a consumer of config.go that isn't a full fledged provider and doesn't
-// have its own endpoint mechanism such as sweepers, init {{"{{"}}service{{"}}"}}BasePath
-// values to a default. After using this, you should call config.LoadAndValidate.
-func ConfigureBasePaths(c *Config) {
-	// Generated Products
-	{{- range $product := $.Products }}
-	c.{{ $product.Name }}BasePath = DefaultBasePaths[{{ $product.Name }}BasePathKey]
-	{{- end }}
 }
 
 func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
