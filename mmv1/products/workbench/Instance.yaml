@@ -52,6 +52,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/workbench_instance.go.tmpl'
   pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
   post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1-a"
@@ -105,7 +106,7 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
@@ -192,6 +193,10 @@ properties:
                 - 'NVIDIA_TESLA_A100'
                 - 'NVIDIA_A100_80GB'
                 - 'NVIDIA_L4'
+                - 'NVIDIA_H100_80GB'
+                - 'NVIDIA_H100_MEGA_80GB'
+                - 'NVIDIA_H200_141GB'
+                - 'NVIDIA_B200'
                 - 'NVIDIA_TESLA_T4_VWS'
                 - 'NVIDIA_TESLA_P100_VWS'
                 - 'NVIDIA_TESLA_P4_VWS'
@@ -323,6 +328,9 @@ properties:
               - 'PD_SSD'
               - 'PD_BALANCED'
               - 'PD_EXTREME'
+              - 'HYPERDISK_BALANCED'
+              - 'HYPERDISK_BALANCED_HIGH_AVAILABILITY'
+              - 'HYPERDISK_ML'
           - name: 'diskEncryption'
             type: Enum
             description: |
@@ -368,6 +376,11 @@ properties:
                 - 'PD_SSD'
                 - 'PD_BALANCED'
                 - 'PD_EXTREME'
+                - 'HYPERDISK_BALANCED'
+                - 'HYPERDISK_EXTREME'
+                - 'HYPERDISK_THROUGHPUT'
+                - 'HYPERDISK_BALANCED_HIGH_AVAILABILITY'
+                - 'HYPERDISK_ML'
             - name: 'diskEncryption'
               type: Enum
               description: |

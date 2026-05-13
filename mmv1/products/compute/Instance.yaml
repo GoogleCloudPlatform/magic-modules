@@ -233,6 +233,17 @@ properties:
                 * /projects/{project}/zones/{zone}/storagePools/{storagePool}
               required: false
               immutable: true
+            - name: 'replicaZones'
+              type: Array
+              description: |
+                A list of short names or self_links of zones in which to create a regional disk.
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+              item_type:
+                name: 'zone'
+                type: ResourceRef
+                description: 'A reference to a zone where the disk should be replicated to.'
+                resource: 'Zone'
+                imports: 'selfLink'
         - name: 'interface'
           type: Enum
           description: |
@@ -720,3 +731,10 @@ properties:
           comply with RFC1035.
         item_type:
           type: String
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disks restored from source snapshots or source machine image should erase Windows specific VSS signature.
+    min_version: 'beta'
+    ignore_read: true
+    default_value: false

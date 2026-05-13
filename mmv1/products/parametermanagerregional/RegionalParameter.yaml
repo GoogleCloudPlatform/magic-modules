@@ -31,6 +31,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'regional_parameter_basic'
     primary_resource_id: 'regional-parameter-basic'
@@ -50,7 +52,7 @@ examples:
       parameter_id: 'regional_parameter'
       kms_key: 'kms-key'
     test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"

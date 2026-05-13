@@ -265,6 +265,7 @@ func flattenNodeNetworkConfig(c interface{}, d *schema.ResourceData, prefix stri
 			"network_performance_config":      flattenNodeNetworkPerformanceConfig(config["networkPerformanceConfig"]),
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(config["additionalNodeNetworkConfigs"]),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(config["additionalPodNetworkConfigs"]),
+			"accelerator_network_profile":     config["acceleratorNetworkProfile"],
 		}
 
 		// enable_private_nodes = false and the field not in HCL behaves the same, as this field is in ForceSendFields and the false value is included in the API request when it is not specified in config.

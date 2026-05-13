@@ -1,3 +1,10 @@
-import "net/url"
+import (
+	"net/url"
 
-var _ = url.Parse
+	rmClient "{{ $.ImportPath }}/services/resourcemanager/client"
+)
+
+var (
+	_ = url.Parse
+	_ = rmClient.NewClient
+)

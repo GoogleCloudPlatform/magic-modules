@@ -198,7 +198,13 @@ Please refer to the field `effective_labels` for all of the labels present on th
 * `web_settings` -
   (Optional)
   Settings for keys that can be used by websites.
-  
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+   When a 'terraform destroy' or 'terraform apply' would delete the resource,
+   the command will fail if this field is set to "PREVENT" in Terraform state.
+   When set to "ABANDON", the command will remove the resource from Terraform
+   management without updating or deleting the resource in the API.
+   When set to "DELETE", deleting the resource is allowed. 
 
 
 The `android_settings` block supports:
@@ -261,8 +267,41 @@ The `web_settings` block supports:
     
 * `integration_type` -
   (Required)
-  Required. Describes how this key is integrated with the website. Possible values: SCORE, CHECKBOX, INVISIBLE
+  Required. Describes how this key is integrated with the website. Possible values: SCORE, CHECKBOX, INVISIBLE, POLICY_BASED_CHALLENGE
     
+* `challenge_settings` -
+  (Optional)
+  Settings for POLICY_BASED_CHALLENGE keys to control when a challenge is triggered.
+  Structure is documented below.
+
+The `challenge_settings` block supports:
+
+* `default_settings` -
+  (Required)
+  Defines when a challenge is triggered by default.
+  Structure is documented below.
+
+* `action_settings` -
+  (Optional)
+  The action to score threshold map. The action name should be the same as the action name passed in the `data-action` attribute. Action names are case-insensitive.
+  Structure is documented below.
+
+The `default_settings` block supports:
+
+* `score_threshold` -
+  (Required)
+  A challenge is triggered if the end-user score is below that threshold. Value must be between 0 and 1 (inclusive).
+
+The `action_settings` block supports:
+
+* `action` -
+  (Required)
+  The action name.
+
+* `score_threshold` -
+  (Required)
+  A challenge is triggered if the end-user score is below that threshold. Value must be between 0 and 1 (inclusive).
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:

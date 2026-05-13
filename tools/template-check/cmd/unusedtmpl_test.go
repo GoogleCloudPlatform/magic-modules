@@ -12,14 +12,17 @@ func TestProcessInput(t *testing.T) {
 		"mmv1/templates/terraform/examples/abc.go.tmpl",
 		"mmv1/templates/terraform/examples/subfolder/abc.tf.tmpl",
 		"mmv1/templates/terraform/custom_flatten/abc.go.tmpl",
+		"mmv1/templates/terraform/samples/services/workstations/workstation_cluster_custom_urls.tf.tmpl",
 	}
-	tmpl, examples := processInputFiles(fileList)
-	wantTmpl, wantExamples := []string{
+	tmpl, examples, samples := processInputFiles(fileList)
+	wantTmpl, wantExamples, wantSamples := []string{
 		"mmv1/templates/terraform/examples/abc.go.tmpl",
 		"mmv1/templates/terraform/examples/subfolder/abc.tf.tmpl",
 		"mmv1/templates/terraform/custom_flatten/abc.go.tmpl",
 	}, []string{
 		"mmv1/templates/terraform/examples/abc.tf.tmpl",
+	}, []string{
+		"mmv1/templates/terraform/samples/services/workstations/workstation_cluster_custom_urls.tf.tmpl",
 	}
 
 	if diff := cmp.Diff(wantTmpl, tmpl); diff != "" {
@@ -27,6 +30,9 @@ func TestProcessInput(t *testing.T) {
 	}
 	if diff := cmp.Diff(wantExamples, examples); diff != "" {
 		t.Errorf("processInputFiles() got diff(-want, got) for example files = %s", diff)
+	}
+	if diff := cmp.Diff(wantSamples, samples); diff != "" {
+		t.Errorf("processInputFiles() got diff(-want, got) for sample files = %s", diff)
 	}
 }
 
@@ -52,6 +58,7 @@ func TestFindTmpls(t *testing.T) {
 		"templates/terraform/custom_flatten/bigquery_dataset_ref.go.tmpl":                      true,
 		"templates/terraform/iam/example_config_body/app_engine_service.tf.tmpl":               true,
 		"templates/terraform/state_migrations/big_query_job.go.tmpl":                           true,
+		"custom/path/to/step2.tf.tmpl":                                                         true,
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("findTmpls() got unexpected diff(-want, got) = %s", diff)
@@ -82,5 +89,21 @@ func TestFindExamples(t *testing.T) {
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("findExamples() got unexpected diff(-want, got) = %s", diff)
+	}
+}
+
+func TestFindSamples(t *testing.T) {
+	yamlFiles := []string{"testdata/resource1.yaml"}
+	got, err := findSamples(yamlFiles)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := map[string]bool{
+		"templates/terraform/samples/services/testdata/step1.tf.tmpl": true,
+		"custom/path/to/step2.tf.tmpl":                                true,
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("findSamples() got unexpected diff(-want, got) = %s", diff)
 	}
 }

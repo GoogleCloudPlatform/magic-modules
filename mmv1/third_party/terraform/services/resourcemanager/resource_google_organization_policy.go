@@ -5,9 +5,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -164,6 +166,10 @@ func ResourceGoogleOrganizationPolicy() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
+
 		Schema: tpgresource.MergeSchemas(
 			schemaOrganizationPolicy,
 			map[string]*schema.Schema{
@@ -172,6 +178,9 @@ func ResourceGoogleOrganizationPolicy() *schema.Resource {
 					Required: true,
 					ForceNew: true,
 				},
+				//UDP schema start
+				"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+				//UDP schema end
 			}),
 		UseJSONNumber: true,
 	}
@@ -201,7 +210,7 @@ func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface
 	var policy *cloudresourcemanager.OrgPolicy
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (readErr error) {
-			policy, readErr = config.NewResourceManagerClient(userAgent).Organizations.GetOrgPolicy(org, &cloudresourcemanager.GetOrgPolicyRequest{
+			policy, readErr = rmClient.NewClient(config, userAgent).Organizations.GetOrgPolicy(org, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 			}).Do()
 			return readErr
@@ -234,10 +243,19 @@ func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error setting restore_policy: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceGoogleOrganizationPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleOrganizationPolicy) {
+		return ResourceGoogleOrganizationPolicy().Read(d, meta)
+	}
+
 	if isOrganizationPolicyUnset(d) {
 		return resourceGoogleOrganizationPolicyDelete(d, meta)
 	}
@@ -250,6 +268,13 @@ func resourceGoogleOrganizationPolicyUpdate(d *schema.ResourceData, meta interfa
 }
 
 func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -259,7 +284,7 @@ func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interfa
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			_, dErr := config.NewResourceManagerClient(userAgent).Organizations.ClearOrgPolicy(org, &cloudresourcemanager.ClearOrgPolicyRequest{
+			_, dErr := rmClient.NewClient(config, userAgent).Organizations.ClearOrgPolicy(org, &cloudresourcemanager.ClearOrgPolicyRequest{
 				Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 			}).Do()
 			return dErr
@@ -323,7 +348,7 @@ func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (setErr error) {
-			_, setErr = config.NewResourceManagerClient(userAgent).Organizations.SetOrgPolicy(org, &cloudresourcemanager.SetOrgPolicyRequest{
+			_, setErr = rmClient.NewClient(config, userAgent).Organizations.SetOrgPolicy(org, &cloudresourcemanager.SetOrgPolicyRequest{
 				Policy: &cloudresourcemanager.OrgPolicy{
 					Constraint:     CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 					BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),

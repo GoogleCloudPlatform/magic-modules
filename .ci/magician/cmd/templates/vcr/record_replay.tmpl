@@ -1,46 +1,35 @@
-{{- if gt (len .RecordingResult.PassedTests) 0 -}}
-{{color "green" "Tests passed during RECORDING mode:"}}
-{{range .RecordingResult.PassedTests -}}
-`{{.}}` {{/* remove trailing whitespace */ -}}
-  [[Debug log]({{$.LogBaseUrl}}/recording/{{.}}.log)]
-{{/* remove trailing whitespace */ -}}
-{{end}}
-
-{{- if gt (len .ReplayingAfterRecordingResult.FailedTests ) 0 }}
-
-{{color "red" "Tests failed when rerunning REPLAYING mode:"}}
-{{range .ReplayingAfterRecordingResult.FailedTests -}}
-`{{.}}` {{/* remove trailing whitespace */ -}}
-  [[Error message]({{$.LogBaseUrl}}/build-log/replaying_build_after_recording/{{compoundTest .}}_replaying_test.log)] {{/* remove trailing whitespace */ -}}
-  [[Debug log]({{$.LogBaseUrl}}/replaying_after_recording/{{.}}.log)]
-{{/* remove trailing whitespace */ -}}
-{{end}}
-
-Tests failed due to non-determinism or randomness when the VCR replayed the response after the HTTP request was made.
-
-Please fix these to complete your PR. If you believe these test failures to be incorrect or unrelated to your change, or if you have any questions, please raise the concern with your reviewer.
-
-{{else}}
-{{color "green" "No issues found for passed tests after REPLAYING rerun."}}
-{{end}}{{/* end of if gt (len .ReplayingAfterRecordingResult.FailedTests ) 0 */}}
 ---
-{{end}}{{/* end of if gt (len .RecordingResult.PassedTests) 0 */}}
 
-{{if gt (len .RecordingResult.FailedTests) 0 -}}
-{{color "red" "Tests failed during RECORDING mode:"}}
-{{range .RecordingResult.FailedTests -}}
-`{{.}}` {{/* remove trailing whitespace */ -}}
-  [[Error message]({{$.LogBaseUrl}}/build-log/recording_build/{{compoundTest .}}_recording_test.log)] {{/* remove trailing whitespace */ -}}
-  [[Debug log]({{$.LogBaseUrl}}/recording/{{.}}.log)]
-{{/* remove trailing whitespace */ -}}
+**Step 2: Recording Mode**
+
+| Recording Mode | Replaying Rerun | Test Name |
+| :--- | :--- | :--- |
+{{range .TestRows -}}
+| {{symbol .RecordingStatus}}{{if .RecordingErrorUrl}}&nbsp;[Error]({{.RecordingErrorUrl}}){{end}}{{if .RecordingLogUrl}}{{if .RecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.RecordingLogUrl}}){{end}} | {{symbol .ReplayingAfterRecordingStatus}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;[Error]({{.ReplayingAfterRecordingErrorUrl}}){{end}}{{if .ReplayingAfterRecordingLogUrl}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.ReplayingAfterRecordingLogUrl}}){{end}} | {{.DisplayName}} |
 {{end}}
-{{end}} {{- /* end of if gt (len .RecordingResult.FailedTests) 0 */ -}}
 
-{{if .HasTerminatedTests}}{{color "red" "Several tests terminated during RECORDING mode."}}{{end}}
+{{ if or (gt (len .ReplayingAfterRecordingResult.FailedTests) 0) (gt (len .RecordingResult.FailedTests) 0) .HasTerminatedTests .RecordingErr (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0) }}
+> [!CAUTION]
+> **Issues requiring attention before PR completion**
+>
+{{ if or (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0) }}> {{color "red" "**Manual Verification Required**: New tests were added that are skipped in presubmit tests. See the \"Manual Verification Required\" section at the top for details."}}
+>
+{{ end -}}
+{{ if gt (len .RecordingResult.FailedTests) 0 }}> {{color "red" "**Initial Recording Failed**: Some tests failed during the recording step. See the table above for details."}}
+>
+{{ end -}}
+{{ if gt (len .ReplayingAfterRecordingResult.FailedTests) 0 }}> {{color "red" "**Replaying Rerun Failed**: Some tests failed due to non-determinism when VCR replayed the response. See the table above for details."}}
+>
+{{ end -}}
+{{ if .HasTerminatedTests }}> {{color "red" "**Terminated Tests**: Several tests terminated during RECORDING mode."}}
+>
+{{ end -}}
+{{ if and .RecordingErr (eq (len .RecordingResult.FailedTests) 0) (eq (len .ReplayingAfterRecordingResult.FailedTests) 0) (not .HasTerminatedTests) }}> {{color "red" "**Recording Errors**: An unexpected error occurred during RECORDING mode. Please check the build log for details."}}
+>
+{{ end -}}
+> Please address these issues to complete your PR. If you believe these detections are incorrect or unrelated to your change, please raise the concern with your reviewer.
+{{ else }}
+{{ color "green" "**All tests passed!**" }}
+{{ end }}
 
-{{if .RecordingErr}}{{color "red" "Errors occurred during RECORDING mode. Please fix them to complete your PR."}}{{end}}
-
-{{if .AllRecordingPassed}}{{color "green" "All tests passed!"}}{{end}}
-
-View the [build log]({{.LogBaseUrl}}/build-log/recording_test.log) {{/* remove trailing whitespace */ -}}
-or the [debug log]({{.BrowseLogBaseUrl}}/recording) for each test
+View the [build log]({{.LogBaseUrl}}/build-log/recording_test.log) or the [debug logs folder]({{.BrowseLogBaseUrl}}/recording) for detailed results.

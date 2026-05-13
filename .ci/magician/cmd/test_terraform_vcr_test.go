@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"magician/github"
 	"magician/provider"
 	"magician/vcr"
 )
@@ -235,19 +236,12 @@ func TestAnalyticsComment(t *testing.T) {
 				AffectedServices: []string{},
 			},
 			wantContains: []string{
-				"#### Tests analytics",
-				"Total tests: 6",
-				"Passed tests: 3",
-				"Skipped tests: 2",
-				"Affected tests: 1",
-				"",
+				"#### Analytics",
+				"| Total Tests | Passed | Skipped | Affected |",
+				"| 6 | 3 | 2 | 1 |",
 				"<details>",
-				"<summary>Click here to see the affected service packages</summary>",
-				"<blockquote>",
-				"",
-				"None",
-				"",
-				"</blockquote>",
+				"<summary><b>Affected Service Packages</b></summary>",
+				"* None",
 				"</details>",
 			},
 		},
@@ -263,23 +257,13 @@ func TestAnalyticsComment(t *testing.T) {
 				AffectedServices: []string{"svc-a", "svc-b"},
 			},
 			wantContains: []string{
-				"#### Tests analytics",
-				"Total tests: 6",
-				"Passed tests: 3",
-				"Skipped tests: 2",
-				"Affected tests: 1",
-				"",
+				"#### Analytics",
+				"| Total Tests | Passed | Skipped | Affected |",
+				"| 6 | 3 | 2 | 1 |",
 				"<details>",
-				"<summary>Click here to see the affected service packages</summary>",
-				"<blockquote>",
-				"",
-				"<ul>",
-				"<li>svc-a</li>",
-				"<li>svc-b</li>",
-				"",
-				"</ul>",
-				"",
-				"</blockquote>",
+				"<summary><b>Affected Service Packages</b></summary>",
+				"* svc-a",
+				"* svc-b",
 				"</details>",
 			},
 		},
@@ -295,19 +279,12 @@ func TestAnalyticsComment(t *testing.T) {
 				AffectedServices: []string{},
 			},
 			wantContains: []string{
-				"#### Tests analytics",
-				"Total tests: 6",
-				"Passed tests: 3",
-				"Skipped tests: 2",
-				"Affected tests: 1",
-				"",
+				"#### Analytics",
+				"| Total Tests | Passed | Skipped | Affected |",
+				"| 6 | 3 | 2 | 1 |",
 				"<details>",
-				"<summary>Click here to see the affected service packages</summary>",
-				"<blockquote>",
-				"",
-				"All service packages are affected",
-				"",
-				"</blockquote>",
+				"<summary><b>Affected Service Packages</b></summary>",
+				"* All service packages are affected",
 				"</details>",
 			},
 		},
@@ -339,11 +316,13 @@ func TestNonExercisedTestsComment(t *testing.T) {
 				NotRunBetaTests: []string{"beta-1", "beta-2"},
 			},
 			wantContains: []string{
-				"#### Non-exercised tests",
-				"",
-				color("red", "Tests were added that are skipped in VCR:"),
-				"- beta-1",
-				"- beta-2",
+				"> [!IMPORTANT]",
+				"**Manual Verification Required**",
+				"VCR cannot automatically execute the following tests added in this PR. Please verify them manually:",
+				"> 🔴 beta-1",
+				"> 🔴 beta-2",
+				"> [!CAUTION]",
+				"**Issues requiring attention before PR completion**",
 			},
 		},
 		{
@@ -352,13 +331,13 @@ func TestNonExercisedTestsComment(t *testing.T) {
 				NotRunGATests: []string{"ga-1", "ga-2"},
 			},
 			wantContains: []string{
-				"#### Non-exercised tests",
-				"",
-				"",
-				"",
-				color("red", "Tests were added that are GA-only additions and require manual runs:"),
-				"- ga-1",
-				"- ga-2",
+				"> [!IMPORTANT]",
+				"**Manual Verification Required (GA-only additions)**",
+				"The following tests are GA-only additions and cannot be run by VCR in Beta mode. Please verify them manually:",
+				"> 🔴 ga-1",
+				"> 🔴 ga-2",
+				"> [!CAUTION]",
+				"**Issues requiring attention before PR completion**",
 			},
 		},
 		{
@@ -368,17 +347,17 @@ func TestNonExercisedTestsComment(t *testing.T) {
 				NotRunBetaTests: []string{"beta-1", "beta-2"},
 			},
 			wantContains: []string{
-				"#### Non-exercised tests",
-				"",
-				color("red", "Tests were added that are skipped in VCR:"),
-				"- beta-1",
-				"- beta-2",
-				"",
-				"",
-				"",
-				color("red", "Tests were added that are GA-only additions and require manual runs:"),
-				"- ga-1",
-				"- ga-2",
+				"> [!IMPORTANT]",
+				"**Manual Verification Required**",
+				"VCR cannot automatically execute the following tests added in this PR. Please verify them manually:",
+				"> 🔴 beta-1",
+				"> 🔴 beta-2",
+				"**Manual Verification Required (GA-only additions)**",
+				"The following tests are GA-only additions and cannot be run by VCR in Beta mode. Please verify them manually:",
+				"> 🔴 ga-1",
+				"> 🔴 ga-2",
+				"> [!CAUTION]",
+				"**Issues requiring attention before PR completion**",
 			},
 		},
 	}
@@ -413,18 +392,11 @@ func TestWithReplayFailedTests(t *testing.T) {
 			wantContains: []string{
 				"#### Action taken",
 				"<details>",
-				"<summary>Found 2 affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests",
-				"</summary>",
-				"<blockquote>",
-				"<ul>",
-				"<li>a</li>",
-				"<li>b</li>",
-				"", // Empty line
-				"</ul>",
-				"</blockquote>",
+				"<summary>Found 2 affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary>",
+				"* a",
+				"* b",
 				"</details>",
-				"",
-				"[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)",
+				"[Learn how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)",
 			},
 		},
 	}
@@ -459,7 +431,8 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 				Version:      provider.Beta.String(),
 			},
 			wantContains: []string{
-				color("red", "Errors occurred during REPLAYING mode. Please fix them to complete your PR."),
+				"> [!CAUTION]",
+				"🔴 Errors occurred during REPLAYING mode. Please check the build log for details.",
 				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_test.log)",
 			},
 		},
@@ -472,7 +445,7 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 				Version:   provider.Beta.String(),
 			},
 			wantContains: []string{
-				color("green", "All tests passed!"),
+				"🟢 **All tests passed in Replaying mode! No Recording was needed.**",
 				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_test.log)",
 			},
 		},
@@ -501,13 +474,43 @@ func TestRecordReplay(t *testing.T) {
 		{
 			name: "ReplayingAfterRecordingResult has failed tests",
 			data: recordReplay{
-				RecordingResult: vcr.Result{
-					PassedTests: []string{"a", "b", "c"},
-					FailedTests: []string{"d", "e"},
-				},
-				ReplayingAfterRecordingResult: vcr.Result{
-					PassedTests: []string{"a"},
-					FailedTests: []string{"b", "c"},
+				TestRows: []VCRTestTableRow{
+					{
+						DisplayName:                   "TestAcc_a",
+						RecordingStatus:               "Passed",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log",
+						ReplayingAfterRecordingStatus: "Passed",
+					},
+					{
+						DisplayName:                     "TestAcc_b",
+						RecordingStatus:                 "Passed",
+						RecordingLogUrl:                 "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log",
+						ReplayingAfterRecordingStatus:   "Failed",
+						ReplayingAfterRecordingErrorUrl: "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/b_replaying_test.log",
+						ReplayingAfterRecordingLogUrl:   "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/b.log",
+					},
+					{
+						DisplayName:                     "TestAcc_c",
+						RecordingStatus:                 "Passed",
+						RecordingLogUrl:                 "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log",
+						ReplayingAfterRecordingStatus:   "Failed",
+						ReplayingAfterRecordingErrorUrl: "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/c_replaying_test.log",
+						ReplayingAfterRecordingLogUrl:   "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/c.log",
+					},
+					{
+						DisplayName:                   "TestAcc_d",
+						RecordingStatus:               "Failed",
+						RecordingErrorUrl:             "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/d_recording_test.log",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/d.log",
+						ReplayingAfterRecordingStatus: "-",
+					},
+					{
+						DisplayName:                   "TestAcc_e",
+						RecordingStatus:               "Failed",
+						RecordingErrorUrl:             "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/e_recording_test.log",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/e.log",
+						ReplayingAfterRecordingStatus: "-",
+					},
 				},
 				HasTerminatedTests: true,
 				RecordingErr:       fmt.Errorf("some error"),
@@ -517,32 +520,39 @@ func TestRecordReplay(t *testing.T) {
 				Head:               "auto-pr-123",
 			},
 			wantContains: []string{
-				color("green", "Tests passed during RECORDING mode:"),
-				"`a` [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log)]",
-				"`b` [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log)]",
-				"`c` [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log)]",
-				color("red", "Tests failed when rerunning REPLAYING mode:"),
-				"`b` [[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/b_replaying_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/b.log)]",
-				"`c` [[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/c_replaying_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/c.log)]",
-				"Tests failed due to non-determinism or randomness when the VCR replayed the response after the HTTP request was made.",
-				"Please fix these to complete your PR. If you believe these test failures to be incorrect or unrelated to your change, or if you have any questions, please raise the concern with your reviewer.",
-				color("red", "Tests failed during RECORDING mode:"),
-				"`d` [[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/d_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/d.log)]",
-				"`e` [[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/e_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/e.log)]",
-				color("red", "Several tests terminated during RECORDING mode."),
-				"Errors occurred during RECORDING mode. Please fix them to complete your PR.",
-				"[build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log)",
-				"[debug log](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording)",
+				"| Recording Mode | Replaying Rerun | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log) | ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/b_replaying_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/b.log) | TestAcc_b |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log) | ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/c_replaying_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/c.log) | TestAcc_c |",
+				"| ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/d_recording_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/d.log) | - | TestAcc_d |",
+				"| ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/e_recording_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/e.log) | - | TestAcc_e |",
+
+				"Please address these issues to complete your PR",
+				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log) or the [debug logs folder](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording) for detailed results.",
 			},
 		},
 		{
 			name: "ReplayingAfterRecordingResult does not have failed tests",
 			data: recordReplay{
-				RecordingResult: vcr.Result{
-					PassedTests: []string{"a", "b", "c"},
-				},
-				ReplayingAfterRecordingResult: vcr.Result{
-					PassedTests: []string{"a", "b", "c"},
+				TestRows: []VCRTestTableRow{
+					{
+						DisplayName:                   "TestAcc_a",
+						RecordingStatus:               "Passed",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log",
+						ReplayingAfterRecordingStatus: "Passed",
+					},
+					{
+						DisplayName:                   "TestAcc_b",
+						RecordingStatus:               "Passed",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log",
+						ReplayingAfterRecordingStatus: "Passed",
+					},
+					{
+						DisplayName:                   "TestAcc_c",
+						RecordingStatus:               "Passed",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log",
+						ReplayingAfterRecordingStatus: "Passed",
+					},
 				},
 				AllRecordingPassed: true,
 				BuildID:            "build-123",
@@ -551,17 +561,12 @@ func TestRecordReplay(t *testing.T) {
 				LogBucket:          "ci-vcr-logs",
 			},
 			wantContains: []string{
-				color("green", "Tests passed during RECORDING mode:"),
-				"`a`",
-				"[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log)]",
-				"`b`",
-				"[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log)]",
-				"`c`",
-				"[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log)]",
-				color("green", "No issues found for passed tests after REPLAYING rerun."),
-				color("green", "All tests passed!"),
-				"[build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log)",
-				"[debug log](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording)",
+				"| Recording Mode | Replaying Rerun | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log) | ✅ | TestAcc_b |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log) | ✅ | TestAcc_c |",
+				"🟢 **All tests passed!**",
+				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log) or the [debug logs folder](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording) for detailed results.",
 			},
 		},
 	}
@@ -572,10 +577,129 @@ func TestRecordReplay(t *testing.T) {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
 			for _, wc := range tc.wantContains {
-				if !strings.Contains(got, wc) {
-					t.Errorf("formatRecordReplay() return value:\n%s\n\ndoes not contain %q", got, wc)
-				}
+				assert.Contains(t, got, wc)
 			}
 		})
 	}
+}
+
+func TestHandleBuildFailures(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+	}
+	result := vcr.Result{
+		BuildFailures: []string{"package1", "package2"},
+	}
+
+	rnr := &mockRunner{}
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh, rnr)
+
+	assert.NoError(t, err)
+	assert.True(t, handled)
+
+	assert.Len(t, gh.calledMethods["PostComment"], 1)
+	assert.Equal(t, "123", gh.calledMethods["PostComment"][0][0])
+	comment := gh.calledMethods["PostComment"][0][1].(string)
+	assert.Contains(t, comment, "**Step 1: Replaying Mode**")
+	assert.Contains(t, comment, "package1")
+	assert.Contains(t, comment, "package2")
+
+	assert.Len(t, gh.calledMethods["PostBuildStatus"], 1)
+	assert.Equal(t, "123", gh.calledMethods["PostBuildStatus"][0][0])
+	assert.Equal(t, "VCR-test", gh.calledMethods["PostBuildStatus"][0][1])
+	assert.Equal(t, "failure", gh.calledMethods["PostBuildStatus"][0][2])
+}
+
+func TestHandleBuildFailures_Recording(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+	}
+	result := vcr.Result{
+		BuildFailures: []string{"package1", "package2"},
+	}
+
+	rnr := &mockRunner{}
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Recording, gh, rnr)
+
+	assert.NoError(t, err)
+	assert.True(t, handled)
+
+	assert.Len(t, gh.calledMethods["PostComment"], 1)
+	comment := gh.calledMethods["PostComment"][0][1].(string)
+	assert.Contains(t, comment, "**Step 2: Recording Mode**")
+	assert.Contains(t, comment, "package1")
+	assert.Contains(t, comment, "package2")
+}
+
+func TestHandleBuildFailures_NoFailures(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+	}
+	result := vcr.Result{}
+
+	rnr := &mockRunner{}
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh, rnr)
+
+	assert.NoError(t, err)
+	assert.False(t, handled)
+	assert.Len(t, gh.calledMethods["PostComment"], 0)
+	assert.Len(t, gh.calledMethods["PostBuildStatus"], 0)
+}
+
+func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+		pullRequest: github.PullRequest{
+			User: github.User{Login: "author1"},
+		},
+		requestedReviewers: []github.User{
+			{Login: "reviewer1"},
+			{Login: "reviewer2"},
+		},
+		pullRequestComments: []github.PullRequestComment{
+			{
+				ID:   456,
+				Body: "Some other comment",
+			},
+		},
+	}
+
+	rnr := &mockRunner{}
+	err := appendVCRResultToDiffComment("123", "VCR Results", gh, rnr)
+
+	assert.NoError(t, err)
+	assert.Len(t, gh.calledMethods["PostComment"], 1)
+	assert.Equal(t, "123", gh.calledMethods["PostComment"][0][0])
+	assert.Equal(t, "VCR Results", gh.calledMethods["PostComment"][0][1])
+}
+func TestAppendVCRResultToDiffComment_UseFileID(t *testing.T) {
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+		pullRequest: github.PullRequest{
+			User: github.User{Login: "author1"},
+		},
+		requestedReviewers: []github.User{
+			{Login: "reviewer1"},
+			{Login: "reviewer2"},
+		},
+		pullRequestComments: []github.PullRequestComment{
+			{
+				ID:   456,
+				Body: "Some comment",
+			},
+		},
+	}
+	rnr := &mockRunner{
+		fileContents: map[string]string{
+			"/workspace/diff_comment_id.txt": "456",
+		},
+	}
+
+	err := appendVCRResultToDiffComment("123", "VCR Results", gh, rnr)
+
+	assert.NoError(t, err)
+	assert.Len(t, gh.calledMethods["UpdateComment"], 1)
+	assert.Equal(t, "123", gh.calledMethods["UpdateComment"][0][0])
+	assert.Contains(t, gh.calledMethods["UpdateComment"][0][1].(string), "VCR Results")
+	assert.Equal(t, 456, gh.calledMethods["UpdateComment"][0][2])
 }

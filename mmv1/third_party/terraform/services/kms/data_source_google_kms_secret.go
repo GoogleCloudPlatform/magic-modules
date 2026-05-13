@@ -62,7 +62,7 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 		kmsDecryptRequest.AdditionalAuthenticatedData = aad.(string)
 	}
 
-	decryptResponse, err := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId.CryptoKeyId(), kmsDecryptRequest).Do()
+	decryptResponse, err := NewClient(config, userAgent).Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId.CryptoKeyId(), kmsDecryptRequest).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error decrypting ciphertext: %s", err)

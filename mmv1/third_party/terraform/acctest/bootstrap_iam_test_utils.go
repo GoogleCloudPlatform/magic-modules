@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -22,11 +23,11 @@ type IamMember struct {
 // default project due to parallel tests managing the same member/role pairings. Members
 // will have `{project_number}` replaced with the default test project's project number.
 func BootstrapIamMembers(t *testing.T, members []IamMember) {
-	config := BootstrapConfig(t)
+	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		t.Fatal("Could not bootstrap a config for BootstrapIamMembers.")
 	}
-	client := config.NewResourceManagerClient(config.UserAgent)
+	client := rmClient.NewClient(config, config.UserAgent)
 
 	// Separate the given members into two groups: project-level vs. org-level
 	var projectMembers []IamMember

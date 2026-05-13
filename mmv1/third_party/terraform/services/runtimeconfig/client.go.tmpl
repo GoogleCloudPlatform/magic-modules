@@ -1,0 +1,25 @@
+package runtimeconfig
+
+{{ if ne $.TargetVersionName `ga` -}}
+import (
+	"log"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"google.golang.org/api/option"
+	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
+)
+
+func NewClient(c *transport_tpg.Config, userAgent string) *runtimeconfig.Service {
+	runtimeConfigClientBasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c))
+	log.Printf("[INFO] Instantiating Google Cloud Runtimeconfig client for path %s", runtimeConfigClientBasePath)
+	clientRuntimeconfig, err := runtimeconfig.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client runtime config: %s", err)
+		return nil
+	}
+	clientRuntimeconfig.UserAgent = userAgent
+	clientRuntimeconfig.BasePath = runtimeConfigClientBasePath
+
+	return clientRuntimeconfig
+}
+{{- end }}

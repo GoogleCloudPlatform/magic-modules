@@ -42,6 +42,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'logging_folder_settings_all'
     primary_resource_id: 'example'
@@ -51,7 +52,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'folder'
     type: String

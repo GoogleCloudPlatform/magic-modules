@@ -35,6 +35,7 @@ func ResourceComputeRegionInstanceTemplate() *schema.Resource {
 		},
 		SchemaVersion: 1,
 		CustomizeDiff: customdiff.All(
+            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			resourceComputeInstanceTemplateSourceImageCustomizeDiff,
@@ -516,8 +517,8 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "MRDMA", "IRDMA"}, false),
-							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, MRDMA, and IRDMA`,
+							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "MRDMA", "IRDMA", "IDPF"}, false),
+							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, MRDMA, IRDMA and IDPF`,
 						},
 
 						"network_attachment": {
@@ -1274,6 +1275,9 @@ be from 0 to 999,999,999 inclusive.`,
 				ValidateFunc: validation.StringInSlice([]string{"NONE", "STOP", ""}, false),
 				Description:  `Action to be taken when a customer's encryption key is revoked. Supports "STOP" and "NONE", with "NONE" being the default.`,
 			},
+			//UDP schema start
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1307,7 +1311,11 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
-	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
+	partnerMetadataMap, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return err
+	}
+	PartnerMetadata, err := convertPartnerMetadataToCompute(partnerMetadataMap)
 	if err != nil {
 		return err
 	}
@@ -1416,7 +1424,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 }
 
 func resourceComputeRegionInstanceTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
-	// Only the field "labels" and "terraform_labels" is mutable
+	// Only the field "deletion_policy", "labels" and "terraform_labels" is mutable
 	return resourceComputeRegionInstanceTemplateRead(d, meta)
 }
 
@@ -1502,7 +1510,7 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	if instanceProperties.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(instanceProperties.PartnerMetadata)
+		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instanceProperties.PartnerMetadata))
 		if err != nil {
 			return fmt.Errorf("Error parsing partner metadata: %s", err)
 		}
@@ -1665,11 +1673,23 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		}
 	}
 
+        
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
+    }
+    
 	return nil
 }
 
 func resourceComputeRegionInstanceTemplateDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+    
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
+        return nil
+    }
+    	
+    config :=  meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

@@ -94,6 +94,12 @@ properties:
           type: 'String'
           description: 'The selected network policy provider.'
           is_missing_in_cai: true
+  - name: minMasterVersion
+    type: String
+    ignore_read: true
+  - name: nodeVersion
+    type: String
+    ignore_read: true
 tgc_tests:
   - name: TestAccContainerCluster_withDatabaseEncryption
     skip: Bug in the API, https://github.com/hashicorp/terraform-provider-google/issues/26882

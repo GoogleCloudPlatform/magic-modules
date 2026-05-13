@@ -3,11 +3,21 @@ package resourcemanager
 import (
 	"strings"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_project",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProject(),
+	}.Register()
+}
 
 // ProjectAssetType is the CAI asset type name for project.
 const ProjectAssetType string = "cloudresourcemanager.googleapis.com/Project"
