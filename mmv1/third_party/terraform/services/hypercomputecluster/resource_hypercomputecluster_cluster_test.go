@@ -513,7 +513,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         bucket = "bucket-new-2-%{random_suffix}"
         autoclass {
           enabled = true
-					terminal_storage_class = "NEARLINE"
+          terminal_storage_class = "NEARLINE"
         }
         hierarchical_namespace {
           enabled = false
