@@ -55,6 +55,7 @@ id_format: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
 custom_diff:
   - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
   - sendSecondaryIpRangeIfEmptyDiff
+  - resourceComputeSubnetworkSecondaryIpRangeCustomDiff
 sweeper:
   url_substitutions:
     - region: us-west2
@@ -332,7 +333,6 @@ properties:
             Ranges must be unique and non-overlapping with all primary and
             secondary IP ranges within a network. Only IPv4 is supported.
             Field is optional when `reserved_internal_range` is defined, otherwise required.
-          diff_suppress_func: IpDiffSuppress
           validation:
             function: verify.ValidateIpCidrRange
           default_from_api: true
@@ -347,6 +347,7 @@ properties:
           type: Enum
           description: |
             The IP version of the secondary range. If not specified, IPV4 is used.
+          default_from_api: true
           min_version: 'beta'
           enum_values:
             - IPV4
@@ -358,7 +359,6 @@ properties:
             This field should be specified for configuring BYOGUA internal IPv6 secondary range.
             When specified along with the ip_cidr_range, the ip_cidr_range must lie within the PDP referenced by the `ipCollection` field.
             When specified without the ip_cidr_range, the range is auto-allocated from the PDP referenced by the `ipCollection` field.
-          diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
           min_version: 'beta'
           resource: PublicDelegatedPrefix
           imports: selfLink

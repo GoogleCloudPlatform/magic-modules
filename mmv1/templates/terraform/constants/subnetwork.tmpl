@@ -85,3 +85,142 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 
 	return addr_equality && netmask_equality
 }
+
+func resourceComputeSubnetworkSecondaryIpRangeCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	keys := diff.GetChangedKeysPrefix("secondary_ip_range")
+	if len(keys) == 0 {
+		return nil
+	}
+	oldCount, newCount := diff.GetChange("secondary_ip_range.#")
+	var count int
+	if oldCount.(int) < newCount.(int) {
+		count = newCount.(int)
+	} else {
+		count = oldCount.(int)
+	}
+
+	if count < 1 {
+		return nil
+	}
+
+	// Extract pristine user config directly from HCL to bypass SDK index matching corruption
+	rawConfig := diff.GetRawConfig().GetAttr("secondary_ip_range")
+	configCidrByName := make(map[string]string)
+	if rawConfig.IsKnown() && !rawConfig.IsNull() {
+		for _, item := range rawConfig.AsValueSlice() {
+			if item.IsKnown() && !item.IsNull() {
+				nameVal := item.GetAttr("range_name")
+				cidrVal := item.GetAttr("ip_cidr_range")
+				if nameVal.IsKnown() && !nameVal.IsNull() && nameVal.AsString() != "" {
+					if cidrVal.IsKnown() && !cidrVal.IsNull() {
+						configCidrByName[nameVal.AsString()] = cidrVal.AsString()
+					} else {
+						configCidrByName[nameVal.AsString()] = ""
+					}
+				}
+			}
+		}
+	}
+
+	old := make([]interface{}, 0, count)
+	new := make([]interface{}, 0, count)
+	for i := 0; i < count; i++ {
+		o, n := diff.GetChange(fmt.Sprintf("secondary_ip_range.%d", i))
+		if o != nil {
+			old = append(old, o)
+		}
+		if n != nil {
+			new = append(new, n)
+		}
+	}
+
+	oldByName := make(map[string]map[string]interface{})
+	for _, o := range old {
+		item := o.(map[string]interface{})
+		if name, ok := item["range_name"].(string); ok && name != "" {
+			oldByName[name] = item
+		}
+	}
+
+	// Helper to normalize IPv6 CIDRs (e.g. converting :0:0:0:0/64 to ::/64)
+	normalizeCidr := func(cidrStr string) string {
+		if cidrStr == "" {
+			return ""
+		}
+		ip, ipNet, err := net.ParseCIDR(cidrStr)
+		if err != nil {
+			return cidrStr
+		}
+		maskSize, _ := ipNet.Mask.Size()
+		return fmt.Sprintf("%s/%d", ip.String(), maskSize)
+	}
+
+	normalizedOld := make([]interface{}, 0, len(old))
+	for _, o := range old {
+		item := o.(map[string]interface{})
+		normalizedItem := make(map[string]interface{})
+		for k, v := range item {
+			if v == nil || v == "" {
+				continue // Omit nil/empty values entirely from hash comparison
+			}
+			if k == "ip_collection" {
+				if rel, err := tpgresource.GetRelativePath(v.(string)); err == nil {
+					normalizedItem[k] = rel
+				} else {
+					normalizedItem[k] = v
+				}
+			} else if k == "ip_cidr_range" {
+				normalizedItem[k] = normalizeCidr(v.(string))
+			} else {
+				normalizedItem[k] = v
+			}
+		}
+		normalizedOld = append(normalizedOld, normalizedItem)
+	}
+
+	normalizedNew := make([]interface{}, 0, len(new))
+	for _, n := range new {
+		item := n.(map[string]interface{})
+		normalizedItem := make(map[string]interface{})
+		rangeName, _ := item["range_name"].(string)
+		userCidr := configCidrByName[rangeName]
+
+		for k, v := range item {
+			if k == "ip_cidr_range" {
+				if userCidr == "" {
+					// User omitted CIDR in HCL: inherit allocated state CIDR
+					if oldItem, ok := oldByName[rangeName]; ok && oldItem["ip_cidr_range"] != nil && oldItem["ip_cidr_range"] != "" {
+						normalizedItem[k] = normalizeCidr(oldItem["ip_cidr_range"].(string))
+					}
+				} else {
+					normalizedItem[k] = normalizeCidr(userCidr)
+				}
+				continue
+			}
+			if v == nil || v == "" {
+				continue
+			}
+			if k == "ip_collection" {
+				if rel, err := tpgresource.GetRelativePath(v.(string)); err == nil {
+					normalizedItem[k] = rel
+				} else {
+					normalizedItem[k] = v
+				}
+			} else {
+				normalizedItem[k] = v
+			}
+		}
+		normalizedNew = append(normalizedNew, normalizedItem)
+	}
+
+	oldSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), normalizedOld)
+	newSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), normalizedNew)
+
+	if oldSet.Equal(newSet) {
+		if err := diff.Clear("secondary_ip_range"); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
