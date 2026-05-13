@@ -113,6 +113,7 @@ properties:
     type: Boolean
     description: |
       Administrative state of the underlying connectivity. If set to true (default), connectivity should be available between your environments. If set to false, the connectivity over these links is disabled. Disabling your Transport does not affect billing, and retains the underlying network bandwidth associated with the connectivity.
+    min_version: 'beta'
     send_empty_value: true
     default_value: true
   - name: 'network'
@@ -142,6 +143,7 @@ properties:
     type: ResourceRef
     description: |
       The NCC Hub that the Transport should attach to. The hub must be in the same project as the Transport.
+    min_version: 'beta'
     resource: 'Hub'
     imports: 'selfLink'
     immutable: true
@@ -149,6 +151,7 @@ properties:
     type: Boolean
     description: |
       Controls whether a Routing VPC Spoke should be created and attached to the NCC Hub.
+    min_version: 'beta'
     send_empty_value: true
     default_value: false
     immutable: true
@@ -156,6 +159,7 @@ properties:
     type: Boolean
     description: |
       Controls whether resources proposed by the Transport are automatically accepted on behalf of the user.
+    min_version: 'beta'
     send_empty_value: true
     default_value: false
     immutable: true
