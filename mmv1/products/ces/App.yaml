@@ -467,9 +467,7 @@ properties:
     type: String
     description: |-
       The tool execution mode for the app.
-      Possible values:
-      PARALLEL
-      SEQUENTIAL
+      See the [API reference](https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rpc/google.cloud.ces.v1#google.cloud.ces.v1.App.ToolExecutionMode) for more details.
   - name: updateTime
     type: String
     description: Timestamp when the app was last updated.
