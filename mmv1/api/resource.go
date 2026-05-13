@@ -723,27 +723,6 @@ func (r Resource) IdentityProperties() []*Type {
 		if slices.Contains(importFormat, field) && !optionalValues[field] && hasField[field] {
 			props = append(props, &Type{Name: field, Type: "string"})
 		}
-		// Only synthesize project/zone/region identity entries when the resource's
-		// schema actually exposes that attribute. import_format may reference
-		// parent-scoped fields (e.g. "project" inherited via a {{cluster}} path)
-		// that aren't part of this resource's own schema; emitting them as
-		// identity properties would generate Read code that calls
-		// d.Get(<field>).(string) on a non-existent attribute and panic.
-		switch field {
-		case "project":
-			if !r.HasProject() {
-				continue
-			}
-		case "region":
-			if !r.HasRegion() {
-				continue
-			}
-		case "zone":
-			if !r.HasZone() {
-				continue
-			}
-		}
-		props = append(props, &Type{Name: field, Type: "string"})
 	}
 
 	if len(r.CustomCode.CustomIdentity) > 0 {
