@@ -194,7 +194,6 @@ virtual_fields:
       When true, the provider will treat removing secondary_ip_range as sending an
       empty list of secondary IP ranges to the API.
       Defaults to false.
-    client_side: true
 properties:
   - name: creationTimestamp
     type: Time
