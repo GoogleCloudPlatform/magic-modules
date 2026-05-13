@@ -1,13 +1,13 @@
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
-  instance_id   = "{{index $.ResourceIdVars "alloydb_instance_name"}}"
+  instance_id   = "{{index $.Vars "alloydb_instance_name"}}"
   instance_type = "PRIMARY"
 
   depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "default" {
-  cluster_id = "{{index $.ResourceIdVars "alloydb_cluster_name"}}"
+  cluster_id = "{{index $.Vars "alloydb_cluster_name"}}"
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
@@ -22,11 +22,11 @@ resource "google_alloydb_cluster" "default" {
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "{{index $.ResourceIdVars "network_name"}}"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "{{index $.ResourceIdVars "alloydb_cluster_name"}}"
+  name          = "{{index $.Vars "alloydb_cluster_name"}}"
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
@@ -41,7 +41,7 @@ resource "google_service_networking_connection" "vpc_connection" {
 
 resource "google_alloydb_user" "{{$.PrimaryResourceId}}" {
   cluster = google_alloydb_cluster.default.name
-  user_id = "{{index $.ResourceIdVars "alloydb_user_name"}}"
+  user_id = "{{index $.Vars "alloydb_user_name"}}"
   user_type = "ALLOYDB_BUILT_IN"
 
   password = "{{index $.Vars "alloydb_user_pass"}}"
