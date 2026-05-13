@@ -110,6 +110,7 @@ properties:
           description: |
             Encrypts or decrypts a disk using a customer-supplied
             encryption key.
+          immutable: true
           properties:
             - name: 'rawKey'
               type: String
@@ -117,12 +118,14 @@ properties:
                 Specifies a 256-bit customer-supplied encryption key,
                 encoded in RFC 4648 base64 to either encrypt or decrypt
                 this resource.
+              sensitive: true
             - name: 'rsaEncryptedKey'
               type: String
               description: |
                 Specifies an RFC 4648 base64 encoded, RSA-wrapped
                 2048-bit customer-supplied encryption key to either
                 encrypt or decrypt this resource.
+              sensitive: true
             - name: 'sha256'
               type: String
               description: |
@@ -210,6 +213,7 @@ properties:
                 encryption keys, so you cannot create disks for
                 instances in a managed instance group if the source
                 images are encrypted with your own keys.
+              immutable: true
               properties:
                 - name: 'rawKey'
                   type: String
@@ -217,6 +221,7 @@ properties:
                     Specifies a 256-bit customer-supplied encryption
                     key, encoded in RFC 4648 base64 to either encrypt
                     or decrypt this resource.
+                  sensitive: true
                 - name: 'sha256'
                   type: String
                   description: |

@@ -303,13 +303,16 @@ properties:
             - name: 'diskEncryptionKey'
               type: NestedObject
               description: 'Optional. Encrypts or decrypts a disk using a customer-supplied encryption key.'
+              immutable: true
               properties:
                 - name: 'rawKey'
                   type: String
                   description: 'Optional. Specifies a 256-bit customer-supplied encryption key.'
+                  sensitive: true
                 - name: 'rsaEncryptedKey'
                   type: String
                   description: 'Optional. RSA-wrapped 2048-bit customer-supplied encryption key.'
+                  sensitive: true
                 - name: 'kmsKeyName'
                   type: String
                   description: 'Optional. The name of the encryption key that is stored in Google Cloud KMS.'
@@ -360,11 +363,14 @@ properties:
       - name: 'instanceEncryptionKey'
         type: NestedObject
         description: 'Optional. Encrypts suspended data for an instance with a customer-managed encryption key.'
+        immutable: true
         properties:
           - name: 'rawKey'
             type: String
+            sensitive: true
           - name: 'rsaEncryptedKey'
             type: String
+            sensitive: true
           - name: 'kmsKeyName'
             type: String
           - name: 'kmsKeyServiceAccount'
@@ -708,11 +714,14 @@ properties:
       - name: 'diskEncryptionKey'
         type: NestedObject
         description: 'Optional. Encrypts the disk using a customer-supplied encryption key.'
+        immutable: true
         properties:
           - name: 'rawKey'
             type: String
+            sensitive: true
           - name: 'rsaEncryptedKey'
             type: String
+            sensitive: true
           - name: 'kmsKeyName'
             type: String
           - name: 'kmsKeyServiceAccount'
