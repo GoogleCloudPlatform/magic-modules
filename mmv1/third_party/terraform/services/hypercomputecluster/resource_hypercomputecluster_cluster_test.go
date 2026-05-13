@@ -1,3 +1,4 @@
+
 package hypercomputecluster_test
 
 import (
@@ -805,7 +806,6 @@ func TestAccHypercomputeclusterCluster_networkValidation(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
-			// Test case: Expect error when network_resources is missing on create
 			{
 				Config:      testAccHypercomputeclusterCluster_missingNetwork(context),
 				ExpectError: regexp.MustCompile("network_resources: At least one network_resources entry must be specified for cluster creation"),
@@ -827,7 +827,6 @@ resource "google_hypercomputecluster_cluster" "cluster" {
   cluster_id                  = "tf%{random_suffix}"
   location                    = "us-central1"
   description                 = "Cluster Director instance created through Terraform - Missing Network"
-  # network_resources IS INTENTIONALLY OMITTED
   compute_resources {
     id = "compute-spot"
     config {
