@@ -22,7 +22,6 @@ import (
 	"sort"
 	"strings"
 
-	"bitbucket.org/creachadair/stringset"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
@@ -120,7 +119,7 @@ type Resource struct {
 	CustomizeDiff []string
 
 	// List of other Golang packages to import in a resources' generated Go file
-	additionalFileImportSet stringset.Set
+	additionalFileImportSet map[string]struct{}
 
 	// ListFields is the list of fields required for a list call.
 	ListFields []string
@@ -442,16 +441,17 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	resourceTitle := strings.Split(info.Title, "/")[1]
 
 	res := Resource{
-		title:                SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
-		dclStructName:        TitleCaseResourceName(schema.Title),
-		dclTitle:             TitleCaseResourceName(resourceTitle),
-		productMetadata:      product,
-		versionMetadata:      version,
-		Description:          info.Description,
-		location:             location,
-		InsertTimeoutMinutes: 20,
-		UpdateTimeoutMinutes: 20,
-		DeleteTimeoutMinutes: 20,
+		title:                   SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
+		dclStructName:           TitleCaseResourceName(schema.Title),
+		dclTitle:                TitleCaseResourceName(resourceTitle),
+		productMetadata:         product,
+		versionMetadata:         version,
+		Description:             info.Description,
+		location:                location,
+		InsertTimeoutMinutes:    20,
+		UpdateTimeoutMinutes:    20,
+		DeleteTimeoutMinutes:    20,
+		additionalFileImportSet: make(map[string]struct{}),
 	}
 
 	// Since the resource's "info" extension field can't be accessed, the relevant

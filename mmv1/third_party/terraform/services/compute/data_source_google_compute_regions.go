@@ -11,11 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func DataSourceGoogleComputeRegions() *schema.Resource {
@@ -43,7 +38,7 @@ func DataSourceGoogleComputeRegions() *schema.Resource {
 
 func dataSourceGoogleComputeRegionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -54,17 +49,41 @@ func dataSourceGoogleComputeRegionsRead(d *schema.ResourceData, meta interface{}
 	}
 	filter := ""
 	if s, ok := d.GetOk("status"); ok {
-		filter = fmt.Sprintf(" (status eq %s)", s)
+		filter = fmt.Sprintf("(status eq %s)", s.(string))
 	}
 
-	call := NewClient(config, userAgent).Regions.List(project).Filter(filter)
-
-	resp, err := call.Do()
+	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions")
 	if err != nil {
 		return err
 	}
 
-	regions := flattenRegions(resp.Items)
+	queryParams := map[string]string{
+		"filter":      filter,
+		"prettyPrint": "false",
+	}
+	url, err = transport_tpg.AddQueryParams(url, queryParams)
+	if err != nil {
+		return err
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return err
+	}
+
+	var regions []string
+	rawItems, ok := res["items"].([]interface{})
+	if !ok {
+		log.Printf("[DEBUG] no regions found in response")
+	} else {
+		regions = flattenRegions(rawItems)
+	}
 	log.Printf("[DEBUG] Received Google Compute Regions: %q", regions)
 
 	if err := d.Set("names", regions); err != nil {
@@ -78,10 +97,18 @@ func dataSourceGoogleComputeRegionsRead(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func flattenRegions(regions []*compute.Region) []string {
-	result := make([]string, len(regions))
-	for i, region := range regions {
-		result[i] = region.Name
+func flattenRegions(regions []interface{}) []string {
+	var result []string
+	for _, region := range regions {
+		regionMap, ok := region.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name, ok := regionMap["name"].(string)
+		if !ok {
+			continue
+		}
+		result = append(result, name)
 	}
 	sort.Strings(result)
 	return result
@@ -89,9 +116,9 @@ func flattenRegions(regions []*compute.Region) []string {
 
 func init() {
 	registry.Schema{
-		Name: "google_compute_regions",
+		Name:        "google_compute_regions",
 		ProductName: "compute",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceGoogleComputeRegions(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRegions(),
 	}.Register()
 }

@@ -1,0 +1,34 @@
+resource "google_database_migration_service_private_connection" "{{$.PrimaryResourceId}}" {
+	display_name          = "dbms_pc"
+	location              = "us-central1"
+	private_connection_id = "{{index $.Vars "private_connection_id"}}"
+
+	labels = {
+		key = "value"
+	}
+
+	psc_interface_config {
+		network_attachment = resource.google_compute_network_attachment.default.id
+	}
+
+	create_without_validation = false
+}
+
+resource "google_compute_network_attachment" "default" {
+  name                  = "{{index $.Vars "attachment_name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_AUTOMATIC"
+  subnetworks           = [resource.google_compute_subnetwork.default.id]
+}
+
+resource "google_compute_network" "default" {
+  name = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+}

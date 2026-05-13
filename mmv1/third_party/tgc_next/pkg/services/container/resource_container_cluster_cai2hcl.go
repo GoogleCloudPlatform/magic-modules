@@ -122,8 +122,6 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 			hclData["node_locations"] = locations
 		}
 	}
-	hclData["min_master_version"] = asset.Resource.Data["currentNodeVersion"]
-	hclData["node_version"] = asset.Resource.Data["currentNodeVersion"]
 	hclData["logging_service"] = asset.Resource.Data["loggingService"]
 	hclData["monitoring_service"] = asset.Resource.Data["monitoringService"]
 	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil)
@@ -1177,11 +1175,11 @@ func flattenClusterAutoscaling(v interface{}, enableAutopilot bool) []map[string
 		if !enableAutopilot {
 			transformed["enabled"] = true
 		}
-	} else if !enableAutopilot {
-		transformed["enabled"] = false
+		transformed["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a["autoprovisioningNodePoolDefaults"])
 	}
-	transformed["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a["autoprovisioningNodePoolDefaults"])
-	transformed["auto_provisioning_locations"] = a["autoprovisioningLocations"]
+	if v := a["autoprovisioningLocations"]; v != nil {
+		transformed["auto_provisioning_locations"] = v
+	}
 	if v := a["autoscalingProfile"]; v != nil && v != "BALANCED" {
 		transformed["autoscaling_profile"] = v
 	}
@@ -1189,6 +1187,9 @@ func flattenClusterAutoscaling(v interface{}, enableAutopilot bool) []map[string
 		transformed["default_compute_class_enabled"] = dccc["enabled"]
 	}
 
+	if len(transformed) == 0 {
+		return nil
+	}
 	return []map[string]interface{}{transformed}
 }
 

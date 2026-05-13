@@ -1,5 +1,23 @@
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_for_project" {
+  create_duration = "60s"
+  depends_on      = [google_project.project]
+}
+
+resource "google_project_service" "datalineage_api" {
+  project            = google_project.project.project_id
+  service            = "datalineage.googleapis.com"
+  depends_on         = [time_sleep.wait_for_project]
+}
+
 resource "google_data_lineage_config" "{{$.PrimaryResourceId}}" {
-  parent = "projects/{{index $.TestEnvVars "project"}}"
+  parent = "projects/${google_project.project.project_id}"
   location = "global"
 
   ingestion {
@@ -12,4 +30,5 @@ resource "google_data_lineage_config" "{{$.PrimaryResourceId}}" {
       }
     }
   }
+  depends_on = [google_project_service.datalineage_api]
 }

@@ -21,6 +21,9 @@ func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatabaseMigrationServiceConnectionProfile_basic(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_database_migration_service_connection_profile.default", "role", "SOURCE"),
+				),
 			},
 			{
 				ResourceName:            "google_database_migration_service_connection_profile.default",
@@ -30,6 +33,9 @@ func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
 			},
 			{
 				Config: testAccDatabaseMigrationServiceConnectionProfile_update(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_database_migration_service_connection_profile.default", "role", "DESTINATION"),
+				),
 			},
 			{
 				ResourceName:            "google_database_migration_service_connection_profile.default",
@@ -47,6 +53,7 @@ resource "google_database_migration_service_connection_profile" "default" {
 	location = "us-central1"
 	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
 	display_name          = "tf-test-dbms-connection-profile-display%{random_suffix}"
+	role                  = "SOURCE"
 	labels	= { 
 		foo = "bar" 
 	}
@@ -66,6 +73,7 @@ resource "google_database_migration_service_connection_profile" "default" {
 	location = "us-central1"
 	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
 	display_name          = "tf-test-dbms-connection-profile-updated-display%{random_suffix}"
+	role                  = "DESTINATION"
 	labels	= { 
 		bar = "foo" 
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/services/workflows"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -293,7 +294,7 @@ func TestAccWorkflowsWorkflow_CMEK(t *testing.T) {
 	t.Parallel()
 
 	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", acctest.RandInt(t))
-	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	bootstrapped := kms.BootstrapKMSKeyInLocation(t, "us-central1")
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-workflows.iam.gserviceaccount.com",
@@ -307,7 +308,7 @@ func TestAccWorkflowsWorkflow_CMEK(t *testing.T) {
 		CheckDestroy:             testAccCheckWorkflowsWorkflowDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWorkflowsWorkflow_CMEK(workflowName, kms.CryptoKey.Name),
+				Config: testAccWorkflowsWorkflow_CMEK(workflowName, bootstrapped.CryptoKey.Name),
 			},
 		},
 	})

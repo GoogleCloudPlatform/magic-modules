@@ -43,6 +43,7 @@ iam_policy:
     - '{{connection_id}}'
 custom_code:
   encoder: 'templates/terraform/encoders/bigquery_connection.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "US"
@@ -145,7 +146,7 @@ examples:
       kms_key_name: 'projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKey(t).CryptoKey.Name'
       # for backward compatible
       username: '"user" + randomSuffix'
     oics_vars_overrides:
@@ -163,8 +164,8 @@ examples:
       username: '"user" + randomSuffix'
       password: '"password"'
     ignore_read_extra:
-      # username and password are not returned by the API
-      - 'configuration.0.authentication.0.username_password.0.username'
+      # The plaintext password is redacted by the API on read, so it cannot
+      # be verified against the original config.
       - 'configuration.0.authentication.0.username_password.0.password'
     external_providers: ["random", "time"]
     # Random provider

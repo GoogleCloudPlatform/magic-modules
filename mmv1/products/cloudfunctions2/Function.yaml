@@ -55,6 +55,7 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/cloudfunctions2_function.go.tmpl'
   encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 taint_resource_on_failed_create: true
 sweeper:
   url_substitutions:
@@ -244,7 +245,7 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
     # ignore these fields during import step

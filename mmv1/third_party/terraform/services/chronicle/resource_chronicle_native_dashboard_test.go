@@ -1,7 +1,5 @@
 package chronicle_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
 
@@ -121,5 +119,3 @@ resource "google_chronicle_native_dashboard" "my_dashboard" {
 }
 `, context)
 }
-
-{{- end }}

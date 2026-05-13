@@ -28,6 +28,7 @@ autogen_async: true
 
 custom_code:
   pre_create: templates/terraform/pre_create/observability_organization_settings.go.tmpl
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 import_format:
   - 'organizations/{{organization}}/locations/{{location}}/settings'
 
@@ -50,7 +51,7 @@ examples:
       location: "us"
       kms_key_name: "example-key"
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
       # for backward compatible
       location: '"us" + randomSuffix'
     test_env_vars:

@@ -54,7 +54,7 @@ examples:
       parameter_version_id: 'regional_parameter_version'
       kms_key: 'kms-key'
     test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
@@ -77,6 +77,7 @@ examples:
 custom_code:
   pre_create: 'templates/terraform/pre_create/parameter_manager_regional_parameter_version.go.tmpl'
   custom_import: 'templates/terraform/custom_import/parameter_manager_regional_parameter_version.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 # exluding resource_identity due to custom_import
 exclude_identity_generation: true
 parameters:
