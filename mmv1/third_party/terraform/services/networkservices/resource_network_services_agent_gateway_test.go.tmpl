@@ -100,6 +100,11 @@ resource "google_network_services_agent_gateway" "default" {
     egress {
       network_attachment = "projects/%{project}/regions/us-central1/networkAttachments/oh-my-network-attachment"
     }
+    dns_peering_config {
+      domains        = ["update.example.com."]
+      target_project = "%{project}"
+      target_network = "projects/%{project}/global/networks/oh-my-network"
+    }
   }
 }
 `, context)

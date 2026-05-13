@@ -20,5 +20,10 @@ resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
     egress {
       network_attachment = "projects/{{index $.TestEnvVars "project"}}/regions/us-central1/networkAttachments/my-network-attachment"
     }
+    dns_peering_config {
+      domains        = ["example.com."]
+      target_project = "{{index $.TestEnvVars "project"}}"
+      target_network = "projects/{{index $.TestEnvVars "project"}}/global/networks/my-network"
+    }
   }
 }
