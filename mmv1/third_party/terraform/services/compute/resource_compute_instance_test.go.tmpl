@@ -2795,6 +2795,7 @@ func TestAccComputeInstance_removeAliasIpv6Range(t *testing.T) {
 				Config: testAccComputeInstance_aliasIpv6Range_noAlias(networkName, subnetName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceNoAliasIpv6Range(&instance),
 				),
 			},
 		},
@@ -6317,6 +6318,18 @@ func testAccCheckComputeInstanceHasAliasIpv6Range(instance *compute.Instance, iP
 		}
 
 		return fmt.Errorf("Alias ipv6 range with cidr %s not present", iPCidrRange)
+	}
+}
+
+func testAccCheckComputeInstanceNoAliasIpv6Range(instance *compute.Instance) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, networkInterface := range instance.NetworkInterfaces {
+			if len(networkInterface.AliasIpv6Ranges) > 0 {
+				return fmt.Errorf("Alias ipv6 range still present on instance")
+			}
+		}
+
+		return nil
 	}
 }
 {{- end }}

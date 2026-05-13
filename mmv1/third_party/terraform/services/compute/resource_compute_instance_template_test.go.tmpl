@@ -301,6 +301,7 @@ func TestAccComputeInstanceTemplate_aliasIpv6Range(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "network_interface.0.alias_ipv6_range.0.ip_cidr_range", "/96"),
 				),
 			},
 			{
@@ -5730,7 +5731,6 @@ resource "google_compute_instance_template" "foobar" {
     subnetwork = google_compute_subnetwork.custom-test.name
     stack_type = "IPV6_ONLY"
     alias_ipv6_range {
-      subnetwork_range_name = "v6-ula"
       ip_cidr_range         = "/96"
     }
   }
