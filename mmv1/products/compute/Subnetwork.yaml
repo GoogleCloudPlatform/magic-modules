@@ -43,7 +43,6 @@ references:
   api: https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
-deletion_policy_exclude: true
 has_self_link: true
 collection_url_key: items
 iam_policy:
