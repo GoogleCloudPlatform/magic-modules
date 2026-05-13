@@ -177,7 +177,7 @@ func ListDnsRecordSets(
 		return err
 	}
 
-	req := config.NewDnsClient(userAgent).ResourceRecordSets.List(project, managedZone)
+	req := config.NewClient(config, userAgent).ResourceRecordSets.List(project, managedZone)
 
 	if recordName != "" {
 		req = req.Name(recordName)
