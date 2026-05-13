@@ -25,7 +25,6 @@ resource "google_ces_app" "ces_app_basic" {
   description = "Basic CES App example"
   display_name = "{{index $.Vars "display_name"}}"
   pinned = true
-  tool_execution_mode = "SEQUENTIAL"
 
   language_settings {
     default_language_code    = "en-US"
