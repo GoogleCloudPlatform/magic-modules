@@ -50,7 +50,11 @@ func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedMaxRunDuration = map[string]interface{}{"nanos": float64(123), "seconds": "60"}
+	// Define in testAccComputeInstanceFromMachineImage_maxRunDuration
+	expectedMaxRunDuration := map[string]interface{}{
+		"nanos":   float64(123),
+		"seconds": "60",
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -139,7 +143,10 @@ func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedLocalSsdRecoveryTimeout = map[string]interface{}{"nanos": float64(0), "seconds": "3600"}
+	expectedLocalSsdRecoveryTimeout := map[string]interface{}{
+		"nanos":   float64(0),
+    "seconds": "3600",
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -164,7 +171,10 @@ func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedLocalSsdRecoveryTimeout = map[string]interface{}{"nanos": float64(0), "seconds": "7200"}
+	expectedLocalSsdRecoveryTimeout := map[string]interface{}{
+		"nanos":   float64(0),
+    "seconds": "7200",
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -191,14 +201,9 @@ func TestAccComputeInstanceFromMachineImageWithOverride_partnerMetadata(t *testi
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
 	var namespace = "test.compute.googleapis.com"
-	expectedPartnerMetadata := make(map[string]map[string]interface{})
-	expectedPartnerMetadata[namespace] = map[string]interface{}{
-		"entries": map[string]interface{}{
-			"key1": "value1",
-			"key2": float64(2),
-			"key3": map[string]interface{}{
-				"key31": "value31",
-			},
+	expectedPartnerMetadata := map[string]interface{}{
+		namespace: map[string]interface{}{
+			"entries": `{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`,
 		},
 	}
 
