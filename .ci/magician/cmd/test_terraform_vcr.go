@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -28,6 +29,8 @@ var (
 	postReplayTmplText string
 	//go:embed templates/vcr/record_replay.tmpl
 	recordReplayTmplText string
+	//go:embed templates/vcr/record_replay_rows.tmpl
+	recordReplayRowsTmplText string
 )
 
 var ttvRequiredEnvironmentVariables = [...]string{
@@ -277,7 +280,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		BuildID:          buildID,
 	}
 
-	comment, err := formatPostReplay(postReplayData)
+	comment, err := formatPostReplay(postReplayData, os.Stdout)
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
@@ -385,7 +388,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			NotRunBetaTests:               notRunBeta,
 			NotRunGATests:                 notRunGa,
 		}
-		recordReplayComment, err := formatRecordReplay(recordReplayData)
+		recordReplayComment, err := formatRecordReplay(recordReplayData, os.Stdout)
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
@@ -675,7 +678,7 @@ func init() {
 	rootCmd.AddCommand(testTerraformVCRCmd)
 }
 
-func formatComment(fileName string, tmplText string, data any) (string, error) {
+func parseTemplate(filename string, tmplText string) *template.Template {
 	funcs := template.FuncMap{
 		"join":         strings.Join,
 		"add":          func(i, j int) int { return i + j },
@@ -685,30 +688,50 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 		"symbol":       symbol,
 		"contains":     contains,
 	}
-	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
+	tmpl, err := template.New(filename).Funcs(funcs).Parse(tmplText)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to parse %s: %s", fileName, err))
+		panic(fmt.Sprintf("Unable to parse %s: %s", filename, err))
 	}
+	return tmpl
+}
+
+func formatComment(filename string, tmplText string, data any) (string, error) {
+	tmpl := parseTemplate(filename, tmplText)
 	sb := new(strings.Builder)
-	err = tmpl.Execute(sb, data)
+	err := tmpl.Execute(sb, data)
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(sb.String()), nil
 }
 
-func formatPostReplay(data postReplay) (string, error) {
+func formatPostReplay(data postReplay, w io.Writer) (string, error) {
+	if len(data.ReplayingResult.FailedTests) > 100 {
+		fmt.Fprintln(w, "Failed replaying tests:")
+		for _, t := range data.ReplayingResult.FailedTests {
+			fmt.Fprintln(w, "* "+t)
+		}
+	}
 	return formatComment("post_replay.tmpl", postReplayTmplText, data)
 }
 
-func formatRecordReplay(data recordReplay) (string, error) {
+func formatRecordReplay(data recordReplay, w io.Writer) (string, error) {
+	if len(data.TestRows) > 100 {
+		tmpl := parseTemplate("record_replay_rows.tmpl", recordReplayRowsTmplText+`{{ template "RecordReplayRows" . }}`)
+		sb := new(strings.Builder)
+		err := tmpl.Execute(sb, data)
+		if err != nil {
+			return "", err
+		}
+		fmt.Fprintln(w, strings.TrimSpace(sb.String()))
+	}
 	logBasePath := fmt.Sprintf("%s/%s/refs/heads/%s/artifacts/%s", data.LogBucket, data.Version, data.Head, data.BuildID)
 	if data.BuildID == "" {
 		logBasePath = fmt.Sprintf("%s/%s/refs/heads/%s", data.LogBucket, data.Version, data.Head)
 	}
 	data.LogBaseUrl = fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
 	data.BrowseLogBaseUrl = fmt.Sprintf("https://console.cloud.google.com/storage/browser/%s", logBasePath)
-	return formatComment("record_replay.tmpl", recordReplayTmplText, data)
+	return formatComment("record_replay.tmpl", recordReplayRowsTmplText+recordReplayTmplText, data)
 }
 
 func contains(slice []string, item string) bool {

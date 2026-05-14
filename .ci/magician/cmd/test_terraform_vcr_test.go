@@ -291,7 +291,7 @@ func TestAnalyticsComment(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatPostReplay(tc.data, new(strings.Builder))
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
@@ -363,7 +363,7 @@ func TestNonExercisedTestsComment(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatPostReplay(tc.data, new(strings.Builder))
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
@@ -377,10 +377,16 @@ func TestNonExercisedTestsComment(t *testing.T) {
 }
 
 func TestWithReplayFailedTests(t *testing.T) {
+	manyFailedTests := make([]string, 101)
+	for i := range manyFailedTests {
+		manyFailedTests[i] = "TestAccAlloydbBackup_alloydbBackupFullTestNewExample"
+	}
 	tests := []struct {
-		name         string
-		data         postReplay
-		wantContains []string
+		name               string
+		data               postReplay
+		wantContains       []string
+		wantNotContains    []string
+		wantStdoutContains []string
 	}{
 		{
 			name: "with failed tests",
@@ -391,18 +397,38 @@ func TestWithReplayFailedTests(t *testing.T) {
 			},
 			wantContains: []string{
 				"#### Action taken",
+				"Found 2 affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit.",
 				"<details>",
-				"<summary>Found 2 affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary>",
+				"<summary>Click here to see the affected tests</summary>",
 				"* a",
 				"* b",
 				"</details>",
 				"[Learn how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)",
 			},
 		},
+		{
+			name: "Too many failed tests",
+			data: postReplay{
+				ReplayingResult: vcr.Result{
+					FailedTests: manyFailedTests,
+				},
+				RunFullVCR: true,
+			},
+			wantContains: []string{
+				"More than 100 tests failed in replaying; this is too many to display on GitHub.",
+			},
+			wantNotContains: []string{manyFailedTests[0]},
+			wantStdoutContains: []string{
+				"Failed replaying tests",
+				manyFailedTests[0],
+			},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			sb := new(strings.Builder)
+			got, err := formatPostReplay(tc.data, sb)
+			gotStdout := sb.String()
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
@@ -410,6 +436,12 @@ func TestWithReplayFailedTests(t *testing.T) {
 				if !strings.Contains(got, wc) {
 					t.Errorf("formatPostReplay() returned %q, which does not contain %q", got, wc)
 				}
+			}
+			for _, s := range tc.wantNotContains {
+				assert.NotContains(t, got, s)
+			}
+			for _, s := range tc.wantStdoutContains {
+				assert.Contains(t, gotStdout, s)
 			}
 		})
 	}
@@ -452,7 +484,7 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatPostReplay(tc.data, new(strings.Builder))
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
@@ -466,10 +498,21 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 }
 
 func TestRecordReplay(t *testing.T) {
+	manyRows := make([]VCRTestTableRow, 101)
+	for i := range manyRows {
+		manyRows[i] = VCRTestTableRow{
+			DisplayName:                   "TestAcc_a",
+			RecordingStatus:               "Passed",
+			RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log",
+			ReplayingAfterRecordingStatus: "Passed",
+		}
+	}
 	tests := []struct {
-		name         string
-		data         recordReplay
-		wantContains []string
+		name               string
+		data               recordReplay
+		wantContains       []string
+		wantNotContains    []string
+		wantStdoutContains []string
 	}{
 		{
 			name: "ReplayingAfterRecordingResult has failed tests",
@@ -569,15 +612,44 @@ func TestRecordReplay(t *testing.T) {
 				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log) or the [debug logs folder](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording) for detailed results.",
 			},
 		},
+		{
+			name: "Too many rows",
+			data: recordReplay{
+				TestRows:           manyRows,
+				AllRecordingPassed: true,
+				BuildID:            "build-123",
+				Head:               "auto-pr-123",
+				Version:            provider.Beta.String(),
+				LogBucket:          "ci-vcr-logs",
+			},
+			wantContains: []string{
+				"More than 100 tests ran in recording mode; this is too many to display on GitHub.",
+			},
+			wantNotContains: []string{
+				manyRows[0].DisplayName,
+			},
+			wantStdoutContains: []string{
+				"| Recording Mode | Replaying Rerun | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
+			},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatRecordReplay(tc.data)
+			sb := new(strings.Builder)
+			got, err := formatRecordReplay(tc.data, sb)
+			gotStdout := sb.String()
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
-			for _, wc := range tc.wantContains {
-				assert.Contains(t, got, wc)
+			for _, s := range tc.wantContains {
+				assert.Contains(t, got, s)
+			}
+			for _, s := range tc.wantNotContains {
+				assert.NotContains(t, got, s)
+			}
+			for _, s := range tc.wantStdoutContains {
+				assert.Contains(t, gotStdout, s)
 			}
 		})
 	}

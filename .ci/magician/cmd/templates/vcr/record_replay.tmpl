@@ -2,11 +2,11 @@
 
 **Step 2: Recording Mode**
 
-| Recording Mode | Replaying Rerun | Test Name |
-| :--- | :--- | :--- |
-{{range .TestRows -}}
-| {{symbol .RecordingStatus}}{{if .RecordingErrorUrl}}&nbsp;[Error]({{.RecordingErrorUrl}}){{end}}{{if .RecordingLogUrl}}{{if .RecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.RecordingLogUrl}}){{end}} | {{symbol .ReplayingAfterRecordingStatus}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;[Error]({{.ReplayingAfterRecordingErrorUrl}}){{end}}{{if .ReplayingAfterRecordingLogUrl}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.ReplayingAfterRecordingLogUrl}}){{end}} | {{.DisplayName}} |
-{{end}}
+{{ if gt (len .TestRows) 100 -}}
+More than 100 tests ran in recording mode; this is too many to display on GitHub. View the [build](http://console.cloud.google.com/cloud-build/builds/${{$.BuildID}}) to see the result summary.
+{{- else -}}
+{{template "RecordReplayRows" .}}
+{{- end}}
 
 {{ if or (gt (len .ReplayingAfterRecordingResult.FailedTests) 0) (gt (len .RecordingResult.FailedTests) 0) .HasTerminatedTests .RecordingErr (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0) }}
 > [!CAUTION]
