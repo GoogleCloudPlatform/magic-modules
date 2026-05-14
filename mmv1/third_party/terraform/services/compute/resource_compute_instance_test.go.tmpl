@@ -1,9 +1,7 @@
 package compute_test
 
 import (
-	{{- if ne $.TargetVersionName "ga" }}
 	"encoding/json"
-	{{- end }}
 	"fmt"
 	{{- if ne $.TargetVersionName "ga" }}
 	"google.golang.org/api/googleapi"
@@ -26,6 +24,7 @@ import (
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 {{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
@@ -5554,10 +5553,10 @@ func testAccCheckComputeInstanceExists(t *testing.T, n string, instance interfac
 		panic("Attempted to check existence of Instance that was nil.")
 	}
 
-	return testAccCheckComputeInstanceExistsInProject(t, n, envvar.GetTestProjectFromEnv(), instance.(*compute.Instance))
+	return testAccCheckComputeInstanceExistsInProject(t, n, envvar.GetTestProjectFromEnv(), instance)
 }
 
-func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, instance *compute.Instance) resource.TestCheckFunc {
+func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, instance interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -5569,22 +5568,45 @@ func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, insta
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		{{- if eq $.TargetVersionName "ga" }}
-		found, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Get(
-			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
-		{{- else }}
-		found, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Get(
-			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).View("FULL").Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s",
+			transport_tpg.BaseUrl(tpgcompute.Product, config), p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+		{{- if ne $.TargetVersionName "ga" }}
+		url, queryErr := transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
+		if queryErr != nil {
+			return queryErr
+		}
 		{{- end }}
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   p,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		if found.Name != rs.Primary.Attributes["name"] {
+		if gotName, _ := found["name"].(string); gotName != rs.Primary.Attributes["name"] {
 			return fmt.Errorf("Instance not found")
 		}
 
-		*instance = *found
+		switch dst := instance.(type) {
+		case *compute.Instance:
+			b, err := json.Marshal(found)
+			if err != nil {
+				return fmt.Errorf("Error marshaling instance: %s", err)
+			}
+			var inst compute.Instance
+			if err := json.Unmarshal(b, &inst); err != nil {
+				return fmt.Errorf("Error unmarshaling instance: %s", err)
+			}
+			*dst = inst
+		case *map[string]interface{}:
+			*dst = found
+		default:
+			return fmt.Errorf("unsupported instance type %T", instance)
+		}
 
 		return nil
 	}
@@ -5695,21 +5717,47 @@ func testAccCheckComputeResourcePolicy(instance *compute.Instance, scheduleName 
 	}
 }
 
-func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, instanceMaxRunDurationWant compute.Duration) resource.TestCheckFunc {
+func testAccCheckComputeInstanceMaxRunDuration(instance interface{}, instanceMaxRunDurationWant interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance == nil {
 			return fmt.Errorf("instance is nil")
 		}
-		if instance.Scheduling == nil {
+		instMap, err := convertToInstanceMap(instance)
+		if err != nil {
+			return fmt.Errorf("error converting instance: %s", err)
+		}
+		sched, ok := instMap["scheduling"].(map[string]interface{})
+		if !ok {
 			return fmt.Errorf("no scheduling")
 		}
-
-		if !reflect.DeepEqual(*instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant) {
-			return fmt.Errorf("got the wrong instance max run duration action: have: %#v; want: %#v", instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant)
+		gotMRD, ok := sched["maxRunDuration"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("no maxRunDuration")
+		}
+		wantMRD, err := convertToInstanceMap(instanceMaxRunDurationWant)
+		if err != nil {
+			return fmt.Errorf("error converting want: %s", err)
+		}
+		if !reflect.DeepEqual(gotMRD, wantMRD) {
+			return fmt.Errorf("got the wrong instance max run duration action: have: %#v; want: %#v", gotMRD, wantMRD)
 		}
 
 		return nil
 	}
+}
+
+// convertToInstanceMap normalizes a typed compute struct or a map[string]interface{}
+// into a map representation via JSON roundtrip, so helpers can work with either input.
+func convertToInstanceMap(v interface{}) (map[string]interface{}, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	var m map[string]interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func testAccCheckComputeInstanceHasAvailabilityDomain(instance *compute.Instance, availabilityDomain int64) resource.TestCheckFunc {
@@ -5729,17 +5777,29 @@ func testAccCheckComputeInstanceHasAvailabilityDomain(instance *compute.Instance
 	}
 }
 
-func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instance, instanceLocalSsdRecoveryTiemoutWant compute.Duration) resource.TestCheckFunc {
+func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance interface{}, instanceLocalSsdRecoveryTiemoutWant interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance == nil {
 			return fmt.Errorf("instance is nil")
 		}
-		if instance.Scheduling == nil {
+		instMap, err := convertToInstanceMap(instance)
+		if err != nil {
+			return fmt.Errorf("error converting instance: %s", err)
+		}
+		sched, ok := instMap["scheduling"].(map[string]interface{})
+		if !ok {
 			return fmt.Errorf("no scheduling")
 		}
-
-		if !reflect.DeepEqual(*instance.Scheduling.LocalSsdRecoveryTimeout, instanceLocalSsdRecoveryTiemoutWant) {
-			return fmt.Errorf("got the wrong instance local ssd recovery timeout action: have: %#v; want: %#v", instance.Scheduling.LocalSsdRecoveryTimeout, instanceLocalSsdRecoveryTiemoutWant)
+		gotLSRT, ok := sched["localSsdRecoveryTimeout"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("no localSsdRecoveryTimeout")
+		}
+		wantLSRT, err := convertToInstanceMap(instanceLocalSsdRecoveryTiemoutWant)
+		if err != nil {
+			return fmt.Errorf("error converting want: %s", err)
+		}
+		if !reflect.DeepEqual(gotLSRT, wantLSRT) {
+			return fmt.Errorf("got the wrong instance local ssd recovery timeout action: have: %#v; want: %#v", gotLSRT, wantLSRT)
 		}
 
 		return nil
@@ -5747,31 +5807,72 @@ func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instan
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func testAccCheckComputeInstancePartnerMetadata(instance *compute.Instance, expectedPartnerMetadata map[string]compute.StructuredEntries) resource.TestCheckFunc {
+func testAccCheckComputeInstancePartnerMetadata(instance interface{}, expectedPartnerMetadata interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance == nil {
 			return fmt.Errorf("instance is nil")
 		}
-		if instance.PartnerMetadata == nil {
+		instMap, err := convertToInstanceMap(instance)
+		if err != nil {
+			return fmt.Errorf("error converting instance: %s", err)
+		}
+		gotPartnerMetadata, ok := instMap["partnerMetadata"].(map[string]interface{})
+		if !ok {
 			return fmt.Errorf("no partner metadata")
+		}
+		wantPartnerMetadata, err := convertToInstanceMap(expectedPartnerMetadata)
+		if err != nil {
+			return fmt.Errorf("error converting want: %s", err)
 		}
 		expectedPartnerMetadataMap := make(map[string]interface{})
 		acutalPartnerMetadataMap := make(map[string]interface{})
-		for key, value := range instance.PartnerMetadata {
-			var jsonMap map[string]interface{}
-			json.Unmarshal(value.Entries, jsonMap)
-			acutalPartnerMetadataMap[key] = jsonMap
+		for key, value := range gotPartnerMetadata {
+			entries, ok := value.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			rawEntries, ok := entries["entries"]
+			if !ok {
+				continue
+			}
+			acutalPartnerMetadataMap[key] = normalizeEntries(rawEntries)
 		}
-		for key, value := range expectedPartnerMetadata {
-			var jsonMap map[string]interface{}
-			json.Unmarshal(value.Entries, jsonMap)
-			expectedPartnerMetadataMap[key] = jsonMap
+		for key, value := range wantPartnerMetadata {
+			entries, ok := value.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			rawEntries, ok := entries["entries"]
+			if !ok {
+				continue
+			}
+			expectedPartnerMetadataMap[key] = normalizeEntries(rawEntries)
 		}
 		if !reflect.DeepEqual(acutalPartnerMetadataMap, expectedPartnerMetadataMap) {
 			return fmt.Errorf("got the wrong instance partne metadata action: have: %+v; want: %+v", acutalPartnerMetadataMap, expectedPartnerMetadataMap)
 		}
 		return nil
 
+	}
+}
+
+// normalizeEntries decodes raw JSON entries (string or json.RawMessage) into a map for comparison.
+func normalizeEntries(raw interface{}) interface{} {
+	switch v := raw.(type) {
+	case string:
+		var m map[string]interface{}
+		if err := json.Unmarshal([]byte(v), &m); err == nil {
+			return m
+		}
+		return v
+	case []byte:
+		var m map[string]interface{}
+		if err := json.Unmarshal(v, &m); err == nil {
+			return m
+		}
+		return string(v)
+	default:
+		return v
 	}
 }
 {{- end }}
@@ -6312,14 +6413,27 @@ func testAccCheckComputeInstanceHasShieldedVmConfig(instance *compute.Instance, 
 	}
 }
 
-func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.Instance, EnableConfidentialCompute bool, ConfidentialInstanceType string) resource.TestCheckFunc {
+func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance interface{}, EnableConfidentialCompute bool, ConfidentialInstanceType string) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
-		if instance.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
-			return fmt.Errorf("Wrong ConfidentialInstanceConfig EnableConfidentialCompute: expected %t, got, %t", EnableConfidentialCompute, instance.ConfidentialInstanceConfig.EnableConfidentialCompute)
+		if instance == nil {
+			return fmt.Errorf("instance is nil")
 		}
-		if instance.ConfidentialInstanceConfig.ConfidentialInstanceType != ConfidentialInstanceType {
-			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, instance.ConfidentialInstanceConfig.ConfidentialInstanceType)
+		instMap, err := convertToInstanceMap(instance)
+		if err != nil {
+			return fmt.Errorf("error converting instance: %s", err)
+		}
+		cic, ok := instMap["confidentialInstanceConfig"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("no confidentialInstanceConfig")
+		}
+		gotEnable, _ := cic["enableConfidentialCompute"].(bool)
+		if gotEnable != EnableConfidentialCompute {
+			return fmt.Errorf("Wrong ConfidentialInstanceConfig EnableConfidentialCompute: expected %t, got, %t", EnableConfidentialCompute, gotEnable)
+		}
+		gotType, _ := cic["confidentialInstanceType"].(string)
+		if gotType != ConfidentialInstanceType {
+			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, gotType)
 		}
 
 		return nil
