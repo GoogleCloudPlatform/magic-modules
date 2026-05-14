@@ -50,7 +50,6 @@ func FolderIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
 }
 
 // FolderIamParentResourceIdentityParser returns the parent folder's id
-// import via resource identity (same shape as FolderIamUpdater.GetResourceId()).
 func FolderIamParentResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
 	v, ok := identity.GetOk("folder")
 	if !ok {
