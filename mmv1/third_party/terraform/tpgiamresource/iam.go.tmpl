@@ -432,7 +432,7 @@ type IamSettings struct {
 	StateUpgraders     []schema.StateUpgrader
 	SchemaVersion      int
 	CreateTimeOut      int64
-	// ParentResourceIdentityParser, when non-nil, enables ResourceIdentity for this IAM
+	// ParentResourceIdentityParser, when non-nil, enables ResourceIdentity for this IAM resource
 	ParentResourceIdentityParser ParentResourceIdFromIdentityParserFunc
 }
 
