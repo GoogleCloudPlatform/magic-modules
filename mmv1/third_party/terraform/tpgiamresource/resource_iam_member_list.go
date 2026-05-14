@@ -263,10 +263,10 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 	if req.IncludeResource {
 		tfRes, err := rd.TfTypeResourceState()
 		if err != nil {
-			return list.ListResult{}, fmt.Errorf("resource state: %w", err)
+			return list.ListResult{}, fmt.Errorf("resource state: %v", err)
 		}
 		if err := res.Resource.Set(ctx, *tfRes); err != nil {
-			return list.ListResult{}, fmt.Errorf("set resource: %w", err)
+			return list.ListResult{}, fmt.Errorf("set resource: %v", err)
 		}
 	}
 
