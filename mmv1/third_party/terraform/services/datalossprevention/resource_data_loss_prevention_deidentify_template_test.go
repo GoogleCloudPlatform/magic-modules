@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 )
 
 func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsUpdate(t *testing.T) {
@@ -14,7 +15,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -456,7 +457,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1048,7 +1049,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTran
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1153,7 +1154,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1485,7 +1486,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1794,7 +1795,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1892,7 +1893,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -2039,7 +2040,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	context := map[string]interface{}{
 		"organization": envvar.GetTestOrgFromEnv(t),
-		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name": kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3330,7 +3331,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	context := map[string]interface{}{
 		"organization": envvar.GetTestOrgFromEnv(t),
-		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name": kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4089,7 +4090,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	context := map[string]interface{}{
 		"organization": envvar.GetTestOrgFromEnv(t),
-		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name": kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4314,7 +4315,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	context := map[string]interface{}{
 		"organization": envvar.GetTestOrgFromEnv(t),
-		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name": kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4554,7 +4555,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	context := map[string]interface{}{
 		"organization": envvar.GetTestOrgFromEnv(t),
-		"kms_key_name": acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name": kms.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

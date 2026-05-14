@@ -48,6 +48,12 @@ examples:
       short_name: "my-short-name"
     test_env_vars:
       org_id: 'ORG_TARGET'
+  - name: 'organization_security_policy_association_excluded'
+    primary_resource_id: 'policy'
+    vars:
+      short_name: "my-short-name-excluded"
+    test_env_vars:
+      org_id: 'ORG_TARGET'
 parameters:
   - name: 'policyId'
     type: String

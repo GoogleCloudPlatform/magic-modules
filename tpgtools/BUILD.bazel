@@ -210,7 +210,6 @@ go_binary(
         "@com_github_kylelemons_godebug//pretty",
         "@com_github_nasa9084_go_openapi//:go-openapi",
         "@in_gopkg_yaml_v2//:yaml_v2",
-        "@org_bitbucket_creachadair_stringset//:stringset",
     ],
 )
 
@@ -249,7 +248,6 @@ go_binary(
                "@com_github_kylelemons_godebug//pretty",
                "@com_github_nasa9084_go_openapi//:go-openapi",
                "@in_gopkg_yaml_v2//:yaml_v2",
-               "@org_bitbucket_creachadair_stringset//:stringset",
            ] + ["@com_github_googlecloudplatform_declarative_resource_client_library//services/google/" + s for s in SERVICES] +
            ["@com_github_googlecloudplatform_declarative_resource_client_library//services/google/" + s + "/beta" for s in SERVICES],
 )
@@ -353,6 +351,5 @@ go_library(
         "@com_github_kylelemons_godebug//pretty",
         "@com_github_nasa9084_go_openapi//:go-openapi",
         "@in_gopkg_yaml_v2//:yaml_v2",
-        "@org_bitbucket_creachadair_stringset//:stringset",
     ],
 )

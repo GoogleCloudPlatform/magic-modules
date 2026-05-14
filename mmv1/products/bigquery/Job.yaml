@@ -46,6 +46,7 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/bigquery_job.go.tmpl'
   encoder: 'templates/terraform/encoders/bigquery_job.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 # exluding resource_identity due to dataset_id field
 exclude_identity_generation: true
 schema_version: 1
@@ -128,7 +129,7 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
@@ -143,7 +144,7 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:

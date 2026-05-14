@@ -28,6 +28,7 @@ update_mask: true
 
 custom_code:
   pre_create: templates/terraform/pre_create/observability_folder_settings.go.tmpl
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 import_format:
   - 'folders/{{folder}}/locations/{{location}}/settings'
 
@@ -53,7 +54,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
       # for backward compatible
       location: '"us" + randomSuffix'
   - name: "observability_folder_settings_basic_global"

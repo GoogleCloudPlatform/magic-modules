@@ -56,6 +56,7 @@ custom_code:
   pre_create: 'templates/terraform/constants/vertex_ai_featurestore_entitytype.go.tmpl'
   pre_delete: 'templates/terraform/constants/vertex_ai_featurestore_entitytype.go.tmpl'
   custom_import: 'templates/terraform/custom_import/vertex_ai_featurestore_entitytype.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'vertex_ai_featurestore_entitytype'
@@ -68,7 +69,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       # for backward compatible
       name: '"terraform" + randomSuffix'
   - name: 'vertex_ai_featurestore_entitytype_with_beta_fields'
@@ -82,7 +83,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       # for backward compatible
       name: '"terraform2" + randomSuffix'
 parameters:

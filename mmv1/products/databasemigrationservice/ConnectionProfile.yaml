@@ -201,6 +201,14 @@ properties:
       - RDS
       - AURORA
       - ALLOYDB
+  - name: role
+    type: Enum
+    description: |
+      The connection profile role.
+    default_from_api: true
+    enum_values:
+      - SOURCE
+      - DESTINATION
   - name: mysql
     type: NestedObject
     description: |
@@ -287,7 +295,7 @@ properties:
       - name: cloudSqlId
         type: String
         description: |
-          If the source is a Cloud SQL database, use this field to provide the Cloud SQL instance ID of the source.
+          If the connection profile is a Cloud SQL database, use this field to provide the Cloud SQL instance ID.
   - name: postgresql
     type: NestedObject
     description: |
@@ -305,23 +313,17 @@ properties:
           The IP or hostname of the source MySQL database.
         required_with:
           - postgresql.0.port
-          - postgresql.0.username
-          - postgresql.0.password
       - name: port
         type: Integer
         description: |
           The network port of the source MySQL database.
         required_with:
           - postgresql.0.host
-          - postgresql.0.username
-          - postgresql.0.password
       - name: username
         type: String
         description: |
           The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
         required_with:
-          - postgresql.0.host
-          - postgresql.0.port
           - postgresql.0.password
       - name: password
         type: String
@@ -329,17 +331,20 @@ properties:
           Input only. The password for the user that Database Migration Service will be using to connect to the database.
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
         immutable: true
-        required_with:
-          - postgresql.0.host
-          - postgresql.0.port
-          - postgresql.0.username
         sensitive: true
         custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_password.go.tmpl
+        required_with:
+          - postgresql.0.username
       - name: passwordSet
         type: Boolean
         description: |
           Output only. Indicates If this connection profile password is stored.
         output: true
+      - name: database
+        type: String
+        description: |
+          The name of the specific database within the host.
+        default_from_api: true
       - name: ssl
         type: NestedObject
         description: |
@@ -385,11 +390,11 @@ properties:
       - name: cloudSqlId
         type: String
         description: |
-          If the source is a Cloud SQL database, use this field to provide the Cloud SQL instance ID of the source.
+          If the connection profile is a Cloud SQL database, use this field to provide the Cloud SQL instance ID.
       - name: alloydbClusterId
         type: String
         description: |
-          If the connected database is an AlloyDB instance, use this field to provide the AlloyDB cluster ID.
+          If the connection profile is an AlloyDB instance, use this field to provide the AlloyDB cluster ID.
       - name: networkArchitecture
         type: Enum
         description: |
@@ -398,6 +403,16 @@ properties:
         enum_values:
           - NETWORK_ARCHITECTURE_OLD_CSQL_PRODUCER
           - NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER
+      - name: privateConnectivity
+        type: NestedObject
+        description: |
+          Private connectivity.
+        properties:
+          - name: privateConnection
+            type: String
+            required: true
+            description: |
+              Required. The resource name (URI) of the private connection.
   - name: oracle
     type: NestedObject
     description: |

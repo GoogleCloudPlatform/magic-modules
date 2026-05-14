@@ -68,6 +68,79 @@ properties:
                       - name: 'gpuDriverVersion'
                         type: 'String'
                         description: 'Mode for how the GPU driver is installed.'
+            - name: 'taint'
+              type: 'Array'
+              api_name: 'taints'
+              description: 'Taints to be applied to nodes in the pool.'
+              ignore_read: true
+              item_type:
+                type: 'NestedObject'
+                properties:
+                  - name: 'key'
+                    type: 'String'
+                    description: 'The key of the taint.'
+                    ignore_read: true
+                  - name: 'value'
+                    type: 'String'
+                    description: 'The value of the taint.'
+                    ignore_read: true
+                  - name: 'effect'
+                    type: 'String'
+                    description: 'The effect of the taint.'
+                    ignore_read: true
+  - name: 'nodeConfig'
+    type: 'NestedObject'
+    description: 'Configuration for the nodes in the pool.'
+    properties:
+      - name: 'guest_accelerator'
+        type: 'Array'
+        api_name: 'accelerators'
+        description: 'A list of hardware accelerators to be attached to each node.'
+        ignore_read: true
+        item_type:
+          type: 'NestedObject'
+          properties:
+            - name: 'count'
+              type: 'Integer'
+              description: 'The number of the accelerator cards exposed to an instance.'
+              ignore_read: true
+            - name: 'type'
+              type: 'String'
+              description: 'The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.'
+              ignore_read: true
+            - name: 'gpuPartitionSize'
+              type: 'String'
+              description: 'Size of partitions to create on the GPU. Supported values are described in the NVIDIA mig user guide.'
+              ignore_read: true
+            - name: 'gpuDriverInstallationConfig'
+              type: 'NestedObject'
+              description: 'Configuration for GPU driver installation.'
+              ignore_read: true
+              properties:
+                - name: 'gpuDriverVersion'
+                  type: 'String'
+                  description: 'Mode for how the GPU driver is installed.'
+      - name: 'taint'
+        type: 'Array'
+        api_name: 'taints'
+        description: 'Taints to be applied to nodes in the pool.'
+        ignore_read: true
+        item_type:
+          type: 'NestedObject'
+          properties:
+            - name: 'key'
+              type: 'String'
+              description: 'The key of the taint.'
+              ignore_read: true
+            - name: 'value'
+              type: 'String'
+              description: 'The value of the taint.'
+              ignore_read: true
+            - name: 'effect'
+              type: 'String'
+              description: 'The effect of the taint.'
+              ignore_read: true
+
   - name: 'ipAllocationPolicy'
     type: 'NestedObject'
     properties:
@@ -94,6 +167,12 @@ properties:
           type: 'String'
           description: 'The selected network policy provider.'
           is_missing_in_cai: true
+  - name: minMasterVersion
+    type: String
+    ignore_read: true
+  - name: nodeVersion
+    type: String
+    ignore_read: true
 tgc_tests:
   - name: TestAccContainerCluster_withDatabaseEncryption
     skip: Bug in the API, https://github.com/hashicorp/terraform-provider-google/issues/26882

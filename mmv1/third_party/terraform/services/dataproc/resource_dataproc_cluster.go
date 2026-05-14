@@ -199,6 +199,7 @@ func ResourceDataprocCluster() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			// User labels are not supported in Dataproc Virtual Cluster
 			tpgresource.SetLabelsDiffWithoutAttributionLabel,
@@ -1661,7 +1662,7 @@ by Dataproc`,
 										Computed:         true,
 										AtLeastOneOf:     clusterSoftwareConfigKeys,
 										ForceNew:         true,
-										DiffSuppressFunc: dataprocImageVersionDiffSuppress,
+										DiffSuppressFunc: DataprocImageVersionDiffSuppress,
 										Description:      `The Cloud Dataproc image version to use for the cluster - this controls the sets of software versions installed onto the nodes when you create clusters. If not specified, defaults to the latest version.`,
 									},
 									"override_properties": {
@@ -2036,6 +2037,9 @@ by Dataproc`,
 					},
 				},
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -3010,6 +3014,11 @@ func expandAccelerators(configured []interface{}) []*dataproc.AcceleratorConfig 
 }
 
 func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceDataprocCluster) {
+		return ResourceDataprocCluster().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -3198,6 +3207,10 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	err = d.Set("virtual_cluster_config", virtualCfg)
 
 	if err != nil {
+		return err
+	}
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
 
@@ -3534,7 +3547,7 @@ func flattenInitializationActions(nia []*dataproc.NodeInitializationAction) ([]m
 			"script": v.ExecutableFile,
 		}
 		if len(v.ExecutionTimeout) > 0 {
-			tsec, err := extractInitTimeout(v.ExecutionTimeout)
+			tsec, err := ExtractInitTimeout(v.ExecutionTimeout)
 			if err != nil {
 				return nil, err
 			}
@@ -3833,7 +3846,7 @@ func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 	return []map[string]interface{}{data}
 }
 
-func extractInitTimeout(t string) (int, error) {
+func ExtractInitTimeout(t string) (int, error) {
 	d, err := time.ParseDuration(t)
 	if err != nil {
 		return 0, err
@@ -3842,6 +3855,13 @@ func extractInitTimeout(t string) (int, error) {
 }
 
 func resourceDataprocClusterDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -3889,53 +3909,53 @@ func configOptions(d *schema.ResourceData, option string) (map[string]interface{
 	return nil, false
 }
 
-func dataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	oldV, err := parseDataprocImageVersion(old)
+func DataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	oldV, err := ParseDataprocImageVersion(old)
 	if err != nil {
 		return false
 	}
-	newV, err := parseDataprocImageVersion(new)
+	newV, err := ParseDataprocImageVersion(new)
 	if err != nil {
 		return false
 	}
 
-	if newV.major != oldV.major {
+	if newV.Major != oldV.Major {
 		return false
 	}
-	if newV.minor != oldV.minor {
+	if newV.Minor != oldV.Minor {
 		return false
 	}
 
 	ignoreSubminor := []string{"", "prodcurrent", "prodprevious"}
 	// Only compare subminor version if set to a numeric value in config version.
-	if !slices.Contains(ignoreSubminor, newV.subminor) && newV.subminor != oldV.subminor {
+	if !slices.Contains(ignoreSubminor, newV.Subminor) && newV.Subminor != oldV.Subminor {
 		return false
 	}
 	// Only compare os if it is set in config version.
-	if newV.osName != "" && newV.osName != oldV.osName {
+	if newV.OsName != "" && newV.OsName != oldV.OsName {
 		return false
 	}
 	return true
 }
 
-type dataprocImageVersion struct {
-	major    string
-	minor    string
-	subminor string
-	osName   string
+type DataprocImageVersion struct {
+	Major    string
+	Minor    string
+	Subminor string
+	OsName   string
 }
 
-func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
+func ParseDataprocImageVersion(version string) (*DataprocImageVersion, error) {
 	matches := resolveDataprocImageVersion.FindStringSubmatch(version)
 	if len(matches) != 5 {
 		return nil, fmt.Errorf("invalid image version %q", version)
 	}
 
-	return &dataprocImageVersion{
-		major:    matches[1],
-		minor:    matches[2],
-		subminor: matches[3],
-		osName:   matches[4],
+	return &DataprocImageVersion{
+		Major:    matches[1],
+		Minor:    matches[2],
+		Subminor: matches[3],
+		OsName:   matches[4],
 	}, nil
 }
 
