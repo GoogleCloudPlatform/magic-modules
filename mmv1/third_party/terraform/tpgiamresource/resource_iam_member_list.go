@@ -257,13 +257,13 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 		return list.ListResult{}, fmt.Errorf("identity state: %w", err)
 	}
 	if err := res.Identity.Set(ctx, *tfIdent); err != nil {
-		return list.ListResult{}, fmt.Errorf("set identity: %w", err)
+		return list.ListResult{}, fmt.Errorf("set identity: %v", err)
 	}
 
 	if req.IncludeResource {
 		tfRes, err := rd.TfTypeResourceState()
 		if err != nil {
-			return list.ListResult{}, fmt.Errorf("resource state: %v", err)
+			return list.ListResult{}, fmt.Errorf("resource state: %w", err)
 		}
 		if err := res.Resource.Set(ctx, *tfRes); err != nil {
 			return list.ListResult{}, fmt.Errorf("set resource: %v", err)
