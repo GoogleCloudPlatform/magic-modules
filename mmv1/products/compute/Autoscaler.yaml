@@ -153,6 +153,16 @@ properties:
           and time the startup process.
         api_name: coolDownPeriodSec
         default_value: 60
+      - name: 'stabilizationPeriod'
+        type: Integer
+        description: |
+          The number of seconds that the autoscaler waits for load stabilization
+          before making scale-in decisions.
+
+          This might appear as a delay in scaling in but it is an important mechanism
+          for your application to not have fluctuating size due to short term load
+          fluctuations.
+        api_name: stabilizationPeriodSec
       - name: 'mode'
         type: String
         description: |
