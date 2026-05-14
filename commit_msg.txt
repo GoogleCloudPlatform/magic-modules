@@ -1,0 +1,9 @@
+KMS: Schema Addition & Test Prep for deletion policy
+
+This is part 1 of a two-part change for the next major release to implement KMS hard-deletion.
+PR 2 will follow with the actual delete logic.
+
+- Added deletionPolicy property to CryptoKeyVersion.yaml with default DELETE.
+- Updated existing acceptance tests to use deletion_policy = DESTROY to avoid teardown failures.
+- Added new test for DESTROY_SCHEDULED state transition.
+- Fixed pre_update template to handle simultaneous updates safely and ensure state refresh.

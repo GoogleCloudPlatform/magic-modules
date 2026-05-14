@@ -17,11 +17,9 @@ description: |
   A `CryptoKey` represents a logical key that can be used for cryptographic operations.
 
 
-  ~> **Note:** CryptoKeys cannot be deleted from Google Cloud Platform.
-  Destroying a Terraform-managed CryptoKey will remove it from state
-  and delete all CryptoKeyVersions, rendering the key unusable, but *will
-  not delete the resource from the project.* When Terraform destroys these keys,
-  any data previously encrypted with these keys will be irrecoverable.
+  ~> **Note:** By default, deleting a Terraform-managed CryptoKey will attempt to permanently delete it from Google Cloud Platform if all its child versions have been permanently deleted.
+  If you want to preserve the key resource in GCP while rendering it unusable (legacy Terraform behavior), set `deletion_policy` to `DESTROY`.
+  When Terraform destroys these keys or their versions, any data previously encrypted with them will be irrecoverable.
   For this reason, it is strongly recommended that you add
   [lifecycle](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle)
   hooks to the resource to prevent accidental destruction.
@@ -170,6 +168,13 @@ properties:
       The resource name is in the format "projects/*/locations/*/ekmConnections/*" and only applies to "EXTERNAL_VPC" keys.
     immutable: true
     default_from_api: true
+  - name: 'deletionPolicy'
+    type: String
+    description: |
+      The deletion policy for the CryptoKey.
+      `DELETE` is the default and requires all versions to be permanently deleted first.
+      `DESTROY` will destroy all versions and abandon the key in state (legacy behavior).
+    default_value: "DELETE"
   - name: 'keyAccessJustificationsPolicy'
     type: NestedObject
     description: |

@@ -1,13 +1,27 @@
     
-    cryptoKeyVersionId, err := parseKmsCryptoKeyVersionId(d.Id(), config)
-    if err != nil {
-        return err
-    }
-    if cryptoKeyVersionId == nil {
-        return nil
-    }
-    if err := deleteCryptoKeyVersions(cryptoKeyVersionId, d, userAgent, config); err != nil { 
-        return nil
-    }
-    d.SetId("")
-	return nil
+	cryptoKeyVersionId, err := parseKmsCryptoKeyVersionId(d.Id(), config)
+	if err != nil {
+		return err
+	}
+	if cryptoKeyVersionId == nil {
+		return nil
+	}
+	policy := d.Get("deletion_policy").(string)
+
+	// Handle the legacy "DESTROY" behavior first
+	if policy == "DESTROY" {
+		if err := destroyCryptoKeyVersion(cryptoKeyVersionId, d, userAgent, config); err != nil {
+			return err
+		}
+		d.SetId("")
+		return nil
+	} else if policy == "" || policy == "DELETE" {
+		// Proceed with the "DELETE" workflow
+		if err := deleteCryptoKeyVersion(cryptoKeyVersionId, d, userAgent, config); err != nil {
+			return err
+		}
+		d.SetId("")
+		return nil
+	} else {
+		return fmt.Errorf("Unsupported deletion_policy: %s", policy)
+	}
