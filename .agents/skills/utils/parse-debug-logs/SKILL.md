@@ -27,7 +27,7 @@ Execute the `tf_debug_parser.py` script against the debug logs.
 #### Parse Debug Logs
 ```bash
 # Execute the parser to extract the outline
-python3 <PATH_TO_MAGIC_MODULES>/.agents/scripts/tf_debug_parser.py /path/to/test_output.log --extract-dir <PATH_TO_OUTPUT_DIRECTORY>
+python3 <PATH_TO_MAGIC_MODULES>/.agents/scripts/tf_debug_parser.py /path/to/test_output.log --extract-dir <PATH_TO_MAGIC_MODULES>/debug_output
 ```
 
 ### 3. Verification & Handoff
