@@ -57,6 +57,17 @@ resource "google_data_fusion_instance" "foobar" {
     accelerator_type = "CDC"
     state = "DISABLED"
   }
+  maintenance_policy {
+    maintenance_window {
+      recurring_time_window {
+        window {
+          start_time = "2027-01-01T00:00:00Z"
+          end_time   = "2027-01-01T04:00:00Z"
+        }
+        recurrence = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
+      }
+    }
+  }
 }
 `, instanceName)
 }
@@ -79,6 +90,17 @@ resource "google_data_fusion_instance" "foobar" {
   accelerators {
     accelerator_type = "CCAI_INSIGHTS"
     state = "ENABLED"
+  }
+  maintenance_policy {
+    maintenance_window {
+      recurring_time_window {
+        window {
+          start_time = "2027-01-01T01:00:00Z"
+          end_time   = "2027-01-01T05:00:00Z"
+        }
+        recurrence = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
+      }
+    }
   }
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
@@ -147,6 +169,19 @@ resource "google_data_fusion_instance" "foobar" {
     label1 = "value1"
     label2 = "value2"
   }
+
+  maintenance_policy {
+    maintenance_window {
+      recurring_time_window {
+        window {
+          start_time = "2027-01-01T00:00:00Z"
+          end_time   = "2027-01-01T04:00:00Z"
+        }
+        recurrence = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
+      }
+    }
+  }
+
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
   	prober_test_run = "true"
