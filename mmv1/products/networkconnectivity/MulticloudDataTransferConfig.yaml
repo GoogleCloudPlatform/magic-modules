@@ -39,6 +39,13 @@ examples:
     vars:
       config_name: "basic_config"
 
+sweeper:
+  url_substitutions:
+    - region: "europe-west1"
+    - region: "europe-west2"
+    - region: "europe-west3"
+    - region: "europe-west4"
+
 parameters:
   - name: 'location'
     type: String
