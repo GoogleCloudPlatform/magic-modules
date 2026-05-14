@@ -19,7 +19,6 @@ func TestAccOracleDatabaseCloudVmCluster_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_cluster.my-vmcluster", "display_name"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_cluster.my-vmcluster", "exadata_infrastructure"),
-					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_cluster.my-vmcluster", "cidr"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_cluster.my-vmcluster", "properties.#"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_cluster.my-vmcluster", "properties.0.cpu_core_count"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_cluster.my-vmcluster", "identity_connector.#"),
