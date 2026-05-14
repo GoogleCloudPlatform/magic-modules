@@ -16,11 +16,16 @@ type ContactCenterInsightsOperationWaiter struct {
 	tpgresource.CommonOperationWaiter
 }
 
+// QueryOp is handwritten because Contact Center Insights requires regional endpoints
+// for non-global regions. We need to extract the location from the operation name
+// and construct the correct regional URL. The default Magic Modules generator
+// does not support this dynamic endpoint switching based on operation name.
 func (w *ContactCenterInsightsOperationWaiter) QueryOp() (interface{}, error) {
 	if w == nil {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
-	// Returns the proper get.
+	
+	// Extract location from operation name (e.g., projects/.../locations/us-east1/operations/...)
 	location := ""
 	if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(w.CommonOperationWaiter.Op.Name); parts != nil {
 		location = parts[1]
@@ -32,7 +37,11 @@ func (w *ContactCenterInsightsOperationWaiter) QueryOp() (interface{}, error) {
 		)
 	}
 
+	// Construct the regional endpoint URL
 	url := fmt.Sprintf("https://%s-contactcenterinsights.googleapis.com/v1/%s", location, w.CommonOperationWaiter.Op.Name)
+	
+	// For historical reasons, us-central1 acts as the global endpoint and does not use a prefix.
+	// See: https://docs.cloud.google.com/contact-center/insights/docs/regionalization
 	if location == "us-central1" {
 		url = fmt.Sprintf("https://contactcenterinsights.googleapis.com/v1/%s", w.CommonOperationWaiter.Op.Name)
 	}
