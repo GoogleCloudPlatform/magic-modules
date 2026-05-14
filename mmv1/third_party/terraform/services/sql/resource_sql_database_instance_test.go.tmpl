@@ -20,9 +20,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-{{- end }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -851,13 +849,12 @@ func TestAccSqlDatabaseInstance_diskspecs(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_hyperdisk(t *testing.T) {
 	t.Parallel()
 	enterprisePlusName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -886,7 +883,6 @@ func TestAccSqlDatabaseInstance_hyperdisk(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 	t.Parallel()
@@ -7932,13 +7928,10 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-{{- if ne $.TargetVersionName "ga" }}
 func testGoogleSqlDatabaseInstance_hyperdisk_default(databaseName string) string {
 	return fmt.Sprintf(`
 
 resource "google_sql_database_instance" "instance" {
-  provider = google-beta
-
   name             = "%s"
   region           = "us-east1"
   database_version    = "POSTGRES_17"
@@ -7955,7 +7948,6 @@ func testGoogleSqlDatabaseInstance_hyperdisk(databaseName string, iops, throughp
 	return fmt.Sprintf(`
 
 resource "google_sql_database_instance" "instance" {
-  provider = google-beta
 
   name             = "%s"
   region           = "us-east1"
@@ -7970,7 +7962,6 @@ resource "google_sql_database_instance" "instance" {
   }
 }`, databaseName, iops, throughput)
 }
-{{- end }}
 
 var testGoogleSqlDatabaseInstance_maintenance = `
 resource "google_sql_database_instance" "instance" {
