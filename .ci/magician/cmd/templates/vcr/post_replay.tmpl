@@ -50,7 +50,7 @@
 
 Found {{len .ReplayingResult.FailedTests}} affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit.
 
-{{ if gt (len .ReplayingResult.FailedTests) 100 -}}
+{{ if gt (len .ReplayingResult.FailedTests) 5 -}}
 More than 100 tests failed in replaying; this is too many to display on GitHub. View the [build](http://console.cloud.google.com/cloud-build/builds/${{$.BuildID}}) to see the full list.
 {{- else -}}
 <details>

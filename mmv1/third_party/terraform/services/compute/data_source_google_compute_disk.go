@@ -9,6 +9,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// FORCE compute VCR run
 func DataSourceGoogleComputeDisk() *schema.Resource {
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeDisk().Schema)
