@@ -78,7 +78,6 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 
 	var listDisplayName acctest.ListDisplayName
 {{- if $sample.ListQueryScopeSources }}
-	// Captured at create-step time and used to populate list-query input variables.
 	var listScope acctest.ListScopeCapture
 {{- end }}
 	acctest.VcrTest(t, resource.TestCase{
