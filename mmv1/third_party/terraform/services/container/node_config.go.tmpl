@@ -871,7 +871,7 @@ func schemaNodeConfig() *schema.Schema {
 								Type:         schema.TypeInt,
 								Optional:     true,
 								ValidateFunc: validation.IntBetween(0, 120),
-								Description:  `Duration in seconds (0-120) reserved for terminating critical pods during graceful node shutdown. Must be less than or equal to shutdown_grace_period_seconds.`,
+								Description:  `Duration in seconds (0-120) reserved for terminating critical pods during graceful node shutdown. Only valid for Spot VMs, and only meaningful when shutdown_grace_period_seconds is set. Must be less than or equal to shutdown_grace_period_seconds.`,
 							},
 							"eviction_soft": {
 								Type:        schema.TypeList,
