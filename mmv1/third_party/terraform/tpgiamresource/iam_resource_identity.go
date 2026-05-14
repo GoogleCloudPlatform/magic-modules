@@ -16,7 +16,7 @@ type IamIdentityParam struct {
 }
 
 // IamResourceIdentityConfig holds all the per-resource data needed to parse an
-// IAM import identity into a canonical resource id.
+// IAM import identity into the parent resource's id
 type IamResourceIdentityConfig struct {
 	Params    []IamIdentityParam
 	UriFormat string // fmt.Sprintf format producing the canonical resource id
