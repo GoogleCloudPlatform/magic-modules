@@ -915,7 +915,11 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
                                                "node_config.0.kubelet_config.0.topology_manager.0.policy", "best-effort"),
 					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
-						                       "node_config.0.kubelet_config.0.topology_manager.0.scope", "pod"),							   
+						                       "node_config.0.kubelet_config.0.topology_manager.0.scope", "pod"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
+                                               "node_config.0.kubelet_config.0.shutdown_grace_period_seconds", "120"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
+                                               "node_config.0.kubelet_config.0.shutdown_grace_period_critical_pods_seconds", "15"),
 					// resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
 					//      "node_config.0.kubelet_config.0.allowed_unsafe_sysctls.0", "kernel.shm*"),
 				),
@@ -4091,6 +4095,8 @@ resource "google_container_node_pool" "with_kubelet_config" {
       single_process_oom_kill                = %v
       max_parallel_image_pulls               = 5
       eviction_max_pod_grace_period_seconds  = 200
+      shutdown_grace_period_seconds                = 120
+      shutdown_grace_period_critical_pods_seconds  = 15
       eviction_soft {
         memory_available = "100Mi"
 	nodefs_available = "50%%"
