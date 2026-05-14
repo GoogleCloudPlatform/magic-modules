@@ -1,6 +1,11 @@
 # Workflows Menu
 
-This document lists the available high-level workflows in this repository. To use one, the user must explicitly invoke it.
+This document lists the available high-level workflows in this repository and the rules governing them. To use one, the user must explicitly invoke it.
+
+## Rules of Engagement (Active in Workflow Mode)
+1.  **No Blind Fixes:** Never modify YAML or Go files without presenting an implementation plan and receiving approval.
+2.  **Source of Truth:** `magic-modules` contains YAML schema definitions in `mmv1/` and templates. Code is generated into downstream providers.
+3.  **Use Skills:** Discover and leverage `.agents/skills/` to perform complex tasks.
 
 ## Available Workflows:
 

@@ -9,9 +9,8 @@ This document outlines the structured 5-step lifecycle for formal implementation
 
 ## Execution Steps
 
-### 1. Session Setup
-*   Execute the `session-setup` skill (located in `.agents/skills/operations/session-setup/`), which teaches you how to invoke the subagent.
-*   **Transfers to Step 2:** Verified workspaces and status.
+### 1. Repo Sync
+*   Execute the `repo-sync` skill (located in `.agents/skills/operations/repo-sync/`). This skill handles checking the sync status and prompting for action if needed.
 
 ### 2. Triage
 *   Gather context on the change or bug. Plan the change (New feature or bug fix) within schema or logic. 

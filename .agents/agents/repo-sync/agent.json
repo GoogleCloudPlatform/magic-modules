@@ -1,5 +1,5 @@
 {
-  "name": "session-setup",
+  "name": "repo-sync",
   "configPath": {
     "relativePathToConfig": "config.yaml"
   }
