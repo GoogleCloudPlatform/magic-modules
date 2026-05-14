@@ -1,0 +1,264 @@
+package compute
+
+import (
+	"testing"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+{{ if ne $.TargetVersionName `ga` -}}
+func TestUnitComputeSubnetworkSecondaryIpRange_customizeDiff(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		KeysPrefix  []string
+		OldCount    int
+		NewCount    int
+		Before      map[string]interface{}
+		After       map[string]interface{}
+		RawConfig   cty.Value
+		ExpectClear bool
+	}{
+		"no changes": {
+			KeysPrefix:  []string{},
+			ExpectClear: false,
+		},
+		"exact match with multiple ipv4 secondary ranges": {
+			KeysPrefix: []string{"secondary_ip_range"},
+			OldCount:   2,
+			NewCount:   2,
+			Before: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "tf-test-ipv4-range-1",
+					"ip_cidr_range": "10.2.0.0/16",
+				},
+				"secondary_ip_range.1": map[string]interface{}{
+					"range_name":    "tf-test-ipv4-range-2",
+					"ip_cidr_range": "10.3.0.0/16",
+				},
+			},
+			After: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "tf-test-ipv4-range-1",
+					"ip_cidr_range": "10.2.0.0/16",
+				},
+				"secondary_ip_range.1": map[string]interface{}{
+					"range_name":    "tf-test-ipv4-range-2",
+					"ip_cidr_range": "",
+				},
+			},
+			RawConfig: cty.ObjectVal(map[string]cty.Value{
+				"secondary_ip_range": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("tf-test-ipv4-range-1"),
+						"ip_cidr_range": cty.StringVal("10.2.0.0/16"),
+					}),
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("tf-test-ipv4-range-2"),
+						"ip_cidr_range": cty.StringVal(""),
+					}),
+				}),
+			}),
+			ExpectClear: true,
+		},
+		"exact match with ipv6 cidr compression": {
+			KeysPrefix: []string{"secondary_ip_range"},
+			OldCount:   1,
+			NewCount:   1,
+			Before: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "v6-byoip-auto",
+					"ip_cidr_range": "2001:db8:abcd:1::/64",
+					"ip_version":    "IPV6",
+				},
+			},
+			After: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "v6-byoip-auto",
+					"ip_cidr_range": "2001:db8:abcd:1:0:0:0:0/64",
+					"ip_version":    "IPV6",
+				},
+			},
+			RawConfig: cty.ObjectVal(map[string]cty.Value{
+				"secondary_ip_range": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("v6-byoip-auto"),
+						"ip_cidr_range": cty.StringVal("2001:db8:abcd:1::/64"),
+					}),
+				}),
+			}),
+			ExpectClear: true,
+		},
+		"multi-range match with ula inheritance, url normalization, and cidr compression": {
+			KeysPrefix: []string{"secondary_ip_range"},
+			OldCount:   3,
+			NewCount:   3,
+			Before: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "v6-byoip-url",
+					"ip_cidr_range": "2001:db8:abcd:1::/64",
+					"ip_version":    "IPV6",
+					"ip_collection": "https://www.googleapis.com/compute/v1/projects/my-proj/regions/us-central1/publicDelegatedPrefixes/my-pdp",
+				},
+				"secondary_ip_range.1": map[string]interface{}{
+					"range_name":    "v6-ula",
+					"ip_cidr_range": "2001:db8:abcd:2:0:0:0:0/64",
+					"ip_version":    "IPV6",
+				},
+				"secondary_ip_range.2": map[string]interface{}{
+					"range_name":    "v6-byoip-compress",
+					"ip_cidr_range": "2001:db8:abcd:3:0:0:0:0/64",
+					"ip_version":    "IPV6",
+				},
+			},
+			After: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "v6-byoip-url",
+					"ip_cidr_range": "2001:db8:abcd:1::/64",
+					"ip_version":    "IPV6",
+					"ip_collection": "projects/my-proj/regions/us-central1/publicDelegatedPrefixes/my-pdp",
+				},
+				"secondary_ip_range.1": map[string]interface{}{
+					"range_name":    "v6-ula",
+					"ip_cidr_range": "",
+					"ip_version":    "IPV6",
+				},
+				"secondary_ip_range.2": map[string]interface{}{
+					"range_name":    "v6-byoip-compress",
+					"ip_cidr_range": "2001:db8:abcd:3::/64",
+					"ip_version":    "IPV6",
+				},
+			},
+			RawConfig: cty.ObjectVal(map[string]cty.Value{
+				"secondary_ip_range": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("v6-byoip-url"),
+						"ip_cidr_range": cty.StringVal("2001:db8:abcd:1::/64"),
+					}),
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("v6-ula"),
+						"ip_cidr_range": cty.StringVal(""),
+					}),
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("v6-byoip-compress"),
+						"ip_cidr_range": cty.StringVal("2001:db8:abcd:3::/64"),
+					}),
+				}),
+			}),
+			ExpectClear: true,
+		},
+		"real mismatch with differing ip_cidr_range": {
+			KeysPrefix: []string{"secondary_ip_range"},
+			OldCount:   1,
+			NewCount:   1,
+			Before: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "v6-byoip-auto",
+					"ip_cidr_range": "2001:db8:abcd:1::/64",
+				},
+			},
+			After: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "v6-byoip-auto",
+					"ip_cidr_range": "2001:db8:abcd:9999::/64",
+				},
+			},
+			RawConfig: cty.ObjectVal(map[string]cty.Value{
+				"secondary_ip_range": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("v6-byoip-auto"),
+						"ip_cidr_range": cty.StringVal("2001:db8:abcd:9999::/64"),
+					}),
+				}),
+			}),
+			ExpectClear: false,
+		},
+		"real mismatch with differing range_name": {
+			KeysPrefix: []string{"secondary_ip_range"},
+			OldCount:   1,
+			NewCount:   1,
+			Before: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "old-range-name",
+					"ip_cidr_range": "10.2.0.0/16",
+				},
+			},
+			After: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "new-range-name",
+					"ip_cidr_range": "10.2.0.0/16",
+				},
+			},
+			RawConfig: cty.ObjectVal(map[string]cty.Value{
+				"secondary_ip_range": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("new-range-name"),
+						"ip_cidr_range": cty.StringVal("10.2.0.0/16"),
+					}),
+				}),
+			}),
+			ExpectClear: false,
+		},
+		"real mismatch with differing ip_collection": {
+			KeysPrefix: []string{"secondary_ip_range"},
+			OldCount:   1,
+			NewCount:   1,
+			Before: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "v6-byoip-auto",
+					"ip_cidr_range": "2001:db8:abcd:1::/64",
+					"ip_collection": "https://www.googleapis.com/compute/v1/projects/my-proj/regions/us-central1/publicDelegatedPrefixes/my-pdp-1",
+				},
+			},
+			After: map[string]interface{}{
+				"secondary_ip_range.0": map[string]interface{}{
+					"range_name":    "v6-byoip-auto",
+					"ip_cidr_range": "2001:db8:abcd:1::/64",
+					"ip_collection": "projects/my-proj/regions/us-central1/publicDelegatedPrefixes/my-pdp-2",
+				},
+			},
+			RawConfig: cty.ObjectVal(map[string]cty.Value{
+				"secondary_ip_range": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"range_name":    cty.StringVal("v6-byoip-auto"),
+						"ip_cidr_range": cty.StringVal("2001:db8:abcd:1::/64"),
+					}),
+				}),
+			}),
+			ExpectClear: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			d := &tpgresource.ResourceDiffMock{
+				Before:     tc.Before,
+				After:      tc.After,
+				KeysPrefix: tc.KeysPrefix,
+				RawConfig:  tc.RawConfig,
+			}
+			if tc.OldCount > 0 || tc.NewCount > 0 {
+				if d.Before == nil {
+					d.Before = make(map[string]interface{})
+				}
+				if d.After == nil {
+					d.After = make(map[string]interface{})
+				}
+				d.Before["secondary_ip_range.#"] = tc.OldCount
+				d.After["secondary_ip_range.#"] = tc.NewCount
+			}
+
+			err := resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(d)
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err)
+			}
+
+			cleared := d.Cleared != nil && d.Cleared["secondary_ip_range"] != nil
+			if cleared != tc.ExpectClear {
+				t.Errorf("expected diff clear to be %v, but was %v", tc.ExpectClear, cleared)
+			}
+		})
+	}
+}
+{{- end }}

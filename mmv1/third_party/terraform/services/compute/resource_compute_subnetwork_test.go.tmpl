@@ -461,7 +461,7 @@ func TestAccComputeSubnetwork_secondaryIpv6Ranges(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1529,12 +1529,14 @@ resource "google_compute_subnetwork" "test_subnet" {
 func testAccComputeSubnetwork_secondaryIpv6RangesShared(cnName, papName, pdpName, subPdpName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "custom-test" {
+  provider                 = google-beta
   name                     = "%s"
   auto_create_subnetworks  = false
   enable_ula_internal_ipv6 = true
 }
 
 resource "google_compute_public_advertised_prefix" "ipv6_pap" {
+  provider         = google-beta
   name             = "%s"
   ip_cidr_range    = "2001:db8::/32"
   pdp_scope        = "REGIONAL"
@@ -1543,6 +1545,7 @@ resource "google_compute_public_advertised_prefix" "ipv6_pap" {
 }
 
 resource "google_compute_public_delegated_prefix" "ipv6_pdp" {
+  provider      = google-beta
   name          = "%s"
   region        = "us-central1"
   ip_cidr_range = "2001:db8:abcd::/48"
@@ -1551,6 +1554,7 @@ resource "google_compute_public_delegated_prefix" "ipv6_pdp" {
 }
 
 resource "google_compute_public_delegated_prefix" "ipv6_sub_pdp" {
+  provider      = google-beta
   name          = "%s"
   region        = "us-central1"
   ip_cidr_range = "2001:db8:abcd::/56"
@@ -1566,6 +1570,7 @@ func testAccComputeSubnetwork_secondaryIpv6RangesBase(cnName, subnetworkName, pa
 	return fmt.Sprintf(`
 %s
 resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
+  provider         = google-beta
   name             = "%s"
   region           = "us-central1"
   network          = google_compute_network.custom-test.self_link
@@ -1581,6 +1586,7 @@ func testAccComputeSubnetwork_secondaryIpv6RangesAdd(cnName, subnetworkName, pap
 	return fmt.Sprintf(`
 %s
 resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
+  provider         = google-beta
   name             = "%s"
   network          = google_compute_network.custom-test.self_link
   region           = "us-central1"
@@ -1612,6 +1618,7 @@ func testAccComputeSubnetwork_secondaryIpv6RangesReorder(cnName, subnetworkName,
 	return fmt.Sprintf(`
 %s
 resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
+  provider         = google-beta
   name             = "%s"
   region           = "us-central1"
   network          = google_compute_network.custom-test.self_link
@@ -1644,6 +1651,7 @@ func testAccComputeSubnetwork_secondaryIpv6RangesRemove(cnName, subnetworkName, 
 	return fmt.Sprintf(`
 %s
 resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
+  provider         = google-beta
   name             = "%s"
   region           = "us-central1"
   network          = google_compute_network.custom-test.self_link
