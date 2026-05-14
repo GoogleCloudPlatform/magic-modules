@@ -191,7 +191,7 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 }
 
 // setIamMemberIdFromParentResourceIdentity converts a resource-identity import into
-// the canonical id (`{resource} {role} {member} [condition_title]`) consumed
+// the `id` (`{resource} {role} {member} [condition_title]`) consumed
 // by iamMemberImport. No-op if there is no identity parser or d already has
 // an id.
 func setIamMemberIdFromParentResourceIdentity(d *schema.ResourceData, config *transport_tpg.Config, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) error {
