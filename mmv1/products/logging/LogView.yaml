@@ -31,6 +31,8 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - '{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
+datasource_experimental:
+  generate: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
