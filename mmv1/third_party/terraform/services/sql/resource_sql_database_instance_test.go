@@ -1,4 +1,3 @@
-
 package sql_test
 
 import (
@@ -14,16 +13,16 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/activedirectory"
 	"github.com/hashicorp/terraform-provider-google/google/services/backupdr"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
-	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Fields that should be ignored in import tests because they aren't returned
@@ -402,7 +401,7 @@ func TestAccSqlDatabaseInstance_basicMSSQL_passwordWo(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_basic_mssql_wo_password, databaseName, rootPassword),
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_sql_database_instance.instance", "root_password_wo"),
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "root_password_wo_version", "1"),
 				),
@@ -416,7 +415,7 @@ func TestAccSqlDatabaseInstance_basicMSSQL_passwordWo(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_basic_mssql_wo_password_update, databaseName, updatedRootPassword),
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_sql_database_instance.instance", "root_password_wo"),
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "root_password_wo_version", "2"),
 				),
@@ -1234,7 +1233,6 @@ func TestAccSqlDatabaseInstance_updateMCPEnabled(t *testing.T) {
 	})
 }
 
-
 func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t *testing.T) {
 	t.Parallel()
 
@@ -1504,7 +1502,6 @@ func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUri_thenRemo
 	networkAttachmentName := tpgcompute.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
 	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
 
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1555,14 +1552,13 @@ func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUriOnCreate(
 	networkAttachmentName := tpgcompute.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
 	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
 
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instanceName, networkAttachmentUri),
+				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instanceName, networkAttachmentUri),
 				ExpectError: regexp.MustCompile(`.*Network attachment used for Private Service Connect interfaces can not be assigned with instance creation.*`),
 			},
 		},
@@ -1711,19 +1707,19 @@ func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
 	t.Parallel()
 
 	// Bootstrap the BackupDR vault
-    backupVaultID := "bv-test"
-    vaultLocation := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
-    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+	backupVaultID := "bv-test"
+	vaultLocation := "us-central1"
+	project := envvar.GetTestProjectFromEnv()
+	backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
-    context := map[string]interface{}{
-        "random_suffix":  acctest.RandString(t, 10),
-        "project":        project,
-        "backup_vault_id": backupVaultID,
-        "backup_vault":   backupvault,
+	context := map[string]interface{}{
+		"random_suffix":          acctest.RandString(t, 10),
+		"project":                project,
+		"backup_vault_id":        backupVaultID,
+		"backup_vault":           backupvault,
 		"target_instance_region": "us-central1",
-		"vault_location": vaultLocation,
-    }
+		"vault_location":         vaultLocation,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1753,7 +1749,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"db_version":   "POSTGRES_11",
+		"db_version":       "POSTGRES_11",
 		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -1785,23 +1781,23 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
-    t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/24234")
-    acctest.SkipIfVcr(t)
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/24234")
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	// Bootstrap the BackupDR vault
-    backupVaultID := "bv-test"
-    location := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
-    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
+	backupVaultID := "bv-test"
+	location := "us-central1"
+	project := envvar.GetTestProjectFromEnv()
+	backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
-    context := map[string]interface{}{
-        "random_suffix": 	acctest.RandString(t, 10),
-        "project": 			project,
-        "backup_vault_id": 	backupVaultID,
-        "backup_vault": 	backupvault,
-		"db_version": 		"MYSQL_8_0_41",
-    }
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"project":         project,
+		"backup_vault_id": backupVaultID,
+		"backup_vault":    backupvault,
+		"db_version":      "MYSQL_8_0_41",
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1837,19 +1833,19 @@ func TestAccSqlDatabaseInstance_createFromCrossRegionBackupDrBackup(t *testing.T
 	t.Parallel()
 
 	// Bootstrap the BackupDR vault
-    backupVaultID := "bv-test"
+	backupVaultID := "bv-test"
 	vaultLocation := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
-    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+	project := envvar.GetTestProjectFromEnv()
+	backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
-    context := map[string]interface{}{
-        "random_suffix":  acctest.RandString(t, 10),
-        "project":        project,
-        "backup_vault_id": backupVaultID,
-        "backup_vault":   backupvault,
+	context := map[string]interface{}{
+		"random_suffix":          acctest.RandString(t, 10),
+		"project":                project,
+		"backup_vault_id":        backupVaultID,
+		"backup_vault":           backupvault,
 		"target_instance_region": "us-east1",
-		"vault_location": vaultLocation,
-    }
+		"vault_location":         vaultLocation,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1876,19 +1872,19 @@ func TestAccSqlDatabaseInstance_createFromMultiRegionBackupDrBackup(t *testing.T
 	t.Parallel()
 
 	// Bootstrap the BackupDR vault
-    backupVaultID := "bv-test-mr"
+	backupVaultID := "bv-test-mr"
 	vaultLocation := "us"
-    project := envvar.GetTestProjectFromEnv()
-    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+	project := envvar.GetTestProjectFromEnv()
+	backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
-    context := map[string]interface{}{
-        "random_suffix":  acctest.RandString(t, 10),
-        "project":        project,
-        "backup_vault_id": backupVaultID,
-        "backup_vault":   backupvault,
+	context := map[string]interface{}{
+		"random_suffix":          acctest.RandString(t, 10),
+		"project":                project,
+		"backup_vault_id":        backupVaultID,
+		"backup_vault":           backupvault,
 		"target_instance_region": "us-central1",
-		"vault_location": vaultLocation,
-    }
+		"vault_location":         vaultLocation,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1915,19 +1911,19 @@ func TestAccSqlDatabaseInstance_createFromMultiRegionBackupDrBackupCrossRegion(t
 	t.Parallel()
 
 	// Bootstrap the BackupDR vault
-    backupVaultID := "bv-test-mr"
+	backupVaultID := "bv-test-mr"
 	vaultLocation := "us"
-    project := envvar.GetTestProjectFromEnv()
-    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+	project := envvar.GetTestProjectFromEnv()
+	backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
-    context := map[string]interface{}{
-        "random_suffix":  acctest.RandString(t, 10),
-        "project":        project,
-        "backup_vault_id": backupVaultID,
-        "backup_vault":   backupvault,
+	context := map[string]interface{}{
+		"random_suffix":          acctest.RandString(t, 10),
+		"project":                project,
+		"backup_vault_id":        backupVaultID,
+		"backup_vault":           backupvault,
 		"target_instance_region": "us-east1",
-		"vault_location": vaultLocation,
-    }
+		"vault_location":         vaultLocation,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1982,9 +1978,9 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           acctest.RandString(t, 10),
-		"orgId": envvar.GetTestOrgFromEnv(t),
-		"billingAccount": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":      acctest.RandString(t, 10),
+		"orgId":              envvar.GetTestOrgFromEnv(t),
+		"billingAccount":     envvar.GetTestBillingAccountFromEnv(t),
 		"cloneSourceProject": envvar.GetTestProjectFromEnv(),
 	}
 
@@ -2002,7 +1998,7 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateIdFunc: 		 testAccSqlDatabaseInstanceImportStateIdFunc("google_sql_database_instance.instance"),
+				ImportStateIdFunc:       testAccSqlDatabaseInstanceImportStateIdFunc("google_sql_database_instance.instance"),
 				ImportStateVerifyIgnore: []string{"deletion_protection", "clone"},
 			},
 		},
@@ -2080,18 +2076,18 @@ func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-    backupVaultID := "bv-test"
-    location := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
+	backupVaultID := "bv-test"
+	location := "us-central1"
+	project := envvar.GetTestProjectFromEnv()
 	backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
-    context := map[string]interface{}{
-        "random_suffix": 	acctest.RandString(t, 10),
-        "project": 			project,
-        "backup_vault_id": 	backupVaultID,
-        "backup_vault": 	backupVault,
-		"db_version": 		"MYSQL_8_0_41",
-    }
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"project":         project,
+		"backup_vault_id": backupVaultID,
+		"backup_vault":    backupVault,
+		"db_version":      "MYSQL_8_0_41",
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2119,17 +2115,17 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreInMultiRegion(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-    backupVaultID := "bv-test-mr"
-    location := "us"
-    project := envvar.GetTestProjectFromEnv()
+	backupVaultID := "bv-test-mr"
+	location := "us"
+	project := envvar.GetTestProjectFromEnv()
 	backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
-    context := map[string]interface{}{
-        "random_suffix": 	acctest.RandString(t, 10),
-        "project": 			project,
-        "backup_vault_id": 	backupVaultID,
-        "backup_vault": 	backupVault,
-    }
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"project":         project,
+		"backup_vault_id": backupVaultID,
+		"backup_vault":    backupVault,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2157,18 +2153,18 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreWithSettings(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-    backupVaultID := "bv-test"
-    location := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
+	backupVaultID := "bv-test"
+	location := "us-central1"
+	project := envvar.GetTestProjectFromEnv()
 	backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
-    context := map[string]interface{}{
-        "random_suffix": 	acctest.RandString(t, 10),
-        "project": 			project,
-        "backup_vault_id": 	backupVaultID,
-        "backup_vault": 	backupVault,
-		"db_version": 		"MYSQL_8_0_41",
-    }
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"project":         project,
+		"backup_vault_id": backupVaultID,
+		"backup_vault":    backupVault,
+		"db_version":      "MYSQL_8_0_41",
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -3956,10 +3952,10 @@ func TestAccSqlDatabaseInstance_PostgresReadPoolScaleUpSuccess(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-					DatabaseType:        "POSTGRES_15",
-					ReplicaName:         readPoolName,
-					NodeCount:           1,
-					ReplicaMachineType:  "db-perf-optimized-N-2",
+					DatabaseType:       "POSTGRES_15",
+					ReplicaName:        readPoolName,
+					NodeCount:          1,
+					ReplicaMachineType: "db-perf-optimized-N-2",
 				}),
 			},
 			{
@@ -3976,10 +3972,10 @@ func TestAccSqlDatabaseInstance_PostgresReadPoolScaleUpSuccess(t *testing.T) {
 			},
 			{
 				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-					DatabaseType:        "POSTGRES_15",
-					ReplicaName:         readPoolName,
-					NodeCount:           1,
-					ReplicaMachineType:  "db-perf-optimized-N-4",
+					DatabaseType:       "POSTGRES_15",
+					ReplicaName:        readPoolName,
+					NodeCount:          1,
+					ReplicaMachineType: "db-perf-optimized-N-4",
 				}),
 			},
 			{
@@ -4075,170 +4071,168 @@ func TestAccSqlDatabaseInstance_MysqlReadPoolEnableDisableSuccess(t *testing.T) 
 
 // Read pool for MySQL. Enable and disable read pool auto scale
 func TestAccSqlDatabaseInstance_MysqlReadPoolAutoScaleEnableDisableSuccess(t *testing.T) {
-        t.Parallel()
-        primaryName := "tf-test-mysql-as-readpool-primary-" + acctest.RandString(t, 10)
-        readPoolName := "tf-test-mysql-as-readpool-" + acctest.RandString(t, 10)
-        project := envvar.GetTestProjectFromEnv()
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "MYSQL_8_0",
-                                        ReplicaName:  readPoolName,
-                                }),
-                        },
-                        {
-                                ResourceName:            "google_sql_database_instance.original-primary",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
-                        {
-                                ResourceName:            "google_sql_database_instance.original-read-pool",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
-                        // Enable auto scale
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "MYSQL_8_0",
-                                        ReplicaName:  readPoolName,
-										AutoScaleEnabled: true,
-										NodeCount: 2,
-										MaxNodeCount: 2,
-										MinNodeCount: 2,
-                                }),
-                        },
-                        {
-                                ResourceName:            "google_sql_database_instance.original-primary",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
-                        {
-                                ResourceName:            "google_sql_database_instance.original-read-pool",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
-                        // Disable auto scale
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "MYSQL_8_0",
-                                        ReplicaName:  readPoolName,
-                                        AutoScaleEnabled: false,
-                                }),
-                        },
-                        {
-                                ResourceName:            "google_sql_database_instance.original-primary",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
-                        {
-                                ResourceName:            "google_sql_database_instance.original-read-pool",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
-                },
-        })
+	t.Parallel()
+	primaryName := "tf-test-mysql-as-readpool-primary-" + acctest.RandString(t, 10)
+	readPoolName := "tf-test-mysql-as-readpool-" + acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType: "MYSQL_8_0",
+					ReplicaName:  readPoolName,
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			// Enable auto scale
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:     "MYSQL_8_0",
+					ReplicaName:      readPoolName,
+					AutoScaleEnabled: true,
+					NodeCount:        2,
+					MaxNodeCount:     2,
+					MinNodeCount:     2,
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			// Disable auto scale
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:     "MYSQL_8_0",
+					ReplicaName:      readPoolName,
+					AutoScaleEnabled: false,
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
 }
-
 
 // Read pool for Postgres. Modify Node Count when auto scale enabled
 func TestAccSqlDatabaseInstance_PostgresReadPoolAutoScaleChangeNodeCount(t *testing.T) {
-        t.Parallel()
-        primaryName := "tf-test-postgreas-as-readpool-primary-" + acctest.RandString(t, 10)
-        readPoolName := "tf-test-postgres-as-readpool-" + acctest.RandString(t, 10)
-        project := envvar.GetTestProjectFromEnv()
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
-                Steps: []resource.TestStep{
-						// Create with auto scale takes min node count as node count
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "POSTGRES_15",
-                                        ReplicaName:  readPoolName,
-										AutoScaleEnabled: true,
-										NodeCount: 2,
-										MinNodeCount: 1,
-										MaxNodeCount: 5,
-                                }),
-								Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 1, 1, 5),
-                        },
-                        // Change node count not respected
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "POSTGRES_15",
-                                        ReplicaName:  readPoolName,
-										AutoScaleEnabled: true,
-										NodeCount: 4,
-										MinNodeCount: 1,
-										MaxNodeCount: 5,
-                                }),
-								Check: resource.ComposeTestCheckFunc(
-									testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 1, 1, 5),
-									testGoogleSqlDatabaseInstanceChangeNodeCount(t, readPoolName, 3),
-									), // Simulate auto scale to 3 nodes.
+	t.Parallel()
+	primaryName := "tf-test-postgreas-as-readpool-primary-" + acctest.RandString(t, 10)
+	readPoolName := "tf-test-postgres-as-readpool-" + acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Create with auto scale takes min node count as node count
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:     "POSTGRES_15",
+					ReplicaName:      readPoolName,
+					AutoScaleEnabled: true,
+					NodeCount:        2,
+					MinNodeCount:     1,
+					MaxNodeCount:     5,
+				}),
+				Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 1, 1, 5),
+			},
+			// Change node count not respected
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:     "POSTGRES_15",
+					ReplicaName:      readPoolName,
+					AutoScaleEnabled: true,
+					NodeCount:        4,
+					MinNodeCount:     1,
+					MaxNodeCount:     5,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 1, 1, 5),
+					testGoogleSqlDatabaseInstanceChangeNodeCount(t, readPoolName, 3),
+				), // Simulate auto scale to 3 nodes.
 
-                        },
-                        // Change Min/Max (no change to node count)
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "POSTGRES_15",
-                                        ReplicaName:  readPoolName,
-                                        AutoScaleEnabled: true,
-										NodeCount: 4,
-										MinNodeCount: 2,
-										MaxNodeCount: 4,
-                                }),
-								Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 3, 2, 4),
-                        },
-						// Change Min (higher than node count), sets node count
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "POSTGRES_15",
-                                        ReplicaName:  readPoolName,
-                                        AutoScaleEnabled: true,
-										NodeCount: 3,
-										MinNodeCount: 4,
-										MaxNodeCount: 5,
-                                }),
-								Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 4, 4, 5),
-                        },
-						// Change Max (lower than node count), sets node count
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "POSTGRES_15",
-                                        ReplicaName:  readPoolName,
-                                        AutoScaleEnabled: true,
-										NodeCount: 5,
-										MinNodeCount: 3,
-										MaxNodeCount: 3,
-                                }),
-								Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 3, 3, 3),
-                        },
-						// Disable auto scale, sets node count
-                        {
-                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
-                                        DatabaseType: "POSTGRES_15",
-                                        ReplicaName:  readPoolName,
-                                        AutoScaleEnabled: false,
-										NodeCount: 2,
-                                }),
-								Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 2, 0, 0),
-                        },
-                },
-        })
+			},
+			// Change Min/Max (no change to node count)
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:     "POSTGRES_15",
+					ReplicaName:      readPoolName,
+					AutoScaleEnabled: true,
+					NodeCount:        4,
+					MinNodeCount:     2,
+					MaxNodeCount:     4,
+				}),
+				Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 3, 2, 4),
+			},
+			// Change Min (higher than node count), sets node count
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:     "POSTGRES_15",
+					ReplicaName:      readPoolName,
+					AutoScaleEnabled: true,
+					NodeCount:        3,
+					MinNodeCount:     4,
+					MaxNodeCount:     5,
+				}),
+				Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 4, 4, 5),
+			},
+			// Change Max (lower than node count), sets node count
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:     "POSTGRES_15",
+					ReplicaName:      readPoolName,
+					AutoScaleEnabled: true,
+					NodeCount:        5,
+					MinNodeCount:     3,
+					MaxNodeCount:     3,
+				}),
+				Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 3, 3, 3),
+			},
+			// Disable auto scale, sets node count
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:     "POSTGRES_15",
+					ReplicaName:      readPoolName,
+					AutoScaleEnabled: false,
+					NodeCount:        2,
+				}),
+				Check: testGoogleSqlDatabaseInstanceCheckNodeCount(t, readPoolName, 2, 0, 0),
+			},
+		},
+	})
 }
-
 
 func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 	t.Parallel()
@@ -4399,7 +4393,6 @@ func TestAccSqlDatabaseInstance_setServerCertRotationMode(t *testing.T) {
 	})
 }
 
-
 func TestAccSqlDatabaseInstance_useCustomSubjectAlternateName(t *testing.T) {
 	t.Parallel()
 
@@ -4418,7 +4411,7 @@ func TestAccSqlDatabaseInstance_useCustomSubjectAlternateName(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 
 		Steps: []resource.TestStep{
 			{
@@ -4455,7 +4448,7 @@ func TestAccSqlDatabaseInstance_useCustomerManagedServerCa(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 
 		Steps: []resource.TestStep{
 			{
@@ -4576,235 +4569,234 @@ func TestAccSqlDatabaseInstance_DiskSizeAutoResizeWithDiskSize(t *testing.T) {
 }
 
 func TestEnhancedBackupManagerDiffSuppressFunc(t *testing.T) {
-    cases := map[string]struct {
-        key            string
-        old            string
-        new            string
-        backupTier     string
-        expectSuppress bool
-        description    string
-    }{
-        "suppress enabled diff when backup tier is enhanced": {
-            key:            "settings.0.backup_configuration.0.enabled",
-            old:            "true",
-            new:            "false",
-            backupTier:     "ENHANCED",
-            expectSuppress: true,
-            description:    "enabled should be suppressed when ENHANCED",
-        },
-        "suppress start_time diff when backup tier is enhanced": {
-            key:            "settings.0.backup_configuration.0.start_time",
-            old:            "03:00",
-            new:            "05:00",
-            backupTier:     "ENHANCED",
-            expectSuppress: true,
-            description:    "start_time should be suppressed when ENHANCED",
-        },
-        "suppress binary_log_enabled diff when backup tier is enhanced": {
-            key:            "settings.0.backup_configuration.0.binary_log_enabled",
-            old:            "true",
-            new:            "false",
-            backupTier:     "ENHANCED",
-            expectSuppress: true,
-            description:    "binary_log_enabled should be suppressed when ENHANCED",
-        },
-        "suppress point_in_time_recovery_enabled diff when backup tier is enhanced": {
-            key:            "settings.0.backup_configuration.0.point_in_time_recovery_enabled",
-            old:            "false",
-            new:            "true",
-            backupTier:     "ENHANCED",
-            expectSuppress: true,
-            description:    "point_in_time_recovery_enabled should be suppressed when ENHANCED",
-        },
-        "suppress transaction_log_retention_days diff when backup tier is enhanced": {
-            key:            "settings.0.backup_configuration.0.transaction_log_retention_days",
-            old:            "7",
-            new:            "14",
-            backupTier:     "ENHANCED",
-            expectSuppress: true,
-            description:    "transaction_log_retention_days should be suppressed when ENHANCED",
-        },
-        "suppress retained_backups diff when backup tier is enhanced": {
-            key:            "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups",
-            old:            "7",
-            new:            "14",
-            backupTier:     "ENHANCED",
-            expectSuppress: true,
-            description:    "retained_backups should be suppressed when ENHANCED",
-        },
-        "do not suppress diff when backup tier is standard": {
-            key:            "settings.0.backup_configuration.0.enabled",
-            old:            "true",
-            new:            "false",
-            backupTier:     "STANDARD",
-            expectSuppress: false,
-            description:    "enabled should NOT be suppressed when STANDARD",
-        },
-        "do not suppress diff when backup tier is empty": {
-            key:            "settings.0.backup_configuration.0.enabled",
-            old:            "true",
-            new:            "false",
-            backupTier:     "",
-            expectSuppress: false,
-            description:    "enabled should NOT be suppressed when backup_tier is empty",
-        },
-        "do not suppress when old and new are same": {
-            key:            "settings.0.backup_configuration.0.enabled",
-            old:            "true",
-            new:            "true",
-            backupTier:     "ENHANCED",
-            expectSuppress: true,
-            description:    "no diff to suppress when old and new are same",
-        },
-    }
+	cases := map[string]struct {
+		key            string
+		old            string
+		new            string
+		backupTier     string
+		expectSuppress bool
+		description    string
+	}{
+		"suppress enabled diff when backup tier is enhanced": {
+			key:            "settings.0.backup_configuration.0.enabled",
+			old:            "true",
+			new:            "false",
+			backupTier:     "ENHANCED",
+			expectSuppress: true,
+			description:    "enabled should be suppressed when ENHANCED",
+		},
+		"suppress start_time diff when backup tier is enhanced": {
+			key:            "settings.0.backup_configuration.0.start_time",
+			old:            "03:00",
+			new:            "05:00",
+			backupTier:     "ENHANCED",
+			expectSuppress: true,
+			description:    "start_time should be suppressed when ENHANCED",
+		},
+		"suppress binary_log_enabled diff when backup tier is enhanced": {
+			key:            "settings.0.backup_configuration.0.binary_log_enabled",
+			old:            "true",
+			new:            "false",
+			backupTier:     "ENHANCED",
+			expectSuppress: true,
+			description:    "binary_log_enabled should be suppressed when ENHANCED",
+		},
+		"suppress point_in_time_recovery_enabled diff when backup tier is enhanced": {
+			key:            "settings.0.backup_configuration.0.point_in_time_recovery_enabled",
+			old:            "false",
+			new:            "true",
+			backupTier:     "ENHANCED",
+			expectSuppress: true,
+			description:    "point_in_time_recovery_enabled should be suppressed when ENHANCED",
+		},
+		"suppress transaction_log_retention_days diff when backup tier is enhanced": {
+			key:            "settings.0.backup_configuration.0.transaction_log_retention_days",
+			old:            "7",
+			new:            "14",
+			backupTier:     "ENHANCED",
+			expectSuppress: true,
+			description:    "transaction_log_retention_days should be suppressed when ENHANCED",
+		},
+		"suppress retained_backups diff when backup tier is enhanced": {
+			key:            "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups",
+			old:            "7",
+			new:            "14",
+			backupTier:     "ENHANCED",
+			expectSuppress: true,
+			description:    "retained_backups should be suppressed when ENHANCED",
+		},
+		"do not suppress diff when backup tier is standard": {
+			key:            "settings.0.backup_configuration.0.enabled",
+			old:            "true",
+			new:            "false",
+			backupTier:     "STANDARD",
+			expectSuppress: false,
+			description:    "enabled should NOT be suppressed when STANDARD",
+		},
+		"do not suppress diff when backup tier is empty": {
+			key:            "settings.0.backup_configuration.0.enabled",
+			old:            "true",
+			new:            "false",
+			backupTier:     "",
+			expectSuppress: false,
+			description:    "enabled should NOT be suppressed when backup_tier is empty",
+		},
+		"do not suppress when old and new are same": {
+			key:            "settings.0.backup_configuration.0.enabled",
+			old:            "true",
+			new:            "true",
+			backupTier:     "ENHANCED",
+			expectSuppress: true,
+			description:    "no diff to suppress when old and new are same",
+		},
+	}
 
-    for name, tc := range cases {
-        t.Run(name, func(t *testing.T) {
-            // Build real *schema.ResourceData using the resource schema and TestResourceDataRaw
-            // Put backup_tier into the nested settings->backup_configuration block (state)
-            rd := schema.TestResourceDataRaw(t, sql.ResourceSqlDatabaseInstance().Schema, map[string]interface{}{
-                "name": "test-instance",
-                "settings": []interface{}{
-                    map[string]interface{}{
-                        "backup_configuration": []interface{}{
-                            map[string]interface{}{
-                                "backup_tier": tc.backupTier,
-                            },
-                        },
-                    },
-                },
-            })
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			// Build real *schema.ResourceData using the resource schema and TestResourceDataRaw
+			// Put backup_tier into the nested settings->backup_configuration block (state)
+			rd := schema.TestResourceDataRaw(t, sql.ResourceSqlDatabaseInstance().Schema, map[string]interface{}{
+				"name": "test-instance",
+				"settings": []interface{}{
+					map[string]interface{}{
+						"backup_configuration": []interface{}{
+							map[string]interface{}{
+								"backup_tier": tc.backupTier,
+							},
+						},
+					},
+				},
+			})
 
-            suppressed := sql.EnhancedBackupManagerDiffSuppressFunc(tc.key, tc.old, tc.new, rd)
+			suppressed := sql.EnhancedBackupManagerDiffSuppressFunc(tc.key, tc.old, tc.new, rd)
 
-            if suppressed != tc.expectSuppress {
-                t.Errorf("expected suppressed to be %v but got %v. Desc: %s", tc.expectSuppress, suppressed, tc.description)
-            }
-        })
-    }
+			if suppressed != tc.expectSuppress {
+				t.Errorf("expected suppressed to be %v but got %v. Desc: %s", tc.expectSuppress, suppressed, tc.description)
+			}
+		})
+	}
 }
 
 func TestAccSqlDatabaseInstance_updateInstanceTierForEnhancedBackupTierInstance(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    backupVaultID := "bv-test"
-    location := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
-    backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
+	backupVaultID := "bv-test"
+	location := "us-central1"
+	project := envvar.GetTestProjectFromEnv()
+	backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
-    context := map[string]interface{}{
-        "random_suffix":     acctest.RandString(t, 10),
-        "project":           project,
-        "backup_vault_id":   backupVaultID,
-        "backup_vault":      backupVault,
-        "db_version":        "MYSQL_8_0_41",
-    }
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"project":         project,
+		"backup_vault_id": backupVaultID,
+		"backup_vault":    backupVault,
+		"db_version":      "MYSQL_8_0_41",
+	}
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:     func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-        Steps: []resource.TestStep{
-            {
-                // Create backup plan and associate with instance
-                Config: testGoogleSqlDatabaseInstance_attachGCBDR(context),
-                Check: resource.ComposeAggregateTestCheckFunc(
-                    resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.backup_association", "id"),
-                ),
-            },
-            {
-                // Update instance backup tier to ENHANCED, which should ignore backup_configuration settings
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create backup plan and associate with instance
+				Config: testGoogleSqlDatabaseInstance_attachGCBDR(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.backup_association", "id"),
+				),
+			},
+			{
+				// Update instance backup tier to ENHANCED, which should ignore backup_configuration settings
 				Config: testGoogleSqlDatabaseInstance_updateTierForGcbdrManagedInstance(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.tier", "db-g1-small"),
 				),
-            },
-        },
-    })
+			},
+		},
+	})
 }
 
 func TestAccSqlDatabaseInstance_majorVersionUpgradeForEnhancedBackupTierInstance(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    backupVault := backupdr.BootstrapBackupDRVault(t, "bv-test", "us-central1")
+	backupVault := backupdr.BootstrapBackupDRVault(t, "bv-test", "us-central1")
 
-    context := map[string]interface{}{
-        "random_suffix":     acctest.RandString(t, 10),
-        "project":           envvar.GetTestProjectFromEnv(),
-        "backup_vault":      backupVault,
-        "db_version":        "MYSQL_8_0_41",
-    }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"backup_vault":  backupVault,
+		"db_version":    "MYSQL_8_0_41",
+	}
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:     func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-        Steps: []resource.TestStep{
-            {
-                // Create backup plan and associate with instance
-                Config: testGoogleSqlDatabaseInstance_attachGCBDR(context),
-                Check: resource.ComposeAggregateTestCheckFunc(
-                    resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.backup_association", "id"),
-                ),
-            },
-            {
-                // Update instance database version to a new major version, which should ignore backup_configuration settings
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create backup plan and associate with instance
+				Config: testGoogleSqlDatabaseInstance_attachGCBDR(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.backup_association", "id"),
+				),
+			},
+			{
+				// Update instance database version to a new major version, which should ignore backup_configuration settings
 				Config: testGoogleSqlDatabaseInstance_majorVersionUpgradeGcbdrManagedInstance(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "database_version", "MYSQL_8_0_42"),
 				),
-            },
-        },
-    })
+			},
+		},
+	})
 }
 
 func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    backupVault := backupdr.BootstrapBackupDRVault(t, "bv-test", "us-central1")
+	backupVault := backupdr.BootstrapBackupDRVault(t, "bv-test", "us-central1")
 
-    context := map[string]interface{}{
-        "random_suffix":     acctest.RandString(t, 10),
-        "project":           envvar.GetTestProjectFromEnv(),
-        "backup_vault":      backupVault,
-        "db_version":        "MYSQL_8_0_41",
-		"edition":           "ENTERPRISE",
-		"tier":              "db-f1-micro",
-    }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"backup_vault":  backupVault,
+		"db_version":    "MYSQL_8_0_41",
+		"edition":       "ENTERPRISE",
+		"tier":          "db-f1-micro",
+	}
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:     func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-        Steps: []resource.TestStep{
-            {
-                // Create backup plan and associate with instance
-                Config: testGoogleSqlDatabaseInstance_attachGCBDR(context),
-                Check: resource.ComposeAggregateTestCheckFunc(
-                    resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.backup_association", "id"),
-                ),
-            },
-            {
-                // Edition upgrade, which should ignore backup_configuration settings
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create backup plan and associate with instance
+				Config: testGoogleSqlDatabaseInstance_attachGCBDR(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.backup_association", "id"),
+				),
+			},
+			{
+				// Edition upgrade, which should ignore backup_configuration settings
 				Config: testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context, "ENTERPRISE_PLUS", "db-perf-optimized-N-4"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
 				),
-            },
+			},
 			{
-                // Edition downgrade, which should ignore backup_configuration settings
+				// Edition downgrade, which should ignore backup_configuration settings
 				Config: testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context, "ENTERPRISE", "db-f1-micro"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
 				),
-            },
-
-        },
-    })
+			},
+		},
+	})
 }
 
 func testGoogleSqlDatabaseInstance_attachGCBDR(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {}
 
 resource "google_sql_database_instance" "instance" {
@@ -4852,7 +4844,7 @@ resource "google_backup_dr_backup_plan_association" "backup_association" {
 }
 
 func testGoogleSqlDatabaseInstance_updateTierForGcbdrManagedInstance(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {}
 
 resource "google_sql_database_instance" "instance" {
@@ -4911,7 +4903,7 @@ resource "google_backup_dr_backup_plan_association" "backup_association" {
 }
 
 func testGoogleSqlDatabaseInstance_majorVersionUpgradeGcbdrManagedInstance(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {}
 
 resource "google_sql_database_instance" "instance" {
@@ -4970,14 +4962,14 @@ resource "google_backup_dr_backup_plan_association" "backup_association" {
 }
 
 func testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context map[string]interface{}, edition string, tier string) string {
- // Create a copy of the context map to avoid modifying the map from the caller
-    localContext := make(map[string]interface{})
+	// Create a copy of the context map to avoid modifying the map from the caller
+	localContext := make(map[string]interface{})
 	for k, v := range context {
-        localContext[k] = v
-    }
-    localContext["edition"] = edition
-    localContext["tier"] = tier
-    return acctest.Nprintf(`
+		localContext[k] = v
+	}
+	localContext["edition"] = edition
+	localContext["tier"] = tier
+	return acctest.Nprintf(`
 data "google_project" "project" {}
 
 resource "google_sql_database_instance" "instance" {
@@ -5237,7 +5229,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 func testGoogleSqlDatabaseInstance_setServerCertRotationMode(databaseName, rotationMode string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
   region              = "us-central1"
@@ -6878,7 +6870,7 @@ resource "google_sql_database_instance" "original-replica" {
 
 type ReadPoolConfig struct {
 	DatabaseType string
-	ReplicaName string
+	ReplicaName  string
 	// InstanceType specifies the instance type of the replica,
 	// defaulting to READ_POOL_INSTANCE.
 	//
@@ -6886,19 +6878,19 @@ type ReadPoolConfig struct {
 	// READ_REPLICA_INSTANCE to create an ordinary read replica in order
 	// to test enable/disable pool scenarios.
 	InstanceType string
-	NodeCount int64
+	NodeCount    int64
 	// ReplicaMachineType gives the machine type of the read pool nodes
 	// or read replica. It defaults to db-perf-optimized-N-2.
 	ReplicaMachineType string
 	// AutoScaleEnabled indicates if auto scaling should be enabled on
 	// the read pool.
 	AutoScaleEnabled bool
-	MinNodeCount int64
-	MaxNodeCount int64
+	MinNodeCount     int64
+	MaxNodeCount     int64
 }
 
 func testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName string, rpconfig ReadPoolConfig) string {
-  nodeCountStr := ""
+	nodeCountStr := ""
 	if rpconfig.NodeCount > 0 {
 		nodeCountStr = fmt.Sprintf(`  node_count = %d
 `, rpconfig.NodeCount)
@@ -6950,7 +6942,7 @@ func testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName 
 	read_pool_auto_scale_config {
 		enabled = false
 	}
-`		)
+`)
 	}
 
 	return fmt.Sprintf(`
@@ -7220,7 +7212,6 @@ func verifyCreateOperationOnEplusWithPrivateNetwork(resourceName string) func(*t
 	}
 }
 
-
 func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, isPscAutoConnectionConfigExpected bool, expectedConsumerNetwork string, expectedConsumerProject string) func(*terraform.State) error {
 	return func(s *terraform.State) error {
 		resource, ok := s.RootModule().Resources[resourceName]
@@ -7268,7 +7259,7 @@ func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected 
 	}
 }
 
-func verifyPscNetorkAttachmentOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedNetworkAttachmentUri string ) func(*terraform.State) error {
+func verifyPscNetorkAttachmentOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedNetworkAttachmentUri string) func(*terraform.State) error {
 	return func(s *terraform.State) error {
 		resource, ok := s.RootModule().Resources[resourceName]
 		if !ok {
@@ -8113,7 +8104,7 @@ resource "google_sql_database_instance" "instance" {
 `
 
 func testGoogleSqlDatabaseInstance_insights_enhanced_postgres17(instanceName string, enhanced bool) string {
-		return fmt.Sprintf(`resource "google_sql_database_instance" "instance" {
+	return fmt.Sprintf(`resource "google_sql_database_instance" "instance" {
 	name                = "%s"
 	region              = "us-central1"
 	database_version    = "POSTGRES_17"
@@ -8134,6 +8125,7 @@ func testGoogleSqlDatabaseInstance_insights_enhanced_postgres17(instanceName str
 }
 `, instanceName, enhanced)
 }
+
 var testGoogleSqlDatabaseInstance_encryptionKey = `
 data "google_project" "project" {
   project_id = "%{project_id}"
