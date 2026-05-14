@@ -13,9 +13,6 @@ if err := tpgresource.ParseImportId([]string{
 // "Cannot determine region".
 indexEndpointRe := regexp.MustCompile(`^projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/indexEndpoints/[^/]+$`)
 if m := indexEndpointRe.FindStringSubmatch(d.Get("index_endpoint").(string)); m != nil {
-	if err := d.Set("project", m[1]); err != nil {
-		return nil, fmt.Errorf("Error setting project: %s", err)
-	}
 	if err := d.Set("region", m[2]); err != nil {
 		return nil, fmt.Errorf("Error setting region: %s", err)
 	}
