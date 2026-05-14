@@ -265,12 +265,8 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 `, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber)
 }
 
-// Step 3: Update to sources (access_level) + external_resources + operations (bigquery, no selectors)
-// Covers update of: sources.access_level, external_resources, operations.service_name (changed)
-//
-// Note: method_selectors.method is already covered in step 1. With external_resources,
-// the API requires service_name=bigquery.googleapis.com and only allows permission-based
-// method_selectors (BigQuery doesn't support any), so we omit method_selectors here.
+// Step 3: Update to sources (access_level) + external_resources + operations (bigquery, permission selector)
+// Covers update of: sources.access_level, external_resources, operations.service_name (changed), method_selectors.permission
 func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step3(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
@@ -301,6 +297,9 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
     external_resources = ["s3://bucket-update-test"]
     operations {
       service_name = "bigquery.googleapis.com"
+      method_selectors {
+        permission = "bigquery.jobs.get"
+      }
     }
   }
 }
