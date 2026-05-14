@@ -244,7 +244,7 @@ func setIamMemberIdFromParentResourceIdentity(d *schema.ResourceData, config *tr
 // fields from updater.GetResourceId(). Those fields must come from the same state the updater
 // used, so they stay consistent with GetResourceId() and round-trip through ParentResourceIdentityParser.
 func setIamMemberResourceIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSpecificSchema map[string]*schema.Schema, role, member, conditionTitle string) {
-	PopulateIamParentIdentity(identity, d, parentSpecificSchema)
+	populateIamParentIdentity(identity, d, parentSpecificSchema)
 	identity.Set("role", role)
 	identity.Set("member", tpgresource.NormalizeIamPrincipalCasing(member))
 	if conditionTitle != "" {
