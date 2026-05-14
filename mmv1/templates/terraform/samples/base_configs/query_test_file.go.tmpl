@@ -77,17 +77,10 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	}
 
 	var listDisplayName acctest.ListDisplayName
-{{- $hasCapture := false }}
-{{- range $scope := $.ListScopeProperties }}
-	{{- if $scope.Required }}
-		{{- if $sample.ListQueryScopeCapture (underscore $scope.Name) }}{{- $hasCapture = true }}{{- end }}
-	{{- end }}
-{{- end }}
-{{- if $hasCapture }}
+{{- if $sample.ListQueryScopeSources }}
 	// Captured at create-step time and used to populate list-query input variables.
 	var listScope acctest.ListScopeCapture
 {{- end }}
-
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
@@ -120,7 +113,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 						{{- end }}
 						},
 					),
-{{- if $hasCapture }}
+{{- if $sample.ListQueryScopeSources }}
 					listScope.Capture(map[string]acctest.ScopeSource{
 					{{- range $scope := $.ListScopeProperties }}
 						{{- if $scope.Required }}
@@ -137,7 +130,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 			{
 				Query:  true,
 				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
-{{- if $hasCapture }}
+{{- if $sample.ListQueryScopeSources }}
 				ConfigVariables: listScope.AsConfigVariables(),
 {{- end }}
 				QueryResultChecks: []querycheck.QueryResultCheck{
