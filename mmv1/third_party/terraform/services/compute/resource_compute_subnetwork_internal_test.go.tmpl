@@ -1,13 +1,11 @@
 package compute
-
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"testing"
-
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestUnitComputeSubnetworkSecondaryIpRange_customizeDiff(t *testing.T) {
 	t.Parallel()
 
