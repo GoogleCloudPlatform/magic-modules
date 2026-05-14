@@ -240,7 +240,7 @@ func setIamMemberIdFromParentResourceIdentity(d *schema.ResourceData, config *tr
 }
 
 // setIamMemberResourceIdentity sets parent attributes from state plus role/member/condition_title.
-// ParentResourceIdentityParser is only identity→canonical id (for import); it cannot derive parent
+// ParentResourceIdentityParser is only identity→id (for import); it cannot derive parent
 // fields from updater.GetResourceId(). Those fields must come from the same state the updater
 // used, so they stay consistent with GetResourceId() and round-trip through ParentResourceIdentityParser.
 func setIamMemberResourceIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSpecificSchema map[string]*schema.Schema, role, member, conditionTitle string) {
