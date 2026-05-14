@@ -11,6 +11,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	storage_tpg "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -319,7 +321,7 @@ func TestAccStorageObject_metadata(t *testing.T) {
 func TestAccStorageObjectKms(t *testing.T) {
 	t.Parallel()
 
-	kms := acctest.BootstrapKMSKeyInLocation(t, "us")
+	bootstrapped := kms.BootstrapKMSKeyInLocation(t, "us")
 	bucketName := acctest.TestBucketName(t)
 	data := []byte("data data data")
 	dataCrc32c := calculateCrc32cHash(data)
@@ -334,7 +336,7 @@ func TestAccStorageObjectKms(t *testing.T) {
 		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketsObjectKms(bucketName, testFile.Name(), kms.CryptoKey.Name),
+				Config: testGoogleStorageBucketsObjectKms(bucketName, testFile.Name(), bootstrapped.CryptoKey.Name),
 				Check:  testAccCheckGoogleStorageObjectCrc32cHash(t, bucketName, objectName, dataCrc32c),
 			},
 		},
@@ -642,7 +644,7 @@ func testAccCheckGoogleStorageObjectCrc32cWithEncryption(t *testing.T, bucket, o
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		objectsService := storage.NewObjectsService(config.NewStorageClient(config.UserAgent))
+		objectsService := storage.NewObjectsService(storage_tpg.NewClient(config, config.UserAgent))
 
 		getCall := objectsService.Get(bucket, object)
 		if customerEncryptionKey != "" {
@@ -672,7 +674,7 @@ func testAccCheckGoogleStorageFolder(t *testing.T, bucket, folderName string) re
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		objectsService := storage.NewObjectsService(config.NewStorageClient(config.UserAgent))
+		objectsService := storage.NewObjectsService(storage_tpg.NewClient(config, config.UserAgent))
 
 		getCall := objectsService.Get(bucket, folderName)
 		res, err := getCall.Do()
@@ -701,7 +703,7 @@ func testAccStorageObjectDestroyProducer(t *testing.T) func(s *terraform.State) 
 			bucket := rs.Primary.Attributes["bucket"]
 			name := rs.Primary.Attributes["name"]
 
-			objectsService := storage.NewObjectsService(config.NewStorageClient(config.UserAgent))
+			objectsService := storage.NewObjectsService(storage_tpg.NewClient(config, config.UserAgent))
 
 			getCall := objectsService.Get(bucket, name)
 			_, err := getCall.Do()
@@ -1131,7 +1133,7 @@ func testAccCheckStorageObjectExists(t *testing.T, bucketName string) resource.T
 
 		config := acctest.GoogleProviderConfig(t)
 
-		_, err := config.NewStorageClient(config.UserAgent).Objects.Get(bucketName, objectName).Do()
+		_, err := storage_tpg.NewClient(config, config.UserAgent).Objects.Get(bucketName, objectName).Do()
 		if err != nil {
 			return err
 		}
@@ -1144,7 +1146,7 @@ func testAccCheckStorageObjectContextsExists(t *testing.T, bucketName string, cu
 
 		config := acctest.GoogleProviderConfig(t)
 
-		res, err := config.NewStorageClient(config.UserAgent).Objects.Get(bucketName, objectName).Do()
+		res, err := storage_tpg.NewClient(config, config.UserAgent).Objects.Get(bucketName, objectName).Do()
 		if err != nil {
 			return err
 		}
@@ -1160,7 +1162,7 @@ func testAccCheckStorageObjectContexts(t *testing.T, bucketName, customKey strin
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		res, err := config.NewStorageClient(config.UserAgent).Objects.Get(bucketName, objectName).Do()
+		res, err := storage_tpg.NewClient(config, config.UserAgent).Objects.Get(bucketName, objectName).Do()
 		if err != nil {
 			return err
 		}

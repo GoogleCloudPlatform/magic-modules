@@ -23,16 +23,18 @@ import (
 
 type GithubClient interface {
 	GetPullRequest(prNumber string) (github.PullRequest, error)
+	GetPullRequestAuthor(prNumber string) (string, error)
 	GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error)
 	GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error)
 	GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error)
 	GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error)
+	GetPullRequestComment(commentID int) (github.PullRequestComment, error)
 	GetCommitMessage(owner, repo, sha string) (string, error)
 	GetUserType(user string) github.UserType
 	GetTeamMembers(organization, team string) ([]github.User, error)
 	MergePullRequest(owner, repo, prNumber, commitSha string) error
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
-	PostComment(prNumber, comment string) error
+	PostComment(prNumber, comment string) (int, error)
 	UpdateComment(prNumber, comment string, id int) error
 	RequestPullRequestReviewers(prNumber string, reviewers []string) error
 	RemovePullRequestReviewers(prNumber string, reviewers []string) error

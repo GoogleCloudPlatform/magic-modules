@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,11 +19,16 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDiskAsyncReplicationCreate,
 		Read:   resourceDiskAsyncReplicationRead,
+		Update: resourceDiskAsyncReplicationUpdate,
 		Delete: resourceDiskAsyncReplicationDelete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -60,6 +66,9 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 					},
 				},
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -105,11 +114,11 @@ func asyncReplicationGetDiskStatus(config *transport_tpg.Config, userAgent strin
 	var url string
 	var project string
 	if rv == nil { // Zonal disk
-		url = fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s", config.ComputeBasePath, zv.Project, zv.Zone, zv.Name)
+		url = fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s", transport_tpg.BaseUrl(Product, config), zv.Project, zv.Zone, zv.Name)
 		project = zv.Project
 		log.Printf("[DEBUG] Get disk zones/%s/%s", zv.Zone, zv.Name)
 	} else {
-		url = fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s", config.ComputeBasePath, rv.Project, rv.Region, rv.Name)
+		url = fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s", transport_tpg.BaseUrl(Product, config), rv.Project, rv.Region, rv.Name)
 		project = rv.Project
 		log.Printf("[DEBUG] Get disk regions/%s/%s", rv.Region, rv.Name)
 	}
@@ -141,7 +150,7 @@ func resourceDiskAsyncReplicationCreate(d *schema.ResourceData, meta interface{}
 	secondaryDiskMap := secondaryDiskList[0].(map[string]interface{})
 	secondaryDisk := secondaryDiskMap["disk"].(string)
 	if rv == nil { // Zonal disk
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s/startAsyncReplication", config.ComputeBasePath, zv.Project, zv.Zone, zv.Name)
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s/startAsyncReplication", transport_tpg.BaseUrl(Product, config), zv.Project, zv.Zone, zv.Name)
 		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -156,7 +165,7 @@ func resourceDiskAsyncReplicationCreate(d *schema.ResourceData, meta interface{}
 			return err
 		}
 	} else {
-		url := fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s/startAsyncReplication", config.ComputeBasePath, rv.Project, rv.Region, rv.Name)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s/startAsyncReplication", transport_tpg.BaseUrl(Product, config), rv.Project, rv.Region, rv.Name)
 		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -272,10 +281,30 @@ func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error setting secondary_disk: %s", err)
 	}
 	d.SetId(resourceId)
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
+// UDP update start
+func resourceDiskAsyncReplicationUpdate(d *schema.ResourceData, meta interface{}) error {
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceDiskAsyncReplicationRead(d, meta)
+}
+
+//UDP update end
+
 func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config, userAgent, err := asyncReplicationGetConfigAndUserAgent(d, meta)
 	if err != nil {
 		return err
@@ -316,7 +345,7 @@ func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}
 		if state != "STOPPED" {
 			replicationStopped = true
 			if rv == nil { // Zonal disk
-				url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s/stopAsyncReplication", config.ComputeBasePath, zv.Project, zv.Zone, zv.Name)
+				url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s/stopAsyncReplication", transport_tpg.BaseUrl(Product, config), zv.Project, zv.Zone, zv.Name)
 				_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
 					Method:    "POST",
@@ -328,7 +357,7 @@ func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}
 					return err
 				}
 			} else {
-				url := fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s/stopAsyncReplication", config.ComputeBasePath, rv.Project, rv.Region, rv.Name)
+				url := fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s/stopAsyncReplication", transport_tpg.BaseUrl(Product, config), rv.Project, rv.Region, rv.Name)
 				_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
 					Method:    "POST",

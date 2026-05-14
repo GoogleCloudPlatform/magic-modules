@@ -30,6 +30,7 @@ update_mask: true
 
 custom_code:
   pre_create: templates/terraform/pre_create/observability_project_settings.go.tmpl
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 
 async:
   operation:
@@ -53,7 +54,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCOUNT'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
       # for backward compatible
       location: '"us" + randomSuffix'
   - name: "observability_project_settings_basic_global"

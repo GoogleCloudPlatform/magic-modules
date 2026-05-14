@@ -11,7 +11,7 @@ func NewDCLContainerAzureClient(config *transport_tpg.Config, userAgent, billing
 		dcl.WithHTTPClient(config.Client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dcl.DCLLogger{}),
-		dcl.WithBasePath(config.ContainerAzureBasePath),
+		dcl.WithBasePath(transport_tpg.BaseUrl(Product, config)),
 	}
 
 	if timeout != 0 {

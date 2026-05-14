@@ -1,0 +1,105 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DataCollector'
+description: |
+  A `DataCollector` collects and stores data from the runtime for use in
+  Analytics custom reports or API monetization. Data collectors are scoped
+  to an Apigee organization.
+references:
+  guides:
+    'Creating a data collector': 'https://cloud.google.com/apigee/docs/api-platform/analytics/custom-reports'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.datacollectors'
+docs:
+base_url: '{{org_id}}/datacollectors'
+self_link: '{{org_id}}/datacollectors/{{data_collector_id}}'
+create_url: '{{org_id}}/datacollectors?dataCollectorId={{data_collector_id}}'
+update_url: '{{org_id}}/datacollectors/{{data_collector_id}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: '{{org_id}}/datacollectors/{{data_collector_id}}'
+import_format:
+  - '{{org_id}}/datacollectors/{{data_collector_id}}'
+  - '{{org_id}}/{{data_collector_id}}'
+timeouts:
+  insert_minutes: 1
+  update_minutes: 1
+  delete_minutes: 1
+custom_code:
+  custom_import: 'templates/terraform/custom_import/apigee_data_collector.go.tmpl'
+examples:
+  - name: 'apigee_data_collector_basic'
+    vars:
+      network_name: 'apigee-network'
+      range_name: 'apigee-range'
+      data_collector_id: 'dc_my_data_collector'
+    exclude_test: true
+  - name: 'apigee_data_collector_basic_test'
+    primary_resource_id: 'apigee_data_collector'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    external_providers: ["time"]
+parameters:
+  - name: 'orgId'
+    type: String
+    description: |
+      The Apigee Organization associated with the Apigee data collector,
+      in the format `organizations/{{org_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'dataCollectorId'
+    type: String
+    description: |
+      The ID for the data collector. Must begin with `dc_`.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      regex: '^dc_[a-zA-Z0-9_]+$'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the data collector, in the format
+      `organizations/{{org_name}}/datacollectors/{{data_collector_id}}`.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      A description of the data collector.
+  - name: 'type'
+    type: Enum
+    description: |
+      The type of data this data collector will collect.
+    required: true
+    immutable: true
+    enum_values:
+      - 'BOOLEAN'
+      - 'DATETIME'
+      - 'FLOAT'
+      - 'INTEGER'
+      - 'STRING'
+  - name: 'createdAt'
+    type: String
+    description: |
+      The time at which the data collector was created in milliseconds since the epoch.
+    output: true
+  - name: 'lastModifiedAt'
+    type: String
+    description: |
+      The time at which the data collector was last modified in milliseconds since the epoch.
+    output: true

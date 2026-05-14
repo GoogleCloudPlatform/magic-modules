@@ -1,0 +1,800 @@
+package ces_test
+
+{{ if ne $.TargetVersionName "ga" }}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+func TestAccCESEvaluation_update(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"app_display_name":        "tf-test-my-app-update" + randomSuffix,
+		"app_id":                  "tf-test-app-" + randomSuffix,
+		"evaluation_id":           "tf-test-eval-" + randomSuffix,
+		"tool_id":                 "tf-test-tool-id-full" + randomSuffix,
+		"tool_id_updated":         "tf-test-tool-id-updated" + randomSuffix,
+		"random_suffix":           randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCESEvaluationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESEvaluation_cesEvaluationFullExample(context),
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+			{
+				Config: testAccCESEvaluation_cesEvaluationUpdateFields(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_evaluation.ces_evaluation_full", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+			{
+				Config: testAccCESEvaluation_cesEvaluationMinimal(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_evaluation.ces_evaluation_full", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+		},
+	})
+}
+
+func TestAccCESEvaluation_toolset_update(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"app_display_name":        "tf-test-my-app-toolset-update" + randomSuffix,
+		"app_id":                  "tf-test-app-toolset-" + randomSuffix,
+		"evaluation_id":           "tf-test-eval-toolset-" + randomSuffix,
+		"random_suffix":           randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCESEvaluationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESEvaluation_cesEvaluationToolsetExample(context),
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_toolset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+			{
+				Config: testAccCESEvaluation_cesEvaluationToolsetUpdateFields(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_evaluation.ces_evaluation_toolset", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_toolset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+		},
+	})
+}
+
+func testAccCESEvaluation_cesEvaluationMinimal(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "%{app_id}"
+  location = "us"
+  display_name = "%{app_display_name}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_full" {
+  provider = google-beta
+  evaluation_id = "%{evaluation_id}"
+  display_name = "my-evaluation-update-minimal"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+}
+`, context)
+}
+
+func testAccCESEvaluation_cesEvaluationUpdateFields(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "%{app_id}"
+  location = "us"
+  display_name = "%{app_display_name}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_tool" "tool" {
+  provider = google-beta
+  location       = "us"
+  app            = google_ces_app.app.app_id
+  tool_id        = "%{tool_id_updated}"
+  execution_type = "SYNCHRONOUS"
+  python_function {
+    name = "example_function"
+    python_code = "def example_function() -> int: return 0"
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_full" {
+  provider = google-beta
+  evaluation_id = "%{evaluation_id}"
+  display_name = "my-evaluation-update-final"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+  description  = "Updated full evaluation description"
+  tags         = ["test", "updated_full"]
+
+  golden {
+    evaluation_expectations = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/evaluationExpectations/dummy-exp"]
+
+    turns {
+      steps {
+        user_input {
+          text = "Hi there"
+        }
+      }
+      steps {
+        user_input {
+          variables = {
+            key = "new_value"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect tool call update"
+          tool_call {
+            id = "tool-call-id-1-new"
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+            args = {
+              param = "new_value"
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect agent response update"
+          agent_response {
+            role = "agent"
+            chunks {
+              updated_variables = { "key": "new_value" }
+            }
+            chunks {
+              agent_transfer {
+                target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent-update"
+              }
+            }
+            chunks {
+              tool_call {
+                id = "tool-call-id-2-new"
+                tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+              }
+            }
+            chunks {
+              tool_response {
+                id = "tool-call-id-3-new"
+                response = { result = "updated_success" }
+                tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+              }
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect toolset tool call update"
+          tool_call {
+            id = "tool-call-id-2-new"
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset-update"
+              tool_id = "updated-dummy-tool"
+            }
+          }
+        }
+      }
+      steps {
+        agent_transfer {
+          target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent-update"
+        }
+      }
+      steps {
+        expectation {
+          agent_transfer {
+            target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent-update"
+            display_name = "dummy-agent-update"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect mock tool response update"
+          mock_tool_response {
+            id = "tool-call-id-5-new"
+            response = { result = "updated_mocked" }
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect tool response update"
+          tool_response {
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset-update"
+              tool_id = "updated-dummy-tool"
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect updated variables update"
+          updated_variables {
+            notes = "Updated notes"
+          }
+        }
+      }
+      steps {
+        user_input {
+          tool_responses {
+            tool_responses {
+              id = "tool-call-id-6-new"
+              response = { result = "updated_user_provided" }
+              tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+            }
+          }
+        }
+      }
+      steps {
+        user_input {
+          event {
+            event = "updated-event"
+          }
+        }
+      }
+      steps {
+        user_input {
+          dtmf = "5678"
+        }
+      }
+      steps {
+        user_input {
+          audio = "dXBkYXRlZCBhdWRpbyBkYXRh"
+        }
+      }
+      steps {
+        user_input {
+          blob {
+            mime_type = "text/plain"
+            data = "dXBkYXRlZCBibG9iIGRhdGE="
+          }
+        }
+      }
+      steps {
+        user_input {
+          image {
+            mime_type = "image/png"
+            data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+          }
+        }
+      }
+      steps {
+        user_input {
+          tool_responses {
+            tool_responses {
+              id = "tool-call-id"
+              response = {
+                result = "updated_success"
+              }
+              tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect tool response update"
+          tool_response {
+            id = "tool-call-id"
+            response = {
+              result = "updated_success"
+            }
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect agent response with chunks update"
+          agent_response {
+            role = "agent"
+            chunks {
+              text = "Hi again"
+            }
+            chunks {
+              text = "Hi again transcript"
+            }
+
+            chunks {
+              blob {
+                mime_type = "text/plain"
+                data = "dXBkYXRlZCBibG9iIGRhdGE="
+              }
+            }
+            chunks {
+              image {
+                mime_type = "image/png"
+                data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+              }
+            }
+            chunks {
+              tool_call {
+                id = "tool-call-id-9-new"
+                tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+                args = {
+                  param = "new_value"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCESEvaluation_cesEvaluationToolsetUpdateFields(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "%{app_id}"
+  location = "us"
+  display_name = "%{app_display_name}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_toolset" {
+  provider = google-beta
+  evaluation_id = "%{evaluation_id}"
+  display_name = "my-evaluation-toolset-updated"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+
+  golden {
+    turns {
+      steps {
+        expectation {
+          note = "Expect agent response with toolset tool call updated"
+          agent_response {
+            chunks {
+              tool_call {
+                id = "tool-call-id-1-new"
+                toolset_tool {
+                  toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset-updated"
+                  tool_id = "dummy-tool-updated"
+                }
+              }
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect agent response with toolset tool response updated"
+          agent_response {
+            role = "agent"
+            chunks {
+              tool_response {
+                id = "tool-call-id-2-new"
+                response = { result = "success_updated" }
+                toolset_tool {
+                  toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset-updated"
+                  tool_id = "dummy-tool-updated"
+                }
+              }
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect mock tool response with toolset tool updated"
+          mock_tool_response {
+            id = "tool-call-id-3-new"
+            response = { result = "mocked_updated" }
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset-updated"
+              tool_id = "dummy-tool-updated"
+            }
+          }
+        }
+      }
+      steps {
+        user_input {
+          tool_responses {
+            tool_responses {
+              id = "tool-call-id-4-new"
+              response = { result = "user-provided-updated" }
+              toolset_tool {
+                toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset-updated"
+                tool_id = "dummy-tool-updated"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+
+func TestAccCESEvaluation_scenario_update(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"app_display_name": "tf-test-my-app-scenario-update" + randomSuffix,
+		"app_id":           "tf-test-app-scenario-" + randomSuffix,
+		"evaluation_id":    "tf-test-eval-scenario-" + randomSuffix,
+		"tool_id":          "tf-test-tool-id-scenario" + randomSuffix,
+		"tool_update_id":   "tf-test-tool-upd-" + randomSuffix,
+		"random_suffix":    randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCESEvaluationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESEvaluation_cesEvaluationScenarioFullExample(context),
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_scenario_full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+			{
+				Config: testAccCESEvaluation_cesEvaluationScenarioUpdateFields(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_evaluation.ces_evaluation_scenario_full", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_scenario_full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+		},
+	})
+}
+
+func TestAccCESEvaluation_scenario_toolset_update(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"app_display_name": "tf-test-my-app-scen-ts-upd" + randomSuffix,
+		"app_id":           "tf-test-app-scen-ts-" + randomSuffix,
+		"evaluation_id":    "tf-test-eval-scen-ts-" + randomSuffix,
+		"toolset_id":       "tf-test-ts-scen-" + randomSuffix,
+		"toolset_update_id": "tf-test-ts-scen-upd-" + randomSuffix,
+		"random_suffix":    randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCESEvaluationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESEvaluation_cesEvaluationScenarioToolsetExample(context),
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_scenario_toolset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+			{
+				Config: testAccCESEvaluation_cesEvaluationScenarioToolsetUpdateFields(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_evaluation.ces_evaluation_scenario_toolset", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_evaluation.ces_evaluation_scenario_toolset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "evaluation_id", "location"},
+			},
+		},
+	})
+}
+
+func testAccCESEvaluation_cesEvaluationScenarioUpdateFields(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "%{app_id}"
+  location = "us"
+  display_name = "%{app_display_name}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_tool" "tool" {
+  provider = google-beta
+  location       = "us"
+  app            = google_ces_app.app.app_id
+  tool_id        = "%{tool_update_id}"
+  execution_type = "SYNCHRONOUS"
+  python_function {
+    name = "example_function"
+    python_code = "def example_function() -> int: return 0"
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_scenario_full" {
+  provider = google-beta
+  evaluation_id = "%{evaluation_id}"
+  display_name = "my-evaluation-scenario-updated"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+  description  = "Updated evaluation for testing scenario"
+  tags         = ["test", "updated", "scenario"]
+
+  scenario {
+    task = "Updated Test task"
+    max_turns = 10
+    rubrics = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/rubrics/dummy-rubric-updated"]
+    user_goal_behavior = "USER_GOAL_REJECTED"
+    task_completion_behavior = "TASK_REJECTED"
+    variable_overrides = {
+      key = "updated_value"
+    }
+    evaluation_expectations = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/evaluationExpectations/dummy-exp-updated"]
+
+    user_facts {
+      name = "user_name"
+      value = "Jane Doe"
+    }
+    user_facts {
+      name = "user_role"
+      value = "admin"
+    }
+
+    scenario_expectations {
+      tool_expectation {
+        expected_tool_call {
+          id = "tool-call-id-updated"
+          tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+          args = {
+            param = "updated_value"
+          }
+        }
+        mock_tool_response {
+          id = "tool-call-id-updated"
+          response = { result = "mocked_updated" }
+          tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+        }
+      }
+    }
+
+    scenario_expectations {
+      agent_response {
+        role = "agent"
+        chunks {
+          text = "Hello Updated"
+        }
+        chunks {
+          updated_variables = { "key": "updated_value" }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCESEvaluation_cesEvaluationScenarioToolsetUpdateFields(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "%{app_id}"
+  location = "us"
+  display_name = "%{app_display_name}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_toolset" "toolset" {
+  provider = google-beta
+  toolset_id = "%{toolset_update_id}"
+  location = "us"
+  app      = google_ces_app.app.app_id
+  display_name = "Basic toolset display name updated"
+  description = "Test description updated"
+  execution_type = "SYNCHRONOUS"
+
+  open_api_toolset {
+    open_api_schema = <<-EOT
+      openapi: 3.0.0
+      info:
+        title: My Sample API Updated
+        version: 1.1.0
+        description: A simple API example updated
+      servers:
+        - url: https://api.example.com/v2
+      paths: {}
+    EOT
+    ignore_unknown_fields = true
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_scenario_toolset" {
+  provider = google-beta
+  evaluation_id = "%{evaluation_id}"
+  display_name = "my-evaluation-scenario-toolset-updated"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+  description  = "Full evaluation for testing scenario with toolset updated"
+  tags         = ["test", "updated", "scenario", "toolset"]
+
+  scenario {
+    task = "Updated Test task"
+    max_turns = 10
+    rubrics = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/rubrics/dummy-rubric-updated"]
+    user_goal_behavior = "USER_GOAL_REJECTED"
+    task_completion_behavior = "TASK_REJECTED"
+    variable_overrides = {
+      key = "updated_value"
+    }
+    evaluation_expectations = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/evaluationExpectations/dummy-exp-updated"]
+
+    user_facts {
+      name = "user_name"
+      value = "Jane Doe"
+    }
+
+    scenario_expectations {
+      tool_expectation {
+        expected_tool_call {
+          id = "tool-call-id-updated"
+          toolset_tool {
+            toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/${google_ces_toolset.toolset.toolset_id}"
+            tool_id = "dummy-tool-updated"
+          }
+          args = {
+            param = "updated_value"
+          }
+        }
+        mock_tool_response {
+          id = "tool-call-id-updated"
+          response = { result = "mocked_updated" }
+          toolset_tool {
+            toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/${google_ces_toolset.toolset.toolset_id}"
+            tool_id = "dummy-tool-updated"
+          }
+        }
+      }
+    }
+
+    scenario_expectations {
+      agent_response {
+        role = "agent"
+        chunks {
+          text = "Hello Updated"
+        }
+        chunks {
+          tool_call {
+            id = "tool-call-id-3-updated"
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/${google_ces_toolset.toolset.toolset_id}"
+              tool_id = "dummy-tool-updated"
+            }
+            args = {
+              param = "updated_value"
+            }
+          }
+        }
+        chunks {
+          tool_response {
+            id = "tool-call-id-3-updated"
+            response = { result = "success_updated" }
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/${google_ces_toolset.toolset.toolset_id}"
+              tool_id = "dummy-tool-updated"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+{{ else }}
+// TestAccCESEvaluation_update is not available in GA
+{{ end }}

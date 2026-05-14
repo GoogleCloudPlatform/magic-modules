@@ -123,6 +123,7 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
       - name: 'sha256'
         type: String
         description: |
@@ -241,6 +242,7 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
         # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String

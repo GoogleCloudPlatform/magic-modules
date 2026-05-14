@@ -101,10 +101,10 @@ var (
 		"addons_config.0.parallelstore_csi_driver_config",
 		"addons_config.0.lustre_csi_driver_config",
 		"addons_config.0.slice_controller_config",
+		"addons_config.0.pod_snapshot_config",
 	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
-		"addons_config.0.pod_snapshot_config",
 	{{- end }}
 	}
 
@@ -231,6 +231,7 @@ func ResourceContainerCluster() *schema.Resource {
 		Delete: resourceContainerClusterDelete,
 
 		CustomizeDiff: customdiff.All(
+            		tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			resourceNodeConfigEmptyGuestAccelerator,
 			customdiff.ForceNewIfChange("enable_l4_ilb_subsetting", isBeenEnabled),
 			customdiff.ForceNewIfChange("enable_fqdn_network_policy", isBeenEnabled),
@@ -242,16 +243,14 @@ func ResourceContainerCluster() *schema.Resource {
 			containerClusterEnableK8sBetaApisCustomizeDiff,
 			containerClusterNodeVersionCustomizeDiff,
 			tpgresource.SetDiffForLabelsWithCustomizedName("resource_labels"),
-			{{ if ne $.TargetVersionName `ga` }}
 			clusterAcceleratorNetworkProfileCustomizeDiff,
-			{{- end }}
 		),
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(40 * time.Minute),
-			Read:   schema.DefaultTimeout(40 * time.Minute),
-			Update: schema.DefaultTimeout(60 * time.Minute),
-			Delete: schema.DefaultTimeout(40 * time.Minute),
+			Create: schema.DefaultTimeout(90 * time.Minute),
+			Read:   schema.DefaultTimeout(90 * time.Minute),
+			Update: schema.DefaultTimeout(90 * time.Minute),
+			Delete: schema.DefaultTimeout(90 * time.Minute),
 		},
 
 		SchemaVersion: 2,
@@ -529,6 +528,23 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"pod_snapshot_config": {
+							Type: schema.TypeList,
+							Optional: true,
+							Computed: true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems: 1,
+							Description: `Configuration for the Pod Snapshot feature.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type: schema.TypeBool,
+										Required: true,
+										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
+									},
+								},
+							},
+						},
 						{{- if ne $.TargetVersionName "ga" }}
 						"istio_config": {
 							Type:         schema.TypeList,
@@ -567,23 +583,6 @@ func ResourceContainerCluster() *schema.Resource {
 									"enabled": {
 										Type:     schema.TypeBool,
 										Required: true,
-									},
-								},
-							},
-						},
-						"pod_snapshot_config": {
-							Type: schema.TypeList,
-							Optional: true,
-							Computed: true,
-							AtLeastOneOf: addonsConfigKeys,
-							MaxItems: 1,
-							Description: `Configuration for the Pod Snapshot feature.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enabled": {
-										Type: schema.TypeBool,
-										Required: true,
-										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
 									},
 								},
 							},
@@ -1812,7 +1811,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{ if ne $.TargetVersionName `ga` -}}
 			"secret_sync_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1851,7 +1849,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{- end }}
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -2865,6 +2862,9 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+	//UDP schema start
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+	//UDP schema end
 		},
 	}
 }
@@ -3027,9 +3027,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 {{- end }}
 		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
-{{- if ne $.TargetVersionName "ga" }}
 		SecretSyncConfig: 	 expandSecretSyncConfig(d.Get("secret_sync_config")),
-{{- end }}
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
@@ -3274,7 +3272,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	var op *container.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			clusterCreateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Create(parent, req)
+			clusterCreateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Create(parent, req)
 			if config.UserProjectOverride {
 				clusterCreateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -3308,7 +3306,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		// Try a GET on the cluster so we can see the state in debug logs. This will help classify error states.
-		clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
+		clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
 		if config.UserProjectOverride {
 			clusterGetCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -3330,7 +3328,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		parent := fmt.Sprintf("%s/nodePools/%s", containerClusterFullName(project, location, clusterName), "default-pool")
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				clusterNodePoolDeleteCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Delete(parent)
+				clusterNodePoolDeleteCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Delete(parent)
 				if config.UserProjectOverride {
 					clusterNodePoolDeleteCall.Header().Add("X-Goog-User-Project", project)
 				}
@@ -3373,7 +3371,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 				if config.UserProjectOverride {
 					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 				}
@@ -3405,7 +3403,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 				if config.UserProjectOverride {
 					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 				}
@@ -3433,7 +3431,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 				if config.UserProjectOverride {
 					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 				}
@@ -3498,7 +3496,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		waitErr := ContainerOperationWait(config, op, project, location, "resuming GKE cluster", userAgent, d.Timeout(schema.TimeoutRead))
 		if waitErr != nil {
 			// Try a GET on the cluster so we can see the state in debug logs. This will help classify error states.
-			clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
+			clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
 			if config.UserProjectOverride {
 				clusterGetCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -3515,7 +3513,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	name := containerClusterFullName(project, location, clusterName)
-	clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+	clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 	if config.UserProjectOverride {
 		clusterGetCall.Header().Add("X-Goog-User-Project", project)
 	}
@@ -3763,12 +3761,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
 	}
-{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(cluster.SecretSyncConfig)); err != nil {
 		return err
 	}
-{{- end }}
-
 	if err := tpgresource.SetLabels(cluster.ResourceLabels, d, "resource_labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
@@ -3859,10 +3854,20 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
     return err
   }
 
+        
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
+    }
+    
 	return nil
 }
 
 func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) error {
+    
+    if tpgresource.DeletionPolicyPreUpdate(d, ResourceContainerCluster) {
+        return ResourceContainerCluster().Read(d, meta)
+    }
+    
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -3892,7 +3897,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	updateFunc := func(req *container.UpdateClusterRequest, updateDescription string) func() error {
 		return func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4099,7 +4104,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating release_channel")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4131,7 +4136,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating gke_auto_upgrade_config")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4167,7 +4172,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating enable_intranode_visibility")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4199,7 +4204,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating private_ipv6_google_access")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4236,7 +4241,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating enable_l4_ilb_subsetting")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4270,7 +4275,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating disable_l4_lb_firewall_reconciliation")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4304,7 +4309,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating in_transit_encryption_config")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4418,7 +4423,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating default_snat_status")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4498,7 +4503,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating enable_legacy_abac")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterSetLegacyAbacCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetLegacyAbac(name, req)
+			clusterSetLegacyAbacCall := NewClient(config, userAgent).Projects.Locations.Clusters.SetLegacyAbac(name, req)
 			if config.UserProjectOverride {
 				clusterSetLegacyAbacCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4533,7 +4538,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 					DesiredLoggingService:    logging,
 				},
 			}
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4563,7 +4568,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating network_policy")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterSetNetworkPolicyCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetNetworkPolicy(name, req)
+			clusterSetNetworkPolicyCall := NewClient(config, userAgent).Projects.Locations.Clusters.SetNetworkPolicy(name, req)
 			if config.UserProjectOverride {
 				clusterSetNetworkPolicyCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4773,7 +4778,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterSetMaintenancePolicyCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetMaintenancePolicy(name, req)
+			clusterSetMaintenancePolicyCall := NewClient(config, userAgent).Projects.Locations.Clusters.SetMaintenancePolicy(name, req)
 			if config.UserProjectOverride {
 				clusterSetMaintenancePolicyCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4818,7 +4823,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating notification_config")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4869,7 +4874,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4896,7 +4901,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4923,7 +4928,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4951,7 +4956,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4979,7 +4984,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5006,7 +5011,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5023,7 +5028,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s secret manager csi add-on has been updated", d.Id())
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("secret_sync_config") {
 		req := &container.UpdateClusterRequest{}
 		if c, ok := d.GetOk("secret_sync_config"); !ok {
@@ -5043,7 +5047,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 		}
 	}
-{{- end }}
 
 	if d.HasChange("workload_identity_config") {
 		// Because GKE uses a non-RESTful update function, when removing the
@@ -5168,7 +5171,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterSetResourceLabelsCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetResourceLabels(name, req)
+			clusterSetResourceLabelsCall := NewClient(config, userAgent).Projects.Locations.Clusters.SetResourceLabels(name, req)
 			if config.UserProjectOverride {
 				clusterSetResourceLabelsCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5189,7 +5192,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("remove_default_node_pool") && d.Get("remove_default_node_pool").(bool) {
 		name := fmt.Sprintf("%s/nodePools/%s", containerClusterFullName(project, location, clusterName), "default-pool")
-		clusterNodePoolDeleteCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Delete(name)
+		clusterNodePoolDeleteCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Delete(name)
 		if config.UserProjectOverride {
 			clusterNodePoolDeleteCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -5217,7 +5220,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5298,7 +5301,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Print("[INFO] Enable Kubernetes Beta APIs")
 		if v, ok := d.GetOk("enable_k8s_beta_apis"); ok {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+			clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 			if config.UserProjectOverride {
 				clusterGetCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5577,7 +5580,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating cluster_telemetry")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5656,7 +5659,14 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	if d.Get("deletion_protection").(bool) {
+    
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
+        return nil
+    }
+    	
+    	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with cluster deletion.")
 	}
 	config := meta.(*transport_tpg.Config)
@@ -5695,7 +5705,7 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 		count++
 
 		name := containerClusterFullName(project, location, clusterName)
-		clusterDeleteCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Delete(name)
+		clusterDeleteCall := NewClient(config, userAgent).Projects.Locations.Clusters.Delete(name)
 		if config.UserProjectOverride {
 			clusterDeleteCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -5739,7 +5749,7 @@ var containerClusterRestingStates = RestingStates{
 func containerClusterAwaitRestingState(config *transport_tpg.Config, project, location, clusterName, userAgent string, timeout time.Duration) (state string, err error) {
 	err = retry.Retry(timeout, func() *retry.RetryError {
 		name := containerClusterFullName(project, location, clusterName)
-		clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+		clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 		if config.UserProjectOverride {
 			clusterGetCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -5920,6 +5930,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
     }
 
+	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
 {{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
@@ -5933,14 +5951,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	if v, ok := config["kalm_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.KalmConfig = &container.KalmConfig{
-			Enabled:         addon["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
-		}
-	}
-
-	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
 			Enabled:         addon["enabled"].(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
@@ -6074,7 +6084,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	if err != nil {
 		return nil
 	}
-	clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+	clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 	if config.UserProjectOverride {
 		clusterGetCall.Header().Add("X-Goog-User-Project", project)
 	}
@@ -7026,7 +7036,6 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 	return sc
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -7057,7 +7066,6 @@ func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig 
 	}
 	return sc
 }
-{{- end }}
 
 func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint {
 	if v == nil {
@@ -7629,6 +7637,13 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 	}
+	if c.PodSnapshotConfig != nil {
+		result["pod_snapshot_config"] = []map[string]interface{}{
+			{
+				"enabled": c.PodSnapshotConfig.Enabled,
+			},
+		}
+	}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if c.IstioConfig != nil {
@@ -7644,14 +7659,6 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["kalm_config"] = []map[string]interface{}{
 			{
 				"enabled": c.KalmConfig.Enabled,
-			},
-		}
-	}
-
-	if c.PodSnapshotConfig != nil {
-		result["pod_snapshot_config"] = []map[string]interface{}{
-			{
-				"enabled": c.PodSnapshotConfig.Enabled,
 			},
 		}
 	}
@@ -8255,7 +8262,6 @@ func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]i
 	return []map[string]interface{}{result}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interface{} {
 	if c == nil {
 		return []map[string]interface{}{
@@ -8282,8 +8288,6 @@ func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interfa
 	result["rotation_config"] = rotationList
 	return []map[string]interface{}{result}
 }
-{{- end }}
-
 
 func flattenResourceUsageExportConfig(c *container.ResourceUsageExportConfig) []map[string]interface{} {
 	if c == nil {
@@ -8845,7 +8849,6 @@ func DatabaseEncryptionSuppress(k, old, new string, d *schema.ResourceData) bool
         return false
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "secret_sync_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("secret_sync_config"); ok {
@@ -8859,7 +8862,6 @@ func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	}
 	return false
 }
-{{- end }}
 
 func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
 	// if network_policy configuration is empty, we store it as populated and enabled=false, and
@@ -8974,7 +8976,6 @@ func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformReso
 	return nil
 }
 
-{{ if ne $.TargetVersionName `ga` }}
 func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
 	// 1. SKIP ON CREATE
 	if diff.Id() == "" {
@@ -9123,7 +9124,6 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 
 	return nil
 }
-{{- end }}
 
 func init() {
 	registry.Schema{

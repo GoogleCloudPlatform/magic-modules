@@ -3,6 +3,7 @@ package sql_test
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -11,7 +12,13 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/activedirectory"
+	"github.com/hashicorp/terraform-provider-google/google/services/backupdr"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 {{- if ne $.TargetVersionName "ga" }}
@@ -38,6 +45,169 @@ var ignoredReplicaConfigurationFields = []string{
 	"replica_configuration.0.username",
 	"replica_configuration.0.verify_server_certificate",
 	"replica_configuration.0.failover_target",
+}
+
+// SQL Instance names are not reusable for a week after deletion
+const SharedTestSQLInstanceNamePrefix = "tf-bootstrap-"
+
+// BootstrapSharedSQLInstanceBackupRun will return a shared SQL db instance that
+// has a backup created for it.
+func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
+	project := envvar.GetTestProjectFromEnv()
+
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	log.Printf("[DEBUG] Getting list of existing sql instances")
+
+	instances, err := sql.NewClient(config, config.UserAgent).Instances.List(project).Do()
+	if err != nil {
+		t.Fatalf("Unable to bootstrap SQL Instance. Cannot retrieve instance list: %s", err)
+	}
+
+	var bootstrapInstance *sqladmin.DatabaseInstance
+
+	// Look for any existing bootstrap instances
+	for _, i := range instances.Items {
+		if strings.HasPrefix(i.Name, SharedTestSQLInstanceNamePrefix) {
+			bootstrapInstance = i
+			break
+		}
+	}
+
+	if bootstrapInstance == nil {
+		bootstrapInstanceName := SharedTestSQLInstanceNamePrefix + acctest.RandString(t, 10)
+		log.Printf("[DEBUG] Bootstrap SQL Instance not found, bootstrapping new instance %s", bootstrapInstanceName)
+
+		backupConfig := &sqladmin.BackupConfiguration{
+			Enabled:                    true,
+			PointInTimeRecoveryEnabled: true,
+		}
+		settings := &sqladmin.Settings{
+			Tier:                "db-custom-2-3840",
+			BackupConfiguration: backupConfig,
+		}
+		bootstrapInstance = &sqladmin.DatabaseInstance{
+			Name:            bootstrapInstanceName,
+			Region:          "us-central1",
+			Settings:        settings,
+			DatabaseVersion: "POSTGRES_11",
+		}
+
+		var op *sqladmin.Operation
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (operr error) {
+				op, operr = sql.NewClient(config, config.UserAgent).Instances.Insert(project, bootstrapInstance).Do()
+				return operr
+			},
+			Timeout:              20 * time.Minute,
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
+		if err != nil {
+			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
+		}
+		err = sql.SqlAdminOperationWaitTime(config, op, project, "Create Instance", config.UserAgent, 40*time.Minute)
+		if err != nil {
+			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
+		}
+	}
+
+	// Look for backups in bootstrap instance
+	res, err := sql.NewClient(config, config.UserAgent).BackupRuns.List(project, bootstrapInstance.Name).Do()
+	if err != nil {
+		t.Fatalf("Unable to bootstrap SQL Instance. Cannot retrieve backup list: %s", err)
+	}
+	backupsList := res.Items
+	if len(backupsList) == 0 {
+		log.Printf("[DEBUG] No backups found for %s, creating backup", bootstrapInstance.Name)
+		backupRun := &sqladmin.BackupRun{
+			Instance: bootstrapInstance.Name,
+		}
+
+		var op *sqladmin.Operation
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (operr error) {
+				op, operr = sql.NewClient(config, config.UserAgent).BackupRuns.Insert(project, bootstrapInstance.Name, backupRun).Do()
+				return operr
+			},
+			Timeout:              20 * time.Minute,
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
+		if err != nil {
+			t.Fatalf("Error, failed to create instance backup: %s", err)
+		}
+		err = sql.SqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.UserAgent, 20*time.Minute)
+		if err != nil {
+			t.Fatalf("Error, failed to create instance backup: %s", err)
+		}
+	}
+
+	return bootstrapInstance.Name
+}
+
+const SharedTestADDomainPrefix = "tf-bootstrap-ad"
+
+func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string) string {
+	project := envvar.GetTestProjectFromEnv()
+	sharedADDomain := fmt.Sprintf("%s.%s.com", SharedTestADDomainPrefix, testId)
+	adDomainName := fmt.Sprintf("projects/%s/locations/global/domains/%s", project, sharedADDomain)
+
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	log.Printf("[DEBUG] Getting shared test active directory domain %q", adDomainName)
+	getURL := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(activedirectory.Product, config), adDomainName)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   4 * time.Minute,
+	})
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] AD domain %q not found, bootstrapping", sharedADDomain)
+		postURL := fmt.Sprintf("%sprojects/%s/locations/global/domains?domainName=%s", transport_tpg.BaseUrl(activedirectory.Product, config), project, sharedADDomain)
+		domainObj := map[string]interface{}{
+			"locations":          []string{"us-central1"},
+			"reservedIpRange":    "10.0.1.0/24",
+			"authorizedNetworks": []string{fmt.Sprintf("projects/%s/global/networks/%s", project, networkName)},
+		}
+
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      domainObj,
+			Timeout:   60 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared active directory domain %q: %s", adDomainName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for active directory domain creation to finish")
+	}
+
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   4 * time.Minute,
+	})
+
+	if err != nil {
+		t.Fatalf("Error getting shared active directory domain %q: %s", adDomainName, err)
+	}
+
+	return sharedADDomain
 }
 
 func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
@@ -297,7 +467,7 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 						Host:     "%",
 						Password: acctest.RandString(t, 26),
 					}
-					op, err := config.NewSqlAdminClient(config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
+					op, err := sql.NewClient(config, config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
 					if err != nil {
 						t.Errorf("Error while inserting root@%% user: %s", err)
 						return
@@ -326,8 +496,8 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	testId := "sql-instance-clone-2"
-	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
@@ -350,7 +520,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 						Host:     "%",
 						Password: acctest.RandString(t, 26),
 					}
-					op, err := config.NewSqlAdminClient(config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
+					op, err := sql.NewClient(config, config.UserAgent).Users.Insert(config.Project, databaseName, &user).Do()
 					if err != nil {
 						t.Errorf("Error while inserting root@%% user: %s", err)
 						return
@@ -945,7 +1115,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-1")
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1236,7 +1406,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(t *testing
 	testId := "test-psc-auto-con-1"
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, testId)
 	network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1265,7 +1435,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddPscAutoConnections_thenRem
 	testId := "test-psc-auto-con-2"
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
-	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, testId)
 	network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1334,9 +1504,9 @@ func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUri_thenRemo
 	networkNameStr := "tf-test-cloud-sql-network-psc-1"
 	subnetworkNameStr := "tf-test-cloud-sql-subnetwork-psc-1"
 	networkAttachmentNameStr := "tf-test-cloud-sql-update-na-psc-1"
-	networkName := acctest.BootstrapSharedTestNetwork(t, networkNameStr)
-	subnetworkName := acctest.BootstrapSubnet(t, subnetworkNameStr, networkName)
-	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, networkNameStr)
+	subnetworkName := tpgcompute.BootstrapSubnet(t, subnetworkNameStr, networkName)
+	networkAttachmentName := tpgcompute.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
 	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
 
 
@@ -1385,9 +1555,9 @@ func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUriOnCreate(
 	networkNameStr := "tf-test-cloud-sql-network-psc-2"
 	subnetworkNameStr := "tf-test-cloud-sql-subnetwork-psc-2"
 	networkAttachmentNameStr := "tf-test-cloud-sql-update-na-psc-2"
-	networkName := acctest.BootstrapSharedTestNetwork(t, networkNameStr)
-	subnetworkName := acctest.BootstrapSubnet(t, subnetworkNameStr, networkName)
-	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, networkNameStr)
+	subnetworkName := tpgcompute.BootstrapSubnet(t, subnetworkNameStr, networkName)
+	networkAttachmentName := tpgcompute.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
 	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
 
 
@@ -1411,12 +1581,12 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	testId := "sql-instance-allocated-1"
-	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	updateTestId := "sql-instance-allocated-update-1"
-	addressName_update := acctest.BootstrapSharedTestGlobalAddress(t, updateTestId)
-	networkName_update := acctest.BootstrapSharedServiceNetworkingConnection(t, updateTestId)
+	addressName_update := tpgcompute.BootstrapSharedTestGlobalAddress(t, updateTestId)
+	networkName_update := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, updateTestId)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1452,8 +1622,8 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 
 	testId := "sql-instance-replica-1"
-	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1485,8 +1655,8 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	testId := "sql-instance-clone-1"
-	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1519,7 +1689,7 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1549,7 +1719,7 @@ func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
     backupVaultID := "bv-test"
     vaultLocation := "us-central1"
     project := envvar.GetTestProjectFromEnv()
-    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
     context := map[string]interface{}{
         "random_suffix":  acctest.RandString(t, 10),
@@ -1589,7 +1759,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
 		"db_version":   "POSTGRES_11",
-		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1628,7 +1798,7 @@ func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
     backupVaultID := "bv-test"
     location := "us-central1"
     project := envvar.GetTestProjectFromEnv()
-    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
     context := map[string]interface{}{
         "random_suffix": 	acctest.RandString(t, 10),
@@ -1675,7 +1845,7 @@ func TestAccSqlDatabaseInstance_createFromCrossRegionBackupDrBackup(t *testing.T
     backupVaultID := "bv-test"
 	vaultLocation := "us-central1"
     project := envvar.GetTestProjectFromEnv()
-    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
     context := map[string]interface{}{
         "random_suffix":  acctest.RandString(t, 10),
@@ -1714,7 +1884,7 @@ func TestAccSqlDatabaseInstance_createFromMultiRegionBackupDrBackup(t *testing.T
     backupVaultID := "bv-test-mr"
 	vaultLocation := "us"
     project := envvar.GetTestProjectFromEnv()
-    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
     context := map[string]interface{}{
         "random_suffix":  acctest.RandString(t, 10),
@@ -1753,7 +1923,7 @@ func TestAccSqlDatabaseInstance_createFromMultiRegionBackupDrBackupCrossRegion(t
     backupVaultID := "bv-test-mr"
 	vaultLocation := "us"
     project := envvar.GetTestProjectFromEnv()
-    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+    backupvault := backupdr.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
     context := map[string]interface{}{
         "random_suffix":  acctest.RandString(t, 10),
@@ -1792,7 +1962,7 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1861,7 +2031,7 @@ func TestAccSqlDatabaseInstance_cloneWithSettings(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1889,7 +2059,7 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1918,7 +2088,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
     backupVaultID := "bv-test"
     location := "us-central1"
     project := envvar.GetTestProjectFromEnv()
-	backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+	backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
     context := map[string]interface{}{
         "random_suffix": 	acctest.RandString(t, 10),
@@ -1957,7 +2127,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreInMultiRegion(t *testing.T) {
     backupVaultID := "bv-test-mr"
     location := "us"
     project := envvar.GetTestProjectFromEnv()
-	backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+	backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
     context := map[string]interface{}{
         "random_suffix": 	acctest.RandString(t, 10),
@@ -1995,7 +2165,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreWithSettings(t *testing.T) {
     backupVaultID := "bv-test"
     location := "us-central1"
     project := envvar.GetTestProjectFromEnv()
-	backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+	backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
     context := map[string]interface{}{
         "random_suffix": 	acctest.RandString(t, 10),
@@ -2034,7 +2204,7 @@ func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			_, err := config.NewSqlAdminClient(config.UserAgent).Instances.Get(config.Project,
+			_, err := sql.NewClient(config, config.UserAgent).Instances.Get(config.Project,
 				rs.Primary.Attributes["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Database Instance still exists")
@@ -2049,7 +2219,7 @@ func testAccCheckGoogleSqlDatabaseRootUserDoesNotExist(t *testing.T, instance st
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		users, err := config.NewSqlAdminClient(config.UserAgent).Users.List(config.Project, instance).Do()
+		users, err := sql.NewClient(config, config.UserAgent).Users.List(config.Project, instance).Do()
 
 		if err != nil {
 			return fmt.Errorf("Could not list database users for %q: %s", instance, err)
@@ -2430,8 +2600,8 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 	context := map[string]interface{}{
 		"project_id":    envvar.GetTestProjectFromEnv(),
 		"instance_name": "tf-test-sql-" + acctest.RandString(t, 10),
-		"kms_key_name1": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-sql-database-instance-key1").CryptoKey.Name,
-		"kms_key_name2": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-sql-database-instance-key2").CryptoKey.Name,
+		"kms_key_name1": kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-sql-database-instance-key1").CryptoKey.Name,
+		"kms_key_name2": kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-sql-database-instance-key2").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -2466,9 +2636,9 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 
 	t.Parallel()
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-ad-1")
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-ad-1")
 	rootPassword := acctest.RandString(t, 15)
-	adDomainName := acctest.BootstrapSharedTestADDomain(t, "test-domain", networkName)
+	adDomainName := BootstrapSharedTestADDomain(t, "test-domain", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -3442,7 +3612,7 @@ func TestAccSqlDatabaseInstance_MysqlEplusWithFailoverReplicaSetupWithPrivateNet
 
 	primaryName := "tf-test-mysql-primary-" + acctest.RandString(t, 10)
 	replicaName := "tf-test-mysql-replica-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
 	projectId := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3481,7 +3651,7 @@ func TestAccSqlDatabaseInstance_PostgresEplusWithFailoverReplicaSetupWithPrivate
 
 	primaryName := "tf-test-postgres-primary-" + acctest.RandString(t, 10)
 	replicaName := "tf-test-postgres-replica-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
 	projectId := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3519,7 +3689,7 @@ func TestAccSqlDatabaseInstance_MysqlEplusWithPrivateNetwork(t *testing.T) {
 	t.Parallel()
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
 	projectId := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3546,7 +3716,7 @@ func TestAccSqlDatabaseInstance_PostgresEplusWithPrivateNetwork(t *testing.T) {
 	t.Parallel()
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
 	projectId := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4525,7 +4695,7 @@ func TestAccSqlDatabaseInstance_updateInstanceTierForEnhancedBackupTierInstance(
     backupVaultID := "bv-test"
     location := "us-central1"
     project := envvar.GetTestProjectFromEnv()
-    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+    backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
     context := map[string]interface{}{
         "random_suffix":     acctest.RandString(t, 10),
@@ -4561,7 +4731,7 @@ func TestAccSqlDatabaseInstance_updateInstanceTierForEnhancedBackupTierInstance(
 func TestAccSqlDatabaseInstance_majorVersionUpgradeForEnhancedBackupTierInstance(t *testing.T) {
     t.Parallel()
 
-    backupVault := acctest.BootstrapBackupDRVault(t, "bv-test", "us-central1")
+    backupVault := backupdr.BootstrapBackupDRVault(t, "bv-test", "us-central1")
 
     context := map[string]interface{}{
         "random_suffix":     acctest.RandString(t, 10),
@@ -4596,7 +4766,7 @@ func TestAccSqlDatabaseInstance_majorVersionUpgradeForEnhancedBackupTierInstance
 func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *testing.T) {
     t.Parallel()
 
-    backupVault := acctest.BootstrapBackupDRVault(t, "bv-test", "us-central1")
+    backupVault := backupdr.BootstrapBackupDRVault(t, "bv-test", "us-central1")
 
     context := map[string]interface{}{
         "random_suffix":     acctest.RandString(t, 10),
@@ -9421,7 +9591,7 @@ func testGoogleSqlDatabaseInstanceResizeDisk(t *testing.T, instance string, addG
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		sqlAdminClient := config.NewSqlAdminClient(config.UserAgent)
+		sqlAdminClient := sql.NewClient(config, config.UserAgent)
 
 		inst, err := sqlAdminClient.Instances.Get(config.Project, instance).Do()
 		if err != nil {
@@ -9451,7 +9621,7 @@ func testGoogleSqlDatabaseInstanceCheckDiskSize(t *testing.T, instance string, s
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		sqlAdminClient := config.NewSqlAdminClient(config.UserAgent)
+		sqlAdminClient := sql.NewClient(config, config.UserAgent)
 
 		inst, err := sqlAdminClient.Instances.Get(config.Project, instance).Do()
 		if err != nil {
@@ -9470,7 +9640,7 @@ func testGoogleSqlDatabaseInstanceChangeNodeCount(t *testing.T, instance string,
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		sqlAdminClient := config.NewSqlAdminClient(config.UserAgent)
+		sqlAdminClient := sql.NewClient(config, config.UserAgent)
 
 		operation, err := sqlAdminClient.Instances.Patch(config.Project, instance, &sqladmin.DatabaseInstance{
 			NodeCount: newNodeCount,
@@ -9492,7 +9662,7 @@ func testGoogleSqlDatabaseInstanceCheckNodeCount(t *testing.T, instance string, 
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		sqlAdminClient := config.NewSqlAdminClient(config.UserAgent)
+		sqlAdminClient := sql.NewClient(config, config.UserAgent)
 
 		inst, err := sqlAdminClient.Instances.Get(config.Project, instance).Do()
 		if err != nil {

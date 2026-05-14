@@ -316,6 +316,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Datafusion",
         "path" to "./google/services/datafusion"
     ),
+    "datalineage" to mapOf(
+        "name" to "datalineage",
+        "displayName" to "Datalineage",
+        "path" to "./google/services/datalineage"
+    ),
     "datalossprevention" to mapOf(
         "name" to "datalossprevention",
         "displayName" to "Datalossprevention",
@@ -520,6 +525,11 @@ var ServicesListGa = mapOf(
         "name" to "iambeta",
         "displayName" to "Iambeta",
         "path" to "./google/services/iambeta"
+    ),
+    "iamcredentials" to mapOf(
+        "name" to "iamcredentials",
+        "displayName" to "Iamcredentials",
+        "path" to "./google/services/iamcredentials"
     ),
     "iamworkforcepool" to mapOf(
         "name" to "iamworkforcepool",
@@ -726,10 +736,10 @@ var ServicesListGa = mapOf(
         "displayName" to "Resourcemanager",
         "path" to "./google/services/resourcemanager"
     ),
-    "resourcemanager3" to mapOf(
-        "name" to "resourcemanager3",
-        "displayName" to "Resourcemanager3",
-        "path" to "./google/services/resourcemanager3"
+    "resourcemanagerv3" to mapOf(
+        "name" to "resourcemanagerv3",
+        "displayName" to "Resourcemanagerv3",
+        "path" to "./google/services/resourcemanagerv3"
     ),
     "runtimeconfig" to mapOf(
         "name" to "runtimeconfig",
@@ -855,6 +865,11 @@ var ServicesListGa = mapOf(
         "name" to "tags",
         "displayName" to "Tags",
         "path" to "./google/services/tags"
+    ),
+    "tagslocation" to mapOf(
+        "name" to "tagslocation",
+        "displayName" to "Tagslocation",
+        "path" to "./google/services/tagslocation"
     ),
     "tpuv2" to mapOf(
         "name" to "tpuv2",

@@ -317,6 +317,12 @@ var schemaNodePool = map[string]*schema.Schema{
 					Computed:    true,
 					Description: `Whether nodes have internal IP addresses only.`,
 				},
+				"accelerator_network_profile": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
+					Description: `The accelerator network profile for the node pool.`,
+				},
 				"pod_range": {
 					Type:        schema.TypeString,
 					Optional:    true,

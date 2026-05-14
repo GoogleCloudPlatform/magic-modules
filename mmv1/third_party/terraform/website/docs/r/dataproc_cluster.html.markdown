@@ -156,6 +156,14 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
       [Duration](https://developers.google.com/protocol-buffers/docs/proto3#json)).
       Only supported on Dataproc image versions 1.2 and higher.
       For more context see the [docs](https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters/patch#query-parameters)
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 - - -
 
 <a name="nested_virtual_cluster_config"></a>The `virtual_cluster_config` block supports:
@@ -992,7 +1000,7 @@ auxiliary_node_groups{
 ```hcl
 cluster_config {
   lifecycle_config {
-    idle_delete_ttl = "10m"
+    idle_delete_ttl = "600s"
     auto_delete_time = "2120-01-01T12:00:00.01Z"
     idle_stop_ttl = "10m"
     auto_stop_time = "2120-01-01T12:00:00.01Z"
@@ -1001,7 +1009,7 @@ cluster_config {
 ```
 
 * `idle_delete_ttl` - (Optional) The duration to keep the cluster alive while idling
-  (no jobs running). After this TTL, the cluster will be deleted. Valid range: [10m, 14d].
+  (no jobs running). After this TTL, the cluster will be deleted. Valid range: [300s, 1209600s].
 
 * `auto_delete_time` - (Optional) The time when cluster will be auto-deleted.
   A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds.

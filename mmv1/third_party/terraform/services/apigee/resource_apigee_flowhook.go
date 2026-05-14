@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -16,6 +17,7 @@ func ResourceApigeeFlowhook() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceApigeeFlowhookCreate,
 		Read:   resourceApigeeFlowhookRead,
+		Update: resourceApigeeFlowhookUpdate,
 		Delete: resourceApigeeFlowhookDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -26,6 +28,10 @@ func ResourceApigeeFlowhook() *schema.Resource {
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"description": {
@@ -65,6 +71,9 @@ func ResourceApigeeFlowhook() *schema.Resource {
 				Default:     true,
 				Description: `Flag that specifies whether execution should continue if the flow hook throws an exception. Set to true to continue execution. Set to false to stop execution if the flow hook throws an exception. Defaults to true.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -97,7 +106,7 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 		obj["continueOnError"] = continue_on_errorProp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}
@@ -142,7 +151,7 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}
@@ -179,10 +188,29 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error reading Flowhook: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
+// UDP update start
+func resourceApigeeFlowhookUpdate(d *schema.ResourceData, meta interface{}) error {
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceApigeeFlowhookRead(d, meta)
+}
+
+//UDP update end
+
 func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -191,7 +219,7 @@ func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) erro
 
 	billingProject := ""
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}

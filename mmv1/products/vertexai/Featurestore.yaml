@@ -46,6 +46,7 @@ iam_policy:
   min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/vertex_ai_force_delete.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'vertex_ai_featurestore'
@@ -58,7 +59,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       # for backward compatible
       name: '"terraform" + randomSuffix'
     ignore_read_extra:
@@ -74,7 +75,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       # for backward compatible
       name: '"terraform2" + randomSuffix'
     ignore_read_extra:
@@ -89,7 +90,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       # for backward compatible
       name: '"terraform3" + randomSuffix'
     ignore_read_extra:

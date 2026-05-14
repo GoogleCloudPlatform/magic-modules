@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 {{ if eq $.TargetVersionName `ga` }}
@@ -888,18 +889,18 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	kms := acctest.BootstrapKMSKey(t)
+	bootstrapped := kms.BootstrapKMSKey(t)
 
-	bootKmsKeyName := kms.CryptoKey.Name
+	bootKmsKeyName := bootstrapped.CryptoKey.Name
 	diskNameToEncryptionKey := map[string]*compute.CustomerEncryptionKey{
 		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			KmsKeyName: kms.CryptoKey.Name,
+			KmsKeyName: bootstrapped.CryptoKey.Name,
 		},
 		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			KmsKeyName: kms.CryptoKey.Name,
+			KmsKeyName: bootstrapped.CryptoKey.Name,
 		},
 		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			KmsKeyName: kms.CryptoKey.Name,
+			KmsKeyName: bootstrapped.CryptoKey.Name,
 		},
 	}
 
@@ -955,11 +956,11 @@ func TestAccComputeInstance_instanceEncryption(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	kms := acctest.BootstrapKMSKey(t)
+	bootstrapped := kms.BootstrapKMSKey(t)
 
 	context_1 := map[string]interface{}{
 		"instance_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"encryption_key": kms.CryptoKey.Name,
+		"encryption_key": bootstrapped.CryptoKey.Name,
 		"desired_status": "RUNNING",
 	}
 
@@ -1041,16 +1042,47 @@ func TestAccComputeInstance_snapshot(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_repdBootFromSnapshot(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+
+	context := map[string]interface{}{
+		"network_name":    fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"subnetwork_name": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"disk_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"snapshot_name":   fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"instance_name":   fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_repdBootFromSnapshot(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.instance", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.instance", "boot_disk.0.initialize_params.0.replica_zones.#", "2"),
+					resource.TestCheckResourceAttr("google_compute_instance.instance", "boot_disk.0.initialize_params.0.replica_zones.0", "us-central1-a"),
+					resource.TestCheckResourceAttr("google_compute_instance.instance", "boot_disk.0.initialize_params.0.replica_zones.1", "us-central1-b"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstance_snapshotEncryption(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	kms := acctest.BootstrapKMSKey(t)
+	bootstrapped := kms.BootstrapKMSKey(t)
 	context := map[string]interface{}{
 		"instance_name1":    fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"instance_name2":    fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"snapshot_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"kms_key":           kms.CryptoKey.Name,
+		"kms_key":           bootstrapped.CryptoKey.Name,
 		"raw_key":           "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
 		"rsa_encrypted_key": "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
 	}
@@ -1086,12 +1118,12 @@ func TestAccComputeInstance_imageEncryption(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	kms := acctest.BootstrapKMSKey(t)
+	bootstrapped := kms.BootstrapKMSKey(t)
 	context := map[string]interface{}{
 		"instance_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"image_name":        fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"disk_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"kms_key":           kms.CryptoKey.Name,
+		"kms_key":           bootstrapped.CryptoKey.Name,
 		"raw_key":           "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
 		"rsa_encrypted_key": "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
 	}
@@ -2859,13 +2891,13 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 
 func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 	t.Parallel()
-	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-hyperdisk-key1")
+	bootstrapped := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-hyperdisk-key1")
 
 	context_1 := map[string]interface{}{
 		"instance_name":                fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"confidential_compute":         true,
-		"key_ring":                     kms.KeyRing.Name,
-		"key_name":                     kms.CryptoKey.Name,
+		"key_ring":                     bootstrapped.KeyRing.Name,
+		"key_name":                     bootstrapped.CryptoKey.Name,
 		"zone":                         "us-central1-a",
 		"machine_type":                 "n2d-standard-16",
 		"confidential_instance_config": "confidential_instance_config { \n \t enable_confidential_compute = true \n }",
@@ -5120,7 +5152,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 
 		config := acctest.GoogleProviderConfig(t)
 
-		op, err := config.NewComputeClient(config.UserAgent).Instances.Stop(config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
+		op, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Stop(config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
@@ -5133,7 +5165,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 			MachineType: "zones/us-central1-a/machineTypes/f1-micro",
 		}
 
-		op, err = config.NewComputeClient(config.UserAgent).Instances.SetMachineType(
+		op, err = tpgcompute.NewClient(config, config.UserAgent).Instances.SetMachineType(
 			config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"], &machineType).Do()
 		if err != nil {
 			return fmt.Errorf("Could not change machine type: %s", err)
@@ -5506,7 +5538,7 @@ func testAccCheckComputeInstanceDestroyProducer(t *testing.T) func(s *terraform.
 				continue
 			}
 
-			_, err := config.NewComputeClient(config.UserAgent).Instances.Get(
+			_, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Get(
 				config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Instance still exists")
@@ -5538,10 +5570,10 @@ func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, insta
 
 		config := acctest.GoogleProviderConfig(t)
 		{{- if eq $.TargetVersionName "ga" }}
-		found, err := config.NewComputeClient(config.UserAgent).Instances.Get(
+		found, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 		{{- else }}
-		found, err := config.NewComputeClient(config.UserAgent).Instances.Get(
+		found, err := tpgcompute.NewClient(config, config.UserAgent).Instances.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).View("FULL").Do()
 		{{- end }}
 		if err != nil {
@@ -5819,7 +5851,7 @@ func testAccCheckComputeInstanceBootDiskType(t *testing.T, instanceName string, 
 		config := acctest.GoogleProviderConfig(t)
 
 		// boot disk is named the same as the Instance
-		disk, err := config.NewComputeClient(config.UserAgent).Disks.Get(config.Project, "us-central1-a", instanceName).Do()
+		disk, err := tpgcompute.NewClient(config, config.UserAgent).Disks.Get(config.Project, "us-central1-a", instanceName).Do()
 		if err != nil {
 			return err
 		}
@@ -12740,7 +12772,7 @@ func TestAccComputeInstance_bootDisk_storagePoolSpecified(t *testing.T) {
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
-	storagePoolNameLong := acctest.BootstrapComputeStoragePool(t, "basic-1", "hyperdisk-balanced")
+	storagePoolNameLong := tpgcompute.BootstrapComputeStoragePool(t, "basic-1", "hyperdisk-balanced")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -12762,7 +12794,7 @@ func TestAccComputeInstance_bootDisk_storagePoolSpecified_nameOnly(t *testing.T)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
-	acctest.BootstrapComputeStoragePool(t, "basic-2", "hyperdisk-balanced")
+	tpgcompute.BootstrapComputeStoragePool(t, "basic-2", "hyperdisk-balanced")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -13155,6 +13187,55 @@ resource "google_compute_instance" "foobar2" {
 	network_interface {
 		network = "default"
 	}
+}
+`, context)
+}
+
+func testAccComputeInstance_repdBootFromSnapshot(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "net" {
+  name = "%{network_name}"
+}
+
+resource "google_compute_subnetwork" "sub" {
+  name          = "%{subnetwork_name}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.net.id
+}
+
+resource "google_compute_disk" "zonal" {
+  name    = "%{disk_name}"
+  type    = "pd-ssd"
+  zone    = "us-central1-a"
+  image   = "debian-cloud/debian-11"
+  size    = 50
+}
+
+resource "google_compute_snapshot" "snapshot" {
+  name              = "%{snapshot_name}"
+  source_disk       = google_compute_disk.zonal.self_link
+  zone              = "us-central1-a"
+  storage_locations = ["us-central1"]
+}
+
+resource "google_compute_instance" "instance" {
+  name         = "%{instance_name}"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      snapshot      = google_compute_snapshot.snapshot.id
+      replica_zones = ["us-central1-a", "us-central1-b"]
+      size          = "200"
+      type          = "pd-ssd"
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.sub.id
+  }
 }
 `, context)
 }

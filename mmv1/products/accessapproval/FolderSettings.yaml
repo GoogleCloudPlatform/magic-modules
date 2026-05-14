@@ -29,6 +29,9 @@ update_verb: PATCH
 legacy_name: google_folder_access_approval_settings
 import_format:
   - folders/{{folder_id}}/accessApprovalSettings
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccAccessApprovalSettings/folder'
 custom_code:
   constants: templates/terraform/constants/access_approval.go.tmpl
   pre_create: templates/terraform/update_mask.go.tmpl

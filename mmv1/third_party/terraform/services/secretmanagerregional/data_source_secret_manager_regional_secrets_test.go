@@ -31,8 +31,9 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecrets_basic(t *testing.T) {
 						"data.google_secret_manager_regional_secrets.foo",
 						"google_secret_manager_regional_secret.foo",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":              {},
+							"project":         {},
+							"deletion_policy": {},
 						},
 					),
 				),
@@ -89,8 +90,9 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecrets_filter(t *testing.T) 
 						"google_secret_manager_regional_secret.foo",
 						"google_secret_manager_regional_secret.bar",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":              {},
+							"project":         {},
+							"deletion_policy": {},
 						},
 					),
 				),

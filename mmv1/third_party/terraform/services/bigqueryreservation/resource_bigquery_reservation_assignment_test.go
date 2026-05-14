@@ -1,14 +1,14 @@
 package bigqueryreservation_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccBigQueryReservationAssignment_basic(t *testing.T) {
+func TestAccBigqueryReservationReservationAssignment_bareNameWithoutLocation(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,37 +20,26 @@ func TestAccBigQueryReservationAssignment_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryReservationAssignment_basic(t, context),
-			},
-			{
-				ResourceName:      "google_bigquery_reservation_assignment.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config:      testAccBigqueryReservationReservationAssignment_bareNameWithoutLocation(context),
+				ExpectError: regexp.MustCompile("`location` is required"),
 			},
 		},
 	})
 }
 
-func testAccBigQueryReservationAssignment_basic(t *testing.T, context map[string]interface{}) string {
+func testAccBigqueryReservationReservationAssignment_bareNameWithoutLocation(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_bigquery_reservation" "basic" {
-  name            = "tf-test-res-%{random_suffix}"
-  location        = "us-central1"
-  slot_capacity   = 100
-  edition         = "ENTERPRISE"
-  ignore_idle_slots = false
+resource "google_bigquery_reservation" "test" {
+  name          = "tf-test-reservation-%{random_suffix}"
+  location      = "us-central1"
+  slot_capacity = 0
+  edition       = "ENTERPRISE"
 }
 
-resource "google_bigquery_reservation_assignment" "primary" {
-  assignee    = "projects/%{project_id}"
+resource "google_bigquery_reservation_assignment" "test" {
+  reservation = google_bigquery_reservation.test.name
+  assignee    = "projects/${google_bigquery_reservation.test.project}"
   job_type    = "QUERY"
-  principal   = "principal://iam.googleapis.com/projects/-/serviceAccounts/%{service_account}"
-  location    = "us-central1"
-  reservation = google_bigquery_reservation.basic.name
 }
-`, map[string]interface{}{
-		"random_suffix":   context["random_suffix"],
-		"project_id":      envvar.GetTestProjectFromEnv(),
-		"service_account": envvar.GetTestServiceAccountFromEnv(t),
-	})
+`, context)
 }

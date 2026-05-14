@@ -54,9 +54,9 @@ jobs:
         run: |
           # Create lists of service packages in providers. Need to cd into repos where go.mod is to do this command.
           cd ${GOOGLE_REPO_PATH}
-          go list -f '{{.Name}}' ${GOOGLE_REPO_PATH}/google/services/... > $GITHUB_WORKSPACE/provider_services_ga.txt
+          go list -e -f '{{.Name}}' ${GOOGLE_REPO_PATH}/google/services/* > $GITHUB_WORKSPACE/provider_services_ga.txt
           cd ${GOOGLE_BETA_REPO_PATH}
-          go list -f '{{.Name}}' ${GOOGLE_BETA_REPO_PATH}/google-beta/services/... > $GITHUB_WORKSPACE/provider_services_beta.txt
+          go list -e -f '{{.Name}}' ${GOOGLE_BETA_REPO_PATH}/google-beta/services/* > $GITHUB_WORKSPACE/provider_services_beta.txt
 
           # Run tool to compare service packages in the providers vs those listed in TeamCity config files
           cd $GITHUB_WORKSPACE

@@ -1088,6 +1088,21 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
+							"accurate_time_config": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `The settings for the accurate time configuration.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"enable_ptp_kvm_time_sync": {
+											Type:        schema.TypeBool,
+											Optional:    true,
+											Description: `Whether to enable accurate time synchronization with PTP-KVM.`,
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -2529,22 +2544,23 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"min_cpu_platform":                   c["minCpuPlatform"],
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
 		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
-		"taint":                              flattenEffectiveTaints(c["taints"]),
-		"workload_metadata_config":           flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
-		"confidential_nodes":                 flattenConfidentialNodes(c["confidentialNodes"]),
-		"boot_disk_kms_key":                  c["bootDiskKmsKey"],
-		"kubelet_config":                     flattenKubeletConfig(c["kubeletConfig"]),
-		"linux_node_config":                  flattenLinuxNodeConfig(c["linuxNodeConfig"]),
-		"windows_node_config":                flattenWindowsNodeConfig(c["windowsNodeConfig"]),
-		"node_group":                         c["nodeGroup"],
-		"advanced_machine_features":          flattenAdvancedMachineFeaturesConfig(c["advancedMachineFeatures"]),
-		"max_run_duration":                   c["maxRunDuration"],
-		"flex_start":                         c["flexStart"],
-		"sole_tenant_config":                 flattenSoleTenantConfig(c["soleTenantConfig"]),
-		"fast_socket":                        flattenFastSocket(c["fastSocket"]),
-		"resource_manager_tags":              flattenResourceManagerTags(c["resourceManagerTags"]),
-		"enable_confidential_storage":        c["enableConfidentialStorage"],
-		"local_ssd_encryption_mode":          c["localSsdEncryptionMode"],
+		// TODO: need to differentiate the new resource and existing resource
+		// "taint":                              flattenEffectiveTaints(c["taints"]),
+		"workload_metadata_config":    flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
+		"confidential_nodes":          flattenConfidentialNodes(c["confidentialNodes"]),
+		"boot_disk_kms_key":           c["bootDiskKmsKey"],
+		"kubelet_config":              flattenKubeletConfig(c["kubeletConfig"]),
+		"linux_node_config":           flattenLinuxNodeConfig(c["linuxNodeConfig"]),
+		"windows_node_config":         flattenWindowsNodeConfig(c["windowsNodeConfig"]),
+		"node_group":                  c["nodeGroup"],
+		"advanced_machine_features":   flattenAdvancedMachineFeaturesConfig(c["advancedMachineFeatures"]),
+		"max_run_duration":            c["maxRunDuration"],
+		"flex_start":                  c["flexStart"],
+		"sole_tenant_config":          flattenSoleTenantConfig(c["soleTenantConfig"]),
+		"fast_socket":                 flattenFastSocket(c["fastSocket"]),
+		"resource_manager_tags":       flattenResourceManagerTags(c["resourceManagerTags"]),
+		"enable_confidential_storage": c["enableConfidentialStorage"],
+		"local_ssd_encryption_mode":   c["localSsdEncryptionMode"],
 	}
 
 	// Suppress Default Value
@@ -3171,8 +3187,23 @@ func flattenLinuxNodeConfig(v interface{}) []map[string]interface{} {
 		"transparent_hugepage_defrag":  c["transparentHugepageDefrag"],
 		"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
 		"swap_config":                  flattenSwapConfig(c["swapConfig"]),
+		"accurate_time_config":         flattenAccurateTimeConfig(c["accurateTimeConfig"]),
 	}
 
+	return []map[string]interface{}{transformed}
+}
+
+func flattenAccurateTimeConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"enable_ptp_kvm_time_sync": c["enablePtpKvmTimeSync"],
+	}
 	return []map[string]interface{}{transformed}
 }
 

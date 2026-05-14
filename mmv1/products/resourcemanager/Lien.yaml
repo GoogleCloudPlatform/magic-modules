@@ -45,6 +45,8 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
+  constants: 'templates/terraform/constants/resourcemanager_lien.go.tmpl'
+  test_constants: 'templates/terraform/constants/resourcemanager_lien.go.tpml'
   decoder: 'templates/terraform/decoders/avoid_meaningless_project_update.tmpl'
   pre_delete: 'templates/terraform/pre_delete/modify_delete_url.tmpl'
   post_import: 'templates/terraform/post_import/lien_import.tmpl'

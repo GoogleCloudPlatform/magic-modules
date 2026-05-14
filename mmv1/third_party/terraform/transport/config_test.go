@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
+	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	googleoauth "golang.org/x/oauth2/google"
 )
@@ -202,8 +203,6 @@ func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
@@ -221,8 +220,6 @@ func TestConfigLoadAndValidate_accountFileJSON(t *testing.T) {
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
@@ -235,8 +232,6 @@ func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
 		Project:     "my-gce-project",
 		Region:      "us-central1",
 	}
-
-	transport_tpg.ConfigureBasePaths(config)
 
 	if config.LoadAndValidate(context.Background()) == nil {
 		t.Fatalf("expected error, but got nil")
@@ -258,14 +253,12 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = config.NewComputeClient(config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected call with loaded config client to work, got error: %s", err)
 	}
@@ -277,7 +270,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	}
 	acctest.AccTestPreCheck(t)
 
-	serviceaccount := transport_tpg.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	serviceaccount := envvar.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 	creds := envvar.GetTestCredsFromEnv()
 	proj := envvar.GetTestProjectFromEnv()
 
@@ -288,14 +281,12 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 		Region:                    "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = config.NewComputeClient(config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -309,7 +300,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 
 	creds := envvar.GetTestCredsFromEnv()
 	proj := envvar.GetTestProjectFromEnv()
-	serviceaccount := transport_tpg.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	serviceaccount := envvar.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
 	c, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(creds), transport_tpg.DefaultClientScopes...)
 	if err != nil {
@@ -328,14 +319,12 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 		Region:                    "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = config.NewComputeClient(config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -366,14 +355,12 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = config.NewComputeClient(config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -386,8 +373,6 @@ func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 		Region:      "us-central1",
 		Scopes:      []string{"https://www.googleapis.com/auth/compute"},
 	}
-
-	transport_tpg.ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -517,140 +502,6 @@ func TestGetRegionFromRegionSelfLink(t *testing.T) {
 
 			if region != tc.ExpectedOutput {
 				t.Fatalf("want %s,  got %s", region, tc.ExpectedOutput)
-			}
-		})
-	}
-}
-
-func TestResourceBasePathDefault(t *testing.T) {
-	config := &transport_tpg.Config{
-		Credentials: transport_tpg.TestFakeCredentialsPath,
-		Project:     "my-gce-project",
-		Region:      "us-central1",
-	}
-	cases := map[string]struct {
-		BasePath       string
-		RepPath        string
-		BasePathKey    string
-		Config         *transport_tpg.Config
-		Location       string
-		ExpectedOutput string
-	}{
-		"Default to global path": {
-			BasePath:       "https://clouddeploy.googleapis.com/v1/",
-			RepPath:        "https://www.clouddeploy.{{location}}.rep.googleapis.com/v1/",
-			BasePathKey:    "Clouddeploy",
-			Config:         config,
-			Location:       "us-central1",
-			ExpectedOutput: "https://clouddeploy.googleapis.com/v1/",
-		},
-		"Overridden path takes priority": {
-			BasePath:       "https://override.{{location}}.googleapis.com/v1/",
-			RepPath:        "https://www.clouddeploy.{{location}}.rep.googleapis.com/v1/",
-			BasePathKey:    "Clouddeploy",
-			Config:         config,
-			Location:       "us-central1",
-			ExpectedOutput: "https://override.us-central1.googleapis.com/v1/",
-		},
-	}
-
-	for tn, tc := range cases {
-		t.Run(tn, func(t *testing.T) {
-
-			basePath, _ := transport_tpg.ResourceBasePath(tc.BasePath, tc.RepPath, tc.BasePathKey, tc.Config, tc.Location)
-
-			if basePath != tc.ExpectedOutput {
-				t.Fatalf("want %s,  got %s", tc.ExpectedOutput, basePath)
-			}
-		})
-	}
-}
-
-func TestResourceBasePathPreferGlobal(t *testing.T) {
-	config := &transport_tpg.Config{
-		Credentials:           transport_tpg.TestFakeCredentialsPath,
-		Project:               "my-gce-project",
-		Region:                "us-central1",
-		PreferGlobalEndpoints: true,
-	}
-	cases := map[string]struct {
-		BasePath       string
-		RepPath        string
-		BasePathKey    string
-		Config         *transport_tpg.Config
-		Location       string
-		ExpectedOutput string
-	}{
-		"Default to global path": {
-			BasePath:       "https://clouddeploy.googleapis.com/v1/",
-			RepPath:        "https://www.clouddeploy.{{location}}.rep.googleapis.com/v1/",
-			BasePathKey:    "Clouddeploy",
-			Config:         config,
-			Location:       "us-central1",
-			ExpectedOutput: "https://clouddeploy.googleapis.com/v1/",
-		},
-		"Overridden path takes priority": {
-			BasePath:       "https://override.{{location}}.googleapis.com/v1/",
-			RepPath:        "https://www.clouddeploy.{{location}}.rep.googleapis.com/v1/",
-			BasePathKey:    "Clouddeploy",
-			Config:         config,
-			Location:       "us-central1",
-			ExpectedOutput: "https://override.us-central1.googleapis.com/v1/",
-		},
-	}
-
-	for tn, tc := range cases {
-		t.Run(tn, func(t *testing.T) {
-
-			basePath, _ := transport_tpg.ResourceBasePath(tc.BasePath, tc.RepPath, tc.BasePathKey, tc.Config, tc.Location)
-
-			if basePath != tc.ExpectedOutput {
-				t.Fatalf("want %s,  got %s", tc.ExpectedOutput, basePath)
-			}
-		})
-	}
-}
-
-func TestResourceBasePathPreferRegional(t *testing.T) {
-	config := &transport_tpg.Config{
-		Credentials:             transport_tpg.TestFakeCredentialsPath,
-		Project:                 "my-gce-project",
-		Region:                  "us-central1",
-		PreferRegionalEndpoints: true,
-	}
-	cases := map[string]struct {
-		BasePath       string
-		RepPath        string
-		BasePathKey    string
-		Config         *transport_tpg.Config
-		Location       string
-		ExpectedOutput string
-	}{
-		"Default to regional path": {
-			BasePath:       "https://clouddeploy.googleapis.com/v1/",
-			RepPath:        "https://www.clouddeploy.{{location}}.rep.googleapis.com/v1/",
-			BasePathKey:    "Clouddeploy",
-			Config:         config,
-			Location:       "us-central1",
-			ExpectedOutput: "https://www.clouddeploy.us-central1.rep.googleapis.com/v1/",
-		},
-		"Overridden path takes priority": {
-			BasePath:       "https://override.{{location}}.googleapis.com/v1/",
-			RepPath:        "https://www.clouddeploy.{{location}}.rep.googleapis.com/v1/",
-			BasePathKey:    "Clouddeploy",
-			Config:         config,
-			Location:       "us-central1",
-			ExpectedOutput: "https://override.us-central1.googleapis.com/v1/",
-		},
-	}
-
-	for tn, tc := range cases {
-		t.Run(tn, func(t *testing.T) {
-
-			basePath, _ := transport_tpg.ResourceBasePath(tc.BasePath, tc.RepPath, tc.BasePathKey, tc.Config, tc.Location)
-
-			if basePath != tc.ExpectedOutput {
-				t.Fatalf("want %s,  got %s", tc.ExpectedOutput, basePath)
 			}
 		})
 	}
