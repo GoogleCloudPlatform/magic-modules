@@ -1793,7 +1793,7 @@ func expandNetworkInterfaces_v2(d tpgresource.TerraformResourceData, config *tra
 			iface["igmpQuery"] = v
 		}
 {{- if ne $.TargetVersionName "ga" }}
-		if macAddress, ok := data["mac_address"]; ok {
+		if macAddress, ok := data["mac_address"]; ok && macAddress.(string) != "" {
 			iface["macAddress"] = macAddress.(string)
 		}
 {{- end }}
