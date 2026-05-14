@@ -24,7 +24,7 @@ func (w *ContactCenterInsightsOperationWaiter) QueryOp() (interface{}, error) {
 	if w == nil {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
-	
+
 	// Extract location from operation name (e.g., projects/.../locations/us-east1/operations/...)
 	location := ""
 	if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(w.CommonOperationWaiter.Op.Name); parts != nil {
@@ -39,7 +39,7 @@ func (w *ContactCenterInsightsOperationWaiter) QueryOp() (interface{}, error) {
 
 	// Construct the regional endpoint URL
 	url := fmt.Sprintf("https://%s-contactcenterinsights.googleapis.com/v1/%s", location, w.CommonOperationWaiter.Op.Name)
-	
+
 	// For historical reasons, us-central1 acts as the global endpoint and does not use a prefix.
 	// See: https://docs.cloud.google.com/contact-center/insights/docs/regionalization
 	if location == "us-central1" {
