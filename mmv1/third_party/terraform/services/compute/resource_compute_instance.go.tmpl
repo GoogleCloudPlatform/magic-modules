@@ -2459,7 +2459,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Config:    config,
 					Method:    "PUT",
 					Project:   project,
-					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name),
+					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 					UserAgent: userAgent,
 					Body:      instanceMap,
 				})
@@ -2507,7 +2507,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Config:    config,
 					Method:    "POST",
 					Project:   project,
-					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setMetadata", config.ComputeBasePath, project, zone, instance.Name),
+					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setMetadata", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 					UserAgent: userAgent,
 					Body:      metadataMap,
 				})
@@ -2557,7 +2557,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Config:    config,
 					Method:    "PUT",
 					Project:   project,
-					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name),
+					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 					UserAgent: userAgent,
 					Body:      instanceMap,
 				})
@@ -2666,7 +2666,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Config:    config,
 					Method:    "PUT",
 					Project:   project,
-					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name),
+					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 					UserAgent: userAgent,
 					Body:      instanceMap,
 				})
@@ -3397,7 +3397,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Config:    config,
 					Method:    "PUT",
 					Project:   project,
-					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name),
+					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 					UserAgent: userAgent,
 					Body:      instanceMap,
 				})
@@ -3434,7 +3434,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 						Config:    config,
 						Method:    "POST",
 						Project:   project,
-						RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/resume", config.ComputeBasePath, project, zone, instance.Name),
+						RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/resume", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 						UserAgent: userAgent,
 					})
 					if err != nil {
@@ -3451,7 +3451,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Config:    config,
 					Method:    "POST",
 					Project:   project,
-					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/stop", config.ComputeBasePath, project, zone, instance.Name),
+					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/stop", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 					UserAgent: userAgent,
 				})
 				if err != nil {
@@ -3462,7 +3462,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Config:    config,
 					Method:    "POST",
 					Project:   project,
-					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/suspend", config.ComputeBasePath, project, zone, instance.Name),
+					RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/suspend", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 					UserAgent: userAgent,
 				})
 				if err != nil {
@@ -3716,7 +3716,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 						Config:    config,
 						Method:    "PUT",
 						Project:   project,
-						RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instance.Name),
+						RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 						UserAgent: userAgent,
 						Body:      instanceMap,
 					})
@@ -3809,14 +3809,17 @@ func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
 	}
 
-	// Retrieve instance from config to pull encryption keys if necessary
-	instanceFromConfig, err := expandComputeInstance(project, d, config)
+	// Retrieve instance from config to pull encryption keys if necessary.
+	// expandComputeInstance_v2 stores *compute.AttachedDisk values in the disks
+	// slice, so we can type-assert them back to read DiskEncryptionKey.
+	instanceBody, err := expandComputeInstance_v2(project, d, config)
 	if err != nil {
 		return nil, err
 	}
 
 	var encryptedDisks []interface{}
-	for _, disk := range instanceFromConfig.Disks {
+	for _, diskRaw := range instanceBody["disks"].([]interface{}) {
+		disk := diskRaw.(*compute.AttachedDisk)
 		if disk.DiskEncryptionKey != nil {
 			keyMap := map[string]interface{}{}
 			if v := disk.DiskEncryptionKey.RawKey; v != "" {
@@ -3837,7 +3840,7 @@ func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config
 			Config:    config,
 			Method:    "POST",
 			Project:   project,
-			RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/startWithEncryptionKey", config.ComputeBasePath, project, zone, instance.Name),
+			RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/startWithEncryptionKey", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 			UserAgent: userAgent,
 			Body:      map[string]interface{}{"disks": encryptedDisks},
 		})
@@ -3846,7 +3849,7 @@ func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config
 		Config:    config,
 		Method:    "POST",
 		Project:   project,
-		RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/start", config.ComputeBasePath, project, zone, instance.Name),
+		RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/start", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, instance.Name),
 		UserAgent: userAgent,
 	})
 }
@@ -4084,7 +4087,7 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 			Config:    config,
 			Method:    "DELETE",
 			Project:   project,
-			RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, d.Get("name").(string)),
+			RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, d.Get("name").(string)),
 			UserAgent: userAgent,
 		})
 		if err != nil {
@@ -4100,7 +4103,7 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 				Config:    config,
 				Method:    "GET",
 				Project:   project,
-				RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/operations/%s", config.ComputeBasePath, project, zone, opName),
+				RawURL:    fmt.Sprintf("%sprojects/%s/zones/%s/operations/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, zone, opName),
 				UserAgent: userAgent,
 			})
 			// Do not return an error if the operation actually completed
