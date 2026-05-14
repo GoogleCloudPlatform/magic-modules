@@ -3,6 +3,7 @@ package contactcenterinsights
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -44,6 +45,12 @@ func (w *ContactCenterInsightsOperationWaiter) QueryOp() (interface{}, error) {
 	// See: https://docs.cloud.google.com/contact-center/insights/docs/regionalization
 	if location == "us-central1" {
 		url = fmt.Sprintf("https://contactcenterinsights.googleapis.com/v1/%s", w.CommonOperationWaiter.Op.Name)
+	}
+
+	// Handle custom universe domain
+	universeDomain := w.Config.UniverseDomain
+	if universeDomain != "" && universeDomain != "googleapis.com" {
+		url = strings.Replace(url, "googleapis.com", universeDomain, 1)
 	}
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
