@@ -118,6 +118,16 @@ properties:
           - name: webWidgetTitle
             type: String
             description: The title of the web widget.
+          - name: securitySettings
+            type: NestedObject
+            description: Security settings for the web widget.
+            properties:
+              - name: enablePublicAccess
+                type: Boolean
+                description: |-
+                  Whether to enable public access for the web widget deployment.
+                  When true, the widget can be embedded without additional
+                  authentication.
   - name: createTime
     type: String
     description: Timestamp when this deployment was created.
