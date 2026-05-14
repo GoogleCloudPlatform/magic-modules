@@ -29,7 +29,7 @@ var DefaultConfigValueFuncs = map[string]func(tpgresource.TerraformResourceData,
 	"location": tpgresource.GetLocation,
 }
 
-// ParseIamResourceIdentity resolves an IAM import identity into a canonical
+// ParseIamResourceIdentity resolves an IAM import identity into the parent
 // resource id string (the same shape as the IAM updater's GetResourceId()).
 func ParseIamResourceIdentity(
 	d *schema.ResourceData,
