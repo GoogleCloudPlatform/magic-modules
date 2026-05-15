@@ -1,0 +1,127 @@
+package oracledatabase
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceOracleDatabaseGoldengateConnectionTypes() *schema.Resource {
+	dsSchema := map[string]*schema.Schema{
+		"project": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The ID of the project in which the resource is located. If it is not provided, the provider project is used.",
+		},
+		"location": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The location of the resource.",
+		},
+		"goldengate_connection_types": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The name of the Goldengate Connection Type resource.",
+					},
+					"connection_type": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The connection type of the Goldengate Connection Type resource.",
+					},
+					"technology_types": {
+						Type:     schema.TypeList,
+						Computed: true,
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Description: "An array of technologyTypes supported for the connection type.",
+					},
+				},
+			},
+		},
+	}
+	return &schema.Resource{
+		Read:   DataSourceOracleDatabaseGoldengateConnectionTypesRead,
+		Schema: dsSchema,
+	}
+}
+
+func DataSourceOracleDatabaseGoldengateConnectionTypesRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+	url, err := tpgresource.ReplaceVars(d, config, "{{OracleDatabaseBasePath}}projects/{{project}}/locations/{{location}}/goldengateConnectionTypes")
+	if err != nil {
+		return err
+	}
+	billingProject := ""
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for GoldengateConnectionTypes: %s", err)
+	}
+	billingProject = project
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error reading GoldengateConnectionTypes: %s", err)
+	}
+
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("goldengate_connection_types", flattenGoldengateConnectionTypes(res["goldengateConnectionTypes"], d, config)); err != nil {
+		return fmt.Errorf("Error setting goldengate_connection_types: %s", err)
+	}
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/goldengateConnectionTypes")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+	return nil
+}
+
+func flattenGoldengateConnectionTypes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	l := v.([]interface{})
+	transformed := make([]map[string]interface{}, 0)
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		transformed = append(transformed, map[string]interface{}{
+			"name":             original["name"],
+			"connection_type":  original["connectionType"],
+			"technology_types": original["technologyTypes"],
+		})
+	}
+
+	return transformed
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_oracle_database_goldengate_connection_types",
+		ProductName: "oracledatabase",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseGoldengateConnectionTypes(),
+	}.Register()
+}
