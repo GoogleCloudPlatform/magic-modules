@@ -13,6 +13,7 @@
 
 ---
 name: 'CryptoKey'
+deletion_policy_exclude: true
 description: |
   A `CryptoKey` represents a logical key that can be used for cryptographic operations.
 
@@ -175,6 +176,8 @@ properties:
       `DELETE` is the default and requires all versions to be permanently deleted first.
       `DESTROY` will destroy all versions and abandon the key in state (legacy behavior).
     default_value: "DELETE"
+    url_param_only: true
+    ignore_read: true
   - name: 'keyAccessJustificationsPolicy'
     type: NestedObject
     description: |

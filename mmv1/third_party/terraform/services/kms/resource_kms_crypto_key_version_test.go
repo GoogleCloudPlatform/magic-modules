@@ -709,13 +709,13 @@ func TestAccKmsCryptoKeyVersion_delete(t *testing.T) {
 					func(s *terraform.State) error {
 						config := acctest.GoogleProviderConfig(t)
 						versionsClient := kms.NewClient(config, config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
-						
+
 						rs, ok := s.RootModule().Resources["google_kms_crypto_key_version.crypto_key_version"]
 						if !ok {
 							return fmt.Errorf("Not found: google_kms_crypto_key_version.crypto_key_version")
 						}
 						id := rs.Primary.ID
-						
+
 						err := resource.Retry(20*time.Second, func() *resource.RetryError {
 							res, err := versionsClient.Get(id).Do()
 							if err != nil {
