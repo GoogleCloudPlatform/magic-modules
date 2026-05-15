@@ -366,6 +366,14 @@ type Resource struct {
 	// ====================
 	TGCResource `yaml:",inline"`
 
+	// EXPERIMENTAL: RPC settings are not fully implemented, and should not be
+	// used at this time.
+	RPCService      string `yaml:"rpc_service,omitempty"`
+	RPCCreateMethod string `yaml:"rpc_create_method,omitempty"`
+	RPCReadMethod   string `yaml:"rpc_read_method,omitempty"`
+	RPCUpdateMethod string `yaml:"rpc_update_method,omitempty"`
+	RPCDeleteMethod string `yaml:"rpc_delete_method,omitempty"`
+
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
 	// Examples in documentation. Backed by generated tests, and have
