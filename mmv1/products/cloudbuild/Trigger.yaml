@@ -14,7 +14,6 @@
 ---
 name: 'Trigger'
 api_resource_type_kind: BuildTrigger
-collection_url_key: 'triggers'
 api_variant_patterns:
   - 'projects/{project}/locations/{location}/triggers/{trigger}'
 description: |
@@ -32,7 +31,6 @@ base_url: 'projects/{{project}}/locations/{{location}}/triggers'
 self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 update_verb: 'PATCH'
 # import by default only works with old-style self links ending in a name
-generate_list_resource: true
 import_format:
   - 'projects/{{project}}/triggers/{{trigger_id}}'
   - 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'

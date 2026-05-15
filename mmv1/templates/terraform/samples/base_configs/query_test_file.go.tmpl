@@ -77,9 +77,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	}
 
 	var listDisplayName acctest.ListDisplayName
-{{- if $sample.ListQueryScopeSources }}
 	var listScope acctest.ListScopeCapture
-{{- end }}
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
@@ -112,26 +110,24 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 						{{- end }}
 						},
 					),
-{{- if $sample.ListQueryScopeSources }}
 					listScope.Capture(map[string]acctest.ScopeSource{
 					{{- range $scope := $.ListScopeProperties }}
 						{{- if $scope.Required }}
 							{{- $n := underscore $scope.Name }}
 							{{- with $sample.ListQueryScopeCapture $n }}
 						"{{ $n }}": {Resource: "{{ .Resource }}", Attr: "{{ .Attr }}"},
+							{{- else }}
+						"{{ $n }}": {Resource: "{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}", Attr: "{{ $n }}"},
 							{{- end }}
 						{{- end }}
 					{{- end }}
 					}),
-{{- end }}
 				),
 			},
 			{
 				Query:  true,
 				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
-{{- if $sample.ListQueryScopeSources }}
 				ConfigVariables: listScope.AsConfigVariables(),
-{{- end }}
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("{{ $sample.ResourceType $.TerraformName }}.list_query", 1),
 					querycheck.ExpectResourceDisplayName(
@@ -150,9 +146,7 @@ func testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(cont
 {{- range $scope := $.ListScopeProperties }}
 	{{- if $scope.Required }}
 		{{- $n := underscore $scope.Name }}
-		{{- if $sample.ListQueryScopeCapture $n }}
 variable "{{ $n }}" { type = string }
-		{{- end }}
 	{{- end }}
 {{- end }}
 list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
@@ -161,11 +155,7 @@ list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
 {{- range $scope := $.ListScopeProperties }}
         {{- if $scope.Required }}
             {{- $n := underscore $scope.Name }}
-            {{- if $sample.ListQueryScopeCapture $n }}
         {{ $n }} = var.{{ $n }}
-            {{- else }}
-        {{ $n }} = "%{{"{"}}{{ $step.ResolveScopeVarKey $n }}{{"}"}}"
-            {{- end }}
         {{- end }}
 {{- end }}
     }

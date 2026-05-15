@@ -37,7 +37,7 @@ custom_code:
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 # exluding resource_identity due to custom_import
-exclude_identity_generation: true
+generate_list_resource: true
 examples:
   - name: 'alloydb_user_builtin'
     primary_resource_id: 'user1'
