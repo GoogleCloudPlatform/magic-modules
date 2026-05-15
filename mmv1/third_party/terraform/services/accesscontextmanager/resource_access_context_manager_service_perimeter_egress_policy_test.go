@@ -298,7 +298,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
     operations {
       service_name = "bigquery.googleapis.com"
       method_selectors {
-        permission = "bigquery.jobs.get"
+        permission = "externalResource.read"
       }
     }
   }
