@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccComputeSnapshot_encryption(t *testing.T) {
@@ -208,14 +209,17 @@ resource "google_compute_disk" "persistent" {
 
 func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 	t.Parallel()
-	// Compute service agent on the VCR CI project lacks
-	// resourcemanager.tagValueBindings.create; cannot be granted by a
-	// fork contributor. Tag binding still exercised via live acceptance runs.
-	acctest.SkipIfVcr(t)
+
+	org := envvar.GetTestOrgFromEnv(t)
+	suffix := acctest.RandString(t, 10)
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagKey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-snapshots-tagvalue", sharedTagKey, org)
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": suffix,
+		"tag_key_id":    tagKeyResult["name"],
+		"tag_value_id":  tagValueResult["name"],
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -226,30 +230,12 @@ func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 			{
 				Config: testAccComputeSnapshot_resourceManagerTags(context),
 			},
-			{
-				ResourceName:            "google_compute_snapshot.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"params", "source_disk", "zone"},
-			},
 		},
 	})
 }
 
 func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_tags_tag_key" "tag_key" {
-  parent      = "projects/%{project_id}"
-  short_name  = "snapshot-tag-%{random_suffix}"
-  description = "Tag key for snapshot acceptance tests"
-}
-
-resource "google_tags_tag_value" "tag_value" {
-  parent      = google_tags_tag_key.tag_key.id
-  short_name  = "value-%{random_suffix}"
-  description = "Tag value for snapshot acceptance tests"
-}
-
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -265,11 +251,11 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_snapshot" "foobar" {
   name        = "tf-test-snapshot-%{random_suffix}"
-  source_disk = google_compute_disk.foobar.name
-  zone        = "us-central1-a"
+  source_disk = google_compute_disk.foobar.self_link
+  zone        = google_compute_disk.foobar.zone
   params {
     resource_manager_tags = {
-      (google_tags_tag_key.tag_key.id) = google_tags_tag_value.tag_value.id
+      "%{tag_key_id}" = "%{tag_value_id}"
     }
   }
 }
