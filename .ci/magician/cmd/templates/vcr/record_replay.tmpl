@@ -2,7 +2,7 @@
 
 **Step 2: Recording Mode**
 
-{{ if gt (len .TestRows) 1 -}}
+{{ if gt (len .TestRows) 100 -}}
 More than 100 tests ran in recording mode; this is too many to display on GitHub. View the [Cloud Build logs]({{$.BuildStepUrl}}) to see the result summary.
 {{- else -}}
 {{template "RecordReplayRows" .}}
