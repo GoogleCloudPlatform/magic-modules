@@ -25,6 +25,7 @@ fields:
   - api_field: 'addonsConfig.gkeBackupAgentConfig.enabled'
   - api_field: 'addonsConfig.horizontalPodAutoscaling.disabled'
   - api_field: 'addonsConfig.httpLoadBalancing.disabled'
+  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.istioConfig.auth'
 {{- end }}
@@ -33,7 +34,6 @@ fields:
 {{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.kalmConfig.enabled'
-  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- end }}
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enableLegacyLustrePort'
   - api_field: 'addonsConfig.lustreCsiDriverConfig.disableMultiNic'
@@ -449,10 +449,8 @@ fields:
     api_field: 'nodePools.name'
   - field: 'node_pool.name_prefix'
     provider_only: true
-  {{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.network_config.accelerator_network_profile'
     api_field: 'nodePools.networkConfig.acceleratorNetworkProfile'
-  {{- end }}
   - field: 'node_pool.network_config.additional_node_network_configs.network'
     api_field: 'nodePools.networkConfig.additionalNodeNetworkConfigs.network'
   - field: 'node_pool.network_config.additional_node_network_configs.subnetwork'
@@ -845,11 +843,9 @@ fields:
   - api_field: 'secretManagerConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.rotationInterval'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'secretSyncConfig.enabled'
   - api_field: 'secretSyncConfig.rotationConfig.enabled'
   - api_field: 'secretSyncConfig.rotationConfig.rotationInterval'
-{{- end }}
   - api_field: 'securityPostureConfig.mode'
   - api_field: 'securityPostureConfig.vulnerabilityMode'
   - api_field: 'selfLink'
@@ -883,3 +879,5 @@ fields:
   - api_field: 'workloadAltsConfig.enableAlts'
 {{- end }}
   - api_field: 'workloadIdentityConfig.workloadPool'
+  - field: 'deletion_policy'
+    provider_only: true

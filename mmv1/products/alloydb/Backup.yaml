@@ -40,6 +40,7 @@ async:
     resource_inside_response: false
 custom_code:
   encoder: 'templates/terraform/encoders/alloydb_backup.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 include_in_tgc_next: true
 examples:
   - name: 'alloydb_backup_basic'
@@ -61,7 +62,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -85,7 +86,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'

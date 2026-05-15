@@ -37,6 +37,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/integrations_client.go.tmpl'
   pre_create: 'templates/terraform/pre_create/integrations_client.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'integrations_client_basic'
@@ -49,7 +50,7 @@ examples:
     test_vars_overrides:
       key_ring_name: '"tftest-shared-keyring-1"'
       crypto_key_name: '"tftest-shared-key-1"'
-      kms_key: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1")'
+      kms_key: 'kms.BootstrapKMSKeyInLocation(t, "us-east1")'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com"
         role: "roles/cloudkmskacls.serviceAgent"

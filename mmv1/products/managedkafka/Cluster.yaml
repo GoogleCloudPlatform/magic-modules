@@ -38,6 +38,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'managedkafka_cluster_basic'
     primary_resource_id: 'example'
@@ -61,7 +62,7 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-managedkafka.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     external_providers: ["time"]
 parameters:
   - name: 'location'

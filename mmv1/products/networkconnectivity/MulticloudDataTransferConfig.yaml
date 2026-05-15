@@ -53,7 +53,7 @@ properties:
     type: String
     required: true
     immutable: true
-    url_param_only: true
+    ignore_read: true
     description: |
       The name of the MulticloudDataTransferConfig resource.
   - name: 'createTime'

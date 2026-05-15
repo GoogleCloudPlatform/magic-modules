@@ -2,12 +2,14 @@ package resourcemanager
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -34,6 +36,7 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			resourceServiceAccountCustomDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Identity: &schema.ResourceIdentity{
@@ -110,6 +113,9 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 				Computed:    false,
 				Description: `If set to true, skip service account creation if a service account with the same email already exists.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -140,7 +146,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		ServiceAccount: sa,
 	}
 
-	iamClient := config.NewIamClient(userAgent)
+	iamClient := iambeta.NewClient(config, userAgent)
 	sa, err = iamClient.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 	if err != nil {
 		gerr, ok := err.(*googleapi.Error)
@@ -156,7 +162,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 					}
 
 					d.SetId(sa.Name)
-					return populateResourceData(d, sa)
+					return populateResourceData(d, sa, config)
 				},
 				Timeout: d.Timeout(schema.TimeoutCreate),
 				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
@@ -171,7 +177,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	d.SetId(sa.Name)
-	populateResourceData(d, sa)
+	populateResourceData(d, sa, config)
 
 	// We poll until the resource is found due to eventual consistency issue
 	// on part of the api https://cloud.google.com/iam/docs/overview#consistency.
@@ -204,12 +210,21 @@ func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) tr
 		}
 
 		// Confirm the service account exists
-		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+		sa, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 
 		if err != nil {
 			return nil, err
 		}
-		return nil, nil
+		resp := map[string]interface{}{
+			"email":        sa.Email,
+			"unique_id":    sa.UniqueId,
+			"project":      sa.ProjectId,
+			"name":         sa.Name,
+			"display_name": sa.DisplayName,
+			"description":  sa.Description,
+			"disabled":     sa.Disabled,
+		}
+		return resp, nil
 	}
 }
 
@@ -221,15 +236,15 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	// Confirm the service account exists
-	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+	sa, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
 	}
 
-	return populateResourceData(d, sa)
+	return populateResourceData(d, sa, config)
 }
 
-func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error {
+func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount, config *transport_tpg.Config) error {
 	if err := d.Set("email", sa.Email); err != nil {
 		return fmt.Errorf("Error setting email: %s", err)
 	}
@@ -258,6 +273,10 @@ func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error 
 		return fmt.Errorf("Error setting member: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"email":   sa.Email,
 		"project": sa.ProjectId,
@@ -265,13 +284,20 @@ func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error 
 }
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	name := d.Id()
-	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Delete(name).Do()
+	_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Delete(name).Do()
 	if err != nil {
 		gerr, ok := err.(*googleapi.Error)
 		notFound := ok && gerr.Code == 404
@@ -284,43 +310,57 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleServiceAccount) {
+		return ResourceGoogleServiceAccount().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
-	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+	sa, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return fmt.Errorf("Error retrieving service account %q: %s", d.Id(), err)
 	}
 	updateMask := make([]string, 0)
+	updatedFields := make(map[string]interface{})
 	if d.HasChange("description") {
 		updateMask = append(updateMask, "description")
+		updatedFields["description"] = d.Get("description")
 	}
 	if d.HasChange("display_name") {
 		updateMask = append(updateMask, "display_name")
+		updatedFields["display_name"] = d.Get("display_name")
 	}
 
 	// We want to skip the Patch Call below if only the disabled field has been changed
-	if d.HasChange("disabled") && !d.Get("disabled").(bool) {
-		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Enable(d.Id(),
-			&iam.EnableServiceAccountRequest{}).Do()
-		if err != nil {
-			return err
-		}
-	} else if d.HasChange("disabled") && d.Get("disabled").(bool) {
-		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Disable(d.Id(),
-			&iam.DisableServiceAccountRequest{}).Do()
-		if err != nil {
-			return err
+	if d.HasChange("disabled") {
+		updatedFields["display_name"] = d.Get("disabled")
+		if !d.Get("disabled").(bool) {
+			_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Enable(d.Id(),
+				&iam.EnableServiceAccountRequest{}).Do()
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Disable(d.Id(),
+				&iam.DisableServiceAccountRequest{}).Do()
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	if len(updateMask) == 0 {
-		return nil
+		return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+			"email":   sa.Email,
+			"project": sa.ProjectId,
+		})
 	}
 
-	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Patch(d.Id(),
+	_, err = iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Patch(d.Id(),
 		&iam.PatchServiceAccountRequest{
 			UpdateMask: strings.Join(updateMask, ","),
 			ServiceAccount: &iam.ServiceAccount{
@@ -332,6 +372,22 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return err
 	}
+
+	// We poll until the updated resource is found due to eventual consistency issue
+	// on part of the api https://cloud.google.com/iam/docs/overview#consistency.
+	// Wait for at least 3 successful responses in a row to ensure result is consistent.
+	err = transport_tpg.PollingWaitTime(
+		resourceServiceAccountPollRead(d, meta),
+		pollCheckForUpdates(updatedFields),
+		"Updating Service Account",
+		1*time.Minute,
+		3, // Number of consecutive occurences.
+	)
+
+	if err != nil {
+		return err
+	}
+
 	// This API is meant to be synchronous, but in practice it shows the old value for
 	// a few milliseconds after the update goes through. 5 seconds is more than enough
 	// time to ensure following reads are correct.
@@ -341,6 +397,33 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		"email":   sa.Email,
 		"project": sa.ProjectId,
 	})
+}
+
+func pollCheckForUpdates(updates map[string]interface{}) transport_tpg.PollCheckResponseFunc {
+	return func(resp map[string]interface{}, respErr error) transport_tpg.PollResult {
+		if respErr != nil {
+			return transport_tpg.ErrorPollResult(respErr)
+		}
+
+		if resp == nil {
+			return transport_tpg.ErrorPollResult(errors.New("Polling did not return a response"))
+		}
+
+		for key, updatedValue := range updates {
+			currentValue, exists := resp[key]
+			if !exists {
+				return transport_tpg.ErrorPollResult(fmt.Errorf("Field '%s' was not included in the response", key))
+			}
+
+			if currentValue != updatedValue {
+				return transport_tpg.PendingStatusPollResult(
+					fmt.Sprintf("Field '%s' is not updated. Expected '%s' but was '%s'",
+						key, updatedValue, currentValue))
+			}
+		}
+
+		return transport_tpg.SuccessPollResult()
+	}
 }
 
 func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

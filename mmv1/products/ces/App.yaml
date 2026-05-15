@@ -13,12 +13,16 @@
 
 ---
 name: App
-description: Description
+description: Customer Engagement Suite App
+references:
+  api: https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1/projects.locations.apps
 base_url: projects/{{project}}/locations/{{location}}/apps
 self_link: projects/{{project}}/locations/{{location}}/apps/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/apps?appId={{app_id}}
 update_mask: true
 update_verb: PATCH
+mutex: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}'
+id_format: projects/{{project}}/locations/{{location}}/apps/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{name}}
 async:
@@ -459,6 +463,11 @@ properties:
       - name: timeZone
         type: String
         description: The time zone of the app from the time zone database, e.g., America/Los_Angeles, Europe/Paris.
+  - name: toolExecutionMode
+    type: String
+    description: |-
+      The tool execution mode for the app.
+      See the [API reference](https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rpc/google.cloud.ces.v1#google.cloud.ces.v1.App.ToolExecutionMode) for more details.
   - name: updateTime
     type: String
     description: Timestamp when the app was last updated.

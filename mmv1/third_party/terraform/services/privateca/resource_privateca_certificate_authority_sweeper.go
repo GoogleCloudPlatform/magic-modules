@@ -73,7 +73,7 @@ func testSweepCertificateAuthority(region string) error {
 
 		poolName := obj["name"].(string)
 
-		caListUrl := config.PrivatecaBasePath + poolName + "/certificateAuthorities"
+		caListUrl := transport_tpg.BaseUrl(Product, config) + poolName + "/certificateAuthorities"
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
@@ -111,7 +111,7 @@ func testSweepCertificateAuthority(region string) error {
 			}
 
 			if obj["state"] == "ENABLED" {
-				disableUrl := fmt.Sprintf("%s%s:disable", config.PrivatecaBasePath, caName)
+				disableUrl := fmt.Sprintf("%s%s:disable", transport_tpg.BaseUrl(Product, config), caName)
 				_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
 					Method:    "POST",
@@ -126,7 +126,7 @@ func testSweepCertificateAuthority(region string) error {
 				}
 			}
 
-			deleteUrl := config.PrivatecaBasePath + caName
+			deleteUrl := transport_tpg.BaseUrl(Product, config) + caName
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "DELETE",

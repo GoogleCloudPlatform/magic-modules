@@ -31,6 +31,8 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+custom_code:
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 description: |
  The Eventarc Channel resource
 error_retry_predicates:
@@ -48,7 +50,7 @@ examples:
       project: 'PROJECT_NAME'
       project_number: 'PROJECT_NUMBER'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name'
+      'key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name'
   - name: eventarc_channel
     primary_resource_id: primary
     vars:

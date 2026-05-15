@@ -82,7 +82,7 @@ clean-tgc:
 		rm -rf ./tfplan2cai/converters/google/provider;\
 		rm -rf ./tfplan2cai/converters/google/resources;\
 		rm -rf ./cai2hcl/*;\
-		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
+		rm -rf ./tfplan2cai/test/*;\
 		rm -rf ./pkg/*;\
 		rm -rf ./test/*;\
 		rm -rf ./cmd/*;\

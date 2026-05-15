@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 {{ if eq $.TargetVersionName `ga` }}
@@ -700,7 +701,7 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	kms := acctest.BootstrapKMSKey(t)
+	bootstrapped := kms.BootstrapKMSKey(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -708,7 +709,7 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_encryptionKMS(acctest.RandString(t, 10), kms.CryptoKey.Name, tpgresource.GetResourceNameFromSelfLink(kms.KeyRing.Name)),
+				Config: testAccComputeInstanceTemplate_encryptionKMS(acctest.RandString(t, 10), bootstrapped.CryptoKey.Name, tpgresource.GetResourceNameFromSelfLink(bootstrapped.KeyRing.Name)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 				),
@@ -1584,7 +1585,7 @@ func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	kmsKey := kms.BootstrapKMSKeyInLocation(t, "us-central1")
 
 	context := map[string]interface{}{
 		"kms_ring_name": tpgresource.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
@@ -1647,7 +1648,7 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	kmsKey := kms.BootstrapKMSKeyInLocation(t, "us-central1")
 
 	context := map[string]interface{}{
 		"kms_ring_name": tpgresource.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
@@ -1708,9 +1709,9 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 
-	testNetworkName := acctest.BootstrapSharedTestNetwork(t, "attachment-network")
-	subnetName := acctest.BootstrapSubnet(t, "tf-test-subnet", testNetworkName)
-	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, "tf-test-attachment", subnetName)
+	testNetworkName := tpgcompute.BootstrapSharedTestNetwork(t, "attachment-network")
+	subnetName := tpgcompute.BootstrapSubnet(t, "tf-test-subnet", testNetworkName)
+	networkAttachmentName := tpgcompute.BootstrapNetworkAttachment(t, "tf-test-attachment", subnetName)
 
 	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{networkAttachmentName}
 	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), networkAttachmentName)
@@ -2304,7 +2305,7 @@ func testAccCheckComputeInstanceTemplateDestroyProducer(t *testing.T) func(s *te
 			}
 
 			splits := strings.Split(rs.Primary.ID, "/")
-			_, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
+			_, err := tpgcompute.NewClient(config, config.UserAgent).InstanceTemplates.Get(
 				config.Project, splits[len(splits)-1]).Do()
 			if err == nil {
 				return fmt.Errorf("Instance template still exists")
@@ -2339,10 +2340,10 @@ func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p strin
 		splits := strings.Split(rs.Primary.ID, "/")
 		templateName := splits[len(splits)-1]
 		{{- if eq $.TargetVersionName "ga" }}
-		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
+		found, err := tpgcompute.NewClient(config, config.UserAgent).InstanceTemplates.Get(
 			p, templateName).Do()
 		{{- else }}
-		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
+		found, err := tpgcompute.NewClient(config, config.UserAgent).InstanceTemplates.Get(
 			p, templateName).View("FULL").Do()
 		{{- end }}
 

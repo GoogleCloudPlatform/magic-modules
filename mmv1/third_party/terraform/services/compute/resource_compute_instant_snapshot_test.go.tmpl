@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	{{ if eq $.TargetVersionName `ga` }}
@@ -99,7 +101,7 @@ func testAccCheckComputeInstantSnapshotExists(t *testing.T, n, p string, is *com
 
 		zone := tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
 
-		found, err := config.NewComputeClient(config.UserAgent).InstantSnapshots.Get(
+		found, err := compute_tpg.NewClient(config, config.UserAgent).InstantSnapshots.Get(
 			p, zone, rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
@@ -163,9 +165,9 @@ func TestAccComputeInstantSnapshot_resourceManagerTags(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	suffix := acctest.RandString(t, 10)
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-instant-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-instant-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagKey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-instant-snapshots-tagvalue", sharedTagKey, org)
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-instant-snapshots-tagvalue", sharedTagKey, org)
 
 	context := map[string]interface{}{
 		"random_suffix": suffix,

@@ -49,6 +49,7 @@ iam_policy:
     - '{{membership_id}}'
 custom_code:
   constants: 'templates/terraform/constants/gke_hub_membership_diff.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
 include_in_tgc_next: true
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
@@ -66,8 +67,8 @@ examples:
       project: 'PROJECT_NAME'
       location: 'REGION'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
       # for backward compatible
       name: '"basic" + randomSuffix'
   - name: 'gkehub_membership_basic'
@@ -80,8 +81,8 @@ examples:
       subnetwork_name: 'default'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
       # for backward compatible
       name: '"basic" + randomSuffix'
     oics_vars_overrides:
@@ -98,8 +99,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
       # for backward compatible
       name: '"basic" + randomSuffix'
     oics_vars_overrides:

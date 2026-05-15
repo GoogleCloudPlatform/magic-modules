@@ -21,3 +21,18 @@ func color(color, text string) string {
 	}
 	return fmt.Sprintf("%s %s", emoji, text)
 }
+
+func symbol(status string) string {
+	switch status {
+	case "Passed":
+		return "✅"
+	case "Failed":
+		return "❌"
+	case "Terminated":
+		return "🔴"
+	case "-":
+		return "-"
+	default:
+		return ""
+	}
+}

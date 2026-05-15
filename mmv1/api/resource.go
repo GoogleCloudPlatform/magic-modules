@@ -298,6 +298,19 @@ type Resource struct {
 	// public ca external account keys
 	ExcludeRead bool `yaml:"exclude_read,omitempty"`
 
+	// Set to true for resources that are excluded from universal deletion policy due to differing
+	// behavior on a universal option or use a different data type
+	DeletionPolicyExclude bool `yaml:"deletion_policy_exclude,omitempty"`
+
+	// Set to true for resources that have deletion policy fields with custom options that are
+	// compatible with the universal deletion policy
+	// if set to true, use implement `deletion_policy` within the yaml of the resource
+	DeletionPolicyCustomDocs bool `yaml:"deletion_policy_custom_docs,omitempty"`
+
+	// Set to the default deletion policy value for the resource.
+	// By default this will be "DELETE".
+	DeletionPolicyDefault string `yaml:"deletion_policy_default,omitempty"`
+
 	// Set to true for resources that wish to disable automatic generation of default provider
 	// value customdiff functions
 	// TODO rewrite: 1 instance used
@@ -492,6 +505,11 @@ func (r *Resource) setShallowDefaults() {
 	if r.Timeouts == nil {
 		r.Timeouts = NewTimeouts() // This only sets defaults if Timeouts is nil
 	}
+	if !r.DeletionPolicyExclude {
+		if r.DeletionPolicyDefault == "" {
+			r.DeletionPolicyDefault = "DELETE"
+		}
+	}
 }
 
 // SetDefault sets default values for this Resource and all its properties.
@@ -682,8 +700,9 @@ func (r Resource) IdentityProperties() []*Type {
 		}
 	}
 
+	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
 	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
-		if slices.Contains(importFormat, field) && !optionalValues[field] {
+		if slices.Contains(importFormat, field) && !optionalValues[field] && hasField[field] {
 			props = append(props, &Type{Name: field, Type: "string"})
 		}
 	}

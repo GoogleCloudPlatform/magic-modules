@@ -33,6 +33,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/colab_runtime.go.tmpl'
   custom_update: 'templates/terraform/custom_update/colab_runtime.go.tmpl'
   constants: 'templates/terraform/constants/colab_runtime.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'colab_runtime_basic'
     primary_resource_id: 'runtime'
@@ -53,7 +54,7 @@ examples:
       runtime_name: 'colab-runtime'
       key_name: 'my-crypto-key'
     test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'desired_state'
       - 'auto_upgrade'

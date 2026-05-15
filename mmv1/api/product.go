@@ -327,6 +327,13 @@ func Merge(self, otherObj reflect.Value, version string) {
 
 		if selfObj.Field(i).Kind() == reflect.Slice {
 			DeepMerge(selfObj.Field(i), otherObj.Field(i), version)
+		} else if selfObj.Field(i).Kind() == reflect.Pointer {
+			// merge the objects that are being pointed to, if both exist (namely, ItemTypes)
+			if reflect.Indirect(selfObj.Field(i)).IsValid() && reflect.Indirect(otherObj.Field(i)).IsValid() {
+				Merge(selfObj.Field(i), reflect.Indirect(otherObj.Field(i)), version)
+			} else {
+				selfObj.Field(i).Set(otherObj.Field(i))
+			}
 		} else {
 			selfObj.Field(i).Set(otherObj.Field(i))
 		}
