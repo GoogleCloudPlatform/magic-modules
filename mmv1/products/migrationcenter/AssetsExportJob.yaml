@@ -1,0 +1,259 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AssetsExportJob
+description: AssetsExportJob represents a batch job that exports Migration Center assets to external destinations such as Cloud Storage.
+base_url: projects/{{project}}/locations/{{location}}/assetsExportJobs
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/assetsExportJobs/{{assets_export_job_id}}
+create_url: projects/{{project}}/locations/{{location}}/assetsExportJobs?assetsExportJobId={{assets_export_job_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/assetsExportJobs/{{assets_export_job_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: QXNzZXRzRXhwb3J0Sm9i
+autogen_async: true
+examples:
+  - name: 'migration_center_assets_export_job_basic'
+    primary_resource_id: 'default'
+    vars:
+      assets_export_job_id: 'assets-export-job-test'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: assetsExportJobId
+    type: String
+    required: true
+    description: The ID to use for the asset export job.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: condition
+    type: NestedObject
+    description: Conditions for selecting assets to export.
+    properties:
+      - name: filter
+        type: String
+        description: Assets filter, supports the same syntax as asset listing.
+  - name: createTime
+    type: String
+    description: Resource creation time.
+    output: true
+  - name: inventory
+    type: NestedObject
+    description: Configuration for asset inventory details exports.
+    output: true
+    properties: []
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      Labels as key value pairs.
+      Labels must meet the following constraints:
+
+      * Keys and values can contain only lowercase letters, numeric characters,
+      underscores, and dashes.
+      * All characters must use UTF-8 encoding, and international characters are
+      allowed.
+      * Keys must start with a lowercase letter or international character.
+      * Each resource is limited to a maximum of 64 labels.
+
+      Both keys and values are additionally constrained to be <= 128 bytes.
+  - name: name
+    type: String
+    description: Identifier. Resource name.
+    output: true
+  - name: networkDependencies
+    type: NestedObject
+    description: Configuration for network dependencies exports.
+    output: true
+    properties: []
+  - name: performanceData
+    type: NestedObject
+    description: Configuration for performance data exports.
+    properties:
+      - name: maxDays
+        type: Integer
+        description: |-
+          When this value is set to a positive integer,
+          performance data will be returned for the most recent days
+          for which data is available. When this value is unset (or set to zero),
+          all available data is returned.
+          The maximum value is 420; values above 420 will be coerced to 420.
+          If unset (0 value) a default value of 40 will be used.
+  - name: recentExecutions
+    type: Array
+    description: Recent non expired executions of the job.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: endTime
+          type: String
+          description: Completion time of the export.
+          output: true
+        - name: executionId
+          type: String
+          description: Globally unique identifier of the execution.
+          output: true
+        - name: expireTime
+          type: String
+          description: Expiration time for the export and artifacts.
+          output: true
+        - name: requestedAssetCount
+          type: Integer
+          description: |-
+            Number of assets requested for export after resolving the requested
+            filters.
+          output: true
+        - name: result
+          type: NestedObject
+          description: Contains the result of the assets export.
+          properties:
+            - name: error
+              type: NestedObject
+              description: |-
+                The `Status` type defines a logical error model that is suitable for
+                different programming environments, including REST APIs and RPC APIs. It is
+                used by [gRPC](https://github.com/grpc). Each `Status` message contains
+                three pieces of data: error code, error message, and error details.
+
+                You can find out more about this error model and how to work with it in the
+                [API Design Guide](https://cloud.google.com/apis/design/errors).
+              properties:
+                - name: code
+                  type: Integer
+                  description: The status code, which should be an enum value of google.rpc.Code.
+                - name: details
+                  type: Array
+                  description: |-
+                    A list of messages that carry the error details.  There is a common set of
+                    message types for APIs to use.
+                  item_type:
+                    type: NestedObject
+                    properties: []
+                - name: message
+                  type: String
+                  description: |-
+                    A developer-facing error message, which should be in English. Any
+                    user-facing error message should be localized and sent in the
+                    google.rpc.Status.details field, or localized by the client.
+            - name: outputFiles
+              type: NestedObject
+              description: Contains a list of output files.
+              properties:
+                - name: entries
+                  type: Array
+                  description: List of output files.
+                  output: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: csvOutputFile
+                        type: NestedObject
+                        description: Contains a single output file of type CSV.
+                        properties:
+                          - name: columnsCount
+                            type: Integer
+                            description: Number of columns in the file.
+                            output: true
+                          - name: rowCount
+                            type: Integer
+                            description: Number of rows in the file.
+                            output: true
+                          - name: signedUri
+                            type: NestedObject
+                            description: Contains a signed URI.
+                            properties:
+                              - name: file
+                                type: String
+                                description: Name of the file the Signed URI references.
+                                output: true
+                              - name: uri
+                                type: String
+                                description: Download URI for the file.
+                                output: true
+                      - name: fileSizeBytes
+                        type: String
+                        description: File size in bytes.
+                        output: true
+                      - name: xlsxOutputFile
+                        type: NestedObject
+                        description: Contains a single output file of type XLSX.
+                        properties:
+                          - name: signedUri
+                            type: NestedObject
+                            description: Contains a signed URI.
+                            properties:
+                              - name: file
+                                type: String
+                                description: Name of the file the Signed URI references.
+                                output: true
+                              - name: uri
+                                type: String
+                                description: Download URI for the file.
+                                output: true
+            - name: signedUris
+              type: NestedObject
+              description: Contains a list of Signed URIs.
+              properties:
+                - name: signedUris
+                  type: Array
+                  description: List of signed URIs.
+                  output: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: file
+                        type: String
+                        description: Name of the file the Signed URI references.
+                        output: true
+                      - name: uri
+                        type: String
+                        description: Download URI for the file.
+                        output: true
+        - name: startTime
+          type: String
+          description: Execution timestamp.
+          output: true
+  - name: showHidden
+    type: Boolean
+    description: |-
+      When this value is set to 'true' the response will include all assets,
+      including those that are hidden.
+  - name: signedUriDestination
+    type: NestedObject
+    description: Signed URI destination configuration.
+    properties:
+      - name: fileFormat
+        type: String
+        required: true
+        description: |-
+          The file format to export.
+          Possible values:
+          CSV
+          XLSX
+  - name: updateTime
+    type: String
+    description: Resource update time.
+    output: true
