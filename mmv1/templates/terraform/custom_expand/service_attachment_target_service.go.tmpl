@@ -5,3 +5,4 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	// the API validate it. This avoids panics and confusing errors when users
 	// reference resources by name (e.g. google_network_services_gateway.*.name).
 	return v, nil
+}
