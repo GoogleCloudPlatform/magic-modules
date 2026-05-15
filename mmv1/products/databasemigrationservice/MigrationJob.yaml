@@ -38,7 +38,7 @@ async:
     base_url: '{{op_id}}'
 autogen_async: true
 custom_code:
-  post_create: templates/terraform/custom_create/dms_migration_job.go.tmpl
+  pre_create: templates/terraform/pre_create/dms_migration_job.go.tmpl
   custom_update: templates/terraform/custom_update/dms_migration_job.go.tmpl
 include_in_tgc_next: true
 examples:
@@ -147,18 +147,12 @@ properties:
     type: KeyValueLabels
     description: |
       The resource labels for migration job to use to annotate any related underlying resources such as Compute Engine VMs.
-  - name: createWithoutValidation
-    type: Boolean
-    description: |
-      If set to true, will skip validations for the migration job.
-    url_param_only: true
-    default_value: false
   - name: stopOnWarnings
     type: Boolean
     description: |
       If set to true, will stop the Terraform apply if there are validation warnings.
     url_param_only: true
-    default_value: false
+    default_value: true
   - name: state
     type: Enum
     description: |
