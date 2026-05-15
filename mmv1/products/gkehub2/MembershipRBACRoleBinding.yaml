@@ -42,7 +42,6 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 examples:

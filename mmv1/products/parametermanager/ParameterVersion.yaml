@@ -90,7 +90,6 @@ examples:
       parameter_id: '"parameter" + randomSuffix'
 custom_code:
   custom_import: 'templates/terraform/custom_import/parameter_manager_parameter_version.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 exclude_identity_generation: true
 parameters:
   - name: 'parameter'

@@ -61,7 +61,6 @@ custom_code:
   post_delete: 'templates/terraform/post_delete/netapp_volume_replication_delete_destination_volume.go.tmpl'
   post_update: 'templates/terraform/post_update/netapp_volume_replication_mirror_state.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_replication_stop_before_delete.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 examples:
   - name: 'netapp_volume_replication_create'
     primary_resource_id: 'test_replication'

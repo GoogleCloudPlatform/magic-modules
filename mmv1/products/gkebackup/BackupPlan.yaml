@@ -44,7 +44,6 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
     - '{{name}}'
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
 include_in_tgc_next: true
 examples:
   - name: 'gkebackup_backupplan_basic'

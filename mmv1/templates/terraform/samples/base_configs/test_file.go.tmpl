@@ -44,8 +44,20 @@ import (
 {{ range $s := $.Res.TestSamples }}
   {{- if $s.BootstrapIam }}
     "{{ $.ImportPath  }}/services/resourcemanager"
-    {{ break }}
   {{- end }}
+  {{- range $i, $step := $s.TestSteps }}
+		{{- range $_, $v := $step.TestContextVars }}
+			{{- if hasPrefix $v "tpgcompute." }}
+				tpgcompute "{{ $.ImportPath }}/services/compute"
+			{{- end }}
+			{{- if hasPrefix $v "kms." }}
+				"{{ $.ImportPath }}/services/kms"
+			{{- end }}
+			{{- if hasPrefix $v "servicenetworking." }}
+				"{{ $.ImportPath }}/services/servicenetworking"
+			{{- end }}
+		{{- end }}
+	{{- end }}
 {{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
