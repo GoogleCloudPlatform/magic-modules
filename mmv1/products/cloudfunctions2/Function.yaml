@@ -74,7 +74,7 @@ examples:
     test_vars_overrides:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -92,7 +92,7 @@ examples:
       'zip_path': '"./test-fixtures/function-source-pubsub.zip"'
       'primary_resource_id': '"terraform-test"'
       'location': '"us-central1"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -109,7 +109,7 @@ examples:
       'primary_resource_id': '"terraform-test"'
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -130,7 +130,7 @@ examples:
     test_vars_overrides:
       'zip_path': '"./test-fixtures/function-source-eventarc-gcs.zip"'
       'primary_resource_id': '"terraform-test"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -150,7 +150,7 @@ examples:
     test_vars_overrides:
       'zip_path': '"./test-fixtures/function-source-eventarc-gcs.zip"'
       'primary_resource_id': '"terraform-test"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -166,7 +166,7 @@ examples:
     test_vars_overrides:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -186,7 +186,7 @@ examples:
     test_vars_overrides:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
+      # ignore these fields during import step
       # for backward compatible
       secret: '"secret" + randomSuffix'
     ignore_read_extra:
@@ -207,7 +207,7 @@ examples:
     test_vars_overrides:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
+      # ignore these fields during import step
       # for backward compatible
       secret: '"secret" + randomSuffix'
     ignore_read_extra:
@@ -225,7 +225,7 @@ examples:
     test_vars_overrides:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
+      # ignore these fields during import step
       # for backward compatible
       pool: '"workerpool" + randomSuffix'
     ignore_read_extra:
@@ -248,13 +248,13 @@ examples:
       'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-    # ignore these fields during import step
+      # ignore these fields during import step
       # for backward compatible
       kms_service_name: '"cloudkms.googleapis.com" + randomSuffix'
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
- # the example file is written in a repetitive way to help acc tests, so exclude
+    # the example file is written in a repetitive way to help acc tests, so exclude
     exclude_docs: true
     skip_vcr: true
   - name: 'cloudfunctions2_cmek_docs'
@@ -269,7 +269,7 @@ examples:
       unencoded-ar-repo: 'ar-repo'
       kms_key_name: 'cmek-key'
       project: 'my-project-name'
- # this example file will cause IAM conflicts between tests if used to make a test
+    # this example file will cause IAM conflicts between tests if used to make a test
     test_vars_overrides:
       # for backward compatible
       kms_service_name: '"cloudkms.googleapis.com" + randomSuffix'
@@ -289,7 +289,7 @@ examples:
       'zip_path': '"./test-fixtures/function-source-pubsub.zip"'
       'primary_resource_id': '"terraform-test"'
       'location': '"europe-west6"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -308,7 +308,7 @@ examples:
       'zip_path': '"./test-fixtures/function-source-pubsub.zip"'
       'primary_resource_id': '"terraform-test"'
       'location': '"europe-west6"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -323,7 +323,7 @@ examples:
     test_vars_overrides:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
+    # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'

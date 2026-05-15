@@ -71,7 +71,7 @@ examples:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
     exclude_docs: true
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_full'
     primary_resource_id: 'default'
@@ -91,7 +91,7 @@ examples:
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_postgresql'
     primary_resource_id: 'default'
@@ -144,7 +144,7 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
-    # Requires SQLServer Configuration
+      # Requires SQLServer Configuration
       # for backward compatible
       database_name: '"db" + randomSuffix'
       # for backward compatible
@@ -168,7 +168,7 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
-    # Requires MySQL Configuration
+      # Requires MySQL Configuration
       # for backward compatible
       database_name: '"db" + randomSuffix'
       # for backward compatible
@@ -212,7 +212,7 @@ examples:
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_bigquery_cross_project_source_hierachy'
     primary_resource_id: 'default'
@@ -232,7 +232,7 @@ examples:
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_bigquery_append_only'
     primary_resource_id: 'default'
@@ -249,7 +249,7 @@ examples:
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_bigquery_blmt'
     primary_resource_id: 'default'

@@ -52,15 +52,15 @@ examples:
     vars:
       environment_name: 'my-environment'
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
   - name: 'apigee_environment_basic_test'
     primary_resource_id: 'apigee_environment'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
+    # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
@@ -69,7 +69,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
+    # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_environment_basic_properties_test'
@@ -88,7 +88,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
+    # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_environment_client_ip_resolution_config_test'
@@ -97,7 +97,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
+    # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
 parameters:
