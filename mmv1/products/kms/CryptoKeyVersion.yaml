@@ -13,6 +13,7 @@
 
 ---
 name: 'CryptoKeyVersion'
+deletion_policy_exclude: true
 description: |
   A `CryptoKeyVersion` represents an individual cryptographic key, and the associated key material.
 
@@ -69,6 +70,8 @@ properties:
       - 'DELETE' (Default): When the resource block is removed from configuration, the provider will verify the resource state is DESTROYED and call the permanent delete API endpoint. If the resource has not completed its scheduled destruction period, the Terraform destroy operation will fail and return an error.
       - 'DESTROY': When the resource block is removed from configuration, the provider will call the destroy API endpoint to schedule the key for destruction, and then immediately drop the resource from the Terraform state. The API resource itself is not permanently removed.
     default_value: 'DELETE'
+    url_param_only: true
+    ignore_read: true
   - name: 'state'
     type: Enum
     description: |

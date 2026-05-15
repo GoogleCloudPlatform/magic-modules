@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -290,8 +291,8 @@ func deleteCryptoKeyVersion(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema
 	switch ckvResponse.State {
 	case "DESTROYED", "GENERATION_FAILED", "IMPORT_FAILED":
 		// Proceed with the "DELETE" (hard-delete) workflow
-		deleteUrl := config.KMSBasePath + cryptoKeyVersionId.Name
-		
+		deleteUrl := transport_tpg.BaseUrl(registry.GetProduct("kms"), config) + cryptoKeyVersionId.Name
+
 		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "DELETE",
@@ -300,7 +301,7 @@ func deleteCryptoKeyVersion(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema
 			UserAgent: userAgent,
 		})
 		if err != nil {
-			if transport_tpg.IsNotFoundError(err) {
+			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 				return nil
 			}
 			return fmt.Errorf("Error deleting CryptoKeyVersion: %s", err)
@@ -311,9 +312,9 @@ func deleteCryptoKeyVersion(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema
 	default:
 		return fmt.Errorf(
 			"CryptoKeyVersion %q cannot be deleted directly because it is in state %q. "+
-			"Please follow the two-step deletion process: first, set the 'state' "+
-			"field of the resource to 'DESTROY_SCHEDULED' and wait for the scheduled "+
-			"destruction period to complete before removing the resource from your configuration.",
+				"Please follow the two-step deletion process: first, set the 'state' "+
+				"field of the resource to 'DESTROY_SCHEDULED' and wait for the scheduled "+
+				"destruction period to complete before removing the resource from your configuration.",
 			d.Id(), ckvResponse.State)
 	}
 }
@@ -326,7 +327,7 @@ func checkCryptoKeyVersionsEmpty(cryptoKeyId *KmsCryptoKeyId, userAgent string, 
 	}
 	versionsResponse, err := listCall.Do()
 	if err != nil {
-		if transport_tpg.IsNotFoundError(err) {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 			return nil
 		}
 		return err
@@ -339,8 +340,8 @@ func checkCryptoKeyVersionsEmpty(cryptoKeyId *KmsCryptoKeyId, userAgent string, 
 }
 
 func deleteCryptoKey(cryptoKeyId *KmsCryptoKeyId, d *schema.ResourceData, userAgent string, config *transport_tpg.Config) error {
-	deleteUrl := config.KMSBasePath + cryptoKeyId.CryptoKeyId()
-	
+	deleteUrl := transport_tpg.BaseUrl(registry.GetProduct("kms"), config) + cryptoKeyId.CryptoKeyId()
+
 	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "DELETE",
@@ -349,12 +350,12 @@ func deleteCryptoKey(cryptoKeyId *KmsCryptoKeyId, d *schema.ResourceData, userAg
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		if transport_tpg.IsNotFoundError(err) {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 			return nil
 		}
 		return fmt.Errorf("Error deleting CryptoKey: %s", err)
 	}
-	
+
 	return nil
 }
 
