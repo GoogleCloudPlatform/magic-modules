@@ -706,7 +706,7 @@ func formatComment(filename string, tmplText string, data any) (string, error) {
 }
 
 func formatPostReplay(data postReplay, w io.Writer) (string, error) {
-	if len(data.ReplayingResult.FailedTests) > 5 {
+	if len(data.ReplayingResult.FailedTests) > 1 {
 		fmt.Fprintln(w, "Failed replaying tests:")
 		for _, t := range data.ReplayingResult.FailedTests {
 			fmt.Fprintln(w, "* "+t)
@@ -716,7 +716,7 @@ func formatPostReplay(data postReplay, w io.Writer) (string, error) {
 }
 
 func formatRecordReplay(data recordReplay, w io.Writer) (string, error) {
-	if len(data.TestRows) > 5 {
+	if len(data.TestRows) > 1 {
 		tmpl := parseTemplate("record_replay_rows.tmpl", recordReplayRowsTmplText+`{{ template "RecordReplayRows" . }}`)
 		sb := new(strings.Builder)
 		err := tmpl.Execute(sb, data)
