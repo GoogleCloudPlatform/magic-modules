@@ -3066,10 +3066,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		data["database_flags"] = flattenDatabaseFlags(settings.DatabaseFlags)
 	}
 
-	// Always flatten connection_pool_config when the user has configured it, even
-	// if the API returns nil (which happens when connection_pooling_enabled = false).
-	// This prevents a perpetual diff where Terraform wants to re-add the block.
-	if settings.ConnectionPoolConfig != nil || len(d.Get("settings.0.connection_pool_config").(*schema.Set).List()) > 0 {
+	// When connection_pooling_enabled=false the API returns nil for ConnectionPoolConfig.
+	// We still need to flatten if the user has configured the block to avoid a permadiff.
+	poolConfigSet, _ := d.Get("settings.0.connection_pool_config").(*schema.Set)
+	if settings.ConnectionPoolConfig != nil || (poolConfigSet != nil && poolConfigSet.Len() > 0) {
 		data["connection_pool_config"] = flattenConnectionPoolConfig(settings.ConnectionPoolConfig)
 	}
 
