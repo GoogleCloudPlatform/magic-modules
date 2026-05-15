@@ -71,6 +71,7 @@ type postReplay struct {
 	Version          string
 	Head             string
 	BuildID          string
+	BuildStepUrl     string
 }
 
 type VCRTestTableRow struct {
@@ -94,6 +95,7 @@ type recordReplay struct {
 	Version                       string
 	Head                          string
 	BuildID                       string
+	BuildStepUrl                  string
 	LogBaseUrl                    string
 	BrowseLogBaseUrl              string
 	NotRunBetaTests               []string
@@ -229,8 +231,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
-	buildStatusTargetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
-	if err := gh.PostBuildStatus(prNumber, "VCR-test", "pending", buildStatusTargetURL, mmCommitSha); err != nil {
+	buildStepUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
+	if err := gh.PostBuildStatus(prNumber, "VCR-test", "pending", buildStepUrl, mmCommitSha); err != nil {
 		return fmt.Errorf("error posting pending status: %w", err)
 	}
 
@@ -249,13 +251,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
-	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
+	if hasPanics, err := handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling panics: %w", err)
 	} else if hasPanics {
 		return nil
 	}
 
-	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
+	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling build failures: %w", err)
 	} else if hasBuildFailures {
 		return nil
@@ -278,6 +280,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		Version:          provider.Beta.String(),
 		Head:             newBranch,
 		BuildID:          buildID,
+		BuildStepUrl:     buildStepUrl,
 	}
 
 	comment, err := formatPostReplay(postReplayData, os.Stdout)
@@ -321,13 +324,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
-		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
+		if hasPanics, err := handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
 			return nil
 		}
 
-		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
+		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling build failures: %w", err)
 		} else if hasBuildFailures {
 			return nil
@@ -385,6 +388,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			Version:                       provider.Beta.String(),
 			Head:                          newBranch,
 			BuildID:                       buildID,
+			BuildStepUrl:                  buildStepUrl,
 			NotRunBetaTests:               notRunBeta,
 			NotRunGATests:                 notRunGa,
 		}
@@ -401,7 +405,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 	}
 
-	if err := gh.PostBuildStatus(prNumber, "VCR-test", testState, buildStatusTargetURL, mmCommitSha); err != nil {
+	if err := gh.PostBuildStatus(prNumber, "VCR-test", testState, buildStepUrl, mmCommitSha); err != nil {
 		return fmt.Errorf("error posting build status: %w", err)
 	}
 	return nil
@@ -549,7 +553,7 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 	return result, testDirs, replayingErr
 }
 
-func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
+func handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.Panics) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Panic occurred during VCR tests**\n>\n"
@@ -574,7 +578,7 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
-		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
+		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha); err != nil {
 			return true, fmt.Errorf("error posting failure status: %v", err)
 		}
 		return true, nil
@@ -582,7 +586,7 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 	return false, nil
 }
 
-func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
+func handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.BuildFailures) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Build Failure during VCR tests**\n>\n"
@@ -610,7 +614,7 @@ func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha st
 		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
-		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
+		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha); err != nil {
 			return true, fmt.Errorf("error posting failure status: %v", err)
 		}
 		return true, nil
