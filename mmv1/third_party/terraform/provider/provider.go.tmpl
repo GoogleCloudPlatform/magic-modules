@@ -402,11 +402,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 	config.BatchingConfig = batchCfg
 
-	// Registered products
-	{{- range $product := $.Products }}
-	config.{{ $product.Name }}BasePath = transport_tpg.BaseUrl(registry.GetProduct("{{ lower $product.Name }}"), &config)
-	{{- end }}
-
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {
 		stopCtx = ctx

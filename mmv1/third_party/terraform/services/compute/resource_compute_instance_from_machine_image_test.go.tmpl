@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 {{ if eq $.TargetVersionName `ga` }}
@@ -433,7 +434,7 @@ func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) fu
 			}
 
 		instanceURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s",
-				config.ComputeBasePath, config.Project, rs.Primary.Attributes["zone"], rs.Primary.ID)
+				transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.ID)
 			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",

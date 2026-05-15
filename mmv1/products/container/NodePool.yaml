@@ -31,9 +31,13 @@ properties:
     type: 'Integer'
     description: 'The initial node count for the pool.'
     ignore_read: true
-  - name: 'NamePrefix'
+  - name: 'namePrefix'
     type: 'String'
     description: 'The prefix of the node pool name.'
+    ignore_read: true
+  - name: 'version'
+    type: 'String'
+    description: 'The version of the node pool.'
     ignore_read: true
   - name: 'nodeConfig'
     type: 'NestedObject'
@@ -91,6 +95,26 @@ properties:
                 type: 'Boolean'
                 description: 'Enable PTP KVM time sync.'
                 is_missing_in_cai: true
+      - name: 'taint'
+        type: 'Array'
+        api_name: 'taints'
+        description: 'Taints to be applied to nodes in the pool.'
+        ignore_read: true
+        item_type:
+          type: 'NestedObject'
+          properties:
+            - name: 'key'
+              type: 'String'
+              description: 'The key of the taint.'
+              ignore_read: true
+            - name: 'value'
+              type: 'String'
+              description: 'The value of the taint.'
+              ignore_read: true
+            - name: 'effect'
+              type: 'String'
+              description: 'The effect of the taint.'
+              ignore_read: true
   - name: 'networkConfig'
     type: 'NestedObject'
     description: 'Networking configuration for this NodePool.'

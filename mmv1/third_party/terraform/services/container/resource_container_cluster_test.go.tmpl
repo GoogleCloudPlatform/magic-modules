@@ -5197,7 +5197,6 @@ func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
 		},
 	})
 }
-{{ if ne $.TargetVersionName `ga` -}}
 
 func TestAccContainerCluster_withSecretSyncConfig(t *testing.T) {
   t.Parallel()
@@ -5268,7 +5267,6 @@ func TestAccContainerCluster_withSecretSyncConfig(t *testing.T) {
     },
   })
 }
-{{- end }}
 
 func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 	t.Parallel()
@@ -13254,7 +13252,6 @@ resource "google_container_cluster" "primary" {
 }
 `, projectID, name, networkName, subnetworkName)
 }
-{{ if ne $.TargetVersionName `ga` -}}
 
 func testAccContainerCluster_forSecretSyncConfig(projectID, name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
@@ -13377,7 +13374,6 @@ resource "google_container_cluster" "primary" {
 }
 `, projectID, name, networkName, subnetworkName)
 }
-{{- end }}
 
 func testAccContainerCluster_withLoggingConfigEnabled(name, networkName, subnetworkName string, minVersion string) string {
 	return fmt.Sprintf(`

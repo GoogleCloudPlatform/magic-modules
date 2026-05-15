@@ -61,6 +61,7 @@ custom_code:
   post_delete: 'templates/terraform/post_delete/netapp_volume_replication_delete_destination_volume.go.tmpl'
   post_update: 'templates/terraform/post_update/netapp_volume_replication_mirror_state.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_replication_stop_before_delete.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 examples:
   - name: 'netapp_volume_replication_create'
     primary_resource_id: 'test_replication'
@@ -72,7 +73,7 @@ examples:
       destination_volume: 'destination-volume'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     ignore_read_extra:
       - 'delete_destination_volume'
       - 'replication_enabled'

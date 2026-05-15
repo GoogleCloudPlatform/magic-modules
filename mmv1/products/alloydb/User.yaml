@@ -34,6 +34,7 @@ autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_user.go.tmpl'
   pre_update: 'templates/terraform/pre_update/alloydb_user.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 # exluding resource_identity due to custom_import
@@ -64,7 +65,7 @@ examples:
       alloydb_user_pass: 'user_secret'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
       # for backward compatible
       alloydb_user_name: '"user1" + randomSuffix'
     ignore_read_extra:
@@ -91,7 +92,7 @@ examples:
       alloydb_user_name: 'user2@foo.com'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
       # for backward compatible
       alloydb_user_name: '"user2@foo.com" + randomSuffix'
     exclude_docs: true
