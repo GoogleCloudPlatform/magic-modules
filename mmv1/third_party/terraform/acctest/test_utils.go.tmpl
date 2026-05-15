@@ -131,45 +131,16 @@ func (c *ListDisplayName) CheckValue() knownvalue.Check {
 	})
 }
 
-// ScopeSource describes where to read a list-query scope value from a previously
-// applied resource's state.
 type ScopeSource struct {
-	// Resource is the Terraform resource address (e.g. "google_alloydb_cluster.default").
 	Resource string
-	// Attr is the attribute on that resource to read (e.g. "name", "id").
 	Attr string
 }
 
-// ListScopeCapture captures scope-field values from the state of resources
-// created in an earlier test step and exposes them as Terraform input
-// variables for a later list-query step.
-//
-// Typical usage:
-//
-//	var listScope acctest.ListScopeCapture
-//	Steps: []resource.TestStep{
-//	    {
-//	        Config: testAccPrimary(context),
-//	        Check: resource.ComposeTestCheckFunc(
-//	            listScope.Capture(map[string]acctest.ScopeSource{
-//	                "cluster": {Resource: "google_alloydb_cluster.default", Attr: "name"},
-//	            }),
-//	        ),
-//	    },
-//	    {
-//	        Query:           true,
-//	        Config:          testAccListQuery(context), // declares variable "cluster" {}
-//	        ConfigVariables: listScope.AsConfigVariables(),
-//	    },
-//	}
 type ListScopeCapture struct {
 	sources map[string]ScopeSource
 	values  map[string]string
 }
 
-// Capture stores the source mapping and returns a TestCheckFunc that, when
-// invoked after a step's apply, walks the state and records each
-// scope -> value into the capture.
 func (c *ListScopeCapture) Capture(sources map[string]ScopeSource) resource.TestCheckFunc {
 	c.sources = sources
 	c.values = map[string]string{}
@@ -193,22 +164,14 @@ func (c *ListScopeCapture) Capture(sources map[string]ScopeSource) resource.Test
 	}
 }
 
-// lazyStringVariable is a config.Variable whose JSON encoding is computed
-// each time MarshalJSON is called. This lets a later step read values that
-// are populated by earlier steps' Check functions.
 type lazyStringVariable struct {
 	get func() string
 }
 
-// MarshalJSON implements json.Marshaler (and therefore config.Variable).
 func (v lazyStringVariable) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.get())
 }
 
-// AsConfigVariables returns a config.Variables map suitable for assigning to
-// TestStep.ConfigVariables. The variables are evaluated lazily during the
-// step that consumes them, so this method may be called at TestCase
-// construction time.
 func (c *ListScopeCapture) AsConfigVariables() config.Variables {
 	out := config.Variables{}
 	for scope := range c.sources {
