@@ -3,7 +3,7 @@
 **Step 2: Recording Mode**
 
 {{ if gt (len .TestRows) 1 -}}
-More than 100 tests ran in recording mode; this is too many to display on GitHub. View the [build]({{$.BuildStepUrl}}) to see the result summary.
+More than 100 tests ran in recording mode; this is too many to display on GitHub. View the [Cloud Build logs]({{$.BuildStepUrl}}) to see the result summary.
 {{- else -}}
 {{template "RecordReplayRows" .}}
 {{- end}}
@@ -32,4 +32,4 @@ More than 100 tests ran in recording mode; this is too many to display on GitHub
 {{ color "green" "**All tests passed!**" }}
 {{ end }}
 
-View the [build log]({{.LogBaseUrl}}/build-log/recording_test.log) or the [debug logs folder]({{.BrowseLogBaseUrl}}/recording) for detailed results.
+View the [recording VCR build log]({{.LogBaseUrl}}/build-log/recording_test.log) or the [debug logs folder]({{.BrowseLogBaseUrl}}/recording) for detailed results.

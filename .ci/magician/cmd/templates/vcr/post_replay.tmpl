@@ -51,7 +51,7 @@
 Found {{len .ReplayingResult.FailedTests}} affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit.
 
 {{ if gt (len .ReplayingResult.FailedTests) 1 -}}
-More than 100 tests failed in replaying; this is too many to display on GitHub. View the [build]({{$.BuildStepUrl}}) to see the full list.
+More than 100 tests failed in replaying; this is too many to display on GitHub. View the [Cloud Build logs]({{$.BuildStepUrl}}) to see the full list.
 {{- else -}}
 <details>
 <summary>Click here to see the affected tests</summary>
@@ -77,4 +77,4 @@ More than 100 tests failed in replaying; this is too many to display on GitHub. 
 {{ end }}
 {{ end }}
 
-View the [build log](https://storage.cloud.google.com/{{.LogBucket}}/{{.Version}}/refs/heads/{{.Head}}/artifacts/{{.BuildID}}/build-log/replaying_test.log)
+View the [replaying VCR build log](https://storage.cloud.google.com/{{.LogBucket}}/{{.Version}}/refs/heads/{{.Head}}/artifacts/{{.BuildID}}/build-log/replaying_test.log)
