@@ -177,9 +177,10 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		fmt.Println("running tests in RECORDING mode now")
 
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
-			Mode:    vcr.Recording,
-			Version: provider.Beta,
-			Tests:   replayingResult.FailedTests,
+			Mode:             vcr.Recording,
+			Version:          provider.Beta,
+			Tests:            replayingResult.FailedTests,
+			UploadBranchName: "main",
 		})
 
 		// upload build and test logs first to preserve debugging logs in case

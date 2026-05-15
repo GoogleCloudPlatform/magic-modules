@@ -1,6 +1,7 @@
 package vcr
 
 import (
+	"magician/provider"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -79,4 +80,25 @@ go: downloading ...
 		}
 	}
 
+}
+
+func TestAsyncCassetteUploadPath(t *testing.T) {
+	vt := &Tester{
+		cassetteBucket: "ci-vcr-cassettes",
+	}
+
+	wantNightly := "gs://ci-vcr-cassettes/beta/fixtures/"
+	if got := vt.asyncCassetteUploadPath("main", provider.Beta); got != wantNightly {
+		t.Errorf("asyncCassetteUploadPath(\"main\", Beta) = %q; want %q", got, wantNightly)
+	}
+
+	wantFallback := "gs://ci-vcr-cassettes/beta/refs/heads//fixtures/"
+	if got := vt.asyncCassetteUploadPath("", provider.Beta); got != wantFallback {
+		t.Errorf("asyncCassetteUploadPath(\"\", Beta) = %q; want %q", got, wantFallback)
+	}
+
+	wantPR := "gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/"
+	if got := vt.asyncCassetteUploadPath("auto-pr-123", provider.Beta); got != wantPR {
+		t.Errorf("asyncCassetteUploadPath(\"auto-pr-123\", Beta) = %q; want %q", got, wantPR)
+	}
 }
