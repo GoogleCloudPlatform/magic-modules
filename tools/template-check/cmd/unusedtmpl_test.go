@@ -13,6 +13,8 @@ func TestProcessInput(t *testing.T) {
 		"mmv1/templates/terraform/examples/subfolder/abc.tf.tmpl",
 		"mmv1/templates/terraform/custom_flatten/abc.go.tmpl",
 		"mmv1/templates/terraform/samples/services/workstations/workstation_cluster_custom_urls.tf.tmpl",
+		"mmv1/templates/terraform/list_resource.go.tmpl",
+		"mmv1/templates/terraform/samples/base_configs/query_test_file.go.tmpl",
 	}
 	tmpl, examples, samples := processInputFiles(fileList)
 	wantTmpl, wantExamples, wantSamples := []string{
