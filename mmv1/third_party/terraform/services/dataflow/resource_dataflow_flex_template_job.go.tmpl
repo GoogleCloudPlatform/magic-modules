@@ -545,8 +545,11 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		return nil
 	}
 
-	if err := d.Set("create_ignore_already_exists", false); err != nil {
-		return fmt.Errorf("Error setting create_ignore_already_exists: %s", err)
+	// Explicitly set client-side fields to default values if unset
+	if _, ok := d.GetOkExists("create_ignore_already_exists"); !ok {
+		if err := d.Set("create_ignore_already_exists", false); err != nil {
+			return fmt.Errorf("Error setting create_ignore_already_exists: %s", err)
+		}
 	}
 
 	return nil
