@@ -15,7 +15,7 @@ func TestAccDataSourceGoogleCloudRunV2Service_basic(t *testing.T) {
 
 	project := envvar.GetTestProjectFromEnv()
 
-	name := fmt.Sprintf("tf-test-cloud-run-v2-service-1%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-test-cloud-run-v2-service-%d", acctest.RandInt(t))
 	location := "us-central1"
 	id := fmt.Sprintf("projects/%s/locations/%s/services/%s", project, location, name)
 	deterministicURLRegex, err := regexp.Compile(fmt.Sprintf("https://%s-[0-9]+.%s.run.ap", name, location))
