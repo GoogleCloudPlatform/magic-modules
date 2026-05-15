@@ -71,7 +71,7 @@ func resourceComputeSharedVpcServiceProjectCreate(d *schema.ResourceData, meta i
 	hostProject := d.Get("host_project").(string)
 	serviceProject := d.Get("service_project").(string)
 
-	url := fmt.Sprintf("%sprojects/%s/enableXpnResource", config.ComputeBasePath, hostProject)
+	url := fmt.Sprintf("%sprojects/%s/enableXpnResource", transport_tpg.BaseUrl(Product, config), hostProject)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",
@@ -112,7 +112,7 @@ func resourceComputeSharedVpcServiceProjectRead(d *schema.ResourceData, meta int
 	hostProject := split[0]
 	serviceProject := split[1]
 
-	url := fmt.Sprintf("%sprojects/%s/getXpnHost", config.ComputeBasePath, serviceProject)
+	url := fmt.Sprintf("%sprojects/%s/getXpnHost", transport_tpg.BaseUrl(Product, config), serviceProject)
 	associatedHostProject, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
@@ -170,7 +170,7 @@ func disableXpnResource(d *schema.ResourceData, config *transport_tpg.Config, ho
 		return err
 	}
 
-	url := fmt.Sprintf("%sprojects/%s/disableXpnResource", config.ComputeBasePath, hostProject)
+	url := fmt.Sprintf("%sprojects/%s/disableXpnResource", transport_tpg.BaseUrl(Product, config), hostProject)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",
