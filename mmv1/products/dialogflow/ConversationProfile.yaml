@@ -676,16 +676,11 @@ properties:
     name: 'sipConfig'
     description: |
       Configuration for SIP.
-    min_version: beta
     properties:
       - type: Boolean
         name: 'createConversationOnTheFly'
         description: |
           Asks Dialogflow Telephony to create the conversation provided in the SIP header on the fly when the call comes in.
-      - type: Boolean
-        name: 'useMultiSdpPorts'
-        description: |
-          Uses multiple ports, each for one SDP media connection.
       - type: Boolean
         name: 'inactiveStart'
         description: |
@@ -702,10 +697,6 @@ properties:
         name: 'keepConversationRunning'
         description: |
           Keeps the conversation running even if the call is disconnected.
-      - type: Boolean
-        name: 'useProgress'
-        description: |
-          Use 183 Progress instead of 180 Ringing during SDP negotiation.
       - type: Array
         name: 'copyInboundCallLegHeaders'
         description: |
