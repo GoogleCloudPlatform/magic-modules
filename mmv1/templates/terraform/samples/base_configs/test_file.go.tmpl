@@ -24,6 +24,7 @@
 
 package {{ $.Res.PackageName }}_test
 
+{{if or (gt (len $.Res.TestSamples) 0) (not $.Res.ExcludeDelete) -}}
 import (
 	"fmt"
 	"log"
@@ -236,4 +237,5 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		return nil
 	}
 }
+{{- end }}
 {{- end }}
