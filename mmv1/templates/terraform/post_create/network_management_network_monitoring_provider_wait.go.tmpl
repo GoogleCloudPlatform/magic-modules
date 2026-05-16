@@ -1,0 +1,28 @@
+err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        Timeout: d.Timeout(schema.TimeoutCreate),
+        RetryFunc: func() error {
+                if err := resourceNetworkManagementNetworkMonitoringProviderRead(d, meta); err != nil {
+                        return err
+                }
+                state := d.Get("state").(string)
+                if state == "ACTIVATING" {
+                        return fmt.Errorf("NetworkMonitoringProvider %q is still in state %q", d.Id(), state)
+                }
+                if state == "ACTIVE" {
+                        log.Printf("[DEBUG] NetworkMonitoringProvider %q reached ACTIVE state", d.Id())
+                        return nil
+                }
+                return fmt.Errorf("NetworkMonitoringProvider %q reached unexpected state %q", d.Id(), state)
+        },
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
+                func(err error) (bool, string) {
+                        if strings.Contains(err.Error(), "is still in state \"ACTIVATING\"") {
+                                return true, "waiting for resource to become ACTIVE"
+                        }
+                        return false, ""
+                },
+        },
+})
+if err != nil {
+        return fmt.Errorf("Error waiting for NetworkMonitoringProvider to become ACTIVE: %s", err)
+}

@@ -1,0 +1,5 @@
+resource "google_network_management_network_monitoring_provider" "{{$.PrimaryResourceId}}" {
+  network_monitoring_provider_id = "{{index $.Vars "network_monitoring_provider_id"}}"
+  location                       = "global"
+  provider_type                  = "EXTERNAL"
+}
