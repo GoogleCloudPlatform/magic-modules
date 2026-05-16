@@ -1,6 +1,9 @@
+// Reference design doc: go/lima-terraform
 product := obj["product"].(string)
 count := obj["licensecount"].(int)
 
+// License type mapping is currently static based on known SPLA product offerings.
+// If License Manager expands its catalog or introduces API-based product discovery, replace this hardcoded logic with dynamic metadata lookup.
 licenseType := "LICENSE_TYPE_PER_MONTH_PER_USER"
 if product == "MicrosoftSQLServer2022Enterprise" {
     licenseType = "LICENSE_TYPE_PER_MONTH_PER_PACK"

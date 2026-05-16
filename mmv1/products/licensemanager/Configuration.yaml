@@ -12,6 +12,7 @@
 # limitations under the License.
 
 ---
+# Reference design doc: go/lima-terraform
 name: Configuration
 description: Configuration resource for License Manager
 base_url: projects/{{project}}/locations/{{location}}/configurations
@@ -77,17 +78,23 @@ properties:
   - name: labels
     type: KeyValueLabels
     description: Labels as key value pairs
+  # ignore_read is set because the API returns a full URL (projects/.../products/{product})
+  # while Terraform stores the short product name. Populated via post_read custom code.
   - name: product
     type: String
     required: true
     immutable: true
     ignore_read: true
     description: Name field (with URL) of the Product offered for SPLA.
+  # ignore_read is set because the count is returned nested inside currentBillingInfo
+  # (userCountBilling/packCountBilling). Populated via post_read custom code.
   - name: licensecount
     type: Integer
     required: true
     ignore_read: true
     description: Number of units to bill for.
+  # ignore_read is set because active is a virtual boolean attribute derived from the API's
+  # 'state' field (STATE_ACTIVE vs STATE_SUSPENDED). Populated via post_read custom code.
   - name: active
     type: Boolean
     default_value: true
