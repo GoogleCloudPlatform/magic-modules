@@ -751,6 +751,8 @@ This field is always inherited from its subnetwork.
 
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 
+* `network_interface.0.enable_vpc_scoped_dns` - Optional. If true, DNS resolution will be enabled over this interface. Only valid with networkAttachment.
+
 * `network_interface.0.parent_nic_name` - Name of the parent network interface of a dynamic network interface.
 
 * `network_interface.0.access_config.0.nat_ip` - If the instance has an access config, either the given external ip (in the `nat_ip` field) or the ephemeral (generated) ip (if you didn't provide one).

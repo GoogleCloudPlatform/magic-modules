@@ -833,6 +833,8 @@ Referencing an instance template via this attribute prevents Time of Check to Ti
 
 * `tags_fingerprint` - The unique fingerprint of the tags.
 
+* `network_interface.0.enable_vpc_scoped_dns` - Optional. If true, DNS resolution will be enabled over this interface. Only valid with networkAttachment.
+
 * `network_interface.0.parent_nic_name` - Name of the parent network interface of a dynamic network interface.
 
 [1]: /docs/providers/google/r/compute_instance_group_manager.html
