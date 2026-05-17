@@ -44,6 +44,7 @@ references:
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
 has_self_link: true
+bypass_clientside_update_check: true
 collection_url_key: items
 iam_policy:
   allowed_iam_role: roles/compute.networkUser
