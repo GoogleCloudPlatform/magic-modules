@@ -38,9 +38,10 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+deletion_policy_default: "DEFAULT"
+deletion_policy_custom_docs: true
 exclude_sweeper: true
 error_abort_predicates:
-
   - 'transport_tpg.Is429QuotaError'
 examples:
   - name: 'looker_instance_basic'
@@ -83,9 +84,9 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
     test_vars_overrides:
-      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
+      'address_name': 'tpgcompute.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", tpgcompute.AddressWithPrefixLength(8))'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", servicenetworking.ServiceNetworkWithPrefixLength(8))'
     exclude_docs: true
   - name: 'looker_instance_custom_domain'
     primary_resource_id: 'looker-instance'
@@ -110,15 +111,24 @@ examples:
       - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
-    default_value: "DEFAULT"
     type: String
     description: |
       Policy to determine if the cluster should be deleted forcefully.
       If setting deletion_policy = "FORCE", the Looker instance will be deleted regardless
       of its nested resources. If set to "DEFAULT", Looker instances that still have
-      nested resources will return an error. Possible values: DEFAULT, FORCE
+      nested resources will return an error.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+      Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
+    exclude: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
+  test_constants: 'templates/terraform/test_constants/import_tpgcompute_kms_servicenetworking.go.tmpl'
 parameters:
   - name: 'region'
     type: String

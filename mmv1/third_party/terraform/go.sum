@@ -1,5 +1,3 @@
-bitbucket.org/creachadair/stringset v0.0.11 h1:6Sv4CCv14Wm+OipW4f3tWOb0SQVpBDLW0knnJqUnmZ8=
-bitbucket.org/creachadair/stringset v0.0.11/go.mod h1:wh0BHewFe+j0HrzWz7KcGbSNpFzWwnpmgPRlB57U5jU=
 cel.dev/expr v0.25.1 h1:1KrZg61W6TWSxuNZ37Xy49ps13NUovb66QLprthtwi4=
 cel.dev/expr v0.25.1/go.mod h1:hrXvqGP6G6gyx8UAHSHJ5RGk//1Oj5nXQ2NI02Nrsg4=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
@@ -194,8 +192,8 @@ github.com/hashicorp/terraform-plugin-framework v1.19.0 h1:q0bwyhxAOR3vfdgbk9ipl
 github.com/hashicorp/terraform-plugin-framework v1.19.0/go.mod h1:YRXOBu0jvs7xp4AThBbX4mAzYaMJ1JgtFH//oGKxwLc=
 github.com/hashicorp/terraform-plugin-framework-timeouts v0.5.0 h1:I/N0g/eLZ1ZkLZXUQ0oRSXa8YG/EF0CEuQP1wXdrzKw=
 github.com/hashicorp/terraform-plugin-framework-timeouts v0.5.0/go.mod h1:t339KhmxnaF4SzdpxmqW8HnQBHVGYazwtfxU0qCs4eE=
-github.com/hashicorp/terraform-plugin-framework-validators v0.12.0 h1:HOjBuMbOEzl7snOdOoUfE2Jgeto6JOjLVQ39Ls2nksc=
-github.com/hashicorp/terraform-plugin-framework-validators v0.12.0/go.mod h1:jfHGE/gzjxYz6XoUwi/aYiiKrJDeutQNUtGQXkaHklg=
+github.com/hashicorp/terraform-plugin-framework-validators v0.19.0 h1:Zz3iGgzxe/1XBkooZCewS0nJAaCFPFPHdNJd8FgE4Ow=
+github.com/hashicorp/terraform-plugin-framework-validators v0.19.0/go.mod h1:GBKTNGbGVJohU03dZ7U8wHqc2zYnMUawgCN+gC0itLc=
 github.com/hashicorp/terraform-plugin-go v0.31.0 h1:0Fz2r9DQ+kNNl6bx8HRxFd1TfMKUvnrOtvJPmp3Z0q8=
 github.com/hashicorp/terraform-plugin-go v0.31.0/go.mod h1:A88bDhd/cW7FnwqxQRz3slT+QY6yzbHKc6AOTtmdeS8=
 github.com/hashicorp/terraform-plugin-log v0.10.0 h1:eu2kW6/QBVdN4P3Ju2WiB2W3ObjkAsyfBsL3Wh1fj3g=

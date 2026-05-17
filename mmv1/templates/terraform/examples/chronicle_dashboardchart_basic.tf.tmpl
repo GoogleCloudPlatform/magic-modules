@@ -1,6 +1,5 @@
 # A Native Dashboard is required to create a Dashboard Chart.
 resource "google_chronicle_native_dashboard" "my_dashboard" {
-  provider     = google-beta
   location     = "us" 
   instance     = "%{chronicle_id}"
   display_name = "tf-test-dashboard-1%{random_suffix}"
@@ -23,7 +22,6 @@ resource "google_chronicle_native_dashboard" "my_dashboard" {
 }
 
 resource "google_chronicle_dashboard_chart" "my_chart" {
-  provider         = google-beta
   location         = "us" # Example region, adjust as necessary
   instance         = "{{index $.TestEnvVars "chronicle_id"}}"
   # This parameter creates an implicit dependency: Terraform will create

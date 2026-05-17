@@ -30,6 +30,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'parameter_config_basic'
     primary_resource_id: 'parameter-basic'
@@ -58,7 +60,7 @@ examples:
       parameter_id: 'parameter'
       kms_key: 'kms-key'
     test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      'kms_key': 'kms.BootstrapKMSKey(t).CryptoKey.Name'
       # for backward compatible
       parameter_id: '"parameter" + randomSuffix'
     bootstrap_iam:

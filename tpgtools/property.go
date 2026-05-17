@@ -900,7 +900,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		// Add any new imports as needed
 		if ls := p.GetRequiredFileImports(); len(ls) > 0 {
-			resource.additionalFileImportSet.Add(ls...)
+			for _, imp := range ls {
+				resource.additionalFileImportSet[imp] = struct{}{}
+			}
 		}
 
 		csgd := CustomStateGetterDetails{}

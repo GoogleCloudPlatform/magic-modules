@@ -104,7 +104,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
         Create: resource{{ $.ResourceName -}}Create,
         Read: resource{{ $.ResourceName -}}Read,
-{{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
+{{- if or (or $.Updatable $.RootLabels (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude))) $.VirtualFields }}
         Update: resource{{ $.ResourceName -}}Update,
 {{- end}}
         Delete: resource{{ $.ResourceName -}}Delete,
@@ -162,6 +162,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
             tpgresource.DefaultProviderZone,
 {{- end }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+            tpgresource.DefaultProviderDeletionPolicy("{{$.DeletionPolicyDefault}}"),
+{{- end }}
         ),
 {{- end}}
 {{- if $.CustomCode.ValidateRawResourceConfigFuncs }}
@@ -212,7 +215,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{template "SchemaFields" $prop -}}
 			{{- end }}
             {{- range $prop := $.VirtualFields }}
+            {{- if not $prop.Exclude }}
 {{template "SchemaFields" $prop -}}
+            {{- end }}
             {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
     {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
@@ -229,6 +234,24 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             "self_link": {
                 Type:     schema.TypeString,
                 Computed: true,
+            },
+{{- end}}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+            "deletion_policy": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Computed: true,
+    {{- if $.DeletionPolicyCustomDocs}}
+                Description: `This field uses a custom implementation please refer to documentation under /hashicorp/terraform-provider-google-beta/website/docs/r/{{ underscore $.ResourceName}}.html.markdown for specifics`,
+    {{else}}
+                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+    {{- end}}
             },
 {{- end}}
         },
@@ -742,7 +765,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return nil
     }
 {{ end}}
-{{- if $.VirtualFields }}
+{{- if or $.VirtualFields (and (not $.ExcludeDelete)  (not $.DeletionPolicyExclude)) }}
 
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
@@ -753,6 +776,20 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         }
     }
 {{- end}}
+{{- end}}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        //prioritize config's value if present
+        if config.DeletionPolicy != ""{
+            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }else{
+            if err := d.Set("deletion_policy", "{{ $.DeletionPolicyDefault -}}"); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }
+    }
 {{- end}}
 {{- end}}
 {{- if $.HasProject }}
@@ -815,7 +852,21 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{-     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
+{{-     if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+    clientSideFields := map[string]bool{"deletion_policy": true}
+    clientSideOnly := true
+    for field := range Resource{{ $.ResourceName -}}().Schema {
+        if d.HasChange(field) && !clientSideFields[field] {
+            clientSideOnly = false
+            break
+        }
+    }
+    if clientSideOnly {
+        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+        return resource{{ $.ResourceName -}}Read(d, meta)
+    }
+{{-     end}}
+{{     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
     var project string
 {{-     end}}
     config := meta.(*transport_tpg.Config)
@@ -1176,9 +1227,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{-      end }}{{/*if CustomUpdate*/}}
 }
-{{  else if or $.RootLabels $.VirtualFields -}}{{/*if not immutable*/}}
+{{  else if or $.RootLabels $.VirtualFields (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)) -}}{{/*if not immutable*/}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-    // Only the root field "labels", "terraform_labels", and virtual fields are mutable
+    // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
     return resource{{ $.ResourceName -}}Read(d, meta)
 }
 
@@ -1192,6 +1243,15 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     return nil
 {{- else }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+{{- end }}
 {{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
     var project string
 {{- end }}

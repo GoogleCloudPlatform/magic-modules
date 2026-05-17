@@ -144,6 +144,11 @@ func Provider() *schema.Provider {
 				Optional: true,
 			},
 
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"request_reason": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -288,6 +293,10 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		}
 	}
 
+	if v, ok := d.GetOk("deletion_policy"); ok {
+		config.DeletionPolicy = v.(string)
+	}
+
 	if v, ok := d.GetOk("request_reason"); ok {
 		config.RequestReason = v.(string)
 	}
@@ -392,11 +401,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(err)
 	}
 	config.BatchingConfig = batchCfg
-
-	// Registered products
-	{{- range $product := $.Products }}
-	config.{{ $product.Name }}BasePath = transport_tpg.BaseUrl(registry.GetProduct("{{ lower $product.Name }}"), &config)
-	{{- end }}
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {

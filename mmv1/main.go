@@ -89,7 +89,9 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 		panic(err)
 	}
 
-	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory, Sysfs: ofs, CompilerTarget: providerName})
+	wrappedFS := loader.NewVarsReplacingFS(ofs)
+
+	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory, Sysfs: wrappedFS, CompilerTarget: providerName})
 	loader.LoadProducts()
 	loader.AddExtraFields()
 	loader.Validate()
@@ -107,7 +109,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 
 	for _, productApi := range loadedProducts {
 		wg.Add(1)
-		go GenerateProduct(version, providerName, productApi, outputPath, startTime, ofs, productsToGenerate, resource, generateCode, generateDocs)
+		go GenerateProduct(version, providerName, productApi, outputPath, startTime, wrappedFS, productsToGenerate, resource, generateCode, generateDocs)
 	}
 	wg.Wait()
 
@@ -121,7 +123,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 
 	// In order to only copy/compile files once per provider this must be called outside
 	// of the products loop. Create an MMv1 provider with an arbitrary product (the first loaded).
-	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime, ofs)
+	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime, wrappedFS)
 	providerToGenerate.CopyCommonFiles(outputPath, generateCode, generateDocs)
 
 	if generateCode {

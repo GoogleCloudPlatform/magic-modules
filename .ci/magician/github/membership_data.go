@@ -82,7 +82,12 @@ var (
 			},
 		},
 		"hao-nan-li": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2026, 5, 15),
+					endDate:   newDate(2026, 5, 26),
+				},
+			},
 		},
 		"malhotrasagar2212": {
 			vacations: []Vacation{},
@@ -125,17 +130,17 @@ var (
 					startDate: newDate(2026, 04, 14),
 					endDate:   newDate(2026, 04, 19),
 				},
+				{
+					startDate: newDate(2026, 05, 14),
+					endDate:   newDate(2026, 05, 25),
+				},
 			},
 		},
 		"roaks3": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 8, 1),
-					endDate:   newDate(2025, 8, 11),
-				},
-				{
-					startDate: newDate(2025, 9, 23),
-					endDate:   newDate(2025, 9, 29),
+					startDate: newDate(2026, 5, 7),
+					endDate:   newDate(2026, 5, 11),
 				},
 			},
 		},
@@ -166,12 +171,8 @@ var (
 		"slevenick": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 5, 22),
-					endDate:   newDate(2025, 6, 7),
-				},
-				{
-					startDate: newDate(2026, 4, 13),
-					endDate:   newDate(2026, 4, 19),
+					startDate: newDate(2026, 5, 7),
+					endDate:   newDate(2026, 5, 12),
 				},
 			},
 		},

@@ -85,7 +85,7 @@ func (t Type) String() string {
 	case "":
 		return "<nil>"
 	default:
-		return fmt.Sprintf("undefined type: %s", t.typ)
+		return fmt.Sprintf("undefined type: %v", t.typ)
 	}
 }
 

@@ -43,6 +43,8 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
     - '{{runtime_template}}'
 include_in_tgc_next: true
+custom_code:
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
@@ -58,7 +60,7 @@ examples:
       network_name: 'colab-test-default'
       key_name: 'my-crypto-key'
     test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String

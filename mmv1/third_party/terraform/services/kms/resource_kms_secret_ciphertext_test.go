@@ -17,7 +17,7 @@ import (
 func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 	t.Parallel()
 
-	kms := acctest.BootstrapKMSKey(t)
+	bootstrapped := kms.BootstrapKMSKey(t)
 
 	plaintext := fmt.Sprintf("secret-%s", acctest.RandString(t, 10))
 	aad := "plainaad"
@@ -27,9 +27,9 @@ func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleKmsSecretCiphertext(kms.CryptoKey.Name, plaintext),
+				Config: testGoogleKmsSecretCiphertext(bootstrapped.CryptoKey.Name, plaintext),
 				Check: func(s *terraform.State) error {
-					plaintext, err := testAccDecryptSecretDataWithCryptoKey(t, s, kms.CryptoKey.Name, "google_kms_secret_ciphertext.acceptance", "")
+					plaintext, err := testAccDecryptSecretDataWithCryptoKey(t, s, bootstrapped.CryptoKey.Name, "google_kms_secret_ciphertext.acceptance", "")
 
 					if err != nil {
 						return err
@@ -40,9 +40,9 @@ func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 			},
 			// With AAD
 			{
-				Config: testGoogleKmsSecretCiphertext_withAAD(kms.CryptoKey.Name, plaintext, aad),
+				Config: testGoogleKmsSecretCiphertext_withAAD(bootstrapped.CryptoKey.Name, plaintext, aad),
 				Check: func(s *terraform.State) error {
-					plaintext, err := testAccDecryptSecretDataWithCryptoKey(t, s, kms.CryptoKey.Name, "google_kms_secret_ciphertext.acceptance", aad)
+					plaintext, err := testAccDecryptSecretDataWithCryptoKey(t, s, bootstrapped.CryptoKey.Name, "google_kms_secret_ciphertext.acceptance", aad)
 
 					if err != nil {
 						return err
