@@ -72,7 +72,7 @@ examples:
       display_name: 'Display Name Full'
       bundle_id: 'apple.app.12345'
       app_store_id: '12345'
- # Has to be a 10-digit number.
+      # Has to be a 10-digit number.
       team_id: '9987654321'
       api_key_name: 'api-key'
     test_env_vars:

@@ -246,4 +246,4 @@ properties:
     allow_empty_object: true
     description: Settings related to Cloud Logging.
     properties:
-      [] # Meant to be an empty object with no properties for now.
+      []  # Meant to be an empty object with no properties for now.

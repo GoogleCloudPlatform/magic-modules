@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+---
 name: Group
 include_in_tgc_next: true
 legacy_long_form_project: true

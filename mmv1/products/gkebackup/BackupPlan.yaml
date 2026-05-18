@@ -380,7 +380,7 @@ properties:
                           - 'FRIDAY'
                           - 'SATURDAY'
                           - 'SUNDAY'
-            # Exclusion Window Object - End
+  # Exclusion Window Object - End
   - name: 'etag'
     type: String
     description: |

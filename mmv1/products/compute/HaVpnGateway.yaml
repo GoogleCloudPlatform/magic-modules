@@ -77,7 +77,7 @@ examples:
       network2_name: '"network2" + randomSuffix'
     exclude_test: true
     exclude_docs: true
-      # Multiple fine-grained resources
+    # Multiple fine-grained resources
     skip_vcr: true
   - name: 'compute_ha_vpn_gateway_encrypted_interconnect'
     primary_resource_id: 'vpn-gateway'
