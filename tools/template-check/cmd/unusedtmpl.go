@@ -62,7 +62,7 @@ func (o *unusedTmplOptions) run() error {
 	if len(o.fileList) == 0 {
 		return nil
 	}
-	newCustomTmpls, newExamples, newSamples := processInputFiles(o.fileList)
+	newCustomTmpls, newExamples, newSamples, newBaseTmpls := processInputFiles(o.fileList)
 
 	found := false
 	// get repo dir from tmpl files
@@ -114,19 +114,37 @@ func (o *unusedTmplOptions) run() error {
 			}
 		}
 	}
+	if len(newBaseTmpls) > 0 {
+		codeTmpls, err := findCodeReferencedTmpls(filepath.Join(repoPath, "mmv1"))
+		if err != nil {
+			return err
+		}
+		for _, file := range newBaseTmpls {
+			templatePath := strings.ReplaceAll(file, repoPath+"/mmv1/", "")
+			templatePath = strings.TrimPrefix(templatePath, "mmv1/")
+			if _, ok := codeTmpls[templatePath]; !ok {
+				found = true
+				fmt.Fprintf(os.Stderr, "Base generator template %s not referenced in any mmv1 Go code or base template.\n", file)
+			}
+		}
+	}
 	if found {
 		return fmt.Errorf("found templates not used")
 	}
 	return nil
 }
 
-func processInputFiles(fileList []string) (customTmpls []string, examples []string, samples []string) {
+func processInputFiles(fileList []string) (customTmpls []string, examples []string, samples []string, baseTmpls []string) {
 	for _, v := range fileList {
 		if exampleFilePathReg.MatchString(v) {
 			examples = append(examples, v)
 		} else if sampleFilePathReg.MatchString(v) {
 			samples = append(samples, v)
 		} else if strings.Contains(v, "mmv1/templates/terraform") && strings.HasSuffix(v, ".tmpl") {
+			if strings.HasSuffix(filepath.Dir(v), "mmv1/templates/terraform") || strings.Contains(v, "/base_configs/") || strings.Contains(v, "/static/") {
+				baseTmpls = append(baseTmpls, v)
+				continue
+			}
 			customTmpls = append(customTmpls, v)
 		} else {
 			fmt.Printf("Skipping check for file %s\n", v)
@@ -306,4 +324,31 @@ func findSamples(yamlFiles []string) (map[string]bool, error) {
 		}
 	}
 	return allSamples, nil
+}
+
+var templateRefReg = regexp.MustCompile("[\"`](templates/terraform/[^\"`]+\\.tmpl)[\"`]")
+
+func findCodeReferencedTmpls(dir string) (map[string]bool, error) {
+	refs := map[string]bool{}
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		ext := filepath.Ext(path)
+		if ext == ".go" || ext == ".tmpl" || ext == ".erb" {
+			b, err := os.ReadFile(path)
+			if err != nil {
+				return nil
+			}
+			matches := templateRefReg.FindAllStringSubmatch(string(b), -1)
+			for _, m := range matches {
+				refs[m[1]] = true
+			}
+		}
+		return nil
+	})
+	return refs, err
 }
