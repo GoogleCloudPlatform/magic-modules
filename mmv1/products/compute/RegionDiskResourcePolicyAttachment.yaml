@@ -48,6 +48,13 @@ examples:
       disk_name: my-disk
       policy_name: my-resource-policy
       snapshot_name: my-snapshot
+  - name: region_disk_resource_policy_attachment_location_hint
+    primary_resource_id: attachment
+    vars:
+      base_disk_name: my-base-disk
+      disk_name: my-disk
+      policy_name: my-resource-policy
+      snapshot_name: my-snapshot
 parameters:
   - name: disk
     type: ResourceRef
@@ -71,3 +78,8 @@ properties:
     description: |
       The resource policy to be attached to the disk for scheduling snapshot
       creation. Do not specify the self link.
+  - name: locationHint
+    type: String
+    description: |-
+      An opaque location hint used to place the disk close to other resources.
+      This field is for use by internal tools that use the public API.
