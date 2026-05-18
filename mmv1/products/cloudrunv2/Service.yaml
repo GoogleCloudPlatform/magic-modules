@@ -176,6 +176,37 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
+samples:
+  - name: cloudrunv2_service_iap_update
+    primary_resource_id: default
+    # exclude_basic_doc: true
+    steps:
+      - name: cloudrunv2_service_iap_update
+        min_version: beta
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-iap-service'
+        vars:
+          iap_enabled: 'true'
+          max_instance_count: '100'
+        ignore_read_extra:
+          - deletion_protection
+      - name: cloudrunv2_service_iap_update
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-iap-service'
+        vars:
+          iap_enabled: 'false'
+          max_instance_count: '100'
+        ignore_read_extra:
+          - deletion_protection
+      - name: cloudrunv2_service_iap_update_no_scaling
+        min_version: beta
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-iap-service'
+        vars:
+          iap_enabled: 'true'
+        ignore_read_extra:
+          - deletion_protection
+        include_step_doc: true
 virtual_fields:
   - name: 'deletion_protection'
     description: |
