@@ -127,6 +127,10 @@ func processInputFiles(fileList []string) (customTmpls []string, examples []stri
 		} else if sampleFilePathReg.MatchString(v) {
 			samples = append(samples, v)
 		} else if strings.Contains(v, "mmv1/templates/terraform") && strings.HasSuffix(v, ".tmpl") {
+			if strings.HasSuffix(filepath.Dir(v), "mmv1/templates/terraform") || strings.Contains(v, "/base_configs/") {
+				fmt.Printf("Skipping check for base generator template %s\n", v)
+				continue
+			}
 			customTmpls = append(customTmpls, v)
 		} else {
 			fmt.Printf("Skipping check for file %s\n", v)
