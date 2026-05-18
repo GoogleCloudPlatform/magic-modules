@@ -157,6 +157,7 @@ properties:
   - name: dataStoreSettings
     type: NestedObject
     description: Data store related settings for the app.
+    output: true
     properties:
       - name: engines
         type: Array
