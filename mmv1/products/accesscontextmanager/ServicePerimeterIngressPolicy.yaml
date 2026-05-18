@@ -25,9 +25,6 @@ description: |
   Individual ingress policies can be limited by restricting which services and/
   or actions they match using the ingressTo field.
 
-  ~> **Note:** By default, updates to this resource will remove the IngressPolicy from the
-  from the perimeter and add it back in a non-atomic manner. To ensure that the new IngressPolicy
-  is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
   ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
   the service perimeter resource must have a `lifecycle` block with `ignore_changes = [status[0].ingress_policies]` so
   they don't fight over which ingress rules should be in the policy.
@@ -39,11 +36,12 @@ docs:
 id_format: '{{perimeter}}'
 base_url: ''
 self_link: '{{perimeter}}'
-create_url: '{{perimeter}}'
+create_url: '{{perimeter}}?updateMask=status.ingressPolicies'
 create_verb: 'PATCH'
-update_mask: true
+update_verb: 'PATCH'
+update_url: '{{perimeter}}?updateMask=status.ingressPolicies'
 delete_verb: 'PATCH'
-immutable: true
+delete_url: '{{perimeter}}?updateMask=status.ingressPolicies'
 mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter}}'
@@ -74,6 +72,7 @@ custom_code:
   constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
   encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
+  patch_update_encoder: 'templates/terraform/update_encoder/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
   post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
   pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
@@ -103,6 +102,7 @@ parameters:
       The name of the Service Perimeter to add this resource to.
     url_param_only: true
     required: true
+    immutable: true
     resource: 'ServicePerimeter'
     imports: 'name'
 properties:
@@ -231,6 +231,7 @@ properties:
                       corresponding `serviceName` in `ApiOperation`.
   - name: 'title'
     type: String
+    immutable: true
     description: |
       Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'accessPolicyId'

@@ -1,0 +1,25 @@
+// Enforce API constraints: the Terraform SDK DiffSuppressFunc on certain
+// fields can cause d.Get/d.GetChange to return stale state values even when
+// they have been removed from the config. These checks ensure the PATCH
+// payload complies with the API validation rules.
+//
+// 1. When identityType is not IDENTITY_TYPE_UNSPECIFIED, identities must be empty.
+if ingressFrom, ok := obj["ingressFrom"].(map[string]interface{}); ok {
+	if identityType, ok := ingressFrom["identityType"].(string); ok {
+		if identityType != "" && identityType != "IDENTITY_TYPE_UNSPECIFIED" {
+			ingressFrom["identities"] = []interface{}{}
+		}
+	}
+}
+
+// Sync ResourceData state with corrected obj so that FindNestedObjectInList
+// in the subsequent Read uses up-to-date values for matching.
+config := meta.(*transport_tpg.Config)
+if ingressFromVal, ok := obj["ingressFrom"]; ok {
+	flattenedIngressFrom := flattenNestedAccessContextManagerServicePerimeterIngressPolicyIngressFrom(ingressFromVal, d, config)
+	d.Set("ingress_from", flattenedIngressFrom)
+}
+if ingressToVal, ok := obj["ingressTo"]; ok {
+	flattenedIngressTo := flattenNestedAccessContextManagerServicePerimeterIngressPolicyIngressTo(ingressToVal, d, config)
+	d.Set("ingress_to", flattenedIngressTo)
+}
