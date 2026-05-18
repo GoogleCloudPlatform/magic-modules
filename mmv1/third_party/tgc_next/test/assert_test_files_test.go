@@ -139,3 +139,21 @@ func TestCheckDiffSuppressFunc(t *testing.T) {
 		})
 	}
 }
+
+func TestPrototypeStateBasedDiff(t *testing.T) {
+	t.Run("TestAccAlloydbCluster_update", func(t *testing.T) {
+		ignoredFields := []string{
+			"backup_source",
+			"backupdr_backup_source",
+			"continuous_backup_info",
+			"effective_annotations",
+			"effective_labels",
+			"encryption_info",
+			"migration_source",
+			"terraform_labels",
+			"trial_metadata",
+		}
+		primaryResourceType := "google_alloydb_cluster"
+		StateBasedDiffConversion(t, ignoredFields, primaryResourceType)
+	})
+}
