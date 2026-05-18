@@ -1,0 +1,75 @@
+{{- /*
+	Helper function to consolidate allowed values for API Hub attributes.
+	This function merges existing immutable values with desired values,
+	handling both system-defined and user-defined attributes.
+*/ -}}
+func consolidateAllowedValues(d *schema.ResourceData, currentAttribute map[string]interface{}, desiredAllowedValues []interface{}) []interface{} {
+	// Check if it's system-defined
+	isSystemDefined := false
+	if defType, ok := currentAttribute["definitionType"].(string); ok && defType == "SYSTEM_DEFINED" {
+		isSystemDefined = true
+	}
+	
+	// Get current allowed_values from the API
+	currentAllowedValues := []interface{}{}
+	if av, ok := currentAttribute["allowedValues"]; ok && av != nil {
+		currentAllowedValues = av.([]interface{})
+	}
+	
+	// Build a map of desired values by ID for easy lookup
+	desiredMap := make(map[string]interface{})
+	for _, val := range desiredAllowedValues {
+		if valMap, ok := val.(map[string]interface{}); ok {
+			if id, ok := valMap["id"].(string); ok {
+				desiredMap[id] = val
+			}
+		}
+	}
+	
+	// Merge values based on attribute type
+	mergedValues := []interface{}{}
+	if isSystemDefined {
+		// For system-defined attributes, preserve immutable values
+		for _, currentVal := range currentAllowedValues {
+			if currentValMap, ok := currentVal.(map[string]interface{}); ok {
+				currentId, _ := currentValMap["id"].(string)
+				
+				// Check if this value is immutable
+				isImmutable := false
+				if immutableVal, ok := currentValMap["immutable"]; ok {
+					if immutableBool, ok := immutableVal.(bool); ok && immutableBool {
+						isImmutable = true
+					}
+				}
+				
+				if isImmutable {
+					// Always include immutable values
+					mergedValues = append(mergedValues, currentVal)
+				} else if desiredVal, exists := desiredMap[currentId]; exists {
+					// Include the desired version of mutable values
+					mergedValues = append(mergedValues, desiredVal)
+					delete(desiredMap, currentId)
+				} else if !d.HasChange("allowed_values") {
+					// If allowed_values hasn't changed, keep existing values
+					mergedValues = append(mergedValues, currentVal)
+				}
+			}
+		}
+	} else {
+		// For user-defined attributes
+		if d.HasChange("allowed_values") {
+			// Use desired values directly when changed
+			mergedValues = desiredAllowedValues
+		} else {
+			// Keep existing values when not changed
+			mergedValues = currentAllowedValues
+		}
+	}
+	
+	// Add any new values
+	for _, val := range desiredMap {
+		mergedValues = append(mergedValues, val)
+	}
+	
+	return mergedValues
+}

@@ -1,0 +1,30 @@
+resource "google_apihub_attribute_allowed_values" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  attribute_id = "{{index $.Vars "attribute_id"}}"
+  
+  # Manage allowed values for the system-defined attribute
+  # The resource automatically fetches existing values and preserves immutable ones
+  allowed_values {
+    id           = "dev"
+    display_name = "Development"
+    description  = "Development environment"
+  }
+  
+  allowed_values {
+    id           = "test"
+    display_name = "Testing"
+    description  = "Testing environment"
+  }
+  
+  allowed_values {
+    id           = "staging"
+    display_name = "Staging"
+    description  = "Staging environment"
+  }
+  
+  allowed_values {
+    id           = "prod"
+    display_name = "Production"
+    description  = "Production environment"
+  }
+}
