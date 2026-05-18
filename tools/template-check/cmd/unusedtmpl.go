@@ -16,6 +16,7 @@ import (
 const unusedTmplDesc = "Check whether any template files are not used in product yamls"
 
 var exampleFilePathReg = regexp.MustCompile(".*mmv1/templates/terraform/examples/([a-zA-Z0-9_-]+).tf.tmpl")
+var sampleFilePathReg = regexp.MustCompile(".*mmv1/templates/terraform/samples/services/.*\\.tf\\.tmpl")
 
 type unusedTmplOptions struct {
 	rootOptions *rootOptions
@@ -29,8 +30,15 @@ type tree struct {
 
 type resourceYaml struct {
 	Examples []struct {
-		Name string
-	}
+		Name string `yaml:"name"`
+	} `yaml:"examples,omitempty"`
+	Samples []struct {
+		Name  string `yaml:"name"`
+		Steps []struct {
+			Name       string `yaml:"name"`
+			ConfigPath string `yaml:"config_path,omitempty"`
+		} `yaml:"steps"`
+	} `yaml:"samples,omitempty"`
 }
 
 func newUnusedTmplCmd(rootOptions *rootOptions) *cobra.Command {
@@ -54,7 +62,7 @@ func (o *unusedTmplOptions) run() error {
 	if len(o.fileList) == 0 {
 		return nil
 	}
-	newCustomTmpls, newExamples := processInputFiles(o.fileList)
+	newCustomTmpls, newExamples, newSamples := processInputFiles(o.fileList)
 
 	found := false
 	// get repo dir from tmpl files
@@ -93,16 +101,31 @@ func (o *unusedTmplOptions) run() error {
 		}
 
 	}
+	if len(newSamples) > 0 {
+		samples, err := findSamples(productFiles)
+		if err != nil {
+			return err
+		}
+		for _, file := range newSamples {
+			templatePath := strings.ReplaceAll(file, repoPath+"/mmv1/", "")
+			if _, ok := samples[templatePath]; !ok {
+				found = true
+				fmt.Fprintf(os.Stderr, "File %s not used in any product yaml.\n", file)
+			}
+		}
+	}
 	if found {
 		return fmt.Errorf("found templates not used")
 	}
 	return nil
 }
 
-func processInputFiles(fileList []string) (customTmpls []string, examples []string) {
+func processInputFiles(fileList []string) (customTmpls []string, examples []string, samples []string) {
 	for _, v := range fileList {
 		if exampleFilePathReg.MatchString(v) {
 			examples = append(examples, v)
+		} else if sampleFilePathReg.MatchString(v) {
+			samples = append(samples, v)
 		} else if strings.Contains(v, "mmv1/templates/terraform") && strings.HasSuffix(v, ".tmpl") {
 			customTmpls = append(customTmpls, v)
 		} else {
@@ -253,4 +276,34 @@ func findExamples(yamlFiles []string) (map[string]bool, error) {
 		}
 	}
 	return allExamples, nil
+}
+
+// findSamples parsed yaml files to get samples.
+// It returns a map of samples where the key is the inferred sample path.
+func findSamples(yamlFiles []string) (map[string]bool, error) {
+	allSamples := map[string]bool{}
+	for _, yamlFile := range yamlFiles {
+		b, err := os.ReadFile(yamlFile)
+		if err != nil {
+			return nil, err
+		}
+
+		var r resourceYaml
+		if err := yaml.Unmarshal(b, &r); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal yaml file for samples %s: %s", yamlFile, err)
+		}
+		packageName := filepath.Base(filepath.Dir(yamlFile))
+		for _, sample := range r.Samples {
+			for _, step := range sample.Steps {
+				var tmplPath string
+				if step.ConfigPath != "" {
+					tmplPath = step.ConfigPath
+				} else {
+					tmplPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
+				}
+				allSamples[tmplPath] = true
+			}
+		}
+	}
+	return allSamples, nil
 }

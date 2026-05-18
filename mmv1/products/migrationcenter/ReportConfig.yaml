@@ -1,0 +1,91 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ReportConfig
+description: ReportConfig defines the configuration and criteria used to generate Migration Center reports.
+base_url: projects/{{project}}/locations/{{location}}/reportConfigs
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config_id}}
+create_url: projects/{{project}}/locations/{{location}}/reportConfigs?reportConfigId={{report_config_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: UmVwb3J0Q29uZmln
+autogen_async: true
+examples:
+  - name: 'migration_center_report_config_basic'
+    primary_resource_id: 'default'
+    vars:
+      report_config_id: 'report-config-test'
+      pref_set_id: 'pref-set-test'
+      group_id: 'group-test'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: reportConfigId
+    type: String
+    required: true
+    description: |-
+      User specified ID for the report config. It will become the last component
+      of the report config name. The ID must be unique within the project, must
+      conform with RFC-1034, is restricted to lower-cased letters, and has a
+      maximum length of 63 characters. The ID must match the regular expression:
+      [a-z]([a-z0-9-]{0,61}[a-z0-9])?.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The timestamp when the resource was created.
+    output: true
+  - name: description
+    type: String
+    description: Free-text description.
+  - name: displayName
+    type: String
+    description: User-friendly display name. Maximum length is 63 characters.
+  - name: groupPreferencesetAssignments
+    type: Array
+    required: true
+    description: Collection of combinations of groups and preference sets.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: group
+          type: String
+          required: true
+          description: Name of the group.
+        - name: preferenceSet
+          type: String
+          required: true
+          description: Name of the Preference Set.
+  - name: name
+    type: String
+    description: Name of resource.
+    output: true
+  - name: updateTime
+    type: String
+    description: The timestamp when the resource was last updated.
+    output: true

@@ -20,7 +20,6 @@ import (
 	"sort"
 	"strings"
 
-	"bitbucket.org/creachadair/stringset"
 	"github.com/nasa9084/go-openapi"
 )
 
@@ -81,9 +80,8 @@ func defaultImportFormats(id string, onlyLongFormFormat bool) (formats []string)
 	if onlyLongFormFormat {
 		return []string{id}
 	}
-	uniqueFormats := stringset.New()
-
-	uniqueFormats.Add(id)
+	uniqueFormats := make(map[string]struct{})
+	uniqueFormats[id] = struct{}{}
 
 	parts := idParts(id)
 	for i, v := range parts {
@@ -101,7 +99,7 @@ func defaultImportFormats(id string, onlyLongFormFormat bool) (formats []string)
 		}
 	}
 	if len(locationalParts) != 0 {
-		uniqueFormats.Add(strings.Join(locationalParts, "/"))
+		uniqueFormats[strings.Join(locationalParts, "/")] = struct{}{}
 	}
 
 	// short form sans project, region, zone
@@ -112,10 +110,10 @@ func defaultImportFormats(id string, onlyLongFormFormat bool) (formats []string)
 		}
 	}
 	if len(resourceParts) != 0 {
-		uniqueFormats.Add(strings.Join(resourceParts, "/"))
+		uniqueFormats[strings.Join(resourceParts, "/")] = struct{}{}
 	}
 
-	for _, f := range uniqueFormats.Elements() {
+	for f := range uniqueFormats {
 		formats = append(formats, f)
 	}
 

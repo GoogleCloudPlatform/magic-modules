@@ -45,6 +45,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   dependencies:
     - 'google_discovery_engine_chat_engine'
@@ -62,7 +63,7 @@ examples:
       data_store_id: 'data-store-id'
       kms_key_name: 'kms-key'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     vars:

@@ -246,6 +246,20 @@ properties:
           - MIN
           - OPTIMAL
           - MAX
+  - name: postgresHomogeneousConfig
+    type: NestedObject
+    description: |
+      PostgreSQL to PostgreSQL configuration.
+    properties:
+      - name: isNativeLogical
+        type: Boolean
+        required: true
+        description: |
+          Whether the migration uses native logical replication.
+      - name: maxAdditionalSubscriptions
+        type: Integer
+        description: |
+          Maximum number of additional subscriptions to use for the migration job.
   - name: dumpPath
     type: String
     description: |
@@ -269,7 +283,7 @@ properties:
       Cloud SQL console or using Cloud SQL APIs.
     send_empty_value: true
     allow_empty_object: true
-    exactly_one_of:
+    conflicts:
       - reverseSshConnectivity
       - vpcPeeringConnectivity
     properties: []
@@ -277,7 +291,7 @@ properties:
     type: NestedObject
     description: |
       The details of the VPC network that the source database is located in.
-    exactly_one_of:
+    conflicts:
       - staticIpConnectivity
       - vpcPeeringConnectivity
     properties:
@@ -304,7 +318,7 @@ properties:
     type: NestedObject
     description: |
       The details of the VPC network that the source database is located in.
-    exactly_one_of:
+    conflicts:
       - staticIpConnectivity
       - reverseSshConnectivity
     properties:

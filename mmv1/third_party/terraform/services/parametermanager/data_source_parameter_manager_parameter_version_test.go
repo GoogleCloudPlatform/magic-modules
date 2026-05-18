@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccDataSourceParameterManagerParameterVersion_basicWithResourceReference(t *testing.T) {
@@ -190,7 +192,7 @@ data "google_parameter_manager_parameter_version" "parameter-version-with-yaml-d
 func TestAccDataSourceParameterManagerParameterVersion_withKmsKey(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -198,7 +200,7 @@ func TestAccDataSourceParameterManagerParameterVersion_withKmsKey(t *testing.T) 
 	})
 
 	context := map[string]interface{}{
-		"kms_key":       acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-1").CryptoKey.Name,
+		"kms_key":       kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-1").CryptoKey.Name,
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

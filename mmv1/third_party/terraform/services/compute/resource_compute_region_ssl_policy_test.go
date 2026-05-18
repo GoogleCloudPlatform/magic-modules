@@ -1,0 +1,428 @@
+package compute_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	compute "google.golang.org/api/compute/v0.alpha"
+)
+
+func TestAccComputeRegionSslPolicy_regionInherit(t *testing.T) {
+	t.Parallel()
+
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSslRegionDefaultFromEnv(sslPolicyName),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslUpdateRegionDefaultFromEnv(sslPolicyName),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionSslPolicy_update(t *testing.T) {
+	t.Parallel()
+
+	var sslPolicy map[string]interface{}
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSslUpdate1(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "MODERN"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_0"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslUpdate2(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "RESTRICTED"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_2"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslUpdate4(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "FIPS_202205"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_2"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslUpdate5(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "RESTRICTED"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_3"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionSslPolicy_update_to_custom(t *testing.T) {
+	t.Parallel()
+
+	var sslPolicy map[string]interface{}
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSslUpdate1(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "MODERN"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_0"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslUpdate3(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "CUSTOM"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_1"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
+	t.Parallel()
+
+	var sslPolicy map[string]interface{}
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSslUpdate3(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "CUSTOM"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_1"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslUpdate1(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "MODERN"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_0"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
+	t.Parallel()
+
+	var sslPolicy compute.SslPolicy
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSslUpdate1(sslPolicyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "profile", "MODERN"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_0"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", ""),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "ENABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", "ENABLED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "DEFERRED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", "DEFERRED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", "DEFAULT"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccCheckComputeRegionSslPolicyExists(t *testing.T, n string, sslPolicy *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		project, err := acctest.GetTestProject(rs.Primary, config)
+		if err != nil {
+			return err
+		}
+
+		name := rs.Primary.Attributes["name"]
+
+		url := fmt.Sprintf("%sprojects/%s/regions/us-central1/sslPolicies/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), project, name)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("Error Reading SSL Policy %s: %s", name, err)
+		}
+
+		if foundName, ok := found["name"].(string); !ok || foundName != name {
+			return fmt.Errorf("SSL Policy not found")
+		}
+
+		*sslPolicy = found
+
+		return nil
+	}
+}
+
+func testAccComputeRegionSslUpdate1(resourceName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "update" {
+  name            = "%s"
+  description     = "Generated by TF provider acceptance test"
+  min_tls_version = "TLS_1_0"
+  profile         = "MODERN"
+  region          = "us-central1"
+}
+`, resourceName)
+}
+
+func testAccComputeRegionSslUpdate2(resourceName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "update" {
+  name            = "%s"
+  description     = "Generated by TF provider acceptance test"
+  min_tls_version = "TLS_1_2"
+  profile         = "RESTRICTED"
+  region          = "us-central1"
+}
+`, resourceName)
+}
+
+func testAccComputeRegionSslUpdate3(resourceName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "update" {
+  name            = "%s"
+  description     = "Generated by TF provider acceptance test"
+  min_tls_version = "TLS_1_1"
+  profile         = "CUSTOM"
+  region          = "us-central1"
+  custom_features = ["TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"]
+}
+`, resourceName)
+}
+
+func testAccComputeRegionSslUpdate4(resourceName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "update" {
+  name            = "%s"
+  description     = "Generated by TF provider acceptance test"
+  min_tls_version = "TLS_1_2"
+  profile         = "FIPS_202205"
+  region          = "us-central1"
+}
+`, resourceName)
+}
+
+func testAccComputeRegionSslUpdate5(resourceName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "update" {
+  name            = "%s"
+  description     = "Generated by TF provider acceptance test"
+  min_tls_version = "TLS_1_3"
+  profile         = "RESTRICTED"
+  region          = "us-central1"
+}
+`, resourceName)
+}
+
+func testAccComputeRegionSslRegionDefaultFromEnv(resourceName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "foobar" {
+  name            = "%s"
+  description     = "Generated by TF provider acceptance test"
+  min_tls_version = "TLS_1_0"
+  profile         = "MODERN"
+}
+`, resourceName)
+}
+
+func testAccComputeRegionSslUpdateRegionDefaultFromEnv(resourceName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "foobar" {
+  name            = "%s"
+  description     = "Generated by TF provider acceptance test - updated"
+  min_tls_version = "TLS_1_0"
+  profile         = "MODERN"
+}
+`, resourceName)
+}
+
+func testAccComputeRegionSslPostQuantum(resourceName string, pqke string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "postquantum" {
+  name                         = "%s"
+  profile                      = "MODERN"
+  min_tls_version              = "TLS_1_2"
+  region                       = "us-central1"
+  post_quantum_key_exchange    = "%s"
+}
+`, resourceName, pqke)
+}

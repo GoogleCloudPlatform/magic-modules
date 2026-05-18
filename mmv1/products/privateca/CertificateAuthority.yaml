@@ -54,6 +54,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/privateca_authority_disable.go.tmpl'
   post_import: 'templates/terraform/post_import/privateca_import.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/privateca_certificate_authority.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 custom_diff:
   - 'resourcePrivateCaCACustomDiff'
 examples:
@@ -65,7 +66,7 @@ examples:
       pool_location: 'us-central1'
       deletion_protection: 'true'
     test_vars_overrides:
-      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       'pool_location': '"us-central1"'
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -78,7 +79,7 @@ examples:
       pool_location: 'us-central1'
       deletion_protection: 'true'
     test_vars_overrides:
-      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       'pool_location': '"us-central1"'
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -93,7 +94,7 @@ examples:
       pool_location: 'us-central1'
       deletion_protection: 'true'
     test_vars_overrides:
-      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       'pool_location': '"us-central1"'
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -111,8 +112,8 @@ examples:
       pool_location: 'us-central1'
       deletion_protection: 'true'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
-      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       'pool_location': '"us-central1"'
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -131,8 +132,8 @@ examples:
       pool_location: 'us-central1'
       deletion_protection: 'true'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
-      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       'pool_location': '"us-central1"'
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -149,7 +150,7 @@ examples:
       pool_location: 'us-central1'
       deletion_protection: 'true'
     test_vars_overrides:
-      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       'pool_location': '"us-central1"'
       'deletion_protection': 'false'
     ignore_read_extra:
