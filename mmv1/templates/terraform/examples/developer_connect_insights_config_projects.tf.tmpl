@@ -7,16 +7,10 @@ resource "google_project" "project" {
 }
 
 # Grant Permissions
-resource "google_project_iam_member" "apphub_permissions" {
-  project = google_project.project.project_id
-  role = "roles/apphub.admin"
-  member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
-}
-
 resource "google_project_iam_member" "insights_agent" {
   project = google_project.project.project_id
   role = "roles/developerconnect.insightsAgent"
-  member = "serviceAccount:66214305248-compute@developer.gserviceaccount.com"
+  member = "serviceAccount:service-${google_project.project.number}@gcp-sa-devconnect.iam.gserviceaccount.com"
 }
 
 # Enable APIs
@@ -85,7 +79,6 @@ resource "google_project_service" "devconnect_api" {
 # Wait delay after enabling APIs and granting permissions
 resource "time_sleep" "wait_for_propagation" {
   depends_on = [
-    google_project_iam_member.apphub_permissions,
     google_project_iam_member.insights_agent,
     google_project_service.apphub_api_service,
     google_project_service.containeranalysis_api,
