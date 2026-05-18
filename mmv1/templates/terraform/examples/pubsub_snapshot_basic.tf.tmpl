@@ -1,0 +1,17 @@
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
+}
+
+resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
+  name  = "{{index $.Vars "subscription_name"}}"
+  topic = google_pubsub_topic.{{$.PrimaryResourceId}}.id
+}
+
+resource "google_pubsub_snapshot" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "snapshot_name"}}"
+  subscription = google_pubsub_subscription.{{$.PrimaryResourceId}}.name
+
+  labels = {
+    foo = "bar"
+  }
+}
