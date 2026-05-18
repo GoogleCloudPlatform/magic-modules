@@ -1,0 +1,35 @@
+// Reference design doc: go/lima-terraform
+// Un-nesting API billing info back to the flat 'licensecount' attribute.
+// If new billing structures (e.g., vCPU or tier-based billing) are added to the API, add corresponding decoders here.
+billingInfo, ok := res["currentBillingInfo"].(map[string]interface{})
+if ok {
+    if userCountBilling, ok := billingInfo["userCountBilling"].(map[string]interface{}); ok {
+        if err := d.Set("licensecount", userCountBilling["userCount"]); err != nil {
+            return fmt.Errorf("Error setting count: %s", err)
+        }
+    } else if packCountBilling, ok := billingInfo["packCountBilling"].(map[string]interface{}); ok {
+        if err := d.Set("licensecount", packCountBilling["packCount"]); err != nil {
+            return fmt.Errorf("Error setting count: %s", err)
+        }
+    }
+}
+
+prodSplit := strings.Split(res["product"].(string), "/")
+if err := d.Set("product", prodSplit[len(prodSplit) - 1]); err != nil {
+    return fmt.Errorf("Error setting product: %s", err)
+}
+
+// Mapping API state to the Terraform 'active' boolean.
+// If additional API states (e.g., PENDING or DELETING) are introduced in future API versions, update state evaluations accordingly.
+state, ok := res["state"].(string)
+if ok {
+    if state == "STATE_ACTIVE" {
+        if err := d.Set("active", true); err != nil {
+            return fmt.Errorf("Error setting active: %s", err)
+        }
+    } else if state == "STATE_SUSPENDED" {
+        if err := d.Set("active", false); err != nil {
+            return fmt.Errorf("Error setting active: %s", err)
+        }
+    }
+}
