@@ -942,6 +942,7 @@ properties:
             - name: 'details'
               type: Array
               description: A list of messages that carry the error details.
+              custom_flatten: 'templates/terraform/custom_flatten/dlp_discovery_config_error_details.tmpl'
               item_type:
                 type: KeyValuePairs
         - name: 'timestamp'
