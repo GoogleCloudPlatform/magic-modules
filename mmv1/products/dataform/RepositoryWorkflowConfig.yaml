@@ -41,6 +41,19 @@ examples:
     test_vars_overrides:
       # for backward compatible
       git_repository_name: '"my/repository" + randomSuffix'
+  - name: dataform_repository_workflow_config_with_query_priority
+    primary_resource_id: workflow
+    min_version: beta
+    vars:
+      data: secret-data
+      dataform_repository_name: dataform_repository
+      git_repository_name: my/repository
+      release_name: my_release
+      secret_name: my_secret
+      service_account_name: dataform-sa
+      workflow_name: my_workflow
+    test_vars_overrides:
+      git_repository_name: '"my/repository" + randomSuffix'
 parameters:
   - name: region
     type: String
@@ -113,6 +126,12 @@ properties:
         type: String
         description: Optional. The service account to run workflow invocations under.
         min_version: beta
+      - name: queryPriority
+        type: Enum
+        description: Specifies the priority for query execution in BigQuery. More information can be found at https://cloud.google.com/bigquery/docs/running-queries#queries.
+        enum_values:
+          - INTERACTIVE
+          - BATCH
   - name: cronSchedule
     type: String
     description: Optional. Optional schedule (in cron format) for automatic creation of compilation results.
