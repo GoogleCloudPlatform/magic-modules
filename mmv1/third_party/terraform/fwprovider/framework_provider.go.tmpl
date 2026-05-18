@@ -294,15 +294,12 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
 	//    See also, new approaches to handle this: https://github.com/GoogleCloudPlatform/magic-modules/pull/11925
 
 
-<<<<<<< HEAD
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources, data sources,
 	// ephemeral resources, and list resources implemented using the plugin-framework. Their Configure functions receive this data via ConfigureRequest.ProviderData
 	// (list resources use ConfigureResponse.ListResourceData — see terraform-plugin-framework list.ConfigureRequest).
 	meta := p.Primary.Meta().(*transport_tpg.Config)
-=======
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources and data sources
 	// implemented using the plugin-framework. The resources' Configure functions receive this data in the ConfigureRequest argument.
-<<<<<<< HEAD
 	primaryMeta := p.Primary.Meta()
 	if primaryMeta == nil {
 		resp.Diagnostics.AddError("Provider not configured", "SDK provider metadata is nil. Ensure the provider block is configured before using framework resources.")
@@ -313,10 +310,7 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
 		resp.Diagnostics.AddError("Provider configuration error", "SDK provider metadata had unexpected type and could not be propagated to framework resources.")
 		return
 	}
->>>>>>> 4a8305bc7 (resolve issues with using list_compute_iam_member (muxinng + helpers))
-=======
 	meta := p.Primary.Meta().(*transport_tpg.Config)
->>>>>>> 464559223 (remove extra nil checks)
 	resp.DataSourceData = meta
 	resp.ResourceData = meta
 	resp.EphemeralResourceData = meta
@@ -333,12 +327,6 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
 func (p *FrameworkProvider) Resources(_ context.Context) []func() resource.Resource {
 	return registry.FrameworkResourceFuncs()
 }
-
-// ListResources defines list blocks for managed resource types implemented with SDKv2 schemas (e.g. IAM members).
-// MMv1-generated IAM list factories live in iam_member_list_resources.go; handwritten IAM types register here.
-//func (p *FrameworkProvider) ListResources(_ context.Context) []func() list.ListResource {
-//	return sdkprovider.IamMemberListResources()
-//}
 
 // Functions defines the provider functions implemented in the provider.
 func (p *FrameworkProvider) Functions(_ context.Context) []func() function.Function {
