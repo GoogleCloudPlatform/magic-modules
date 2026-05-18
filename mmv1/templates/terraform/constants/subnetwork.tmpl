@@ -96,7 +96,7 @@ func resourceComputeSubnetworkSecondaryIpRangeCustomDiff(_ context.Context, diff
 }
 
 func resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
-{{ if and (ne $.TargetVersionName `ga`) (ne $.ProductMetadata.Compiler `terraformgoogleconversion-codegen`) -}}
+{{ if and (ne $.TargetVersionName `ga`) (and (ne $.ProductMetadata.Compiler `terraformgoogleconversion-codegen`) (ne $.ProductMetadata.Compiler `terraformgoogleconversionnext-codegen`)) -}}
 	if len(diff.GetChangedKeysPrefix("secondary_ip_range")) == 0 {
 		return nil
 	}
