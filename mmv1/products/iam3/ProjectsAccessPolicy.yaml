@@ -256,6 +256,3 @@ properties:
       The time when the access policy was most recently
       updated.
     output: true
-
-
-
