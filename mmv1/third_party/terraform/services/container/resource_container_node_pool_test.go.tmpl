@@ -916,7 +916,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
                                                "node_config.0.kubelet_config.0.topology_manager.0.policy", "best-effort"),
 					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
-						                       "node_config.0.kubelet_config.0.topology_manager.0.scope", "pod"),							   
+						                       "node_config.0.kubelet_config.0.topology_manager.0.scope", "pod"),
 					// resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
 					//      "node_config.0.kubelet_config.0.allowed_unsafe_sysctls.0", "kernel.shm*"),
 				),
@@ -949,6 +949,51 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_kubelet_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_withShutdownGracePeriodConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withShutdownGracePeriodConfig(cluster, np, networkName, subnetworkName, 120, 30),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_shutdown_grace_period",
+						"node_config.0.kubelet_config.0.shutdown_grace_period_seconds", "120"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_shutdown_grace_period",
+						"node_config.0.kubelet_config.0.shutdown_grace_period_critical_pods_seconds", "30"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_shutdown_grace_period",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withShutdownGracePeriodConfig(cluster, np, networkName, subnetworkName, 30, 15),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_shutdown_grace_period",
+						"node_config.0.kubelet_config.0.shutdown_grace_period_seconds", "30"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_shutdown_grace_period",
+						"node_config.0.kubelet_config.0.shutdown_grace_period_critical_pods_seconds", "15"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_shutdown_grace_period",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -4125,6 +4170,41 @@ resource "google_container_node_pool" "with_kubelet_config" {
   }
 }
 `, cluster, networkName, subnetworkName, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, quota, period, insecureKubeletReadonlyPortEnabled, podPidsLimit, containerLogMaxSize, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent, imageMinimumGcAge, imageMaximumGcAge, singleProcessOomKill)
+}
+
+func testAccContainerNodePool_withShutdownGracePeriodConfig(cluster, np, networkName, subnetworkName string, gracePeriod, criticalGracePeriod int) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+}
+
+# shutdown_grace_period_seconds and shutdown_grace_period_critical_pods_seconds
+# are only valid for Spot VMs.
+resource "google_container_node_pool" "with_shutdown_grace_period" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type = "e2-medium"
+    image_type   = "COS_CONTAINERD"
+    spot         = true
+    kubelet_config {
+      shutdown_grace_period_seconds               = %d
+      shutdown_grace_period_critical_pods_seconds = %d
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, networkName, subnetworkName, np, gracePeriod, criticalGracePeriod)
 }
 
 func testAccContainerNodePool_withLinuxNodeConfig(cluster, np, tcpMem, networkName, subnetworkName string) string {
