@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	compute "google.golang.org/api/compute/v0.alpha"
 )
 
 func TestAccComputeRegionSslPolicy_regionInherit(t *testing.T) {
@@ -218,7 +217,7 @@ func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
 func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
 	t.Parallel()
 
-	var sslPolicy compute.SslPolicy
+	var sslPolicy map[string]interface{}
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -230,17 +229,17 @@ func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
 				Config: testAccComputeRegionSslUpdate1(sslPolicyName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionSslPolicyExists(
-						t, "google_compute_region_ssl_policy.update", &sslPolicy),
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
 					resource.TestCheckResourceAttr(
-						"google_compute_region_ssl_policy.update", "profile", "MODERN"),
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "profile", "MODERN"),
 					resource.TestCheckResourceAttr(
-						"google_compute_region_ssl_policy.update", "min_tls_version", "TLS_1_0"),
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "min_tls_version", "TLS_1_0"),
 					resource.TestCheckResourceAttr(
-						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", ""),
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", ""),
 				),
 			},
 			{
-				ResourceName:      "google_compute_region_ssl_policy.update",
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -248,13 +247,13 @@ func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
 				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "ENABLED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionSslPolicyExists(
-						t, "google_compute_region_ssl_policy.post_quantum", &sslPolicy),
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
 					resource.TestCheckResourceAttr(
-						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", "ENABLED"),
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "ENABLED"),
 				),
 			},
 			{
-				ResourceName:      "google_compute_region_ssl_policy.post_quantum",
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -262,13 +261,13 @@ func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
 				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "DEFERRED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionSslPolicyExists(
-						t, "google_compute_region_ssl_policy.post_quantum", &sslPolicy),
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
 					resource.TestCheckResourceAttr(
-						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", "DEFERRED"),
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "DEFERRED"),
 				),
 			},
 			{
-				ResourceName:      "google_compute_region_ssl_policy.post_quantum",
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -276,13 +275,13 @@ func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
 				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "DEFAULT"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionSslPolicyExists(
-						t, "google_compute_region_ssl_policy.post_quantum", &sslPolicy),
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
 					resource.TestCheckResourceAttr(
-						"google_compute_region_ssl_policy.post_quantum", "post_quantum_key_exchange", "DEFAULT"),
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "DEFAULT"),
 				),
 			},
 			{
-				ResourceName:      "google_compute_region_ssl_policy.post_quantum",
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
