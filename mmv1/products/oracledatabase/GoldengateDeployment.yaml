@@ -214,6 +214,7 @@ properties:
       - name: description
         type: String
         description: The description of the GoldengateDeployment.
+        default_from_api: true
       - name: environmentType
         type: String
         description: The environment type of the GoldengateDeployment.
@@ -493,6 +494,7 @@ properties:
           - name: oggVersion
             type: String
             description: Version of OGG
+            default_from_api: true
           - name: passwordSecretId
             type: String
             description: The password secret id of the GoldengateDeployment.

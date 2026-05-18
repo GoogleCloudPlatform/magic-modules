@@ -16,11 +16,13 @@ resource "google_oracle_database_goldengate_deployment" "{{$.PrimaryResourceId}}
     is_auto_scaling_enabled = false
     license_model           = "LICENSE_INCLUDED"
     environment_type        = "PRODUCTION"
+    description             = "This is a test deployment"
     
     ogg_data {
-      admin_username = "admin"
-      admin_password = "123Abpassword!"
-      deployment     = "deployment"
+      admin_username              = "admin"
+      admin_password_secret_version = "projects/676769435840/secrets/adb-password/versions/1"
+      deployment                  = "deployment"
+      ogg_version                 = "21.3.0.0.0"
     }
 
     maintenance_window {
