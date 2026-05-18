@@ -369,7 +369,6 @@ func (t *Terraform) GenerateIamPolicyLegacy(object api.Resource, templateData Te
 		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
-
 		// Only generate test if testable examples exist.
 		examples := google.Reject(object.Examples, func(e *resource.Examples) bool {
 			return e.ExcludeTest
@@ -401,7 +400,6 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
-
 		// Only generate test if testable example configs exist.
 		samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
 			return s.ExcludeTest
@@ -955,19 +953,25 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 			}
 
 			var iamClassName string
+			var iamMemberListImport string
+			var iamMemberListFunc string
 			iamPolicy := object.IamPolicy
 			if iamPolicy != nil && !iamPolicy.Exclude {
 				t.IAMResourceCount += 3
 
 				if slices.Index(product.ORDER, iamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName) {
 					iamClassName = fmt.Sprintf("%s.%s", service, object.ResourceName())
+					iamMemberListImport = service
+					iamMemberListFunc = fmt.Sprintf("New%sIamMemberListResource", object.ResourceName())
 				}
 			}
 
 			t.ResourcesForVersion = append(t.ResourcesForVersion, map[string]string{
-				"TerraformName": object.TerraformName(),
-				"ResourceName":  resourceName,
-				"IamClassName":  iamClassName,
+				"TerraformName":       object.TerraformName(),
+				"ResourceName":        resourceName,
+				"IamClassName":        iamClassName,
+				"IamMemberListImport": iamMemberListImport,
+				"IamMemberListFunc":   iamMemberListFunc,
 			})
 		}
 	}

@@ -16,7 +16,7 @@ type IamIdentityParam struct {
 }
 
 // IamResourceIdentityConfig holds all the per-resource data needed to parse an
-// IAM import identity into the parent resource's id
+// IAM import identity into a canonical resource id.
 type IamResourceIdentityConfig struct {
 	Params    []IamIdentityParam
 	UriFormat string // fmt.Sprintf format producing the canonical resource id
@@ -29,7 +29,7 @@ var DefaultConfigValueFuncs = map[string]func(tpgresource.TerraformResourceData,
 	"location": tpgresource.GetLocation,
 }
 
-// ParseIamResourceIdentity resolves an IAM import identity into the parent
+// ParseIamResourceIdentity resolves an IAM import identity into a canonical
 // resource id string (the same shape as the IAM updater's GetResourceId()).
 func ParseIamResourceIdentity(
 	d *schema.ResourceData,

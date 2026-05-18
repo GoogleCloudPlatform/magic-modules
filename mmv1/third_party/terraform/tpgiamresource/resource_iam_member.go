@@ -191,7 +191,7 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 }
 
 // setIamMemberIdFromParentResourceIdentity converts a resource-identity import into
-// the `id` (`{resource} {role} {member} [condition_title]`) consumed
+// the canonical id (`{resource} {role} {member} [condition_title]`) consumed
 // by iamMemberImport. No-op if there is no identity parser or d already has
 // an id.
 func setIamMemberIdFromParentResourceIdentity(d *schema.ResourceData, config *transport_tpg.Config, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) error {
@@ -240,11 +240,11 @@ func setIamMemberIdFromParentResourceIdentity(d *schema.ResourceData, config *tr
 }
 
 // setIamMemberResourceIdentity sets parent attributes from state plus role/member/condition_title.
-// ParentResourceIdentityParser is only identity→id (for import); it cannot derive parent
+// ParentResourceIdentityParser is only identity→canonical id (for import); it cannot derive parent
 // fields from updater.GetResourceId(). Those fields must come from the same state the updater
 // used, so they stay consistent with GetResourceId() and round-trip through ParentResourceIdentityParser.
 func setIamMemberResourceIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSpecificSchema map[string]*schema.Schema, role, member, conditionTitle string) {
-	populateIamParentIdentity(identity, d, parentSpecificSchema)
+	PopulateIamParentIdentity(identity, d, parentSpecificSchema)
 	identity.Set("role", role)
 	identity.Set("member", tpgresource.NormalizeIamPrincipalCasing(member))
 	if conditionTitle != "" {

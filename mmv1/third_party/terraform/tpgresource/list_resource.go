@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"log"
 
+	fwdiag "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -247,4 +249,67 @@ func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResourc
 	}
 
 	return nil
+}
+
+// SdkSchemaToListSchema converts an SDK schema map to a plugin-framework list schema.
+// Required SDK attributes become Required list attributes; everything else becomes Optional.
+func SdkSchemaToListSchema(sdkSchema map[string]*schema.Schema) listschema.Schema {
+	attrs := make(map[string]listschema.Attribute, len(sdkSchema))
+	for name, sch := range sdkSchema {
+		attr := listschema.StringAttribute{Description: sch.Description}
+		if sch.Required {
+			attr.Required = true
+		} else {
+			attr.Optional = true
+		}
+		attrs[name] = attr
+	}
+	return listschema.Schema{Attributes: attrs}
+}
+
+// ApplyListBlockConfig reads string attributes from the Terraform list-block config
+// and sets them on the given ResourceData.
+func ApplyListBlockConfig(ctx context.Context, req list.ListRequest, attrSchema map[string]*schema.Schema, rd *schema.ResourceData) fwdiag.Diagnostics {
+	var diags fwdiag.Diagnostics
+	for attrName := range attrSchema {
+		var v types.String
+		diags.Append(req.Config.GetAttribute(ctx, path.Root(attrName), &v)...)
+		if diags.HasError() {
+			return diags
+		}
+		if v.IsNull() || v.IsUnknown() {
+			continue
+		}
+		if err := rd.Set(attrName, v.ValueString()); err != nil {
+			diags.AddError("Error setting list block attribute", fmt.Sprintf("%s: %v", attrName, err))
+			return diags
+		}
+	}
+	return diags
+}
+
+// CopyResourceDataFields copies the values of the given schema keys from src to dst.
+func CopyResourceDataFields(dst, src *schema.ResourceData, fields map[string]*schema.Schema) {
+	for k := range fields {
+		_ = dst.Set(k, src.Get(k))
+	}
+}
+
+// DeriveListSchemas splits a resource's full schema into two maps by stripping out baseSchema
+// keys and optionally excluding resourceNameField from the list block.
+//   - resourceSchema: all keys in fullSchema that are NOT in baseSchema
+//   - listBlockSchema: same as resourceSchema minus resourceNameField (if non-empty)
+func DeriveListSchemas(fullSchema map[string]*schema.Schema, baseSchema map[string]*schema.Schema, resourceNameField string) (resourceSchema, listBlockSchema map[string]*schema.Schema) {
+	resourceSchema = make(map[string]*schema.Schema, len(fullSchema))
+	listBlockSchema = make(map[string]*schema.Schema, len(fullSchema))
+	for k, v := range fullSchema {
+		if _, isBase := baseSchema[k]; isBase {
+			continue
+		}
+		resourceSchema[k] = v
+		if k != resourceNameField {
+			listBlockSchema[k] = v
+		}
+	}
+	return
 }
