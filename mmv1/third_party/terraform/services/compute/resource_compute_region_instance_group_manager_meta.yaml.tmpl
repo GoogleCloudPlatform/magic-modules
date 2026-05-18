@@ -126,6 +126,7 @@ fields:
 {{- end }}
   - field: 'project'
   - api_field: 'region'
+  - api_field: 'resourcePolicies.workloadPolicy'
   - api_field: 'selfLink'
   - api_field: 'standbyPolicy.initialDelaySec'
   - api_field: 'standbyPolicy.mode'
@@ -149,6 +150,7 @@ fields:
   - api_field: 'status.versionTarget.isReached'
   - api_field: 'targetPools'
   - api_field: 'targetSize'
+  - api_field: 'targetSizePolicy.mode'
   - api_field: 'targetStoppedSize'
   - api_field: 'targetSuspendedSize'
   - api_field: 'updatePolicy.instanceRedistributionType'
@@ -178,4 +180,6 @@ fields:
   - field: 'wait_for_instances'
     provider_only: true
   - field: 'wait_for_instances_status'
+    provider_only: true
+  - field: 'deletion_policy'
     provider_only: true

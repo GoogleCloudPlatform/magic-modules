@@ -53,8 +53,8 @@ delete_url: 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
 timeouts:
-  insert_minutes: 45
-  update_minutes: 60
+  insert_minutes: 120
+  update_minutes: 120
   delete_minutes: 45
 autogen_async: true
 async:
@@ -67,6 +67,7 @@ async:
 include_in_tgc_next: true
 custom_code:
   pre_update: 'templates/terraform/pre_update/netapp_storagepool.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:
@@ -76,7 +77,7 @@ examples:
       pool_name: 'test-pool'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     exclude_docs: true
   - name: 'Storage_pool_create_doc'
     primary_resource_id: 'test_pool'
@@ -258,6 +259,17 @@ properties:
     immutable: true
     min_version: beta
     default_from_api: true
+    deprecation_message: '`scaleTier` is deprecated and will be removed in a future major release. Use `scaleType` instead.'
+  - name: 'scaleType'
+    type: Enum
+    description: |
+      The scale type of the storage pool. Defaults to `SCALE_TYPE_DEFAULT` if not specified.
+    enum_values:
+      - 'SCALE_TYPE_UNSPECIFIED'
+      - 'SCALE_TYPE_DEFAULT'
+      - 'SCALE_TYPE_SCALEOUT'
+    immutable: true
+    default_from_api: true
   - name: 'mode'
     type: Enum
     description: |
@@ -270,5 +282,4 @@ properties:
       - 'DEFAULT'
       - 'ONTAP'
     immutable: true
-    min_version: beta
     default_from_api: true

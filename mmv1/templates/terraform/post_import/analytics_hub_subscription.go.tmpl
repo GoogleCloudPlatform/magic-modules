@@ -4,7 +4,7 @@ if err != nil {
 }
 
 projectNumber := d.Get("project").(string)
-resourceManager := config.NewResourceManagerV3Client(userAgent)
+resourceManager := resourcemanagerv3.NewClient(config, userAgent)
 projectData, err := resourceManager.Projects.Get("projects/" + d.Get("project").(string)).Do()
 if err != nil {
 	return nil, err

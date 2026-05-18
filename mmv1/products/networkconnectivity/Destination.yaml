@@ -56,15 +56,14 @@ parameters:
     url_param_only: true
     description: |
       The location of the destination.
+properties:
   - name: 'name'
     type: String
     required: true
     immutable: true
-    url_param_only: true
+    ignore_read: true
     description: |
       The name of the destination.
-
-properties:
   - name: 'createTime'
     type: Time
     output: true

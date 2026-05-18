@@ -37,6 +37,9 @@ examples:
       data_sharing_with_google_setting_id: ls-tf1
       setting_binding_id: ls-tf1b1
       target: projects/980109375338
+    test_vars_overrides:
+      # for backward compatible
+      target: '"projects/980109375338" + randomSuffix'
 autogen_async: true
 async:
   operation:

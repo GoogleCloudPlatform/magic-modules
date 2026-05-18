@@ -161,6 +161,9 @@ type Resource struct {
 	// must be set.
 	Identity []string `yaml:"identity,omitempty"`
 
+	// [Optional] If set to true, the identity values will not be included in identity() generation
+	ExcludeIdentityFromIdentityImport bool `yaml:"exclude_identity_from_identity_import,omitempty"`
+
 	// [Optional] (Api::Resource::NestedQuery) This is useful in case you need
 	// to change the query made for GET requests only. In particular, this is
 	// often used to extract an object from a parent object or a collection.
@@ -245,6 +248,9 @@ type Resource struct {
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
+	// If true, skip identity generation for this resource
+	ExcludeIdentityGeneration bool `yaml:"exclude_identity_generation,omitempty"`
+
 	// Override sweeper settings
 	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
 
@@ -261,6 +267,11 @@ type Resource struct {
 	// mmv1/templates/terraform/state_migrations/
 	// used for maintaining state stability with resources first provisioned on older api versions.
 	SchemaVersion int `yaml:"schema_version,omitempty"`
+
+	// The version of the identity schema for the resource.
+	IdentitySchemaVersion int `yaml:"identity_schema_version,omitempty"`
+
+	IdentityUpgraders bool `yaml:"identity_upgraders,omitempty"`
 
 	// From this schema version on, state_upgrader code is generated for the resource.
 	// When unset, state_upgrade_base_schema_version defauts to 0.
@@ -286,6 +297,19 @@ type Resource struct {
 	// Set to true for resources that are unable to be read from the API, such as
 	// public ca external account keys
 	ExcludeRead bool `yaml:"exclude_read,omitempty"`
+
+	// Set to true for resources that are excluded from universal deletion policy due to differing
+	// behavior on a universal option or use a different data type
+	DeletionPolicyExclude bool `yaml:"deletion_policy_exclude,omitempty"`
+
+	// Set to true for resources that have deletion policy fields with custom options that are
+	// compatible with the universal deletion policy
+	// if set to true, use implement `deletion_policy` within the yaml of the resource
+	DeletionPolicyCustomDocs bool `yaml:"deletion_policy_custom_docs,omitempty"`
+
+	// Set to the default deletion policy value for the resource.
+	// By default this will be "DELETE".
+	DeletionPolicyDefault string `yaml:"deletion_policy_default,omitempty"`
 
 	// Set to true for resources that wish to disable automatic generation of default provider
 	// value customdiff functions
@@ -481,6 +505,11 @@ func (r *Resource) setShallowDefaults() {
 	if r.Timeouts == nil {
 		r.Timeouts = NewTimeouts() // This only sets defaults if Timeouts is nil
 	}
+	if !r.DeletionPolicyExclude {
+		if r.DeletionPolicyDefault == "" {
+			r.DeletionPolicyDefault = "DELETE"
+		}
+	}
 }
 
 // SetDefault sets default values for this Resource and all its properties.
@@ -654,6 +683,37 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	}
 
 	return nested
+}
+
+func (r Resource) IdentityProperties() []*Type {
+	props := make([]*Type, 0)
+	identities := r.Identity
+	if r.ExcludeIdentityFromIdentityImport {
+		identities = nil
+	}
+	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, identities, r.BaseUrl)[0])
+	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
+	for _, p := range r.AllProperties() {
+		if slices.Contains(importFormat, google.Underscore(p.Name)) {
+			props = append(props, p)
+			optionalValues[p.Name] = true
+		}
+	}
+
+	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
+	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
+		if slices.Contains(importFormat, field) && !optionalValues[field] && hasField[field] {
+			props = append(props, &Type{Name: field, Type: "string"})
+		}
+	}
+
+	if len(r.CustomCode.CustomIdentity) > 0 {
+		for _, fieldName := range r.CustomCode.CustomIdentity {
+			props = append(props, &Type{Name: google.Underscore(fieldName), Type: "string", Required: true})
+		}
+	}
+
+	return props
 }
 
 func (r Resource) SensitiveProps() []*Type {
@@ -1065,6 +1125,10 @@ func getLabelsFieldNote(title string) string {
 
 func (r Resource) StateMigrationFile() string {
 	return fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+}
+
+func (r Resource) IdentityUpgraderFile() string {
+	return fmt.Sprintf("templates/terraform/identity_upgraders/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
 
 // ====================
@@ -2116,6 +2180,21 @@ func (r Resource) StateUpgradersCount() []int {
 	return nums
 }
 
+func (r Resource) IdentityUpgradersCount() []int {
+	var nums []int
+	for i := 1; i < r.IdentitySchemaVersion; i++ {
+		nums = append(nums, i)
+	}
+	return nums
+}
+
+func (r Resource) GetIdentitySchemaVersion() int {
+	if r.IdentitySchemaVersion == 0 { // default to 1 if not set; a resource with no identity support has a version of 0
+		return 1
+	}
+	return r.IdentitySchemaVersion
+}
+
 func (r Resource) CaiProductBaseUrl() string {
 	return r.ProductMetadata.ServiceBaseUrl()
 }
@@ -2143,9 +2222,7 @@ func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
 
 // Returns the asset type for this resource.
 func (r Resource) CaiAssetType() string {
-	baseURL := r.CaiProductBaseUrl()
-	productBackendName := r.CaiProductBackendName(baseURL)
-	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, r.CaiResourceName())
+	return fmt.Sprintf("%s/%s", r.ProductMetadata.ServiceName(), r.CaiResourceName())
 }
 
 // DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
@@ -2261,13 +2338,13 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 		return caiAssetNameFormat
 	}
 
-	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
+	return fmt.Sprintf("//%s/%s", r.ProductMetadata.ServiceName(), r.IdFormat)
 }
 
 // Gets a format string for CAI asset name
 func (r Resource) Cai2hclAssetNameTemplate() string {
 	if r.Cai2hclNameFormat != "" {
-		return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.Cai2hclNameFormat)
+		return fmt.Sprintf("//%s/%s", r.ProductMetadata.ServiceName(), r.Cai2hclNameFormat)
 	}
 
 	return r.GetCaiAssetNameTemplate()

@@ -63,6 +63,8 @@ examples:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'display_name': '"tf-test Display Name Basic"'
+      # for backward compatible
+      bundle_id: '"apple.app.12345" + randomSuffix'
   - name: 'firebase_apple_app_full'
     primary_resource_id: 'full'
     min_version: 'beta'
@@ -79,17 +81,11 @@ examples:
       'app_store_id': '12345'
       'team_id': '9987654321'
       'display_name': '"tf-test Display Name Full"'
+      # for backward compatible
+      bundle_id: '"apple.app.12345" + randomSuffix'
     ignore_read_extra:
       - 'project'
       - 'deletion_policy'
-virtual_fields:
-  - name: 'deletion_policy'
-    description: |
-      (Optional) Set to `ABANDON` to allow the Apple to be untracked from terraform state
-      rather than deleted upon `terraform destroy`. This is useful because the Apple may be
-      serving traffic. Set to `DELETE` to delete the Apple. Defaults to `DELETE`.
-    type: String
-    default_value: "DELETE"
 parameters:
 properties:
   - name: 'name'

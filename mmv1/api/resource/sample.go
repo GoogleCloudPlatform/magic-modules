@@ -76,10 +76,6 @@ type Sample struct {
 	// object parent
 	PrimaryResourceType string `yaml:"primary_resource_type,omitempty"`
 
-	// The name of the primary resource for use in IAM tests. IAM tests need
-	// a reference to the primary resource to create IAM policies for
-	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
-
 	// Steps
 	Steps []*Step
 

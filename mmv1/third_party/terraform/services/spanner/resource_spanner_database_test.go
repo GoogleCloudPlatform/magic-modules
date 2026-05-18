@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccSpannerDatabase_basic(t *testing.T) {
@@ -569,8 +571,12 @@ resource "google_spanner_database" "basic" {
 func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"database_name": "tf-test-my-database" + randomSuffix,
+		"instance_name": "tf-test-my-instance" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -602,7 +608,7 @@ func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
 func testAccSpannerDatabase_deletionProtection(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_spanner_instance" "main" {
-  name         = "tf-test-%{random_suffix}"
+  name         = "%{instance_name}"
   display_name = "main-instance"
   config       = "regional-europe-west1"
   num_nodes    = 1
@@ -610,7 +616,7 @@ resource "google_spanner_instance" "main" {
 
 resource "google_spanner_database" "database" {
   instance = google_spanner_instance.main.name
-  name     = "tf-test-my-database%{random_suffix}"
+  name     = "%{database_name}"
   ddl = [
     "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
     "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
@@ -622,7 +628,7 @@ resource "google_spanner_database" "database" {
 func TestAccSpannerDatabase_cmek(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-spanner.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -631,7 +637,7 @@ func TestAccSpannerDatabase_cmek(t *testing.T) {
 
 	// Make the keys outside of Terraform so that a) the project isn't littered with a key from each run and b) so that VCR
 	// can work.
-	kmsKey := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "europe-west1", "tf-test-cmek-test-key-europe-west1")
+	kmsKey := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "europe-west1", "tf-test-cmek-test-key-europe-west1")
 
 	context := map[string]interface{}{
 		"key_name":      kmsKey.CryptoKey.Name,
@@ -687,9 +693,9 @@ resource "google_spanner_database" "database" {
 func TestAccSpannerDatabase_mrcmek(t *testing.T) {
 	t.Parallel()
 
-	kms1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-test-key-us-central1")
-	kms2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-test-key-us-east1")
-	kms3 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-test-key-us-east4")
+	kms1 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-test-key-us-central1")
+	kms2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-test-key-us-east1")
+	kms3 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-test-key-us-east4")
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"key_ring1":     kms1.KeyRing.Name,

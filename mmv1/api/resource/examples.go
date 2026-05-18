@@ -172,9 +172,10 @@ type Examples struct {
 	// your test so avoid if you can.
 	ExternalProviders []string `yaml:"external_providers,omitempty"`
 
-	DocumentationHCLText string `yaml:"-"`
-	TestHCLText          string `yaml:"-"`
-	OicsHCLText          string `yaml:"-"`
+	DocumentationHCLText string            `yaml:"-"`
+	TestHCLText          string            `yaml:"-"`
+	OicsHCLText          string            `yaml:"-"`
+	TestContextVars      map[string]string `yaml:"-"`
 
 	// ====================
 	// TGC
@@ -301,6 +302,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 
 	testVars := make(map[string]string)
 	testTestEnvVars := make(map[string]string)
+	testContextVars := make(map[string]string)
 	// Override vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
@@ -318,12 +320,14 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		// testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+		testContextVars[key] = fmt.Sprintf("\"%s\"+randomSuffix", newVal)
 	}
 
 	// Apply overrides from YAML
-	for key := range e.TestVarsOverrides {
-		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	for key, value := range e.TestVarsOverrides {
+		testContextVars[key] = fmt.Sprintf("%s", value)
 	}
 	for key := range originalTestEnvVars {
 		testTestEnvVars[key] = fmt.Sprintf("%%{%s}", key)
@@ -331,6 +335,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
+	e.TestContextVars = testContextVars
 	e.TestHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		return err

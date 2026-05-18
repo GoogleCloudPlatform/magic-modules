@@ -46,6 +46,7 @@ custom_code:
   constants: 'templates/terraform/constants/vpc_access_connector.go.tmpl'
   pre_update: 'templates/terraform/pre_update/vpc_access_connector_instances.go.tmpl'
   tgc_ignore_terraform_decoder: true
+  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("min_instances", isInstanceShrinkage)'
   - 'customdiff.ForceNewIfChange("max_instances", isInstanceShrinkage)'
@@ -56,14 +57,14 @@ examples:
       name: 'vpc-con'
       network_name: 'default'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")'
   - name: 'vpc_access_connector_shared_vpc'
     primary_resource_id: 'connector'
     vars:
       name: 'vpc-con'
       network_name: 'default'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")'
 tgc_tests:
   - name: TestAccVPCAccessConnector_vpcAccessConnectorThroughput_usingThroughputOrInstancesLimits
     skip: 'For instances vs throughput, prefer instances during cai2hcl conversion as throughput is discouraged.'

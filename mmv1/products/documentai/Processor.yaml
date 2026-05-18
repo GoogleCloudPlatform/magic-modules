@@ -27,6 +27,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/documentai_processor.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us"

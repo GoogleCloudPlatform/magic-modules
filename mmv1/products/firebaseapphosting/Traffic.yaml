@@ -50,6 +50,8 @@ examples:
     test_vars_overrides:
       # prevent tests from colliding with each other
       service_act_id: '"tf-test-traffic-rp"'
+      # for backward compatible
+      branch: '"main" + randomSuffix'
   - name: firebase_app_hosting_traffic_rollout_policy_disabled
     primary_resource_id: example
     vars:
@@ -61,6 +63,8 @@ examples:
     test_vars_overrides:
       # prevent tests from colliding with each other
       service_act_id: '"tf-test-traffic-rpd"'
+      # for backward compatible
+      branch: '"main" + randomSuffix'
 autogen_async: true
 async:
   operation:

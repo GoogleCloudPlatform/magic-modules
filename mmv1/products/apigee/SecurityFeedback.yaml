@@ -29,6 +29,8 @@ import_format:
   - '{{org_id}}/{{feedback_id}}'
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_security_feedback.go.tmpl"
+# we'll exlude from due to custom_import
+exclude_identity_generation: true
 examples:
   - name: 'apigee_security_feedback_basic'
     vars:

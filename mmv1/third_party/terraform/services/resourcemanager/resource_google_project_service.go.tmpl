@@ -12,7 +12,9 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
     tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
+    "github.com/hashicorp/terraform-provider-google/google/registry"
     "github.com/hashicorp/terraform-provider-google/google/tpgresource"
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
     "github.com/hashicorp/terraform-provider-google/google/verify"
@@ -93,6 +95,7 @@ func ResourceGoogleProjectService() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 		),
 
@@ -126,6 +129,9 @@ func ResourceGoogleProjectService() *schema.Resource {
 				Optional: true,
 			},
       {{- end }}
+      		//UDP schema start
+      		"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+      		//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -197,7 +203,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	project = tpgresource.GetResourceNameFromSelfLink(project)
 
 	// Verify project for services still exists
-	projectGetCall := config.NewResourceManagerClient(userAgent).Projects.Get(project)
+	projectGetCall := rmClient.NewClient(config, userAgent).Projects.Get(project)
 	if config.UserProjectOverride {
 		billingProject := project
 
@@ -236,6 +242,11 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 		}
 		return nil
 	}
+	
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	
 
 	log.Printf("[DEBUG] service %s not in enabled services for project %s, removing from state", srv, project)
 	d.SetId("")
@@ -243,6 +254,13 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}) error {
+	
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	
 	config := meta.(*transport_tpg.Config)
 
 	if disable := d.Get("disable_on_destroy"); !(disable.(bool)) {
@@ -299,7 +317,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 				checkIfServiceHasUsage = "CHECK"
 			}
 		  {{- end }}
-			servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
+			servicesDisableCall := tpgserviceusage.NewClient(config, userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 				DisableDependentServices: disableDependentServices,
 				{{- if ne $.TargetVersionName "ga" }}
 				CheckIfServiceHasUsage: checkIfServiceHasUsage,
@@ -335,4 +353,13 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, err)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_project_service",
+		ProductName: "resourcemanager",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceGoogleProjectService(),
+	}.Register()
 }

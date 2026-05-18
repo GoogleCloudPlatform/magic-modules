@@ -46,6 +46,9 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/bigquery_job.go.tmpl'
   encoder: 'templates/terraform/encoders/bigquery_job.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
+# exluding resource_identity due to dataset_id field
+exclude_identity_generation: true
 schema_version: 1
 state_upgraders: true
 examples:
@@ -54,6 +57,9 @@ examples:
     vars:
       job_id: 'job_query'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -71,6 +77,9 @@ examples:
     vars:
       job_id: 'job_query'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'query.0.default_dataset.0.dataset_id'
@@ -120,7 +129,9 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -133,7 +144,9 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'copy.0.destination_table.0.table_id'
@@ -147,6 +160,9 @@ examples:
     vars:
       job_id: 'job_extract'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -155,6 +171,9 @@ examples:
     vars:
       job_id: 'job_extract'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'extract.0.source_table.0.table_id'

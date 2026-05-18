@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -33,6 +34,7 @@ func ResourceOSConfigOSPolicyAssignment() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -1063,6 +1065,9 @@ For a given OS policy assignment, there is only one revision with a value of 'tr
 				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      "The project for the resource",
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1271,10 +1276,19 @@ func resourceOSConfigOSPolicyAssignmentRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error reading OSPolicyAssignment: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceOSConfigOSPolicyAssignment) {
+		return ResourceOSConfigOSPolicyAssignment().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1385,6 +1399,13 @@ func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta inter
 }
 
 func resourceOSConfigOSPolicyAssignmentDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -4670,4 +4691,13 @@ func expandOSConfigOSPolicyAssignmentRolloutDisruptionBudgetPercent(v interface{
 
 func expandOSConfigOSPolicyAssignmentRolloutMinWaitDuration(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_os_config_os_policy_assignment",
+		ProductName: "osconfig",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceOSConfigOSPolicyAssignment(),
+	}.Register()
 }

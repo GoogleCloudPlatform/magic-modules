@@ -42,6 +42,7 @@ include_in_tgc_next: true
 custom_code:
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.tmpl
   constants: templates/terraform/constants/cloud_dataproc_batch.go.tmpl
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
   tgc_ignore_terraform_decoder: true
 examples:
   - name: dataproc_batch_spark
@@ -55,7 +56,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")
   - name: dataproc_batch_spark_full
     primary_resource_id: example_batch_spark
     ignore_read_extra:
@@ -68,7 +69,7 @@ examples:
     test_env_vars:
       project_name: PROJECT_NAME
     test_vars_overrides:
-      kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
+      kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
       prevent_destroy: "false"
   - name: dataproc_batch_sparksql
     primary_resource_id: example_batch_sparsql
@@ -81,7 +82,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network", "dataproc-sparksql-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network", "dataproc-sparksql-test-subnetwork")
   - name: dataproc_batch_pyspark
     primary_resource_id: example_batch_pyspark
     ignore_read_extra:
@@ -93,7 +94,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
   - name: dataproc_batch_sparkr
     primary_resource_id: example_batch_sparkr
     ignore_read_extra:
@@ -105,7 +106,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
   - name: dataproc_batch_autotuning
     primary_resource_id: example_batch_autotuning
     ignore_read_extra:
@@ -117,7 +118,7 @@ examples:
       project_name: PROJECT_NAME
     test_vars_overrides:
       prevent_destroy: "false"
-      subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network", "dataproc-autotuning-test-subnetwork")
+      subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network", "dataproc-autotuning-test-subnetwork")
 parameters:
   - name: location
     type: String
@@ -303,6 +304,7 @@ properties:
               description: |
                 Scenario represents a specific goal that autotuning will attempt to achieve by modifying workloads.
               enum_values:
+                - AUTO
                 - SCALING
                 - BROADCAST_HASH_JOIN
                 - MEMORY

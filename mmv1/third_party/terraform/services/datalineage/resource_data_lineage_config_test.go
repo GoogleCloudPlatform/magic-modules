@@ -1,0 +1,138 @@
+package datalineage_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccDataLineageConfig_update(t *testing.T) {
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLineageConfigDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLineageConfig_basic(context),
+			},
+			{
+				ResourceName:            "google_data_lineage_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
+			{
+				Config: testAccDataLineageConfig_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_data_lineage_config.default", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_data_lineage_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
+		},
+	})
+}
+
+func testAccDataLineageConfig_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_for_project" {
+  create_duration = "60s"
+  depends_on      = [google_project.project]
+}
+
+resource "google_project_service" "datalineage_api" {
+  project            = google_project.project.project_id
+  service            = "datalineage.googleapis.com"
+  depends_on         = [time_sleep.wait_for_project]
+}
+
+resource "google_data_lineage_config" "default" {
+  parent = "projects/${google_project.project.project_id}"
+  location = "global"
+
+  ingestion {
+    rule {
+      integration_selector {
+        integration = "DATAPROC"
+      }
+      lineage_enablement {
+        enabled = true
+      }
+    }
+    rule {
+      integration_selector {
+        integration = "LOOKER_CORE"
+      }
+      lineage_enablement {
+        enabled = true
+      }
+    }
+  }
+  depends_on = [google_project_service.datalineage_api]
+}
+`, context)
+}
+
+func testAccDataLineageConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_for_project" {
+  create_duration = "60s"
+  depends_on      = [google_project.project]
+}
+
+resource "google_project_service" "datalineage_api" {
+  project            = google_project.project.project_id
+  service            = "datalineage.googleapis.com"
+  depends_on         = [time_sleep.wait_for_project]
+}
+
+resource "google_data_lineage_config" "default" {
+  parent = "projects/${google_project.project.project_id}"
+  location = "global"
+
+  ingestion {
+    rule {
+      integration_selector {
+        integration = "DATAPROC"
+      }
+      lineage_enablement {
+        enabled = false
+      }
+    }
+  }
+  depends_on = [google_project_service.datalineage_api]
+}
+`, context)
+}

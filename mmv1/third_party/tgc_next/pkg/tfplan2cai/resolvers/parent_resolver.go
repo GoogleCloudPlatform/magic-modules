@@ -26,42 +26,48 @@ func NewParentResourceResolver(errorLogger *zap.Logger) *ParentResourceResolver 
 	}
 }
 
-func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string][]string {
-	parentToChildMap := make(map[string][]string)
+func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string]map[string]string {
+	dependenciesMap := make(map[string]map[string]string)
 
-	// Read elements from the resouce config
 	resourceConfig, err := tfplan.ReadResourceConfigurations(jsonPlan)
 	if err != nil {
-		return parentToChildMap
+		return dependenciesMap
+	}
+
+	if resourceConfig == nil || resourceConfig.RootModule == nil {
+		return dependenciesMap
 	}
 
 	for _, resource := range resourceConfig.RootModule.Resources {
-		for _, expression := range resource.Expressions {
+		for attrName, expression := range resource.Expressions {
 			if expression.ExpressionData.NestedBlocks != nil {
-				for _, innerExexpression := range expression.ExpressionData.NestedBlocks {
-					for _, v := range innerExexpression {
+				for i, innerMap := range expression.ExpressionData.NestedBlocks {
+					for propName, v := range innerMap {
 						reference := v.References
-						if reference != nil {
-							if strings.HasSuffix(reference[0], ".id") {
-								parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Address)
+						if reference != nil && len(reference) >= 2 && (strings.HasSuffix(reference[0], ".id")) {
+							if dependenciesMap[resource.Address] == nil {
+								dependenciesMap[resource.Address] = make(map[string]string)
 							}
+							path := fmt.Sprintf("%s.%d.%s", attrName, i, propName)
+							dependenciesMap[resource.Address][path] = reference[1]
 						}
 					}
 				}
 			}
 			reference := expression.ExpressionData.References
-			if reference != nil {
-				if strings.HasSuffix(reference[0], ".id") {
-					parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Address)
+			if reference != nil && len(reference) >= 2 && (strings.HasSuffix(reference[0], ".id")) {
+				if dependenciesMap[resource.Address] == nil {
+					dependenciesMap[resource.Address] = make(map[string]string)
 				}
+				dependenciesMap[resource.Address][attrName] = reference[1]
 			}
 		}
 	}
 
-	return parentToChildMap
+	return dependenciesMap
 }
 
-func sortTraversalOrder(graph map[string][]string) (map[int][]string, error) {
+func SortTraversalOrder(graph map[string][]string) (map[int][]string, error) {
 	inDegree := make(map[string]int)
 	allNodes := make(map[string]bool)
 

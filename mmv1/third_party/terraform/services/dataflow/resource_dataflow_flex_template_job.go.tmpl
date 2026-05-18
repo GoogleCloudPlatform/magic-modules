@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
@@ -258,6 +259,9 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 				Default:     false,
 				Description: `If true, treat DRAINING and CANCELLING as terminal job states and do not wait for further changes before removing from terraform state and moving on. WARNING: this will lead to job name conflicts if you do not ensure that the job names are different, e.g. by embedding a release ID or by using a random_id.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -295,7 +299,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		},
 	}
 
-	response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
+	response, err := NewClient(config, userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 	if err != nil {
 		return err
 	}
@@ -522,6 +526,11 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		d.SetId("")
 		return nil
 	}
+	
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	
 
 	return nil
 }
@@ -570,6 +579,11 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 	if resourceDataflowJobIsVirtualUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
 		return nil
 	}
+	
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceDataflowFlexTemplateJob) {
+	    return ResourceDataflowFlexTemplateJob().Read(d, meta)
+	}
+	
 
 	if jobHasUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
 		config := meta.(*transport_tpg.Config)
@@ -613,7 +627,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 			},
 		}
 
-		response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
+		response, err := NewClient(config, userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 		if err != nil {
 			return err
 		}
@@ -636,6 +650,13 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interface{}) error {
+	
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -862,6 +883,15 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 		}
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_dataflow_flex_template_job",
+		ProductName: "dataflow",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceDataflowFlexTemplateJob(),
+	}.Register()
 }
 
 {{ end }}

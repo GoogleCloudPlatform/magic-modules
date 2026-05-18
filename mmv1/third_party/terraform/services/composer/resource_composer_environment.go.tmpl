@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -156,10 +156,11 @@ func ResourceComposerEnvironment() *schema.Resource {
 			// Composer takes <= 1 hr for create/update.
 			Create: schema.DefaultTimeout(120 * time.Minute),
 			Update: schema.DefaultTimeout(120 * time.Minute),
-			Delete: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(120 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
+            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
@@ -1079,6 +1080,9 @@ func ResourceComposerEnvironment() *schema.Resource {
 					},
 				},
 			},
+//UDP schema start
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1117,7 +1121,7 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 	updateOnlyEnv := getComposerEnvironmentPostCreateUpdateObj(env)
 
 	log.Printf("[DEBUG] Creating new Environment %q", envName.ParentName())
-	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Create(envName.ParentName(), env).Do()
+	op, err := NewClient(config, userAgent).Projects.Locations.Environments.Create(envName.ParentName(), env).Do()
 	if err != nil {
 		return err
 	}
@@ -1168,7 +1172,7 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	res, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
+	res, err := NewClient(config, userAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComposerEnvironment %q", d.Id()))
 	}
@@ -1199,10 +1203,20 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("storage_config", flattenComposerStorageConfig(res.StorageConfig)); err != nil {
 		return fmt.Errorf("Error setting Storage: %s", err)
 	}
+                
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
+    }
+    
 	return nil
 }
 
 func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{}) error {
+        
+    if tpgresource.DeletionPolicyPreUpdate(d, ResourceComposerEnvironment) {
+        return ResourceComposerEnvironment().Read(d, meta)
+    }
+    
 	tfConfig := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, tfConfig.UserAgent)
 	if err != nil {
@@ -1609,7 +1623,7 @@ func resourceComposerEnvironmentPatchField(updateMask, userAgent string, env *co
 		return err
 	}
 
-	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.
+	op, err := NewClient(config, userAgent).Projects.Locations.Environments.
 		Patch(envName.ResourceName(), env).
 		UpdateMask(updateMask).Do()
 	if err != nil {
@@ -1629,6 +1643,13 @@ func resourceComposerEnvironmentPatchField(updateMask, userAgent string, env *co
 }
 
 func resourceComposerEnvironmentDelete(d *schema.ResourceData, meta interface{}) error {
+        
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
+        return nil
+    }
+    
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1641,7 +1662,7 @@ func resourceComposerEnvironmentDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	log.Printf("[DEBUG] Deleting Environment %q", d.Id())
-	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Delete(envName.ResourceName()).Do()
+	op, err := NewClient(config, userAgent).Projects.Locations.Environments.Delete(envName.ResourceName()).Do()
 	if err != nil {
 		return err
 	}
@@ -2853,7 +2874,7 @@ func handleComposerEnvironmentCreationOpFailure(id string, envName *ComposerEnvi
 
 	log.Printf("[WARNING] Creation operation for Composer Environment %q failed, check Environment isn't still running", id)
 	// Try to get possible created but invalid environment.
-	env, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
+	env, err := NewClient(config, userAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
 	if err != nil {
 		// If error is 401, we don't have to clean up environment, return nil.
 		// Otherwise, we encountered another error.
@@ -2868,7 +2889,7 @@ func handleComposerEnvironmentCreationOpFailure(id string, envName *ComposerEnvi
 	}
 
 	log.Printf("[WARNING] Environment %q from failed creation operation was created, deleting.", id)
-	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Delete(envName.ResourceName()).Do()
+	op, err := NewClient(config, userAgent).Projects.Locations.Environments.Delete(envName.ResourceName()).Do()
 	if err != nil {
 		return fmt.Errorf("Could not delete the invalid created environment with state %q: %s", env.State, err)
 	}
@@ -3150,4 +3171,13 @@ func gscBucketNameDiffSuppress(_, old, new string, _ *schema.ResourceData) bool 
     return true
   }
   return false
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_composer_environment",
+		ProductName: "composer",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComposerEnvironment(),
+	}.Register()
 }

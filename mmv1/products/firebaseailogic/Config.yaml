@@ -41,6 +41,9 @@ examples:
     primary_resource_id: default
     vars:
       project_id: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      project_id: '"basic" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
@@ -52,6 +55,9 @@ examples:
     vars:
       project_id: 'full'
       api_key_id: "gemini-api-key"
+    test_vars_overrides:
+      # for backward compatible
+      project_id: '"full" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'

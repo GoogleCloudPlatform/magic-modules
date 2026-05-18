@@ -30,6 +30,9 @@ examples:
     vars:
       curation_id: 'test'
     # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
+    test_vars_overrides:
+      # for backward compatible
+      curation_id: '"test" + randomSuffix'
     exclude_test: true
     external_providers: ["time"]
 parameters:

@@ -323,6 +323,9 @@ func (td *TemplateData) GenerateTGCNextTestFile(filePath string, resource api.Re
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	templateFileName := filepath.Base(templatePath)
+	if templatePath == "templates/terraform/examples/base_configs/iam_test_file.go.tmpl" {
+		templatePath = "templates/terraform/samples/base_configs/iam_test_file.go.tmpl"
+	}
 
 	funcMap := template.FuncMap{
 		"TemplatePath": func() string { return templatePath },

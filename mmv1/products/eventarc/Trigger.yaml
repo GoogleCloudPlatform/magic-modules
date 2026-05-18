@@ -31,12 +31,16 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 description: |
  The Eventarc Trigger resource
 sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "europe-west1"
+custom_code:
+  test_constants: 'templates/terraform/test_constants/import_tpgcompute_and_kms.go.tmpl'
 examples:
   - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
@@ -50,7 +54,7 @@ examples:
       trigger_name: some-trigger
       network_attachment_name: network-attachment
     test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-trigger-network")))'
+      'network_attachment_name': 'tpgcompute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na", tpgcompute.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", tpgcompute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-trigger-network")))'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
@@ -69,7 +73,7 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
+      'key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
     exclude_docs: true
   - name: eventarc_trigger_with_workflow_destination
     primary_resource_id: primary

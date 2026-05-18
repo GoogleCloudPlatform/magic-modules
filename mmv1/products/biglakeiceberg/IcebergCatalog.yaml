@@ -29,7 +29,7 @@ supports_indirect_user_project_override: true
 base_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs'
 self_link: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{name}}'
 immutable: false
-create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}&primary-location={{primary_location}}'
+create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}&primary_location={{primary_location}}'
 custom_code:
   custom_update:
     templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl

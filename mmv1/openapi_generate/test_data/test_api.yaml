@@ -235,6 +235,8 @@ components:
           type: object
           additionalProperties: 
             $ref: "#/components/schemas/Food"
+        recursivePet:
+          $ref: "#/components/schemas/Pet"
     Food:
       required:
         - name

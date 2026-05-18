@@ -1,0 +1,24 @@
+resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
+  short_name = "tf-test%{random_suffix}"
+  parent     = "organizations/{{index $.TestEnvVars "org_id"}}"
+  type       = "CLOUD_ARMOR"
+}
+
+resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResourceId}}" {
+  policy_id = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.id
+  action    = "redirect"
+
+  match {
+    config {
+      src_ip_ranges = ["10.0.1.0/24"]
+    }
+    versioned_expr = "SRC_IPS_V1"
+  }
+
+  redirect_options {
+    type   = "EXTERNAL_302"
+    target = "https://www.example.com/blocked"
+  }
+
+  priority = 100
+}

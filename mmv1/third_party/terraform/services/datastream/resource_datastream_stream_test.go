@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDatastreamStream_update(t *testing.T) {
@@ -13,9 +14,18 @@ func TestAccDatastreamStream_update(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"random_suffix":       acctest.RandString(t, 10),
-		"deletion_protection": false,
+		"bucket_name":                       "tf-test-my-bucket" + randomSuffix,
+		"database_instance_name":            "tf-test-my-instance" + randomSuffix,
+		"deletion_protection":               false,
+		"destination_connection_profile_id": "tf-test-destination-profile" + randomSuffix,
+		"network_name":                      "tf-test-my-network" + randomSuffix,
+		"private_connection_id":             "tf-test-my-connection" + randomSuffix,
+		"source_connection_profile_id":      "tf-test-source-profile" + randomSuffix,
+		"stream_id":                         "tf-test-my-stream" + randomSuffix,
+		"random_suffix":                     randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -98,7 +108,7 @@ data "google_project" "project" {
 }
 
 resource "google_sql_database_instance" "instance" {
-    name             = "tf-test-my-instance%{random_suffix}"
+    name             = "%{database_instance_name}"
     database_version = "MYSQL_8_0"
     region           = "us-central1"
     settings {
@@ -156,7 +166,7 @@ resource "google_sql_user" "user" {
 resource "google_datastream_connection_profile" "source_connection_profile" {
     display_name          = "Source connection profile"
     location              = "us-central1"
-    connection_profile_id = "tf-test-source-profile%{random_suffix}"
+    connection_profile_id = "%{source_connection_profile_id}"
     create_without_validation = true
 
     mysql_profile {
@@ -167,7 +177,7 @@ resource "google_datastream_connection_profile" "source_connection_profile" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name                        = "tf-test-my-bucket%{random_suffix}"
+  name                        = "%{bucket_name}"
   location                    = "US"
   uniform_bucket_level_access = true
 }
@@ -193,7 +203,7 @@ resource "google_storage_bucket_iam_member" "reader" {
 resource "google_datastream_connection_profile" "destination_connection_profile" {
     display_name          = "Connection profile"
     location              = "us-central1"
-    connection_profile_id = "tf-test-destination-profile%{random_suffix}"
+    connection_profile_id = "%{destination_connection_profile_id}"
 
     gcs_profile {
         bucket    = google_storage_bucket.bucket.name
@@ -202,7 +212,7 @@ resource "google_datastream_connection_profile" "destination_connection_profile"
 }
 
 resource "google_datastream_stream" "default" {
-    stream_id = "tf-test-my-stream%{random_suffix}"
+    stream_id = "%{stream_id}"
     location = "us-central1"
     display_name = "my stream update"
     desired_state = "%{desired_state}"
@@ -279,6 +289,8 @@ func TestAccDatastreamStream_mongoDb(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "us-central1",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

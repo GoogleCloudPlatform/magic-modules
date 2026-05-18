@@ -24,6 +24,7 @@
 
 package {{ $.Res.PackageName }}_test
 
+{{if or (gt (len $.Res.TestSamples) 0) (not $.Res.ExcludeDelete) -}}
 import (
 	"fmt"
 	"log"
@@ -40,11 +41,23 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
+	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
+{{ range $s := $.Res.TestSamples }}
+  {{- if $s.BootstrapIam }}
+    "{{ $.ImportPath  }}/services/resourcemanager"
+    {{ break }}
+  {{- end }}
+{{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 
 	"google.golang.org/api/googleapi"
+
 )
+
+{{if $.Res.CustomCode.TestConstants -}} 
+    {{- customTemplate $ $.Res.CustomCode.TestConstants true -}}
+{{- end}}
 
 var (
 	_ = fmt.Sprintf
@@ -58,6 +71,7 @@ var (
 	_ = tpgresource.SetLabels
 	_ = transport_tpg.Config{}
 	_ = googleapi.Error{}
+	_ = {{ lower $.Res.ProductMetadata.Name }}.Product
 )
 
 {{ range $s := $.Res.TestSamples }}
@@ -76,7 +90,7 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	t.Parallel()
 
 	{{- if $s.BootstrapIam }}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 	{{- range $iam := $s.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",
@@ -86,10 +100,7 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	})
 	{{- end }}
 
-	{{- $stepCount := len $s.TestSteps }}
-	{{- if gt $stepCount 1 }}
 	randomSuffix := acctest.RandString(t, 10)
-	{{- end }}
 
 	{{- range $i, $st := $s.TestSteps }}
 	{{- if eq $i 0 }}
@@ -100,17 +111,10 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	context_{{ $i }} := map[string]interface{}{
 	{{- end }}
 		{{- template "EnvVarContext" dict "TestEnvVars" $st.TestEnvVars "HasNewLine" false}}
-		{{- range $varKey, $varVal := $st.Vars }}
+		{{- range $varKey, $varVal := $st.TestContextVars }}
 		"{{$varKey}}": {{ $varVal }},
 		{{- end }}
-		{{- range $varKey, $varVal := $st.TestVarsOverrides }}
-		"{{$varKey}}": {{ $varVal }},
-		{{- end }}
-	{{- if gt $stepCount 1 }}
 		"random_suffix": randomSuffix,
-	{{- else }}
-		"random_suffix": acctest.RandString(t, 10),
-	{{- end }}
 	}
 	{{- end }}
 
@@ -154,6 +158,14 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $st }},
 			{{- end }}
 			},
+			{{- if not $.Res.ExcludeIdentityGeneration }}
+			{
+				ResourceName:       "{{ $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+			{{- end }}
 			{{- end }}
 		{{- end }}
 		},
@@ -187,11 +199,15 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)
-
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}{{$.Res.ProductMetadata.Name}}{{"BasePath}}"}}{{$.Res.SelfLinkUri}}")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("%s%s", transport_tpg.BaseUrl({{ lower $.Res.ProductMetadata.Name }}.Product, config), "{{$.Res.SelfLinkUri}}"))
 		if err != nil {
 			return err
 		}
+{{- if $.Res.ProductMetadata.Version.RepEnabled }}
+		if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+			return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+		}
+{{- end }}
 
 		billingProject := ""
 
@@ -221,4 +237,5 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		return nil
 	}
 }
+{{- end }}
 {{- end }}

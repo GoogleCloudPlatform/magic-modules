@@ -12,9 +12,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/container/v1"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_cluster",
+		ProductName: "container",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceContainerCluster(),
+	}.Register()
+}
 
 // ContainerClusterAssetType is the CAI asset type name for container cluster.
 const ContainerClusterAssetType string = "container.googleapis.com/Cluster"
@@ -95,6 +105,7 @@ var (
 		"addons_config.0.lustre_csi_driver_config",
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
+		"addons_config.0.slice_controller_config",
 	}
 
 	privateClusterConfigKeys = []string{
@@ -533,6 +544,20 @@ func ResourceContainerCluster() *schema.Resource {
 							MaxItems:      1,
 							Description:   `The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications. Defaults to disabled; set enabled = true to enable.`,
 							ConflictsWith: []string{"enable_autopilot"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"slice_controller_config": {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -985,6 +1010,53 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `Enable NET_ADMIN for this cluster.`,
 			},
 
+			"autopilot_privileged_admission": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "The customer allowlist Cloud Storage paths for the cluster. These paths are used with the `--autopilot-privileged-admission` flag to authorize privileged workloads in Autopilot clusters. To allow default partner allowlists, set to []. To allow no allowlists, set to [\"\"].",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringMatch(regexp.MustCompile(`^((?:gke|gs)://.+)?$`), "allowlist path must start with either gke:// or gs://"),
+				},
+			},
+
+			"autopilot_cluster_policy_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration for Autopilot cluster policy.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"no_standard_node_pools": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether standard node pools are disabled.`,
+						},
+						"no_system_impersonation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether system impersonation is disabled.`,
+						},
+						"no_system_mutation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether system mutation is disabled.`,
+						},
+						"no_unsafe_webhooks": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether unsafe webhooks are disabled.`,
+						},
+					},
+				},
+			},
+
 			"authenticator_groups_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1141,6 +1213,24 @@ func ResourceContainerCluster() *schema.Resource {
 												},
 											},
 										},
+									},
+								},
+							},
+						},
+						"disruption_budget": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Time window for maintenance operations.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"minor_version_disruption_interval": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"patch_version_disruption_interval": {
+										Type:     schema.TypeString,
+										Optional: true,
 									},
 								},
 							},
@@ -1479,6 +1569,18 @@ func ResourceContainerCluster() *schema.Resource {
 
 			"node_config": schemaNodeConfig(),
 
+			"node_pool": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				ForceNew: true, // TODO: Add ability to add/remove nodePools
+				Elem: &schema.Resource{
+					Schema: schemaNodePool,
+				},
+				Description:   `List of node pools associated with this cluster. See google_container_node_pool for schema. Warning: node pools defined inside a cluster can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability to say "these are the only node pools associated with this cluster", use the google_container_node_pool resource instead of this property.`,
+				ConflictsWith: []string{"enable_autopilot"},
+			},
+
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
 			"node_pool_auto_config": {
@@ -1785,6 +1887,11 @@ func ResourceContainerCluster() *schema.Resource {
 										Optional:    true,
 										Description: `List of secondary ranges names within this subnetwork that can be used for pod IPs.`,
 										Elem:        &schema.Schema{Type: schema.TypeString},
+									},
+									"status": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Status of the subnetwork, If in draining status, subnet will not be selected for new node pools.`,
 									},
 								},
 							},

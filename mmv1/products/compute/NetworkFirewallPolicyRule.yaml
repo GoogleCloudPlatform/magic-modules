@@ -48,6 +48,9 @@ examples:
       network: network
       tag_key: tag-key
       tag_value: tag-value
+    test_vars_overrides:
+      # for backward compatible
+      network: '"network" + randomSuffix'
     test_env_vars:
       org_id: ORG_ID
       project_name: PROJECT_NAME
@@ -65,6 +68,9 @@ examples:
     vars:
       fw_policy: fw-policy
       network: network
+    test_vars_overrides:
+      # for backward compatible
+      network: '"network" + randomSuffix'
     test_env_vars:
       project_name: PROJECT_NAME
   - name: network_firewall_policy_rule_network_context_egress
@@ -78,6 +84,9 @@ examples:
     vars:
       fw_policy: fw-policy
       network: network
+    test_vars_overrides:
+      # for backward compatible
+      network: '"network" + randomSuffix'
     test_env_vars:
       project_name: PROJECT_NAME
 parameters:

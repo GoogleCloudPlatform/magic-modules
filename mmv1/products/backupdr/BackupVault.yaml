@@ -39,6 +39,7 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/backup_dr_backup_vault.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 include_in_tgc_next: true
 examples:
   - name: 'backup_dr_backup_vault_simple'
@@ -58,7 +59,7 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String

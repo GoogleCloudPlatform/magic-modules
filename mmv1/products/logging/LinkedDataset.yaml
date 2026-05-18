@@ -55,6 +55,9 @@ examples:
     vars:
       bucket_id: 'my-bucket'
       link_id: 'mylink'
+    test_vars_overrides:
+      # for backward compatible
+      link_id: '"mylink" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'logging_linked_dataset_all_params'
@@ -62,6 +65,9 @@ examples:
     vars:
       bucket_id: 'my-bucket'
       link_id: 'mylink'
+    test_vars_overrides:
+      # for backward compatible
+      link_id: '"mylink" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
 parameters:

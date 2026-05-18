@@ -3,13 +3,25 @@ package resourcemanager
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/iam/v1"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_organization_iam_custom_role",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleOrganizationIamCustomRole(),
+	}.Register()
+}
 
 func ResourceGoogleOrganizationIamCustomRole() *schema.Resource {
 	return &schema.Resource{
@@ -21,6 +33,10 @@ func ResourceGoogleOrganizationIamCustomRole() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"role_id": {
@@ -71,6 +87,9 @@ func ResourceGoogleOrganizationIamCustomRole() *schema.Resource {
 				Computed:    true,
 				Description: `The name of the role in the format organizations/{{org_id}}/roles/{{role_id}}. Like id, this field can be used as a reference in other resources such as IAM role bindings.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -90,7 +109,7 @@ func resourceGoogleOrganizationIamCustomRoleCreate(d *schema.ResourceData, meta 
 	// Look for role with given ID.
 	// If it exists in deleted state, update to match "created" role state
 	// If it exists and is enabled, return error - we should not try to recreate.
-	r, err := config.NewIamClient(userAgent).Organizations.Roles.Get(roleId).Do()
+	r, err := iambeta.NewClient(config, userAgent).Organizations.Roles.Get(roleId).Do()
 	if err == nil {
 		if r.Deleted {
 			// This role was soft-deleted; update to match new state.
@@ -106,7 +125,7 @@ func resourceGoogleOrganizationIamCustomRoleCreate(d *schema.ResourceData, meta 
 		}
 	} else if err := transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Custom Organization Role %q", roleId)); err == nil {
 		// If no role was found, actually create a new role.
-		role, err := config.NewIamClient(userAgent).Organizations.Roles.Create(orgId, &iam.CreateRoleRequest{
+		role, err := iambeta.NewClient(config, userAgent).Organizations.Roles.Create(orgId, &iam.CreateRoleRequest{
 			RoleId: d.Get("role_id").(string),
 			Role: &iam.Role{
 				Title:               d.Get("title").(string),
@@ -134,7 +153,7 @@ func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta in
 		return err
 	}
 
-	role, err := config.NewIamClient(userAgent).Organizations.Roles.Get(d.Id()).Do()
+	role, err := iambeta.NewClient(config, userAgent).Organizations.Roles.Get(d.Id()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, d.Id())
 	}
@@ -169,10 +188,19 @@ func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error setting deleted: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceGoogleOrganizationIamCustomRoleUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleOrganizationIamCustomRole) {
+		return ResourceGoogleOrganizationIamCustomRole().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -183,20 +211,20 @@ func resourceGoogleOrganizationIamCustomRoleUpdate(d *schema.ResourceData, meta 
 
 	// We want to update the role to some undeleted state.
 	// Make sure the role with given ID exists and is un-deleted before patching.
-	r, err := config.NewIamClient(userAgent).Organizations.Roles.Get(d.Id()).Do()
+	r, err := iambeta.NewClient(config, userAgent).Organizations.Roles.Get(d.Id()).Do()
 	if err != nil {
 		return fmt.Errorf("unable to find custom project role %s to update: %v", d.Id(), err)
 	}
 
 	if r.Deleted {
-		_, err := config.NewIamClient(userAgent).Organizations.Roles.Undelete(d.Id(), &iam.UndeleteRoleRequest{}).Do()
+		_, err := iambeta.NewClient(config, userAgent).Organizations.Roles.Undelete(d.Id(), &iam.UndeleteRoleRequest{}).Do()
 		if err != nil {
 			return fmt.Errorf("Error undeleting the custom organization role %s: %s", d.Get("title").(string), err)
 		}
 	}
 
 	if d.HasChange("title") || d.HasChange("description") || d.HasChange("stage") || d.HasChange("permissions") {
-		_, err := config.NewIamClient(userAgent).Organizations.Roles.Patch(d.Id(), &iam.Role{
+		_, err := iambeta.NewClient(config, userAgent).Organizations.Roles.Patch(d.Id(), &iam.Role{
 			Title:               d.Get("title").(string),
 			Description:         d.Get("description").(string),
 			Stage:               d.Get("stage").(string),
@@ -213,19 +241,26 @@ func resourceGoogleOrganizationIamCustomRoleUpdate(d *schema.ResourceData, meta 
 }
 
 func resourceGoogleOrganizationIamCustomRoleDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	r, err := config.NewIamClient(userAgent).Organizations.Roles.Get(d.Id()).Do()
+	r, err := iambeta.NewClient(config, userAgent).Organizations.Roles.Get(d.Id()).Do()
 	if err == nil && r != nil && r.Deleted && d.Get("deleted").(bool) {
 		// This role has already been deleted, don't try again.
 		return nil
 	}
 
-	_, err = config.NewIamClient(userAgent).Organizations.Roles.Delete(d.Id()).Do()
+	_, err = iambeta.NewClient(config, userAgent).Organizations.Roles.Delete(d.Id()).Do()
 	if err != nil {
 		return fmt.Errorf("Error deleting the custom organization role %s: %s", d.Get("title").(string), err)
 	}

@@ -169,13 +169,18 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		return fmt.Errorf("provider crashed while running the VCR tests in REPLAYING mode: %v", replayingResult.Panics)
 	}
 
+	if len(replayingResult.BuildFailures) != 0 {
+		return fmt.Errorf("provider failed to build during VCR tests in REPLAYING mode: %v", replayingResult.BuildFailures)
+	}
+
 	if len(replayingResult.FailedTests) != 0 {
 		fmt.Println("running tests in RECORDING mode now")
 
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
-			Mode:    vcr.Recording,
-			Version: provider.Beta,
-			Tests:   replayingResult.FailedTests,
+			Mode:             vcr.Recording,
+			Version:          provider.Beta,
+			Tests:            replayingResult.FailedTests,
+			UploadBranchName: "main",
 		})
 
 		// upload build and test logs first to preserve debugging logs in case
@@ -216,6 +221,10 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 
 		if len(recordingResult.Panics) != 0 {
 			return fmt.Errorf("provider crashed while running the VCR tests in RECORDING mode: %v", recordingResult.Panics)
+		}
+
+		if len(recordingResult.BuildFailures) != 0 {
+			return fmt.Errorf("provider failed to build during VCR tests in RECORDING mode: %v", recordingResult.BuildFailures)
 		}
 	}
 	return nil

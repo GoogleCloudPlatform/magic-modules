@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -66,7 +67,7 @@ func dataSourceGoogleLoggingProjectSettingsRead(d *schema.ResourceData, meta int
 	}
 
 	project := d.Get("project").(string)
-	res, err := config.NewLoggingClient(userAgent).Projects.GetSettings(fmt.Sprintf("projects/%s", project)).Do()
+	res, err := NewClient(config, userAgent).Projects.GetSettings(fmt.Sprintf("projects/%s", project)).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("LoggingProjectSettings %q", d.Id()), d.Id())
 	}
@@ -96,4 +97,13 @@ func dataSourceGoogleLoggingProjectSettingsRead(d *schema.ResourceData, meta int
 		return fmt.Errorf("Error reading ProjectSettings: %s", err)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_logging_project_settings",
+		ProductName: "logging",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleLoggingProjectSettings(),
+	}.Register()
 }

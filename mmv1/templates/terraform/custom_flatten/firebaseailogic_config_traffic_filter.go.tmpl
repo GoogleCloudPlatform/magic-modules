@@ -1,22 +1,31 @@
 func flatten{{$.GetPrefix}}TrafficFilter(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		// If the API drops the whole block, pull the user's configured block from state 
-		// to prevent the perpetual diff.
-		if val, ok := d.GetOk("traffic_filter"); ok {
-			return val
+	userState := d.Get("traffic_filter").([]interface{})
+
+	var apiState []interface{}
+	apiEnabled := false
+	if original, ok := v.(map[string]interface{}); ok {
+		block := make(map[string]interface{})
+		if templateOnly, ok := original["templateOnly"].(bool); ok && templateOnly {
+			block["template_only"] = true
+			apiEnabled = true
+		} else {
+			block["template_only"] = false
 		}
-		return nil
+		apiState = []interface{}{block}
 	}
 
-	original := v.(map[string]interface{})
-	transformed := make(map[string]interface{})
-
-	if val, ok := original["templateOnly"]; ok {
-		transformed["template_only"] = val
-	} else if val, ok := d.GetOk("traffic_filter.0.template_only"); ok {
-		// If the API returns the block but drops the false boolean, pull it from state
-		transformed["template_only"] = val
+	userEnabled := false
+	if len(userState) > 0 && userState[0] != nil {
+		if tfMap, ok := userState[0].(map[string]interface{}); ok {
+			userEnabled, _ = tfMap["template_only"].(bool)
+		}
 	}
 
-	return []interface{}{transformed}
+	if apiEnabled || userEnabled {
+		return apiState
+	}
+
+	// Both API and user agree the feature is disabled.
+	// Return the userState to prevent perpetual diffs.
+	return userState
 }

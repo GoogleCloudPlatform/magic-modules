@@ -25,6 +25,7 @@ base_url: 'projects/{{project}}/datasets/{{dataset_id}}/routines'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
 import_format:
   - 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
+exclude_identity_generation: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20

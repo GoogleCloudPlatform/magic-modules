@@ -38,6 +38,10 @@ examples:
       assessment_rule_id: 'assessmentrulebasic'
     test_vars_overrides:
       'id_suffix': 'strings.ToLower(acctest.RandString(t, 10))'
+      # for backward compatible
+      resource_name: '"assessmentrulebasic" + randomSuffix'
+      # for backward compatible
+      assessment_rule_id: '"assessmentrulebasic" + randomSuffix'
   - name: 'contact_center_insights_assessment_rule_full'
     primary_resource_id: 'assessment_rule_full'
     vars:
@@ -45,6 +49,10 @@ examples:
       assessment_rule_id: 'assessmentrulefull'
     test_vars_overrides:
       'id_suffix': 'strings.ToLower(acctest.RandString(t, 10))'
+      # for backward compatible
+      resource_name: '"assessmentrulefull" + randomSuffix'
+      # for backward compatible
+      assessment_rule_id: '"assessmentrulefull" + randomSuffix'
 autogen_status: QXNzZXNzbWVudFJ1bGU=
 parameters:
   - name: location

@@ -51,6 +51,9 @@ examples:
     vars:
       service_id: 'custom-srv'
       resource_name: '//product.googleapis.com/foo/foo/services/test'
+    test_vars_overrides:
+      # for backward compatible
+      resource_name: '"//product.googleapis.com/foo/foo/services/test" + randomSuffix'
 parameters:
   - name: 'serviceId'
     type: String

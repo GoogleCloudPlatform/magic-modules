@@ -46,6 +46,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/datastream_stream.go.tmpl'
   post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
   post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccDatastreamStream_mongoDb'
@@ -86,7 +87,7 @@ examples:
       stream_cmek: 'kms-name'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'stream_cmek': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'stream_cmek': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
@@ -120,6 +121,14 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_sql_server_change_tables'
     primary_resource_id: 'default'
@@ -136,6 +145,14 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     # Requires SQLServer Configuration
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_mysql_gtid'
     primary_resource_id: 'default'
@@ -152,6 +169,16 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     # Requires MySQL Configuration
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      mysql_name: '"mysql" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
@@ -162,6 +189,9 @@ examples:
       instance_name: 'instance-name'
       sql_user_name: 'my-user'
       source_connection_profile_id: 'source-profile'
+    test_vars_overrides:
+      # for backward compatible
+      dataset_id: '"postgres" + randomSuffix'
     external_providers: ["random", "time"]
     # Random provider
     skip_vcr: true
@@ -178,7 +208,7 @@ examples:
       bigquery_destination_table_kms_key_name: 'bigquery-kms-name'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'bigquery_destination_table_kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'bigquery_destination_table_kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]

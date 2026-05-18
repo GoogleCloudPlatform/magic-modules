@@ -1,0 +1,28 @@
+if p, ok := res["postgresql"].(map[string]interface{}); ok {
+	if _, ok := p["alloydbClusterId"]; ok {
+		p["host"] = "unknown"
+		p["username"] = "unknown"
+		p["port"] = 0
+		p["password"] = "unknown"
+	} else if _, ok := p["cloudSqlId"]; ok {
+		p["host"] = "unknown"
+		p["username"] = "unknown"
+		p["port"] = 0
+		p["password"] = "unknown"
+	} else if _, ok := p["password"]; !ok || p["password"] == "" {
+		p["password"] = "unknown"
+	}
+}
+
+if m, ok := res["mysql"].(map[string]interface{}); ok {
+	if _, ok := m["cloudSqlId"]; ok {
+		m["host"] = "unknown"
+		m["username"] = "unknown"
+		m["port"] = 0
+		m["password"] = "unknown"
+	} else if _, ok := m["password"]; !ok || m["password"] == "" {
+		m["password"] = "unknown"
+	}
+}
+
+return res, hclData, nil

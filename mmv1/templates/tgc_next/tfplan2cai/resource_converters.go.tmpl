@@ -40,6 +40,7 @@ var ConverterMap = map[string]cai.Tfplan2caiConverter{
 	// ####### START handwritten resources ###########
 	"google_project":             resourcemanager.ProjectTfplan2caiConverter(),
 	"google_compute_instance":    compute.ComputeInstanceTfplan2caiConverter(),
+	"google_container_cluster":   container.ContainerClusterTfplan2caiConverter(),
 	"google_container_node_pool": container.ContainerNodePoolTfplan2caiConverter(),
 	// ####### END handwritten resources ###########
 

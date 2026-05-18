@@ -31,8 +31,10 @@ async:
   operation:
 import_format:
   - 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
+include_in_tgc_next: true
 custom_code:
   post_create: 'templates/terraform/post_create/colab_notebook_execution.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'colab_notebook_execution_basic'
     primary_resource_id: 'notebook-execution'
@@ -80,7 +82,9 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # for backward compatible
+      secret: '"secret" + randomSuffix'
 parameters:
   - name: 'location'
     type: String
@@ -144,6 +148,7 @@ properties:
         required: true
         description: 'The base64-encoded contents of the input notebook file.'
         custom_flatten: 'templates/terraform/custom_flatten/colab_notebook_execution_direct_content.go.tmpl'
+        tgc_ignore_terraform_custom_flatten: true
   - name: executionTimeout
     type: String
     description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'

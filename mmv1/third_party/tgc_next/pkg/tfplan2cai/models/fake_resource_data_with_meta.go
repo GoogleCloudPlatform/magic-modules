@@ -46,22 +46,22 @@ func (d *FakeResourceMeta) IsDeleted() bool {
 }
 
 func NewFakeResourceDataWithMeta(kind string, resourceSchema map[string]*schema.Schema, values map[string]interface{}, isDeleted bool, tfplanAddress string) *FakeResourceDataWithMeta {
-	state := map[string]string{}
-	var address []string
-	attributes(values, address, state, resourceSchema)
-	reader := &schema.MapFieldReader{
-		Map:    schema.BasicMapReader(state),
-		Schema: resourceSchema,
-	}
-	return &FakeResourceDataWithMeta{
-		FakeResourceData{
+	d := &FakeResourceDataWithMeta{
+		FakeResourceData: FakeResourceData{
 			schema: resourceSchema,
-			reader: reader,
 		},
-		FakeResourceMeta{
+		FakeResourceMeta: FakeResourceMeta{
 			kind:      kind,
 			isDeleted: isDeleted,
 			address:   tfplanAddress,
 		},
 	}
+	d.state = map[string]string{}
+	var address []string
+	attributes(values, address, d.state, resourceSchema)
+	d.reader = &schema.MapFieldReader{
+		Map:    schema.BasicMapReader(d.state),
+		Schema: resourceSchema,
+	}
+	return d
 }

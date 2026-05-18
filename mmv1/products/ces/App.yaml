@@ -13,12 +13,16 @@
 
 ---
 name: App
-description: Description
+description: Customer Engagement Suite App
+references:
+  api: https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1/projects.locations.apps
 base_url: projects/{{project}}/locations/{{location}}/apps
 self_link: projects/{{project}}/locations/{{location}}/apps/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/apps?appId={{app_id}}
 update_mask: true
 update_verb: PATCH
+mutex: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}'
+id_format: projects/{{project}}/locations/{{location}}/apps/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{name}}
 async:
@@ -337,6 +341,7 @@ properties:
           type: String
   - name: loggingSettings
     type: NestedObject
+    default_from_api: true
     description: Settings to describe the logging behaviors for the app.
     properties:
       - name: audioRecordingConfig
@@ -458,6 +463,11 @@ properties:
       - name: timeZone
         type: String
         description: The time zone of the app from the time zone database, e.g., America/Los_Angeles, Europe/Paris.
+  - name: toolExecutionMode
+    type: String
+    description: |-
+      The tool execution mode for the app.
+      See the [API reference](https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rpc/google.cloud.ces.v1#google.cloud.ces.v1.App.ToolExecutionMode) for more details.
   - name: updateTime
     type: String
     description: Timestamp when the app was last updated.
@@ -557,8 +567,14 @@ properties:
               description: |-
                 Optional. Default value of the data. Represents a dynamically typed value
                 which can be either null, a number, a string, a boolean, a struct,
-                or a list of values. The provided default value must be compatible
-                with the defined 'type' and other schema constraints.
+                or a list of values. The provided default value must be encoded as a JSON string.
+                Use `jsonencode` in Terraform HCL to encode the default value.
+              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+              send_empty_value: true
+              validation:
+                function: validation.StringIsJSON
+              custom_expand: templates/terraform/custom_expand/json_value.tmpl
+              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: additionalProperties
               type: String
               description: |-

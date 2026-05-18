@@ -55,6 +55,10 @@ examples:
       'team_id': '"9987654321"'
       'token_ttl': '"7200s"'
     # Need the time_sleep resource
+      # for backward compatible
+      bundle_id: '"bundle.id.devicecheck" + randomSuffix'
+      # for backward compatible
+      key_id: '"Key ID" + randomSuffix'
     external_providers: ["random", "time"]
 parameters:
   - name: 'app_id'

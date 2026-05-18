@@ -73,6 +73,11 @@ examples:
       network_name: 'network'
       instance_group_name: 'instance-group'
       instance_name: 'instance'
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"network" + randomSuffix'
+      # for backward compatible
+      instance_name: '"instance" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'zone'

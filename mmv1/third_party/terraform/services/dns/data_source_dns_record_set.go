@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -66,7 +67,7 @@ func dataSourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error 
 	dnsType := d.Get("type").(string)
 	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s/%s", project, zone, name, dnsType))
 
-	resp, err := config.NewDnsClient(userAgent).ResourceRecordSets.List(project, zone).Name(name).Type(dnsType).Do()
+	resp, err := NewClient(config, userAgent).ResourceRecordSets.List(project, zone).Name(name).Type(dnsType).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("dataSourceDnsRecordSet %q", name))
 	}
@@ -85,4 +86,13 @@ func dataSourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_dns_record_set",
+		ProductName: "dns",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceDnsRecordSet(),
+	}.Register()
 }

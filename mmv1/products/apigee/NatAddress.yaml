@@ -68,6 +68,9 @@ examples:
     vars:
       nat_address_name: 'my-nat-address'
       nat_address_activate: 'true'
+    test_vars_overrides:
+      # for backward compatible
+      nat_address_activate: '"true" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'instanceId'

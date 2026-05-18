@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -45,7 +46,7 @@ func dataSourceGoogleStorageTransferProjectServiceAccountRead(d *schema.Resource
 		return err
 	}
 
-	serviceAccount, err := config.NewStorageTransferClient(userAgent).GoogleServiceAccounts.Get(project).Do()
+	serviceAccount, err := NewClient(config, userAgent).GoogleServiceAccounts.Get(project).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, "Google Cloud Storage Transfer service account not found", fmt.Sprintf("Project %q Google Cloud Storage Transfer account", project))
 	}
@@ -64,4 +65,13 @@ func dataSourceGoogleStorageTransferProjectServiceAccountRead(d *schema.Resource
 		return fmt.Errorf("Error setting member: %s", err)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_transfer_project_service_account",
+		ProductName: "storagetransfer",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageTransferProjectServiceAccount(),
+	}.Register()
 }

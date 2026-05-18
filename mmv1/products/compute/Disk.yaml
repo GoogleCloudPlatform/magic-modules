@@ -60,6 +60,7 @@ include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/disk.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
+  custom_update: 'templates/terraform/custom_update/disk_update.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
@@ -122,6 +123,7 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
       - name: 'sha256'
         type: String
         description: |
@@ -240,6 +242,7 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
         # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
@@ -473,7 +476,7 @@ properties:
       allows for an update of IOPS every 4 hours. To update your hyperdisk more frequently, you'll need to manually delete and recreate it
     required: false
     default_from_api: true
-    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=provisionedIops'
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     update_verb: 'PATCH'
   - name: 'provisionedThroughput'
     type: Integer
@@ -482,7 +485,7 @@ properties:
       Note: Updating currently is only supported by hyperdisk skus without the need to delete and recreate the disk, hyperdisk
       allows for an update of Throughput every 4 hours. To update your hyperdisk more frequently, you'll need to manually delete and recreate it
     default_from_api: true
-    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=provisionedThroughput'
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     update_verb: 'PATCH'
   - name: 'asyncPrimaryDisk'
     type: NestedObject

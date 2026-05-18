@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -180,7 +181,7 @@ func testAccCheckGoogleOrganizationIamBindingExists(t *testing.T, bindingResourc
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		p, err := config.NewResourceManagerClient(config.UserAgent).Organizations.GetIamPolicy(
+		p, err := rmClient.NewClient(config, config.UserAgent).Organizations.GetIamPolicy(
 			"organizations/"+bindingRs.Primary.Attributes["org_id"],
 			&cloudresourcemanager.GetIamPolicyRequest{
 				Options: &cloudresourcemanager.GetPolicyOptions{
@@ -217,7 +218,7 @@ func testAccCheckGoogleOrganizationIamMemberExists(t *testing.T, n, role, member
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		p, err := config.NewResourceManagerClient(config.UserAgent).Organizations.GetIamPolicy(
+		p, err := rmClient.NewClient(config, config.UserAgent).Organizations.GetIamPolicy(
 			"organizations/"+rs.Primary.Attributes["org_id"],
 			&cloudresourcemanager.GetIamPolicyRequest{
 				Options: &cloudresourcemanager.GetPolicyOptions{

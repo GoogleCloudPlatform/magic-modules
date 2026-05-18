@@ -55,6 +55,11 @@ examples:
       display_name: 'binding for all principals in the folder'
       folder_binding_id: 'binding-for-all-folder-principals'
       folder_name: 'my folder'
+    test_vars_overrides:
+      # for backward compatible
+      display_name: '"binding for all principals in the folder" + randomSuffix'
+      # for backward compatible
+      folder_name: '"my folder" + randomSuffix'
     external_providers: ["time"]
 parameters:
   - name: 'folder'

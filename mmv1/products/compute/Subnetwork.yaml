@@ -295,7 +295,7 @@ properties:
       **Note**: This field uses [attr-as-block mode](https://developer.hashicorp.com/terraform/language/attr-as-blocks) to avoid
       breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
       set `send_secondary_ip_range_if_empty = true`
-    update_verb: PATCH
+    update_verb: NOOP
     update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     update_id: secondaryIpRanges
     fingerprint_name: fingerprint
@@ -499,7 +499,10 @@ properties:
       Partial URL, as in:
         * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{sub-pdp-name}}`
         * `regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
-    ignore_read: true
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    fingerprint_name: fingerprint
     is_missing_in_cai: true
   - name: ipv6GceEndpoint
     type: Enum
@@ -560,3 +563,5 @@ properties:
     enum_values:
       - ARP_ALL_RANGES
       - ARP_PRIMARY_RANGE
+      - ARP_BROADCAST_PRIMARY_RANGE
+      - ARP_BROADCAST_PRIMARY_RANGE_WITH_LEARNING

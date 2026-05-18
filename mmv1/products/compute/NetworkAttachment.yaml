@@ -35,7 +35,9 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next: true
+custom_code:
+# excluding identity due to region value inconsistency
+exclude_identity_generation: true
 examples:
   - name: 'network_attachment_basic'
     primary_resource_id: 'default'

@@ -47,6 +47,7 @@ async:
     resource_inside_response: true
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/discoveryengine_cmekconfig_kmskey.go.tmpl'
+  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   url_substitutions:
     - location: "us"
@@ -57,7 +58,7 @@ examples:
       cmek_config_id: 'cmek-config-id'
       kms_key_name: 'kms-key-name'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-5").CryptoKey.Name'
+      kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-5").CryptoKey.Name'
     ignore_read_extra:
       - 'project'
     # Skipping test because cmek configs are expensive to provision and teardown.
