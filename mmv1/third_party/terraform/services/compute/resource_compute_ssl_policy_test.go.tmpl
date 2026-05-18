@@ -212,13 +212,17 @@ func TestAccComputeSslPolicy_postQuantumKeyExchange(t *testing.T) {
 				Config: testAccComputeSslPostQuantum(sslPolicyName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSslPolicyExists(
-						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
+						t, "google_compute_ssl_policy.post_quantum_key_exchange", &sslPolicy),
 					resource.TestCheckResourceAttr(
-						"google_compute_ssl_policy.post_quantum", "post_quantum_key_exchange", "ENABLED"),
+						"google_compute_ssl_policy.post_quantum_key_exchange", "profile", "MODERN"),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.post_quantum_key_exchange", "min_tls_version", "TLS_1_2"),
+					resource.TestCheckResourceAttr(
+						"google_compute_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", ""),
 				),
 			},
 			{
-				ResourceName:      "google_compute_ssl_policy.post_quantum",
+				ResourceName:      "google_compute_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -226,13 +230,13 @@ func TestAccComputeSslPolicy_postQuantumKeyExchange(t *testing.T) {
 				Config: testAccComputeSslPostQuantum(sslPolicyName, "DEFAULT"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSslPolicyExists(
-						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
+						t, "google_compute_ssl_policy.post_quantum_key_exchange", &sslPolicy),
 					resource.TestCheckResourceAttr(
-						"google_compute_ssl_policy.post_quantum", "post_quantum_key_exchange", "DEFAULT"),
+						"google_compute_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "DEFAULT"),
 				),
 			},
 			{
-				ResourceName:      "google_compute_ssl_policy.post_quantum",
+				ResourceName:      "google_compute_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -240,13 +244,13 @@ func TestAccComputeSslPolicy_postQuantumKeyExchange(t *testing.T) {
 				Config: testAccComputeSslPostQuantum(sslPolicyName, "ENABLED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSslPolicyExists(
-						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
+						t, "google_compute_ssl_policy.post_quantum_key_exchange", &sslPolicy),
 					resource.TestCheckResourceAttr(
-						"google_compute_ssl_policy.post_quantum", "post_quantum_key_exchange", "ENABLED"),
+						"google_compute_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "ENABLED"),
 				),
 			},
 			{
-				ResourceName:      "google_compute_ssl_policy.post_quantum",
+				ResourceName:      "google_compute_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -254,13 +258,13 @@ func TestAccComputeSslPolicy_postQuantumKeyExchange(t *testing.T) {
 				Config: testAccComputeSslPostQuantum(sslPolicyName, "DEFERRED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSslPolicyExists(
-						t, "google_compute_ssl_policy.post_quantum", &sslPolicy),
+						t, "google_compute_ssl_policy.post_quantum_key_exchange", &sslPolicy),
 					resource.TestCheckResourceAttr(
-						"google_compute_ssl_policy.post_quantum", "post_quantum_key_exchange", "DEFERRED"),
+						"google_compute_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "DEFERRED"),
 				),
 			},
 			{
-				ResourceName:      "google_compute_ssl_policy.post_quantum",
+				ResourceName:      "google_compute_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -362,7 +366,7 @@ resource "google_compute_ssl_policy" "update" {
 
 func testAccComputeSslPostQuantum(resourceName, pqke string) string {
 	return fmt.Sprintf(`
-resource "google_compute_ssl_policy" "post_quantum" {
+resource "google_compute_ssl_policy" "post_quantum_key_exchange" {
   name                         = "%s"
   profile                      = "MODERN"
   min_tls_version              = "TLS_1_2"
