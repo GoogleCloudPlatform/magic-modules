@@ -1,0 +1,10 @@
+resource "google_compute_snapshot_recycle_bin_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  rules {
+    name = "default"
+    standard_snapshots {
+      retention_duration_days = 14
+    }
+  }
+}

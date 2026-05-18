@@ -1,0 +1,55 @@
+{{/*
+	res is the operation map[string]interface{} returned by PATCH.
+	We need to poll this operation until it's done.
+*/}}
+opSelfLink, ok := res["selfLink"].(string)
+if !ok {
+	return fmt.Errorf("operation response missing selfLink")
+}
+
+// Ensure we use the correct billing project for the operation status check.
+// Organization operations often require the X-Goog-User-Project header.
+operationBillingProject, err := tpgresource.GetBillingProject(d, config)
+if err != nil {
+	operationBillingProject = config.Project
+}
+
+waitFunc := func() (map[string]interface{}, error) {
+	url := opSelfLink
+	if !strings.HasPrefix(url, "https://") && !strings.HasPrefix(url, "http://") {
+		url = config.ComputeBasePath + url
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   operationBillingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+err = transport_tpg.PollingWaitTime(waitFunc, func(res map[string]interface{}, err error) transport_tpg.PollResult {
+	if err != nil {
+		return transport_tpg.ErrorPollResult(err)
+	}
+	status, ok := res["status"]
+	if !ok {
+		return transport_tpg.ErrorPollResult(fmt.Errorf("operation response missing status"))
+	}
+	if status.(string) == "DONE" {
+		if errorVal, ok := res["error"]; ok && errorVal != nil {
+			return transport_tpg.ErrorPollResult(fmt.Errorf("operation failed: %v", errorVal))
+		}
+		return transport_tpg.SuccessPollResult()
+	}
+	return transport_tpg.PendingStatusPollResult(status.(string))
+}, "Waiting for OrganizationSnapshotRecycleBinPolicy operation", d.Timeout(schema.TimeoutCreate), 1)
+
+if err != nil {
+	return err
+}
