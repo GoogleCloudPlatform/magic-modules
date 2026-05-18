@@ -528,6 +528,11 @@ properties:
               either a name to a reservation in the same project or
               "projects/different-project/reservations/some-reservation-name"
               to target a shared reservation in the same zone but in a different project.
+      - name: 'minCpuPlatform'
+        type: String
+        description: |
+          Optional. The minimum CPU platform to use for this instance.
+        immutable: true
   - name: 'proxyUri'
     type: String
     description: |

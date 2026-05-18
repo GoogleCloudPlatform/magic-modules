@@ -48,6 +48,7 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
 
   gce_setup {
     machine_type = "n1-standard-4" // cant be e2 because of accelerator
+    min_cpu_platform = "Intel Broadwell"
     accelerator_configs {
       type         = "NVIDIA_TESLA_T4"
       core_count   = 1
