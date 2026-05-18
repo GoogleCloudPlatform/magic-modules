@@ -1,0 +1,6 @@
+if state, ok := d.Get("state").(string); ok && state == "RUNNING" {
+	return fmt.Errorf("Migration Job cannot be created in RUNNING state. Please set state to 'NOT_STARTED' for creation, and update to 'RUNNING' afterwards.")
+}
+
+// Ensure state is set to NOT_STARTED in the API payload as safe default or backup for skipped expansion.
+obj["state"] = "NOT_STARTED"

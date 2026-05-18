@@ -1,0 +1,14 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return "NOT_STARTED"
+	}
+	
+	switch v.(string) {
+	case "DRAFT", "NOT_STARTED":
+		return "NOT_STARTED"
+	default:
+		// Map all other active states and phases to RUNNING
+		// This ensures stability in Terraform while accurately reflecting that the resource exists and has moved past DRAFT.
+		return "RUNNING"
+	}
+}
