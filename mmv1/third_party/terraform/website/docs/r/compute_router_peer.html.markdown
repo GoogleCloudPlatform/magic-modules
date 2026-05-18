@@ -515,12 +515,20 @@ The following arguments are supported:
   IPv4 address of the BGP interface outside Google Cloud Platform.
 
 *  `export_policies` -
+<<<<<<< Updated upstream
   (Optional, [Beta](../guides/provider_versions.html.markdown)) 
+=======
+  (Optional) 
+>>>>>>> Stashed changes
   routers.list of export policies applied to this peer, in the order they must be evaluated. 
   The name must correspond to an existing policy that has ROUTE_POLICY_TYPE_EXPORT type.
 
 *  `import_policies` -
+<<<<<<< Updated upstream
   (Optional, [Beta](../guides/provider_versions.html.markdown)) 
+=======
+  (Optional) 
+>>>>>>> Stashed changes
   routers.list of import policies applied to this peer, in the order they must be evaluated. 
   The name must correspond to an existing policy that has ROUTE_POLICY_TYPE_IMPORT type.
 
