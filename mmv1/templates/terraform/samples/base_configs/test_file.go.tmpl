@@ -42,23 +42,8 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
-{{ range $s := $.Res.TestSamples }}
-  {{- if $s.BootstrapIam }}
-    "{{ $.ImportPath  }}/services/resourcemanager"
-  {{- end }}
-  {{- range $i, $step := $s.TestSteps }}
-		{{- range $_, $v := $step.TestContextVars }}
-			{{- if hasPrefix $v "tpgcompute." }}
-				tpgcompute "{{ $.ImportPath }}/services/compute"
-			{{- end }}
-			{{- if hasPrefix $v "kms." }}
-				"{{ $.ImportPath }}/services/kms"
-			{{- end }}
-			{{- if hasPrefix $v "servicenetworking." }}
-				"{{ $.ImportPath }}/services/servicenetworking"
-			{{- end }}
-		{{- end }}
-	{{- end }}
+{{- range $service, $alias := $.Res.TestServiceDependencies }}
+	{{ $alias }} "{{ $.ImportPath  }}/services/{{ $service }}"
 {{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"

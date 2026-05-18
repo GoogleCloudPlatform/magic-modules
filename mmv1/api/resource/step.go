@@ -122,6 +122,24 @@ func (s *Step) TestStepSlug(productName, resourceName string) string {
 	return ret
 }
 
+// TestServiceDependencies returns a map of service names to import aliases that are required
+// by this step.
+func (s *Step) TestServiceDependencies() map[string]string {
+	deps := map[string]string{}
+	for _, val := range s.TestContextVars {
+		if strings.HasPrefix(val, "compute.") {
+			deps["compute"] = ""
+		}
+		if strings.HasPrefix(val, "kms.") {
+			deps["kms"] = ""
+		}
+		if strings.HasPrefix(val, "servicenetworking.") {
+			deps["servicenetworking"] = ""
+		}
+	}
+	return deps
+}
+
 func (s *Step) Validate(rName, sName string) (es []error) {
 	for k := range s.Vars {
 		if _, exists := s.ResourceIdVars[k]; exists {
