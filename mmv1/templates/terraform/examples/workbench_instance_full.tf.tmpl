@@ -46,6 +46,8 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "instance_name"}}"
   location = "us-central1-a"
 
+  enable_deletion_protection = true
+
   gce_setup {
     machine_type = "n1-standard-4" // cant be e2 because of accelerator
     accelerator_configs {

@@ -646,3 +646,7 @@ properties:
     type: Boolean
     description: |
       Flag to enable managed end user credentials for the instance.
+  - name: 'enableDeletionProtection'
+    type: Boolean
+    description: |
+      Optional. If true, deletion protection will be enabled for this Workbench Instance.
