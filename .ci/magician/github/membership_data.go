@@ -82,7 +82,12 @@ var (
 			},
 		},
 		"hao-nan-li": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2026, 5, 15),
+					endDate:   newDate(2026, 5, 26),
+				},
+			},
 		},
 		"malhotrasagar2212": {
 			vacations: []Vacation{},
@@ -124,6 +129,10 @@ var (
 				{
 					startDate: newDate(2026, 04, 14),
 					endDate:   newDate(2026, 04, 19),
+				},
+				{
+					startDate: newDate(2026, 05, 14),
+					endDate:   newDate(2026, 05, 25),
 				},
 			},
 		},
