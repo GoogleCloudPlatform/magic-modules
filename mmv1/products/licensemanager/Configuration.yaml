@@ -43,7 +43,8 @@ autogen_async: true
 custom_code:
   encoder: 'templates/terraform/encoders/licensemanager_configuration.go.tmpl'
   post_read: 'templates/terraform/post_read/licensemanager_configuration.go.tmpl'
-  custom_update: 'templates/terraform/custom_update/licensemanager_configuration.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/licensemanager_configuration.go.tmpl'
+  post_update: 'templates/terraform/post_update/licensemanager_configuration.go.tmpl'
 parameters:
   - name: location
     type: String
@@ -92,6 +93,8 @@ properties:
     type: Integer
     required: true
     ignore_read: true
+    update_mask_fields:
+      - 'currentBillingInfo'
     description: Number of units to bill for.
   # ignore_read is set because active is a virtual boolean attribute derived from the API's
   # 'state' field (STATE_ACTIVE vs STATE_SUSPENDED). Populated via post_read custom code.

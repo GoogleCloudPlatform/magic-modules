@@ -1,41 +1,49 @@
 // Reference design doc: go/lima-terraform
-product := obj["product"].(string)
-count := obj["licensecount"].(int)
+var product string
+if val, ok := obj["product"]; ok && val != nil {
+	product = val.(string)
+} else {
+	product = d.Get("product").(string)
+}
 
 // License type mapping is currently static based on known SPLA product offerings.
 // If License Manager expands its catalog or introduces API-based product discovery, replace this hardcoded logic with dynamic metadata lookup.
 licenseType := "LICENSE_TYPE_PER_MONTH_PER_USER"
-if product == "MicrosoftSQLServer2022Enterprise" {
-    licenseType = "LICENSE_TYPE_PER_MONTH_PER_PACK"
-}
-
-obj["licenseType"] = licenseType
-
-billingInfo := map[string]interface{}{}
-if licenseType == "LICENSE_TYPE_PER_MONTH_PER_USER" {
-    billingInfo["userCountBilling"] = map[string]interface{}{
-        "userCount": count,
-    }
-} else if licenseType == "LICENSE_TYPE_PER_MONTH_PER_PACK" {
-    billingInfo["packCountBilling"] = map[string]interface{}{
-        "packCount": count,
-    }
+if product == "MicrosoftSQLServer2022Enterprise" || strings.HasSuffix(product, "MicrosoftSQLServer2022Enterprise") {
+	licenseType = "LICENSE_TYPE_PER_MONTH_PER_PACK"
 }
 
 configurationId := d.Get("configuration_id").(string)
 project := d.Get("project").(string)
 region := d.Get("location").(string)
 
-
-obj["currentBillingInfo"] = billingInfo
-obj["nextBillingInfo"] = billingInfo
+// Always populate name and displayName to satisfy backend validation during CREATE and UPDATE
 obj["name"] = configurationId
-obj["product"] = fmt.Sprintf("projects/%s/locations/%s/products/%s", project, region, product)
-
 if _, ok := obj["displayName"]; !ok {
-    obj["displayName"] = configurationId + "-terraform"
+	obj["displayName"] = configurationId + "-terraform"
 }
 
-delete(obj, "licensecount")
+if val, ok := obj["product"]; ok && val != nil {
+	obj["product"] = fmt.Sprintf("projects/%s/locations/%s/products/%s", project, region, val.(string))
+}
+
+if val, ok := obj["licensecount"]; ok && val != nil {
+	count := val.(int)
+	billingInfo := map[string]interface{}{}
+	if licenseType == "LICENSE_TYPE_PER_MONTH_PER_USER" {
+		billingInfo["userCountBilling"] = map[string]interface{}{
+			"userCount": count,
+		}
+	} else if licenseType == "LICENSE_TYPE_PER_MONTH_PER_PACK" {
+		billingInfo["packCountBilling"] = map[string]interface{}{
+			"packCount": count,
+		}
+	}
+	obj["currentBillingInfo"] = billingInfo
+	obj["nextBillingInfo"] = billingInfo
+	obj["licenseType"] = licenseType
+	delete(obj, "licensecount")
+}
+
 delete(obj, "active")
 return obj, nil

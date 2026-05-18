@@ -10,8 +10,10 @@ import (
 func TestAccLicenseManagerConfiguration_lifecycle(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"configuration_id": "example-configuration-123",
+		"configuration_id": "tf-test-example-config-" + randomSuffix,
 		"product":          "Office2021ProfessionalPlus",
 	}
 
@@ -41,7 +43,7 @@ resource "google_license_manager_configuration" "example" {
   location         = "us-central1"
   configuration_id = "%{configuration_id}"
   product          = "%{product}"
-  licensecount    = `+fmt.Sprintf("%d", licensecount)+`
+  licensecount     = `+fmt.Sprintf("%d", licensecount)+`
   active           = `+fmt.Sprintf("%t", active)+`
 }
 `, context)
