@@ -19,5 +19,6 @@ resource "google_network_services_authz_extension" "{{$.PrimaryResourceId}}" {
   service               = google_compute_region_backend_service.default.self_link
   timeout               = "0.1s"
   fail_open             = false
+  forward_attributes    = ["connection.client_cert_chain"]
   forward_headers       = ["Authorization"]
 }
