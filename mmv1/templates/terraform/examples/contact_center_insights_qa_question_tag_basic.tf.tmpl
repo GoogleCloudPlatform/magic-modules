@@ -1,0 +1,13 @@
+data "google_project" "project" {}
+
+resource "google_contact_center_insights_qa_question_tag" "{{$.PrimaryResourceId}}" {
+  qa_question_tag_id = "{{index $.Vars "qa_question_tag_id"}}"
+  location           = "us-central1"
+  display_name       = "My Question Tag {{index $.Vars "qa_question_tag_id"}}"
+}
+
+
+
+
+
+

@@ -1,0 +1,90 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: QaQuestionTag
+description: Tag for QaQuestions in Contact Center Insights.
+base_url: projects/{{project}}/locations/{{location}}/qaQuestionTags
+self_link: projects/{{project}}/locations/{{location}}/qaQuestionTags/{{qa_question_tag_id}}
+create_url: projects/{{project}}/locations/{{location}}/qaQuestionTags?qaQuestionTagId={{qa_question_tag_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/qaQuestionTags/{{qa_question_tag_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: UWFRdWVzdGlvblRhZw==
+autogen_async: true
+examples:
+  - name: contact_center_insights_qa_question_tag_basic
+    primary_resource_id: default
+    vars:
+      qa_question_tag_id: tag
+    ignore_read_extra:
+      - 'update_time'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: qaQuestionTagId
+    type: String
+    required: true
+    description: |-
+      A unique ID for the new QaQuestionTag. This ID will become the final
+      component of the QaQuestionTag's resource name. If no ID is specified, a
+      server-generated ID will be used.
+
+      This value should be 4-64 characters and must match the regular
+      expression `^[a-z0-9-]{4,64}$`. Valid characters are `a-z-`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The time at which the question tag was created.
+    output: true
+  - name: displayName
+    type: String
+    required: true
+    description: A user-specified display name for the tag.
+  - name: name
+    type: String
+    description: |-
+      Identifier. Resource name for the QaQuestionTag
+      Format
+      projects/{project}/locations/{location}/qaQuestionTags/{qa_question_tag}
+      In the above format, the last segment, i.e., qa_question_tag, is a
+      server-generated ID corresponding to the tag resource.
+    output: true
+  - name: qaQuestionIds
+    type: Array
+    description: |-
+      The list of Scorecard Question IDs that the tag applies to.
+      Each QaQuestionId is represented as a full resource name containing the
+      Question ID. Lastly, Since a tag may not necessarily be referenced by any
+      Scorecard Questions, we treat this field as optional.
+    item_type:
+      type: String
+  - name: updateTime
+    type: String
+    description: The most recent time at which the question tag was updated.
+    output: true
