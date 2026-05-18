@@ -437,6 +437,108 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull2(context map[strin
 `, context)
 }
 
+func TestAccDialogflowConversationProfile_responseDebugInfo(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowConversationProfile_responseDebugInfoConfig(context),
+			},
+			{
+				ResourceName:            "google_dialogflow_conversation_profile.profile",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "logging_config", "logging_config.0", "logging_config.0.enable_stackdriver_logging"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowConversationProfile_responseDebugInfoConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_project" "agent_project" {
+		name            = "tf-test-dialogflow-%{random_suffix}"
+		project_id      = "tf-test-dialogflow-%{random_suffix}"
+		org_id          = "%{org_id}"
+		billing_account = "%{billing_account}"
+		deletion_policy = "DELETE"
+	}
+
+	resource "google_project_service" "agent_project" {
+		project                    = google_project.agent_project.id
+		service                    = "dialogflow.googleapis.com"
+		disable_dependent_services = false
+	}
+
+	resource "google_service_account" "dialogflow_service_account" {
+		account_id = "tf-test-dialogflow-%{random_suffix}"
+	}
+
+	resource "google_project_iam_member" "agent_create" {
+		project = google_project.agent_project.id
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
+	}
+
+	resource "google_dialogflow_agent" "agent" {
+		display_name          = "tf-test-agent-%{random_suffix}"
+		default_language_code = "en"
+		time_zone             = "America/New_York"
+		project               = google_project.agent_project.name
+	}
+
+	resource "time_sleep" "wait_120_seconds" {
+		create_duration = "120s"
+		depends_on      = [google_dialogflow_agent.agent]
+	}
+
+	resource "google_dialogflow_conversation_profile" "profile" {
+		depends_on   = [google_dialogflow_agent.agent, time_sleep.wait_120_seconds]
+		project      = google_project.agent_project.name
+		display_name = "tf-test-conversation-profile-%{random_suffix}"
+		location     = "global"
+		language_code = "en-US"
+
+		human_agent_assistant_config {
+			human_agent_suggestion_config {
+				skip_empty_event_based_suggestion = true
+				use_unredacted_conversation_data  = false
+				enable_async_tool_call            = true
+				feature_configs {
+					enable_response_debug_info = false
+					suggestion_feature {
+						type = "CONVERSATION_SUMMARIZATION"
+					}
+				}
+			}
+			end_user_suggestion_config {
+				skip_empty_event_based_suggestion = false
+				use_unredacted_conversation_data  = true
+				enable_async_tool_call            = false
+				feature_configs {
+					enable_response_debug_info = true
+					suggestion_feature {
+						type = "CONVERSATION_SUMMARIZATION"
+					}
+				}
+			}
+		}
+	}
+`, context)
+}
+
 func testAccDialogflowConversationProfile_dialogflowRegional(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "agent_project" {
