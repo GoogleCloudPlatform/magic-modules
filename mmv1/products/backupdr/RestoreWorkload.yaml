@@ -146,6 +146,9 @@ properties:
         type: String
         required: true
         description: 'Required. The zone of the Compute Engine instance.'
+      - name: 'useProjectServiceAccount'
+        type: Boolean
+        description: 'Optional. If true, use the BackupDR P4SA credentials for same-project restores. Default is false.'
   - name: 'diskTargetEnvironment'
     type: NestedObject
     description: 'Optional. The destination environment for zonal disk restoration.'
@@ -158,6 +161,9 @@ properties:
         type: String
         required: true
         description: 'Required. Target zone for the disk.'
+      - name: 'useProjectServiceAccount'
+        type: Boolean
+        description: 'Optional. If true, use the BackupDR P4SA credentials for same-project restores. Default is false.'
   - name: 'regionDiskTargetEnvironment'
     type: NestedObject
     description: 'Optional. The destination environment for regional disk restoration.'
@@ -176,6 +182,9 @@ properties:
           type: String
         required: true
         description: 'Required. Target URLs of the replica zones for the disk.'
+      - name: 'useProjectServiceAccount'
+        type: Boolean
+        description: 'Optional. If true, use the BackupDR P4SA credentials for same-project restores. Default is false.'
   # --- Restore Properties (oneof instance_properties) ---
   - name: 'computeInstanceRestoreProperties'
     type: NestedObject

@@ -381,3 +381,41 @@ resource "google_backup_dr_restore_workload" "restore" {
 }
 `, context)
 }
+
+
+func TestAccBackupDRRestoreWorkload_computeInstanceWithProjectSA(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	// ... Setup identical to TestAccBackupDRRestoreWorkload_computeInstanceBasic ...
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBackupDRRestoreWorkload_computeInstanceProjectSA(context),
+			},
+		},
+	})
+}
+
+
+func testAccBackupDRRestoreWorkload_computeInstanceProjectSA(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_backup_dr_restore_workload" "restore" {
+  location         = "us-central1"
+  backup_vault_id  = "%{backup_vault_id}"
+  data_source_id   = "%{data_source_id}"
+  backup_id        = "%{backup_id}"
+
+  compute_instance_target_environment {
+    project                     = "%{project}"
+    zone                        = "us-central1-a"
+    use_project_service_account = true
+  }
+
+  compute_instance_restore_properties {
+    name         = "tf-test-p4sa-instance-%{random_suffix}"
+    machine_type = "projects/%{project}/zones/us-central1-a/machineTypes/e2-medium"
+  }
+}
+`, context)
+}
