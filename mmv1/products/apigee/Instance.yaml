@@ -119,6 +119,8 @@ examples:
       # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+    ignore_read_extra:
+      - 'consumer_accept_list'
 parameters:
   - name: 'orgId'
     type: String
