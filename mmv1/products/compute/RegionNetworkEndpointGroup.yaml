@@ -147,6 +147,12 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+  - name: 'generated_id'
+    type: Integer
+    api_name: 'id'
+    output: true
+    description: |
+      The uniquely generated identifier for the resource. This identifier is defined by the server.
   - name: 'networkEndpointType'
     type: Enum
     description: |
