@@ -31,7 +31,6 @@ async:
   actions:
     - create
     - delete
-    - update
   type: OpAsync
   result:
     resource_inside_response: true
@@ -1005,7 +1004,6 @@ properties:
           Describes the object's current state in detail. For example, it can be
           used to provide actionable information for a resource in a Failed state.
         output: true
-        ignore_read: true
       - name: lifecycleState
         type: String
         description: |-
@@ -1290,7 +1288,6 @@ properties:
           The [OCID] of the connection being
           referenced.
         output: true
-        ignore_read: true
       - name: oracleAiDataPlatformConnectionProperties
         type: NestedObject
         description: The properties of GoldengateOracleAIDataPlatformConnection.
@@ -1617,7 +1614,6 @@ properties:
         type: String
         description: The time the resource was last updated.
         output: true
-        ignore_read: true
 virtual_fields:
   - name: "deletion_protection"
     type: Boolean
