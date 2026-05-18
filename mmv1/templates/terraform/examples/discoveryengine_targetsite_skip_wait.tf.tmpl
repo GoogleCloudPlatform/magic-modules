@@ -1,0 +1,19 @@
+resource "google_discovery_engine_target_site" "skip_wait" {
+  location             = google_discovery_engine_data_store.skip_wait.location
+  data_store_id        = google_discovery_engine_data_store.skip_wait.data_store_id
+  provided_uri_pattern = "cloud.google.com/docs/*"
+  type                 = "INCLUDE"
+  exact_match          = false
+  skip_wait            = true
+}
+
+resource "google_discovery_engine_data_store" "skip_wait" {
+  location                     = "global"
+  data_store_id                = "{{index $.Vars "data_store_id"}}"
+  display_name                 = "tf-test-skip-wait-site-search-datastore"
+  industry_vertical            = "GENERIC"
+  content_config               = "PUBLIC_WEBSITE"
+  solution_types               = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search  = false
+  skip_default_schema_creation = false
+}
