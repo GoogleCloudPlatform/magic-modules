@@ -748,6 +748,9 @@ This resource provides the following
 
 FeatureMembership can be imported using any of these accepted formats:
 
+* `projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}/membershipLocation/{{membership_location}}`
+* `{{project}}/{{location}}/{{feature}}/{{membership}}/{{membership_location}}`
+* `{{location}}/{{feature}}/{{membership}}/{{membership_location}}`
 * `projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}`
 * `{{project}}/{{location}}/{{feature}}/{{membership}}`
 * `{{location}}/{{feature}}/{{membership}}`
@@ -756,7 +759,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = "projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}"
+  id = "projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}/membershipLocation/{{membership_location}}"
   to = google_gke_hub_feature_membership.default
 }
 ```
@@ -764,6 +767,9 @@ import {
 When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), FeatureMembership can be imported using one of the formats above. For example:
 
 ```
+$ terraform import google_gke_hub_feature_membership.default projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}/membershipLocation/{{membership_location}}
+$ terraform import google_gke_hub_feature_membership.default {{project}}/{{location}}/{{feature}}/{{membership}}/{{membership_location}}
+$ terraform import google_gke_hub_feature_membership.default {{location}}/{{feature}}/{{membership}}/{{membership_location}}
 $ terraform import google_gke_hub_feature_membership.default projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}
 $ terraform import google_gke_hub_feature_membership.default {{project}}/{{location}}/{{feature}}/{{membership}}
 $ terraform import google_gke_hub_feature_membership.default {{location}}/{{feature}}/{{membership}}
