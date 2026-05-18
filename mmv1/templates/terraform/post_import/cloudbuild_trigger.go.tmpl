@@ -18,3 +18,50 @@
 		// Happens when imported with legacy import format.
 		d.Set("location", "global")
 	}
+
+	
+	if gitFileSource, ok := obj["gitFileSource"].(map[string]interface{}); ok && len(gitFileSource) > 0 {
+
+		// Manually flatten the nested object.
+		// API response is camelCase, Terraform state is snake_case.
+		gfsMap := make(map[string]interface{})
+
+		if v, ok := gitFileSource["path"].(string); ok {
+			gfsMap["path"] = v
+		}
+		if v, ok := gitFileSource["uri"].(string); ok {
+			gfsMap["uri"] = v
+		}
+		if v, ok := gitFileSource["repository"].(string); ok {
+			gfsMap["repository"] = v
+		}
+		if v, ok := gitFileSource["repoType"].(string); ok {
+			gfsMap["repo_type"] = v
+		}
+		if v, ok := gitFileSource["revision"].(string); ok {
+			gfsMap["revision"] = v
+		}
+		if v, ok := gitFileSource["githubEnterpriseConfig"].(string); ok {
+			gfsMap["github_enterprise_config"] = v
+		}
+		if v, ok := gitFileSource["bitbucketServerConfig"].(string); ok {
+			gfsMap["bitbucket_server_config"] = v
+		}
+
+		// Create the list-of-one-map structure Terraform expects.
+		flattenedGfs := []interface{}{gfsMap}
+
+		// Set the 'git_file_source' field in the state.
+		if err := d.Set("git_file_source", flattenedGfs); err != nil {
+			return fmt.Errorf("Error setting git_file_source: %s", err)
+		}
+
+		// Explicitly clear the other 'exactly_one_of' fields from the state,
+		// just in case the buggy auto-reader set them incorrectly.
+		if err := d.Set("filename", ""); err != nil {
+			return fmt.Errorf("Error clearing filename: %s", err)
+		}
+		if err := d.Set("build", nil); err != nil {
+			return fmt.Errorf("Error clearing build: %s", err)
+		}
+	}
