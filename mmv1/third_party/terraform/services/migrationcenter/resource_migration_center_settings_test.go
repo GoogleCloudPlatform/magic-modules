@@ -1,6 +1,7 @@
 package migrationcenter_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -11,12 +12,14 @@ import (
 func TestAccMigrationCenterSettings_settingsUpdate(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMigrationCenterSettings_settingsStart(),
+				Config: testAccMigrationCenterSettings_settingsStart(randomSuffix),
 			},
 			{
 				ResourceName:            "google_migration_center_settings.default",
@@ -25,7 +28,7 @@ func TestAccMigrationCenterSettings_settingsUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"location"},
 			},
 			{
-				Config: testAccMigrationCenterSettings_settingsUpdateFalse(),
+				Config: testAccMigrationCenterSettings_settingsUpdateFalse(randomSuffix),
 			},
 			{
 				ResourceName:            "google_migration_center_settings.default",
@@ -34,41 +37,112 @@ func TestAccMigrationCenterSettings_settingsUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"location"},
 			},
 			{
-				Config: testAccMigrationCenterSettings_settingsUpdateTrue(),
+				Config: testAccMigrationCenterSettings_settingsUpdateTrue(randomSuffix),
 			},
 			{
 				ResourceName:            "google_migration_center_settings.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccMigrationCenterSettings_settingsUpdateCleanup(randomSuffix),
 			},
 		},
 	})
 }
 
-func testAccMigrationCenterSettings_settingsStart() string {
-	return `
+func testAccMigrationCenterSettings_settingsStart(randomSuffix string) string {
+	return fmt.Sprintf(`
 resource "google_migration_center_settings" "default" {
   location              = "us-central1"
   disable_cloud_logging = true
-}
-`
+  preference_set        = google_migration_center_preference_set.default.id
 }
 
-func testAccMigrationCenterSettings_settingsUpdateFalse() string {
-	return `
+resource "google_migration_center_preference_set" "default" {
+  location          = "us-central1"
+  preference_set_id = "tf-test-pref-set-settings-%s"
+  description       = "Terraform integration test description"
+  display_name      = "Terraform integration test display"
+  virtual_machine_preferences {
+    vmware_engine_preferences {
+      cpu_overcommit_ratio = 1.5
+    }
+    sizing_optimization_strategy = "SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE"
+    target_product = "COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE"
+  }
+}
+`, randomSuffix)
+}
+
+func testAccMigrationCenterSettings_settingsUpdateFalse(randomSuffix string) string {
+	return fmt.Sprintf(`
 resource "google_migration_center_settings" "default" {
   location              = "us-central1"
   disable_cloud_logging = false
-}
-`
+  preference_set        = google_migration_center_preference_set.default.id
 }
 
-func testAccMigrationCenterSettings_settingsUpdateTrue() string {
-	return `
+resource "google_migration_center_preference_set" "default" {
+  location          = "us-central1"
+  preference_set_id = "tf-test-pref-set-settings-%s"
+  description       = "Terraform integration test description"
+  display_name      = "Terraform integration test display"
+  virtual_machine_preferences {
+    vmware_engine_preferences {
+      cpu_overcommit_ratio = 1.5
+    }
+    sizing_optimization_strategy = "SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE"
+    target_product = "COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE"
+  }
+}
+`, randomSuffix)
+}
+
+func testAccMigrationCenterSettings_settingsUpdateTrue(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_migration_center_settings" "default" {
+  location              = "us-central1"
+  disable_cloud_logging = true
+  preference_set        = google_migration_center_preference_set.default.id
+}
+
+resource "google_migration_center_preference_set" "default" {
+  location          = "us-central1"
+  preference_set_id = "tf-test-pref-set-settings-%s"
+  description       = "Terraform integration test description"
+  display_name      = "Terraform integration test display"
+  virtual_machine_preferences {
+    vmware_engine_preferences {
+      cpu_overcommit_ratio = 1.5
+    }
+    sizing_optimization_strategy = "SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE"
+    target_product = "COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE"
+  }
+}
+`, randomSuffix)
+}
+
+func testAccMigrationCenterSettings_settingsUpdateCleanup(randomSuffix string) string {
+	return fmt.Sprintf(`
 resource "google_migration_center_settings" "default" {
   location              = "us-central1"
   disable_cloud_logging = true
 }
-`
+
+resource "google_migration_center_preference_set" "default" {
+  location          = "us-central1"
+  preference_set_id = "tf-test-pref-set-settings-%s"
+  description       = "Terraform integration test description"
+  display_name      = "Terraform integration test display"
+  virtual_machine_preferences {
+    vmware_engine_preferences {
+      cpu_overcommit_ratio = 1.5
+    }
+    sizing_optimization_strategy = "SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE"
+    target_product = "COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE"
+  }
+}
+`, randomSuffix)
 }
