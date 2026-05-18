@@ -77,6 +77,15 @@ examples:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+  - name: 'firestore_field_timestamp_with_ttl_offset'
+    primary_resource_id: 'timestamp-with-offset'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
   - name: 'firestore_field_match_override'
     primary_resource_id: 'match_override'
     vars:
@@ -178,9 +187,9 @@ properties:
   - name: 'ttlConfig'
     type: NestedObject
     description: |
-       The TTL configuration for this Field. If set to an empty block (i.e. `ttl_config {}`), a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
+      The TTL configuration for this Field. If set to an empty (i.e. `ttl_config {}`) or non-empty block, a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/empty_object_if_set.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/firestore_field_ttl_config.go.tmpl'
     properties:
       - name: 'state'
         type: Enum
@@ -191,3 +200,9 @@ properties:
           - 'CREATING'
           - 'ACTIVE'
           - 'NEEDS_REPAIR'
+      - name: 'expirationOffset'
+        type: String
+        description: |
+          The offset, relative to the timestamp value from the field, used to determine the document's expiration time. Formatted as the number of seconds followed by 's'. For example, "60s" represents an offset of one minute. The number of seconds must be between 1 and 2147483647 inclusive. To configure no offset, omit this field.
+        immutable: true
+        default_from_api: true
