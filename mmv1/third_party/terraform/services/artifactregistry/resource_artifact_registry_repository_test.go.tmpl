@@ -467,5 +467,90 @@ resource "google_artifact_registry_repository" "rr-test" {
 `, repositoryID, remoteDescription)
 }
 
+func TestAccArtifactRegistryRepository_updateUpstreamCredentials(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"desc":               "example remote dockerhub repository with credentials" + randomSuffix,
+		"repository_id":      "tf-test-example-dockerhub-remote" + randomSuffix,
+		"secret_id":          "tf-test-example-secret" + randomSuffix,
+		"secret_resource_id": "tf-test-example-remote-secret" + randomSuffix,
+		"random_suffix":      randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccArtifactRegistryRepository_remoteWithCredentials(context, "user1", "version1"),
+			},
+			{
+				Config: testAccArtifactRegistryRepository_remoteWithCredentials(context, "user2", "version2"),
+			},
+		},
+	})
+}
+
+func testAccArtifactRegistryRepository_remoteWithCredentials(context map[string]interface{}, username, passwordVersion string) string {
+	c := make(map[string]interface{})
+	for k, v := range context {
+		c[k] = v
+	}
+	c["username"] = username
+	c["password_version"] = passwordVersion
+
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_secret_manager_secret" "%{secret_resource_id}" {
+  secret_id = "%{secret_id}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "%{secret_resource_id}_version1" {
+  secret = google_secret_manager_secret.%{secret_resource_id}.id
+  secret_data = "password1"
+}
+
+resource "google_secret_manager_secret_version" "%{secret_resource_id}_version2" {
+  secret = google_secret_manager_secret.%{secret_resource_id}.id
+  secret_data = "password2"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret-access" {
+  secret_id = google_secret_manager_secret.%{secret_resource_id}.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+}
+
+resource "google_artifact_registry_repository" "my-repo" {
+  location      = "us-central1"
+  repository_id = "%{repository_id}"
+  description   = "%{desc}"
+  format        = "DOCKER"
+  mode          = "REMOTE_REPOSITORY"
+  remote_repository_config {
+    description = "docker hub with custom credentials"
+    disable_upstream_validation = true
+    docker_repository {
+      public_repository = "DOCKER_HUB"
+    }
+    upstream_credentials {
+      username_password_credentials {
+        username = "%{username}"
+        password_secret_version = google_secret_manager_secret_version.%{secret_resource_id}_%{password_version}.name
+      }
+    }
+  }
+}
+`, c)
+}
+
 {{ end }}
 
