@@ -4707,6 +4707,10 @@ resource "google_container_cluster" "cluster" {
  	  }
       
       gpudirect_strategy = "rdma"
+
+      ephemeral_storage_local_ssd_config {
+        local_ssd_count = 32
+      }
     }
   }
 }
@@ -4726,6 +4730,10 @@ resource "google_container_node_pool" "np_with_gpudirect" {
    }
 
    gpudirect_strategy = "rdma"
+
+   ephemeral_storage_local_ssd_config {
+     local_ssd_count = 32
+   }
   }
 }
 `, cluster, networkName, subnetworkName, np)
