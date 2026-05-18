@@ -1,0 +1,134 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegionNetworkPolicy'
+api_resource_type_kind: NetworkPolicy
+description: "Represents a Compute Region Network Policy resource."
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/networkPolicies'
+self_link: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/networkPolicies'
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+examples:
+  - name: region_network_policy_basic
+    primary_resource_id: default
+    vars:
+      policy_name: tf-test-policy-basic
+    test_env_vars:
+      project_name: PROJECT_NAME
+      region: REGION
+  - name: region_network_policy_full
+    primary_resource_id: default
+    vars:
+      policy_name: tf-test-policy-full
+    test_env_vars:
+      project_name: PROJECT_NAME
+      region: REGION
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of this resource.
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description: Name of the resource.
+    required: true
+    immutable: true
+  - name: 'regionNetworkPolicyId'
+    type: String
+    description: The unique identifier for the resource.
+    api_name: id
+    output: true
+  - name: 'description'
+    type: String
+    description: An optional description of this resource.
+  - name: 'trafficClassificationRules'
+    type: Array
+    description: List of traffic classification rules.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'ruleName'
+          type: String
+          description: Name for the rule.
+        - name: 'priority'
+          type: Integer
+          description: Rule priority.
+        - name: 'match'
+          type: NestedObject
+          description: Match condition.
+          properties:
+            - name: 'srcIpRanges'
+              type: Array
+              item_type:
+                type: String
+            - name: 'destIpRanges'
+              type: Array
+              item_type:
+                type: String
+            - name: 'layer4Configs'
+              type: Array
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipProtocol'
+                    type: String
+                  - name: 'ports'
+                    type: Array
+                    item_type:
+                      type: String
+        - name: 'action'
+          type: NestedObject
+          description: Action to take.
+          properties:
+            - name: 'type'
+              type: String
+            - name: 'trafficClass'
+              type: Enum
+              enum_values: []
+            - name: 'dscpMode'
+              type: Enum
+              enum_values: []
+            - name: 'dscpValue'
+              type: Integer
+        - name: 'targetServiceAccounts'
+          type: Array
+          item_type:
+            type: String
+        - name: 'targetSecureTags'
+          type: Array
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+              - name: 'state'
+                type: Enum
+                enum_values: []
+        - name: 'disabled'
+          type: Boolean
