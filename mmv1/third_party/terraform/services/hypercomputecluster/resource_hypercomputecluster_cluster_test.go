@@ -806,11 +806,11 @@ func TestAccHypercomputeclusterCluster_networkValidation(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccHypercomputeclusterCluster_missingNetwork(context),
+				Config:      testAccHypercomputeclusterCluster_missingNetwork(context),
 				ExpectError: regexp.MustCompile(`Insufficient network_resources blocks`),
 			},
 			{
-				Config: testAccHypercomputeclusterCluster_emptyNetwork(context),
+				Config:      testAccHypercomputeclusterCluster_emptyNetwork(context),
 				ExpectError: regexp.MustCompile(`The argument "id" is required, but no definition was found`),
 			},
 		},
