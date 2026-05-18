@@ -1221,3 +1221,583 @@ func flattenComputeInstanceSourceEncryptionKey(v *compute.CustomerEncryptionKey)
 		},
 	}
 }
+
+// _v2 expand functions return map[string]interface{} / []interface{} for direct
+// HTTP JSON serialization via transport_tpg.SendRequest, replacing Apiary struct usage.
+
+func expandAliasIpRanges_v2(ranges []interface{}) []interface{} {
+	ipRanges := make([]interface{}, 0, len(ranges))
+	for _, raw := range ranges {
+		data := raw.(map[string]interface{})
+		entry := map[string]interface{}{
+			"ipCidrRange": data["ip_cidr_range"].(string),
+		}
+		if v := data["subnetwork_range_name"].(string); v != "" {
+			entry["subnetworkRangeName"] = v
+		}
+		ipRanges = append(ipRanges, entry)
+	}
+	return ipRanges
+}
+
+func expandAccessConfigs_v2(configs []interface{}) []interface{} {
+	acs := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		ac := map[string]interface{}{
+			"type": "ONE_TO_ONE_NAT",
+		}
+		if raw != nil {
+			data := raw.(map[string]interface{})
+			if v := data["nat_ip"].(string); v != "" {
+				ac["natIP"] = v
+			}
+			if v := data["network_tier"].(string); v != "" {
+				ac["networkTier"] = v
+			}
+			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
+				ac["setPublicPtr"] = true
+				ac["publicPtrDomainName"] = ptr.(string)
+			}
+		}
+		acs[i] = ac
+	}
+	return acs
+}
+
+func expandIpv6AccessConfigs_v2(configs []interface{}) []interface{} {
+	iacs := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		iac := map[string]interface{}{
+			"type": "DIRECT_IPV6",
+		}
+		if raw != nil {
+			data := raw.(map[string]interface{})
+			if v := data["network_tier"].(string); v != "" {
+				iac["networkTier"] = v
+			}
+			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
+				iac["publicPtrDomainName"] = ptr.(string)
+			}
+			if eip, ok := data["external_ipv6"]; ok && eip != "" {
+				iac["externalIpv6"] = eip.(string)
+			}
+			if eipl, ok := data["external_ipv6_prefix_length"]; ok && eipl != "" {
+				if strVal, ok := eipl.(string); ok {
+					if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+						iac["externalIpv6PrefixLength"] = intVal
+					}
+				}
+			}
+			if name, ok := data["name"]; ok && name != "" {
+				iac["name"] = name.(string)
+			}
+		}
+		iacs[i] = iac
+	}
+	return iacs
+}
+
+func expandServiceAccounts_v2(configs []interface{}) []interface{} {
+	accounts := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+		email := data["email"].(string)
+		if email == "" {
+			email = "default"
+		}
+		accounts[i] = map[string]interface{}{
+			"email":  email,
+			"scopes": tpgresource.CanonicalizeServiceScopes(tpgresource.ConvertStringSet(data["scopes"].(*schema.Set))),
+		}
+	}
+	return accounts
+}
+
+func resourceInstanceTags_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if v := d.Get("tags"); v != nil {
+		vs := v.(*schema.Set)
+		items := make([]string, vs.Len())
+		for i, v := range vs.List() {
+			items[i] = v.(string)
+		}
+		return map[string]interface{}{
+			"items":       items,
+			"fingerprint": d.Get("tags_fingerprint").(string),
+		}
+	}
+	return nil
+}
+
+func expandShieldedVmConfigs_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("shielded_instance_config"); !ok {
+		return nil
+	}
+	prefix := "shielded_instance_config.0"
+	return map[string]interface{}{
+		"enableSecureBoot":          d.Get(prefix + ".enable_secure_boot").(bool),
+		"enableVtpm":                d.Get(prefix + ".enable_vtpm").(bool),
+		"enableIntegrityMonitoring": d.Get(prefix + ".enable_integrity_monitoring").(bool),
+	}
+}
+
+func expandConfidentialInstanceConfig_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("confidential_instance_config"); !ok {
+		return nil
+	}
+	prefix := "confidential_instance_config.0"
+	result := map[string]interface{}{
+		"enableConfidentialCompute": d.Get(prefix + ".enable_confidential_compute").(bool),
+	}
+	if v := d.Get(prefix + ".confidential_instance_type").(string); v != "" {
+		result["confidentialInstanceType"] = v
+	}
+	return result
+}
+
+func expandAdvancedMachineFeatures_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("advanced_machine_features"); !ok {
+		return nil
+	}
+	prefix := "advanced_machine_features.0"
+	result := map[string]interface{}{}
+	if v := d.Get(prefix + ".enable_nested_virtualization").(bool); v {
+		result["enableNestedVirtualization"] = v
+	}
+	if v := int64(d.Get(prefix + ".threads_per_core").(int)); v > 0 {
+		result["threadsPerCore"] = v
+	}
+	if v := d.Get(prefix + ".turbo_mode").(string); v != "" {
+		result["turboMode"] = v
+	}
+	if v := int64(d.Get(prefix + ".visible_core_count").(int)); v > 0 {
+		result["visibleCoreCount"] = v
+	}
+	if v := d.Get(prefix + ".performance_monitoring_unit").(string); v != "" {
+		result["performanceMonitoringUnit"] = v
+	}
+	if v := d.Get(prefix + ".enable_uefi_networking").(bool); v {
+		result["enableUefiNetworking"] = v
+	}
+	return result
+}
+
+func expandDisplayDevice_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	if _, ok := d.GetOk("enable_display"); !ok {
+		return nil
+	}
+	return map[string]interface{}{
+		"enableDisplay": d.Get("enable_display").(bool),
+	}
+}
+
+func expandNetworkPerformanceConfig_v2(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+	configs, ok := d.GetOk("network_performance_config")
+	if !ok {
+		return nil, nil
+	}
+	npcSlice := configs.([]interface{})
+	if len(npcSlice) > 1 {
+		return nil, fmt.Errorf("cannot specify multiple network_performance_configs")
+	}
+	if len(npcSlice) == 0 || npcSlice[0] == nil {
+		return nil, nil
+	}
+	npc := npcSlice[0].(map[string]interface{})
+	return map[string]interface{}{
+		"totalEgressBandwidthTier": npc["total_egress_bandwidth_tier"].(string),
+	}, nil
+}
+
+func expandComputeInstanceEncryptionKey_v2(d tpgresource.TerraformResourceData) map[string]interface{} {
+	iek, ok := d.GetOk("instance_encryption_key")
+	if !ok {
+		return nil
+	}
+	iekRes := iek.([]interface{})[0].(map[string]interface{})
+	result := map[string]interface{}{}
+	if v := iekRes["kms_key_self_link"].(string); v != "" {
+		result["kmsKeyName"] = v
+	}
+	if v := iekRes["kms_key_service_account"].(string); v != "" {
+		result["kmsKeyServiceAccount"] = v
+	}
+	return result
+}
+
+func expandComputeInstanceSourceEncryptionKey_v2(d tpgresource.TerraformResourceData, field string) map[string]interface{} {
+	cek, ok := d.GetOk(field)
+	if !ok {
+		return nil
+	}
+	cekRes := cek.([]interface{})[0].(map[string]interface{})
+	result := map[string]interface{}{}
+	if v := cekRes["rsa_encrypted_key"].(string); v != "" {
+		result["rsaEncryptedKey"] = v
+	}
+	if v := cekRes["raw_key"].(string); v != "" {
+		result["rawKey"] = v
+	}
+	if v := cekRes["kms_key_self_link"].(string); v != "" {
+		result["kmsKeyName"] = v
+	}
+	if v := cekRes["kms_key_service_account"].(string); v != "" {
+		result["kmsKeyServiceAccount"] = v
+	}
+	return result
+}
+
+func expandComputeInstanceGuestOsFeatures_v2(v interface{}) []interface{} {
+	if v == nil {
+		return nil
+	}
+	var result []interface{}
+	for _, feature := range v.([]interface{}) {
+		result = append(result, map[string]interface{}{
+			"type": feature.(string),
+		})
+	}
+	return result
+}
+
+func expandReservationAffinity_v2(d tpgresource.TerraformResourceData) (map[string]interface{}, error) {
+	_, ok := d.GetOk("reservation_affinity")
+	if !ok {
+		return nil, nil
+	}
+
+	prefix := "reservation_affinity.0"
+	reservationAffinityType := d.Get(prefix + ".type").(string)
+
+	affinity := map[string]interface{}{
+		"consumeReservationType": reservationAffinityType,
+	}
+
+	_, hasSpecificReservation := d.GetOk(prefix + ".specific_reservation")
+	if (reservationAffinityType == "SPECIFIC_RESERVATION") != hasSpecificReservation {
+		return nil, fmt.Errorf("specific_reservation must be set when reservation_affinity is SPECIFIC_RESERVATION, and not set otherwise")
+	}
+
+	if hasSpecificReservation {
+		specificPrefix := prefix + ".specific_reservation.0"
+		var values []string
+		for _, v := range d.Get(specificPrefix + ".values").([]interface{}) {
+			values = append(values, v.(string))
+		}
+		affinity["key"] = d.Get(specificPrefix + ".key").(string)
+		affinity["values"] = values
+	}
+
+	return affinity, nil
+}
+
+func expandComputeMaxRunDuration_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	duration := map[string]interface{}{}
+
+	if nanos := original["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		duration["nanos"] = int64(nanos.(int))
+	}
+	if seconds := original["seconds"]; reflect.ValueOf(seconds).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(seconds)) {
+		duration["seconds"] = int64(seconds.(int))
+	}
+	return duration, nil
+}
+
+func expandComputeOnInstanceStopAction_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	d, ok := original["discard_local_ssd"]
+	if !ok {
+		return nil, nil
+	}
+	return map[string]interface{}{
+		"discardLocalSsd": d.(bool),
+	}, nil
+}
+
+func expandComputeLocalSsdRecoveryTimeout_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	duration := map[string]interface{}{}
+
+	if nanos := original["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		duration["nanos"] = int64(nanos.(int))
+	}
+	if seconds := original["seconds"]; reflect.ValueOf(seconds).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(seconds)) {
+		duration["seconds"] = int64(seconds.(int))
+	}
+	return duration, nil
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func expandGracefulShutdownMaxDuration_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	maxDurationMap := l[0].(map[string]interface{})
+	// Always include seconds to mirror ForceSendFields["Seconds"] in the Apiary version.
+	duration := map[string]interface{}{
+		"seconds": int64(maxDurationMap["seconds"].(int)),
+	}
+	if nanos := maxDurationMap["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		duration["nanos"] = int64(nanos.(int))
+	}
+	return duration, nil
+}
+
+func expandGracefulShutdown_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	gracefulShutdown := map[string]interface{}{
+		"enabled": original["enabled"].(bool),
+	}
+	maxDuration, err := expandGracefulShutdownMaxDuration_v2(original["max_duration"].([]interface{}))
+	if err != nil {
+		return nil, err
+	}
+	if maxDuration != nil {
+		gracefulShutdown["maxDuration"] = maxDuration
+	}
+	return gracefulShutdown, nil
+}
+
+func expandComputePreemptionNoticeDuration_v2(v interface{}) (map[string]interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	duration := map[string]interface{}{}
+	if nanos, ok := original["nanos"]; ok && nanos != nil {
+		duration["nanos"] = int64(nanos.(int))
+	}
+	if seconds, ok := original["seconds"]; ok && seconds != nil {
+		duration["seconds"] = int64(seconds.(int))
+	}
+	return duration, nil
+}
+{{- end }}
+
+func expandScheduling_v2(v interface{}) (map[string]interface{}, error) {
+	if v == nil {
+		return map[string]interface{}{"automaticRestart": true}, nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return map[string]interface{}{"automaticRestart": true}, nil
+	}
+	if len(ls) > 1 || ls[0] == nil {
+		return nil, fmt.Errorf("expected exactly one scheduling block")
+	}
+
+	original := ls[0].(map[string]interface{})
+	scheduling := map[string]interface{}{}
+
+	if v, ok := original["automatic_restart"]; ok {
+		scheduling["automaticRestart"] = v.(bool)
+	}
+	if v, ok := original["preemptible"]; ok {
+		scheduling["preemptible"] = v.(bool)
+	}
+	if v, ok := original["on_host_maintenance"]; ok {
+		if s := v.(string); s != "" {
+			scheduling["onHostMaintenance"] = s
+		}
+	}
+	if v, ok := original["node_affinities"]; ok && v != nil {
+		naSet := v.(*schema.Set).List()
+		nodeAffinities := make([]interface{}, 0, len(naSet))
+		for _, nodeAffRaw := range naSet {
+			if nodeAffRaw == nil {
+				continue
+			}
+			nodeAff := nodeAffRaw.(map[string]interface{})
+			nodeAffinities = append(nodeAffinities, map[string]interface{}{
+				"key":      nodeAff["key"].(string),
+				"operator": nodeAff["operator"].(string),
+				"values":   tpgresource.ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
+			})
+		}
+		scheduling["nodeAffinities"] = nodeAffinities
+	}
+	if v, ok := original["min_node_cpus"]; ok {
+		if n := int64(v.(int)); n > 0 {
+			scheduling["minNodeCpus"] = n
+		}
+	}
+	if v, ok := original["provisioning_model"]; ok {
+		if s := v.(string); s != "" {
+			scheduling["provisioningModel"] = s
+		}
+	}
+	if v, ok := original["instance_termination_action"]; ok {
+		if s := v.(string); s != "" {
+			scheduling["instanceTerminationAction"] = s
+		}
+	}
+	if v, ok := original["availability_domain"]; ok && v != nil {
+		if n := int64(v.(int)); n > 0 {
+			scheduling["availabilityDomain"] = n
+		}
+	}
+	if v, ok := original["max_run_duration"]; ok {
+		transformed, err := expandComputeMaxRunDuration_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["maxRunDuration"] = transformed
+		}
+	}
+	if v, ok := original["on_instance_stop_action"]; ok {
+		transformed, err := expandComputeOnInstanceStopAction_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["onInstanceStopAction"] = transformed
+		}
+	}
+{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := original["host_error_timeout_seconds"]; ok {
+		// API bug: SetScheduling doesn't clear this field when set to 0; send null explicitly.
+		if v == 0 || v == nil {
+			scheduling["hostErrorTimeoutSeconds"] = nil
+		} else {
+			scheduling["hostErrorTimeoutSeconds"] = int64(v.(int))
+		}
+	}
+	if v, ok := original["maintenance_interval"]; ok {
+		if s := v.(string); s != "" {
+			scheduling["maintenanceInterval"] = s
+		}
+	}
+	if v, ok := original["graceful_shutdown"]; ok {
+		transformed, err := expandGracefulShutdown_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["gracefulShutdown"] = transformed
+		}
+	}
+	if v, ok := original["skip_guest_os_shutdown"]; ok {
+		scheduling["skipGuestOsShutdown"] = v.(bool)
+	}
+	if v, ok := original["preemption_notice_duration"]; ok {
+		transformed, err := expandComputePreemptionNoticeDuration_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["preemptionNoticeDuration"] = transformed
+		}
+	}
+{{- end }}
+	if v, ok := original["local_ssd_recovery_timeout"]; ok {
+		transformed, err := expandComputeLocalSsdRecoveryTimeout_v2(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformed != nil {
+			scheduling["localSsdRecoveryTimeout"] = transformed
+		}
+	}
+	if v, ok := original["termination_time"]; ok {
+		if s := v.(string); s != "" {
+			scheduling["terminationTime"] = s
+		}
+	}
+	return scheduling, nil
+}
+
+func expandNetworkInterfaces_v2(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]interface{}, error) {
+	configs := d.Get("network_interface").([]interface{})
+	ifaces := make([]interface{}, len(configs))
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+
+		var networkAttachment string
+		network := data["network"].(string)
+		subnetwork := data["subnetwork"].(string)
+		if networkAttachmentObj, ok := data["network_attachment"]; ok {
+			networkAttachment = networkAttachmentObj.(string)
+		}
+		if networkAttachment == "" && network == "" && subnetwork == "" {
+			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
+		}
+
+		nf, err := tpgresource.ParseNetworkFieldValue(network, d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot determine self_link for network %q: %s", network, err)
+		}
+
+		subnetProjectField := fmt.Sprintf("network_interface.%d.subnetwork_project", i)
+		sf, err := tpgresource.ParseSubnetworkFieldValueWithProjectField(subnetwork, subnetProjectField, d, config)
+		if err != nil {
+			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
+		}
+
+		iface := map[string]interface{}{
+			"accessConfigs":     expandAccessConfigs_v2(data["access_config"].([]interface{})),
+			"aliasIpRanges":     expandAliasIpRanges_v2(data["alias_ip_range"].([]interface{})),
+			"ipv6AccessConfigs": expandIpv6AccessConfigs_v2(data["ipv6_access_config"].([]interface{})),
+		}
+		// Only include optional string/numeric fields when non-zero to match omitempty
+		// semantics of the Apiary struct — sending empty values can cause API validation errors.
+		if v := nf.RelativeLink(); v != "" {
+			iface["network"] = v
+		}
+		if v := sf.RelativeLink(); v != "" {
+			iface["subnetwork"] = v
+		}
+		if v := data["network_ip"].(string); v != "" {
+			iface["networkIP"] = v
+		}
+		if networkAttachment != "" {
+			iface["networkAttachment"] = networkAttachment
+		}
+		if v := int64(data["vlan"].(int)); v != 0 {
+			iface["vlan"] = v
+		}
+		if v := data["nic_type"].(string); v != "" {
+			iface["nicType"] = v
+		}
+		if v := data["stack_type"].(string); v != "" {
+			iface["stackType"] = v
+		}
+		if v := int64(data["queue_count"].(int)); v != 0 {
+			iface["queueCount"] = v
+		}
+		if v := data["ipv6_address"].(string); v != "" {
+			iface["ipv6Address"] = v
+		}
+		if v := int64(data["internal_ipv6_prefix_length"].(int)); v != 0 {
+			iface["internalIpv6PrefixLength"] = v
+		}
+		if v := data["igmp_query"].(string); v != "" {
+			iface["igmpQuery"] = v
+		}
+{{- if ne $.TargetVersionName "ga" }}
+		if macAddress, ok := data["mac_address"]; ok && macAddress.(string) != "" {
+			iface["macAddress"] = macAddress.(string)
+		}
+{{- end }}
+		ifaces[i] = iface
+	}
+	return ifaces, nil
+}
