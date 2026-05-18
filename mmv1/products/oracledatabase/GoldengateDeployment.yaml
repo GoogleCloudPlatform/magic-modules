@@ -574,3 +574,4 @@ examples:
       goldengate_deployment_id: 'fmt.Sprintf("tf-ggdep-full-%s", acctest.RandString(t, 10))'
       odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+      
