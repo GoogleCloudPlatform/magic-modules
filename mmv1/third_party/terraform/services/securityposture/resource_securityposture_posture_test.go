@@ -82,24 +82,18 @@ resource "google_securityposture_posture" "posture_test" {
     	policy_set_id = "org_policy_set"
     	description = "set of org policies"
     	policies {
-    		policy_id = "policy_1"
+    		policy_id = "location_policy_1"
     		constraint {
     			org_policy_constraint {
-    				canned_constraint_id = "storage.uniformBucketLevelAccess"
+    				canned_constraint_id = "gcp.resourceLocations"
     				policy_rules {
-    					enforce = true
+    					values {
+    						allowed_values = ["in:us-locations"]
+    					}
     				}
-    				policy_rules {
-    					enforce = false
-						condition {
-                            title = "Disable constraint for test"
-                            description = "Disable constraint for test"
-                            expression = "resource.matchTagId('tagKeys/123', 'tagValues/345')"
-					    }
-    				}						
     			}
     		}
-		}		
+    	}
     	policies {
     		policy_id = "policy_2"
     		constraint {

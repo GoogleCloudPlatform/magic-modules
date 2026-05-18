@@ -1,0 +1,171 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// expand{{$.GetPrefix}}{{$.TitlelizeProperty}} is a custom expander for the orgPolicyConstraint block.
+// It is self-contained (does not call generated child expanders) because using custom_expand
+// on a NestedObject prevents the template from recursively generating those child functions.
+// The key behaviour difference from the generated code is for the `enforce` field:
+// it is only included in the API request when the user explicitly set it in config,
+// which is determined by inspecting d.GetRawConfig() for null vs. false.
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	// cannedConstraintId — inlined, trivial passthrough.
+	cannedConstraintId, _ := original["canned_constraint_id"].(string)
+	if cannedConstraintId != "" {
+		transformed["cannedConstraintId"] = cannedConstraintId
+	}
+
+	// Determine, per policy_rules entry, whether `enforce` was explicitly set in config.
+	// d.GetRawConfig() preserves null (unset) vs. false (explicitly set to false).
+	enforceIsSet := securitypostureGetEnforceIsSetForOrgPolicyConstraint(d, cannedConstraintId)
+
+	policyRulesRaw, _ := original["policy_rules"].([]interface{})
+	policyRules := make([]interface{}, 0, len(policyRulesRaw))
+	for i, ruleRaw := range policyRulesRaw {
+		if ruleRaw == nil {
+			continue
+		}
+		rule := ruleRaw.(map[string]interface{})
+		transformedRule := make(map[string]interface{})
+
+		// values — inlined nested object expansion.
+		if valuesRaw, ok := rule["values"].([]interface{}); ok && len(valuesRaw) > 0 && valuesRaw[0] != nil {
+			valuesMap := valuesRaw[0].(map[string]interface{})
+			transformedValues := make(map[string]interface{})
+			if av, ok := valuesMap["allowed_values"]; ok {
+				if val := reflect.ValueOf(av); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+					transformedValues["allowedValues"] = av
+				}
+			}
+			if dv, ok := valuesMap["denied_values"]; ok {
+				if val := reflect.ValueOf(dv); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+					transformedValues["deniedValues"] = dv
+				}
+			}
+			if len(transformedValues) > 0 {
+				transformedRule["values"] = transformedValues
+			}
+		}
+
+		// allow_all / deny_all — inlined boolean passthrough with empty-value guard.
+		if val := reflect.ValueOf(rule["allow_all"]); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformedRule["allowAll"] = rule["allow_all"]
+		}
+		if val := reflect.ValueOf(rule["deny_all"]); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformedRule["denyAll"] = rule["deny_all"]
+		}
+
+		// enforce — only include when explicitly set by the user in config.
+		if i < len(enforceIsSet) && enforceIsSet[i] {
+			transformedRule["enforce"] = rule["enforce"]
+		}
+
+		// condition — inlined nested object expansion.
+		if condRaw, ok := rule["condition"].([]interface{}); ok && len(condRaw) > 0 && condRaw[0] != nil {
+			condMap := condRaw[0].(map[string]interface{})
+			transformedCond := make(map[string]interface{})
+			for tfKey, apiKey := range map[string]string{
+				"expression":  "expression",
+				"title":       "title",
+				"description": "description",
+				"location":    "location",
+			} {
+				if v, ok := condMap[tfKey]; ok {
+					if val := reflect.ValueOf(v); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+						transformedCond[apiKey] = v
+					}
+				}
+			}
+			if len(transformedCond) > 0 {
+				transformedRule["condition"] = transformedCond
+			}
+		}
+
+		policyRules = append(policyRules, transformedRule)
+	}
+	if len(policyRules) > 0 {
+		transformed["policyRules"] = policyRules
+	}
+
+	return transformed, nil
+}
+
+// securitypostureGetEnforceIsSetForOrgPolicyConstraint traverses the raw cty config to find
+// which policy_rules[i].enforce values were explicitly set (non-null) for the constraint
+// identified by cannedConstraintId. It returns a slice where result[i] == true means the
+// i-th rule had enforce explicitly set by the user.
+func securitypostureGetEnforceIsSetForOrgPolicyConstraint(d tpgresource.TerraformResourceData, cannedConstraintId string) []bool {
+	rawCfg := d.GetRawConfig()
+	if rawCfg.IsNull() || !rawCfg.IsKnown() {
+		return nil
+	}
+
+	policySets := rawCfg.GetAttr("policy_sets")
+	if policySets.IsNull() || !policySets.IsKnown() {
+		return nil
+	}
+
+	for psIt := policySets.ElementIterator(); psIt.Next(); {
+		_, psVal := psIt.Element()
+		policies := psVal.GetAttr("policies")
+		if policies.IsNull() || !policies.IsKnown() {
+			continue
+		}
+		for pIt := policies.ElementIterator(); pIt.Next(); {
+			_, pVal := pIt.Element()
+			constraint := pVal.GetAttr("constraint")
+			if constraint.IsNull() || !constraint.IsKnown() {
+				continue
+			}
+			for cIt := constraint.ElementIterator(); cIt.Next(); {
+				_, cVal := cIt.Element()
+				orgPolicyConstraint := cVal.GetAttr("org_policy_constraint")
+				if orgPolicyConstraint.IsNull() || !orgPolicyConstraint.IsKnown() {
+					continue
+				}
+				for opcIt := orgPolicyConstraint.ElementIterator(); opcIt.Next(); {
+					_, opcVal := opcIt.Element()
+					idVal := opcVal.GetAttr("canned_constraint_id")
+					if idVal.IsNull() || !idVal.IsKnown() {
+						continue
+					}
+					if idVal.AsString() != cannedConstraintId {
+						continue
+					}
+					// Found the matching constraint — collect enforce null-status per rule.
+					policyRules := opcVal.GetAttr("policy_rules")
+					if policyRules.IsNull() || !policyRules.IsKnown() {
+						return nil
+					}
+					var result []bool
+					for prIt := policyRules.ElementIterator(); prIt.Next(); {
+						_, prVal := prIt.Element()
+						enforce := prVal.GetAttr("enforce")
+						result = append(result, !enforce.IsNull())
+					}
+					return result
+				}
+			}
+		}
+	}
+	return nil
+}
