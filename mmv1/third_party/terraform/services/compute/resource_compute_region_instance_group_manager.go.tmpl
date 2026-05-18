@@ -1009,12 +1009,16 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		"targetSize":                  int64(d.Get("target_size").(int)),
 		"listManagedInstancesResults": d.Get("list_managed_instances_results").(string),
 		"versions":                    expandVersions(d.Get("version").([]interface{})),
-		"standbyPolicy":               expandStandbyPolicy(d),
-		"instanceFlexibilityPolicy":   flexibilityPolicy,
 		"updatePolicy":                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 		"instanceLifecyclePolicy":     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		"statefulPolicy":              expandStatefulPolicy(d),
 		"resourcePolicies":            expandResourcePolicies(d.Get("resource_policies").([]interface{})),
+	}
+	if standbyPolicy := expandStandbyPolicy(d); standbyPolicy != nil {
+		body["standbyPolicy"] = standbyPolicy
+	}
+	if flexibilityPolicy != nil {
+		body["instanceFlexibilityPolicy"] = flexibilityPolicy
 	}
 	if desc := d.Get("description").(string); desc != "" {
 		body["description"] = desc
@@ -1022,29 +1026,31 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 	if namedPorts := getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()); len(namedPorts) > 0 {
 		body["namedPorts"] = namedPorts
 	}
-	if tp := tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)); len(tp) > 0 {
-		body["targetPools"] = tp
+	if targetPools := tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)); len(targetPools) > 0 {
+		body["targetPools"] = targetPools
 	}
-	if ahp := expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})); len(ahp) > 0 {
-		body["autoHealingPolicies"] = ahp
+	if autoHealingPolicies := expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})); len(autoHealingPolicies) > 0 {
+		body["autoHealingPolicies"] = autoHealingPolicies
 	}
-	if ts := d.Get("target_suspended_size").(int); ts > 0 {
-		body["targetSuspendedSize"] = int64(ts)
+	if targetSuspendedSize := d.Get("target_suspended_size").(int); targetSuspendedSize > 0 {
+		body["targetSuspendedSize"] = int64(targetSuspendedSize)
 	}
-	if ts := d.Get("target_stopped_size").(int); ts > 0 {
-		body["targetStoppedSize"] = int64(ts)
+	if targetStoppedSize := d.Get("target_stopped_size").(int); targetStoppedSize > 0 {
+		body["targetStoppedSize"] = int64(targetStoppedSize)
 	}
-	if aic := expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})); aic != nil {
-		body["allInstancesConfig"] = aic
+	if allInstancesConfig := expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})); allInstancesConfig != nil {
+		body["allInstancesConfig"] = allInstancesConfig
 	}
-	if dp := expandDistributionPolicyForCreate(d); dp != nil {
-		body["distributionPolicy"] = dp
+	if distributionPolicy := expandDistributionPolicyForCreate(d); distributionPolicy != nil {
+		body["distributionPolicy"] = distributionPolicy
 	}
-	if tsp := expandTargetSizePolicy(d.Get("target_size_policy").([]interface{})); tsp != nil {
-		body["targetSizePolicy"] = tsp
+	if targetSizePolicy := expandTargetSizePolicy(d.Get("target_size_policy").([]interface{})); targetSizePolicy != nil {
+		body["targetSizePolicy"] = targetSizePolicy
 	}
 	{{- if ne $.TargetVersionName "ga" }}
-	body["params"] = expandInstanceGroupManagerParams(d)
+	if params := expandInstanceGroupManagerParams(d); params != nil {
+		body["params"] = params
+	}
 	{{- end }}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers")
