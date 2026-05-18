@@ -58,7 +58,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdate(t 
 				ResourceName:            "google_firebase_ai_logic_prompt_template.updating",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "regional_propagation_disabled"},
 			},
 			{
 				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdateExample(context, "Hello from Updated Version 2"),
@@ -67,7 +67,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdate(t 
 				ResourceName:            "google_firebase_ai_logic_prompt_template.updating",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "regional_propagation_disabled"},
 			},
 		},
 	})
@@ -100,7 +100,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUp
 				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "regional_propagation_disabled"},
 			},
 			{
 				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdateExample(context, "Updated Name", "gemini-1.5-flash", "Hello V1"),
@@ -112,7 +112,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUp
 				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "regional_propagation_disabled"},
 			},
 			{
 				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdateExample(context, "Final Name", "gemini-2.0-flash", "Hello V2"),
@@ -125,7 +125,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUp
 				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "regional_propagation_disabled"},
 			},
 		},
 	})
@@ -243,7 +243,7 @@ func TestAccFirebaseAILogicPromptTemplate_regional(t *testing.T) {
 				ResourceName:            "google_firebase_ai_logic_prompt_template.regional",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "regional_propagation_disabled"},
 			},
 		},
 	})

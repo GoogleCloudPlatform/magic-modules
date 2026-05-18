@@ -24,11 +24,12 @@ references:
   api: 'https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates'
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{template_id}}
+create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{template_id}}&regionalPropagationDisabled={{regional_propagation_disabled}}
+update_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}?regionalPropagationDisabled={{regional_propagation_disabled}}
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}?regionalPropagationDisabled={{regional_propagation_disabled}}
 autogen_async: false
 autogen_status: UHJvbXB0VGVtcGxhdGU=
 parameters:
@@ -37,6 +38,14 @@ parameters:
     required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
+    url_param_only: true
+  - name: regional_propagation_disabled
+    type: Boolean
+    default_value: false
+    description: |-
+      For the `global` location only. If true, the write operation (create,
+      update, or delete) will apply to the global region only. Otherwise, the
+      operation will also propagate to all applicable regions.
     url_param_only: true
 properties:
   - name: templateId
@@ -93,6 +102,11 @@ examples:
     primary_resource_id: file
     vars:
       template_id: 'file-template'
+  - name: firebaseailogic_prompt_template_global_only
+    min_version: beta
+    primary_resource_id: global_only
+    vars:
+      template_id: 'global-only-template'
   - name: firebaseailogic_prompt_template_basic
     min_version: beta
     primary_resource_id: basic
