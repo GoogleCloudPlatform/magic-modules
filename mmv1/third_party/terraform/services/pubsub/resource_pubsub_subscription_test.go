@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -244,7 +245,7 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 	serviceAccount := fmt.Sprintf("bq-test-sa-%s", acctest.RandString(t, 10))
 	serviceAccount2 := fmt.Sprintf("bq-test-sa2-%s", acctest.RandString(t, 10))
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
 			Role:   "roles/bigquery.dataEditor",

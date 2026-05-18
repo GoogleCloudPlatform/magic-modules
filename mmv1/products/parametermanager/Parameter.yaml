@@ -31,7 +31,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'parameter_config_basic'
     primary_resource_id: 'parameter-basic'

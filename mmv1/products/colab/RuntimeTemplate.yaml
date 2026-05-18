@@ -44,7 +44,6 @@ iam_policy:
     - '{{runtime_template}}'
 include_in_tgc_next: true
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'

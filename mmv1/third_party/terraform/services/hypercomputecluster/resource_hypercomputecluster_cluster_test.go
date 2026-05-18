@@ -513,6 +513,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         bucket = "bucket-new-2-%{random_suffix}"
         autoclass {
           enabled = true
+          terminal_storage_class = "NEARLINE"
         }
         hierarchical_namespace {
           enabled = false
@@ -543,6 +544,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         description = "Lustre instance created via Terraform"
         filesystem = "lustrefs"
         lustre = "projects/${local.project_id}/locations/us-central1-a/instances/lustre-%{random_suffix}"
+          per_unit_storage_throughput = "1000"
       }
     }
   }

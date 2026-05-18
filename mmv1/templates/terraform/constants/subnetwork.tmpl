@@ -86,122 +86,81 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	return addr_equality && netmask_equality
 }
 
-{{ if eq $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
-// Dummy schema resource for tfplan2cai compilation
-func ResourceComputeSubnetwork() *schema.Resource {
-	return &schema.Resource{}
-}
-{{ end }}
-
+// CustomDiff function for secondary_ip_range.
+// Normalizes old state and new config sets before Set comparison to prevent false TypeSet diffs.
+// Specifically handles two Beta-only scenarios where state diverges from HCL config:
+// 1. Automatically inherits allocated ULA CIDRs from state when omitted in HCL config.
+// 2. Normalizes ip_collection self-links to relative paths to match user config short names.
 func resourceComputeSubnetworkSecondaryIpRangeCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	keys := diff.GetChangedKeysPrefix("secondary_ip_range")
-	if len(keys) == 0 {
+	return resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff)
+}
+
+func resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+{{ if and (ne $.TargetVersionName `ga`) (and (ne $.ProductMetadata.Compiler `terraformgoogleconversion-codegen`) (ne $.ProductMetadata.Compiler `terraformgoogleconversionnext-codegen`)) -}}
+	if len(diff.GetChangedKeysPrefix("secondary_ip_range")) == 0 {
 		return nil
 	}
-	oldCount, newCount := diff.GetChange("secondary_ip_range.#")
-	var count int
-	if oldCount.(int) < newCount.(int) {
-		count = newCount.(int)
-	} else {
-		count = oldCount.(int)
-	}
 
+	oldCount, newCount := diff.GetChange("secondary_ip_range.#")
+	count := oldCount.(int)
+	if newCount.(int) > count {
+		count = newCount.(int)
+	}
 	if count < 1 {
 		return nil
 	}
 
-	// Extract pristine user config directly from HCL to bypass SDK index matching corruption
-	rawConfig := diff.GetRawConfig().GetAttr("secondary_ip_range")
+	// Extract pristine user CIDR config directly from HCL
 	configCidrByName := make(map[string]string)
+	rawConfig := diff.GetRawConfig().GetAttr("secondary_ip_range")
 	if rawConfig.IsKnown() && !rawConfig.IsNull() {
 		for _, item := range rawConfig.AsValueSlice() {
-			if item.IsKnown() && !item.IsNull() {
-				nameVal := item.GetAttr("range_name")
-				cidrVal := item.GetAttr("ip_cidr_range")
-				if nameVal.IsKnown() && !nameVal.IsNull() && nameVal.AsString() != "" {
-					if cidrVal.IsKnown() && !cidrVal.IsNull() {
-						configCidrByName[nameVal.AsString()] = cidrVal.AsString()
+			if item.IsKnown() && !item.IsNull() && item.GetAttr("range_name").IsKnown() && !item.GetAttr("range_name").IsNull() {
+				nameVal := item.GetAttr("range_name").AsString()
+				if nameVal != "" {
+					if cidrVal := item.GetAttr("ip_cidr_range"); cidrVal.IsKnown() && !cidrVal.IsNull() {
+						configCidrByName[nameVal] = cidrVal.AsString()
 					} else {
-						configCidrByName[nameVal.AsString()] = ""
+						configCidrByName[nameVal] = ""
 					}
 				}
 			}
 		}
 	}
 
-	old := make([]interface{}, 0, count)
-	new := make([]interface{}, 0, count)
+	// Extract old state and new proposed maps
+	oldByName := make(map[string]map[string]interface{})
+	var oldList, newList []interface{}
 	for i := 0; i < count; i++ {
 		o, n := diff.GetChange(fmt.Sprintf("secondary_ip_range.%d", i))
 		if o != nil {
-			old = append(old, o)
+			oldList = append(oldList, o)
+			if m, ok := o.(map[string]interface{}); ok && m["range_name"] != nil {
+				oldByName[m["range_name"].(string)] = m
+			}
 		}
 		if n != nil {
-			new = append(new, n)
+			newList = append(newList, n)
 		}
 	}
 
-	oldByName := make(map[string]map[string]interface{})
-	for _, o := range old {
-		item := o.(map[string]interface{})
-		if name, ok := item["range_name"].(string); ok && name != "" {
-			oldByName[name] = item
-		}
-	}
-
-	// Helper to normalize IPv6 CIDRs (e.g. converting :0:0:0:0/64 to ::/64)
-	normalizeCidr := func(cidrStr string) string {
-		if cidrStr == "" {
-			return ""
-		}
-		ip, ipNet, err := net.ParseCIDR(cidrStr)
-		if err != nil {
-			return cidrStr
-		}
-		maskSize, _ := ipNet.Mask.Size()
-		return fmt.Sprintf("%s/%d", ip.String(), maskSize)
-	}
-
-	normalizedOld := make([]interface{}, 0, len(old))
-	for _, o := range old {
-		item := o.(map[string]interface{})
-		normalizedItem := make(map[string]interface{})
-		for k, v := range item {
-			if v == nil || v == "" {
-				continue // Omit nil/empty values entirely from hash comparison
-			}
-			if k == "ip_collection" {
-				if rel, err := tpgresource.GetRelativePath(v.(string)); err == nil {
-					normalizedItem[k] = rel
-				} else {
-					normalizedItem[k] = v
-				}
-			} else if k == "ip_cidr_range" {
-				normalizedItem[k] = normalizeCidr(v.(string))
-			} else {
-				normalizedItem[k] = v
-			}
-		}
-		normalizedOld = append(normalizedOld, normalizedItem)
-	}
-
-	normalizedNew := make([]interface{}, 0, len(new))
-	for _, n := range new {
-		item := n.(map[string]interface{})
-		normalizedItem := make(map[string]interface{})
-		rangeName, _ := item["range_name"].(string)
-		userCidr := configCidrByName[rangeName]
-
-		for k, v := range item {
+	// Helper: normalizes CIDR strings and ip_collection self-links
+	normalizeItem := func(m map[string]interface{}, overrideCidr string) map[string]interface{} {
+		clean := make(map[string]interface{})
+		for k, v := range m {
 			if k == "ip_cidr_range" {
-				if userCidr == "" {
-					// User omitted CIDR in HCL: inherit allocated state CIDR
-					if oldItem, ok := oldByName[rangeName]; ok && oldItem["ip_cidr_range"] != nil && oldItem["ip_cidr_range"] != "" {
-						normalizedItem[k] = normalizeCidr(oldItem["ip_cidr_range"].(string))
-					}
-				} else {
-					normalizedItem[k] = normalizeCidr(userCidr)
+				cidrStr, _ := v.(string)
+				if overrideCidr != "" {
+					cidrStr = overrideCidr
 				}
+				if cidrStr == "" {
+					continue
+				}
+				if ip, ipNet, err := net.ParseCIDR(cidrStr); err == nil {
+					maskSize, _ := ipNet.Mask.Size()
+					cidrStr = fmt.Sprintf("%s/%d", ip.String(), maskSize)
+				}
+				clean[k] = cidrStr
 				continue
 			}
 			if v == nil || v == "" {
@@ -209,25 +168,55 @@ func resourceComputeSubnetworkSecondaryIpRangeCustomDiff(_ context.Context, diff
 			}
 			if k == "ip_collection" {
 				if rel, err := tpgresource.GetRelativePath(v.(string)); err == nil {
-					normalizedItem[k] = rel
+					clean[k] = rel
 				} else {
-					normalizedItem[k] = v
+					clean[k] = v
 				}
 			} else {
-				normalizedItem[k] = v
+				clean[k] = v
 			}
 		}
-		normalizedNew = append(normalizedNew, normalizedItem)
+		return clean
 	}
 
-	oldSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), normalizedOld)
-	newSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), normalizedNew)
+	// Build clean normalized sets
+	var normalizedOld, normalizedNew []interface{}
+	for _, o := range oldList {
+		normalizedOld = append(normalizedOld, normalizeItem(o.(map[string]interface{}), ""))
+	}
+	for _, n := range newList {
+		m := n.(map[string]interface{})
+		rangeName, _ := m["range_name"].(string)
+		userCidr := configCidrByName[rangeName]
+		if userCidr == "" {
+			// Inherit allocated state CIDR for ULA ranges
+			if oldItem, ok := oldByName[rangeName]; ok && oldItem["ip_cidr_range"] != nil {
+				userCidr, _ = oldItem["ip_cidr_range"].(string)
+			}
+		}
+		normalizedNew = append(normalizedNew, normalizeItem(m, userCidr))
+	}
 
-	if oldSet.Equal(newSet) {
+	// Compare Sets and Clear Diff
+	var hashFunc schema.SchemaSetFunc
+	if ResourceComputeSubnetwork().Schema != nil && ResourceComputeSubnetwork().Schema["secondary_ip_range"] != nil {
+		hashFunc = schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource))
+	} else {
+		hashFunc = func(v interface{}) int {
+			buf := &bytes.Buffer{}
+			json.NewEncoder(buf).Encode(v)
+			return schema.HashString(buf.String())
+		}
+	}
+
+	if schema.NewSet(hashFunc, normalizedOld).Equal(schema.NewSet(hashFunc, normalizedNew)) {
 		if err := diff.Clear("secondary_ip_range"); err != nil {
 			return err
 		}
 	}
 
 	return nil
+{{ else -}}
+	return nil
+{{ end -}}
 }

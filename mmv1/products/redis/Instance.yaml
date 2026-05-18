@@ -41,7 +41,6 @@ async:
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/redis_instance.tmpl'
   constants: 'templates/terraform/constants/redis_instance.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute.go.tmpl'
   encoder: 'templates/terraform/encoders/redis_location_id_for_fallback_zone.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_instance.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/redis_instance.go.tmpl'
@@ -106,7 +105,7 @@ examples:
       network_name: 'redis-test-network'
       prevent_destroy: 'true'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
       'prevent_destroy': 'false'
     oics_vars_overrides:
       'prevent_destroy': 'false'

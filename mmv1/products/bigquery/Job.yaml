@@ -46,7 +46,6 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/bigquery_job.go.tmpl'
   encoder: 'templates/terraform/encoders/bigquery_job.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 # exluding resource_identity due to dataset_id field
 exclude_identity_generation: true
 schema_version: 1

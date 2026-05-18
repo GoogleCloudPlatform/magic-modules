@@ -42,7 +42,6 @@ deletion_policy_default: "DEFAULT"
 deletion_policy_custom_docs: true
 exclude_sweeper: true
 error_abort_predicates:
-
   - 'transport_tpg.Is429QuotaError'
 examples:
   - name: 'looker_instance_basic'
@@ -87,7 +86,7 @@ examples:
     test_vars_overrides:
       'address_name': 'tpgcompute.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", tpgcompute.AddressWithPrefixLength(8))'
       'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", servicenetworking.ServiceNetworkWithPrefixLength(8))'
     exclude_docs: true
   - name: 'looker_instance_custom_domain'
     primary_resource_id: 'looker-instance'
@@ -129,7 +128,6 @@ virtual_fields:
     exclude: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute_and_kms.go.tmpl'
 parameters:
   - name: 'region'
     type: String

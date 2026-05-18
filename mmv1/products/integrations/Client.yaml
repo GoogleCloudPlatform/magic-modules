@@ -37,7 +37,6 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/integrations_client.go.tmpl'
   pre_create: 'templates/terraform/pre_create/integrations_client.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'integrations_client_basic'

@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 func TestAccMemcacheInstance_update(t *testing.T) {
@@ -14,7 +15,7 @@ func TestAccMemcacheInstance_update(t *testing.T) {
 
 	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)
-	network := acctest.BootstrapSharedServiceNetworkingConnection(t, "memcache-instance-update-1")
+	network := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "memcache-instance-update-1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -104,7 +105,7 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 
 	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)
-	network := acctest.BootstrapSharedServiceNetworkingConnection(t, "memcache-instance-update-1")
+	network := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "memcache-instance-update-1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

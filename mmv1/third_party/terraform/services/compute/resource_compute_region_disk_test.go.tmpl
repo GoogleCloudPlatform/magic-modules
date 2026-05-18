@@ -14,7 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 {{ if eq $.TargetVersionName `ga` }}
@@ -477,7 +479,7 @@ func testAccCheckComputeRegionDiskExists(t *testing.T, n string, disk *compute.D
 
 		config := acctest.GoogleProviderConfig(t)
 
-		url := fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s", config.ComputeBasePath, p, rs.Primary.Attributes["region"], rs.Primary.Attributes["name"])
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), p, rs.Primary.Attributes["region"], rs.Primary.Attributes["name"])
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -915,7 +917,7 @@ func TestAccComputeRegionDisk_fromImageKMS(t *testing.T) {
 		"disk_name":         diskName,
 	}
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -1111,7 +1113,7 @@ func TestAccComputeRegionDisk_fromImageKMSWithServiceAccount(t *testing.T) {
 		"disk_name":         diskName,
 	}
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
