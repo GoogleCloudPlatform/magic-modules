@@ -136,5 +136,3 @@ examples:
       goldengate_connection_assignment_id: 'fmt.Sprintf("tf-gcca-%s", acctest.RandString(t, 10))'
       goldengate_deployment_id: '"tf-test-permanent-deployment"'
       goldengate_connection_id: '"tf-test-permanent-connection"'
-
-
