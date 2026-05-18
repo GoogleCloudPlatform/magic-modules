@@ -16,7 +16,6 @@ name: ResourcePolicy
 description: |
   A policy that can be attached to a resource to specify or schedule actions on that resource.
 references:
-  guides: {}
   api: https://cloud.google.com/compute/docs/reference/rest/v1/resourcePolicies
 base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
 has_self_link: true
@@ -36,8 +35,8 @@ async:
     base_url: '{{op_id}}'
 include_in_tgc_next: true
 tgc_tests:
-  - name: 'TestAccComputeResourcePolicy_withTopologyMode'
-    skip: 'The test should not in GA provider'
+  - name: TestAccComputeResourcePolicy_withTopologyMode
+    skip: The test should not in GA provider
 custom_code:
   constants: templates/terraform/constants/compute_resource_policy.go.tmpl
 examples:
@@ -99,6 +98,10 @@ examples:
   - name: resource_policy_placement_policy_tpu_topology
     primary_resource_id: baz
     min_version: beta
+    vars:
+      name: gce-policy
+  - name: resource_policy_placement_policy_multislice
+    primary_resource_id: default
     vars:
       name: gce-policy
 parameters:
@@ -337,6 +340,17 @@ properties:
           Specifies the shape of the TPU slice.
         immutable: true
         min_version: beta
+      - name: acceleratorTopologyMode
+        type: Enum
+        description: |-
+          Specifies the connection mode for the accelerator topology. If not
+          specified, the default is AUTO_CONNECT.
+        enum_values:
+          - AUTO_CONNECT
+          - PROVISION_ONLY
+      - name: sliceCount
+        type: Integer
+        description: Specifies the number of slices in a multislice workload.
   - name: instanceSchedulePolicy
     type: NestedObject
     description: |
@@ -441,7 +455,6 @@ properties:
           - workload_policy.0.max_topology_distance
       - name: acceleratorTopologyMode
         type: Enum
-        is_missing_in_cai: true
         description: |
           Specifies the connection mode for the accelerator topology.
           Supported values are:
@@ -450,10 +463,11 @@ properties:
 
           If not specified, the default is AUTO_CONNECT.
           This field can be set only when the workload policy type is HIGH_THROUGHPUT and cannot be set if max topology distance is set.
+        immutable: true
         min_version: beta
+        conflicts:
+          - workload_policy.0.max_topology_distance
         enum_values:
           - AUTO_CONNECT
           - PROVISION_ONLY
-        immutable: true
-        conflicts:
-          - workload_policy.0.max_topology_distance
+        is_missing_in_cai: true
