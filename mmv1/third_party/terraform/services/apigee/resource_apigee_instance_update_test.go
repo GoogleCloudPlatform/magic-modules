@@ -34,7 +34,7 @@ func TestAccApigeeInstance_updateConsumerAcceptList(t *testing.T) {
 				ResourceName:            "google_apigee_instance.apigee_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ip_range", "org_id"},
+				ImportStateVerifyIgnore: []string{"ip_range", "org_id", "consumer_accept_list"},
 			},
 			{
 				Config: testAccApigeeInstance_updateConsumerAcceptList(context),
@@ -43,7 +43,7 @@ func TestAccApigeeInstance_updateConsumerAcceptList(t *testing.T) {
 				ResourceName:            "google_apigee_instance.apigee_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ip_range", "org_id"},
+				ImportStateVerifyIgnore: []string{"ip_range", "org_id", "consumer_accept_list"},
 			},
 		},
 	})

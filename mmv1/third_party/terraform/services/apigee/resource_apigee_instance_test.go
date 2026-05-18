@@ -36,6 +36,32 @@ var apigeeInstanceDiffSuppressTestCases = []ApigeeInstanceDiffSuppressTestCase{
 		},
 	},
 	{
+		Name:           "API adds extra entry (e.g. tenant project), user-specified items are all present in API response",
+		KeysToSuppress: []string{"consumer_accept_list.#", "consumer_accept_list.1"},
+		Before: map[string]interface{}{
+			"consumer_accept_list.#": 2,
+			"consumer_accept_list.0": "tf-test8v1bd04pxa",
+			"consumer_accept_list.1": "xf6b33cd4be340fd3-tp",
+		},
+		After: map[string]interface{}{
+			"consumer_accept_list.#": 1,
+			"consumer_accept_list.0": "tf-test8v1bd04pxa",
+		},
+	},
+	{
+		Name:           "user-specified item not present in API response (no suppression)",
+		KeysToSuppress: []string{},
+		Before: map[string]interface{}{
+			"consumer_accept_list.#": 2,
+			"consumer_accept_list.0": "project-a",
+			"consumer_accept_list.1": "xf6b33cd4be340fd3-tp",
+		},
+		After: map[string]interface{}{
+			"consumer_accept_list.#": 1,
+			"consumer_accept_list.0": "project-b",
+		},
+	},
+	{
 		Name:           "projects with the same length and no project conversion",
 		KeysToSuppress: []string{},
 		Before: map[string]interface{}{
