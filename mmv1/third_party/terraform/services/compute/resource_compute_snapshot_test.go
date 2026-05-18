@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
-	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccComputeSnapshot_encryption(t *testing.T) {
@@ -210,16 +209,25 @@ resource "google_compute_disk" "persistent" {
 func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
-	org := envvar.GetTestOrgFromEnv(t)
-	suffix := acctest.RandString(t, 10)
-	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagKey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-snapshots-tagvalue", sharedTagKey, org)
+	// disk.createSnapshot binds the tagValue via the Compute service agent
+	// and/or the Google APIs service agent. The default compute.serviceAgent
+	// role does not include resourcemanager.tagValueBindings.create, so grant
+	// tagUser on the project to both agents — matching the GKE/Dataproc
+	// pattern that ships with resource_manager_tags support.
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+		{
+			Member: "serviceAccount:{project_number}@cloudservices.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+	})
 
 	context := map[string]interface{}{
-		"random_suffix": suffix,
-		"tag_key_id":    tagKeyResult["name"],
-		"tag_value_id":  tagValueResult["name"],
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -230,12 +238,30 @@ func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 			{
 				Config: testAccComputeSnapshot_resourceManagerTags(context),
 			},
+			{
+				ResourceName:            "google_compute_snapshot.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"params", "source_disk", "zone"},
+			},
 		},
 	})
 }
 
 func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_tags_tag_key" "tag_key" {
+  parent      = "projects/%{project_id}"
+  short_name  = "snapshot-tag-%{random_suffix}"
+  description = "Tag key for snapshot acceptance tests"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent      = google_tags_tag_key.tag_key.id
+  short_name  = "value-%{random_suffix}"
+  description = "Tag value for snapshot acceptance tests"
+}
+
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -255,7 +281,7 @@ resource "google_compute_snapshot" "foobar" {
   zone        = google_compute_disk.foobar.zone
   params {
     resource_manager_tags = {
-      "%{tag_key_id}" = "%{tag_value_id}"
+      (google_tags_tag_key.tag_key.id) = google_tags_tag_value.tag_value.id
     }
   }
 }
