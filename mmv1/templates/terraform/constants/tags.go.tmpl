@@ -1,0 +1,13 @@
+// TagKeyPurposeDataDiffSuppress suppresses diffs for purpose_data when the API
+// returns normalized values. For example, the API may resolve "auto" to an
+// actual organization number. Since purpose_data is immutable, if the old value
+// (from state) exists and is non-empty, we suppress the diff to avoid
+// unnecessary replacements after import.
+func TagKeyPurposeDataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// If the old value exists and the field is set in state, suppress the diff
+	// since the API normalizes values (e.g., "auto" -> actual org number)
+	if old != "" && new != "" {
+		return true
+	}
+	return false
+}

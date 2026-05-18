@@ -47,6 +47,7 @@ iam_policy:
   parent_resource_attribute: 'tag_key'
   iam_conditions_request_type: 'REQUEST_BODY'
 custom_code:
+  constants: 'templates/terraform/constants/tags.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'tag_key_basic'
@@ -125,7 +126,7 @@ properties:
 
       Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose expects data in the following format: `network = "<project-name>/<vpc-name>"`.
     immutable: true
-    ignore_read: true
+    diff_suppress_func: 'TagKeyPurposeDataDiffSuppress'
   - name: 'allowedValuesRegex'
     type: String
     description: |
