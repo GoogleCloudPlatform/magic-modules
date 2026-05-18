@@ -6,17 +6,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-  {{- if ne $.TargetVersionName "ga" }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- else }}
-	compute "google.golang.org/api/compute/v1"
-{{- end }}
 )
 
 func TestAccDataSourceComputeInstanceGuestAttributes_basic(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{

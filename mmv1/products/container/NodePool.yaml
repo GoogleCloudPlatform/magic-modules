@@ -31,9 +31,13 @@ properties:
     type: 'Integer'
     description: 'The initial node count for the pool.'
     ignore_read: true
-  - name: 'NamePrefix'
+  - name: 'namePrefix'
     type: 'String'
     description: 'The prefix of the node pool name.'
+    ignore_read: true
+  - name: 'version'
+    type: 'String'
+    description: 'The version of the node pool.'
     ignore_read: true
   - name: 'nodeConfig'
     type: 'NestedObject'

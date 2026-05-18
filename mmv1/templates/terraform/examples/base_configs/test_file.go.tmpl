@@ -31,6 +31,12 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
+{{ range $s := $.Res.TestExamples }}
+  {{- if $s.BootstrapIam }}
+    "{{ $.ImportPath  }}/services/resourcemanager"
+    {{ break }}
+  {{- end }}
+{{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 
@@ -73,7 +79,7 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	t.Parallel()
 
 	{{- if $e.BootstrapIam }}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 	{{- range $iam := $e.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",
