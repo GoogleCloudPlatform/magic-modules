@@ -1,0 +1,76 @@
+resource "google_folder" "folder" {
+  provider     = google-beta
+  display_name = "{{index $.Vars "folder_name"}}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+resource "google_project" "project" {
+  provider        = google-beta
+  project_id      = "{{index $.Vars "project_name"}}"
+  name            = "{{index $.Vars "project_name"}}"
+  folder_id       = google_folder.folder.folder_id
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+  depends_on = [google_folder.folder]
+}
+resource "google_project_service" "iam_api" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  service  = "iam.googleapis.com"
+  disable_on_destroy = false
+  depends_on = [google_project.project]
+}
+resource "time_sleep" "wait_for_propagation" {
+  create_duration = "30s"
+  depends_on = [
+    google_folder.folder,
+    google_project_service.iam_api,
+  ]
+}
+resource "google_service_account" "test_sa" {
+  provider        = google-beta
+  account_id   = "{{index $.Vars "account_id"}}"
+  display_name = "Test Service Account for Access Policy"
+  project      = google_project.project.project_id
+  depends_on = [
+      time_sleep.wait_for_propagation
+  ]
+}
+resource "google_iam_folders_access_policy" "{{$.PrimaryResourceId}}" {
+  provider          = google-beta
+  folder            = google_folder.folder.folder_id
+  location          = "global"
+  access_policy_id  = "{{index $.Vars "access_policy_id"}}"
+  display_name      = "{{index $.Vars "display_name"}}"
+  details {
+    rules {
+      description = "Allow rule for a service account"
+      effect      = "ALLOW"
+      principals  = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test_sa.email}"]
+      operation {
+        permissions = ["eventarc.googleapis.com/messageBuses.publish"]
+      }
+      conditions {
+        service = "iam.googleapis.com"
+        expression   = "resource.matchTag('{{index $.TestEnvVars "org_id"}}/env', 'test')"
+      }
+    }
+    rules {
+      description = "Deny rule for all public principals"
+      effect      = "DENY"
+      principals  = ["principalSet://goog/public:all"]
+      operation {
+        permissions = ["eventarc.googleapis.com/messageBuses.publish"]
+      }
+      conditions {
+        service = "iam.googleapis.com"
+        expression   = "!resource.matchTag('{{index $.TestEnvVars "org_id"}}/env', 'prod')"
+      }
+    }
+  }
+  depends_on = [
+    time_sleep.wait_for_propagation,
+    google_service_account.test_sa
+  ]
+}
+
