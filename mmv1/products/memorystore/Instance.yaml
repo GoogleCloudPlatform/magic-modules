@@ -44,7 +44,6 @@ custom_code:
   encoder: 'templates/terraform/encoders/memorystore_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/memorystore_instance.go.tmpl'
   constants: 'templates/terraform/constants/memorystore_instance.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'memorystore_instance_basic'
     primary_resource_id: 'instance-basic'

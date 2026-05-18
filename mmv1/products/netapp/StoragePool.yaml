@@ -67,7 +67,6 @@ async:
 include_in_tgc_next: true
 custom_code:
   pre_update: 'templates/terraform/pre_update/netapp_storagepool.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:

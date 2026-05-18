@@ -46,7 +46,6 @@ async:
     resource_inside_response: false
 include_in_tgc_next: true
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:

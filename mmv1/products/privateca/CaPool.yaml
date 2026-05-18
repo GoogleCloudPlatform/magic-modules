@@ -49,7 +49,6 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.tmpl'
 custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/privateca_capool.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'privateca_capool_basic'
     primary_resource_id: 'default'

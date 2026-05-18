@@ -47,7 +47,6 @@ async:
     resource_inside_response: true
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/discoveryengine_cmekconfig_kmskey.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   url_substitutions:
     - location: "us"
