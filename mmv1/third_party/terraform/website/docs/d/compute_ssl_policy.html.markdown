@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 description: |-
-  Gets a Regional SSL Policy within GCE, for use with Target HTTPS and Target SSL Proxies.
+  Gets an SSL Policy within GCE, for use with Target HTTPS and Target SSL Proxies.
 ---
 
 # google_compute_ssl_policy
@@ -38,7 +38,7 @@ In addition to the arguments listed above, the following attributes are exported
 
 * `min_tls_version` - The minimum supported TLS version of this policy.
 
-* `post_quantum_key_exchange` - The post-quantum key exchange setting of this policy.
+* `post_quantum_key_exchange` - The post-quantum key exchange setting of this
 
 * `profile` - The Google-curated or custom profile used by this policy.
 
