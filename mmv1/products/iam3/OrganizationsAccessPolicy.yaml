@@ -43,10 +43,10 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     vars:
-      project_name: 'tf-test-ap-org-{{resource_name}}'
-      account_id: 'tf-test-org-sa-{{resource_name}}'
-      access_policy_id: 'my-org-policy-{{resource_name}}'
-      display_name: 'Organization Access Policy for {{resource_name}}'
+      project_name: 'ap-project-'
+      account_id: 'svc-acc-'
+      access_policy_id: 'my-org-policy-'
+      display_name: 'Organization Access Policy'
     external_providers: ["time"]
 parameters:
   - name: organization
