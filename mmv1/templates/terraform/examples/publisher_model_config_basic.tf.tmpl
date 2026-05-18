@@ -1,0 +1,19 @@
+resource "google_vertex_ai_publisher_model_config" "{{$.PrimaryResourceId}}" {
+    provider = google-beta
+
+    publisher = "google"
+    model     = "gemini-2.0-flash"
+    location  = "us-central1"
+
+    publisher_model_config {
+        logging_config {
+            enabled             = true
+            sampling_rate       = 0.5
+            bigquery_destination  {
+                output_uri = "bq://{{index $.TestEnvVars "project_id"}}"
+            }
+            enable_otel_logging = true
+        }
+    }
+}
+
