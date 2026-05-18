@@ -1,0 +1,110 @@
+/*
+ * Copyright 2026 Google Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dialogflow_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestAccDialogflowSipTrunk_update(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"trunk_name":    "tf-test-trunk-" + randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDialogflowSipTrunkDestroyCustom(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowSipTrunk_updateStep1(context),
+			},
+			{
+				Config: testAccDialogflowSipTrunk_updateStep2(context),
+			},
+		},
+	})
+}
+
+func testAccCheckDialogflowSipTrunkDestroyCustom(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_dialogflow_sip_trunk" {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			location := "europe-west3"
+			if loc, ok := rs.Primary.Attributes["location"]; ok {
+				location = loc
+			}
+
+			url := fmt.Sprintf("https://%s-dialogflow.googleapis.com/v2beta1/%s", location, rs.Primary.ID)
+
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("SipTrunk still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccDialogflowSipTrunk_updateStep1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_sip_trunk" "trunk" {
+  display_name = "%{trunk_name}"
+  location = "europe-west3"
+  expected_hostname = [
+    "%{trunk_name}.example.com"
+  ]
+}
+`, context)
+}
+
+func testAccDialogflowSipTrunk_updateStep2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_sip_trunk" "trunk" {
+  display_name = "%{trunk_name}-updated"
+  location = "europe-west3"
+  expected_hostname = [
+    "%{trunk_name}.example.com",
+    "%{trunk_name}-2.example.com"
+  ]
+}
+`, context)
+}

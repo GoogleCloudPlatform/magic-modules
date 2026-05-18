@@ -1,0 +1,96 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'SipTrunk'
+base_url: 'projects/{{project}}/locations/{{location}}/sipTrunks'
+create_url: 'projects/{{project}}/locations/{{location}}/sipTrunks'
+update_verb: 'PATCH'
+update_mask: true
+description: |
+  SipTrunk is the resource that represents a SIP trunk to connect to the Google Telephony Platform SIP trunking service.
+references:
+  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.sipTrunks'
+id_format: '{{name}}'
+self_link: '{{name}}'
+import_format:
+  - '{{name}}'
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
+parameters:
+  - name: 'location'
+    type: String
+    url_param_only: true
+    description: |
+      The location of the SIP trunk.
+    required: true
+    immutable: true
+properties:
+  - type: String
+    name: 'name'
+    description: |
+      Identifier. The unique identifier of the SIP trunk.
+    output: true
+  - type: Array
+    name: 'expectedHostname'
+    description: |
+      Required. The expected hostnames in the peer certificate from the partner that is used for TLS authentication.
+    required: true
+    item_type:
+      type: String
+  - type: String
+    name: 'displayName'
+    description: |
+      Optional. Human-readable alias for this trunk.
+  - type: Array
+    name: 'connections'
+    description: |
+      Output only. The connections of the SIP trunk.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: 'connectionId'
+          description: |
+            Output only. The unique identifier of the connection.
+        - type: String
+          name: 'state'
+          description: |
+            Output only. The state of the connection.
+        - type: String
+          name: 'updateTime'
+          description: |
+            Output only. The last update time of the connection.
+        - type: NestedObject
+          name: 'errorDetails'
+          description: |
+            Output only. The error details of the connection.
+          properties:
+            - type: String
+              name: 'code'
+              description: |
+                Output only. The error code.
+            - type: String
+              name: 'message'
+              description: |
+                Output only. The error message.
+examples:
+  - name: 'dialogflow_sip_trunk_basic'
+    primary_resource_id: 'basic_trunk'
+    vars:
+      trunk_name: 'basic-trunk'
