@@ -1,0 +1,12 @@
+resource "google_chronicle_enrichment_control" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  enrichment_control_option {
+    enrichment_type = "ASSET_ENRICHMENT"
+    target_log_type = "projects/{{index $.TestEnvVars "project_id"}}/locations/us/instances/{{index $.TestEnvVars "chronicle_id"}}/logTypes/WINDOWS_SYSMON"
+    enrichment_source {
+	    log_type = "projects/{{index $.TestEnvVars "project_id"}}/locations/us/instances/{{index $.TestEnvVars "chronicle_id"}}/logTypes/WINDOWS_SYSMON"
+    }
+  }
+}

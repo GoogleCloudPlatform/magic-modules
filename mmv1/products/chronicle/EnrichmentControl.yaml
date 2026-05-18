@@ -1,0 +1,154 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EnrichmentControl
+description: |-
+  An EnrichmentControl resource represents a control to an enrichment.
+  Enrichment is the process of populating UDM events with more useful
+  information.
+references:
+  guides:
+    'Introduction to Enrichment Control': 'https://cloud.google.com/chronicle/docs/onboard/onboard-enrichment-control'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.enrichmentControls'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/enrichmentControls
+immutable: true
+exclude_delete: true
+min_version: beta
+self_link: "projects/{{project}}/locations/{{location}}/instances/{{instance}}/enrichmentControls/{{enrichment_control_id}}"
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/enrichmentControls
+import_format:
+  - "projects/{{project}}/locations/{{location}}/instances/{{instance}}/enrichmentControls/{{enrichment_control_id}}"
+update_mask: true
+autogen_status: RW5yaWNobWVudENvbnRyb2w=
+
+custom_code:
+  decoder: 'templates/terraform/decoders/chronicle_enrichment_control_id.go.tmpl'
+
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: The location of the resource.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: The unique identifier for the Chronicle instance.
+    immutable: true
+    url_param_only: true
+  - name: enrichment_control_id
+    type: String
+    description: The ID of the enrichment control.
+    output: true
+    url_param_only: true
+
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the EnrichmentControl.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/enrichmentControls/{enrichment_control_id}
+    output: true
+  - name: description
+    type: String
+    description: A human-readable description for this enrichment control.
+  - name: displayName
+    type: String
+    description: A human-readable name for this enrichment control.
+  - name: enrichmentControlOption
+    type: NestedObject
+    required: true
+    description: The options to control the enrichment.
+    properties:
+      - name: enrichmentSource
+        type: NestedObject
+        description: |-
+          The enrichment source that an enrichment is from. For source that comes from
+          external and does not have a log type, for example, `GEO_IP_SERVICE`, the
+          `ExternalEnrichmentSource` field should be set.
+        properties:
+          - name: externalEnrichmentSource
+            type: String
+            description: |-
+              Represents an enrichment source from external that does not have a log
+              type. For example, GEO_IP_SERVICE for enrichment from the GeoIP service.
+              Possible values:
+              GEO_IP_SERVICE
+          - name: logType
+            type: String
+            description: |-
+              Raw LogType of an enrichment source.
+              Format:
+              projects/{project}/locations/{location}/instances/{instance}/logTypes/{log_type}
+            diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+      - name: enrichmentType
+        type: String
+        required: true
+        description: |-
+          Possible values:
+          ALL_ENRICHMENT_TYPES
+          ASSET_ENRICHMENT
+          USER_ENRICHMENT
+          PROCESS_ENRICHMENT
+          GOOGLE_THREAT_INTEL_ENRICHMENT
+          GEO_IP_ENRICHMENT
+      - name: targetLogType
+        type: String
+        required: true
+        description: |-
+          LogType of the events to be enriched. Apply to all log types if ALL_TYPE.
+          LogType resource format:
+          projects/{project}/locations/{location}/instances/{instance}/logTypes/{log_type}
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+  - name: records
+    type: Array
+    description: The records of the enrichment control.
+    output: true
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: description
+          type: String
+          description: A human-readable description for this enrichment control record.
+          output: true
+        - name: timeRange
+          type: NestedObject
+          description: |-
+            Represents a time interval, encoded as a Timestamp start (inclusive) and a
+            Timestamp end (exclusive).
+
+            The start must be less than or equal to the end.
+            When the start equals the end, the interval is empty (matches no time).
+            When both start and end are unspecified, the interval matches any time.
+          output: true
+          properties:
+            - name: endTime
+              type: String
+              description: |-
+                Exclusive end of the interval.
+
+                If specified, a Timestamp matching this interval will have to be before the
+                end.
+              output: true
+            - name: startTime
+              type: String
+              description: |-
+                Inclusive start of the interval.
+
+                If specified, a Timestamp matching this interval will have to be the same
+                or after the start.
+              output: true

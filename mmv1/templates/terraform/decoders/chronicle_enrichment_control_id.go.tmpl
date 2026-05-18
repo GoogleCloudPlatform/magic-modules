@@ -1,0 +1,47 @@
+    var ecMap map[string]interface{}
+    var finalRes map[string]interface{}
+
+    ecListVal, ecExists := res["enrichmentControls"]
+    if ecExists {
+        ecList, ok := ecListVal.([]interface{})
+        if !ok {
+            return res, fmt.Errorf("API response 'enrichmentControls' field is not a list, got type: %T", ecListVal)
+        }
+        if len(ecList) == 0 {
+            return res, fmt.Errorf("API response 'enrichmentControls' list is empty")
+        }
+        ecMap, ok = ecList[0].(map[string]interface{})
+        if !ok {
+            return res, fmt.Errorf("First element in 'enrichmentControls' list is not a map, got type: %T", ecList[0])
+        }
+        finalRes = ecMap // For flattening, use the inner map
+    } else {
+        ecMap = res
+        finalRes = res // For flattening, use the whole response
+    }
+
+    name, ok := ecMap["name"].(string)
+    if !ok || name == "" {
+         return res, fmt.Errorf("EnrichmentControl map missing 'name' field or it's empty.")
+    }
+
+    parts := strings.Split(name, "/")
+    if len(parts) < 7 {
+        return res, fmt.Errorf("API response 'name' field is not in the expected format: %s", name)
+    }
+    shortId := parts[len(parts)-1]
+
+    // Avoid project id and number mismatch during import
+    stateProject := d.Get("project").(string)
+    if stateProject != "" {
+        parts[1] = stateProject
+    }
+
+    fullId := strings.Join(parts, "/")
+    d.SetId(fullId)
+
+    if err := d.Set("enrichment_control_id", shortId); err != nil {
+        return res, fmt.Errorf("Error setting enrichment_control_id in decoder: %s", err)
+    }
+
+    return finalRes, nil
