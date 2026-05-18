@@ -1,4 +1,4 @@
-package acctest
+package resourcemanager
 
 import (
 	"strconv"
