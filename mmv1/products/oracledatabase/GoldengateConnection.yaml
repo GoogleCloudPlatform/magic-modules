@@ -1650,4 +1650,3 @@ examples:
       odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
       autonomous_database_id: '"do-not-delete-tf-adb"'
-
