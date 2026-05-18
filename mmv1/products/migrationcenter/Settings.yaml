@@ -29,6 +29,7 @@ async:
     - update
   result:
     resource_inside_response: true
+# Singleton resource, no delete functionality
 exclude_delete: true
 autogen_status: U2V0dGluZ3M=
 autogen_async: true
