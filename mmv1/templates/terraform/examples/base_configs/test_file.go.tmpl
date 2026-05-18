@@ -169,11 +169,6 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		if err != nil {
 			return err
 		}
-{{- if $.Res.ProductMetadata.Version.RepEnabled }}
-		if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-			return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
-		}
-{{- end }}
 
 		billingProject := ""
 

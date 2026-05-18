@@ -172,7 +172,7 @@ type DefaultVars struct {
 }
 
 func ReplaceVars(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string) string {
-	return ReplaceVarsRecursive(ctx, req, diags, data, config, linkTmpl, false, 0)
+	return ReplaceVarsRecursive(ctx, req, diags, data, config, linkTmpl, false)
 }
 
 // relaceVarsForId shortens variables by running them through GetResourceNameFromSelfLink
@@ -184,30 +184,29 @@ func ReplaceVars(ctx context.Context, req interface{}, diags *diag.Diagnostics, 
 // access_level: accessPolicies/foo/accessLevels/bar
 // becomes accessPolicies/foo/accessLevels/bar
 func ReplaceVarsForId(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string) string {
-	return ReplaceVarsRecursive(ctx, req, diags, data, config, linkTmpl, true, 0)
+	return ReplaceVarsRecursive(ctx, req, diags, data, config, linkTmpl, true)
 }
 
-// ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
-// (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
-// substitution as 10+ calls to allow for future use cases.
-func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) string {
-	if depth > 10 {
-		diags.AddError("url building error", "Recursive substitution detected.")
-	}
-
+// ReplaceVarsRecursive runs replacement twice, then returns an error if any replacements remain
+// undone. We currently support two rounds of replacement because some {{ProductBasePath}} replacements
+// will contain `{{location}}` fields or similar; however, we're working to remove {{ProductBasePath}}
+// replacement, at which point a single round of replacement would be sufficient.
+func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool) string {
 	// https://github.com/google/re2/wiki/Syntax
 	re := regexp.MustCompile("{{([%[:word:]]+)}}")
 	f := BuildReplacementFunc(ctx, re, req, diags, data, config, linkTmpl, shorten)
 	if diags.HasError() {
 		return ""
 	}
-	final := re.ReplaceAllStringFunc(linkTmpl, f)
+	ret := re.ReplaceAllStringFunc(linkTmpl, f)
+	ret = re.ReplaceAllStringFunc(ret, f)
 
-	if re.Match([]byte(final)) {
-		return ReplaceVarsRecursive(ctx, req, diags, data, config, final, shorten, depth+1)
+	if re.MatchString(ret) {
+		diags.AddError("url building error", fmt.Sprintf("Unreplaced value found: %s", ret))
+		return ""
 	}
 
-	return final
+	return ret
 }
 
 // This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
@@ -215,7 +214,7 @@ func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diag
 // This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
 func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool) func(string) string {
 	var project, region, zone string
-	var projectID types.String
+	var projectIDAttribute types.String
 
 	if strings.Contains(linkTmpl, "{{project}}") {
 		project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
@@ -227,27 +226,29 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 		}
 	}
 
+	projectID := ""
 	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
 		var diagInfo diag.Diagnostics
 		switch req.(type) {
 		case resource.CreateRequest:
 			pReq := req.(resource.CreateRequest)
-			diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
+			diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectIDAttribute)
 		case resource.UpdateRequest:
 			pReq := req.(resource.UpdateRequest)
-			diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
+			diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectIDAttribute)
 		case resource.ReadRequest:
 			sReq := req.(resource.ReadRequest)
-			diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
+			diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectIDAttribute)
 		case resource.DeleteRequest:
 			sReq := req.(resource.DeleteRequest)
-			diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
+			diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectIDAttribute)
 		}
 		diags.Append(diagInfo...)
 		if diags.HasError() {
 			return nil
 		}
-		if projectID.ValueString() != "" {
+		projectID = projectIDAttribute.ValueString()
+		if projectID != "" {
 			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
 			if diags.HasError() {
 				return nil
@@ -255,7 +256,7 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 		}
 		if shorten {
 			project = strings.TrimPrefix(project, "projects/")
-			projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
+			projectID = strings.TrimPrefix(projectID, "projects/")
 		}
 	}
 
@@ -280,21 +281,15 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 	}
 
 	f := func(s string) string {
-
 		m := re.FindStringSubmatch(s)[1]
-		if m == "project" {
+		switch {
+		case m == "project_id_or_project" && projectID != "":
+			return projectID
+		case (m == "project" || m == "project_id_or_project") && project != "":
 			return project
-		}
-		if m == "project_id_or_project" {
-			if projectID.ValueString() != "" {
-				return projectID.ValueString()
-			}
-			return project
-		}
-		if m == "region" {
+		case m == "region" && region != "":
 			return region
-		}
-		if m == "zone" {
+		case m == "zone" && zone != "":
 			return zone
 		}
 		if string(m[0]) == "%" {
@@ -323,6 +318,8 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 					} else {
 						return fmt.Sprintf("%v", v.ValueString())
 					}
+				} else {
+					return ""
 				}
 			}
 		} else {
@@ -351,6 +348,8 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 					} else {
 						return fmt.Sprintf("%v", v.ValueString())
 					}
+				} else {
+					return ""
 				}
 			}
 		}
@@ -367,7 +366,7 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 				return f.String()
 			}
 		}
-		return ""
+		return s
 	}
 
 	return f

@@ -191,10 +191,16 @@ func ReplaceVarsForTest(config *transport_tpg.Config, rs *terraform.ResourceStat
 			return f.String()
 		}
 
-		return ""
+		return s
 	}
 
-	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
+	ret := re.ReplaceAllStringFunc(linkTmpl, replaceFunc)
+
+	if re.MatchString(ret) {
+		return "", fmt.Errorf("Unreplaced value found: %s", ret)
+	}
+
+	return ret, nil
 }
 
 // These methods are required by some mappers but we don't actually have (or need)
