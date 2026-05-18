@@ -42,6 +42,7 @@ func TestAccProjectIamMemberList_basic(t *testing.T) {
 	})
 }
 
+// test with optional filters
 func TestAccProjectIamMemberList_filter(t *testing.T) {
 	t.Parallel()
 
@@ -72,7 +73,6 @@ func TestAccProjectIamMemberList_filter(t *testing.T) {
 	})
 }
 
-// Normal apply-mode config: only managed resources here (NO list blocks).
 func testAccProjectIamMemberCreate(project, role, member string) string {
 	return fmt.Sprintf(`
 resource "google_project_iam_member" "test" {
@@ -83,8 +83,6 @@ resource "google_project_iam_member" "test" {
 `, project, role, member)
 }
 
-// Query-mode config: ONLY list blocks here. This gets treated like a .tfquery.hcl file
-// when TestStep.Query = true (terraform query).
 func testAccProjectIamMemberListQuery(project string) string {
 	return fmt.Sprintf(`
 list "google_project_iam_member" "test" {
@@ -100,7 +98,6 @@ list "google_project_iam_member" "test" {
 `, project)
 }
 
-// Query-mode config with optional filters. Keep ONLY if your list schema supports them.
 func testAccProjectIamMemberListQueryWithFilters(project, role, member string) string {
 	return fmt.Sprintf(`
 list "google_project_iam_member" "test" {
