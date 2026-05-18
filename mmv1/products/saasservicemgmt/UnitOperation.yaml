@@ -57,6 +57,35 @@ examples:
       org_id: ORG_ID
       project: PROJECT_NAME
       project_number: PROJECT_NUMBER
+  - name: saas_runtime_unit_operation_with_rollout
+    primary_resource_id: provision_unit_operation
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    ignore_read_extra:
+      - etag
+      - error_category
+      - state
+      - update_time
+      - conditions
+    vars:
+      actuation_service_account: actuator
+      deprovision_operation_name: deprovision-unit-operation
+      provision_operation_name: provision-unit-operation
+      release_name: example-release
+      rollout_name: example-rollout
+      saas_name: example-saas
+      tenant_name: example-tenant
+      tenant_project_name: tenant
+      unit_name: example-unit
+      unitkind_name: vm-unitkind
+      upgrade_operation_name: upgrade-unit-operation
+    test_env_vars:
+      billing_account: BILLING_ACCT
+      org_id: ORG_ID
+      project: PROJECT_NAME
+      project_number: PROJECT_NUMBER
 virtual_fields:
   - name: wait_for_completion
     type: Boolean
@@ -277,3 +306,6 @@ properties:
       - name: release
         type: String
         description: Reference to the Release object to use for the Unit. (optional).
+  - name: rollout
+    type: String
+    description: Specifies which rollout created this Unit Operation. This cannot be modified and is used for filtering purposes only. If a dependent unit and unit operation are created as part of another unit operation, they will use the same rolloutId.
