@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 )
 
@@ -201,6 +202,88 @@ resource "google_compute_disk" "persistent" {
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-a"
+}
+`, context)
+}
+
+func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	// disk.createSnapshot binds the tagValue via the Compute service agent
+	// and/or the Google APIs service agent. The default compute.serviceAgent
+	// role does not include resourcemanager.tagValueBindings.create, so grant
+	// tagUser on the project to both agents — matching the GKE/Dataproc
+	// pattern that ships with resource_manager_tags support.
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+		{
+			Member: "serviceAccount:{project_number}@cloudservices.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+	})
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_resourceManagerTags(context),
+			},
+			{
+				ResourceName:            "google_compute_snapshot.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"params", "source_disk", "zone"},
+			},
+		},
+	})
+}
+
+func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "tag_key" {
+  parent      = "projects/%{project_id}"
+  short_name  = "snapshot-tag-%{random_suffix}"
+  description = "Tag key for snapshot acceptance tests"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent      = google_tags_tag_key.tag_key.id
+  short_name  = "value-%{random_suffix}"
+  description = "Tag value for snapshot acceptance tests"
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "tf-test-disk-%{random_suffix}"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name        = "tf-test-snapshot-%{random_suffix}"
+  source_disk = google_compute_disk.foobar.self_link
+  zone        = google_compute_disk.foobar.zone
+  params {
+    resource_manager_tags = {
+      (google_tags_tag_key.tag_key.id) = google_tags_tag_value.tag_value.id
+    }
+  }
 }
 `, context)
 }
