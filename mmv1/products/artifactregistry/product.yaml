@@ -14,6 +14,7 @@
 ---
 name: 'ArtifactRegistry'
 display_name: 'Artifact Registry'
+rep_by_default: true
 versions:
   - name: 'beta'
     base_url: 'https://artifactregistry.googleapis.com/v1/'
