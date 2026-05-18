@@ -59,6 +59,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   name     = "tf-test-fr%{random_suffix}"
   name_prefix = "fr-%{random_suffix}"
   project  = "%{project}"
+  zone     = "us-central1-a"
   planning_status = "DRAFT"
   auto_delete_auto_created_reservations = true
   description      = "test future reservation"
@@ -84,6 +85,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   name     = "tf-test-fr%{random_suffix}"
   name_prefix = "fru-%{random_suffix}"
   project  = "%{project}"
+  zone     = "us-central1-a"
   planning_status = "SUBMITTED"
   auto_delete_auto_created_reservations = false
   description      = "test updated future reservation"

@@ -60,8 +60,6 @@ examples:
       end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
   - name: 'future_reservation_aggregate_reservation'
     primary_resource_id: 'gce_future_reservation'
     vars:
@@ -73,8 +71,6 @@ examples:
       end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     # Skip in VCR until the test issue is resolved
     # https://github.com/hashicorp/terraform-provider-google/issues/25087
     skip_vcr: true
@@ -104,16 +100,20 @@ parameters:
       RFC1035. Specifically, the name must be 1-63 characters long and match
       the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
       first character must be a lowercase letter, and all following
-      characters must be a dash, lowercase letter, or digit, except the las
+      characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
     immutable: true
-properties:
   - name: 'zone'
-    type: String
+    type: ResourceRef
     description: |
-      URL of the Zone where this future reservation resides.
-    output: true
+      The zone where the future reservation is located.
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
+properties:
   - name: 'creationTimestamp'
     type: Time
     description: |
@@ -139,10 +139,12 @@ properties:
         description: |
           Start time of the future reservation in RFC3339 format.
         required: true
+        diff_suppress_func: 'tpgresource.Rfc3339TimeDiffSuppress'
       - name: 'endTime'
         type: String
         description: |
           End time of the future reservation in RFC3339 format.
+        diff_suppress_func: 'tpgresource.Rfc3339TimeDiffSuppress'
       - name: 'duration'
         type: NestedObject
         description: |
