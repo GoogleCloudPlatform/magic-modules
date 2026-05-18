@@ -1,0 +1,15 @@
+resource "google_migration_center_source" "default" {
+  location  = "us-central1"
+  source_id = "{{index $.Vars "source_id"}}"
+  type      = "SOURCE_TYPE_CUSTOM"
+}
+
+resource "google_migration_center_import_job" "default" {
+  location      = "us-central1"
+  import_job_id = "{{index $.Vars "import_job_id"}}"
+  asset_source  = google_migration_center_source.default.id
+  display_name  = "Terraform integration test display"
+  labels = {
+    key = "value"
+  }
+}
