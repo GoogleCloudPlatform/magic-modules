@@ -1,0 +1,21 @@
+resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
+  location = "global"
+  description = "A v2.5 agent coaching generator."
+  inference_parameter {
+    max_output_tokens = 1024
+    temperature       = 0
+    top_k             = 40
+    top_p             = 0.95
+  }
+  agent_coaching_context {
+    version = "2.5"
+    output_language_code = "en"
+    instructions {
+      display_name = "Instruction 1"
+      display_details = "Details for instruction 1"
+      condition = "Condition 1"
+      agent_action = "Agent action 1"
+    }
+  }
+  trigger_event = "MANUAL_CALL"
+}

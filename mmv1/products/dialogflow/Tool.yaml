@@ -1,0 +1,135 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Tool'
+description: |
+  A tool defines an action and its corresponding schema.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.locations.tools'
+base_url: 'projects/{{project}}/locations/{{location}}/tools'
+self_link: '{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/tools/{{name}}'
+  - '{{name}}'
+
+update_verb: 'PATCH'
+update_mask: true
+
+timeouts:
+  insert_minutes: 40
+  update_minutes: 40
+  delete_minutes: 20
+
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
+
+examples:
+  - name: 'dialogflow_tool_basic'
+    primary_resource_id: 'basic_tool'
+    vars:
+      tool_name: 'dialogflow-tool'
+
+parameters:
+  - name: location
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The location of the tool.
+
+properties:
+  - name: name
+    type: String
+    description: |
+      The unique identifier of the tool.
+      Format: `projects/<Project ID>/locations/<Location ID>/tools/<Tool ID>`.
+    output: true
+  - name: displayName
+    type: String
+    required: true
+    description: |
+      Optional. The human-readable name of the tool, unique within an agent.
+  - name: description
+    type: String
+    required: true
+    description: |
+      Optional. High level description of the tool and its usage.
+  - name: toolKey
+    type: String
+    required: true
+    description: |
+      Required. The tooltip key of the tool.
+  - name: actionConfirmationRequirement
+    type: KeyValuePairs
+    description: |
+      Optional. Action confirmation requirement for each action.
+  - name: extensionSpec
+    type: NestedObject
+    conflicts: ['functionSpec', 'connectorSpec', 'openApiSpec']
+    deprecation_message: 'Extension tool specification is deprecated.'
+    description: |
+      Deprecated. Extension tool specification.
+    properties:
+      - name: name
+        type: String
+        description: |
+          Required. The name of the extension.
+  - name: functionSpec
+    type: NestedObject
+    conflicts: ['extensionSpec', 'connectorSpec', 'openApiSpec']
+    description: |
+      Optional. Function tool specification.
+    properties:
+      - name: inputSchema
+        type: String
+        description: |
+          Required. The input schema.
+  - name: connectorSpec
+    type: NestedObject
+    conflicts: ['extensionSpec', 'functionSpec', 'openApiSpec']
+    description: |
+      Optional. Connector tool specification.
+    properties:
+      # Placeholder for ConnectorSpec fields, can be expanded later
+      - name: name
+        type: String
+        description: |
+          Required. The connector name.
+  - name: openApiSpec
+    type: NestedObject
+    conflicts: ['extensionSpec', 'functionSpec', 'connectorSpec']
+    description: |
+      Optional. OpenAPI tool specification.
+    properties:
+      - name: textSchema
+        type: String
+        description: |
+          Required. The OpenAPI schema in text format.
+  - name: satisfiesPzs
+    type: Boolean
+    description: |
+      Output only. A boolean value indicating whether the tool satisfies the requirements of PZS.
+    output: true
+  - name: satisfiesPzi
+    type: Boolean
+    description: |
+      Output only. A boolean value indicating whether the tool satisfies the requirements of PZI.
+    output: true

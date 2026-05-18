@@ -38,6 +38,10 @@ examples:
     primary_resource_id: 'summarization_basic_generator'
     vars:
       profile_name: 'dialogflow-profile'
+  - name: 'dialogflow_generator_agent_coaching'
+    primary_resource_id: 'agent_coaching_generator'
+    vars:
+      profile_name: 'dialogflow-profile'
 
 parameters:
   - name: 'location'
@@ -65,7 +69,9 @@ properties:
       Optional. Human readable description of the generator.
   - name: summarizationContext
     type: NestedObject
-    required: true
+    exactly_one_of:
+      - summarization_context
+      - agent_coaching_context
     description: |
       Input of prebuilt Summarization feature.
     properties:
@@ -213,6 +219,81 @@ properties:
         type: String
         description: |
           Optional. The target language of the generated summary. The language code for conversation will be used if this field is empty. Supported 2.0 and later versions.
+  - name: agentCoachingContext
+    type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - agent_coaching_context
+    description: |
+      Optional. Agent coaching context for the generator.
+    properties:
+      - name: overarchingGuidance
+        type: String
+        description: |
+          Optional. The overarching guidance for the agent coaching. This should be set only for v1.5 and later versions.
+      - name: instructions
+        type: Array
+        description: |
+          Optional. Customized instructions for agent coaching.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: displayName
+              type: String
+              description: |
+                Optional. The display name of the instruction.
+            - name: displayDetails
+              type: String
+              description: |
+                Optional. The display details of the instruction.
+            - name: condition
+              type: String
+              description: |
+                Optional. The condition of the instruction.
+            - name: agentAction
+              type: String
+              description: |
+                Optional. The agent action of the instruction.
+            - name: systemAction
+              type: String
+              description: |
+                Optional. The system action of the instruction.
+            - name: duplicateCheckResult
+              type: NestedObject
+              description: |
+                Optional. The duplicate check result.
+              properties:
+                - name: answerRecord
+                  type: String
+                  description: |
+                    Optional. The answer record.
+                - name: suggestionIndex
+                  type: Integer
+                  description: |
+                    Optional. The suggestion index.
+                - name: similarityScore
+                  type: Double
+                  description: |
+                    Optional. The similarity score.
+            - name: triggeringEvent
+              type: Enum
+              description: |
+                Optional. The event that should trigger this instruction. If UNSPECIFIED, the instruction triggering will be same as the generator's triggerEvent.
+              enum_values:
+                - 'END_OF_UTTERANCE'
+                - 'MANUAL_CALL'
+                - 'CUSTOMER_MESSAGE'
+                - 'AGENT_MESSAGE'
+                - 'TOOL_CALL_COMPLETION'
+      - name: version
+        type: String
+        default_from_api: true
+        description: |
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["2.5"].
+      - name: outputLanguageCode
+        type: String
+        description: |
+          Optional. Output language code.
   - name: inferenceParameter
     type: NestedObject
     description: |

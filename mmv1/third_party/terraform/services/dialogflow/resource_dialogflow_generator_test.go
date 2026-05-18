@@ -213,3 +213,58 @@ resource "google_dialogflow_generator" "summarization_generator" {
 }
 `, context)
 }
+
+func TestAccDialogflowGenerator_agentCoaching(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDialogflowGeneratorDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowGenerator_agentCoaching(context),
+			},
+			{
+				ResourceName:            "google_dialogflow_generator.coaching_generator",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"generator_id", "location"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowGenerator_agentCoaching(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_generator" "coaching_generator" {
+  generator_id = "tf-test-generator%{random_suffix}"
+  location = "global"
+  description = "A v2.5 agent coaching generator."
+  inference_parameter {
+    max_output_tokens = 1024
+    temperature       = 0
+    top_k             = 40
+    top_p             = 0.95
+  }
+  agent_coaching_context {
+    version = "2.5"
+    output_language_code = "en"
+    overarching_guidance = "Be professional."
+    instructions {
+      display_name = "Instruction Display Name"
+      display_details = "Instruction details."
+      condition = "Whenever user asks."
+      agent_action = "Respond politely."
+      system_action = "Save conversation."
+      triggering_event = "TOOL_CALL_COMPLETION"
+    }
+  }
+  trigger_event = "MANUAL_CALL"
+}
+`, context)
+}
