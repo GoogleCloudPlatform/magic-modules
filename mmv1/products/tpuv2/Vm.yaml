@@ -60,6 +60,12 @@ examples:
     external_providers:
       - random
       - time
+  - name: tpu_v2_vm_autocheckpoint
+    primary_resource_id: tpu
+    min_version: beta
+    vars:
+      vm_name: test-tpu-autochkpt
+    skip_vcr: true
 parameters:
   - name: zone
     type: String
@@ -448,3 +454,6 @@ properties:
             A string used to uniquely distinguish a worker within a TPU node.
           output: true
           min_version: beta
+  - name: autocheckpointEnabled
+    type: Boolean
+    description: Whether Autocheckpoint is enabled.
