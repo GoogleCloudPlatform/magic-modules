@@ -1,0 +1,113 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+{{ define "listResourceMethod" }}
+func List{{ $.ResourceName }}s(config *transport_tpg.Config,
+{{- range $scope := $.ListScopeProperties }}
+	{{ $scope.CamelizeProperty }} string,
+{{- end }}
+	callback func(*schema.ResourceData) error,
+) error {
+	resourceData := Resource{{ $.ResourceName }}().Data(&terraform.InstanceState{})
+{{- range $scope := $.ListScopeProperties }}
+	if {{ $scope.CamelizeProperty }} != "" {
+		if err := resourceData.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
+			return fmt.Errorf("error setting {{ underscore $scope.Name }} on temporary resource data: %w", err)
+		}
+	}
+{{- end }}
+
+	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
+	if err != nil {
+		return err
+	}
+
+{{- if $.HasProject }}
+	billingProject := project
+{{- else }}
+	billingProject := ""
+{{- end }}
+	if bp, err := tpgresource.GetBillingProject(resourceData, config); err == nil {
+		billingProject = bp
+	}
+
+	userAgent, err := tpgresource.GenerateUserAgentString(resourceData, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
+		Config:         config,
+		TempData:       resourceData,
+		ListURL:        url,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+		ItemName:       "{{ $.CollectionUrlKey }}",
+		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+			headers := make(http.Header)
+			var err error
+{{- if $.CustomCode.PostRead }}
+			{{ customTemplate $ $.CustomCode.PostRead false -}}
+{{- end }}
+{{- if $.NestedQuery }}
+			res, err = flattenNested{{ $.ResourceName -}}(d, config, res)
+			if err != nil {
+				return err
+			}
+			if res == nil {
+				return fmt.Errorf("error matching nested {{ $.ResourceName }} from list response")
+			}
+{{- end }}
+{{- if $.CustomCode.Decoder }}
+			res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
+			if err != nil {
+				return err
+			}
+			if res == nil {
+				return fmt.Errorf("error decoding {{ $.ResourceName }} from list response")
+			}
+{{- end }}
+			if err = Resource{{ $.ResourceName }}Flatten(d, config, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
+				return err
+			}
+{{- /* url_param_only identity fields (e.g. name) are not GettableProperties, so the flattener does not Set them. Copy from res → d here so SetId/ListResultDisplayName can find them. Integer ids sometimes arrive as strings and need coercion. */ -}}
+{{- range $id := $.IdentityProperties }}
+{{- if $id.ApiName }}
+			if v, ok := res["{{ $id.ApiName }}"]; ok && v != nil {
+	{{- if eq $id.Type "Integer" }}
+				if s, ok := v.(string); ok {
+					i, err := strconv.Atoi(s)
+					if err != nil {
+						return fmt.Errorf("error coercing {{ underscore $id.Name }}: %w", err)
+					}
+					v = i
+				}
+	{{- end }}
+				if err := d.Set("{{ underscore $id.Name }}", v); err != nil {
+					return fmt.Errorf("error setting {{ underscore $id.Name }}: %w", err)
+				}
+			}
+{{- end }}
+{{- end }}
+			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
+			if err != nil {
+				return fmt.Errorf("error constructing id: %w", err)
+			}
+			d.SetId(id)
+			return nil
+		},
+		Callback: callback,
+	})
+}
+{{ end }}

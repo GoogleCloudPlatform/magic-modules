@@ -33,6 +33,7 @@ import_format:
 datasource_experimental:
   generate: true
   exclude_test: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
