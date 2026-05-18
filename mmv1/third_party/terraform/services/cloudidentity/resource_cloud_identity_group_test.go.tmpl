@@ -35,6 +35,8 @@ func TestAccCloudIdentityGroup(t *testing.T) {
 		"data_source_membership_basic":            testAccDataSourceCloudIdentityGroupMemberships_basicTest,
 		"data_source_transitive_membership_basic": testAccDataSourceCloudIdentityGroupTransitiveMemberships_basicTest,
 		"data_source_group_lookup":                testAccDataSourceCloudIdentityGroupLookup_basicTest,
+		"dynamic":                                 testAccCloudIdentityGroup_dynamicTest,
+		"dynamic_update":                          testAccCloudIdentityGroup_dynamicUpdateTest,
 	}
 
 	for name, tc := range testCases {
@@ -134,6 +136,124 @@ resource "google_cloud_identity_group" "cloud_identity_group_basic" {
 
   labels = {
     "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+`, context)
+}
+
+func testAccCloudIdentityGroup_dynamicTest(t *testing.T) {
+	context := map[string]interface{}{
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudIdentityGroupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudIdentityGroup_dynamic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_identity_group.cloud_identity_group_dynamic",
+						"dynamic_group_metadata.0.queries.0.query",
+						"user.organizations.exists(org, org.department=='Engineering')"),
+					resource.TestCheckResourceAttr("google_cloud_identity_group.cloud_identity_group_dynamic",
+						"dynamic_group_metadata.0.queries.0.resource_type", "USER"),
+				),
+			},
+			{
+				ResourceName:            "google_cloud_identity_group.cloud_identity_group_dynamic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_group_config"},
+			},
+		},
+	})
+}
+
+func testAccCloudIdentityGroup_dynamic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_identity_group" "cloud_identity_group_dynamic" {
+  display_name         = "tf-test-my-dynamic-group%{random_suffix}"
+  initial_group_config = "EMPTY"
+
+  parent = "customers/%{cust_id}"
+
+  group_key {
+    id = "tf-test-my-dynamic-group%{random_suffix}@%{org_domain}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+
+  dynamic_group_metadata {
+    queries {
+      query         = "user.organizations.exists(org, org.department=='Engineering')"
+      resource_type = "USER"
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudIdentityGroup_dynamicUpdateTest(t *testing.T) {
+	context := map[string]interface{}{
+		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
+		"cust_id":       envvar.GetTestCustIdFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudIdentityGroupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudIdentityGroup_dynamic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_identity_group.cloud_identity_group_dynamic",
+						"dynamic_group_metadata.0.queries.0.query",
+						"user.organizations.exists(org, org.department=='Engineering')"),
+				),
+			},
+			{
+				Config: testAccCloudIdentityGroup_dynamicUpdated(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_identity_group.cloud_identity_group_dynamic",
+						"dynamic_group_metadata.0.queries.0.query",
+						"user.locations.exists(loc, loc.buildingId=='NYC-01')"),
+					resource.TestCheckResourceAttr("google_cloud_identity_group.cloud_identity_group_dynamic",
+						"display_name", fmt.Sprintf("tf-test-my-dynamic-group%s-updated", context["random_suffix"])),
+				),
+			},
+		},
+	})
+}
+
+func testAccCloudIdentityGroup_dynamicUpdated(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_identity_group" "cloud_identity_group_dynamic" {
+  display_name         = "tf-test-my-dynamic-group%{random_suffix}-updated"
+  initial_group_config = "EMPTY"
+
+  parent = "customers/%{cust_id}"
+
+  group_key {
+    id = "tf-test-my-dynamic-group%{random_suffix}@%{org_domain}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+
+  dynamic_group_metadata {
+    queries {
+      query         = "user.locations.exists(loc, loc.buildingId=='NYC-01')"
+      resource_type = "USER"
+    }
   }
 }
 `, context)

@@ -58,6 +58,15 @@ examples:
       cust_id: 'CUST_ID'
     # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
     exclude_test: true
+  - name: 'cloud_identity_groups_dynamic'
+    primary_resource_id: 'cloud_identity_group_dynamic'
+    vars:
+      id_group: 'my-dynamic-group'
+    test_env_vars:
+      org_domain: 'ORG_DOMAIN'
+      cust_id: 'CUST_ID'
+    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    exclude_test: true
 parameters:
   - name: 'initialGroupConfig'
     type: Enum
@@ -188,3 +197,58 @@ properties:
 
       Identity-mapped groups for Cloud Search have a label with a key of system/groups/external and an empty value.
     required: true
+  - name: 'dynamicGroupMetadata'
+    type: NestedObject
+    description: |
+      Dynamic group metadata. When set, the group's membership is
+      determined dynamically based on a CEL query rather than being
+      explicitly managed. Dynamic groups have a label with a key of
+      cloudidentity.googleapis.com/groups.dynamic which is automatically
+      added by the API.
+    default_from_api: true
+    update_mask_fields:
+      - 'dynamicGroupMetadata.queries'
+    properties:
+      - name: 'queries'
+        type: Array
+        description: |
+          Memberships will be the union of all queries. Only one query is
+          supported currently.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'query'
+              type: String
+              description: |
+                The query string. Must be a CEL expression.
+                Example: `user.organizations.exists(org, org.department=='Engineering')`
+              required: true
+            - name: 'resourceType'
+              type: Enum
+              description: |
+                The resource type that the query is applied to.
+              default_value: "USER"
+              enum_values:
+                - 'USER'
+      - name: 'status'
+        type: NestedObject
+        description: |
+          The current status of the dynamic group.
+        output: true
+        properties:
+          - name: 'status'
+            type: Enum
+            description: |
+              Status of the dynamic group.
+            output: true
+            enum_values:
+              - 'UP_TO_DATE'
+              - 'COMPUTING_MEMBERSHIPS'
+              - 'STATUS_UNSPECIFIED'
+          - name: 'statusTime'
+            type: String
+            description: |
+              The latest time at which the dynamic group is guaranteed
+              to be in the given status. A timestamp in RFC3339 UTC
+              "Zulu" format.
+            output: true
