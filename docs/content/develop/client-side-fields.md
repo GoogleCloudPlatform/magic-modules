@@ -7,10 +7,8 @@ weight: 150
 
 Client-side fields are most often used as flags to modify the behavior of a Terraform resource. Because they don't correspond to an API field, there are some additional considerations in terms of how to implement them.
 
-Common client-side fields include:
-
-- [`deletion_protection`]({{< ref "/best-practices/deletion-behaviors#deletion_protection" >}})
-- [`deletion_policy`]({{< ref "/best-practices/deletion-behaviors#deletion_policy" >}})
+> [!NOTE]
+> **Note:** Examples here detail the implementation of a `deletion_protection` field, previously one of the common usages of client-side fields. Direct implementation of `deletion_protection` and `deletion_policy` fields has been largely superceded by [Universal Deletion Policy]({{< ref "/reference/universal-deletion-policy" >}}). Please refer to that page for details on how to handle those specific fields going forward. The guidance here is still an accurate example of how to implement other kinds of client-side fields.
 
 {{% tabs "schema" %}}
 {{< tab "MMv1" >}}
