@@ -2173,6 +2173,21 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	}
 }
 
+// TestServiceDependencies returns a map of service names to import aliases that are required
+// by this resource's samples.
+func (r Resource) TestServiceDependencies() map[string]string {
+	deps := map[string]string{}
+	for _, s := range r.TestSamples() {
+		for service, alias := range s.TestServiceDependencies() {
+			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
+				panic(fmt.Sprintf("Conflicting aliases (%s vs %s) for service dependency %s for resource %s", depsAlias, alias, service, r.ApiName))
+			}
+			deps[service] = alias
+		}
+	}
+	return deps
+}
+
 func (r Resource) VersionedProvider(exampleVersion string) bool {
 	var vp string
 	if exampleVersion != "" {
