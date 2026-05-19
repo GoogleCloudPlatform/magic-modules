@@ -4834,6 +4834,28 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSe
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				// Clean up any NetworkEdgeSecurityService left over from a previously failed recording
+				// before creating a new one. Only one can exist per region.
+				PreConfig: func() {
+					config := acctest.GoogleProviderConfig(t)
+					client := tpgcompute.NewClient(config, config.UserAgent)
+					found, err := client.NetworkEdgeSecurityServices.List(config.Project, "europe-west1").Do()
+					if err != nil {
+						return
+					}
+					for _, nesec := range found.Items {
+						if !strings.HasPrefix(nesec.Name, "tf-test-") {
+							continue
+						}
+						op, err := client.NetworkEdgeSecurityServices.Delete(config.Project, "europe-west1", nesec.Name).Do()
+						if err != nil {
+							continue
+						}
+						if waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "deleting leftover NetworkEdgeSecurityService", config.UserAgent, 10*time.Minute); waitErr != nil {
+							t.Logf("Warning: cleanup of leftover NetworkEdgeSecurityService %q failed: %v", nesec.Name, waitErr)
+						}
+					}
+				},
 				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsWithTwoSecurityPoliciesAndStatus(suffix, policyName, instanceName, "\"\"", "RUNNING"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(

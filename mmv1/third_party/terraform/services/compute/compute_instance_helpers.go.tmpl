@@ -150,20 +150,34 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.AvailabilityDomain = int64(v.(int))
 	}
 	if v, ok := original["max_run_duration"]; ok {
-		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
+		maxRunDurationMap, err := expandComputeMaxRunDuration(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.MaxRunDuration = transformedMaxRunDuration
+		if maxRunDurationMap != nil {
+			d := &compute.Duration{}
+			if nanos, ok := maxRunDurationMap["nanos"].(int64); ok {
+				d.Nanos = nanos
+			}
+			if seconds, ok := maxRunDurationMap["seconds"].(int64); ok {
+				d.Seconds = seconds
+			}
+			scheduling.MaxRunDuration = d
+		}
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
-		transformedOnInstanceStopAction, err := expandComputeOnInstanceStopAction(v)
+		onInstanceStopActionMap, err := expandComputeOnInstanceStopAction(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
+		if onInstanceStopActionMap != nil {
+			scheduling.OnInstanceStopAction = &compute.SchedulingOnInstanceStopAction{}
+			if d, ok := onInstanceStopActionMap["discardLocalSsd"].(bool); ok {
+				scheduling.OnInstanceStopAction.DiscardLocalSsd = d
+			}
+		}
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
 	}
 {{- if ne $.TargetVersionName "ga" }}
@@ -183,11 +197,27 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	}
 
 	if v, ok := original["graceful_shutdown"]; ok {
-		transformedGracefulShutdown, err := expandGracefulShutdown(v)
+		gracefulShutdownMap, err := expandGracefulShutdown(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.GracefulShutdown = transformedGracefulShutdown
+		if gracefulShutdownMap != nil {
+			scheduling.GracefulShutdown = &compute.SchedulingGracefulShutdown{}
+			if enabled, ok := gracefulShutdownMap["enabled"].(bool); ok {
+				scheduling.GracefulShutdown.Enabled = enabled
+				scheduling.GracefulShutdown.ForceSendFields = append(scheduling.GracefulShutdown.ForceSendFields, "Enabled")
+			}
+			if maxDurationMap, ok := gracefulShutdownMap["maxDuration"].(map[string]interface{}); ok {
+				scheduling.GracefulShutdown.MaxDuration = &compute.Duration{}
+				if nanos, ok := maxDurationMap["nanos"].(int64); ok {
+					scheduling.GracefulShutdown.MaxDuration.Nanos = nanos
+				}
+				if seconds, ok := maxDurationMap["seconds"].(int64); ok {
+					scheduling.GracefulShutdown.MaxDuration.Seconds = seconds
+				}
+				scheduling.GracefulShutdown.MaxDuration.ForceSendFields = append(scheduling.GracefulShutdown.MaxDuration.ForceSendFields, "Seconds")
+			}
+		}
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "GracefulShutdown")
 	}
 
@@ -197,20 +227,37 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	}
 
 	if v, ok := original["preemption_notice_duration"]; ok {
-		transformedPreemptionNoticeDuration, err := expandComputePreemptionNoticeDuration(v)
+		preemptionNoticeDurationMap, err := expandComputePreemptionNoticeDuration(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.PreemptionNoticeDuration = transformedPreemptionNoticeDuration
+		if preemptionNoticeDurationMap != nil {
+			scheduling.PreemptionNoticeDuration = &compute.Duration{}
+			if nanos, ok := preemptionNoticeDurationMap["nanos"].(int64); ok {
+				scheduling.PreemptionNoticeDuration.Nanos = nanos
+			}
+			if seconds, ok := preemptionNoticeDurationMap["seconds"].(int64); ok {
+				scheduling.PreemptionNoticeDuration.Seconds = seconds
+			}
+		}
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "PreemptionNoticeDuration")
 	}
 {{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
-		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
+		localSsdRecoveryTimeoutMap, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
+		if localSsdRecoveryTimeoutMap != nil {
+			d := &compute.Duration{}
+			if nanos, ok := localSsdRecoveryTimeoutMap["nanos"].(int64); ok {
+				d.Nanos = nanos
+			}
+			if seconds, ok := localSsdRecoveryTimeoutMap["seconds"].(int64); ok {
+				d.Seconds = seconds
+			}
+			scheduling.LocalSsdRecoveryTimeout = d
+		}
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
 	}
 	if v, ok := original["termination_time"]; ok {
@@ -219,137 +266,87 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	return scheduling, nil
 }
 
-func expandComputeMaxRunDuration(v interface{}) (*compute.Duration, error) {
+func expandComputeMaxRunDuration(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
-	duration := compute.Duration{}
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
-	raw := l[0]
-	original := raw.(map[string]interface{})
-
-	transformedNanos, err := expandComputeMaxRunDurationNanos(original["nanos"])
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedNanos); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		duration.Nanos = int64(transformedNanos.(int))
+	original := l[0].(map[string]interface{})
+	result := map[string]interface{}{}
+	if nanos := original["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		result["nanos"] = int64(nanos.(int))
 	}
-
-	transformedSeconds, err := expandComputeMaxRunDurationSeconds(original["seconds"])
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedSeconds); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		duration.Seconds = int64(transformedSeconds.(int))
+	if seconds := original["seconds"]; reflect.ValueOf(seconds).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(seconds)) {
+		result["seconds"] = int64(seconds.(int))
 	}
-
-	return &duration, nil
+	return result, nil
 }
 
-func expandComputeMaxRunDurationNanos(v interface{}) (interface{}, error) {
-	return v, nil
-}
-
-func expandComputeMaxRunDurationSeconds(v interface{}) (interface{}, error) {
-	return v, nil
-}
-
-func expandComputeOnInstanceStopAction(v interface{}) (*compute.SchedulingOnInstanceStopAction, error){
+func expandComputeOnInstanceStopAction(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
-	onInstanceStopAction := compute.SchedulingOnInstanceStopAction{}
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
-	raw := l[0]
-	original := raw.(map[string]interface{})
-	
-	if d, ok := original["discard_local_ssd"]; ok {
-		onInstanceStopAction.DiscardLocalSsd = d.(bool)
-	} else {
+	original := l[0].(map[string]interface{})
+	d, ok := original["discard_local_ssd"]
+	if !ok {
 		return nil, nil
 	}
-
-	return &onInstanceStopAction, nil	
+	return map[string]interface{}{
+		"discardLocalSsd": d.(bool),
+	}, nil
 }
 
-func expandComputeLocalSsdRecoveryTimeout(v interface{}) (*compute.Duration, error) {
+func expandComputeLocalSsdRecoveryTimeout(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
-	duration := compute.Duration{}
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
-	raw := l[0]
-	original := raw.(map[string]interface{})
-
-	transformedNanos, err := expandComputeLocalSsdRecoveryTimeoutNanos(original["nanos"])
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedNanos); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		duration.Nanos = int64(transformedNanos.(int))
+	original := l[0].(map[string]interface{})
+	result := map[string]interface{}{}
+	if nanos := original["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		result["nanos"] = int64(nanos.(int))
 	}
-
-	transformedSeconds, err := expandComputeLocalSsdRecoveryTimeoutSeconds(original["seconds"])
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedSeconds); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		duration.Seconds = int64(transformedSeconds.(int))
+	if seconds := original["seconds"]; reflect.ValueOf(seconds).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(seconds)) {
+		result["seconds"] = int64(seconds.(int))
 	}
-	return &duration, nil
-}
-
-func expandComputeLocalSsdRecoveryTimeoutNanos(v interface{}) (interface{}, error) {
-	return v, nil
-}
-
-func expandComputeLocalSsdRecoveryTimeoutSeconds(v interface{}) (interface{}, error) {
-	return v, nil
+	return result, nil
 }
 
 {{- if ne $.TargetVersionName "ga" }}
-func expandGracefulShutdown(v interface{}) (*compute.SchedulingGracefulShutdown, error) {
+func expandGracefulShutdown(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
-	gracefulShutdown := compute.SchedulingGracefulShutdown{}
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
-	raw := l[0]
-	original := raw.(map[string]interface{})
-
-	originalMaxDuration := original["max_duration"].([]interface{})
-	maxDuration, err := expandGracefulShutdownMaxDuration(originalMaxDuration)
+	original := l[0].(map[string]interface{})
+	result := map[string]interface{}{
+		"enabled": original["enabled"].(bool),
+	}
+	maxDurationMap, err := expandGracefulShutdownMaxDuration(original["max_duration"].([]interface{}))
 	if err != nil {
 		return nil, err
 	}
-	if maxDuration != nil {
-		gracefulShutdown.MaxDuration = maxDuration
+	if maxDurationMap != nil {
+		result["maxDuration"] = maxDurationMap
 	}
-
-	gracefulShutdown.Enabled = original["enabled"].(bool)
-	gracefulShutdown.ForceSendFields = append(gracefulShutdown.ForceSendFields, "Enabled")
-	return &gracefulShutdown, nil
+	return result, nil
 }
 
-func expandGracefulShutdownMaxDuration(v interface{}) (*compute.Duration, error) {
+func expandGracefulShutdownMaxDuration(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
-	duration := compute.Duration{}
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
-	raw := l[0]
-
-	maxDurationMap := raw.(map[string]interface{})
-	transformedNanos := maxDurationMap["nanos"]
-	transformedSeconds := maxDurationMap["seconds"]
-
-	if val := reflect.ValueOf(transformedNanos); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		duration.Nanos = int64(transformedNanos.(int))
+	raw := l[0].(map[string]interface{})
+	result := map[string]interface{}{}
+	if nanos := raw["nanos"]; reflect.ValueOf(nanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(nanos)) {
+		result["nanos"] = int64(nanos.(int))
 	}
-	if val := reflect.ValueOf(transformedSeconds); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		duration.Seconds = int64(transformedSeconds.(int))
+	if seconds := raw["seconds"]; reflect.ValueOf(seconds).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(seconds)) {
+		result["seconds"] = int64(seconds.(int))
 	}
-
-	duration.ForceSendFields = append(duration.ForceSendFields, "Seconds")
-
-	return &duration, nil
+	return result, nil
 }
 {{ end }}
 
@@ -369,11 +366,16 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	}
 
 	if resp.MaxRunDuration != nil {
-		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(resp.MaxRunDuration)
+		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(map[string]interface{}{
+			"nanos":   resp.MaxRunDuration.Nanos,
+			"seconds": resp.MaxRunDuration.Seconds,
+		})
 	}
 
 	if resp.OnInstanceStopAction != nil {
-		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
+		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(map[string]interface{}{
+			"discardLocalSsd": resp.OnInstanceStopAction.DiscardLocalSsd,
+		})
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -388,16 +390,31 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	}
 
 	if resp.GracefulShutdown != nil {
-		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(resp.GracefulShutdown)
+		grShutMap := map[string]interface{}{
+			"enabled": resp.GracefulShutdown.Enabled,
+		}
+		if resp.GracefulShutdown.MaxDuration != nil {
+			grShutMap["maxDuration"] = map[string]interface{}{
+				"nanos":   resp.GracefulShutdown.MaxDuration.Nanos,
+				"seconds": resp.GracefulShutdown.MaxDuration.Seconds,
+			}
+		}
+		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(grShutMap)
 	}
 
 	if resp.PreemptionNoticeDuration != nil {
-		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(resp.PreemptionNoticeDuration)
+		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(map[string]interface{}{
+			"nanos":   resp.PreemptionNoticeDuration.Nanos,
+			"seconds": resp.PreemptionNoticeDuration.Seconds,
+		})
 	}
 {{- end }}
 
 	if resp.LocalSsdRecoveryTimeout != nil {
-		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(resp.LocalSsdRecoveryTimeout)
+		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(map[string]interface{}{
+			"nanos":   resp.LocalSsdRecoveryTimeout.Nanos,
+			"seconds": resp.LocalSsdRecoveryTimeout.Seconds,
+		})
 	}
 
 	nodeAffinities := schema.NewSet(schema.HashResource(instanceSchedulingNodeAffinitiesElemSchema()), nil)
@@ -413,84 +430,85 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	return []map[string]interface{}{schedulingMap}
 }
 
-func flattenComputeMaxRunDuration(v *compute.Duration) []interface{} {
+func flattenComputeMaxRunDuration(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
-	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
-	return []interface{}{transformed}
+	return []interface{}{map[string]interface{}{
+		"nanos":   v["nanos"],
+		"seconds": v["seconds"],
+	}}
 }
 
-func flattenOnInstanceStopAction(v *compute.SchedulingOnInstanceStopAction) []interface{} {
+func flattenOnInstanceStopAction(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
-	transformed := make(map[string]interface{})
-	transformed["discard_local_ssd"] = v.DiscardLocalSsd
-	return []interface{}{transformed}
+	return []interface{}{map[string]interface{}{
+		"discard_local_ssd": v["discardLocalSsd"],
+	}}
 }
 
-func flattenComputeLocalSsdRecoveryTimeout(v *compute.Duration) []interface{} {
+func flattenComputeLocalSsdRecoveryTimeout(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
-	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
-	return []interface{}{transformed}
+	return []interface{}{map[string]interface{}{
+		"nanos":   v["nanos"],
+		"seconds": v["seconds"],
+	}}
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenGracefulShutdown(v *compute.SchedulingGracefulShutdown) []interface{} {
+func flattenGracefulShutdown(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
-	transformed := make(map[string]interface{})
-	transformed["enabled"] = v.Enabled
-	transformed["max_duration"] = flattenGracefulShutdownMaxDuration(v.MaxDuration)
+	transformed := map[string]interface{}{
+		"enabled": v["enabled"],
+	}
+	if maxDuration, ok := v["maxDuration"].(map[string]interface{}); ok {
+		transformed["max_duration"] = flattenGracefulShutdownMaxDuration(maxDuration)
+	} else {
+		transformed["max_duration"] = nil
+	}
 	return []interface{}{transformed}
 }
 
-func flattenGracefulShutdownMaxDuration(v *compute.Duration) []interface{} {
+func flattenGracefulShutdownMaxDuration(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
-	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
-	return []interface{}{transformed}
+	return []interface{}{map[string]interface{}{
+		"nanos":   v["nanos"],
+		"seconds": v["seconds"],
+	}}
 }
 
-func expandComputePreemptionNoticeDuration(v interface{}) (*compute.Duration, error) {
+func expandComputePreemptionNoticeDuration(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
-	duration := compute.Duration{}
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
-	raw := l[0]
-	original := raw.(map[string]interface{})
-
-	if transformedNanos, ok := original["nanos"]; ok && transformedNanos != nil {
-		duration.Nanos = int64(transformedNanos.(int))
+	original := l[0].(map[string]interface{})
+	result := map[string]interface{}{}
+	if nanos, ok := original["nanos"]; ok && nanos != nil {
+		result["nanos"] = int64(nanos.(int))
 	}
-
-	if transformedSeconds, ok := original["seconds"]; ok && transformedSeconds != nil {
-		duration.Seconds = int64(transformedSeconds.(int))
+	if seconds, ok := original["seconds"]; ok && seconds != nil {
+		result["seconds"] = int64(seconds.(int))
 	}
-
-	return &duration, nil
+	return result, nil
 }
 
-func flattenComputePreemptionNoticeDuration(v *compute.Duration) []interface{} {
+func flattenComputePreemptionNoticeDuration(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
-	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
-	return []interface{}{transformed}
+	return []interface{}{map[string]interface{}{
+		"nanos":   v["nanos"],
+		"seconds": v["seconds"],
+	}}
 }
 {{- end }}
 
