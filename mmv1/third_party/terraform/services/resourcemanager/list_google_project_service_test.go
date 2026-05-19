@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 // TestAccProjectServiceListResource_queryIdentity lists enabled project services via the
@@ -19,7 +20,7 @@ func TestAccProjectServiceListResource_queryIdentity(t *testing.T) {
 	t.Parallel()
 
 	service := "iam.googleapis.com"
-	project := acctest.BootstrapProject(t, "tf-boot-proj-svc-list-", envvar.GetTestBillingAccountFromEnv(t), []string{service}).ProjectId
+	project := resourcemanager.BootstrapProject(t, "tf-boot-proj-svc-list-", envvar.GetTestBillingAccountFromEnv(t), []string{service}).ProjectId
 
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
