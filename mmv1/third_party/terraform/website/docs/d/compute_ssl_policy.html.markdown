@@ -38,7 +38,7 @@ In addition to the arguments listed above, the following attributes are exported
 
 * `min_tls_version` - The minimum supported TLS version of this policy.
 
-* `post_quantum_key_exchange` - The post-quantum key exchange setting of this
+* `post_quantum_key_exchange` - The post-quantum key exchange setting of this policy.
 
 * `profile` - The Google-curated or custom profile used by this policy.
 
