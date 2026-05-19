@@ -73,7 +73,10 @@ func NewProjectIamMemberListResource() list.ListResource {
 			tpgiamresource.IamWithParentResourceIdentity(ProjectIamParentParentResourceIdentityParser),
 		),
 		NewProjectIamUpdater,
-		tpgiamresource.IamMemberListCallConfig{},
+		tpgiamresource.IamMemberListCallConfig{
+			EnableRoleFilter:   true,
+  			EnableMemberFilter: true,
+		},
 	)
 }
 

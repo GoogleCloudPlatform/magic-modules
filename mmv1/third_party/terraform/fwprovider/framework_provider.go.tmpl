@@ -17,14 +17,11 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/resource"
     "github.com/hashicorp/terraform-plugin-framework/schema/validator"
     "github.com/hashicorp/terraform-plugin-framework/types"
-
+    sdkprovider "github.com/hashicorp/terraform-provider-google/google/provider"
     "github.com/hashicorp/terraform-provider-google/google/fwvalidators"
     "github.com/hashicorp/terraform-provider-google/google/functions"
-    sdkprovider "github.com/hashicorp/terraform-provider-google/google/provider"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
-    "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-    "github.com/hashicorp/terraform-provider-google/google/services/apigee"
-    "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+    "github.com/hashicorp/terraform-provider-google/google/registry"
     "github.com/hashicorp/terraform-provider-google/version"
 
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -219,6 +216,17 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     transport_tpg.CustomEndpointValidator(),
                 },
             },
+
+            // Generated Products. Although these will only be _populated_ for registered products, they
+            // must always be present to match the ProviderModel struct.
+            {{- range $product := $.Products }}
+            "{{ underscore $product.Name }}_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            {{- end }}
         },
         Blocks: map[string]schema.Block{
             "batching": schema.ListNestedBlock{
@@ -262,14 +270,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
         },
     }
-	for _, p := range registry.ListProducts() {
-        resp.Schema.Attributes[p.CustomEndpointField] = &schema.StringAttribute{
-            Optional:     true,
-            Validators: []validator.String{
-                transport_tpg.CustomEndpointValidator(),
-            },
-        }
-	}
 }
 
 // Configure prepares the metadata/'meta' required for data sources and resources to function.
@@ -297,19 +297,6 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources, data sources,
 	// ephemeral resources, and list resources implemented using the plugin-framework. Their Configure functions receive this data via ConfigureRequest.ProviderData
 	// (list resources use ConfigureResponse.ListResourceData — see terraform-plugin-framework list.ConfigureRequest).
-	meta := p.Primary.Meta().(*transport_tpg.Config)
-	// This is how we make provider configuration info (configured clients, default project, etc) available to resources and data sources
-	// implemented using the plugin-framework. The resources' Configure functions receive this data in the ConfigureRequest argument.
-	primaryMeta := p.Primary.Meta()
-	if primaryMeta == nil {
-		resp.Diagnostics.AddError("Provider not configured", "SDK provider metadata is nil. Ensure the provider block is configured before using framework resources.")
-		return
-	}
-	meta, ok := primaryMeta.(*transport_tpg.Config)
-	if !ok {
-		resp.Diagnostics.AddError("Provider configuration error", "SDK provider metadata had unexpected type and could not be propagated to framework resources.")
-		return
-	}
 	meta := p.Primary.Meta().(*transport_tpg.Config)
 	resp.DataSourceData = meta
 	resp.ResourceData = meta

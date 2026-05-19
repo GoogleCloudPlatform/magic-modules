@@ -172,7 +172,7 @@ func init() {
 		Name:        "google_folder_iam_member",
 		ProductName: "resourcemanager",
 		Type:        registry.SchemaTypeIAMResource,
-		Schema:      tpgiamresource.ResourceIamMember(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc, tpgiamresource.IamWithBatching, tpgiamresource.IamWithParentResourceIdentity(FolderIamParentResourceIdentityParser)),
+		Schema:      tpgiamresource.ResourceIamMember(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc, tpgiamresource.IamWithBatching, tpgiamresource.IamWithParentResourceIdentity(FolderIamParentParentResourceIdentityParser)),
 	}.Register()
 	registry.Schema{
 		Name:        "google_folder_iam_policy",
