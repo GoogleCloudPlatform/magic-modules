@@ -371,6 +371,14 @@ type Resource struct {
 	// ====================
 	TGCResource `yaml:",inline"`
 
+	// EXPERIMENTAL: RPC settings are not fully implemented, and should not be
+	// used at this time.
+	RPCService      string `yaml:"rpc_service,omitempty"`
+	RPCCreateMethod string `yaml:"rpc_create_method,omitempty"`
+	RPCReadMethod   string `yaml:"rpc_read_method,omitempty"`
+	RPCUpdateMethod string `yaml:"rpc_update_method,omitempty"`
+	RPCDeleteMethod string `yaml:"rpc_delete_method,omitempty"`
+
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
 	// Examples in documentation. Backed by generated tests, and have
@@ -2500,14 +2508,10 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
-	uriParts := strings.Split(r.IdFormat, "/")
 
-	for _, part := range uriParts {
-		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
-			field := strings.TrimSuffix(strings.TrimPrefix(part, "{{"), "}}")
-			if field != "region" && field != "project" && field != "zone" {
-				requiredFields = append(requiredFields, field)
-			}
+	for _, field := range r.ExtractIdentifiers(r.IdFormat) {
+		if field != "region" && field != "project" && field != "zone" {
+			requiredFields = append(requiredFields, field)
 		}
 	}
 	return requiredFields
@@ -2517,14 +2521,10 @@ func (r Resource) DatasourceRequiredFields() []string {
 // that should be marked as "Optional".
 func (r Resource) DatasourceOptionalFields() []string {
 	optionalFields := []string{}
-	uriParts := strings.Split(r.IdFormat, "/")
 
-	for _, part := range uriParts {
-		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
-			field := strings.TrimSuffix(strings.TrimPrefix(part, "{{"), "}}")
-			if field == "region" || field == "project" || field == "zone" {
-				optionalFields = append(optionalFields, field)
-			}
+	for _, field := range r.ExtractIdentifiers(r.IdFormat) {
+		if field == "region" || field == "project" || field == "zone" {
+			optionalFields = append(optionalFields, field)
 		}
 	}
 	return optionalFields

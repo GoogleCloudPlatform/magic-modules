@@ -13,9 +13,11 @@ func TestProcessInput(t *testing.T) {
 		"mmv1/templates/terraform/examples/subfolder/abc.tf.tmpl",
 		"mmv1/templates/terraform/custom_flatten/abc.go.tmpl",
 		"mmv1/templates/terraform/samples/services/workstations/workstation_cluster_custom_urls.tf.tmpl",
+		"mmv1/templates/terraform/list_resource.go.tmpl",
+		"mmv1/templates/terraform/samples/base_configs/query_test_file.go.tmpl",
 	}
-	tmpl, examples, samples := processInputFiles(fileList)
-	wantTmpl, wantExamples, wantSamples := []string{
+	tmpl, examples, samples, baseTmpls := processInputFiles(fileList)
+	wantTmpl, wantExamples, wantSamples, wantBaseTmpls := []string{
 		"mmv1/templates/terraform/examples/abc.go.tmpl",
 		"mmv1/templates/terraform/examples/subfolder/abc.tf.tmpl",
 		"mmv1/templates/terraform/custom_flatten/abc.go.tmpl",
@@ -23,6 +25,9 @@ func TestProcessInput(t *testing.T) {
 		"mmv1/templates/terraform/examples/abc.tf.tmpl",
 	}, []string{
 		"mmv1/templates/terraform/samples/services/workstations/workstation_cluster_custom_urls.tf.tmpl",
+	}, []string{
+		"mmv1/templates/terraform/list_resource.go.tmpl",
+		"mmv1/templates/terraform/samples/base_configs/query_test_file.go.tmpl",
 	}
 
 	if diff := cmp.Diff(wantTmpl, tmpl); diff != "" {
@@ -33,6 +38,9 @@ func TestProcessInput(t *testing.T) {
 	}
 	if diff := cmp.Diff(wantSamples, samples); diff != "" {
 		t.Errorf("processInputFiles() got diff(-want, got) for sample files = %s", diff)
+	}
+	if diff := cmp.Diff(wantBaseTmpls, baseTmpls); diff != "" {
+		t.Errorf("processInputFiles() got diff(-want, got) for base template files = %s", diff)
 	}
 }
 
@@ -105,5 +113,18 @@ func TestFindSamples(t *testing.T) {
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("findSamples() got unexpected diff(-want, got) = %s", diff)
+	}
+}
+
+func TestFindCodeReferencedTmpls(t *testing.T) {
+	got, err := findCodeReferencedTmpls("../../../mmv1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got["templates/terraform/resource.go.tmpl"] {
+		t.Errorf("findCodeReferencedTmpls() expected to find templates/terraform/resource.go.tmpl")
+	}
+	if !got["templates/terraform/examples/base_configs/test_file.go.tmpl"] {
+		t.Errorf("findCodeReferencedTmpls() expected to find templates/terraform/examples/base_configs/test_file.go.tmpl")
 	}
 }
