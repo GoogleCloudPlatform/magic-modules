@@ -29,10 +29,8 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
   ./.agents/skills/tgc-build-skill/scripts/build_tgc.sh $TGC_DIR
   ```
 
-### 3. Run All Integration Tests
-- **Run All Tests**: Before analyzing the failure or proposing a solution, you MUST run all integration tests for the affected resource (e.g., by running the top-level test instead of a specific subtest) to identify all potential failures and get a complete picture.
-> [!CRITICAL]
-> Do not propose a solution or plan based only on a user-reported subtest failure. You MUST run the top-level test first to discover all failures. 
+### 3. Run Integration Tests
+- **Run Failed Tests**: Before analyzing the failure or proposing a solution, you MUST run the failed integration tests for the affected resource to identify the specific failures.
 - **Read Skill**: Read `tgc-run-integration-tests-skill` for guidance on running integration tests.
 
 ### 4. Fix (Parent Agent)
