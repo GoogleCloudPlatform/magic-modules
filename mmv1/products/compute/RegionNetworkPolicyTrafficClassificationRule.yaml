@@ -1,0 +1,217 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegionNetworkPolicyTrafficClassificationRule'
+api_resource_type_kind: NetworkPolicy
+kind: 'compute#networkPolicyTrafficClassificationRule'
+description: |
+  Represents a traffic classification rule that describes one or more match conditions along with the action to be taken when traffic matches this condition.
+references:
+  guides:
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkPolicies/addTrafficClassificationRule'
+docs:
+id_format: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}/{{priority}}'
+base_url: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}'
+self_link: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}/getTrafficClassificationRule?priority={{priority}}'
+create_url: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}/addTrafficClassificationRule'
+update_url: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}/patchTrafficClassificationRule?priority={{priority}}'
+update_verb: 'POST'
+delete_url: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}/removeTrafficClassificationRule?priority={{priority}}'
+delete_verb: 'POST'
+legacy_long_form_project: true
+import_format:
+  - 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}/{{priority}}'
+  - '{{project}}/{{region}}/{{network_policy}}/{{priority}}'
+  - '{{region}}/{{network_policy}}/{{priority}}'
+  - '{{network_policy}}/{{priority}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_diff:
+  - 'tpgresource.DefaultProviderRegion'
+examples:
+  - name: 'region_network_policy_traffic_classification_rule_basic'
+    primary_resource_id: 'primary'
+    vars:
+      nw_policy: 'nw-policy'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      region: 'REGION'
+parameters:
+  - name: 'networkPolicy'
+    type: ResourceRef
+    description: |
+      The firewall policy of the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    resource: 'RegionNetworkPolicy'
+    imports: 'name'
+  - name: 'region'
+    type: String
+    description: 'The location of this resource.'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'creationTimestamp'
+    type: String
+    description: |
+      Creation timestamp in RFC3339 text format.
+    output: true
+  - name: 'kind'
+    type: String
+    description: |
+      Type of the resource. Alwayscompute#networkPolicyTrafficClassificationRule for network policy traffic classification rules
+    output: true
+  - name: 'ruleName'
+    type: String
+    description: |
+      An optional name for the rule. This field is not a unique identifier and can be updated.
+  - name: 'description'
+    type: String
+    description: 'An optional description for this resource.'
+  - name: 'priority'
+    type: Integer
+    immutable: true
+    description: |
+      An integer indicating the priority of a rule in the list. The priority must be a positive value between 1 and 2147482647.
+      The priority values from 2147482648 to 2147483647 (1000) are reserved for system default network policy rules.
+      Rules are evaluated from highest to lowest priority where 1 is the highest priority and 2147483647 is the lowest priority.
+    required: true
+  - name: 'match'
+    type: NestedObject
+    description: |
+      A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
+    required: true
+    properties:
+      - name: 'srcIpRanges'
+        type: Array
+        send_empty_value: true
+        description: |
+          CIDR IP address range. Maximum number of source CIDR IP ranges allowed is 5000.
+        item_type:
+          type: String
+      - name: 'destIpRanges'
+        type: Array
+        send_empty_value: true
+        description: |
+          CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
+        item_type:
+          type: String
+      - name: 'layer4Configs'
+        type: Array
+        send_empty_value: true
+        description: |
+          Pairs of IP protocols and ports that the rule should match.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'ipProtocol'
+              type: String
+              description: |
+                The IP protocol to which this rule applies. The protocol type is required when creating a traffic classification rule.
+                This value can either be one of the following well known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp), or the IP protocol number.
+              required: true
+            - name: 'ports'
+              type: Array
+              description: |
+                An optional list of ports to which this rule applies. This field is only applicable for UDP or TCP protocol. Each entry must be either an integer or a range. If not specified, this rule applies to connections through any port.
+                Example inputs include: ["22"], ["80","443"], and ["12345-12349"].
+              item_type:
+                type: String
+  - name: 'action'
+    type: NestedObject
+    description: 'The Action to perform when the client connection triggers the rule.'
+    properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          Always APPLY_TRAFFIC_CLASSIFICATION for Traffic Classification Rules.
+        enum_values:
+          - 'apply_traffic_classification'
+        default_value: 'apply_traffic_classification'
+      - name: 'trafficClass'
+        type: Enum
+        description: |
+          The traffic class that should be applied to the matching packet.
+        enum_values:
+          - 'TC1'
+          - 'TC2'
+          - 'TC3'
+          - 'TC4'
+          - 'TC5'
+          - 'TC6'
+      - name: 'dscpMode'
+        type: Enum
+        description: |
+          DSCP mode. When set to AUTO, the DSCP value will be picked automatically based on selected trafficClass. Otherwise,dscpValue needs to be explicitly specified.
+        enum_values:
+          - 'AUTO'
+          - 'CUSTOM'
+      - name: 'dscpValue'
+        type: Integer
+        description: |
+          Custom DSCP value from 0-63 range.
+  - name: 'ruleTupleCount'
+    type: Integer
+    description: |
+      Calculation of the complexity of a single network policy rule.
+    output: true
+  - name: 'targetServiceAccounts'
+    type: Array
+    send_empty_value: true
+    description: |
+      A list of service accounts indicating the sets of instances that are applied with this rule.
+    item_type:
+      type: String
+  - name: 'targetSecureTags'
+    type: Array
+    send_empty_value: true
+    description: |
+      A list of secure tags that controls which instances the traffic classification rule applies to.
+      If targetSecureTag are specified, then the traffic classification rule applies only to instances in the VPC network that have one of those EFFECTIVE secure tags, if all the targetSecureTag are in INEFFECTIVE state, then this rule will be ignored.
+      targetSecureTag may not be set at the same time as targetServiceAccounts. If neither targetServiceAccounts nor targetSecureTag are specified, the firewall rule applies to all instances on the specified network. Maximum number of target label tags allowed is 256.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            Name of the secure tag, created with TagManager's TagValue API.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+        - name: 'state'
+          type: Enum
+          description: |
+            State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+          output: true
+          enum_values:
+            - 'EFFECTIVE'
+            - 'INEFFECTIVE'
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      Denotes whether the network policy rule is disabled.
+      When set to true, the network policy rule is not enforced and traffic behaves as if it did not exist.
+      If this is unspecified, the network policy rule will be enabled.
