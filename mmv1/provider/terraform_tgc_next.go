@@ -112,7 +112,9 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 		log.Printf("Error adding examples from handwritten tests: %v", err)
 	}
 
-	tgc.GenerateResourceTests(object, *templateData, outputFolder)
+	if err := tgc.GenerateResourceTests(object, *templateData, outputFolder); err != nil {
+		log.Fatalf("Error generating resource tests: %v", err)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -130,16 +132,24 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 	}
 
 	templatePath := "templates/tgc_next/services/resource.go.tmpl"
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
+	fileName := fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name))
+	targetFilePath := path.Join(targetFolder, fileName)
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+	tgc.replaceImportPath(targetFolder, fileName)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
-func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) error {
 	if len(object.TGCTests) == 0 {
-		return
+		return fmt.Errorf("No TGC tests generated for resource %s. This commonly happens when all examples in the YAML are excluded AND no matching handwritten tests were found (ensure handwritten test file names match the expected convention, e.g., resource_<product>_<resource_name>_test.go)", object.Name)
+	}
+
+	for _, test := range object.TGCTests {
+		if !strings.HasPrefix(test.Name, "TestAcc") {
+			return fmt.Errorf("TGC test name %s for resource %s does not start with TestAcc", test.Name, object.Name)
+		}
 	}
 
 	productName := tgc.Product.ApiName
@@ -149,6 +159,7 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
 	templateData.GenerateTGCNextTestFile(targetFilePath, object)
+	return nil
 }
 
 // GenerateProduct creates the product.go file for a given service directory.
@@ -242,11 +253,11 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 	resourceConverters := map[string]string{
 		// common
+		"pkg/envvar/envvar_utils.go":              "third_party/terraform/envvar/envvar_utils.go",
 		"pkg/transport/base_url.go":               "third_party/terraform/transport/base_url.go",
 		"pkg/transport/batcher.go":                "third_party/terraform/transport/batcher.go",
 		"pkg/transport/error_retry_predicates.go": "third_party/terraform/transport/error_retry_predicates.go",
 		"pkg/transport/header_transport.go":       "third_party/terraform/transport/header_transport.go",
-		"pkg/transport/mtls_util.go":              "third_party/terraform/transport/mtls_util.go",
 		"pkg/transport/retry_transport.go":        "third_party/terraform/transport/retry_transport.go",
 		"pkg/transport/retry_utils.go":            "third_party/terraform/transport/retry_utils.go",
 		"pkg/transport/transport.go":              "third_party/terraform/transport/transport.go",
@@ -261,13 +272,15 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/version/version.go":                  "third_party/terraform/version/version.go",
 
 		// services
-		"pkg/services/compute/image.go":             "third_party/terraform/services/compute/image.go",
-		"pkg/services/compute/disk_type.go":         "third_party/terraform/services/compute/disk_type.go",
-		"pkg/services/kms/client.go":                "third_party/terraform/services/kms/client.go",
-		"pkg/services/kms/kms_utils.go":             "third_party/terraform/services/kms/kms_utils.go",
-		"pkg/services/privateca/privateca_utils.go": "third_party/terraform/services/privateca/privateca_utils.go",
-		"pkg/services/eventarc/eventarc_utils.go":   "third_party/terraform/services/eventarc/eventarc_utils.go",
-		"pkg/services/storage/client.go":            "third_party/terraform/services/storage/client.go",
+		"pkg/services/compute/image.go":                 "third_party/terraform/services/compute/image.go",
+		"pkg/services/compute/disk_type.go":             "third_party/terraform/services/compute/disk_type.go",
+		"pkg/services/kms/client.go":                    "third_party/terraform/services/kms/client.go",
+		"pkg/services/kms/kms_utils.go":                 "third_party/terraform/services/kms/kms_utils.go",
+		"pkg/services/privateca/privateca_utils.go":     "third_party/terraform/services/privateca/privateca_utils.go",
+		"pkg/services/eventarc/eventarc_utils.go":       "third_party/terraform/services/eventarc/eventarc_utils.go",
+		"pkg/services/resourcemanager/client/client.go": "third_party/terraform/services/resourcemanager/client/client.go",
+		"pkg/services/resourcemanagerv3/client.go":      "third_party/terraform/services/resourcemanagerv3/client.go",
+		"pkg/services/storage/client.go":                "third_party/terraform/services/storage/client.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
@@ -368,6 +381,78 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		})
 	}
 }
+
+func (tgc TerraformGoogleConversionNext) addTestsByTestNameMatch(object *api.Resource) error {
+	if object.ProductMetadata == nil {
+		return nil
+	}
+	productName := strings.ToLower(tgc.Product.Name)
+	dirPath := fmt.Sprintf("third_party/terraform/services/%s", productName)
+
+	entries, err := fs.ReadDir(tgc.templateFS, dirPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return fmt.Errorf("error reading directory %s: %v", dirPath, err)
+	}
+
+	testNamesInYAML := make(map[string]struct{})
+	for _, test := range object.TGCTests {
+		if test.Name != "" {
+			testNamesInYAML[test.Name] = struct{}{}
+		}
+	}
+
+	testPrefix := strings.ToLower("TestAcc" + object.ProductMetadata.Name + object.Name)
+	tests := make([]resource.TGCTest, 0)
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if !strings.HasSuffix(name, "_test.go") && !strings.HasSuffix(name, "_test.go.tmpl") {
+			continue
+		}
+
+		filePath := path.Join(dirPath, name)
+		data, err := fs.ReadFile(tgc.templateFS, filePath)
+		if err != nil {
+			return fmt.Errorf("error reading handwritten test file %s: %v", filePath, err)
+		}
+
+		matches := testRegex.FindAllSubmatch(data, -1)
+		for _, match := range matches {
+			if len(match) == 2 {
+				testName := string(match[1])
+				lowercasedTestName := strings.ToLower(testName)
+				prefixWithUnderscore := testPrefix + "_"
+				prefixWithSUnderscore := testPrefix + "s_"
+
+				if !strings.HasPrefix(lowercasedTestName, prefixWithUnderscore) &&
+					!strings.HasPrefix(lowercasedTestName, prefixWithSUnderscore) &&
+					lowercasedTestName != testPrefix &&
+					lowercasedTestName != testPrefix+"s" {
+					continue
+				}
+
+				if _, ok := testNamesInYAML[testName]; ok {
+					continue
+				}
+
+				tests = append(tests, resource.TGCTest{
+					Name: testName,
+				})
+			}
+		}
+	}
+
+	object.TGCTests = append(object.TGCTests, tests...)
+
+	return nil
+}
+
 func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
 	if object.ProductMetadata == nil {
 		return nil
@@ -379,7 +464,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	for err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
-				log.Printf("no handwritten test file found for %s", resourceFullName)
+				log.Printf("no handwritten test file found at %s", handwrittenTestFilePath)
 				return nil
 			}
 			handwrittenTestFilePath += ".tmpl"
@@ -412,7 +497,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 
 	object.TGCTests = append(object.TGCTests, tests...)
 
-	return nil
+	return tgc.addTestsByTestNameMatch(object)
 }
 
 // Similar to FullResourceName, but override-aware to prevent things like ending in _test.

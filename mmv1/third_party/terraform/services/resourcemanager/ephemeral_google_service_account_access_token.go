@@ -12,12 +12,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwutils"
 	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	iamcredentials_tpg "github.com/hashicorp/terraform-provider-google/google/services/iamcredentials"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/iamcredentials/v1"
 )
 
 var _ ephemeral.EphemeralResource = &googleEphemeralServiceAccountAccessToken{}
+
+func init() {
+	registry.FrameworkEphemeralResource{
+		Name:        "google_service_account_access_token",
+		ProductName: "resourcemanager",
+		Func:        GoogleEphemeralServiceAccountAccessToken,
+	}.Register()
+}
 
 func GoogleEphemeralServiceAccountAccessToken() ephemeral.EphemeralResource {
 	return &googleEphemeralServiceAccountAccessToken{}
@@ -118,7 +128,7 @@ func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req
 		data.Lifetime = types.StringValue("3600s")
 	}
 
-	service := p.providerConfig.NewIamCredentialsClient(p.providerConfig.UserAgent)
+	service := iamcredentials_tpg.NewClient(p.providerConfig, p.providerConfig.UserAgent)
 	name := fmt.Sprintf("projects/-/serviceAccounts/%s", data.TargetServiceAccount.ValueString())
 
 	ScopesSetValue, diags := data.Scopes.ToSetValue(ctx)

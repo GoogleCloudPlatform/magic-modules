@@ -1,0 +1,67 @@
+package firebaseappcheck_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccFirebaseAppCheckResourcePolicy_firebaseAppCheckResourcePolicyUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFirebaseAppCheckResourcePolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirebaseAppCheckResourcePolicy_firebaseAppCheckResourcePolicyUpdate(context, "UNENFORCED", "oauth2.googleapis.com"),
+			},
+			{
+				ResourceName:            "google_firebase_app_check_resource_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"service_id"},
+			},
+			{
+				Config: testAccFirebaseAppCheckResourcePolicy_firebaseAppCheckResourcePolicyUpdate(context, "ENFORCED", "oauth2.googleapis.com"),
+			},
+			{
+				ResourceName:            "google_firebase_app_check_resource_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"service_id"},
+			},
+			{
+				Config: testAccFirebaseAppCheckResourcePolicy_firebaseAppCheckResourcePolicyUpdate(context, "", "oauth2.googleapis.com"),
+			},
+			{
+				ResourceName:            "google_firebase_app_check_resource_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"service_id"},
+			},
+		},
+	})
+}
+
+func testAccFirebaseAppCheckResourcePolicy_firebaseAppCheckResourcePolicyUpdate(context map[string]interface{}, enforcementMode string, serviceId string) string {
+	context["enforcement_mode"] = enforcementMode
+	context["service_id"] = serviceId
+	return acctest.Nprintf(`
+resource "google_firebase_app_check_resource_policy" "default" {
+  service_id = "%{service_id}"
+  enforcement_mode = "%{enforcement_mode}"
+  target_resource = "//%{service_id}/projects/%{project_name}/oauthClients/tf-test%{random_suffix}"
+}
+`, context)
+}

@@ -29,6 +29,12 @@ examples:
       app_display_name: my-app
       app_id: app-id
       deployment_display_name: my-deployment
+  - name: ces_deployment_full
+    primary_resource_id: my-deployment
+    vars:
+      app_display_name: my-app
+      app_id: app-id
+      deployment_display_name: my-deployment
 parameters:
   - name: location
     type: String
@@ -69,6 +75,8 @@ properties:
           TWILIO
           GOOGLE_TELEPHONY_PLATFORM
           CONTACT_CENTER_AS_A_SERVICE
+          FIVE9
+          CONTACT_CENTER_INTEGRATION
       - name: disableBargeInControl
         type: Boolean
         description: |-
@@ -103,21 +111,47 @@ properties:
             description: |-
               The modality of the web widget.
               Possible values:
-              UNKNOWN_MODALITY
+              MODALITY_UNSPECIFIED
               CHAT_AND_VOICE
               VOICE_ONLY
               CHAT_ONLY
+              CHAT_VOICE_AND_VIDEO
           - name: theme
             type: String
             description: |-
               The theme of the web widget.
               Possible values:
-              UNKNOWN_THEME
+              THEME_UNSPECIFIED
               LIGHT
               DARK
           - name: webWidgetTitle
             type: String
             description: The title of the web widget.
+          - name: securitySettings
+            type: NestedObject
+            description: The security settings of the web widget.
+            properties:
+              - name: enablePublicAccess
+                type: Boolean
+                description: |-
+                  Indicates whether public access to the web widget is enabled. If true, the web widget will be publicly accessible. If false, the web widget must be integrated with your own authentication and authorization system to return valid credentials for accessing the CES agent.
+                send_empty_value: true
+              - name: enableOriginCheck
+                type: Boolean
+                description: |-
+                  Indicates whether origin check for the web widget is enabled. If true, the web widget will check the origin of the website that loads the web widget and only allow it to be loaded in the same origin or any of the allowed origins.
+                send_empty_value: true
+              - name: allowedOrigins
+                type: Array
+                description: |-
+                  The origins that are allowed to host the web widget. An origin is defined by RFC 6454. If empty, all origins are allowed. A maximum of 100 origins is allowed. Example: "https://example.com"
+                item_type:
+                  type: String
+              - name: enableRecaptcha
+                type: Boolean
+                description: |-
+                  Indicates whether reCAPTCHA verification for the web widget is enabled.
+                send_empty_value: true
   - name: createTime
     type: String
     description: Timestamp when this deployment was created.

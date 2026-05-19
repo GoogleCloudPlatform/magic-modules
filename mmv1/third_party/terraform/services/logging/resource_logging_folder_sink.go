@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
@@ -18,6 +19,9 @@ func ResourceLoggingFolderSink() *schema.Resource {
 		Delete: resourceLoggingFolderSinkDelete,
 		Update: resourceLoggingFolderSinkUpdate,
 		Schema: resourceLoggingSinkSchema(),
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 		Importer: &schema.ResourceImporter{
 			State: resourceLoggingSinkImportState("folder"),
 		},
@@ -94,10 +98,19 @@ func resourceLoggingFolderSinkRead(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error setting intercept_children: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceLoggingFolderSinkUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingFolderSink) {
+		return ResourceLoggingFolderSink().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -117,6 +130,13 @@ func resourceLoggingFolderSinkUpdate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceLoggingFolderSinkDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

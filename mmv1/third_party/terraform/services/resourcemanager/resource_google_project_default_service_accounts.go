@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -77,12 +79,12 @@ func resourceGoogleProjectDefaultServiceAccountsDoAction(d *schema.ResourceData,
 	serviceAccountSelfLink := fmt.Sprintf("projects/%s/serviceAccounts/%s", project, uniqueID)
 	switch action {
 	case "DELETE":
-		_, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Delete(serviceAccountSelfLink).Do()
+		_, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Delete(serviceAccountSelfLink).Do()
 		if err != nil {
 			return fmt.Errorf("cannot delete service account %s: %v", serviceAccountSelfLink, err)
 		}
 	case "UNDELETE":
-		_, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Undelete(serviceAccountSelfLink, &iam.UndeleteServiceAccountRequest{}).Do()
+		_, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Undelete(serviceAccountSelfLink, &iam.UndeleteServiceAccountRequest{}).Do()
 		errExpected := restorePolicy == "REVERT_AND_IGNORE_FAILURE"
 		errReceived := err != nil
 		if errReceived {
@@ -93,12 +95,12 @@ func resourceGoogleProjectDefaultServiceAccountsDoAction(d *schema.ResourceData,
 			log.Printf("restore policy is %s... ignoring error", restorePolicy)
 		}
 	case "DISABLE":
-		_, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Disable(serviceAccountSelfLink, &iam.DisableServiceAccountRequest{}).Do()
+		_, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Disable(serviceAccountSelfLink, &iam.DisableServiceAccountRequest{}).Do()
 		if err != nil {
 			return fmt.Errorf("cannot disable service account %s: %v", serviceAccountSelfLink, err)
 		}
 	case "ENABLE":
-		_, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Enable(serviceAccountSelfLink, &iam.EnableServiceAccountRequest{}).Do()
+		_, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.Enable(serviceAccountSelfLink, &iam.EnableServiceAccountRequest{}).Do()
 		errReceived := err != nil
 		errExpected := restorePolicy == "REVERT_AND_IGNORE_FAILURE"
 		if errReceived {
@@ -109,7 +111,7 @@ func resourceGoogleProjectDefaultServiceAccountsDoAction(d *schema.ResourceData,
 			log.Printf("restore policy is %s... ignoring error", restorePolicy)
 		}
 	case "DEPRIVILEGE":
-		iamPolicy, err := config.NewResourceManagerClient(userAgent).Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+		iamPolicy, err := rmClient.NewClient(config, userAgent).Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
 		if err != nil {
 			return fmt.Errorf("cannot get IAM policy on project %s: %v", project, err)
 		}
@@ -128,7 +130,7 @@ func resourceGoogleProjectDefaultServiceAccountsDoAction(d *schema.ResourceData,
 			Policy:     iamPolicy,
 			UpdateMask: "bindings,etag,auditConfigs",
 		}
-		_, err = config.NewResourceManagerClient(userAgent).Projects.SetIamPolicy(project, updateRequest).Do()
+		_, err = rmClient.NewClient(config, userAgent).Projects.SetIamPolicy(project, updateRequest).Do()
 		if err != nil {
 			return fmt.Errorf("cannot update IAM policy on project %s: %v", project, err)
 		}
@@ -175,7 +177,7 @@ func resourceGoogleProjectDefaultServiceAccountsCreate(d *schema.ResourceData, m
 
 func listServiceAccounts(config *transport_tpg.Config, d *schema.ResourceData, userAgent string) ([]*iam.ServiceAccount, error) {
 	pid := d.Get("project").(string)
-	response, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.List(PrefixedProject(pid)).Do()
+	response, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.List(PrefixedProject(pid)).Do()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list service accounts on project %q: %v", pid, err)
 	}

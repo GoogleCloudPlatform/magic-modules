@@ -40,6 +40,8 @@ include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccComputeUrlMap_cachePolicyMultiLevelUpdate'
     skip: 'Index mismatch in path_matcher due to test framework limitation'
+custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/compute_url_map.go.tmpl'
 examples:
   - name: 'url_map_bucket_and_service'
     primary_resource_id: 'urlmap'

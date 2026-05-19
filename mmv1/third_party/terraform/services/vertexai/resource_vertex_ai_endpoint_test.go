@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
@@ -13,8 +15,8 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 
 	context := map[string]interface{}{
 		"endpoint_name": fmt.Sprint(acctest.RandInt(t) % 9999999999),
-		"kms_key_name":  acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-update-1"),
+		"kms_key_name":  kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-update-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

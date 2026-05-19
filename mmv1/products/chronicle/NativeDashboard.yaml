@@ -17,7 +17,7 @@ description: A configuration for a native dashboard within a Google SecOps (Chro
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.nativeDashboards'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.nativeDashboards'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards
 self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}'
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards
@@ -28,11 +28,9 @@ import_format:
 update_mask: true
 update_verb: PATCH
 
-min_version: 'beta'
 examples:
   - name: chronicle_nativedashboard_basic
     primary_resource_id: my_basic_dashboard
-    min_version: 'beta'
     ignore_read_extra:
       - "last_viewed_time"
     vars:

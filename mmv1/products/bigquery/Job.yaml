@@ -128,7 +128,7 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
@@ -143,7 +143,7 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:

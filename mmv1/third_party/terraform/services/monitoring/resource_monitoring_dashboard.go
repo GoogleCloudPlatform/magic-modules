@@ -76,6 +76,7 @@ func ResourceMonitoringDashboard() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -97,6 +98,9 @@ func ResourceMonitoringDashboard() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -153,7 +157,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -184,10 +188,19 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error reading Dashboard: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceMonitoringDashboard) {
+		return ResourceMonitoringDashboard().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -211,7 +224,7 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:               config,
 		Method:               "PATCH",
@@ -230,13 +243,20 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {

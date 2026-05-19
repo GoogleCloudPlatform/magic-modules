@@ -8,12 +8,14 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccDataprocSessionTemplate_update(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@dataproc-accounts.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -22,9 +24,9 @@ func TestAccDataprocSessionTemplate_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_name":    envvar.GetTestProjectFromEnv(),
-		"kms_key_name":    acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name,
+		"kms_key_name":    kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name,
 		"prevent_destroy": false,
-		"subnetwork_name": acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork"),
+		"subnetwork_name": BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork"),
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
@@ -110,7 +112,7 @@ resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_
         ttl = "4800s"
         network_tags = ["tag2"]
         kms_key = "%{kms_key_name}"
-	subnetwork_uri = "%{subnetwork_name}"
+  subnetwork_uri = "%{subnetwork_name}"
         service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
         staging_bucket = google_storage_bucket.bucket.name
       }

@@ -10,6 +10,7 @@ import (
 	convert "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google"
 	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/tfplan"
+	tfjson "github.com/hashicorp/terraform-json"
 	"go.uber.org/zap"
 )
 
@@ -32,6 +33,17 @@ type Options struct {
 
 // Convert converts terraform json plan to CAI Assets.
 func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset, error) {
+	// ReadResourceChanges
+	changes, err := tfplan.ReadResourceChanges(jsonPlan)
+	if err != nil {
+		return nil, err
+	}
+
+	return ConvertChanges(ctx, changes, o)
+}
+
+// Convert converts terraform json plan to CAI Assets.
+func ConvertChanges(ctx context.Context, changes []*tfjson.ResourceChange, o *Options) ([]caiasset.Asset, error) {
 	// Creates ancestry manager and converter internally; they are
 	// implementation details private to this package.
 
@@ -57,12 +69,6 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 	}
 
 	converter := convert.NewConverter(cfg, ancestryManager, o.Offline, o.ConvertUnchanged, errorLogger)
-
-	// ReadResourceChanges
-	changes, err := tfplan.ReadResourceChanges(jsonPlan)
-	if err != nil {
-		return nil, err
-	}
 
 	err = converter.AddResourceChanges(changes)
 	if err != nil {

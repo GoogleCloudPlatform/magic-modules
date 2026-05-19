@@ -394,6 +394,7 @@ func categorizeError(errMsg string) string {
 	if strings.Contains(errMsg, "Quota exhausted") ||
 		strings.Contains(errMsg, "Quota exceeded") ||
 		strings.Contains(errMsg, "You do not have quota") ||
+		strings.Contains(errMsg, "The folder operation violates fanout constraints") ||
 		reQuotaLimit.MatchString(errMsg) {
 		return "Quota"
 	}
