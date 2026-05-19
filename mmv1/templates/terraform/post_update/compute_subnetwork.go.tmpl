@@ -81,7 +81,6 @@ if d.HasChange("secondary_ip_range") {
 
 
 	removalsRaw := oldRanges.Difference(newRanges)
-	additionsRaw := newRanges.Difference(oldRanges)
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/subnetworks/{{"{{"}}name{{"}}"}}")
 	if err != nil {
@@ -93,7 +92,7 @@ if d.HasChange("secondary_ip_range") {
 	}
 
 	// If there's a mix of additions and removals, we must perform the removal step first.
-	if removalsRaw.Len() > 0 && additionsRaw.Len() > 0 {
+	if removalsRaw.Len() > 0 {
 		log.Printf("[DEBUG] Splitting update for %q: Performing removal step first.", d.Id())
 
 		getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
