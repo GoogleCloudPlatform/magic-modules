@@ -1263,17 +1263,26 @@ func expandSecurityPolicyRules(configured []interface{}) []interface{} {
 
 func expandSecurityPolicyRule(raw interface{}) map[string]interface{} {
 	data := raw.(map[string]interface{})
-	return map[string]interface{}{
-		"description":            data["description"].(string),
-		"priority":               int64(data["priority"].(int)),
-		"action":                 data["action"].(string),
-		"preview":                data["preview"].(bool),
-		"match":                  expandSecurityPolicyMatch(data["match"].([]interface{})),
-		"preconfiguredWafConfig": expandSecurityPolicyPreconfiguredWafConfig(data["preconfigured_waf_config"].([]interface{})),
-		"rateLimitOptions":       expandSecurityPolicyRuleRateLimitOptions(data["rate_limit_options"].([]interface{})),
-		"redirectOptions":        expandSecurityPolicyRuleRedirectOptions(data["redirect_options"].([]interface{})),
-		"headerAction":           expandSecurityPolicyRuleHeaderAction(data["header_action"].([]interface{})),
+	rule := map[string]interface{}{
+		"description": data["description"].(string),
+		"priority":    int64(data["priority"].(int)),
+		"action":      data["action"].(string),
+		"preview":     data["preview"].(bool),
+		"match":       expandSecurityPolicyMatch(data["match"].([]interface{})),
 	}
+	if v := expandSecurityPolicyPreconfiguredWafConfig(data["preconfigured_waf_config"].([]interface{})); v != nil {
+		rule["preconfiguredWafConfig"] = v
+	}
+	if v := expandSecurityPolicyRuleRateLimitOptions(data["rate_limit_options"].([]interface{})); v != nil {
+		rule["rateLimitOptions"] = v
+	}
+	if v := expandSecurityPolicyRuleRedirectOptions(data["redirect_options"].([]interface{})); v != nil {
+		rule["redirectOptions"] = v
+	}
+	if v := expandSecurityPolicyRuleHeaderAction(data["header_action"].([]interface{})); len(v) > 0 {
+		rule["headerAction"] = v
+	}
+	return rule
 }
 
 func expandSecurityPolicyMatch(configured []interface{}) map[string]interface{} {
@@ -1282,12 +1291,19 @@ func expandSecurityPolicyMatch(configured []interface{}) map[string]interface{} 
 	}
 
 	data := configured[0].(map[string]interface{})
-	return map[string]interface{}{
+	match := map[string]interface{}{
 		"versionedExpr": data["versioned_expr"].(string),
-		"config":        expandSecurityPolicyMatchConfig(data["config"].([]interface{})),
-		"expr":          expandSecurityPolicyMatchExpr(data["expr"].([]interface{})),
-		"exprOptions":   expandSecurityPolicyMatchExprOptions(data["expr_options"].([]interface{})),
 	}
+	if v := expandSecurityPolicyMatchConfig(data["config"].([]interface{})); v != nil {
+		match["config"] = v
+	}
+	if v := expandSecurityPolicyMatchExpr(data["expr"].([]interface{})); v != nil {
+		match["expr"] = v
+	}
+	if v := expandSecurityPolicyMatchExprOptions(data["expr_options"].([]interface{})); v != nil {
+		match["exprOptions"] = v
+	}
+	return match
 }
 
 func expandSecurityPolicyMatchConfig(configured []interface{}) map[string]interface{} {
@@ -1647,11 +1663,14 @@ func expandSecurityPolicyAdaptiveProtectionConfig(configured []interface{}) map[
 	}
 
 	data := configured[0].(map[string]interface{})
-	result := map[string]interface{}{
-		"layer7DdosDefenseConfig": expandLayer7DdosDefenseConfig(data["layer_7_ddos_defense_config"].([]interface{})),
+	result := map[string]interface{}{}
+	if v := expandLayer7DdosDefenseConfig(data["layer_7_ddos_defense_config"].([]interface{})); v != nil {
+		result["layer7DdosDefenseConfig"] = v
 	}
 	{{- if ne $.TargetVersionName "ga" }}
-	result["autoDeployConfig"] = expandAutoDeployConfig(data["auto_deploy_config"].([]interface{}))
+	if v := expandAutoDeployConfig(data["auto_deploy_config"].([]interface{})); v != nil {
+		result["autoDeployConfig"] = v
+	}
 	{{- end }}
 	return result
 }
@@ -1662,11 +1681,14 @@ func expandLayer7DdosDefenseConfig(configured []interface{}) map[string]interfac
 	}
 
 	data := configured[0].(map[string]interface{})
-	return map[string]interface{}{
-		"enable":           data["enable"].(bool),
-		"ruleVisibility":   data["rule_visibility"].(string),
-		"thresholdConfigs": expandThresholdConfigs(data["threshold_configs"].([]interface{})),
+	result := map[string]interface{}{
+		"enable":         data["enable"].(bool),
+		"ruleVisibility": data["rule_visibility"].(string),
 	}
+	if v := expandThresholdConfigs(data["threshold_configs"].([]interface{})); len(v) > 0 {
+		result["thresholdConfigs"] = v
+	}
+	return result
 }
 
 func expandThresholdConfigs(configured []interface{}) []interface{} {
@@ -1824,17 +1846,24 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) map[stri
 	}
 
 	data := configured[0].(map[string]interface{})
-	return map[string]interface{}{
-		"banThreshold":          expandThreshold(data["ban_threshold"].([]interface{})),
-		"rateLimitThreshold":    expandThreshold(data["rate_limit_threshold"].([]interface{})),
-		"exceedAction":          data["exceed_action"].(string),
-		"conformAction":         data["conform_action"].(string),
-		"enforceOnKey":          data["enforce_on_key"].(string),
-		"enforceOnKeyName":      data["enforce_on_key_name"].(string),
-		"enforceOnKeyConfigs":   expandSecurityPolicyEnforceOnKeyConfigs(data["enforce_on_key_configs"].([]interface{})),
-		"banDurationSec":        int64(data["ban_duration_sec"].(int)),
-		"exceedRedirectOptions": expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
+	opts := map[string]interface{}{
+		"exceedAction":        data["exceed_action"].(string),
+		"conformAction":       data["conform_action"].(string),
+		"enforceOnKey":        data["enforce_on_key"].(string),
+		"enforceOnKeyName":    data["enforce_on_key_name"].(string),
+		"enforceOnKeyConfigs": expandSecurityPolicyEnforceOnKeyConfigs(data["enforce_on_key_configs"].([]interface{})),
+		"banDurationSec":      int64(data["ban_duration_sec"].(int)),
 	}
+	if v := expandThreshold(data["ban_threshold"].([]interface{})); v != nil {
+		opts["banThreshold"] = v
+	}
+	if v := expandThreshold(data["rate_limit_threshold"].([]interface{})); v != nil {
+		opts["rateLimitThreshold"] = v
+	}
+	if v := expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})); v != nil {
+		opts["exceedRedirectOptions"] = v
+	}
+	return opts
 }
 
 func expandThreshold(configured []interface{}) map[string]interface{} {
