@@ -129,6 +129,7 @@ properties:
         - name: result
           type: NestedObject
           description: Contains the result of the assets export.
+          output: true
           properties:
             - name: error
               type: NestedObject
@@ -140,15 +141,18 @@ properties:
 
                 You can find out more about this error model and how to work with it in the
                 [API Design Guide](https://cloud.google.com/apis/design/errors).
+              output: true
               properties:
                 - name: code
                   type: Integer
                   description: The status code, which should be an enum value of google.rpc.Code.
+                  output: true
                 - name: details
                   type: Array
                   description: |-
                     A list of messages that carry the error details.  There is a common set of
                     message types for APIs to use.
+                  output: true
                   item_type:
                     type: NestedObject
                     properties: []
@@ -158,9 +162,11 @@ properties:
                     A developer-facing error message, which should be in English. Any
                     user-facing error message should be localized and sent in the
                     google.rpc.Status.details field, or localized by the client.
+                  output: true
             - name: outputFiles
               type: NestedObject
               description: Contains a list of output files.
+              output: true
               properties:
                 - name: entries
                   type: Array
@@ -172,6 +178,7 @@ properties:
                       - name: csvOutputFile
                         type: NestedObject
                         description: Contains a single output file of type CSV.
+                        output: true
                         properties:
                           - name: columnsCount
                             type: Integer
@@ -184,6 +191,7 @@ properties:
                           - name: signedUri
                             type: NestedObject
                             description: Contains a signed URI.
+                            output: true
                             properties:
                               - name: file
                                 type: String
@@ -200,10 +208,12 @@ properties:
                       - name: xlsxOutputFile
                         type: NestedObject
                         description: Contains a single output file of type XLSX.
+                        output: true
                         properties:
                           - name: signedUri
                             type: NestedObject
                             description: Contains a signed URI.
+                            output: true
                             properties:
                               - name: file
                                 type: String
@@ -216,6 +226,7 @@ properties:
             - name: signedUris
               type: NestedObject
               description: Contains a list of Signed URIs.
+              output: true
               properties:
                 - name: signedUris
                   type: Array
