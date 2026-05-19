@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -203,7 +204,7 @@ func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *map[s
 
 		name := rs.Primary.Attributes["name"]
 
-		url := fmt.Sprintf("%sprojects/%s/global/sslPolicies/%s", transport_tpg.BaseUrl(Product, config), project, name)
+		url := fmt.Sprintf("%sprojects/%s/global/sslPolicies/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), project, name)
 		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
