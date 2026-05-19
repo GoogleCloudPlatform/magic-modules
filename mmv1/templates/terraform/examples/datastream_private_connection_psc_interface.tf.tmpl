@@ -1,6 +1,6 @@
 resource "google_datastream_private_connection" "{{$.PrimaryResourceId}}" {
     display_name          = "Connection profile"
-    region                = "us-west1"
+    location              = "us-west1"
     private_connection_id = "{{index $.Vars "private_connection_id"}}"
 
     labels = {
