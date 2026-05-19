@@ -432,7 +432,8 @@ type IamSettings struct {
 	StateUpgraders     []schema.StateUpgrader
 	SchemaVersion      int
 	CreateTimeOut      int64
-	// ParentResourceIdentityParser, when non-nil, enables ResourceIdentity for this IAM resource
+	// ParentResourceIdentityParser, when non-nil, enables Terraform resource identity for this IAM
+	// member resource (identity schema, create/read identity sync, and import when d.Id() is empty).
 	ParentResourceIdentityParser ParentResourceIdFromIdentityParserFunc
 }
 
@@ -450,7 +451,7 @@ func IamWithDeprecationMessage(message string) func(s *IamSettings) {
 	}
 }
 
-// IamWithParentResourceIdentity enables import with resource identity block when parser is non-nil.
+// IamWithParentResourceIdentity sets the parser that derives the canonical resource id from import identity when d.Id() is empty.
 func IamWithParentResourceIdentity(parser ParentResourceIdFromIdentityParserFunc) func(*IamSettings) {
 	return func(s *IamSettings) {
 		s.ParentResourceIdentityParser = parser
@@ -543,7 +544,6 @@ func missingBindingsMap(aMap, bMap map[iamBindingKey]map[string]struct{}) map[ia
 func MissingBindings(a, b []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
 	aMap := createIamBindingsMap(a)
 	bMap := createIamBindingsMap(b)
-
 	var results []*cloudresourcemanager.Binding
 	for key, membersSet := range missingBindingsMap(aMap, bMap) {
 		members := make([]string, 0, len(membersSet))
@@ -575,7 +575,7 @@ func ConvertToIdentitySchema(parentSchema map[string]*schema.Schema) map[string]
 }
 
 // Copies IAM parent attributes from resource state into identity
-func populateIamParentIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSchema map[string]*schema.Schema) {
+func PopulateIamParentIdentity(identity *schema.IdentityData, d *schema.ResourceData, parentSchema map[string]*schema.Schema) {
 	for attr := range parentSchema {
 		identity.Set(attr, d.Get(attr))
 	}

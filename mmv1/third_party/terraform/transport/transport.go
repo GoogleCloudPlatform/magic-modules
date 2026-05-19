@@ -118,6 +118,76 @@ func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 	return result, nil
 }
 
+// ListCallOptions configures paginated LIST API calls that return items under a JSON array key (default "items").
+type ListCallOptions struct {
+	Config         *Config
+	TempData       *schema.ResourceData
+	Url            string
+	BillingProject string
+	UserAgent      string
+	ItemName       string
+	Filter         string
+	Flattener      func(item map[string]interface{}, d *schema.ResourceData, config *Config) error
+	Callback       func(rd *schema.ResourceData) error
+}
+
+// ListCall performs GET requests with optional filter and pageToken, invoking Flattener then Callback per item.
+func ListCall(opts ListCallOptions) error {
+	if opts.ItemName == "" {
+		opts.ItemName = "items"
+	}
+
+	params := make(map[string]string)
+	if opts.Filter != "" {
+		params["filter"] = opts.Filter
+	}
+
+	for {
+		url, err := AddQueryParams(opts.Url, params)
+		if err != nil {
+			return err
+		}
+
+		headers := make(http.Header)
+		res, err := SendRequest(SendRequestOptions{
+			Config:               opts.Config,
+			Method:               "GET",
+			Project:              opts.BillingProject,
+			RawURL:               url,
+			UserAgent:            opts.UserAgent,
+			Headers:              headers,
+			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
+		})
+		if err != nil {
+			return HandleNotFoundError(err, opts.TempData, opts.ItemName)
+		}
+
+		if v, ok := res[opts.ItemName].([]interface{}); ok {
+			for _, item := range v {
+				itemMap, ok := item.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("expected item to be map[string]interface{}, got %T", item)
+				}
+
+				err = opts.Flattener(itemMap, opts.TempData, opts.Config)
+				if err != nil {
+					return fmt.Errorf("Error flattening list item: %w", err)
+				}
+				err = opts.Callback(opts.TempData)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		tok, ok := res["nextPageToken"]
+		if !ok || tok.(string) == "" {
+			break
+		}
+		params["pageToken"] = tok.(string)
+	}
+	return nil
+}
+
 func AddQueryParams(rawurl string, params map[string]string) (string, error) {
 	u, err := url.Parse(rawurl)
 	if err != nil {

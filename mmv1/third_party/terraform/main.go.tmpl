@@ -14,6 +14,73 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 )
 
+type muxWithListResourceServer struct {
+	tfprotov5.ProviderServer
+	listServer tfprotov5.ProviderServerWithListResource
+}
+
+func (s muxWithListResourceServer) GetMetadata(ctx context.Context, req *tfprotov5.GetMetadataRequest) (*tfprotov5.GetMetadataResponse, error) {
+	resp, err := s.ProviderServer.GetMetadata(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	listResp, listErr := s.listServer.GetMetadata(ctx, req)
+	if listErr != nil || listResp == nil {
+		return resp, nil
+	}
+
+	if resp == nil {
+		resp = &tfprotov5.GetMetadataResponse{}
+	}
+	existing := make(map[string]struct{}, len(resp.ListResources))
+	for _, lr := range resp.ListResources {
+		existing[lr.TypeName] = struct{}{}
+	}
+	for _, lr := range listResp.ListResources {
+		if _, ok := existing[lr.TypeName]; ok {
+			continue
+		}
+		resp.ListResources = append(resp.ListResources, lr)
+		existing[lr.TypeName] = struct{}{}
+	}
+	return resp, nil
+}
+
+func (s muxWithListResourceServer) GetProviderSchema(ctx context.Context, req *tfprotov5.GetProviderSchemaRequest) (*tfprotov5.GetProviderSchemaResponse, error) {
+	resp, err := s.ProviderServer.GetProviderSchema(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	listResp, listErr := s.listServer.GetProviderSchema(ctx, req)
+	if listErr != nil || listResp == nil {
+		return resp, nil
+	}
+
+	if resp == nil {
+		resp = &tfprotov5.GetProviderSchemaResponse{}
+	}
+	if resp.ListResourceSchemas == nil {
+		resp.ListResourceSchemas = map[string]*tfprotov5.Schema{}
+	}
+	for typeName, schema := range listResp.ListResourceSchemas {
+		if _, ok := resp.ListResourceSchemas[typeName]; ok {
+			continue
+		}
+		resp.ListResourceSchemas[typeName] = schema
+	}
+	return resp, nil
+}
+
+func (s muxWithListResourceServer) ValidateListResourceConfig(ctx context.Context, req *tfprotov5.ValidateListResourceConfigRequest) (*tfprotov5.ValidateListResourceConfigResponse, error) {
+	return s.listServer.ValidateListResourceConfig(ctx, req)
+}
+
+func (s muxWithListResourceServer) ListResource(ctx context.Context, req *tfprotov5.ListResourceRequest) (*tfprotov5.ListResourceServerStream, error) {
+	return s.listServer.ListResource(ctx, req)
+}
+
 func main() {
 	var debug bool
 
@@ -23,9 +90,15 @@ func main() {
 	// primary is the SDKv2 implementation of the provider
 	primary := provider.Provider()
 
+	frameworkServerFactory := providerserver.NewProtocol5(fwprovider.New(primary))
+	frameworkServer := frameworkServerFactory()
+	listServer, ok := frameworkServer.(tfprotov5.ProviderServerWithListResource)
+	if !ok {
+		log.Fatal("framework provider does not implement list resource RPCs")
+	}
 	providers := []func() tfprotov5.ProviderServer{
 		primary.GRPCProvider, // sdk provider
-		providerserver.NewProtocol5(fwprovider.New(primary)), // framework provider
+		func() tfprotov5.ProviderServer { return frameworkServer }, // framework provider singleton
 	}
 
 	// use the muxer
@@ -42,7 +115,12 @@ func main() {
 
 	err = tf5server.Serve(
 		"registry.terraform.io/hashicorp/google{{- if ne $.TargetVersionName "ga" -}}-{{$.TargetVersionName}}{{- end }}",
-		muxServer.ProviderServer,
+		func() tfprotov5.ProviderServer {
+			return muxWithListResourceServer{
+				ProviderServer: muxServer.ProviderServer(),
+				listServer:     listServer,
+			}
+		},
 		serveOpts...,
 	)
 
