@@ -747,6 +747,29 @@ func ResourceComputeInstance() *schema.Resource {
 							},
 						},
 
+						{{ if ne $.TargetVersionName `ga` -}}
+						"alias_ipv6_range": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `An array of IPv6 alias IP ranges for this network interface.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip_cidr_range": {
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
+										Description:      `The IPv6 CIDR range represented by this alias IP range.`,
+									},
+									"subnetwork_range_name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The subnetwork secondary range name specifying the secondary range from which to allocate the IP CIDR range for this alias IP range.`,
+									},
+								},
+							},
+						},
+						{{- end }}
+
 						"stack_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -2951,6 +2974,56 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
+{{ if ne $.TargetVersionName `ga` -}}
+		if !updateDuringStop && d.HasChange(prefix+".alias_ipv6_range") {
+			// Alias IPv6 ranges cannot be updated; they must be removed and then added
+			// unless you are changing subnetwork/network
+			if len(instNetworkInterface.AliasIpv6Ranges) > 0 {
+				ni := &compute.NetworkInterface{
+					Fingerprint:     instNetworkInterface.Fingerprint,
+					ForceSendFields: []string{"AliasIpv6Ranges"},
+				}
+				if commonAliasIpv6Ranges := CheckForCommonAliasIpv6(instNetworkInterface, networkInterface); len(commonAliasIpv6Ranges) > 0 {
+					ni.AliasIpv6Ranges = commonAliasIpv6Ranges
+				}
+				op, err := NewClient(config, userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
+				if err != nil {
+					return errwrap.Wrapf("Error removing alias_ipv6_range: {{"{{"}}err{{"}}"}}", err)
+				}
+				opErr := ComputeOperationWaitTime(config, op, project, "updating alias ipv6 ranges", userAgent, d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+				// re-read fingerprint
+				instance, err = NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+				if err != nil {
+					return err
+				}
+				instNetworkInterface = instance.NetworkInterfaces[i]
+			}
+
+			networkInterfacePatchObj := &compute.NetworkInterface{
+				AliasIpv6Ranges: networkInterface.AliasIpv6Ranges,
+				Fingerprint:     instNetworkInterface.Fingerprint,
+			}
+			updateCall := NewClient(config, userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			op, err := updateCall()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{`{{`}}err{{`}}`}}", err)
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+			// re-read fingerprint
+			instance, err = NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+			if err != nil {
+				return err
+			}
+			instNetworkInterface = instance.NetworkInterfaces[i]
+		}
+{{- end }}
+
 		if !updateDuringStop && d.HasChange(prefix+".stack_type") {
 
 			networkInterfacePatchObj := &compute.NetworkInterface{
@@ -3097,6 +3170,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				Network:       networkInterface.Network,
 				Subnetwork:    networkInterface.Subnetwork,
 				AliasIpRanges: networkInterface.AliasIpRanges,
+{{ if ne $.TargetVersionName `ga` -}}
+				AliasIpv6Ranges: networkInterface.AliasIpv6Ranges,
+{{- end }}
 			}
 
 			// network_ip can be inferred if not declared. Let's only patch if it's being changed by user
@@ -4471,13 +4547,23 @@ func isEmptyServiceAccountBlock(d *schema.ResourceData) bool {
 // Alias ip ranges cannot be removed and created at the same time. This checks if there are any unchanged alias ip ranges
 // to be kept in between the PATCH operations on Network Interface
 func CheckForCommonAliasIp(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
+	return checkForCommonAliasIpRanges(old.AliasIpRanges, new.AliasIpRanges)
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func CheckForCommonAliasIpv6(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
+	return checkForCommonAliasIpRanges(old.AliasIpv6Ranges, new.AliasIpv6Ranges)
+}
+{{- end }}
+
+func checkForCommonAliasIpRanges(old, new []*compute.AliasIpRange) []*compute.AliasIpRange {
 	newAliasIpMap := make(map[string]bool)
-	for _, ipRange := range new.AliasIpRanges {
+	for _, ipRange := range new {
 		newAliasIpMap[ipRange.IpCidrRange] = true
 	}
 
 	resultAliasIpRanges := make([]*compute.AliasIpRange, 0)
-	for _, val := range old.AliasIpRanges {
+	for _, val := range old {
 		if newAliasIpMap[val.IpCidrRange] {
 			resultAliasIpRanges = append(resultAliasIpRanges, val)
 		}
