@@ -336,3 +336,23 @@ EOF
 }
 `)
 }
+
+func TestAccMonitoringDashboard_noDrift(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringDashboardDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringDashboard_basic(),
+			},
+			{
+				// This step should not show any drift after the dashboard is created
+				// The key test is that this step should not show any changes in the plan
+				Config: testAccMonitoringDashboard_basic(),
+			},
+		},
+	})
+}
