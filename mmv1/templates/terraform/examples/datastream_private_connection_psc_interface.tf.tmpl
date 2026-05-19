@@ -14,7 +14,7 @@ resource "google_datastream_private_connection" "{{$.PrimaryResourceId}}" {
 
 resource "google_compute_network_attachment" "default" {
     name                  = "{{index $.Vars "network_attachment_name"}}"
-    region                = "us-central2"
+    region                = "us-west1"
     description           = "basic network attachment description"
     connection_preference = "ACCEPT_AUTOMATIC"
 

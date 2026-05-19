@@ -13,7 +13,7 @@ provider "google" {
 
 resource "google_datastream_private_connection" "default" {
     display_name          = "Connection profile"
-    location              = "us-central1"
+    location              = "us-west1"
     private_connection_id = "pc-connection"
 
     labels = {
