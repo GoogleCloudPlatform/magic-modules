@@ -67,6 +67,15 @@ The following arguments are supported:
   * `oauth2_client_secret` - (Required) OAuth2 client secret to use for the authentication flow.
     The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
 
+  * `oauth2_client_secret_wo_version` - (Optional) The version of the oauth2_client_secret. For more info see [updating   write-only attributes](/docs/providers/google/guides/using_write_only_attributes.  html#updating-write-only-attributes).
+
+## Ephemeral Attributes Reference
+
+The following write-only attributes are supported:
+
+* `iap.oauth2_client_secret` - (Required) OAuth2 client secret to use for the authentication flow.
+    The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
