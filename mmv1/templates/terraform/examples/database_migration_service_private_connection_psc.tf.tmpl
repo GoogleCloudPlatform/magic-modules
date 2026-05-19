@@ -29,6 +29,6 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.Vars "subnetwork_name"}}"
   ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
+  region        = "us-west1"
   network       = google_compute_network.default.id
 }

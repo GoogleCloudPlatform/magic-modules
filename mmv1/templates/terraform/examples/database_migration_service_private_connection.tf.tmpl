@@ -1,6 +1,6 @@
 resource "google_database_migration_service_private_connection" "{{$.PrimaryResourceId}}" {
 	display_name          = "dbms_pc"
-	location              = "us-central2"
+	location              = "us-west1"
 	private_connection_id = "{{index $.Vars "private_connection_id"}}"
 
 	labels = {
