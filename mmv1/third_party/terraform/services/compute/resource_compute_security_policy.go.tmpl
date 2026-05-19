@@ -1264,11 +1264,15 @@ func expandSecurityPolicyRules(configured []interface{}) []interface{} {
 func expandSecurityPolicyRule(raw interface{}) map[string]interface{} {
 	data := raw.(map[string]interface{})
 	rule := map[string]interface{}{
-		"description": data["description"].(string),
-		"priority":    int64(data["priority"].(int)),
-		"action":      data["action"].(string),
-		"preview":     data["preview"].(bool),
-		"match":       expandSecurityPolicyMatch(data["match"].([]interface{})),
+		"priority": int64(data["priority"].(int)),
+		"action":   data["action"].(string),
+		"match":    expandSecurityPolicyMatch(data["match"].([]interface{})),
+	}
+	if v := data["description"].(string); v != "" {
+		rule["description"] = v
+	}
+	if v := data["preview"].(bool); v {
+		rule["preview"] = v
 	}
 	if v := expandSecurityPolicyPreconfiguredWafConfig(data["preconfigured_waf_config"].([]interface{})); v != nil {
 		rule["preconfiguredWafConfig"] = v
@@ -1564,13 +1568,14 @@ func flattenPreconfiguredWafConfigExclusions(rawExclusions interface{}) []map[st
 		if !ok {
 			continue
 		}
+		targetRuleIds, _ := exclusion["targetRuleIds"].([]interface{})
 		data := map[string]interface{}{
 			"request_header":      flattenPreconfiguredWafConfigExclusionField(exclusion["requestHeadersToExclude"]),
 			"request_cookie":      flattenPreconfiguredWafConfigExclusionField(exclusion["requestCookiesToExclude"]),
 			"request_uri":         flattenPreconfiguredWafConfigExclusionField(exclusion["requestUrisToExclude"]),
 			"request_query_param": flattenPreconfiguredWafConfigExclusionField(exclusion["requestQueryParamsToExclude"]),
 			"target_rule_set":     exclusion["targetRuleSet"],
-			"target_rule_ids":     schema.NewSet(schema.HashString, exclusion["targetRuleIds"].([]interface{})),
+			"target_rule_ids":     schema.NewSet(schema.HashString, targetRuleIds),
 		}
 
 		exclusionsSchema = append(exclusionsSchema, data)
