@@ -1,5 +1,5 @@
 resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" {
-  organization = "{{index $.TestEnvVars "org_id"}}"
+  parent = "projects/{{index $.TestEnvVars "project"}}"
   location     = "global"
   framework_id = "{{index $.Vars "framework_name"}}"
   
@@ -7,7 +7,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   description  = "An Terraform description for the framework"
   
   cloud_control_details {
-		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-assess-resource-availability"
+		name              = "projects/{{index $.TestEnvVars "project"}}/locations/global/cloudControls/builtin-assess-resource-availability"
 		major_revision_id = "1"
     
     parameters {
@@ -19,7 +19,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   }
 
     cloud_control_details {
-		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-cmek-key-in-use-for-bigquery-table"
+		name              = "projects/{{index $.TestEnvVars "project"}}/locations/global/cloudControls/builtin-cmek-key-in-use-for-bigquery-table"
 		major_revision_id = "1"
     
     parameters {
@@ -33,7 +33,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   }
 
   cloud_control_details {
-		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-enable-automatic-backups-cloud-sql"
+		name              = "projects/{{index $.TestEnvVars "project"}}/locations/global/cloudControls/builtin-enable-automatic-backups-cloud-sql"
 		major_revision_id = "1"
     
     parameters {
@@ -45,7 +45,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   }
 
   cloud_control_details {
-		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-require-cmek-on-bigquery-datasets"
+		name              = "projects/{{index $.TestEnvVars "project"}}/locations/global/cloudControls/builtin-require-cmek-on-bigquery-datasets"
 		major_revision_id = "1"
     
     parameters {

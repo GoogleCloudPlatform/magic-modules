@@ -16,21 +16,28 @@ name: FrameworkDeployment
 description: Framework deployments represent the assignment of a framework to a target resource. Supported target resources are organizations, folders, and projects.
 references:
   api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworkDeployments
-base_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments
+base_url: '{{parent}}/locations/{{location}}/frameworkDeployments'
 immutable: true
-self_link: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
-create_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}
-id_format: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
+self_link: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
+create_url: '{{parent}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}'
+id_format: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 import_format:
-  - organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
+  - '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 examples:
-  - name: "cloudsecuritycompliance_framework_deployment_basic"
+  - name: "cloudsecuritycompliance_framework_deployment_org_basic"
     primary_resource_id: "example"
     vars:
       deployment_name: "example-deployment"
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_deployment_project_basic"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+    test_env_vars:
+      project: "PROJECT"
   - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
     primary_resource_id: "example"
     vars:
@@ -64,9 +71,13 @@ async:
   include_project: false
 autogen_status: RnJhbWV3b3JrRGVwbG95bWVudA==
 parameters:
-  - name: organization
+  - name: parent
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: |
+      The parent resource in which to create the FrameworkDeployment.
+      Must be in one of the following formats:
+      * `projects/{{project}}`
+      * `organizations/{{organization}}`
     immutable: true
     url_param_only: true
     required: true
@@ -111,7 +122,7 @@ properties:
           type: String
           description: |-
             The name of the CloudControlDeployment. The format is:
-            organizations/{org}/locations/{location}/cloudControlDeployments/{cloud_control_deployment_id}
+            {parent}/locations/{location}/cloudControlDeployments/{cloud_control_deployment_id}
           output: true
   - name: cloudControlMetadata
     type: Array
@@ -136,8 +147,7 @@ properties:
               type: String
               description: |-
                 The name of the CloudControl in the format:
-                “organizations/{organization}/locations/{location}/
-                cloudControls/{cloud-control}”
+                "{parent}/locations/{location}/cloudControls/{cloud-control}"
               required: true
             - name: parameters
               type: Array
@@ -260,7 +270,7 @@ properties:
         type: String
         description: |-
           In the format:
-          organizations/{org}/locations/{location}/frameworks/{framework}
+          {parent}/locations/{location}/frameworks/{framework}
         required: true
       - name: majorRevisionId
         type: String
@@ -271,7 +281,7 @@ properties:
     type: String
     description: |-
       Identifier. FrameworkDeployment name in the following format:
-      organizations/{organization}/locations/{location}/frameworkDeployments/{framework_deployment_id}
+      {parent}/locations/{location}/frameworkDeployments/{framework_deployment_id}
     output: true
   - name: targetResourceConfig
     type: NestedObject

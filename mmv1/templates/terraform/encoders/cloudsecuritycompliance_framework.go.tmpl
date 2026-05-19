@@ -1,9 +1,9 @@
 // Build the fullname for the Framework resource from the provided
-// organization, location and frameworkId fields and set it on the
+// parent, location and frameworkId fields and set it on the
 // API object that will be sent in the request.
-org, ok := d.Get("organization").(string)
+org, ok := d.Get("parent").(string)
 if !ok || org == "" {
-	return nil, fmt.Errorf("organization is required and must be a non-empty string")
+	return nil, fmt.Errorf("parent is required and must be a non-empty string")
 }
 loc, ok := d.Get("location").(string)
 if !ok || loc == "" {
@@ -14,6 +14,6 @@ if !ok || fw == "" {
 	return nil, fmt.Errorf("framework_id is required and must be a non-empty string")
 }
 // Compose the resource name in the expected API format.
-name := fmt.Sprintf("organizations/%s/locations/%s/frameworks/%s", org, loc, fw)
+name := fmt.Sprintf("%s/locations/%s/frameworks/%s", parent, loc, fw)
 obj["name"] = name
 return obj, nil

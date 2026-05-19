@@ -1,5 +1,5 @@
 resource "google_cloud_security_compliance_cloud_control" "example" {
-  organization        = "{{index $.TestEnvVars "org_id"}}"
+  parent        = "projects/{{index $.TestEnvVars "project"}}"
   location            = "global"
   cloud_control_id    = "{{index $.Vars "cloudcontrol_name"}}"
 
