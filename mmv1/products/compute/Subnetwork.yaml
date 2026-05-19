@@ -330,6 +330,7 @@ properties:
             function: verify.ValidateGCEName
         - name: ipCidrRange
           type: String
+          diff_suppress_func: IpDiffSuppress
           description: |
             The range of IP addresses belonging to this subnetwork secondary
             range. Provide this property when you create the subnetwork.

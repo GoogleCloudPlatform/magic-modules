@@ -104,6 +104,34 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	return addr_equality && netmask_equality
 }
 
+func mergeSurvivor(oldEl, newEl interface{}) interface{} {
+	if oldEl == nil {
+		return newEl
+	}
+	if newEl == nil {
+		return oldEl
+	}
+	
+	oldMap := oldEl.(map[string]interface{})
+	newMap := newEl.(map[string]interface{})
+	
+	merged := make(map[string]interface{})
+	for k, v := range oldMap {
+		merged[k] = v
+	}
+	
+	for k, v := range newMap {
+		if k == "ip_cidr_range" && (v == nil || v == "") {
+			if oldVal, ok := oldMap[k]; ok && oldVal != "" {
+				continue
+			}
+		}
+		merged[k] = v
+	}
+	
+	return merged
+}
+
 func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	if diff.Id() == "" {
 		return nil
@@ -113,7 +141,7 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 	old := oldRaw.([]interface{})
 	new := newRaw.([]interface{})
 
-	// Map existing range names to their current indices
+	// Map existing range names to their current indices in 'old'
 	oldMap := make(map[string]int)
 	for i, r := range old {
 		if r == nil { continue }
@@ -122,21 +150,47 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 	}
 
 	stableNew := make([]interface{}, len(new))
+	
+	// Identify survivors and additions (preserving config order)
+	var survivors []interface{}
 	var additions []interface{}
-
-	// FIX for Bug 2: Keep survivors in their old slots
 	for _, r := range new {
 		if r == nil { continue }
 		m := r.(map[string]interface{})
 		name := m["range_name"].(string)
-		if oldIdx, ok := oldMap[name]; ok && oldIdx < len(new) {
-			stableNew[oldIdx] = r
+		if _, ok := oldMap[name]; ok {
+			survivors = append(survivors, r)
 		} else {
 			additions = append(additions, r)
 		}
 	}
 
-	// Append new ranges to the remaining gaps
+	// Align survivors from right to left to preserve relative order and minimize index shifts.
+	k := len(survivors)
+	N := len(new)
+	nextAvailableIdx := N
+	
+	for j := k - 1; j >= 0; j-- {
+		s := survivors[j]
+		m := s.(map[string]interface{})
+		name := m["range_name"].(string)
+		oldIdx := oldMap[name]
+		
+		// Merge config and state for survivor to preserve computed fields like ip_cidr_range
+		merged := mergeSurvivor(old[oldIdx], s)
+		
+		targetIdx := oldIdx
+		if targetIdx >= nextAvailableIdx {
+			targetIdx = nextAvailableIdx - 1
+		}
+		if targetIdx < 0 {
+			targetIdx = 0
+		}
+		stableNew[targetIdx] = merged
+		nextAvailableIdx = targetIdx
+	}
+
+	// Fill the remaining gaps with additions in the order they appear in config
 	addIdx := 0
 	for i := range stableNew {
 		if stableNew[i] == nil && addIdx < len(additions) {
