@@ -102,6 +102,48 @@ func (l *Loader) LoadProducts() {
 	}
 
 	l.Products = l.batchLoadProducts(allProductFiles)
+
+	// Set up ResourcePrefixServiceMap now that all products are loaded.
+	runtime := api.Runtime{
+		// Hardcode a few unusually-named handwritten resources. These are among the oldest resources
+		// in the provider; we shouldn't be adding more to this list.
+		ResourcePrefixServiceMap: map[string]string{
+			"google_project":         "resourcemanager",
+			"google_folder":          "resourcemanager",
+			"google_organization":    "resourcemanager",
+			"google_service_account": "resourcemanager",
+		},
+	}
+	prefixCount := map[string]int{}
+	for _, p := range l.Products {
+		prefix := fmt.Sprintf("google_%s_", p.TerraformName())
+		runtime.ResourcePrefixServiceMap[prefix] = strings.ToLower(p.ApiName)
+		prefixCount[prefix] += 1
+		if prefixCount[prefix] > 1 {
+			delete(runtime.ResourcePrefixServiceMap, prefix)
+		}
+		// Always add resources with legacy_name
+		for _, r := range p.Objects {
+			if r.LegacyName != "" && !strings.HasPrefix(r.LegacyName, prefix) {
+				runtime.ResourcePrefixServiceMap[r.LegacyName] = strings.ToLower(p.ApiName)
+			}
+		}
+	}
+	// For products that share a prefix, add the individual resources instead.
+	for _, p := range l.Products {
+		prefix := fmt.Sprintf("google_%s_", p.TerraformName())
+		if prefixCount[prefix] > 1 {
+			for _, r := range p.Objects {
+				runtime.ResourcePrefixServiceMap[r.TerraformName()] = strings.ToLower(p.ApiName)
+			}
+		}
+	}
+	for _, p := range l.Products {
+		p.Runtime = runtime
+		for _, r := range p.Objects {
+			r.Runtime = runtime
+		}
+	}
 }
 
 func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {

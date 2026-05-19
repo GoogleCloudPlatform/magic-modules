@@ -410,6 +410,9 @@ type Resource struct {
 	Parameters []*Type `yaml:"parameters,omitempty"`
 
 	Properties []*Type
+
+	// Runtime contains information about the currently-running generation process.
+	Runtime Runtime `yaml:"-"`
 }
 
 type TestConfig struct {
@@ -2178,13 +2181,18 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 func (r Resource) TestServiceDependencies() map[string]string {
 	deps := map[string]string{}
 	for _, s := range r.TestSamples() {
-		for service, alias := range s.TestServiceDependencies() {
+		for service, alias := range s.TestServiceDependencies(r.Runtime.ResourcePrefixServiceMap) {
 			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
-				panic(fmt.Sprintf("Conflicting aliases (%s vs %s) for service dependency %s for resource %s", depsAlias, alias, service, r.ApiName))
+				if (alias == "_" && depsAlias == "") || (alias == "" && depsAlias == "_") {
+					deps[service] = ""
+					continue
+				}
+				log.Fatalf("Conflicting aliases (%s vs %s) for service dependency %s for resource %s", depsAlias, alias, service, r.ApiName)
 			}
 			deps[service] = alias
 		}
 	}
+	delete(deps, strings.ToLower(r.ProductMetadata.Name))
 	return deps
 }
 
