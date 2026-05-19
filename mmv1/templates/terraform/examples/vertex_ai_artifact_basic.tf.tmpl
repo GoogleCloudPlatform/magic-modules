@@ -1,0 +1,21 @@
+resource "google_vertex_ai_metadata_store" "store" {
+  provider      = google-beta
+  name          = "tf-test-store-%{random_suffix}"
+  description   = "Store to test Artifact"
+  region        = "us-central1"
+}
+
+resource "google_vertex_ai_artifact" "artifact" {
+  provider       = google-beta
+  artifact_id    = "tf-test-artifact-%{random_suffix}"
+  display_name   = "tf-test-artifact-display-%{random_suffix}"
+  description    = "An artifact description"
+  region         = "us-central1"
+  metadatastore  = google_vertex_ai_metadata_store.store.name
+  schema_title   = "system.Dataset"
+  schema_version = "0.0.1"
+  uri            = "https://example.com/dataset"
+  metadata = {
+    key = "value"
+  }
+}
