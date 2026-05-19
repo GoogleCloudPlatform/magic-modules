@@ -821,7 +821,7 @@ func testAccCheckComputeSubnetworkExists(t *testing.T, n string, subnetwork *map
 		region := rs.Primary.Attributes["region"]
 		subnet_name := rs.Primary.Attributes["name"]
 
-		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", config.ComputeBasePath, config.Project, region, subnet_name)
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", transport_tpg.BaseUrl(Product, config), config.Project, region, subnet_name)
 		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
