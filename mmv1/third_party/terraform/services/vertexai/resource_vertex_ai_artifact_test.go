@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccVertexAIArtifact_update(t *testing.T) {
@@ -26,7 +26,7 @@ func TestAccVertexAIArtifact_update(t *testing.T) {
 				ResourceName:            "google_vertex_ai_artifact.artifact",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project", "region", "metadatastore", "artifact_id"},
+				ImportStateVerifyIgnore: []string{"project", "region", "metadatastore", "artifact_id", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccVertexAIArtifact_update(context),
@@ -35,7 +35,7 @@ func TestAccVertexAIArtifact_update(t *testing.T) {
 				ResourceName:            "google_vertex_ai_artifact.artifact",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project", "region", "metadatastore", "artifact_id"},
+				ImportStateVerifyIgnore: []string{"project", "region", "metadatastore", "artifact_id", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -63,6 +63,9 @@ resource "google_vertex_ai_artifact" "artifact" {
   metadata = {
     key = "value"
   }
+  labels = {
+    foo = "bar"
+  }
 }
 `, context)
 }
@@ -89,6 +92,9 @@ resource "google_vertex_ai_artifact" "artifact" {
   uri            = "https://example.com/dataset-updated"
   metadata = {
     key = "value-updated"
+  }
+  labels = {
+    foo = "bar2"
   }
 }
 `, context)
