@@ -95,6 +95,13 @@ examples:
     vars:
       fw_policy: 'fw-policy'
       network: 'network'
+      backend_subnet: 'backend-subnet'
+      proxy_subnet: 'proxy-subnet'
+      hc: 'health-check'
+      backend_service: 'backend-service'
+      url_map: 'url-map'
+      target_proxy: 'target-http-proxy'
+      forwarding_rule: 'forwarding-rule'
     test_env_vars:
       org_id: 'ORG_ID'
       project_name: PROJECT_NAME
