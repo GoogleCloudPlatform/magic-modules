@@ -244,7 +244,7 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
     # ignore these fields during import step

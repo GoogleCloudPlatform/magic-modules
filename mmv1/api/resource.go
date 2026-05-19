@@ -94,6 +94,11 @@ type Resource struct {
 	// [Optional] If set to true, the resource is not able to be updated.
 	Immutable bool `yaml:"immutable,omitempty"`
 
+	// [Optional] If set to true, bypasses the generated client-side only check during update.
+	// This should only be used for edge cases of an edge case where virtual field flags that can be set
+	// in advance of an intended change are being used to detect explicit nulls on Optional+Computed fields.
+	BypassClientsideUpdateCheck bool `yaml:"bypass_clientside_update_check,omitempty"`
+
 	// [Optional] If set to true, the object has a `self_link` field. This is
 	// typical of older GCP APIs.
 	HasSelfLink bool `yaml:"has_self_link,omitempty"`
@@ -367,6 +372,14 @@ type Resource struct {
 	// TGC
 	// ====================
 	TGCResource `yaml:",inline"`
+
+	// EXPERIMENTAL: RPC settings are not fully implemented, and should not be
+	// used at this time.
+	RPCService      string `yaml:"rpc_service,omitempty"`
+	RPCCreateMethod string `yaml:"rpc_create_method,omitempty"`
+	RPCReadMethod   string `yaml:"rpc_read_method,omitempty"`
+	RPCUpdateMethod string `yaml:"rpc_update_method,omitempty"`
+	RPCDeleteMethod string `yaml:"rpc_delete_method,omitempty"`
 
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
@@ -702,8 +715,9 @@ func (r Resource) IdentityProperties() []*Type {
 		}
 	}
 
+	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
 	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
-		if slices.Contains(importFormat, field) && !optionalValues[field] {
+		if slices.Contains(importFormat, field) && !optionalValues[field] && hasField[field] {
 			props = append(props, &Type{Name: field, Type: "string"})
 		}
 	}
@@ -2180,6 +2194,21 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	}
 }
 
+// TestServiceDependencies returns a map of service names to import aliases that are required
+// by this resource's samples.
+func (r Resource) TestServiceDependencies() map[string]string {
+	deps := map[string]string{}
+	for _, s := range r.TestSamples() {
+		for service, alias := range s.TestServiceDependencies() {
+			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
+				panic(fmt.Sprintf("Conflicting aliases (%s vs %s) for service dependency %s for resource %s", depsAlias, alias, service, r.ApiName))
+			}
+			deps[service] = alias
+		}
+	}
+	return deps
+}
+
 func (r Resource) VersionedProvider(exampleVersion string) bool {
 	var vp string
 	if exampleVersion != "" {
@@ -2515,14 +2544,10 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
-	uriParts := strings.Split(r.IdFormat, "/")
 
-	for _, part := range uriParts {
-		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
-			field := strings.TrimSuffix(strings.TrimPrefix(part, "{{"), "}}")
-			if field != "region" && field != "project" && field != "zone" {
-				requiredFields = append(requiredFields, field)
-			}
+	for _, field := range r.ExtractIdentifiers(r.IdFormat) {
+		if field != "region" && field != "project" && field != "zone" {
+			requiredFields = append(requiredFields, field)
 		}
 	}
 	return requiredFields
@@ -2532,14 +2557,10 @@ func (r Resource) DatasourceRequiredFields() []string {
 // that should be marked as "Optional".
 func (r Resource) DatasourceOptionalFields() []string {
 	optionalFields := []string{}
-	uriParts := strings.Split(r.IdFormat, "/")
 
-	for _, part := range uriParts {
-		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
-			field := strings.TrimSuffix(strings.TrimPrefix(part, "{{"), "}}")
-			if field == "region" || field == "project" || field == "zone" {
-				optionalFields = append(optionalFields, field)
-			}
+	for _, field := range r.ExtractIdentifiers(r.IdFormat) {
+		if field == "region" || field == "project" || field == "zone" {
+			optionalFields = append(optionalFields, field)
 		}
 	}
 	return optionalFields

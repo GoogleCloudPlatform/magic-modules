@@ -74,12 +74,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       region_backend_service_name: 'tf-test-region-service-external'
-  - name: 'region_backend_service_cache'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_ilb_round_robin'
     primary_resource_id: 'default'
     vars:

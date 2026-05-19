@@ -370,9 +370,17 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $.CustomCode.PreCreate }}
     {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
+{{- if $.RPCCreateMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCCreateMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -615,9 +623,17 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 
+{{ if $.RPCReadMethod -}}
+        res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
@@ -710,9 +726,17 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     {{- if $.CustomCode.PreRead }}
         {{ customTemplate $ $.CustomCode.PreRead false -}}
     {{- end }}
+{{- if $.RPCReadMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -852,7 +876,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{-     if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+{{-     if and (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)) (not $.BypassClientsideUpdateCheck)}}
     clientSideFields := map[string]bool{"deletion_policy": true}
     clientSideOnly := true
     for field := range Resource{{ $.ResourceName -}}().Schema {
@@ -997,9 +1021,17 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 {{-             end}}
+{{- if $.RPCUpdateMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCUpdateMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ $.UpdateVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -1078,9 +1110,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         billingProject = bp
         }
 
+{{ if $.RPCReadMethod -}}
+        getRes, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
         getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
             Project: billingProject,
             RawURL: getUrl,
             UserAgent: userAgent,
@@ -1170,9 +1210,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         billingProject = bp
         }
 
+{{ if $.RPCUpdateMethod -}}
+        res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCUpdateMethod -}}",
+{{- else }}
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ $group.UpdateVerb }}",
+{{- end}}
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
@@ -1327,9 +1375,17 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
+{{- if $.RPCDeleteMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCDeleteMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ camelize $.DeleteVerb "upper" -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,

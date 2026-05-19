@@ -44,6 +44,7 @@ references:
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
 has_self_link: true
+bypass_clientside_update_check: true
 collection_url_key: items
 iam_policy:
   allowed_iam_role: roles/compute.networkUser
@@ -55,6 +56,7 @@ id_format: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
 custom_diff:
   - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
   - sendSecondaryIpRangeIfEmptyDiff
+  - resourceComputeSubnetworkSecondaryIpRangeCustomDiff
 sweeper:
   url_substitutions:
     - region: us-west2
@@ -174,6 +176,15 @@ examples:
     vars:
       network_name: network-ipv6-only
       subnetwork_name: subnet-ipv6-only
+  - name: subnetwork_with_secondary_ipv6_range
+    primary_resource_id: subnetwork_with_secondary_ipv6_range
+    vars:
+      network_name: network-with-secondary-ranges
+      subnetwork_name: subnet-with-secondary-ranges
+      pap_name: pap-for-secondary-ranges
+      pdp_name: pdp-for-secondary-ranges
+      sub_pdp_name: sub-pdp-for-secondary-ranges
+    min_version: 'beta'
 virtual_fields:
   - name: send_secondary_ip_range_if_empty
     type: Boolean
@@ -332,6 +343,25 @@ properties:
             The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
             E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
           resource: InternalRange
+          imports: selfLink
+        - name: ipVersion
+          type: Enum
+          description: |
+            The IP version of the secondary range. If not specified, IPV4 is used.
+          default_from_api: true
+          min_version: 'beta'
+          enum_values:
+            - IPV4
+            - IPV6
+        - name: ipCollection
+          type: ResourceRef
+          description: |
+            Reference to a Public Delegated Prefix (PDP) for BYOIP.
+            This field should be specified for configuring BYOGUA internal IPv6 secondary range.
+            When specified along with the ip_cidr_range, the ip_cidr_range must lie within the PDP referenced by the `ipCollection` field.
+            When specified without the ip_cidr_range, the range is auto-allocated from the PDP referenced by the `ipCollection` field.
+          min_version: 'beta'
+          resource: PublicDelegatedPrefix
           imports: selfLink
   - name: privateIpGoogleAccess
     type: Boolean
