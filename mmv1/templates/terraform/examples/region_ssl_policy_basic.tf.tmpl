@@ -1,0 +1,13 @@
+resource "google_compute_region_ssl_policy" "region-ssl-policy" {
+  name    = "{{index $.Vars "region_ssl_policy_name"}}"
+  region  = "us-central1"
+  profile = "MODERN"
+}
+
+resource "google_compute_region_ssl_policy" "region-post-quantum-ssl-policy" {
+  name                         = "{{index $.Vars "post_quantum_region_ssl_policy_name"}}"
+  region                       = "us-central1"
+  profile                      = "MODERN"
+  min_tls_version              = "TLS_1_2"
+  post_quantum_key_exchange    = "ENABLED"
+}
