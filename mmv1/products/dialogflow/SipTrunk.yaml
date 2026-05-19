@@ -68,27 +68,33 @@ properties:
           name: 'connectionId'
           description: |
             Output only. The unique identifier of the connection.
+          output: true
         - type: String
           name: 'state'
           description: |
             Output only. The state of the connection.
+          output: true
         - type: String
           name: 'updateTime'
           description: |
             Output only. The last update time of the connection.
+          output: true
         - type: NestedObject
           name: 'errorDetails'
           description: |
             Output only. The error details of the connection.
+          output: true
           properties:
             - type: String
               name: 'code'
               description: |
                 Output only. The error code.
+              output: true
             - type: String
               name: 'message'
               description: |
                 Output only. The error message.
+              output: true
 examples:
   - name: 'dialogflow_sip_trunk_basic'
     primary_resource_id: 'basic_trunk'
