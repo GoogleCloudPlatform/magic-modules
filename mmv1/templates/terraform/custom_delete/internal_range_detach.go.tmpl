@@ -92,10 +92,27 @@ if err != nil {
 							time.Sleep(5 * time.Second)
 						}
 					}
-					// e) Re-attempt the InternalRange deletion
-					res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-						Config: config, Method: "DELETE", Project: billingProject, RawURL: url, UserAgent: userAgent,
-					})
+					// e) Re-attempt the InternalRange deletion with retry loop to allow GCP backend synchronization
+					for j := 0; j < 12; j++ { // Retry up to 1 minute
+						time.Sleep(5 * time.Second)
+						res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+							Config: config, Method: "DELETE", Project: billingProject, RawURL: url, UserAgent: userAgent,
+						})
+						if err == nil {
+							err = NetworkConnectivityv1OperationWaitTime(config, res, project, "Deleting InternalRange", userAgent, d.Timeout(schema.TimeoutDelete))
+							if err == nil {
+								return nil
+							}
+							if gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error); ok && gerr != nil && gerr.Code == 400 && strings.Contains(gerr.Message, "already being used") {
+								continue
+							}
+							return err
+						}
+						if gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error); ok && gerr != nil && gerr.Code == 400 && strings.Contains(gerr.Message, "already being used") {
+							continue
+						}
+						break
+					}
 				}
 			}
 		}
