@@ -203,7 +203,7 @@ func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *map[s
 
 		name := rs.Primary.Attributes["name"]
 
-		url := fmt.Sprintf("%sprojects/%s/global/sslPolicies/%s", config.ComputeBasePath, project, name)
+		url := fmt.Sprintf("%sprojects/%s/global/sslPolicies/%s", transport_tpg.BaseUrl(Product, config), project, name)
 		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
