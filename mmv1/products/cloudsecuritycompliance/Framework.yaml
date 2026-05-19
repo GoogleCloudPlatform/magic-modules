@@ -23,7 +23,7 @@ create_url: '{{parent}}/locations/{{location}}/frameworks?frameworkId={{framewor
 update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 import_format:
-  - '(?P<parent>(projects|organizations)/[^/]+)/locations/{{location}}/cloudControls/{{cloud_control_id}}'
+  - '(?P<parent>(?:projects|organizations)/[^/]+)/locations/{{location}}/frameworks/{{framework_id}}'
 supports_indirect_user_project_override: true
 examples:
   - name: "cloudsecuritycompliance_framework_org_basic"

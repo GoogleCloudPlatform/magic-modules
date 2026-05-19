@@ -22,7 +22,7 @@ self_link: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_d
 create_url: '{{parent}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}'
 id_format: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 import_format:
-  - '(?P<parent>(projects|organizations)/[^/]+)/locations/{{location}}/cloudControls/{{cloud_control_id}}'
+  - '(?P<parent>(?:projects|organizations)/[^/]+)/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 supports_indirect_user_project_override: true
 examples:
   - name: "cloudsecuritycompliance_framework_deployment_org_basic"
@@ -39,6 +39,7 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       project_number: "PROJECT_NUMBER"
+      org_id: "ORG_ID"
   - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
     primary_resource_id: "example"
     vars:

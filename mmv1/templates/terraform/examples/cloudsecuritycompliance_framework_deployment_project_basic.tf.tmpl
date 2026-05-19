@@ -7,7 +7,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   description  = "An Terraform description for the framework"
   
   cloud_control_details {
-		name              = "projects/{{index $.TestEnvVars "project_number"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
+		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
 		major_revision_id = "1"
     
     parameters {
@@ -84,7 +84,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
     enforcement_mode = "DETECTIVE"
     
     cloud_control_details {
-      name                  = "projects/{{index $.TestEnvVars "project_number"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
+      name                  = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
       major_revision_id     = "1"
       
       parameters {
