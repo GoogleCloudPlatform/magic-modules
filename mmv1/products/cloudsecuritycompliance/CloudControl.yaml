@@ -23,7 +23,7 @@ create_url: '{{parent}}/locations/{{location}}/cloudControls?cloudControlId={{cl
 update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}'
 import_format:
-  - '{{parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}'
+  - '(?P<parent>(projects|organizations)/[^/]+)/locations/{{location}}/cloudControls/{{cloud_control_id}}'
 supports_indirect_user_project_override: true
 examples:
   - name: "cloudsecuritycompliance_cloudcontrol_org_basic"
