@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 )
 
 var defaultMaxLifetime string = "3600s"
@@ -14,7 +15,7 @@ func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "basic", serviceAccount)
+	targetServiceAccountEmail := iambeta.BootstrapServiceAccount(t, "basic", serviceAccount)
 
 	context := map[string]interface{}{
 		"ephemeral_resource_name": "token",
@@ -47,9 +48,9 @@ func TestAccEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 	t.Parallel()
 
 	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	delegateServiceAccountEmailOne := acctest.BootstrapServiceAccount(t, "delegate1", initialServiceAccount)          // SA_2
-	delegateServiceAccountEmailTwo := acctest.BootstrapServiceAccount(t, "delegate2", delegateServiceAccountEmailOne) // SA_3
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "target", delegateServiceAccountEmailTwo)         // SA_4
+	delegateServiceAccountEmailOne := iambeta.BootstrapServiceAccount(t, "delegate1", initialServiceAccount)          // SA_2
+	delegateServiceAccountEmailTwo := iambeta.BootstrapServiceAccount(t, "delegate2", delegateServiceAccountEmailOne) // SA_3
+	targetServiceAccountEmail := iambeta.BootstrapServiceAccount(t, "target", delegateServiceAccountEmailTwo)         // SA_4
 
 	context := map[string]interface{}{
 		"ephemeral_resource_name": "token",
@@ -82,7 +83,7 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "lifetime", serviceAccount)
+	targetServiceAccountEmail := iambeta.BootstrapServiceAccount(t, "lifetime", serviceAccount)
 
 	context := map[string]interface{}{
 		"ephemeral_resource_name": "token",

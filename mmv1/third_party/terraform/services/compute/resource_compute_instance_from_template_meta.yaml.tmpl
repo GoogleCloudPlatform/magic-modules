@@ -277,3 +277,5 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'eraseWindowsVssSignature'
 {{- end }}
+  - field: 'deletion_policy'
+    provider_only: true

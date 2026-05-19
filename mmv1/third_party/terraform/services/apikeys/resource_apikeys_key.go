@@ -33,6 +33,7 @@ func ResourceApikeysKey() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -86,6 +87,10 @@ func ResourceApikeysKey() *schema.Resource {
 				Computed:    true,
 				Description: "Output only. Unique id in UUID4 format.",
 			},
+
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 	}
 }
@@ -335,9 +340,18 @@ func resourceApikeysKeyRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error setting uid in state: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 func resourceApikeysKeyUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceApikeysKey) {
+		return ResourceApikeysKey().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -385,6 +399,13 @@ func resourceApikeysKeyUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceApikeysKeyDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {

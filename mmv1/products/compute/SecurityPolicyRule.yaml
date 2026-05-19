@@ -81,6 +81,7 @@ examples:
     vars:
       sec_policy_name: 'policyruletest'
       backend_name: 'backendpolicy'
+      network_name: 'test-network'
     test_vars_overrides:
       # for backward compatible
       sec_policy_name: '"policyruletest" + randomSuffix'

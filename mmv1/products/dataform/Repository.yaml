@@ -37,6 +37,7 @@ iam_policy:
   min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/dataform_repository.go.tmpl'
+deletion_policy_custom_docs: true
 examples:
   - name: 'dataform_repository'
     primary_resource_id: 'dataform_repository'
@@ -92,11 +93,17 @@ virtual_fields:
   - name: 'deletion_policy'
     type: Enum
     description: |
-      Policy to control how the repository and its child resources are deleted. When set to `FORCE`, any child resources of this repository will also be deleted. Possible values: `DELETE`, `FORCE`. Defaults to `DELETE`.
-    default_value: 'DELETE'
-    enum_values:
-      - 'DELETE'
-      - 'FORCE'
+      Policy to control how the repository and its child resources are deleted.
+      When set to `FORCE`, any child resources of this repository will also be deleted.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+
+      Possible values: `DELETE`, `FORCE`, 'PREVENT', 'ABANDON'. Defaults to `DELETE`.
+    #excluded from generation due to Universal Deletion Policy
+    exclude: true
 parameters:
   - name: 'region'
     type: String

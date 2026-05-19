@@ -18,6 +18,14 @@ if err != nil {
 } else if v, ok := d.GetOkExists("ttl"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, ttlProp)) {
     obj["ttl"] = ttlProp
 }
+if d.HasChange("ingest_on_write") { // use haschange
+    v := d.Get("ingest_on_write")
+    ingestOnWriteProp, err := expandStorageAnywhereCacheIngestOnWrite(v, d, config)
+    if err != nil {
+        return err
+    }
+    obj["ingestOnWrite"] = ingestOnWriteProp
+}
 
 url, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}"}}")
 if err != nil {
