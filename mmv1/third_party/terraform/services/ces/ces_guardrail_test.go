@@ -788,4 +788,3 @@ resource "google_ces_guardrail" "ces_guardrail_llm_prompt_security_fail_open" {
 }
 `, context)
 }
-
