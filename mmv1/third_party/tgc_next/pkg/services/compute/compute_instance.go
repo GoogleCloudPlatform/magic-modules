@@ -1463,15 +1463,23 @@ func flattenSchedulingTgc(resp *compute.Scheduling) []map[string]interface{} {
 	}
 
 	if resp.MaxRunDuration != nil {
-		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(resp.MaxRunDuration)
+		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(map[string]interface{}{
+			"nanos":   resp.MaxRunDuration.Nanos,
+			"seconds": resp.MaxRunDuration.Seconds,
+		})
 	}
 
 	if resp.OnInstanceStopAction != nil {
-		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
+		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(map[string]interface{}{
+			"discardLocalSsd": resp.OnInstanceStopAction.DiscardLocalSsd,
+		})
 	}
 
 	if resp.LocalSsdRecoveryTimeout != nil {
-		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(resp.LocalSsdRecoveryTimeout)
+		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(map[string]interface{}{
+			"nanos":   resp.LocalSsdRecoveryTimeout.Nanos,
+			"seconds": resp.LocalSsdRecoveryTimeout.Seconds,
+		})
 	}
 
 	if len(schedulingMap) == 0 {
