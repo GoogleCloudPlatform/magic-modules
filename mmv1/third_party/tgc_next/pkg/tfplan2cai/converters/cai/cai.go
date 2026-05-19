@@ -26,3 +26,23 @@ func AssetName(d tpgresource.TerraformResourceData, config *transport_tpg.Config
 
 	return re.ReplaceAllStringFunc(linkTmpl, fWithPlaceholder), nil
 }
+
+// AssetNameShorten is similar to AssetName but it shortens field values 
+// (e.g. extracts resource ID from a self link) before replacement.
+func AssetNameShorten(d tpgresource.TerraformResourceData, config *transport_tpg.Config, linkTmpl string) (string, error) {
+	re := regexp.MustCompile("{{([%[:word:]]+)}}")
+	f, err := tpgresource.BuildReplacementFunc(re, d, config, linkTmpl, true)
+	if err != nil {
+		return "", err
+	}
+
+	fWithPlaceholder := func(key string) string {
+		val := f(key)
+		if val == "" {
+			val = "null"
+		}
+		return val
+	}
+
+	return re.ReplaceAllStringFunc(linkTmpl, fWithPlaceholder), nil
+}
