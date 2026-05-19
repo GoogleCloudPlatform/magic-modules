@@ -50,6 +50,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
 		Config:         config,
 		TempData:       resourceData,
+		Resource:       Resource{{ $.ResourceName -}}(),
 		ListURL:        url,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
