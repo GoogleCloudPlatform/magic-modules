@@ -1,14 +1,14 @@
 // Reference design doc: go/lima-terraform
-// Un-nesting API billing info back to the flat 'licensecount' attribute.
+// Un-nesting API billing info back to the flat 'license_count' attribute.
 // If new billing structures (e.g., vCPU or tier-based billing) are added to the API, add corresponding decoders here.
 billingInfo, ok := res["currentBillingInfo"].(map[string]interface{})
 if ok {
     if userCountBilling, ok := billingInfo["userCountBilling"].(map[string]interface{}); ok {
-        if err := d.Set("licensecount", userCountBilling["userCount"]); err != nil {
+        if err := d.Set("license_count", userCountBilling["userCount"]); err != nil {
             return fmt.Errorf("Error setting count: %s", err)
         }
     } else if packCountBilling, ok := billingInfo["packCountBilling"].(map[string]interface{}); ok {
-        if err := d.Set("licensecount", packCountBilling["packCount"]); err != nil {
+        if err := d.Set("license_count", packCountBilling["packCount"]); err != nil {
             return fmt.Errorf("Error setting count: %s", err)
         }
     }

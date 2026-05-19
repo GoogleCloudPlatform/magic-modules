@@ -27,7 +27,7 @@ if val, ok := obj["product"]; ok && val != nil {
 	obj["product"] = fmt.Sprintf("projects/%s/locations/%s/products/%s", project, region, val.(string))
 }
 
-if val, ok := obj["licensecount"]; ok && val != nil {
+if val, ok := obj["licenseCount"]; ok && val != nil {
 	count := val.(int)
 	billingInfo := map[string]interface{}{}
 	if licenseType == "LICENSE_TYPE_PER_MONTH_PER_USER" {
@@ -42,7 +42,7 @@ if val, ok := obj["licensecount"]; ok && val != nil {
 	obj["currentBillingInfo"] = billingInfo
 	obj["nextBillingInfo"] = billingInfo
 	obj["licenseType"] = licenseType
-	delete(obj, "licensecount")
+	delete(obj, "licenseCount")
 }
 
 delete(obj, "active")

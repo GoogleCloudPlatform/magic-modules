@@ -87,12 +87,13 @@ properties:
     description: Name field (with URL) of the Product offered for SPLA.
   # ignore_read is set because the count is returned nested inside currentBillingInfo
   # (userCountBilling/packCountBilling). Populated via post_read custom code.
-  - name: licensecount
+  - name: licenseCount
     type: Integer
     required: true
     ignore_read: true
     update_mask_fields:
       - 'currentBillingInfo'
+      - 'nextBillingInfo'
     description: Number of units to bill for.
   # ignore_read is set because active is a virtual boolean attribute derived from the API's
   # 'state' field (STATE_ACTIVE vs STATE_SUSPENDED). Populated via post_read custom code.
