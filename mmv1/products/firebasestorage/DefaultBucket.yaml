@@ -63,7 +63,7 @@ properties:
           projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
         min_version: "beta"
         output: true
-      - name: "bucket_id"
+      - name: "bucketId"
         type: String
         description: |
           The last segment of bucket.name.
