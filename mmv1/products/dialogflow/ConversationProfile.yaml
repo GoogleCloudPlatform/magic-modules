@@ -38,6 +38,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
+  test_check_destroy: 'templates/terraform/test_check_destroy/dialogflow_conversation_profile.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'dialogflow_conversation_profile_basic'
@@ -674,6 +675,7 @@ properties:
               - SSML_VOICE_GENDER_NEUTRAL
   - type: NestedObject
     name: 'sipConfig'
+    min_version: beta
     description: |
       Configuration for SIP.
     properties:
@@ -681,10 +683,12 @@ properties:
         name: 'createConversationOnTheFly'
         description: |
           Asks Dialogflow Telephony to create the conversation provided in the SIP header on the fly when the call comes in.
+        send_empty_value: true
       - type: Boolean
         name: 'inactiveStart'
         description: |
           Starts the conversation with inactive SDP directives
+        send_empty_value: true
       - type: String
         name: 'maxAudioRecordingDuration'
         description: |
@@ -693,10 +697,12 @@ properties:
         name: 'allowVirtualAgentInteraction'
         description: |
           Allows interactions with a Dialogflow virtual agent even if the call is connected for SIPREC purposes.
+        send_empty_value: true
       - type: Boolean
         name: 'keepConversationRunning'
         description: |
           Keeps the conversation running even if the call is disconnected.
+        send_empty_value: true
       - type: Array
         name: 'copyInboundCallLegHeaders'
         description: |
@@ -707,6 +713,7 @@ properties:
         name: 'ignoreReinviteMediaDirection'
         description: |
           Ignores any media direction in the reINVITE SDP offer. Reuse the previous media direction.
+        send_empty_value: true
   - type: NestedObject
     name: 'newRecognitionResultNotificationConfig'
     description: |
