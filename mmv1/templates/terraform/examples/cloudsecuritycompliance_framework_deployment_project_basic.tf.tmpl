@@ -1,5 +1,5 @@
 resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" {
-  parent = "projects/{{index $.TestEnvVars "project"}}"
+  parent = "projects/{{index $.TestEnvVars "project_number"}}"
   location     = "global"
   framework_id = "{{index $.Vars "framework_name"}}"
   
@@ -7,7 +7,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   description  = "An Terraform description for the framework"
   
   cloud_control_details {
-		name              = "projects/{{index $.TestEnvVars "project"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
+		name              = "projects/{{index $.TestEnvVars "project_number"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
 		major_revision_id = "1"
     
     parameters {
@@ -66,7 +66,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
 }
 
 resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryResourceId}}" {
-  organization            = "{{index $.TestEnvVars "project"}}"
+  organization            = "{{index $.TestEnvVars "project_number"}}"
   location                = "global"
   framework_deployment_id = "{{index $.Vars "deployment_name"}}"
   description             = "A framework deployment for cloud security compliance"
@@ -77,14 +77,14 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
   }
   
   target_resource_config {
-    existing_target_resource = "projects/{{index $.TestEnvVars "project"}}"
+    existing_target_resource = "projects/{{index $.TestEnvVars "project_number"}}"
   }
   
   cloud_control_metadata {
     enforcement_mode = "DETECTIVE"
     
     cloud_control_details {
-      name                  = "projects/{{index $.TestEnvVars "project"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
+      name                  = "projects/{{index $.TestEnvVars "project_number"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
       major_revision_id     = "1"
       
       parameters {

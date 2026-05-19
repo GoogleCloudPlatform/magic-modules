@@ -36,7 +36,7 @@ examples:
     vars:
       cloudcontrol_name: "example-cloudcontrol"
     test_env_vars:
-      project: "PROJECT"
+      project_number: "PROJECT"
 autogen_status: Q2xvdWRDb250cm9s
 custom_code:
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_cloudcontrol.go.tmpl"

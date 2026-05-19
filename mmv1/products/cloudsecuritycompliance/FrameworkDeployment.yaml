@@ -37,7 +37,7 @@ examples:
       deployment_name: "example-deployment"
       framework_name: "example-framework"
     test_env_vars:
-      project: "PROJECT"
+      project_number: "PROJECT"
   - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
     primary_resource_id: "example"
     vars:

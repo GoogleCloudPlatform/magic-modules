@@ -13,7 +13,7 @@ import (
 func testAccCloudSecurityComplianceFramework_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_framework" "example" {
-  organization = "%{org_id}"
+  parent = "organizations/%{org_id}"
   location     = "global"
   framework_id = "tf-test-example-framework%{random_suffix}"
   

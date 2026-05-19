@@ -41,11 +41,11 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
   entry_link_id = "tf-test-full-entry-link%{random_suffix}"
   entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/schema-join"
   entry_references {
-    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/{{index $.TestEnvVars "project_id"}}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table1.table_id}"
+    name = "projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/{{index $.TestEnvVars "project_id"}}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table1.table_id}"
     type = ""
   }
   entry_references {
-    name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/{{index $.TestEnvVars "project_id"}}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table2.table_id}"
+    name = "projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/{{index $.TestEnvVars "project_id"}}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table2.table_id}"
     type = ""
   }
   aspects {
