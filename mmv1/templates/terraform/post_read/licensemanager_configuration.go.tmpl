@@ -14,11 +14,6 @@ if ok {
     }
 }
 
-prodSplit := strings.Split(res["product"].(string), "/")
-if err := d.Set("product", prodSplit[len(prodSplit) - 1]); err != nil {
-    return fmt.Errorf("Error setting product: %s", err)
-}
-
 // Mapping API state to the Terraform 'active' boolean.
 // If additional API states (e.g., PENDING or DELETING) are introduced in future API versions, update state evaluations accordingly.
 state, ok := res["state"].(string)
