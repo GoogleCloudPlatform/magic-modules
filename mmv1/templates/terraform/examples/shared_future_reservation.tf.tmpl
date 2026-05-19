@@ -13,6 +13,11 @@ resource "google_project_service" "compute" {
   service            = "compute.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_project" "guest_project" {
   provider = google-beta
   project_id      = "tf-test-2%{random_suffix}"
@@ -54,6 +59,6 @@ resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
 
   depends_on = [
     google_org_policy_policy.shared_future_reservation_org_policy,
-    google_project_service.compute
+    time_sleep.wait_120_seconds
   ]
 }
