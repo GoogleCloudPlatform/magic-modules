@@ -2500,14 +2500,10 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
-	uriParts := strings.Split(r.IdFormat, "/")
 
-	for _, part := range uriParts {
-		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
-			field := strings.TrimSuffix(strings.TrimPrefix(part, "{{"), "}}")
-			if field != "region" && field != "project" && field != "zone" {
-				requiredFields = append(requiredFields, field)
-			}
+	for _, field := range r.ExtractIdentifiers(r.IdFormat) {
+		if field != "region" && field != "project" && field != "zone" {
+			requiredFields = append(requiredFields, field)
 		}
 	}
 	return requiredFields
@@ -2517,14 +2513,10 @@ func (r Resource) DatasourceRequiredFields() []string {
 // that should be marked as "Optional".
 func (r Resource) DatasourceOptionalFields() []string {
 	optionalFields := []string{}
-	uriParts := strings.Split(r.IdFormat, "/")
 
-	for _, part := range uriParts {
-		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
-			field := strings.TrimSuffix(strings.TrimPrefix(part, "{{"), "}}")
-			if field == "region" || field == "project" || field == "zone" {
-				optionalFields = append(optionalFields, field)
-			}
+	for _, field := range r.ExtractIdentifiers(r.IdFormat) {
+		if field == "region" || field == "project" || field == "zone" {
+			optionalFields = append(optionalFields, field)
 		}
 	}
 	return optionalFields
