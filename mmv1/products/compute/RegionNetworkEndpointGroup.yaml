@@ -49,6 +49,7 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/detach_reg_neg.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"
