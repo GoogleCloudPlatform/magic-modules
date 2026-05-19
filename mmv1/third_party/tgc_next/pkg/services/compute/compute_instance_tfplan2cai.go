@@ -590,29 +590,52 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.AvailabilityDomain = int64(v.(int))
 	}
 	if v, ok := original["max_run_duration"]; ok {
-		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
+		maxRunDurationMap, err := expandComputeMaxRunDuration(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.MaxRunDuration = transformedMaxRunDuration
+		if maxRunDurationMap != nil {
+			d := &compute.Duration{}
+			if nanos, ok := maxRunDurationMap["nanos"].(int64); ok {
+				d.Nanos = nanos
+			}
+			if seconds, ok := maxRunDurationMap["seconds"].(int64); ok {
+				d.Seconds = seconds
+			}
+			scheduling.MaxRunDuration = d
+		}
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
-		transformedOnInstanceStopAction, err := expandComputeOnInstanceStopAction(v)
+		onInstanceStopActionMap, err := expandComputeOnInstanceStopAction(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
+		if onInstanceStopActionMap != nil {
+			scheduling.OnInstanceStopAction = &compute.SchedulingOnInstanceStopAction{}
+			if d, ok := onInstanceStopActionMap["discardLocalSsd"].(bool); ok {
+				scheduling.OnInstanceStopAction.DiscardLocalSsd = d
+			}
+		}
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
 	}
 
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
-		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
+		localSsdRecoveryTimeoutMap, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
+		if localSsdRecoveryTimeoutMap != nil {
+			d := &compute.Duration{}
+			if nanos, ok := localSsdRecoveryTimeoutMap["nanos"].(int64); ok {
+				d.Nanos = nanos
+			}
+			if seconds, ok := localSsdRecoveryTimeoutMap["seconds"].(int64); ok {
+				d.Seconds = seconds
+			}
+			scheduling.LocalSsdRecoveryTimeout = d
+		}
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
 	}
 	if v, ok := original["termination_time"]; ok {
