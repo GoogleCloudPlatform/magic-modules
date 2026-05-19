@@ -1,0 +1,18 @@
+// Remove "state" from updateMask and obj payload so standard PATCH doesn't send it.
+// This is required because state transitions are performed via custom start/verify POST endpoints in post_update.
+var cleanUpdateMask []string
+for _, mask := range updateMask {
+	if mask != "state" {
+		cleanUpdateMask = append(cleanUpdateMask, mask)
+	}
+}
+updateMask = cleanUpdateMask
+
+// Re-add query parameters to the URL with the clean updateMask (state removed)
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}
+
+// Delete state from the JSON body map payload
+delete(obj, "state")

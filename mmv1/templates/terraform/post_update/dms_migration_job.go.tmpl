@@ -85,18 +85,11 @@ unpackLroError := func(res map[string]interface{}, project string, userAgent str
 	return fmt.Errorf("%s", strings.Join(msgParts, ""))
 }
 
-// Handle standard attribute updates
-if d.HasChangeExcept("state") {
-	if err := resourceDatabaseMigrationServiceMigrationJobUpdate(d, meta); err != nil {
-		return err
-	}
-}
-
-project, err := tpgresource.GetProject(d, config)
+project, err = tpgresource.GetProject(d, config)
 if err != nil {
 	return err
 }
-userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+userAgent, err = tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
 	return err
 }
@@ -173,5 +166,3 @@ if d.HasChange("state") {
 		}
 	}
 }
-
-return resourceDatabaseMigrationServiceMigrationJobRead(d, meta)

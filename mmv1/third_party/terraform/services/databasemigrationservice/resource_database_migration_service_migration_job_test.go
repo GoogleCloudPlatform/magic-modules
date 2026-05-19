@@ -27,7 +27,7 @@ func TestAccDatabaseMigrationServiceMigrationJob_update(t *testing.T) {
 				ResourceName:            "google_database_migration_service_migration_job.mysqltomysql",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "migration_job_id", "terraform_labels", "state"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "migration_job_id", "terraform_labels", "state", "stop_on_warnings"},
 			},
 			{
 				Config: testAccDatabaseMigrationServiceMigrationJob_update(context),
@@ -36,7 +36,7 @@ func TestAccDatabaseMigrationServiceMigrationJob_update(t *testing.T) {
 				ResourceName:            "google_database_migration_service_migration_job.mysqltomysql",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "migration_job_id", "terraform_labels", "state"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "migration_job_id", "terraform_labels", "state", "stop_on_warnings"},
 			},
 		},
 	})
@@ -143,6 +143,7 @@ resource "google_database_migration_service_migration_job" "mysqltomysql" {
       value = "1073741824"
     }
   }
+  source          = google_database_migration_service_connection_profile.source_cp.name
   destination     = google_database_migration_service_connection_profile.destination_cp.name
   type            = "CONTINUOUS"
 }
@@ -280,7 +281,7 @@ func TestAccDatabaseMigrationServiceMigrationJob_postgresQuickstart(t *testing.T
 				ResourceName:            "google_database_migration_service_migration_job.psql_to_psql",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "migration_job_id", "terraform_labels", "state"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "migration_job_id", "terraform_labels", "state", "stop_on_warnings"},
 			},
 		},
 	})

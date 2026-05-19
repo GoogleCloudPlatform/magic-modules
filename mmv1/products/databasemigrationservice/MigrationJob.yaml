@@ -39,7 +39,8 @@ async:
 autogen_async: true
 custom_code:
   pre_create: templates/terraform/pre_create/dms_migration_job.go.tmpl
-  custom_update: templates/terraform/custom_update/dms_migration_job.go.tmpl
+  pre_update: templates/terraform/pre_update/dms_migration_job.go.tmpl
+  post_update: templates/terraform/post_update/dms_migration_job.go.tmpl
 include_in_tgc_next: true
 examples:
   - name: database_migration_service_migration_job_mysql_to_mysql
@@ -151,7 +152,7 @@ properties:
     type: Boolean
     description: |
       If set to true, will stop the Terraform apply if there are validation warnings.
-    url_param_only: true
+    client_side: true
     default_value: true
   - name: state
     type: Enum
@@ -260,10 +261,12 @@ properties:
       - name: isNativeLogical
         type: Boolean
         required: true
+        immutable: true
         description: |
           Whether the migration uses native logical replication.
       - name: maxAdditionalSubscriptions
         type: Integer
+        immutable: true
         description: |
           Maximum number of additional subscriptions to use for the migration job.
   - name: dumpPath
