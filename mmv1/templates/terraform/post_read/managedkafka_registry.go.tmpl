@@ -1,0 +1,11 @@
+nameVal, ok := d.GetOk("name")
+if ok {
+	nameStr := nameVal.(string)
+	if nameStr != "" {
+		parts := strings.Split(nameStr, "/")
+		actualId := parts[len(parts)-1]
+		if err := d.Set("schema_registry_id", actualId); err != nil {
+			return fmt.Errorf("Error setting schema_registry_id from name %q: %s", nameStr, err)
+		}
+	}
+}
