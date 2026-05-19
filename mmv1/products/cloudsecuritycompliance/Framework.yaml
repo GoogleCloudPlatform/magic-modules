@@ -24,6 +24,7 @@ update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 import_format:
   - '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
+supports_indirect_user_project_override: true
 examples:
   - name: "cloudsecuritycompliance_framework_org_basic"
     primary_resource_id: "example"
@@ -36,7 +37,7 @@ examples:
     vars:
       framework_name: "example-framework"
     test_env_vars:
-      project_number: "PROJECT"
+      project_number: "PROJECT_NUMBER"
 autogen_status: RnJhbWV3b3Jr
 custom_code:
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"

@@ -66,7 +66,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
 }
 
 resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryResourceId}}" {
-  organization            = "{{index $.TestEnvVars "org_id"}}"
+  parent            = "organizations/{{index $.TestEnvVars "org_id"}}"
   location                = "global"
   framework_deployment_id = "{{index $.Vars "deployment_name"}}"
   description             = "A framework deployment for cloud security compliance"
