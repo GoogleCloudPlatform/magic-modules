@@ -130,7 +130,6 @@ properties:
     item_type:
       type: String
   - name: 'postQuantumKeyExchange'
-    api_name: 'postQuantumKeyExchange'
     type: Enum
     description: |
       One of `DEFAULT`, `ENABLED`, or `DEFERRED`. Controls whether the load balancer

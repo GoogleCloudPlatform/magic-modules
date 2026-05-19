@@ -218,7 +218,7 @@ func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy map[string]interface{}
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
