@@ -1,0 +1,4 @@
+if res["type"] == "SECURE_WEB_GATEWAY" && res["routingMode"] == nil {
+	log.Printf("[DEBUG] SECURE_WEB_GATEWAY with empty routingMode. Setting up default value to EXPLICIT_ROUTING_MODE")
+    res["routingMode"] = "EXPLICIT_ROUTING_MODE"
+}
