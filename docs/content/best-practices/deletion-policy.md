@@ -1,10 +1,8 @@
 ---
-title: "Universal Deletion Policy"
+title: "Deletion Policy"
 weight: 20
 ---
-Almost all resources in the provider now support a universal `deletion_policy` field, superceding previous guidance on implementing `deletion_protection` or unique `deletion_policy` fields from [Deletion behaviors]({{< ref "/best-practices/deletion-behaviors" >}}).
-
-This page documents how to work with the universal deletion policy in either generated or handwritten resources.
+This page documents how to work with the `deletion_policy` field present in nearly all provider resources.
 
 {{% tabs "schema" %}}
 {{< tab "MMv1" >}}
@@ -19,7 +17,9 @@ This is how resources should be modified for implementing default deletion prote
 
 ##Supporting a custom value for deletion_policy
 If implementing support for additional values such as "FORCE", the following steps can be taken.
-A `pre_delete` constant should be added to the `custom_code` block in the resource YAML file, that performs the logic with the corresponding value. Example implemention here: [#1](https://github.com/GoogleCloudPlatform/magic-modules/FEATURE-BRANCH-universal-deletion-policy/mmv1/products/datastream/PrivateConnection.yaml#L44), [#2](https://github.com/GoogleCloudPlatform/magic-modules/blob/FEATURE-BRANCH-universal-deletion-policy/mmv1/templates/terraform/pre_delete/private_connection.go.tmpl)
+Add a `pre_delete` constant to the `custom_code` block in the resource YAML file, that performs the logic with the corresponding value. Example implemention here: [#1](https://github.com/GoogleCloudPlatform/magic-modules/FEATURE-BRANCH-universal-deletion-policy/mmv1/products/datastream/PrivateConnection.yaml#L44), [#2](https://github.com/GoogleCloudPlatform/magic-modules/blob/FEATURE-BRANCH-universal-deletion-policy/mmv1/templates/terraform/pre_delete/private_connection.go.tmpl)
+
+Custom values should be specifically tested to verify their implementation works and does not disrupt the usage of the global values "PREVENT", "ABANDON", and "DELETE".
 
 In the resource YAML, the following also should be included so documentation can be provided to explain the custom values.
 ```yaml
@@ -56,35 +56,35 @@ All handwritten resources need to support `deletion_policy` unless deemed incomp
 The `tpgresource.DefaultProviderDeletionPolicy()` should be added to the CustomDiff attribute of a given resource's `*schema.Resource`. If no existing CustomizeDiff is present, the whole attribute should be added.
 ```go
 CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
-		),
+            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+        ),
 ```
 If the default is being changed, it should also be updated from "DELETE" here.
 
 ###Schema
-The following should be added to the top level schema of the resource:
+Add following to the top level schema of the resource:
 ```go
 "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 ```
 If the default is being changed, it should also be updated from "DELETE" here.
 
 ###Read
-The following should be added to the end of a resource's Read() function:
+Add the following to the end of a resource's Read() function:
 ```go
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
-		return err
-	}
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+        return err
+    }
 ```
 If the default is being changed, it should also be updated from "DELETE" here.
 
 ###Update
-The following should be added to the start of a resource's Update() function:
+Add the following to the start of a resource's Update() function:
 ```go
 if tpgresource.DeletionPolicyPreUpdate(d, RESOURCENAME) {
-	return RESOURCENAME().Read(d, meta)
+    return RESOURCENAME().Read(d, meta)
 }
 ```
-If the resource does not support updating, the following entire Update() function should be added:
+If the resource does not support updating, the implement the following Update() function for the resource:
 ```go
 //UDP update start
 func resourceRESOURCENAMEUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -95,7 +95,7 @@ func resourceRESOURCENAMEUpdate(d *schema.ResourceData, meta interface{}) error 
 ```
 
 ###Delete
-The following should be added to the start of a resource's Delete() function, or modified depending on what custom values are supported:
+Add following to the start of a resource's Delete() function, modifying as necessary for what custom values are supported:
 ```go
 if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
     return err
@@ -105,14 +105,14 @@ if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
 ```
 
 ###Metadata
-The following line should be added to a resource's meta.yaml:
+Add following line to the resource's meta.yaml:
 ```yaml
 - field: 'deletion_policy'
   provider_only: true
 ```
 
 ###Docs
-The following should be added to a resource's documentation markdown file, or modified depending on what custom values are supported:
+Add the following to the resource's documentation markdown file, modifying as necessary depending for what custom values are supported:
 ```markdown
 * `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
     When a 'terraform destroy' or 'terraform apply' would delete the resource,
