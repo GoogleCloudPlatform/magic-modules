@@ -32,7 +32,6 @@ async:
     resource_inside_response: true
 autogen_async: true
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 description: |
  The Eventarc Channel resource
 error_retry_predicates:

@@ -37,7 +37,6 @@ async:
     resource_inside_response: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/vertex_ai_tensorboard_import.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'vertex_ai_tensorboard'
     primary_resource_id: 'tensorboard'

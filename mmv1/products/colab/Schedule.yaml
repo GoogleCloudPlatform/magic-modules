@@ -34,7 +34,6 @@ custom_code:
   post_create: 'templates/terraform/post_create/colab_schedule.go.tmpl'
   post_update: 'templates/terraform/post_update/colab_schedule.go.tmpl'
   constants: 'templates/terraform/constants/colab_schedule.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   identifier_field: 'displayName'
 examples:

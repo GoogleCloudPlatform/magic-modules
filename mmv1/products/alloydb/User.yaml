@@ -34,7 +34,6 @@ autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_user.go.tmpl'
   pre_update: 'templates/terraform/pre_update/alloydb_user.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 # exluding resource_identity due to custom_import

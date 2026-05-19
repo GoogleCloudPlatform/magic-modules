@@ -55,7 +55,6 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/cloudfunctions2_function.go.tmpl'
   encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 taint_resource_on_failed_create: true
 sweeper:
   url_substitutions:

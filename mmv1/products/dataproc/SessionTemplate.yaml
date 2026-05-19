@@ -32,7 +32,6 @@ import_format:
   - '{{name}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 collection_url_key: 'sessionTemplates'
 examples:
   - name: 'dataproc_session_templates_jupyter'

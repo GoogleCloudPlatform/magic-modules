@@ -46,7 +46,6 @@ custom_code:
   constants: 'templates/terraform/constants/vpc_access_connector.go.tmpl'
   pre_update: 'templates/terraform/pre_update/vpc_access_connector_instances.go.tmpl'
   tgc_ignore_terraform_decoder: true
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("min_instances", isInstanceShrinkage)'
   - 'customdiff.ForceNewIfChange("max_instances", isInstanceShrinkage)'
