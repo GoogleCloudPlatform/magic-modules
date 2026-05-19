@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	compute "google.golang.org/api/compute/v0.alpha"
 )
 
 func TestAccComputeSslPolicy_update(t *testing.T) {
@@ -268,7 +267,7 @@ func TestAccComputeSslPolicy_postQuantumKeyExchange(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *compute.SslPolicy) resource.TestCheckFunc {
+func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
