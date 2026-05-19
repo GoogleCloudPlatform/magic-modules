@@ -1,8 +1,8 @@
 // Build the fullname for the Framework resource from the provided
-// parent, location and frameworkId fields and set it on the
+// parent, location and framework_id fields and set it on the
 // API object that will be sent in the request.
-org, ok := d.Get("parent").(string)
-if !ok || org == "" {
+parent, ok := d.Get("parent").(string)
+if !ok || parent == "" {
 	return nil, fmt.Errorf("parent is required and must be a non-empty string")
 }
 loc, ok := d.Get("location").(string)

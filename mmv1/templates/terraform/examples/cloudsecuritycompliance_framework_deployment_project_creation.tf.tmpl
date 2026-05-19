@@ -1,5 +1,5 @@
 resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" {
-  organization = "{{index $.TestEnvVars "org_id"}}"
+  parent = "organizations/{{index $.TestEnvVars "org_id"}}"
   location     = "global"
   framework_id = "{{index $.Vars "framework_name"}}"
   
