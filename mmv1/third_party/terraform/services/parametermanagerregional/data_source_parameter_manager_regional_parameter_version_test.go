@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/parametermanagerregional"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
