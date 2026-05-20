@@ -1325,6 +1325,7 @@ resource "google_bigtable_instance" "instance" {
 }
 
 func TestAccBigtableInstance_edition(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -1366,6 +1367,7 @@ func TestAccBigtableInstance_edition(t *testing.T) {
 }
 
 func TestAccBigtableInstance_editionEnterprisePlus(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 

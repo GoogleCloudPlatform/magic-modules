@@ -238,6 +238,7 @@ func ResourceBigtableInstance() *schema.Resource {
 			"edition": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Default:      "ENTERPRISE",
 				ValidateFunc: validation.StringInSlice([]string{"ENTERPRISE", "ENTERPRISE_PLUS"}, false),
 				Description:  `The edition of the instance. One of "ENTERPRISE" or "ENTERPRISE_PLUS". Defaults to "ENTERPRISE".`,
 			},
