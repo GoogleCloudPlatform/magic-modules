@@ -13,89 +13,28 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAccCertificateManagerDnsAuthorization_update(t *testing.T) {
+func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckCertificateManagerDnsAuthorizationDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCertificateManagerDnsAuthorization_update0(context),
-			},
-			{
-				ResourceName:            "google_certificate_manager_dns_authorization.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccCertificateManagerDnsAuthorization_update1(context),
-			},
-			{
-				ResourceName:            "google_certificate_manager_dns_authorization.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func testAccCertificateManagerDnsAuthorization_update0(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_certificate_manager_dns_authorization" "default" {
-  name        = "tf-test-dns-auth%{random_suffix}"
-  description = "The default dnss"
-	labels = {
-		a = "a"
-	}
-  domain      = "%{random_suffix}.hashicorptest.com"
-}
-`, context)
-}
-
-func testAccCertificateManagerDnsAuthorization_update1(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_certificate_manager_dns_authorization" "default" {
-  name        = "tf-test-dns-auth%{random_suffix}"
-  description = "The default dnss2"
-	labels = {
-		a = "b"
-	}
-  domain      = "%{random_suffix}.hashicorptest.com"
-}
-`, context)
-}
-
-func TestAccCertificateManagerDnsAuthorization_tags(t *testing.T) {
-	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "dns-authz-tagkey", map[string]interface{}{})
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "issuance-config-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "dns-authz-tagvalue", tagKey),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "issuance-config-tagvalue", tagKey),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckCertificateManagerDnsAuthorizationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateManagerDnsAuthorizationWithTags(context),
+				Config: testAccCertificateManagerIssuanceConfigWithTags(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_certificate_manager_dns_authorization", "tags.%"),
-					checkCertificateManagerDnsAuthorizationWithTags(t),
+					resource.TestCheckResourceAttrSet("google_certificate_manager_certificate_issuance_config.test", "tags.%"),
+					checkCertificateManagerIssuanceConfigWithTags(t),
 				),
 			},
 			{
-				ResourceName:            "google_certificate_manager_dns_authorization.test",
+				ResourceName:            "google_certificate_manager_certificate_issuance_config.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"tags"},
@@ -104,10 +43,10 @@ func TestAccCertificateManagerDnsAuthorization_tags(t *testing.T) {
 	})
 }
 
-func checkCertificateManagerDnsAuthorizationWithTags(t *testing.T) func(s *terraform.State) error {
+func checkCertificateManagerIssuanceConfigWithTags(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_certificate_manager_dns_authorization" {
+			if rs.Type != "google_certificate_manager_certificate_issuance_config" {
 				continue
 			}
 			if strings.HasPrefix(name, "data.") {
@@ -159,16 +98,16 @@ func checkCertificateManagerDnsAuthorizationWithTags(t *testing.T) func(s *terra
 				return fmt.Errorf("tag value details (name) not found in response for namespaced name: %q, response: %v", configuredTagValueNamespacedName, respDescribe)
 			}
 
-			// 3. Get the tag bindings from the Certificate Manager DNS Authorizations.
+			// 3. Get the tag bindings from the Certificate Manager Issuance Config.
 			parts := strings.Split(rs.Primary.ID, "/")
 			if len(parts) != 6 {
 				return fmt.Errorf("invalid resource ID format: %s", rs.Primary.ID)
 			}
 			project := parts[1]
 			location := parts[3]
-			dnsAuthorizations_id := parts[5]
+			certificateIssuanceConfigs_id := parts[5]
 
-			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/dnsAuthorizations/%s", project, location, dnsAuthorizations_id)
+			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/certificateIssuanceConfigs/%s", project, location, certificateIssuanceConfigs_id)
 			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
 
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -216,17 +155,66 @@ func checkCertificateManagerDnsAuthorizationWithTags(t *testing.T) func(s *terra
 	}
 }
 
-func testAccCertificateManagerDnsAuthorizationWithTags(context map[string]interface{}) string {
+func testAccCertificateManagerIssuanceConfigWithTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	resource "google_certificate_manager_dns_authorization" "test" {
-	  name          = "tf-test-dns-auth%{random_suffix}"
-        description = "The default dns"
-        labels = {
-                a = "a"
-        }
-        domain          = "%{random_suffix}.hashicorptest.com"
-	tags = {
+	resource "google_certificate_manager_certificate_issuance_config" "test" {
+  name    = "tf-test-issuance-config%{random_suffix}"
+  description = "sample description for the certificate issuanceConfigs"
+  certificate_authority_config {
+    certificate_authority_service_config {
+        ca_pool = google_privateca_ca_pool.pool.id
+    }
+  }
+  lifetime = "1814400s"
+  rotation_window_percentage = 34
+  key_algorithm = "ECDSA_P256"
+  labels = { "name": "wrench", "count": "3" }
+  depends_on=[google_privateca_certificate_authority.ca_authority]
+  tags = {
 	"%{org}/%{tagKey}" = "%{tagValue}"
   }
-	}`, context)
 }
+resource "google_privateca_ca_pool" "pool" {
+  name     = "ca-pool%{random_suffix}"
+  location = "us-central1"
+  tier     = "ENTERPRISE"
+}
+resource "google_privateca_certificate_authority" "ca_authority" {
+  location = "us-central1"
+  pool = google_privateca_ca_pool.pool.name
+  certificate_authority_id = "ca-authority"
+  config {
+    subject_config {
+      subject {
+        organization = "HashiCorp"
+        common_name = "my-certificate-authority"
+      }
+      subject_alt_name {
+        dns_names = ["hashicorp.com"]
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign = true
+        }
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+  // Disable CA deletion related safe checks for easier cleanup.
+  deletion_protection                    = false
+  skip_grace_period                      = true
+  ignore_active_certificates_on_deletion = true
+}`, context)
+}
+
