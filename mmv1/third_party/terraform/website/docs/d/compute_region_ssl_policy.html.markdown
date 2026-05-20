@@ -1,18 +1,18 @@
 ---
 subcategory: "Compute Engine"
 description: |-
-  Gets an SSL Policy within GCE, for use with Target HTTPS and Target SSL Proxies.
+  Gets a Regional SSL Policy within GCE, for use with Target HTTPS and Target SSL Proxies.
 ---
 
 # google_compute_ssl_policy
 
-Gets an SSL Policy within GCE from its name, for use with Target HTTPS and Target SSL Proxies.
+Gets a Regional SSL Policy within GCE from its name, for use with Target HTTPS and Target SSL Proxies.
     For more information see [the official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies).
 
 ## Example Usage
 
 ```tf
-data "google_compute_ssl_policy" "my-ssl-policy" {
+data "google_compute_region_ssl_policy" "my-ssl-policy" {
   name = "production-ssl-policy"
 }
 ```
@@ -24,6 +24,9 @@ The following arguments are supported:
 * `name` - (Required) The name of the SSL Policy.
 
 - - -
+
+* `region` - (Optional) The region in which the resource belongs. If it
+    is not provided, the provider region is used.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
