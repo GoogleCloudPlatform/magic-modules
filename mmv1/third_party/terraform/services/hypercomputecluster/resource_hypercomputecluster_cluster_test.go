@@ -798,7 +798,7 @@ func TestAccHypercomputeclusterCluster_networkValidation(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 3),
+		"random_suffix": acctest.RandString(t, 8),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -827,7 +827,7 @@ locals {
 }
 
 resource "google_hypercomputecluster_cluster" "cluster" {
-  cluster_id  = "tf-miss-%{random_suffix}"
+  cluster_id  = "tf%{random_suffix}"
   location    = "us-central1"
   project     = local.project_id
   description = "Cluster Director instance created through Terraform - Missing Network"
@@ -884,7 +884,7 @@ locals {
 }
 
 resource "google_hypercomputecluster_cluster" "cluster" {
-  cluster_id  = "tf-empty-%{random_suffix}"
+  cluster_id  = "tf%{random_suffix}"
   location    = "us-central1"
   project     = local.project_id
   description = "Cluster Director instance created through Terraform - Empty Network Block"
