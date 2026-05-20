@@ -24,7 +24,7 @@ func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
 		"scope_1":                 "https://www.googleapis.com/auth/cloud-platform",
 	}
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
@@ -60,7 +60,7 @@ func TestAccEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 		"delegate_2":              delegateServiceAccountEmailTwo,
 	}
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
@@ -92,7 +92,7 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 		"lifetime":                "3600s",
 	}
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
