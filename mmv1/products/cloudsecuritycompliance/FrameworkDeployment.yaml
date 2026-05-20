@@ -22,7 +22,7 @@ self_link: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_d
 create_url: '{{parent}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}'
 id_format: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 import_format:
-  - '(?P<parent>(?:projects|organizations)/[^/]+)/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
+  - '{{%parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 supports_indirect_user_project_override: true
 examples:
   - name: "cloudsecuritycompliance_framework_deployment_org_basic"

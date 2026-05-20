@@ -13,7 +13,7 @@ import (
 func testAccCloudSecurityComplianceFramework_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_framework" "example" {
-  parent = "organizations/%{org_id}"
+  parent       = "organizations/%{org_id}"
   location     = "global"
   framework_id = "tf-test-example-framework%{random_suffix}"
   
@@ -100,7 +100,7 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "organization"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent"},
 			},
 			{
 				Config: testAccCloudSecurityComplianceFramework_update(context),
@@ -114,7 +114,7 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "organization"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent"},
 			},
 		},
 	})
@@ -123,7 +123,7 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 func testAccCloudSecurityComplianceFramework_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_framework" "example" {
-  organization = "%{org_id}"
+  parent       = "organizations/%{org_id}"
   location     = "global"
   framework_id = "tf-test-example-framework%{random_suffix}"
   

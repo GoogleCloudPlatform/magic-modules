@@ -13,7 +13,7 @@ import (
 func testAccCloudSecurityComplianceCloudControl_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_cloud_control" "example" {
-	parent      = "organizations/%{org_id}"
+	parent            = "organizations/%{org_id}"
 	location          = "global"
 	cloud_control_id  = "tf-test-%{random_suffix}"
 	display_name      = "TF Test CloudControl"
@@ -393,7 +393,7 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_cloud_control.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "organization"},
+				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "parent"},
 			},
 			{
 				Config: testAccCloudSecurityComplianceCloudControl_update(context),
@@ -407,7 +407,7 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_cloud_control.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "organization"},
+				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "parent"},
 			},
 		},
 	})
@@ -416,7 +416,7 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 func testAccCloudSecurityComplianceCloudControl_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_cloud_control" "example" {
-  organization      = "%{org_id}"
+  parent            = "organizations/%{org_id}"
   location          = "global"
   cloud_control_id  = "tf-test-%{random_suffix}"
 
