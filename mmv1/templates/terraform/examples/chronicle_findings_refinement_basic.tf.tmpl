@@ -11,13 +11,3 @@ resource "google_chronicle_findings_refinement" "{{$.PrimaryResourceId}}" {
     outcome_value = "value"
   }
 }
-
-output "findings_refinement_create_time" {
-  description = "The creation time of the findings refinement."
-  value = google_chronicle_findings_refinement.example.create_time
-}
-
-output "findings_refinement_update_time" {
-  description = "The last update time of the findings refinement."
-  value = google_chronicle_findings_refinement.example.update_time  
-} 

@@ -20,16 +20,31 @@ references:
   api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1alpha/FindingsRefinementDeployment'
 min_version: 'beta'
 
-base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findingsrefinement}}/deployment
-self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findingsrefinement}}/deployment
-create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findingsrefinement}}/deployment=?updateMask=*
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment?updateMask=*
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
 update_mask: true
 create_verb: PATCH
 update_verb: PATCH
-import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findingsrefinement}}/deployment
 exclude_delete: true
 autogen_status: RmluZGluZ3NSZWZpbmVtZW50RGVwbG95bWVudA==
+
+examples:
+  - name: 'chronicle_findingsrefinementdeployment_basic'
+    primary_resource_id: 'example'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    vars:
+      display_name: findings_refinement_display_name
+  - name: 'chronicle_findingsrefinementdeployment_disabled'
+    primary_resource_id: 'example'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    vars:
+      display_name: findings_refinement_display_name
 
 parameters:
   - name: location
@@ -44,7 +59,7 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-  - name: findingsrefinement
+  - name: findings_refinement
     type: String
     required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
@@ -103,7 +118,7 @@ properties:
       incoming findings.
   - name: name
     type: String
-    required: true
+    output: true
     description: |-
       The resource name of the findings refinement deployment.
       Format:

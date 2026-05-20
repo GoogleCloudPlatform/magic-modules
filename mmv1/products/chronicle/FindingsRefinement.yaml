@@ -18,17 +18,17 @@ references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
   api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.findingsRefinements'
-
 min_version: 'beta'
+
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
-self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
 update_mask: true
 update_verb: PATCH
 exclude_delete: true
 import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
 autogen_status: RmluZGluZ3NSZWZpbmVtZW50
 
 examples:
@@ -62,6 +62,7 @@ properties:
     description: Display name of the findings refinement.
   - name: name
     type: String
+    output: true
     description: |-
       Full resource name for the findings refinement.
       Format:
@@ -110,3 +111,11 @@ properties:
     type: String
     description: The timestamp of when the findings refinement was last updated.
     output: true
+  - name: findingsRefinementId
+    type: String
+    output: true
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Findings Refinement Id is the ID of the Findings Refinement.
