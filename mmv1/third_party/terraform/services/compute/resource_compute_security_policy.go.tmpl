@@ -1161,6 +1161,10 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					patchRuleUpdateMask = append(patchRuleUpdateMask, "preconfigured_waf_config")
 				}
 
+				if fmt.Sprintf("%v", oRules[priority]["header_action"]) != fmt.Sprintf("%v", nRules[priority]["header_action"]) {
+					patchRuleUpdateMask = append(patchRuleUpdateMask, "header_action")
+				}
+
 				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
 				patchRuleURL := fmt.Sprintf("%sprojects/%s/global/securityPolicies/%s/patchRule?priority=%d", transport_tpg.BaseUrl(Product, config), project, sp, priority)
 				if len(patchRuleUpdateMask) > 0 {
@@ -1271,9 +1275,7 @@ func expandSecurityPolicyRule(raw interface{}) map[string]interface{} {
 	if v := data["description"].(string); v != "" {
 		rule["description"] = v
 	}
-	if v := data["preview"].(bool); v {
-		rule["preview"] = v
-	}
+	rule["preview"] = data["preview"].(bool)
 	if v := expandSecurityPolicyPreconfiguredWafConfig(data["preconfigured_waf_config"].([]interface{})); v != nil {
 		rule["preconfiguredWafConfig"] = v
 	}
@@ -1431,11 +1433,12 @@ func flattenSecurityPolicyRules(rawRules interface{}, d *schema.ResourceData) []
 			continue
 		}
 		priority := int(rule["priority"].(float64))
+		preview, _ := rule["preview"].(bool)
 		data := map[string]interface{}{
 			"description":              rule["description"],
 			"priority":                 priority,
 			"action":                   rule["action"],
-			"preview":                  rule["preview"],
+			"preview":                  preview,
 			"match":                    flattenMatch(rule["match"], d, priority),
 			"preconfigured_waf_config": flattenPreconfiguredWafConfig(rule["preconfiguredWafConfig"], d, priority),
 			"rate_limit_options":	      flattenSecurityPolicyRuleRateLimitOptions(rule["rateLimitOptions"]),
@@ -1609,13 +1612,16 @@ func expandSecurityPolicyAdvancedOptionsConfig(configured []interface{}) map[str
 	}
 
 	data := configured[0].(map[string]interface{})
-	return map[string]interface{}{
-		"jsonParsing":               data["json_parsing"].(string),
-		"jsonCustomConfig":          expandSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(data["json_custom_config"].([]interface{})),
-		"logLevel":                  data["log_level"].(string),
-		"userIpRequestHeaders":      tpgresource.ConvertStringArr(data["user_ip_request_headers"].(*schema.Set).List()),
-		"requestBodyInspectionSize": data["request_body_inspection_size"].(string),
+	result := map[string]interface{}{
+		"jsonParsing":          data["json_parsing"].(string),
+		"jsonCustomConfig":     expandSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(data["json_custom_config"].([]interface{})),
+		"logLevel":             data["log_level"].(string),
+		"userIpRequestHeaders": tpgresource.ConvertStringArr(data["user_ip_request_headers"].(*schema.Set).List()),
 	}
+	if v := data["request_body_inspection_size"].(string); v != "" {
+		result["requestBodyInspectionSize"] = v
+	}
+	return result
 }
 
 func flattenSecurityPolicyAdvancedOptionsConfig(rawConf interface{}) []map[string]interface{} {
@@ -1857,7 +1863,9 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) map[stri
 		"enforceOnKey":        data["enforce_on_key"].(string),
 		"enforceOnKeyName":    data["enforce_on_key_name"].(string),
 		"enforceOnKeyConfigs": expandSecurityPolicyEnforceOnKeyConfigs(data["enforce_on_key_configs"].([]interface{})),
-		"banDurationSec":      int64(data["ban_duration_sec"].(int)),
+	}
+	if v := int64(data["ban_duration_sec"].(int)); v != 0 {
+		opts["banDurationSec"] = v
 	}
 	if v := expandThreshold(data["ban_threshold"].([]interface{})); v != nil {
 		opts["banThreshold"] = v
