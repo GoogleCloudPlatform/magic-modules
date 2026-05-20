@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -43,7 +44,7 @@ func newChromePolicyAPI(config *transport_tpg.Config, userAgent, customer string
 }
 
 func (a *chromePolicyAPI) url(path string) string {
-	return a.config.ChromePolicyBasePath + path
+	return transport_tpg.BaseUrl(registry.GetProduct("chromepolicy"), a.config) + path
 }
 
 func (a *chromePolicyAPI) send(method, url string, body map[string]any) (map[string]interface{}, error) {
