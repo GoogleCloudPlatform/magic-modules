@@ -1,5 +1,6 @@
+data "google_project" "project" {}
 resource "google_cloud_security_compliance_cloud_control" "example" {
-  parent        = "projects/{{index $.TestEnvVars "project_number"}}"
+  parent              = "projects/${data.google_project.project.number}"
   location            = "global"
   cloud_control_id    = "{{index $.Vars "cloudcontrol_name"}}"
 
