@@ -15,6 +15,7 @@ package resource
 
 import (
 	"fmt"
+	"log"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -111,15 +112,19 @@ func (s *Sample) TestSteps() []*Step {
 
 // TestServiceDependencies returns a map of service names to import aliases that are required
 // by this sample's steps.
-func (s *Sample) TestServiceDependencies() map[string]string {
+func (s *Sample) TestServiceDependencies(resourcePrefixServiceMap map[string]string) map[string]string {
 	deps := map[string]string{}
 	if len(s.BootstrapIam) > 0 {
 		deps["resourcemanager"] = ""
 	}
 	for _, step := range s.TestSteps() {
-		for service, alias := range step.TestServiceDependencies() {
+		for service, alias := range step.TestServiceDependencies(resourcePrefixServiceMap) {
 			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
-				panic(fmt.Sprintf("Conflicting aliases (%s vs %s) for service dependency %s for sample %s", depsAlias, alias, service, s.Name))
+				if (alias == "_" && depsAlias == "") || (alias == "" && depsAlias == "_") {
+					deps[service] = ""
+					continue
+				}
+				log.Fatalf("Conflicting aliases (%s vs %s) for service dependency %s for sample %s", depsAlias, alias, service, s.Name)
 			}
 			deps[service] = alias
 		}
