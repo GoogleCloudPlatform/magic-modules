@@ -1871,7 +1871,7 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 
 // GPUDirectConfig is currently directly stored as a GpuDirectStrategy string.
 func expandGpuDirectConfig(v interface{}) *container.GPUDirectConfig {
-	if v == nil {
+	if v == nil  || v.(string) == "" {
 		return nil
 	}
 
