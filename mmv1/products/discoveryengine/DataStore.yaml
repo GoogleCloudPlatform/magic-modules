@@ -45,7 +45,6 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   dependencies:
     - 'google_discovery_engine_chat_engine'

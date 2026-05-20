@@ -155,8 +155,8 @@ var (
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 01, 29),
-					endDate:   newDate(2026, 02, 04),
+					startDate: newDate(2026, 05, 22),
+					endDate:   newDate(2026, 06, 01),
 				},
 			},
 		},

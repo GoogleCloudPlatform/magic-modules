@@ -37,7 +37,6 @@ async:
     resource_inside_response: true
 custom_code:
   custom_update: 'templates/terraform/custom_update/vertex_ai_index.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   identifier_field: 'displayName'
 examples:

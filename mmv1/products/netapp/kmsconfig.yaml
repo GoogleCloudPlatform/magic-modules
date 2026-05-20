@@ -54,7 +54,6 @@ async:
 include_in_tgc_next: true
 custom_code:
   post_create: 'templates/terraform/post_create/KMS_Verify.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:

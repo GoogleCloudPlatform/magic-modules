@@ -61,7 +61,6 @@ async:
 exclude_sweeper: true
 include_in_tgc_next: true
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 examples:
   - name: 'netapp_backup'
     primary_resource_id: 'test_backup'

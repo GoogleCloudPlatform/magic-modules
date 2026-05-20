@@ -40,7 +40,6 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west1"
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute_and_kms.go.tmpl'
 examples:
   - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
@@ -54,7 +53,7 @@ examples:
       trigger_name: some-trigger
       network_attachment_name: network-attachment
     test_vars_overrides:
-      'network_attachment_name': 'tpgcompute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na", tpgcompute.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", tpgcompute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-trigger-network")))'
+      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-trigger-network")))'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'

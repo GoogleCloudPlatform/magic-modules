@@ -38,7 +38,6 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'managedkafka_cluster_basic'
     primary_resource_id: 'example'

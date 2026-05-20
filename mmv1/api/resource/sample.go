@@ -109,6 +109,24 @@ func (s *Sample) TestSteps() []*Step {
 	})
 }
 
+// TestServiceDependencies returns a map of service names to import aliases that are required
+// by this sample's steps.
+func (s *Sample) TestServiceDependencies() map[string]string {
+	deps := map[string]string{}
+	if len(s.BootstrapIam) > 0 {
+		deps["resourcemanager"] = ""
+	}
+	for _, step := range s.TestSteps() {
+		for service, alias := range step.TestServiceDependencies() {
+			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
+				panic(fmt.Sprintf("Conflicting aliases (%s vs %s) for service dependency %s for sample %s", depsAlias, alias, service, s.Name))
+			}
+			deps[service] = alias
+		}
+	}
+	return deps
+}
+
 func (s *Sample) ResourceType(terraformName string) string {
 	if s.PrimaryResourceType != "" {
 		return s.PrimaryResourceType
