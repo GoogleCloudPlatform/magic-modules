@@ -14,7 +14,6 @@
 ---
 name: Artifact
 description: Instance of an Artifact on Vertex AI.
-min_version: beta
 base_url: projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/artifacts
 self_link: projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/artifacts/{{artifact_id}}
 create_url: projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/artifacts?artifactId={{artifact_id}}
@@ -32,7 +31,6 @@ async:
 samples:
   - name: "vertex_ai_artifact"
     primary_resource_id: "artifact"
-    min_version: beta
     steps:
       - name: "vertex_ai_artifact_basic"
         resource_id_vars:
