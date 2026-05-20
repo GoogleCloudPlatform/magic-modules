@@ -22,6 +22,9 @@ import (
 {{- if $.FirstTestConfig.Sample.BootstrapIam }}
 	"{{ $.ImportPath }}/services/resourcemanager"
 {{- end }}
+{{- range $service, $alias := $.FirstTestConfig.Step.TestServiceDependencies }}
+	{{ $alias }} "{{ $.ImportPath  }}/services/{{ $service }}"
+{{- end }}
 )
 
 {{if $.CustomCode.TestConstants -}} 

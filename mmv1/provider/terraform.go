@@ -104,12 +104,12 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+		t.GenerateSingularDataSource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
 			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
-			t.GenerateSingularDataSource(object, *templateData, outputFolder)
 			t.GenerateSingularDataSourceTests(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
@@ -273,14 +273,22 @@ func (t *Terraform) GenerateResourceSweeperFile(object api.Resource, targetFileP
 	templateData.GenerateSweeperFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string) {
+func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
 	if !object.ShouldGenerateSingularDataSource() {
 		return
 	}
 
-	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
-	templateData.GenerateDataSourceFile(targetFilePath, object)
+	if generateCode {
+		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
+		templateData.GenerateDataSourceFile(targetFilePath, object)
+	}
+
+	if generateDocs {
+		targetFolder := t.makeFolder(outputFolder, "website", "docs", "d")
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
+		templateData.GenerateDataSourceDocumentationFile(targetFilePath, object)
+	}
 }
 
 func (t *Terraform) GenerateSingularDataSourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {

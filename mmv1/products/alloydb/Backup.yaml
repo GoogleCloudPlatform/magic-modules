@@ -40,7 +40,6 @@ async:
     resource_inside_response: false
 custom_code:
   encoder: 'templates/terraform/encoders/alloydb_backup.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 include_in_tgc_next: true
 examples:
   - name: 'alloydb_backup_basic'

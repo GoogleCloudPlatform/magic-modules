@@ -30,7 +30,6 @@ update_mask: true
 
 custom_code:
   pre_create: templates/terraform/pre_create/observability_project_settings.go.tmpl
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 
 async:
   operation:

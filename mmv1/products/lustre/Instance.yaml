@@ -35,7 +35,6 @@ sweeper:
     - location: "us-central1-a"
     - location: "us-central1-c"
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 examples:
   - name: lustre_instance_basic
     primary_resource_id: 'instance'

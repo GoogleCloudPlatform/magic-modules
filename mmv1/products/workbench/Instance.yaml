@@ -52,7 +52,6 @@ custom_code:
   post_create: 'templates/terraform/post_create/workbench_instance.go.tmpl'
   pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
   post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1-a"

@@ -42,7 +42,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 examples:
   - name: 'logging_folder_settings_all'
     primary_resource_id: 'example'

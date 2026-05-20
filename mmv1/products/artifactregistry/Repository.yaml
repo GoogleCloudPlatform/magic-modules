@@ -53,7 +53,6 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"

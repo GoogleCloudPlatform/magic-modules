@@ -109,14 +109,14 @@ An **acceptance test** verifies that a resource can be created, updated, and des
              network_name: "example-network"
            # test_vars_overrides contains literal overrides for variables in tests.
            test_vars_overrides:
-             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+             network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
          # Subsequent steps define update configurations.
          - name: "pubsub_topic_full"
            resource_id_vars:
              resource_name: "example-resource"
              network_name: "example-network"
            test_vars_overrides:
-             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+             network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
            # vars should ONLY be used for fields that vary between steps.
            # Fields that stay constant across steps should be hardcoded in the .tf.tmpl file.
            vars: 
@@ -126,7 +126,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
              resource_name: "example-resource"
              network_name: "example-network"
            test_vars_overrides:
-             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+             network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
            vars:
              display_name: "Updated Display Name" # The new value for the updatable field
    ```
@@ -291,7 +291,7 @@ Tests within the legacy `examples` generator are configured directly on the reso
        # a shared network for your product to avoid test failures due to limits
        # on the default network.
        test_vars_overrides:
-         network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
+         network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
        # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
        min_version: beta
    ```
@@ -347,16 +347,20 @@ samples:
         resource_id_vars:
           kms_key_name: 'kms-key'
         test_vars_overrides:
-          kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+          kms_key_name: 'kms.BootstrapKMSKey(t).CryptoKey.Name'
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 ```go
+import (
+  "github.com/hashicorp/terraform-provider-google/google/services/kms"
+)
+
 func TestAccProductResource_update(t *testing.T) {
    t.Parallel()
 
    context := map[string]interface{}{
-      "kms": acctest.BootstrapKMSKey(t).CryptoKey.Name,
+      "kms": kms.BootstrapKMSKey(t).CryptoKey.Name,
       // other variables
    }
    // rest of test
@@ -406,13 +410,13 @@ samples:
 ```go
 // Project-level IAM
 import (
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccProductResource_update(t *testing.T) {
     t.Parallel()
 
-    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+    resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
         {
             Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
             Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -424,14 +428,14 @@ func TestAccProductResource_update(t *testing.T) {
 ```go
 // Org-level IAM
 import (
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccProductResource_update(t *testing.T) {
     t.Parallel()
 
-    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+    resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
         {
             Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
             Role:   "roles/osconfig.serviceAgent",
@@ -471,20 +475,24 @@ samples:
           network_name: 'default'
           subnetwork_name: 'default'
         test_vars_overrides:
-          network_name: 'acctest.BootstrapSharedTestNetwork(t, "network-identifier")'
-          subnetwork_name: 'acctest.BootstrapSubnet(t, "subnet-identifier", acctest.BootstrapSharedTestNetwork(t, "network-identifier"))'
+          network_name: 'tpgcompute.BootstrapSharedTestNetwork(t, "network-identifier")'
+          subnetwork_name: 'tpgcompute.BootstrapSubnet(t, "subnet-identifier", tpgcompute.BootstrapSharedTestNetwork(t, "network-identifier"))'
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 ```go
+import (
+  tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+)
+
 func TestAccProductResource_update(t *testing.T) {
    t.Parallel()
 
    networkName := 
    subnetName := 
    context := map[string]interface{}{
-      "network_name": acctest.BootstrapSharedTestNetwork(t, "network-identifier"),
-      "subnetwork_name": acctest.BootstrapSubnet(t, "subnet-identifier", acctest.BootstrapSharedTestNetwork(t, "network-identifier")),
+      "network_name": tpgcompute.BootstrapSharedTestNetwork(t, "network-identifier"),
+      "subnetwork_name": tpgcompute.BootstrapSubnet(t, "subnet-identifier", tpgcompute.BootstrapSharedTestNetwork(t, "network-identifier")),
       // other variables
    }
    // rest of test
@@ -502,8 +510,8 @@ import (
 
 
   "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 func TestAccProductResourceName_update(t *testing.T) {
 	t.Parallel()
