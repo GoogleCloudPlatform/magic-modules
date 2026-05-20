@@ -104,7 +104,7 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	return addr_equality && netmask_equality
 }
 
-func mergeSurvivor(oldEl, newEl interface{}) interface{} {
+func mergeSurvivor(oldEl, newEl interface{}, ipCidrExplicit bool) interface{} {
 	if oldEl == nil {
 		return newEl
 	}
@@ -121,7 +121,9 @@ func mergeSurvivor(oldEl, newEl interface{}) interface{} {
 	}
 	
 	for k, v := range newMap {
-		if k == "ip_cidr_range" && (v == nil || v == "") {
+		if k == "ip_cidr_range" && !ipCidrExplicit {
+			// If ip_cidr_range was not explicitly set in HCL, always keep the old state value
+			// (preventing inheriting wrong index's value from Terraform CLI)
 			if oldVal, ok := oldMap[k]; ok && oldVal != "" {
 				continue
 			}
@@ -141,9 +143,21 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 	old := oldRaw.([]interface{})
 	new := newRaw.([]interface{})
 
-	log.Printf("[DEBUG] SetStyleDiff - diff.Id: %s", diff.Id())
-	log.Printf("[DEBUG] SetStyleDiff - old: %#v", old)
-	log.Printf("[DEBUG] SetStyleDiff - new: %#v", new)
+	// Extract explicit CIDRs from HCL config to prevent wrong index-based computed inheritance
+	explicitCidrByName := make(map[string]bool)
+	rawConfig := diff.GetRawConfig().GetAttr("secondary_ip_range")
+	if rawConfig.IsKnown() && !rawConfig.IsNull() {
+		for _, item := range rawConfig.AsValueSlice() {
+			if item.IsKnown() && !item.IsNull() && item.GetAttr("range_name").IsKnown() && !item.GetAttr("range_name").IsNull() {
+				nameVal := item.GetAttr("range_name").AsString()
+				if nameVal != "" {
+					if cidrVal := item.GetAttr("ip_cidr_range"); cidrVal.IsKnown() && !cidrVal.IsNull() && cidrVal.AsString() != "" {
+						explicitCidrByName[nameVal] = true
+					}
+				}
+			}
+		}
+	}
 
 	// Map existing range names to their current indices in 'old'
 	oldMap := make(map[string]int)
@@ -164,7 +178,7 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 		if oldIdx, ok := oldMap[name]; ok {
 			if oldIdx < len(stableNew) {
 				// Merge config and state for survivor to preserve computed fields like ip_cidr_range
-				stableNew[oldIdx] = mergeSurvivor(old[oldIdx], r)
+				stableNew[oldIdx] = mergeSurvivor(old[oldIdx], r, explicitCidrByName[name])
 				placed[name] = true
 			}
 		}
@@ -191,15 +205,13 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 			
 			// If it is a survivor (but was out of bounds), merge it
 			if oldIdx, ok := oldMap[name]; ok {
-				stableNew[i] = mergeSurvivor(old[oldIdx], r)
+				stableNew[i] = mergeSurvivor(old[oldIdx], r, explicitCidrByName[name])
 			} else {
 				stableNew[i] = r
 			}
 			unplacedIdx++
 		}
 	}
-
-	log.Printf("[DEBUG] SetStyleDiff - stableNew: %#v", stableNew)
 
 	return diff.SetNew("secondary_ip_range", stableNew)
 }
