@@ -51,7 +51,7 @@ examples:
   - name: 'region_ssl_policy_post_quantum'
     primary_resource_id: 'post-quantum-region-ssl-policy'
     vars:
-      post_quantum_region_ssl_policy_name: 'post_quantum_region_ssl_policy'
+      post_quantum_region_ssl_policy_name: 'post-quantum-region-ssl-policy'
 parameters:
   - name: 'region'
     type: ResourceRef
