@@ -1,4 +1,3 @@
-data "google_project" "project" {}
 resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" {
   parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   location     = "global"
