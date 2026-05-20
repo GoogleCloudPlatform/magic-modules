@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -17,6 +18,9 @@ func ResourceLoggingOrganizationSink() *schema.Resource {
 		Delete: resourceLoggingOrganizationSinkDelete,
 		Update: resourceLoggingOrganizationSinkUpdate,
 		Schema: resourceLoggingSinkSchema(),
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 		Importer: &schema.ResourceImporter{
 			State: resourceLoggingSinkImportState("org_id"),
 		},
@@ -60,7 +64,7 @@ func resourceLoggingOrganizationSinkCreate(d *schema.ResourceData, meta interfac
 
 	// Must use a unique writer, since all destinations are in projects.
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err = config.NewLoggingClient(userAgent).Organizations.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(true).Do()
+	_, err = NewClient(config, userAgent).Organizations.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
 	}
@@ -76,7 +80,7 @@ func resourceLoggingOrganizationSinkRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	sink, err := config.NewLoggingClient(userAgent).Organizations.Sinks.Get(d.Id()).Do()
+	sink, err := NewClient(config, userAgent).Organizations.Sinks.Get(d.Id()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Organization Logging Sink %s", d.Get("name").(string)))
 	}
@@ -93,10 +97,19 @@ func resourceLoggingOrganizationSinkRead(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error setting intercept_children: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingOrganizationSink) {
+		return ResourceLoggingOrganizationSink().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -106,7 +119,7 @@ func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interfac
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err = config.NewLoggingClient(userAgent).Organizations.Sinks.Patch(d.Id(), sink).
+	_, err = NewClient(config, userAgent).Organizations.Sinks.Patch(d.Id(), sink).
 		UpdateMask(updateMask).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
@@ -116,13 +129,20 @@ func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceLoggingOrganizationSinkDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Delete(d.Id()).Do()
+	_, err = NewClient(config, userAgent).Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}

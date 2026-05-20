@@ -13,4 +13,19 @@ resource "google_compute_region_commitment" "foobar" {
       type = "MEMORY"
       amount = "9"
   }
+  params {
+    resource_manager_tags = {
+      (google_tags_tag_key.tag_key.id) = (google_tags_tag_value.tag_value.id)
+    }
+  }
+}
+
+resource "google_tags_tag_key" "tag_key" {
+  parent     = "organizations/{{index $.Vars "org_id"}}"
+  short_name = "{{index $.Vars "tag_key"}}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = google_tags_tag_key.tag_key.id
+  short_name = "{{index $.Vars "tag_value"}}"
 }

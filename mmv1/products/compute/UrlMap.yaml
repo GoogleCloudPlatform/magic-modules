@@ -37,6 +37,11 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeUrlMap_cachePolicyMultiLevelUpdate'
+    skip: 'Index mismatch in path_matcher due to test framework limitation'
+custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/compute_url_map.go.tmpl'
 examples:
   - name: 'url_map_bucket_and_service'
     primary_resource_id: 'urlmap'
@@ -153,7 +158,6 @@ examples:
       mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_cache_policy_basic'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'home'
@@ -165,7 +169,6 @@ examples:
       backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_cache_policy_multi_level'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'home'
@@ -1092,7 +1095,6 @@ properties:
                           required: true
                   - name: 'cachePolicy'
                     type: NestedObject
-                    min_version: beta
                     description: |
                       Specifies the cache policy configuration for matched traffic. Available
                       only for Global EXTERNAL_MANAGED load balancer schemes. At least one
@@ -1101,6 +1103,7 @@ properties:
                     properties:
                       - name: 'cacheMode'
                         type: Enum
+                        is_missing_in_cai: true
                         description: |
                           Specifies the cache setting for all responses from this route. If not
                           specified, Cloud CDN uses CACHE_ALL_STATIC mode.
@@ -1110,6 +1113,7 @@ properties:
                           - 'CACHE_ALL_STATIC'
                       - name: 'defaultTtl'
                         type: NestedObject
+                        is_missing_in_cai: true
                         description: |
                           Specifies the default TTL for cached content for responses that do not have
                           an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
@@ -1136,6 +1140,7 @@ properties:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'maxTtl'
                         type: NestedObject
+                        is_missing_in_cai: true
                         description: |
                           Specifies the maximum allowed TTL for cached content. Cache directives that
                           attempt to set a max-age or s-maxage higher than this, or an Expires header
@@ -1162,6 +1167,7 @@ properties:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'clientTtl'
                         type: NestedObject
+                        is_missing_in_cai: true
                         description: |
                           Specifies a separate client (e.g. browser client) maximum TTL for cached
                           content. This is used to clamp the max-age (or Expires) value sent to the
@@ -1189,6 +1195,7 @@ properties:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'requestCoalescing'
                         type: Boolean
+                        is_missing_in_cai: true
                         send_empty_value: true
                         description: |
                           If true then Cloud CDN will combine multiple concurrent cache fill
@@ -1196,6 +1203,7 @@ properties:
                           Cloud CDN applies request coalescing by default.
                       - name: 'negativeCaching'
                         type: Boolean
+                        is_missing_in_cai: true
                         send_empty_value: true
                         description: |
                           Negative caching allows per-status code TTLs to be set, in order to apply
@@ -1215,6 +1223,7 @@ properties:
                           specified, Cloud CDN applies negative caching by default.
                       - name: 'negativeCachingPolicy'
                         type: Array
+                        is_missing_in_cai: true
                         send_empty_value: true
                         description: |
                           Sets a cache TTL for the specified HTTP status code. negativeCaching
@@ -1256,6 +1265,7 @@ properties:
                                     function: 'validation.IntBetween(0, 0)'
                       - name: 'cacheBypassRequestHeaderNames'
                         type: Array
+                        is_missing_in_cai: true
                         description: |
                           Bypass the cache when the specified request headers are matched by name,
                           e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
@@ -1265,6 +1275,7 @@ properties:
                           type: String
                       - name: 'serveWhileStale'
                         type: NestedObject
+                        is_missing_in_cai: true
                         description: |
                           Serve existing content from the cache (if available) when revalidating
                           content with the origin, or when an error is encountered when refreshing
@@ -1299,6 +1310,7 @@ properties:
                           - name: 'includeProtocol'
                             type: Boolean
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               If true, http and https requests will be cached separately. Note: This
                               setting is only applicable to routes that use a Backend Service. It
@@ -1309,6 +1321,7 @@ properties:
                           - name: 'includeHost'
                             type: Boolean
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               If true, requests to different hosts will be cached separately. Note:
                               This setting is only applicable to routes that use a Backend Service.
@@ -1319,6 +1332,7 @@ properties:
                           - name: 'includeQueryString'
                             type: Boolean
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               If true, include query string parameters in the cache key according to
                               includedQueryParameters and excludedQueryParameters. If neither is
@@ -1332,6 +1346,7 @@ properties:
                           - name: 'includedQueryParameters'
                             type: Array
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               Names of query string parameters to include in cache keys. All other
                               parameters will be excluded. Either specify includedQueryParameters
@@ -1342,6 +1357,7 @@ properties:
                           - name: 'excludedQueryParameters'
                             type: Array
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               Names of query string parameters to exclude in cache keys. All other
                               parameters will be included. Either specify excludedQueryParameters
@@ -1357,6 +1373,7 @@ properties:
                           - name: 'includedHeaderNames'
                             type: Array
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               Allows HTTP request headers (by name) to be used in the cache key.
                             item_type:
@@ -1364,6 +1381,7 @@ properties:
                           - name: 'includedCookieNames'
                             type: Array
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               Allows HTTP cookies (by name) to be used in the cache key. The
                               name=value pair will be used in the cache key Cloud CDN generates.
@@ -2156,7 +2174,6 @@ properties:
                           required: true
                   - name: 'cachePolicy'
                     type: NestedObject
-                    min_version: beta
                     description: |
                       Specifies the cache policy configuration for matched traffic. Available
                       only for Global EXTERNAL_MANAGED load balancer schemes. At least one
@@ -2165,6 +2182,7 @@ properties:
                     properties:
                       - name: 'cacheMode'
                         type: Enum
+                        is_missing_in_cai: true
                         description: |
                           Specifies the cache setting for all responses from this route. If not
                           specified, Cloud CDN uses CACHE_ALL_STATIC mode.
@@ -2174,6 +2192,7 @@ properties:
                           - 'CACHE_ALL_STATIC'
                       - name: 'defaultTtl'
                         type: NestedObject
+                        is_missing_in_cai: true
                         description: |
                           Specifies the default TTL for cached content for responses that do not have
                           an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
@@ -2200,6 +2219,7 @@ properties:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'maxTtl'
                         type: NestedObject
+                        is_missing_in_cai: true
                         description: |
                           Specifies the maximum allowed TTL for cached content. Cache directives that
                           attempt to set a max-age or s-maxage higher than this, or an Expires header
@@ -2226,6 +2246,7 @@ properties:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'clientTtl'
                         type: NestedObject
+                        is_missing_in_cai: true
                         description: |
                           Specifies a separate client (e.g. browser client) maximum TTL for cached
                           content. This is used to clamp the max-age (or Expires) value sent to the
@@ -2253,6 +2274,7 @@ properties:
                               function: 'validation.IntBetween(0, 0)'
                       - name: 'requestCoalescing'
                         type: Boolean
+                        is_missing_in_cai: true
                         send_empty_value: true
                         description: |
                           If true then Cloud CDN will combine multiple concurrent cache fill
@@ -2260,6 +2282,7 @@ properties:
                           Cloud CDN applies request coalescing by default.
                       - name: 'negativeCaching'
                         type: Boolean
+                        is_missing_in_cai: true
                         send_empty_value: true
                         description: |
                           Negative caching allows per-status code TTLs to be set, in order to apply
@@ -2279,6 +2302,7 @@ properties:
                           specified, Cloud CDN applies negative caching by default.
                       - name: 'negativeCachingPolicy'
                         type: Array
+                        is_missing_in_cai: true
                         send_empty_value: true
                         description: |
                           Sets a cache TTL for the specified HTTP status code. negativeCaching
@@ -2320,6 +2344,7 @@ properties:
                                     function: 'validation.IntBetween(0, 0)'
                       - name: 'cacheBypassRequestHeaderNames'
                         type: Array
+                        is_missing_in_cai: true
                         description: |
                           Bypass the cache when the specified request headers are matched by name,
                           e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
@@ -2329,6 +2354,7 @@ properties:
                           type: String
                       - name: 'serveWhileStale'
                         type: NestedObject
+                        is_missing_in_cai: true
                         description: |
                           Serve existing content from the cache (if available) when revalidating
                           content with the origin, or when an error is encountered when refreshing
@@ -2363,6 +2389,7 @@ properties:
                           - name: 'includeProtocol'
                             type: Boolean
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               If true, http and https requests will be cached separately. Note: This
                               setting is only applicable to routes that use a Backend Service. It
@@ -2373,6 +2400,7 @@ properties:
                           - name: 'includeHost'
                             type: Boolean
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               If true, requests to different hosts will be cached separately. Note:
                               This setting is only applicable to routes that use a Backend Service.
@@ -2383,6 +2411,7 @@ properties:
                           - name: 'includeQueryString'
                             type: Boolean
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               If true, include query string parameters in the cache key according to
                               includedQueryParameters and excludedQueryParameters. If neither is
@@ -2396,6 +2425,7 @@ properties:
                           - name: 'includedQueryParameters'
                             type: Array
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               Names of query string parameters to include in cache keys. All other
                               parameters will be excluded. Either specify includedQueryParameters
@@ -2406,6 +2436,7 @@ properties:
                           - name: 'excludedQueryParameters'
                             type: Array
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               Names of query string parameters to exclude in cache keys. All other
                               parameters will be included. Either specify excludedQueryParameters
@@ -2421,6 +2452,7 @@ properties:
                           - name: 'includedHeaderNames'
                             type: Array
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               Allows HTTP request headers (by name) to be used in the cache key.
                             item_type:
@@ -2428,6 +2460,7 @@ properties:
                           - name: 'includedCookieNames'
                             type: Array
                             send_empty_value: true
+                            is_missing_in_cai: true
                             description: |
                               Allows HTTP cookies (by name) to be used in the cache key. The
                               name=value pair will be used in the cache key Cloud CDN generates.
@@ -3046,7 +3079,6 @@ properties:
                         function: 'validation.FloatBetween(0, 100)'
             - name: 'cachePolicy'
               type: NestedObject
-              min_version: beta
               description: |
                 Specifies the cache policy configuration for matched traffic. Available
                 only for Global EXTERNAL_MANAGED load balancer schemes. At least one
@@ -3055,6 +3087,7 @@ properties:
               properties:
                 - name: 'cacheMode'
                   type: Enum
+                  is_missing_in_cai: true
                   description: |
                     Specifies the cache setting for all responses from this route. If not
                     specified, Cloud CDN uses CACHE_ALL_STATIC mode.
@@ -3064,6 +3097,7 @@ properties:
                     - 'CACHE_ALL_STATIC'
                 - name: 'defaultTtl'
                   type: NestedObject
+                  is_missing_in_cai: true
                   description: |
                     Specifies the default TTL for cached content for responses that do not have
                     an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
@@ -3090,6 +3124,7 @@ properties:
                         function: 'validation.IntBetween(0, 0)'
                 - name: 'maxTtl'
                   type: NestedObject
+                  is_missing_in_cai: true
                   description: |
                     Specifies the maximum allowed TTL for cached content. Cache directives that
                     attempt to set a max-age or s-maxage higher than this, or an Expires header
@@ -3116,6 +3151,7 @@ properties:
                         function: 'validation.IntBetween(0, 0)'
                 - name: 'clientTtl'
                   type: NestedObject
+                  is_missing_in_cai: true
                   description: |
                     Specifies a separate client (e.g. browser client) maximum TTL for cached
                     content. This is used to clamp the max-age (or Expires) value sent to the
@@ -3143,6 +3179,7 @@ properties:
                         function: 'validation.IntBetween(0, 0)'
                 - name: 'requestCoalescing'
                   type: Boolean
+                  is_missing_in_cai: true
                   send_empty_value: true
                   description: |
                     If true then Cloud CDN will combine multiple concurrent cache fill
@@ -3150,6 +3187,7 @@ properties:
                     Cloud CDN applies request coalescing by default.
                 - name: 'negativeCaching'
                   type: Boolean
+                  is_missing_in_cai: true
                   send_empty_value: true
                   description: |
                     Negative caching allows per-status code TTLs to be set, in order to apply
@@ -3169,6 +3207,7 @@ properties:
                     specified, Cloud CDN applies negative caching by default.
                 - name: 'negativeCachingPolicy'
                   type: Array
+                  is_missing_in_cai: true
                   send_empty_value: true
                   description: |
                     Sets a cache TTL for the specified HTTP status code. negativeCaching
@@ -3210,6 +3249,7 @@ properties:
                               function: 'validation.IntBetween(0, 0)'
                 - name: 'cacheBypassRequestHeaderNames'
                   type: Array
+                  is_missing_in_cai: true
                   description: |
                     Bypass the cache when the specified request headers are matched by name,
                     e.g. Pragma or Authorization headers. Values are case-insensitive. Up to 5
@@ -3219,6 +3259,7 @@ properties:
                     type: String
                 - name: 'serveWhileStale'
                   type: NestedObject
+                  is_missing_in_cai: true
                   description: |
                     Serve existing content from the cache (if available) when revalidating
                     content with the origin, or when an error is encountered when refreshing
@@ -3253,6 +3294,7 @@ properties:
                     - name: 'includeProtocol'
                       type: Boolean
                       send_empty_value: true
+                      is_missing_in_cai: true
                       description: |
                         If true, http and https requests will be cached separately. Note: This
                         setting is only applicable to routes that use a Backend Service. It
@@ -3263,6 +3305,7 @@ properties:
                     - name: 'includeHost'
                       type: Boolean
                       send_empty_value: true
+                      is_missing_in_cai: true
                       description: |
                         If true, requests to different hosts will be cached separately. Note:
                         This setting is only applicable to routes that use a Backend Service.
@@ -3273,6 +3316,7 @@ properties:
                     - name: 'includeQueryString'
                       type: Boolean
                       send_empty_value: true
+                      is_missing_in_cai: true
                       description: |
                         If true, include query string parameters in the cache key according to
                         includedQueryParameters and excludedQueryParameters. If neither is
@@ -3286,6 +3330,7 @@ properties:
                     - name: 'includedQueryParameters'
                       type: Array
                       send_empty_value: true
+                      is_missing_in_cai: true
                       description: |
                         Names of query string parameters to include in cache keys. All other
                         parameters will be excluded. Either specify includedQueryParameters
@@ -3296,6 +3341,7 @@ properties:
                     - name: 'excludedQueryParameters'
                       type: Array
                       send_empty_value: true
+                      is_missing_in_cai: true
                       description: |
                         Names of query string parameters to exclude in cache keys. All other
                         parameters will be included. Either specify excludedQueryParameters
@@ -3311,6 +3357,7 @@ properties:
                     - name: 'includedHeaderNames'
                       type: Array
                       send_empty_value: true
+                      is_missing_in_cai: true
                       description: |
                         Allows HTTP request headers (by name) to be used in the cache key.
                       item_type:
@@ -3318,6 +3365,7 @@ properties:
                     - name: 'includedCookieNames'
                       type: Array
                       send_empty_value: true
+                      is_missing_in_cai: true
                       description: |
                         Allows HTTP cookies (by name) to be used in the cache key. The
                         name=value pair will be used in the cache key Cloud CDN generates.
@@ -4081,7 +4129,6 @@ properties:
                   function: 'validation.FloatBetween(0, 100)'
       - name: 'cachePolicy'
         type: NestedObject
-        min_version: beta
         description: |
           Specifies the cache policy configuration for matched traffic. Available
           only for Global EXTERNAL_MANAGED load balancer schemes. At least one
@@ -4090,6 +4137,7 @@ properties:
         properties:
           - name: 'cacheMode'
             type: Enum
+            is_missing_in_cai: true
             description: |
               Specifies the cache setting for all responses from this route. If not
               specified, Cloud CDN uses CACHE_ALL_STATIC mode.
@@ -4110,6 +4158,7 @@ properties:
               - 'default_route_action.0.cache_policy.0.serve_while_stale'
           - name: 'defaultTtl'
             type: NestedObject
+            is_missing_in_cai: true
             description: |
               Specifies the default TTL for cached content for responses that do not have
               an existing valid TTL (max-age or s-maxage). Setting a TTL of "0" means
@@ -4147,6 +4196,7 @@ properties:
                   function: 'validation.IntBetween(0, 0)'
           - name: 'maxTtl'
             type: NestedObject
+            is_missing_in_cai: true
             description: |
               Specifies the maximum allowed TTL for cached content. Cache directives that
               attempt to set a max-age or s-maxage higher than this, or an Expires header
@@ -4184,6 +4234,7 @@ properties:
                   function: 'validation.IntBetween(0, 0)'
           - name: 'clientTtl'
             type: NestedObject
+            is_missing_in_cai: true
             description: |
               Specifies a separate client (e.g. browser client) maximum TTL for cached
               content. This is used to clamp the max-age (or Expires) value sent to the
@@ -4223,6 +4274,7 @@ properties:
           - name: 'requestCoalescing'
             type: Boolean
             send_empty_value: true
+            is_missing_in_cai: true
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
               - 'default_route_action.0.cache_policy.0.default_ttl'
@@ -4241,6 +4293,7 @@ properties:
           - name: 'negativeCaching'
             type: Boolean
             send_empty_value: true
+            is_missing_in_cai: true
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
               - 'default_route_action.0.cache_policy.0.default_ttl'
@@ -4271,6 +4324,7 @@ properties:
           - name: 'negativeCachingPolicy'
             type: Array
             send_empty_value: true
+            is_missing_in_cai: true
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
               - 'default_route_action.0.cache_policy.0.default_ttl'
@@ -4322,6 +4376,7 @@ properties:
                         function: 'validation.IntBetween(0, 0)'
           - name: 'cacheBypassRequestHeaderNames'
             type: Array
+            is_missing_in_cai: true
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
               - 'default_route_action.0.cache_policy.0.default_ttl'
@@ -4342,6 +4397,7 @@ properties:
               type: String
           - name: 'serveWhileStale'
             type: NestedObject
+            is_missing_in_cai: true
             at_least_one_of:
               - 'default_route_action.0.cache_policy.0.cache_mode'
               - 'default_route_action.0.cache_policy.0.default_ttl'
@@ -4398,6 +4454,7 @@ properties:
               - name: 'includeProtocol'
                 type: Boolean
                 send_empty_value: true
+                is_missing_in_cai: true
                 description: |
                   If true, http and https requests will be cached separately. Note: This
                   setting is only applicable to routes that use a Backend Service. It
@@ -4416,6 +4473,7 @@ properties:
               - name: 'includeHost'
                 type: Boolean
                 send_empty_value: true
+                is_missing_in_cai: true
                 description: |
                   If true, requests to different hosts will be cached separately. Note:
                   This setting is only applicable to routes that use a Backend Service.
@@ -4434,6 +4492,7 @@ properties:
               - name: 'includeQueryString'
                 type: Boolean
                 send_empty_value: true
+                is_missing_in_cai: true
                 description: |
                   If true, include query string parameters in the cache key according to
                   includedQueryParameters and excludedQueryParameters. If neither is
@@ -4455,6 +4514,7 @@ properties:
               - name: 'includedQueryParameters'
                 type: Array
                 send_empty_value: true
+                is_missing_in_cai: true
                 description: |
                   Names of query string parameters to include in cache keys. All other
                   parameters will be excluded. Either specify includedQueryParameters
@@ -4475,6 +4535,7 @@ properties:
               - name: 'excludedQueryParameters'
                 type: Array
                 send_empty_value: true
+                is_missing_in_cai: true
                 description: |
                   Names of query string parameters to exclude in cache keys. All other
                   parameters will be included. Either specify excludedQueryParameters
@@ -4500,6 +4561,7 @@ properties:
               - name: 'includedHeaderNames'
                 type: Array
                 send_empty_value: true
+                is_missing_in_cai: true
                 description: |
                   Allows HTTP request headers (by name) to be used in the cache key.
                 at_least_one_of:
@@ -4515,6 +4577,7 @@ properties:
               - name: 'includedCookieNames'
                 type: Array
                 send_empty_value: true
+                is_missing_in_cai: true
                 description: |
                   Allows HTTP cookies (by name) to be used in the cache key. The
                   name=value pair will be used in the cache key Cloud CDN generates.

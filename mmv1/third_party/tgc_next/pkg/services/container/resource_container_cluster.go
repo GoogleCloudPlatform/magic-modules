@@ -12,9 +12,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/container/v1"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_cluster",
+		ProductName: "container",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceContainerCluster(),
+	}.Register()
+}
 
 // ContainerClusterAssetType is the CAI asset type name for container cluster.
 const ContainerClusterAssetType string = "container.googleapis.com/Cluster"

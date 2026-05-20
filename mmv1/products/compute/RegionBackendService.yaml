@@ -74,12 +74,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       region_backend_service_name: 'tf-test-region-service-external'
-  - name: 'region_backend_service_cache'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_ilb_round_robin'
     primary_resource_id: 'default'
     vars:
@@ -116,7 +110,6 @@ examples:
       network_name: 'rbs-net'
   - name: 'region_backend_service_connection_tracking'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
@@ -1413,7 +1406,6 @@ properties:
       Connection Tracking configuration for this BackendService.
       This is available only for Layer 4 Internal Load Balancing and
       Network Load Balancing.
-    min_version: 'beta'
     properties:
       - name: 'idleTimeoutSec'
         type: Integer

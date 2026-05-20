@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -29,6 +31,10 @@ func ResourceGoogleFolderOrganizationPolicy() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
+
 		Schema: tpgresource.MergeSchemas(
 			schemaOrganizationPolicy,
 			map[string]*schema.Schema{
@@ -38,6 +44,9 @@ func ResourceGoogleFolderOrganizationPolicy() *schema.Resource {
 					ForceNew:    true,
 					Description: `The resource name of the folder to set the policy for. Its format is folders/{folder_id}.`,
 				},
+				//UDP schema start
+				"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+				//UDP schema end
 			},
 		),
 		UseJSONNumber: true,
@@ -91,7 +100,7 @@ func resourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta int
 	var policy *cloudresourcemanager.OrgPolicy
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (getErr error) {
-			policy, getErr = config.NewResourceManagerClient(userAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
+			policy, getErr = rmClient.NewClient(config, userAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 			}).Do()
 			return getErr
@@ -124,10 +133,19 @@ func resourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta int
 		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceGoogleFolderOrganizationPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceGoogleFolderOrganizationPolicy) {
+		return ResourceGoogleFolderOrganizationPolicy().Read(d, meta)
+	}
+
 	if isOrganizationPolicyUnset(d) {
 		return resourceGoogleFolderOrganizationPolicyDelete(d, meta)
 	}
@@ -140,6 +158,13 @@ func resourceGoogleFolderOrganizationPolicyUpdate(d *schema.ResourceData, meta i
 }
 
 func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -149,7 +174,7 @@ func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta i
 
 	return transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (delErr error) {
-			_, delErr = config.NewResourceManagerClient(userAgent).Folders.ClearOrgPolicy(folder, &cloudresourcemanager.ClearOrgPolicyRequest{
+			_, delErr = rmClient.NewClient(config, userAgent).Folders.ClearOrgPolicy(folder, &cloudresourcemanager.ClearOrgPolicyRequest{
 				Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 			}).Do()
 			return delErr
@@ -179,7 +204,7 @@ func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error
 
 	return transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (setErr error) {
-			_, setErr = config.NewResourceManagerClient(userAgent).Folders.SetOrgPolicy(folder, &cloudresourcemanager.SetOrgPolicyRequest{
+			_, setErr = rmClient.NewClient(config, userAgent).Folders.SetOrgPolicy(folder, &cloudresourcemanager.SetOrgPolicyRequest{
 				Policy: &cloudresourcemanager.OrgPolicy{
 					Constraint:     CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 					BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),

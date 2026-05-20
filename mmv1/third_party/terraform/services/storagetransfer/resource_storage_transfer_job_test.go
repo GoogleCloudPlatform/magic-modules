@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/storagetransfer"
 )
 
 func TestAccStorageTransferJob_basic(t *testing.T) {
@@ -113,7 +115,7 @@ func TestAccStorageTransferJob_updateLoggingConfig(t *testing.T) {
 func TestAccStorageTransferReplicationJob_basic(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gs-project-accounts.iam.gserviceaccount.com",
 			Role:   "roles/pubsub.publisher",
@@ -247,7 +249,7 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 func TestAccStorageTransferJob_posixSource(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
 			Role:   "roles/pubsub.admin",
@@ -285,7 +287,7 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 func TestAccStorageTransferJob_posixSink(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
 			Role:   "roles/pubsub.admin",
@@ -543,7 +545,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 func TestAccStorageTransferJob_hdfsSource(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
 			Role:   "roles/pubsub.admin",
@@ -746,7 +748,7 @@ func testAccStorageTransferJobDestroyProducer(t *testing.T) func(s *terraform.St
 				return err
 			}
 
-			res, err := config.NewStorageTransferClient(config.UserAgent).TransferJobs.Get(name, project).Do()
+			res, err := storagetransfer.NewClient(config, config.UserAgent).TransferJobs.Get(name, project).Do()
 			if err != nil {
 				return fmt.Errorf("Transfer Job does not exist, should exist and be DELETED")
 			}
