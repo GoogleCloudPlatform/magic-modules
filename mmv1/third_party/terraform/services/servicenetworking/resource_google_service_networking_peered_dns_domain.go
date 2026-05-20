@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -20,6 +21,7 @@ func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleServiceNetworkingPeeredDNSDomainCreate,
 		Read:   resourceGoogleServiceNetworkingPeeredDNSDomainRead,
+		Update: resourceGoogleServiceNetworkingPeeredDNSDomainUpdate,
 		Delete: resourceGoogleServiceNetworkingPeeredDNSDomainDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -34,6 +36,7 @@ func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -73,6 +76,9 @@ func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -213,10 +219,29 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, 
 		return fmt.Errorf("Error setting parent: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
+// UDP update start
+func resourceGoogleServiceNetworkingPeeredDNSDomainUpdate(d *schema.ResourceData, meta interface{}) error {
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceGoogleServiceNetworkingPeeredDNSDomainRead(d, meta)
+}
+
+//UDP update end
+
 func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -252,7 +277,7 @@ func getProjectNumber(d *schema.ResourceData, config *transport_tpg.Config, proj
 		billingProject = bp
 	}
 
-	getProjectCall := config.NewResourceManagerClient(userAgent).Projects.Get(project)
+	getProjectCall := rmClient.NewClient(config, userAgent).Projects.Get(project)
 	if config.UserProjectOverride {
 		getProjectCall.Header().Add("X-Goog-User-Project", billingProject)
 	}

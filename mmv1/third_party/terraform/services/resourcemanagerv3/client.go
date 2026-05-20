@@ -1,0 +1,24 @@
+package resourcemanagerv3
+
+import (
+	"log"
+
+	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
+	"google.golang.org/api/option"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func NewClient(c *transport_tpg.Config, userAgent string) *resourceManagerV3.Service {
+	resourceManagerV3BasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c))
+	log.Printf("[INFO] Instantiating Google Cloud ResourceManager V3 client for path %s", resourceManagerV3BasePath)
+	clientResourceManagerV3, err := resourceManagerV3.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client resource manager v3: %s", err)
+		return nil
+	}
+	clientResourceManagerV3.UserAgent = userAgent
+	clientResourceManagerV3.BasePath = resourceManagerV3BasePath
+
+	return clientResourceManagerV3
+}

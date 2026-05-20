@@ -9,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/bigtable"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -178,8 +181,8 @@ func TestAccBigtableInstance_kms(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	kms1 := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-	kms2 := acctest.BootstrapKMSKeyInLocation(t, "us-east1")
+	kms1 := kms.BootstrapKMSKeyInLocation(t, "us-central1")
+	kms2 := kms.BootstrapKMSKeyInLocation(t, "us-east1")
 	pid := envvar.GetTestProjectFromEnv()
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 

@@ -67,7 +67,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 
 	var billingAccount *cloudbilling.BillingAccount
 	if v, ok := d.GetOk("billing_account"); ok {
-		resp, err := config.NewBillingClient(userAgent).BillingAccounts.Get(CanonicalBillingAccountName(v.(string))).Do()
+		resp, err := NewClient(config, userAgent).BillingAccounts.Get(CanonicalBillingAccountName(v.(string))).Do()
 		if err != nil {
 			return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Billing Account Not Found : %s", v), CanonicalBillingAccountName(v.(string)))
 		}
@@ -80,7 +80,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 	} else if v, ok := d.GetOk("display_name"); ok {
 		token := ""
 		for paginate := true; paginate; {
-			resp, err := config.NewBillingClient(userAgent).BillingAccounts.List().PageToken(token).Do()
+			resp, err := NewClient(config, userAgent).BillingAccounts.List().PageToken(token).Do()
 			if err != nil {
 				return fmt.Errorf("Error reading billing accounts: %s", err)
 			}
@@ -109,7 +109,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.Get("lookup_projects").(bool) {
-		resp, err := config.NewBillingClient(userAgent).BillingAccounts.Projects.List(billingAccount.Name).Do()
+		resp, err := NewClient(config, userAgent).BillingAccounts.Projects.List(billingAccount.Name).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading billing account projects: %s", err)
 		}

@@ -396,6 +396,72 @@ properties:
           enum_values:
             - 'ENABLED'
             - 'DISABLED'
+  - name: 'maintenancePolicy'
+    type: NestedObject
+    description: |
+      Configure the maintenance policy for this instance.
+    properties:
+      - name: 'maintenanceWindow'
+        type: NestedObject
+        description: |
+          The maintenance window of the instance.
+        properties:
+          - name: 'recurringTimeWindow'
+            type: NestedObject
+            description: |
+              The recurring time window of the maintenance window.
+            required: true
+            properties:
+              - name: 'window'
+                type: NestedObject
+                description: |
+                  The window representing the start and end time of recurrences. This field ignores the date components of the provided timestamps. Only the time of day and duration between start and end time are relevant.
+                required: true
+                properties:
+                  - name: 'startTime'
+                    type: String
+                    description: |
+                      The start time of the time window provided in RFC 3339 format.
+                    required: true
+                  - name: 'endTime'
+                    type: String
+                    description: |
+                      The end time of the time window provided in RFC 3339 format.
+                    required: true
+              - name: 'recurrence'
+                type: String
+                description: |
+                  An RRULE with format RFC-5545 for how this window reccurs. They go on for the span of time between the start and end time. The only supported FREQ value is "WEEKLY". To have something repeat every weekday, use: "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR".
+                required: true
+
+  - name: 'maintenanceEvents'
+    type: Array
+    description: |
+      The maintenance events for this instance.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'startTime'
+          type: String
+          description: |
+            The start time of the maintenance event provided in RFC 3339 format.
+          output: true
+        - name: 'endTime'
+          type: String
+          description: |
+            The end time of the maintenance event provided in RFC 3339 format.
+          output: true
+        - name: 'state'
+          type: Enum
+          description: |
+            The state of the maintenance event.
+          output: true
+          enum_values:
+            - 'STATE_UNSPECIFIED'
+            - 'SCHEDULED'
+            - 'STARTED'
+            - 'COMPLETED'
   - name: 'tags'
     type: KeyValuePairs
     description: |

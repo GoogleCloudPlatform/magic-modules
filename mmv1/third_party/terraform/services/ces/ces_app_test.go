@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 )
 
 func TestAccCESApp_update(t *testing.T) {
@@ -76,6 +78,7 @@ resource "google_ces_app" "ces_app_basic" {
   description = "Basic CES App example"
   display_name = "tf-test-my-app-%{random_suffix}"
   pinned = false
+  tool_execution_mode = "SEQUENTIAL"
 
   language_settings {
     default_language_code    = "en-US"
@@ -267,6 +270,7 @@ resource "google_ces_app" "ces_app_basic" {
   description = "Updated CES App example"
   display_name = "tf-test-my-app%{random_suffix}"
   pinned = true
+  tool_execution_mode = "PARALLEL"
 
   language_settings {
     default_language_code    = "en-ES"

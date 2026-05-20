@@ -22,8 +22,17 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+func init() {
+	registry.FrameworkResource{
+		Name:        "google_chrome_policies",
+		ProductName: "chromepolicy",
+		Func:        NewGoogleChromePoliciesResource,
+	}.Register()
+}
 
 // policies uses DynamicAttribute (not SetNestedBlock) because the Plugin Framework doesn't support dynamic types in collections (terraform-plugin-framework#973).
 // This allows native HCL types in value without jsonencode(). We use a list (not set) to avoid dirty-state issues (terraform-plugin-framework#1008); order is normalized during Read by matching existing state order.

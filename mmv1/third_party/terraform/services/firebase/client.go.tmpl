@@ -12,7 +12,7 @@ import (
 )
 
 func NewClient(ctx context.Context, c *transport_tpg.Config, userAgent string) *firebase.Service {
-	firebaseClientBasePath := transport_tpg.RemoveBasePathVersion(c.FirebaseBasePath)
+	firebaseClientBasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c))
 	firebaseClientBasePath = strings.ReplaceAll(firebaseClientBasePath, "/firebase/", "")
 	log.Printf("[INFO] Instantiating Google Cloud firebase client for path %s", firebaseClientBasePath)
 	clientFirebase, err := firebase.NewService(c.Context, option.WithHTTPClient(c.Client))

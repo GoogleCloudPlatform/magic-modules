@@ -82,13 +82,13 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'Set of label tags associated with the EdgeCache resource.'
- # default from api
+  # default from api
   - name: 'disableQuic'
     type: Boolean
     description: |
       HTTP/3 (IETF QUIC) and Google QUIC are enabled by default.
     default_from_api: true
- # default from api
+  # default from api
   - name: 'disableHttp2'
     type: Boolean
     description: |
@@ -238,7 +238,7 @@ properties:
                     item_type:
                       type: NestedObject
                       properties:
- # default from api
+                        # default from api
                         - name: 'ignoreCase'
                           type: Boolean
                           description: |
@@ -327,9 +327,9 @@ properties:
                             For satisfying the matchRule condition, the path of the request must exactly match the value specified in fullPathMatch after removing any query parameters and anchor that may be part of the original URL.
                     min_size: 1
                     max_size: 5
-                          # TODO: (scottsuarez) conflicts also won't work for array path matchers yet, uncomment here once supported.
-                          # conflicts:
-                          #   - Routing.PathMatcher.RouteRule.prefixMatch
+                  # TODO: (scottsuarez) conflicts also won't work for array path matchers yet, uncomment here once supported.
+                  # conflicts:
+                  #   - Routing.PathMatcher.RouteRule.prefixMatch
                   - name: 'routeMethods'
                     type: NestedObject
                     description: |
@@ -371,7 +371,7 @@ properties:
                               description: |
                                 The value of the header to add.
                               required: true
- # default from api
+                            # default from api
                             - name: 'replace'
                               type: Boolean
                               description: |
@@ -448,7 +448,7 @@ properties:
                         description: |
                           The policy to use for defining caching and signed request behaviour for requests that match this route.
                         properties:
- # default from api
+                          # default from api
                           - name: 'cacheMode'
                             type: Enum
                             description: |
@@ -494,7 +494,7 @@ properties:
 
                               A duration in seconds terminated by 's'. Example: "3s".
                             default_from_api: true
- # defalt from api
+                          # defalt from api
                           - name: 'maxTtl'
                             type: String
                             description: |
@@ -518,7 +518,7 @@ properties:
                             description: |
                               Defines the request parameters that contribute to the cache key.
                             properties:
- # default from api
+                              # default from api
                               - name: 'includeProtocol'
                                 type: Boolean
                                 description: |
@@ -624,7 +624,7 @@ properties:
                               - 'DISABLED'
                               - 'REQUIRE_SIGNATURES'
                               - 'REQUIRE_TOKENS'
- # resource ref, EdgeCacheKeyset?
+                          # resource ref, EdgeCacheKeyset?
                           - name: 'signedRequestKeyset'
                             type: String
                             description: |
@@ -896,7 +896,7 @@ properties:
                           - 'SEE_OTHER'
                           - 'TEMPORARY_REDIRECT'
                           - 'PERMANENT_REDIRECT'
- # default from api
+                      # default from api
                       - name: 'httpsRedirect'
                         type: Boolean
                         description: |
@@ -904,7 +904,7 @@ properties:
 
                           This can only be set if there is at least one (1) edgeSslCertificate set on the service.
                         default_from_api: true
- # default from api
+                      # default from api
                       - name: 'stripQuery'
                         type: Boolean
                         description: |
@@ -919,7 +919,7 @@ properties:
     description: |
       Specifies the logging options for the traffic served by this service. If logging is enabled, logs will be exported to Cloud Logging.
     properties:
- # default from api
+      # default from api
       - name: 'enable'
         type: Boolean
         description: |

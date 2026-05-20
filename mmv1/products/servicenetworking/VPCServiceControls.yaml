@@ -62,7 +62,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
- # we just need the boilerplate async code, we'll call the methods manually
+  # we just need the boilerplate async code, we'll call the methods manually
   actions: ['']
   type: 'OpAsync'
   operation:
@@ -75,7 +75,7 @@ custom_code:
   custom_create: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
   pre_read: 'templates/terraform/pre_read/service_networking_vpc_service_controls.go.tmpl'
   custom_update: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
- # excluding tgc because of helpers in custom_code.constants
+# excluding tgc because of helpers in custom_code.constants
 exclude_tgc: true
 examples:
   - name: 'service_networking_vpc_service_controls_basic'
