@@ -1,0 +1,122 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: FindingsRefinement
+description: Represents a set of logic conditions used to refine various types of findings such as curated rule detections.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.findingsRefinements'
+min_version: 'beta'
+
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
+update_mask: true
+update_verb: PATCH
+exclude_delete: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
+autogen_status: RmluZGluZ3NSZWZpbmVtZW50
+
+examples:
+  - name: 'chronicle_findings_refinement_basic'
+    primary_resource_id: 'findings_refinement_example'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    vars:
+      display_name: findings_refinement_display_name
+
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The timestamp of when the findings refinement was created.
+    output: true
+  - name: displayName
+    type: String
+    description: Display name of the findings refinement.
+  - name: name
+    type: String
+    output: true
+    description: |-
+      Full resource name for the findings refinement.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/findingsRefinements/{findings_refinement}
+  - name: outcomeFilters
+    type: Array
+    description: |-
+      The outcome filters for the findings refinement. These allow you to specify
+      filters that are applied to the outcome variables in the detection.
+      All filters must be true for a detection to match the findings refinement.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: outcomeFilterOperator
+          type: String
+          required: true
+          description: |-
+            The operator to be applied to the outcome variable.
+            Possible values:
+            EQUAL
+            CONTAINS
+            MATCHES_REGEX
+            MATCHES_CIDR
+        - name: outcomeValue
+          type: String
+          required: true
+          description: The value of the outcome variable to match.
+        - name: outcomeVariable
+          type: String
+          required: true
+          description: The outcome variable name.
+  - name: query
+    type: String
+    description: |-
+      The query for the findings refinement. Works in conjunction with the type
+      field to determine the findings refinement behavior. The syntax of this
+      query is the same as a UDM search string. See the following for more
+      information:
+      https://cloud.google.com/chronicle/docs/investigation/udm-search
+  - name: type
+    type: String
+    description: |-
+      DETECTION_EXCLUSION is the only supported type of findings refinement.
+      Possible values:
+      DETECTION_EXCLUSION
+  - name: updateTime
+    type: String
+    description: The timestamp of when the findings refinement was last updated.
+    output: true
+  - name: findingsRefinementId
+    type: String
+    output: true
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Findings Refinement Id is the ID of the Findings Refinement.
