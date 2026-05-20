@@ -42,13 +42,25 @@ parameters:
   - name: parent
     type: String
     description: |
-      The parent resource in which to create the CloudControl.
+      The parent resource in which to create the resource.
       Must be in one of the following formats:
       * `projects/{{project}}`
       * `organizations/{{organization}}`
     immutable: true
     url_param_only: true
-    required: true
+    exactly_one_of:
+      - parent
+      - organization
+  - name: organization
+    type: String
+    description: |
+      Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    deprecation_message: "Use `parent` instead."
+    exactly_one_of:
+      - parent
+      - organization
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122. Currently, only "global" is supported as a location.

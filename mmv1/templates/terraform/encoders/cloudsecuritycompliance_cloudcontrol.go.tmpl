@@ -1,9 +1,14 @@
 // Build the fullname for the CloudControl resource from the provided
 // parent, location and cloud_control_id fields and set it on the
 // API object that will be sent in the request.
-parent, ok := d.Get("parent").(string)
-if !ok || parent == "" {
-	return nil, fmt.Errorf("parent is required and must be a non-empty string")
+// Extract the parent scope, falling back to organization for backward compatibility
+var parentStr string
+if parent, ok := d.GetOk("parent"); ok && parent.(string) != "" {
+	parentStr = parent.(string)
+} else if org, ok := d.GetOk("organization"); ok && org.(string) != "" {
+	parentStr = fmt.Sprintf("organizations/%s", org.(string))
+} else {
+	return nil, fmt.Errorf("either parent or organization must be provided")
 }
 loc, ok := d.Get("location").(string)
 if !ok || loc == "" {
@@ -15,6 +20,6 @@ if !ok || ccid == "" {
 }
 // Compose the resource name in the expected API format.
 // The parent already includes the resource type (e.g. projects/my-project)
-name := fmt.Sprintf("%s/locations/%s/cloudControls/%s", parent, loc, ccid)
+name := fmt.Sprintf("%s/locations/%s/cloudControls/%s", parentStr, loc, ccid)
 obj["name"] = name
 return obj, nil
