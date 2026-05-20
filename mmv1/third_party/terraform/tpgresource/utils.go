@@ -197,21 +197,18 @@ When set to "DELETE", deleting the resource is allowed.
 }
 
 func DeletionPolicyReadDefault(d *schema.ResourceData, config *transport_tpg.Config, resourceDefault string) error {
-	if dpolicy, ok := d.GetOkExists("deletion_policy"); !ok {
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
 		//prioritize config's value if present
 		if config.DeletionPolicy != "" {
-			log.Printf("[DEBUG] `deletion_policy` detected as not set within resource configuration. Falling back to configured provider default, %s", config.DeletionPolicy)
 			if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
 				return fmt.Errorf("Error setting deletion_policy: %s", err)
 			}
 		} else {
-			log.Printf("[DEBUG] `deletion_policy` detected as not set within resource or provider configuration. Falling back to resource default, %s", resourceDefault)
 			if err := d.Set("deletion_policy", resourceDefault); err != nil {
 				return fmt.Errorf("Error setting deletion_policy: %s", err)
 			}
 		}
 	}
-	log.Printf("[DEBUG] `deletion_policy` being set to recorded config value %s", dpolicy.(string))
 	return nil
 }
 
