@@ -1670,7 +1670,7 @@ resource "google_cloud_run_v2_service" "default" {
     source_location = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
     function_target = "helloHttp"
     image_uri = "gcr.io/cloudrun/hello:latest"
-    base_image = "us-central1-docker.pkg.dev/serverless-runtimes/google-22-full/runtimes/nodejs20"
+    base_image = "us-central1-docker.pkg.dev/serverless-runtimes/google-22-full/runtimes/nodejs24"
     enable_automatic_updates = false
     environment_variables = {
       FOO_KEY_FOO = "FOO_VALUE_FOO"
