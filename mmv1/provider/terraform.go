@@ -155,12 +155,38 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
 			templateData.GenerateResourceFile(targetFilePath, object)
 		}
+
+		t.GenerateListResource(object, templateData, targetFolder)
 	}
 
 	if generateDocs {
 		targetFolder := t.makeFolder(outputFolder, "website", "docs", "r")
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
 		templateData.GenerateDocumentationFile(targetFilePath, object)
+
+		if object.GenerateListResource {
+			listDocFolder := t.makeFolder(outputFolder, "website", "docs", "list-resources")
+			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s.html.markdown", object.TerraformName()))
+			templateData.GenerateListResourceDocumentationFile(listDocFilePath, object)
+		}
+	}
+}
+
+func (t *Terraform) GenerateListResource(object api.Resource, templateData TemplateData, targetFolder string) {
+	if object.GenerateListResource {
+		if object.ExcludeIdentityGeneration {
+			log.Fatalf("generate_list_resource requires identity support; remove exclude_identity_generation from resource %q or disable generate_list_resource", object.Name)
+		}
+		if object.ExcludeRead {
+			log.Fatalf("generate_list_resource requires read support; remove exclude_read from resource %q or disable generate_list_resource", object.Name)
+		}
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s.go", t.ResourceGoFilename(object)))
+		templateData.GenerateFile(targetFilePath, "templates/terraform/list_resource.go.tmpl", object, true,
+			"templates/terraform/list_resource.go.tmpl",
+			"templates/terraform/list_resource_method.go.tmpl",
+		)
+
+		t.GenerateListResourceQueryTest(object, templateData, targetFolder)
 	}
 }
 
@@ -247,6 +273,17 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateTestFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Samples == nil || !t.hasEligibleSample(object) {
+		return
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateQueryTestFile(targetFilePath, object)
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
