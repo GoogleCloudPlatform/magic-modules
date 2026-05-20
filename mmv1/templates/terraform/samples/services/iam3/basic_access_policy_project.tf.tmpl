@@ -1,7 +1,7 @@
 resource "google_project" "project" {
   provider        = google-beta
-  project_id      = "{{index $.Vars "project_name"}}"
-  name            = "{{index $.Vars "project_name"}}"
+  project_id      = "{{index $.ResourceIdVars "project_name"}}"
+  name            = "{{index $.ResourceIdVars "project_name"}}"
   org_id          = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
@@ -20,8 +20,17 @@ resource "time_sleep" "wait_for_project_propagation" {
 }
 resource "google_service_account" "test_sa" {
   provider        = google-beta
-  account_id   = "{{index $.Vars "account_id"}}"
+  account_id   = "{{index $.ResourceIdVars "account_id"}}"
   display_name = "Test Service Account for Access Policy"
+  project      = google_project.project.project_id
+  depends_on = [
+      time_sleep.wait_for_project_propagation
+  ]
+}
+resource "google_service_account" "excluded_sa" {
+  provider        = google-beta
+  account_id   = "exc-{{index $.ResourceIdVars "account_id"}}"
+  display_name = "Excluded Service Account for Access Policy"
   project      = google_project.project.project_id
   depends_on = [
       time_sleep.wait_for_project_propagation
@@ -31,13 +40,14 @@ resource "google_iam_projects_access_policy" "{{$.PrimaryResourceId}}" {
   provider          = google-beta
   project           = google_project.project.project_id
   location          = "global"
-  access_policy_id  = "{{index $.Vars "access_policy_id"}}"
+  access_policy_id  = "{{index $.ResourceIdVars "access_policy_id"}}"
   display_name      = "{{index $.Vars "display_name"}}"
   details {
     rules {
-      description = "Allow rule for a service account"
+      description = "Allow rule for a service account with excluded principals"
       effect      = "ALLOW"
       principals  = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test_sa.email}"]
+      excluded_principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.excluded_sa.email}"]
       operation {
         permissions = ["eventarc.googleapis.com/messageBuses.publish"]
       }
@@ -47,9 +57,10 @@ resource "google_iam_projects_access_policy" "{{$.PrimaryResourceId}}" {
       }
     }
     rules {
-      description = "Deny rule for all public principals"
+      description = "Deny rule for all public principals except excluded principals"
       effect      = "DENY"
       principals  = ["principalSet://goog/public:all"]
+      excluded_principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.excluded_sa.email}"]
       operation {
         permissions = ["eventarc.googleapis.com/messageBuses.publish"]
       }
