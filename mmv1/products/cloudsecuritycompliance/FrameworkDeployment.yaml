@@ -38,7 +38,6 @@ examples:
       deployment_name: "example-deployment"
       framework_name: "example-framework"
     test_env_vars:
-      project_number: "PROJECT_NUMBER"
       org_id: "ORG_ID"
   - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
     primary_resource_id: "example"
@@ -57,6 +56,19 @@ examples:
     test_env_vars:
       org_id: "ORG_ID"
       billing_account: "BILLING_ACCT"
+  - name: "cloudsecuritycompliance_framework_deployment_org_project_basic"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+    test_env_vars:
+      org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_deployment_project_application_basic"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+      app_name: "example-app"
 autogen_async: true
 async:
   operation:

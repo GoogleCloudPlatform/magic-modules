@@ -78,7 +78,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
   }
   
   target_resource_config {
-    existing_target_resource = "projects/${data.google_project.project.number}"
+    existing_target_resource = "projects/${data.google_project.project.project_id}"
   }
   
   cloud_control_metadata {
