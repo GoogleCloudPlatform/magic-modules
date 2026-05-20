@@ -8,19 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-
-	{{ if eq $.TargetVersionName `ga` }}
-		"google.golang.org/api/compute/v1"
-	{{- else }}
-		compute "google.golang.org/api/compute/v0.beta"
-	{{- end }}
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeInstantSnapshot_basicFeatures(t *testing.T) {
-	var is compute.InstantSnapshot
+	var is map[string]interface{}
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -41,7 +36,7 @@ func TestAccComputeInstantSnapshot_basicFeatures(t *testing.T) {
 }
 
 func TestAccComputeInstantSnapshot_labelsUpdate(t *testing.T) {
-	var is compute.InstantSnapshot
+	var is map[string]interface{}
 	context_1 := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"label_key":     "test-1",
@@ -85,8 +80,7 @@ func TestAccComputeInstantSnapshot_labelsUpdate(t *testing.T) {
 	})
 }
 
-
-func testAccCheckComputeInstantSnapshotExists(t *testing.T, n, p string, is *compute.InstantSnapshot) resource.TestCheckFunc {
+func testAccCheckComputeInstantSnapshotExists(t *testing.T, n, p string, is *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -101,17 +95,23 @@ func testAccCheckComputeInstantSnapshotExists(t *testing.T, n, p string, is *com
 
 		zone := tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
 
-		found, err := compute_tpg.NewClient(config, config.UserAgent).InstantSnapshots.Get(
-			p, zone, rs.Primary.Attributes["name"]).Do()
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instantSnapshots/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), p, zone, rs.Primary.Attributes["name"])
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   p,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		if found.Name != rs.Primary.Attributes["name"] {
+		if foundName, ok := found["name"].(string); !ok || foundName != rs.Primary.Attributes["name"] {
 			return fmt.Errorf("Instant Snapshot not found")
 		}
 
-		*is = *found
+		*is = found
 
 		return nil
 	}
