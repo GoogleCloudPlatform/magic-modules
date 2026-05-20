@@ -22,6 +22,9 @@ func TestAccEphemeralServiceAccountKey_create(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEphemeralServiceAccountKey_create_setup(accountID, displayName),
