@@ -72,14 +72,11 @@ func sendSecondaryIpRangeIfEmptyDiff(_ context.Context, diff *schema.ResourceDif
 	return nil
 }
 
-func IpDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	log.Printf("[DEBUG] IpDiffSuppress - k: %s, old: %s, new: %s, d.Id: %s", k, old, new, d.Id())
+func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	if d.Id() == "" {
-		log.Printf("[DEBUG] IpDiffSuppress - returning false because d.Id is empty")
 		return false
 	}
 	if old == "" || new == "" {
-		log.Printf("[DEBUG] IpDiffSuppress - returning %t because old or new is empty", old == new)
 		return old == new
 	}
 	addr_equality := false
@@ -89,27 +86,45 @@ func IpDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	addr_netmask_new := strings.Split(new, "/")
 
 	if !((len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2)) {
-		log.Printf("[DEBUG] IpDiffSuppress - returning false because split length != 2")
 		return false
 	}
 
 	var addr_old net.IP = net.ParseIP(addr_netmask_old[0])
 	if addr_old == nil {
-		log.Printf("[DEBUG] IpDiffSuppress - returning false because addr_old is nil")
 		return false
 	}
 	var addr_new net.IP = net.ParseIP(addr_netmask_new[0])
 	if addr_new == nil {
-		log.Printf("[DEBUG] IpDiffSuppress - returning false because addr_new is nil")
 		return false
 	}
 
 	addr_equality = net.IP.Equal(addr_old, addr_new)
 	netmask_equality = addr_netmask_old[1] == addr_netmask_new[1]
 
-	res := addr_equality && netmask_equality
-	log.Printf("[DEBUG] IpDiffSuppress - returning %t (addr_equality: %t, netmask_equality: %t)", res, addr_equality, netmask_equality)
-	return res
+	return addr_equality && netmask_equality
+}
+
+func ipEqual(old, new string) bool {
+	if old == "" || new == "" {
+		return old == new
+	}
+	addr_netmask_old := strings.Split(old, "/")
+	addr_netmask_new := strings.Split(new, "/")
+
+	if !((len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2)) {
+		return false
+	}
+
+	addr_old := net.ParseIP(addr_netmask_old[0])
+	if addr_old == nil {
+		return false
+	}
+	addr_new := net.ParseIP(addr_netmask_new[0])
+	if addr_new == nil {
+		return false
+	}
+
+	return net.IP.Equal(addr_old, addr_new) && addr_netmask_old[1] == addr_netmask_new[1]
 }
 
 func mergeSurvivor(oldEl, newEl interface{}, ipCidrExplicit bool) interface{} {
@@ -129,10 +144,14 @@ func mergeSurvivor(oldEl, newEl interface{}, ipCidrExplicit bool) interface{} {
 	}
 	
 	for k, v := range newMap {
-		if k == "ip_cidr_range" && !ipCidrExplicit {
-			// If ip_cidr_range was not explicitly set in HCL, always keep the old state value
-			// (preventing inheriting wrong index's value from Terraform CLI)
-			if oldVal, ok := oldMap[k]; ok && oldVal != "" {
+		if k == "ip_cidr_range" {
+			oldVal, _ := oldMap[k].(string)
+			newVal, _ := v.(string)
+			if ipEqual(oldVal, newVal) {
+				// If they are semantically equal, always prefer the old state value to avoid diffs
+				continue
+			}
+			if !ipCidrExplicit && oldVal != "" {
 				continue
 			}
 		}
@@ -282,9 +301,6 @@ func resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff tpgresource.Te
 		}
 	}
 
-	log.Printf("[DEBUG] CustomDiff - oldList: %#v", oldList)
-	log.Printf("[DEBUG] CustomDiff - newList: %#v", newList)
-
 	// Helper: normalizes CIDR strings and ip_collection self-links
 	normalizeItem := func(m map[string]interface{}, overrideCidr string) map[string]interface{} {
 		clean := make(map[string]interface{})
@@ -338,9 +354,6 @@ func resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff tpgresource.Te
 		normalizedNew = append(normalizedNew, normalizeItem(m, userCidr))
 	}
 
-	log.Printf("[DEBUG] CustomDiff - normalizedOld: %#v", normalizedOld)
-	log.Printf("[DEBUG] CustomDiff - normalizedNew: %#v", normalizedNew)
-
 	// Compare Sets and Clear Diff
 	var hashFunc schema.SchemaSetFunc
 	if ResourceComputeSubnetwork().Schema != nil && ResourceComputeSubnetwork().Schema["secondary_ip_range"] != nil {
@@ -353,13 +366,7 @@ func resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff tpgresource.Te
 		}
 	}
 
-	setOld := schema.NewSet(hashFunc, normalizedOld)
-	setNew := schema.NewSet(hashFunc, normalizedNew)
-	equal := setOld.Equal(setNew)
-	log.Printf("[DEBUG] CustomDiff - equal: %t", equal)
-
-	if equal {
-		log.Printf("[DEBUG] CustomDiff - clearing diff for secondary_ip_range")
+	if schema.NewSet(hashFunc, normalizedOld).Equal(schema.NewSet(hashFunc, normalizedNew)) {
 		if err := diff.Clear("secondary_ip_range"); err != nil {
 			return err
 		}
