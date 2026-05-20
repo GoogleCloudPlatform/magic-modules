@@ -29,18 +29,29 @@ async:
     - delete
   result:
     resource_inside_response: true
-examples:
-  - name: vertex_ai_artifact_basic
-    primary_resource_id: artifact
-    vars:
-      resource_name: tf-test-artifact
+samples:
+  - name: "vertex_ai_artifact"
+    primary_resource_id: "artifact"
+    min_version: beta
+    steps:
+      - name: "vertex_ai_artifact_basic"
+        resource_id_vars:
+          artifactId: "artifact"
+          storeName: "store"
+      - name: "vertex_ai_artifact_update"
+        resource_id_vars:
+          artifactId: "artifact"
+          storeName: "store"
+        vars:
+          description: "An updated artifact description"
+          display_name: "Updated Display Name"
 parameters:
   - name: region
     type: String
-    required: true
     description: The region of the Artifact.
     immutable: true
     url_param_only: true
+    default_from_api: true
   - name: metadatastore
     type: String
     required: true

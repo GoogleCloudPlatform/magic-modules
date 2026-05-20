@@ -1,0 +1,26 @@
+resource "google_vertex_ai_metadata_store" "store" {
+  provider    = google-beta
+  name        = "{{index $.ResourceIdVars "storeName"}}"
+  description = "Store to test Artifact"
+  region      = "us-central1"
+}
+
+resource "google_vertex_ai_artifact" "{{$.PrimaryResourceId}}" {
+  provider       = google-beta
+  artifact_id    = "{{index $.ResourceIdVars "artifactId"}}"
+  metadatastore  = google_vertex_ai_metadata_store.store.name
+  schema_title   = "system.Dataset"
+  schema_version = "0.0.1"
+  uri            = "https://example.com/dataset"
+
+  description  = "{{index $.Vars "description"}}"
+  display_name = "{{index $.Vars "display_name"}}"
+  
+  labels = {
+    label = "value"
+  }
+
+  metadata = {
+    key = "value"
+  }
+}
