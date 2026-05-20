@@ -2716,44 +2716,58 @@ func expandExternalDataConfiguration(cfg interface{}) (map[string]interface{}, e
 		}
 	}
 
-	if v, ok := raw["file_set_spec_type"]; ok {
+	if v, ok := raw["file_set_spec_type"]; ok && v.(string) != "" {
 		edc["fileSetSpecType"] = v.(string)
 	}
 
-	if v, ok := raw["compression"]; ok {
+	if v, ok := raw["compression"]; ok && v.(string) != "" {
 		edc["compression"] = v.(string)
 	}
 
-	if v, ok := raw["json_extension"]; ok {
+	if v, ok := raw["json_extension"]; ok && v.(string) != "" {
 		edc["jsonExtension"] = v.(string)
 	}
 
 	if v, ok := raw["csv_options"]; ok {
-		edc["csvOptions"] = expandCsvOptions(v)
+		if expanded := expandCsvOptions(v); expanded != nil {
+			edc["csvOptions"] = expanded
+		}
 	}
 	if v, ok := raw["json_options"]; ok {
-		edc["jsonOptions"] = expandJsonOptions(v)
+		if expanded := expandJsonOptions(v); expanded != nil {
+			edc["jsonOptions"] = expanded
+		}
 	}
 	if v, ok := raw["bigtable_options"]; ok {
-		edc["bigtableOptions"] = expandBigtableOptions(v)
+		if expanded := expandBigtableOptions(v); expanded != nil {
+			edc["bigtableOptions"] = expanded
+		}
 	}
 	if v, ok := raw["google_sheets_options"]; ok {
-		edc["googleSheetsOptions"] = expandGoogleSheetsOptions(v)
+		if expanded := expandGoogleSheetsOptions(v); expanded != nil {
+			edc["googleSheetsOptions"] = expanded
+		}
 	}
 	if v, ok := raw["hive_partitioning_options"]; ok {
-		edc["hivePartitioningOptions"] = expandHivePartitioningOptions(v)
+		if expanded := expandHivePartitioningOptions(v); expanded != nil {
+			edc["hivePartitioningOptions"] = expanded
+		}
 	}
 	if v, ok := raw["avro_options"]; ok {
-		edc["avroOptions"] = expandAvroOptions(v)
+		if expanded := expandAvroOptions(v); expanded != nil {
+			edc["avroOptions"] = expanded
+		}
 	}
 	if v, ok := raw["parquet_options"]; ok {
-		edc["parquetOptions"] = expandParquetOptions(v)
+		if expanded := expandParquetOptions(v); expanded != nil {
+			edc["parquetOptions"] = expanded
+		}
 	}
 
-	if v, ok := raw["ignore_unknown_values"]; ok {
+	if v, ok := raw["ignore_unknown_values"]; ok && v.(bool) {
 		edc["ignoreUnknownValues"] = v.(bool)
 	}
-	if v, ok := raw["max_bad_records"]; ok {
+	if v, ok := raw["max_bad_records"]; ok && v.(int) != 0 {
 		edc["maxBadRecords"] = int64(v.(int))
 	}
 	if v, ok := raw["schema"]; ok {
@@ -2762,21 +2776,23 @@ func expandExternalDataConfiguration(cfg interface{}) (map[string]interface{}, e
 		if err != nil {
 			return nil, err
 		}
-		edc["schema"] = schemaMap
+		if schemaMap != nil {
+			edc["schema"] = schemaMap
+		}
 	}
-	if v, ok := raw["source_format"]; ok {
+	if v, ok := raw["source_format"]; ok && v.(string) != "" {
 		edc["sourceFormat"] = v.(string)
 	}
-	if v, ok := raw["connection_id"]; ok {
+	if v, ok := raw["connection_id"]; ok && v.(string) != "" {
 		edc["connectionId"] = v.(string)
 	}
-	if v, ok := raw["reference_file_schema_uri"]; ok {
+	if v, ok := raw["reference_file_schema_uri"]; ok && v.(string) != "" {
 		edc["referenceFileSchemaUri"] = v.(string)
 	}
-	if v, ok := raw["metadata_cache_mode"]; ok {
+	if v, ok := raw["metadata_cache_mode"]; ok && v.(string) != "" {
 		edc["metadataCacheMode"] = v.(string)
 	}
-	if v, ok := raw["object_metadata"]; ok {
+	if v, ok := raw["object_metadata"]; ok && v.(string) != "" {
 		edc["objectMetadata"] = v.(string)
 	}
 
@@ -2872,27 +2888,27 @@ func expandCsvOptions(configured interface{}) map[string]interface{} {
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	opts := map[string]interface{}{}
 
-	if v, ok := raw["allow_jagged_rows"]; ok {
+	if v, ok := raw["allow_jagged_rows"]; ok && v.(bool) {
 		opts["allowJaggedRows"] = v.(bool)
 	}
 
-	if v, ok := raw["allow_quoted_newlines"]; ok {
+	if v, ok := raw["allow_quoted_newlines"]; ok && v.(bool) {
 		opts["allowQuotedNewlines"] = v.(bool)
 	}
 
-	if v, ok := raw["encoding"]; ok {
+	if v, ok := raw["encoding"]; ok && v.(string) != "" {
 		opts["encoding"] = v.(string)
 	}
 
-	if v, ok := raw["field_delimiter"]; ok {
+	if v, ok := raw["field_delimiter"]; ok && v.(string) != "" {
 		opts["fieldDelimiter"] = v.(string)
 	}
 
-	if v, ok := raw["skip_leading_rows"]; ok {
+	if v, ok := raw["skip_leading_rows"]; ok && v.(int) != 0 {
 		opts["skipLeadingRows"] = strconv.FormatInt(int64(v.(int)), 10)
 	}
 
-	if v, ok := raw["source_column_match"]; ok {
+	if v, ok := raw["source_column_match"]; ok && v.(string) != "" {
 		opts["sourceColumnMatch"] = v.(string)
 	}
 
@@ -2947,11 +2963,11 @@ func expandGoogleSheetsOptions(configured interface{}) map[string]interface{} {
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	opts := map[string]interface{}{}
 
-	if v, ok := raw["range"]; ok {
+	if v, ok := raw["range"]; ok && v.(string) != "" {
 		opts["range"] = v.(string)
 	}
 
-	if v, ok := raw["skip_leading_rows"]; ok {
+	if v, ok := raw["skip_leading_rows"]; ok && v.(int) != 0 {
 		opts["skipLeadingRows"] = strconv.FormatInt(int64(v.(int)), 10)
 	}
 	return opts
@@ -2981,15 +2997,15 @@ func expandHivePartitioningOptions(configured interface{}) map[string]interface{
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	opts := map[string]interface{}{}
 
-	if v, ok := raw["mode"]; ok {
+	if v, ok := raw["mode"]; ok && v.(string) != "" {
 		opts["mode"] = v.(string)
 	}
 
-	if v, ok := raw["require_partition_filter"]; ok {
+	if v, ok := raw["require_partition_filter"]; ok && v.(bool) {
 		opts["requirePartitionFilter"] = v.(bool)
 	}
 
-	if v, ok := raw["source_uri_prefix"]; ok {
+	if v, ok := raw["source_uri_prefix"]; ok && v.(string) != "" {
 		opts["sourceUriPrefix"] = v.(string)
 	}
 
@@ -3022,7 +3038,7 @@ func expandAvroOptions(configured interface{}) map[string]interface{} {
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	opts := map[string]interface{}{}
 
-	if v, ok := raw["use_avro_logical_types"]; ok {
+	if v, ok := raw["use_avro_logical_types"]; ok && v.(bool) {
 		opts["useAvroLogicalTypes"] = v.(bool)
 	}
 
@@ -3047,11 +3063,11 @@ func expandParquetOptions(configured interface{}) map[string]interface{} {
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	opts := map[string]interface{}{}
 
-	if v, ok := raw["enum_as_string"]; ok {
+	if v, ok := raw["enum_as_string"]; ok && v.(bool) {
 		opts["enumAsString"] = v.(bool)
 	}
 
-	if v, ok := raw["enable_list_inference"]; ok {
+	if v, ok := raw["enable_list_inference"]; ok && v.(bool) {
 		opts["enableListInference"] = v.(bool)
 	}
 
@@ -3090,15 +3106,15 @@ func expandBigtableOptions(configured interface{}) map[string]interface{} {
 		}
 	}
 
-	if v, ok := raw["ignore_unspecified_column_families"]; ok {
+	if v, ok := raw["ignore_unspecified_column_families"]; ok && v.(bool) {
 		opts["ignoreUnspecifiedColumnFamilies"] = v.(bool)
 	}
 
-	if v, ok := raw["read_rowkey_as_string"]; ok {
+	if v, ok := raw["read_rowkey_as_string"]; ok && v.(bool) {
 		opts["readRowkeyAsString"] = v.(bool)
 	}
 
-	if v, ok := raw["output_column_families_as_json"]; ok {
+	if v, ok := raw["output_column_families_as_json"]; ok && v.(bool) {
 		opts["outputColumnFamiliesAsJson"] = v.(bool)
 	}
 
@@ -3142,19 +3158,19 @@ func expandBigtableColumnFamily(configured interface{}) map[string]interface{} {
 		}
 	}
 
-	if v, ok := raw["family_id"]; ok {
+	if v, ok := raw["family_id"]; ok && v.(string) != "" {
 		opts["familyId"] = v.(string)
 	}
 
-	if v, ok := raw["type"]; ok {
+	if v, ok := raw["type"]; ok && v.(string) != "" {
 		opts["type"] = v.(string)
 	}
 
-	if v, ok := raw["encoding"]; ok {
+	if v, ok := raw["encoding"]; ok && v.(string) != "" {
 		opts["encoding"] = v.(string)
 	}
 
-	if v, ok := raw["only_read_latest"]; ok {
+	if v, ok := raw["only_read_latest"]; ok && v.(bool) {
 		opts["onlyReadLatest"] = v.(bool)
 	}
 
@@ -3185,27 +3201,27 @@ func expandBigtableColumn(configured interface{}) map[string]interface{} {
 
 	opts := map[string]interface{}{}
 
-	if v, ok := raw["qualifier_encoded"]; ok {
+	if v, ok := raw["qualifier_encoded"]; ok && v.(string) != "" {
 		opts["qualifierEncoded"] = v.(string)
 	}
 
-	if v, ok := raw["qualifier_string"]; ok {
+	if v, ok := raw["qualifier_string"]; ok && v.(string) != "" {
 		opts["qualifierString"] = v.(string)
 	}
 
-	if v, ok := raw["field_name"]; ok {
+	if v, ok := raw["field_name"]; ok && v.(string) != "" {
 		opts["fieldName"] = v.(string)
 	}
 
-	if v, ok := raw["type"]; ok {
+	if v, ok := raw["type"]; ok && v.(string) != "" {
 		opts["type"] = v.(string)
 	}
 
-	if v, ok := raw["encoding"]; ok {
+	if v, ok := raw["encoding"]; ok && v.(string) != "" {
 		opts["encoding"] = v.(string)
 	}
 
-	if v, ok := raw["only_read_latest"]; ok {
+	if v, ok := raw["only_read_latest"]; ok && v.(bool) {
 		opts["onlyReadLatest"] = v.(bool)
 	}
 
@@ -3238,7 +3254,7 @@ func expandJsonOptions(configured interface{}) map[string]interface{} {
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	opts := map[string]interface{}{}
 
-	if v, ok := raw["encoding"]; ok {
+	if v, ok := raw["encoding"]; ok && v.(string) != "" {
 		opts["encoding"] = v.(string)
 	}
 
@@ -3781,7 +3797,7 @@ func expandExternalCatalogTableOptions(configured interface{}) map[string]interf
 		ecto["storageDescriptor"] = expandStorageDescriptor(v)
 	}
 
-	if v, ok := raw["connection_id"]; ok {
+	if v, ok := raw["connection_id"]; ok && v.(string) != "" {
 		ecto["connectionId"] = v.(string)
 	}
 
@@ -3818,20 +3834,22 @@ func expandStorageDescriptor(configured interface{}) map[string]interface{} {
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	sd := map[string]interface{}{}
 
-	if v, ok := raw["location_uri"]; ok {
+	if v, ok := raw["location_uri"]; ok && v.(string) != "" {
 		sd["locationUri"] = v.(string)
 	}
 
-	if v, ok := raw["input_format"]; ok {
+	if v, ok := raw["input_format"]; ok && v.(string) != "" {
 		sd["inputFormat"] = v.(string)
 	}
 
-	if v, ok := raw["output_format"]; ok {
+	if v, ok := raw["output_format"]; ok && v.(string) != "" {
 		sd["outputFormat"] = v.(string)
 	}
 
 	if v, ok := raw["serde_info"]; ok {
-		sd["serDeInfo"] = expandSerDeInfo(v)
+		if expanded := expandSerDeInfo(v); expanded != nil {
+			sd["serDeInfo"] = expanded
+		}
 	}
 
 	return sd
@@ -3873,7 +3891,7 @@ func expandSerDeInfo(configured interface{}) map[string]interface{} {
 		"serializationLibrary": raw["serialization_library"].(string),
 	}
 
-	if v, ok := raw["name"]; ok {
+	if v, ok := raw["name"]; ok && v.(string) != "" {
 		si["name"] = v.(string)
 	}
 
@@ -3884,7 +3902,9 @@ func expandSerDeInfo(configured interface{}) map[string]interface{} {
 			parameters[k] = v.(string)
 		}
 
-		si["parameters"] = parameters
+		if len(parameters) > 0 {
+			si["parameters"] = parameters
+		}
 	}
 
 	return si
