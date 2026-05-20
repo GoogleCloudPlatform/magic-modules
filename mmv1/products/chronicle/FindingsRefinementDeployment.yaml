@@ -17,7 +17,7 @@ description: The FindingsRefinementDeployment resource represents the deployment
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1alpha/FindingsRefinementDeployment'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/FindingsRefinementDeployment'
 min_version: 'beta'
 
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment

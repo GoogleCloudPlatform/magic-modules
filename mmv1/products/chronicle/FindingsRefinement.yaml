@@ -17,7 +17,7 @@ description: Represents a set of logic conditions used to refine various types o
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.findingsRefinements'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.findingsRefinements'
 min_version: 'beta'
 
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
@@ -66,7 +66,7 @@ properties:
     description: |-
       Full resource name for the findings refinement.
       Format:
-      projects/{project}/locations/{region}/instances/{instance}/findingsRefinements/{findings_refinement}
+      projects/{project}/locations/{location}/instances/{instance}/findingsRefinements/{findings_refinement}
   - name: outcomeFilters
     type: Array
     description: |-
@@ -105,6 +105,7 @@ properties:
   - name: type
     type: String
     description: |-
+      DETECTION_EXCLUSION is the only supported type of findings refinement.
       Possible values:
       DETECTION_EXCLUSION
   - name: updateTime
