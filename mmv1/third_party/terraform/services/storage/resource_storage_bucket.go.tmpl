@@ -2507,19 +2507,7 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("effective_labels", res.Labels); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	terraformLabels := make(map[string]string)
-	for key, value := range config.DefaultLabels {
-		terraformLabels[key] = value
-	}
-	if config.AddTerraformAttributionLabel {
-		if _, ok := res.Labels[transport_tpg.AttributionKey]; ok {
-			terraformLabels[transport_tpg.AttributionKey] = transport_tpg.AttributionValue
-		}
-	}
-	for key, value := range d.Get("labels").(map[string]interface{}) {
-		terraformLabels[key] = value.(string)
-	}
-	if err := d.Set("terraform_labels", terraformLabels); err != nil {
+	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("website", flattenBucketWebsite(res.Website)); err != nil {

@@ -92,9 +92,10 @@ func TestAccStorageBucket_importBlockWithResourceIdentity(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:    "google_storage_bucket.bucket",
-				ImportState:     true,
-				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateKind:         resource.ImportBlockWithResourceIdentity,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
