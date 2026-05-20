@@ -150,52 +150,48 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 	}
 
 	stableNew := make([]interface{}, len(new))
-	
-	// Identify survivors and additions (preserving config order)
-	var survivors []interface{}
-	var additions []interface{}
+	placed := make(map[string]bool)
+
+	// Step 1: Place survivors that fit in their old slots
 	for _, r := range new {
 		if r == nil { continue }
 		m := r.(map[string]interface{})
 		name := m["range_name"].(string)
-		if _, ok := oldMap[name]; ok {
-			survivors = append(survivors, r)
-		} else {
-			additions = append(additions, r)
+		if oldIdx, ok := oldMap[name]; ok {
+			if oldIdx < len(stableNew) {
+				// Merge config and state for survivor to preserve computed fields like ip_cidr_range
+				stableNew[oldIdx] = mergeSurvivor(old[oldIdx], r)
+				placed[name] = true
+			}
 		}
 	}
 
-	// Align survivors from right to left to preserve relative order and minimize index shifts.
-	k := len(survivors)
-	N := len(new)
-	nextAvailableIdx := N
-	
-	for j := k - 1; j >= 0; j-- {
-		s := survivors[j]
-		m := s.(map[string]interface{})
+	// Step 2: Collect unplaced survivors and additions in the order they appear in 'new'
+	var unplaced []interface{}
+	for _, r := range new {
+		if r == nil { continue }
+		m := r.(map[string]interface{})
 		name := m["range_name"].(string)
-		oldIdx := oldMap[name]
-		
-		// Merge config and state for survivor to preserve computed fields like ip_cidr_range
-		merged := mergeSurvivor(old[oldIdx], s)
-		
-		targetIdx := oldIdx
-		if targetIdx >= nextAvailableIdx {
-			targetIdx = nextAvailableIdx - 1
+		if !placed[name] {
+			unplaced = append(unplaced, r)
 		}
-		if targetIdx < 0 {
-			targetIdx = 0
-		}
-		stableNew[targetIdx] = merged
-		nextAvailableIdx = targetIdx
 	}
 
-	// Fill the remaining gaps with additions in the order they appear in config
-	addIdx := 0
+	// Step 3: Fill the remaining gaps in 'stableNew' with unplaced items
+	unplacedIdx := 0
 	for i := range stableNew {
-		if stableNew[i] == nil && addIdx < len(additions) {
-			stableNew[i] = additions[addIdx]
-			addIdx++
+		if stableNew[i] == nil && unplacedIdx < len(unplaced) {
+			r := unplaced[unplacedIdx]
+			m := r.(map[string]interface{})
+			name := m["range_name"].(string)
+			
+			// If it is a survivor (but was out of bounds), merge it
+			if oldIdx, ok := oldMap[name]; ok {
+				stableNew[i] = mergeSurvivor(old[oldIdx], r)
+			} else {
+				stableNew[i] = r
+			}
+			unplacedIdx++
 		}
 	}
 

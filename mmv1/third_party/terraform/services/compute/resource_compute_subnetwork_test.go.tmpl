@@ -1720,7 +1720,6 @@ resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
   secondary_ip_range { 
   	range_name = "v6-ula" 
   	ip_version = "IPV6" 
-  	ip_cidr_range = "${cidrsubnet(google_compute_network.custom-test.internal_ipv6_range, 16, 1)}"
   }
   secondary_ip_range { 
     range_name = "v6-byoip-auto"
@@ -1765,7 +1764,6 @@ resource "google_compute_subnetwork" "ipv6-secondary-ranges" {
   secondary_ip_range { 
     range_name    = "v6-ula"
     ip_version    = "IPV6" 
-  	ip_cidr_range = "${cidrsubnet(google_compute_network.custom-test.internal_ipv6_range, 16, 1)}"
   }
 }
 `, testAccComputeSubnetwork_secondaryIpv6RangesShared(cnName, papName, pdpName, subPdpName), subnetworkName)
