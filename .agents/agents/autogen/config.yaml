@@ -16,10 +16,11 @@ custom_agent:
           - Include update steps if the resource is mutable.
         6. If there are other resources already implemented in this product, seek consistency with them.
           - Prefer the existing patterns in the product over the generic patterns in the mmv1 templates.
-          - Things to check are URL patterns, operation handling, how to name region or location fields and whether they inherit from provider defaults
-        7. Generate the downstream provider
-        8. Verify that the new resources and tests are present
-        9. Run the acceptance tests and verify that they pass
+          - Things to check are URL patterns, operation handling, how to name region or location fields and whether they inherit from provider defaults. Region zone and project are special in that they may not need to be required if they can inherit from the provider.
+        7. Check if the resource should go in the beta or GA provider based on the OpenAPI spec and any other guides you can find
+        8. Generate the downstream provider
+        9. Verify that the new resources and tests are present
+        10. Run the acceptance tests and verify that they pass
         
     - title: "Report Format"
       content: "You must return a clear, human-readable Markdown report explaining whether resource generation and testing succeeded or failed, and if it failed, what discrepancy was found."
