@@ -1,6 +1,6 @@
 resource "google_oracle_database_goldengate_connection_assignment" "{{$.PrimaryResourceId}}" {
   goldengate_connection_assignment_id = "{{index $.Vars "goldengate_connection_assignment_id"}}"
-  display_name                        = "{{index $.Vars "goldengate_connection_assignment_id"}} display name"
+  display_name                        = "{{index $.Vars "goldengate_connection_assignment_id"}}"
   location                            = "us-east4"
   project                             = "{{index $.Vars "project"}}"
   labels = {
