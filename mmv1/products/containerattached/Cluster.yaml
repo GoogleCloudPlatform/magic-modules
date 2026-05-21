@@ -82,7 +82,7 @@ virtual_fields:
 
       Possible values: DELETE, DELETE_IGNORE_ERRORS, PREVENT, ABANDON'. Defaults to 'DELETE'.
     type: String
-    #excluded from generation due to Universal Deletion Policy
+    # excluded from generation due to Universal Deletion Policy
     exclude: true
 parameters:
 properties:

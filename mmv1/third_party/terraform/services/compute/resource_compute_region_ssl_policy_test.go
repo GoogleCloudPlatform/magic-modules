@@ -14,7 +14,7 @@ import (
 func TestAccComputeRegionSslPolicy_regionInherit(t *testing.T) {
 	t.Parallel()
 
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -45,7 +45,7 @@ func TestAccComputeRegionSslPolicy_update(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy map[string]interface{}
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -124,7 +124,7 @@ func TestAccComputeRegionSslPolicy_update_to_custom(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy map[string]interface{}
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -171,7 +171,7 @@ func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy map[string]interface{}
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -207,6 +207,81 @@ func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_region_ssl_policy.update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
+	t.Parallel()
+
+	var sslPolicy map[string]interface{}
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "profile", "MODERN"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "min_tls_version", "TLS_1_2"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", ""),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "ENABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "ENABLED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "DEFERRED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "DEFERRED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "DEFAULT"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -337,4 +412,16 @@ resource "google_compute_region_ssl_policy" "foobar" {
   profile         = "MODERN"
 }
 `, resourceName)
+}
+
+func testAccComputeRegionSslPostQuantum(resourceName string, pqke string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "post_quantum_key_exchange" {
+  name                         = "%s"
+  profile                      = "MODERN"
+  min_tls_version              = "TLS_1_2"
+  region                       = "us-central1"
+  post_quantum_key_exchange    = "%s"
+}
+`, resourceName, pqke)
 }

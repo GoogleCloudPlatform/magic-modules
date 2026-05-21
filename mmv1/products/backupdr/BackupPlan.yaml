@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+---
 name: 'BackupPlan'
 base_url: projects/{{project}}/locations/{{location}}/backupPlans
 create_url: projects/{{project}}/locations/{{location}}/backupPlans/?backup_plan_id={{backup_plan_id}}
