@@ -64,8 +64,8 @@ samples:
           query: "network.dns.response = true"
           outcome_variable: "risk_score"
           outcome_filter_operator: "CONTAINS"
-          outcome_value: "value2"    
-          
+          outcome_value: "value2"
+
 parameters:
   - name: location
     type: String
