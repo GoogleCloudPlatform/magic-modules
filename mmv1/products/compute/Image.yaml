@@ -152,6 +152,7 @@ properties:
       After you encrypt an image with a customer-supplied key, you must
       provide the same key if you use the image later (e.g. to create a
       disk from the image)
+    immutable: true
     properties:
       - name: 'kmsKeySelfLink'
         type: String
@@ -283,6 +284,7 @@ properties:
     description: |
       The customer-supplied encryption key of the source disk. Required if
       the source disk is protected by a customer-supplied encryption key.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -333,6 +335,7 @@ properties:
     description: |
       The customer-supplied encryption key of the source image. Required if
       the source image is protected by a customer-supplied encryption key.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -456,6 +459,7 @@ properties:
     description: |
       The customer-supplied encryption key of the source snapshot. Required if
       the source snapshot is protected by a customer-supplied encryption key.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String

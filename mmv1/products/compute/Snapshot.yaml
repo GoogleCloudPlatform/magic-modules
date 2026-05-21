@@ -113,6 +113,7 @@ parameters:
       If you do not provide an encryption key when creating the snapshot,
       then the snapshot will be encrypted using an automatically generated
       key and you do not need to provide a key to use the snapshot later.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -154,6 +155,7 @@ parameters:
       if the source snapshot is protected by a customer-supplied encryption
       key.
     ignore_read: true
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
