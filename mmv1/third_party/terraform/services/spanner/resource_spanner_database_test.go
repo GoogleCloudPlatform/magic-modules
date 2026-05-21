@@ -876,3 +876,96 @@ resource "google_spanner_database" "database" {
 `, context)
 }
 
+func TestAccSpannerDatabase_mrcmekReencryption(t *testing.T) {
+	t.Parallel()
+
+	// Grant the Spanner service account KMS permissions
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-spanner.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	// Bootstrap keys in multiple regions
+	kmsKey1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-reenc-key1")
+	kmsKey2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-reenc-key2")
+	kmsKey3 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-reenc-key3")
+
+	context := map[string]interface{}{
+		"key_name_1":    kmsKey1.CryptoKey.Name,
+		"key_name_2":    kmsKey2.CryptoKey.Name,
+		"key_name_3":    kmsKey3.CryptoKey.Name,
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1: Provision with MR-CMEK (Keys 1 & 2)
+			{
+				Config: testAccSpannerDatabase_mrcmekReencryption_1(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_names.#", "2"),
+				),
+			},
+			// Step 2: Update MR-CMEK keys (Drop Key 1, Keep Key 2, Add Key 3)
+			{
+				Config: testAccSpannerDatabase_mrcmekReencryption_2(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_names.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func testAccSpannerDatabase_mrcmekReencryption_1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name             = "tf-test-%{random_suffix}"
+  display_name     = "Terraform test"
+  config           = "nam3"
+  processing_units = 200
+}
+
+resource "google_spanner_database" "database" {
+  instance            = google_spanner_instance.main.name
+  name                = "tf-test-cmek-db%{random_suffix}"
+  deletion_protection = false
+
+  encryption_config {
+    kms_key_names = [
+      "%{key_name_1}",
+      "%{key_name_2}",
+    ]
+  }
+}
+`, context)
+}
+
+func testAccSpannerDatabase_mrcmekReencryption_2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name             = "tf-test-%{random_suffix}"
+  display_name     = "Terraform test"
+  config           = "nam3"
+  processing_units = 200
+}
+
+resource "google_spanner_database" "database" {
+  instance            = google_spanner_instance.main.name
+  name                = "tf-test-cmek-db%{random_suffix}"
+  deletion_protection = false
+
+  encryption_config {
+    kms_key_names = [
+      "%{key_name_2}",
+      "%{key_name_3}",
+    ]
+  }
+}
+`, context)
+}
