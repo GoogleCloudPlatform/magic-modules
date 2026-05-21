@@ -1,3 +1,4 @@
+---
 name: 'WebRegionForwardingRuleService'
 description: |
   Only used to generate IAM resources

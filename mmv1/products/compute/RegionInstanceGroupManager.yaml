@@ -169,7 +169,7 @@ properties:
       group. The group uses this template to create all new instances in the
       managed instance group.
     required: true
-  # kind is internal transport detail
+    # kind is internal transport detail
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'InstanceTemplate'
     imports: 'selfLink'

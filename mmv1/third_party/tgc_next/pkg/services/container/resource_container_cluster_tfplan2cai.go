@@ -155,6 +155,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		NodePoolAutoConfig:   expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
 		EnableK8sBetaApis:    expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
+		SecretSyncConfig:     expandSecretSyncConfig(d.Get("secret_sync_config")),
 	}
 
 	v := d.Get("enable_shielded_nodes")
@@ -479,6 +480,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		if val, ok := lustreConfig["enable_legacy_lustre_port"]; ok {
 			ac.LustreCsiDriverConfig.EnableLegacyLustrePort = val.(bool)
 			ac.LustreCsiDriverConfig.ForceSendFields = append(ac.LustreCsiDriverConfig.ForceSendFields, "EnableLegacyLustrePort")
+		}
+	}
+
+	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
 		}
 	}
 
@@ -1303,6 +1312,39 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 					}
 				} else {
 					sc.RotationConfig = &container.RotationConfig{
+						Enabled:         autoRotationConfig["enabled"].(bool),
+						ForceSendFields: []string{"Enabled"},
+					}
+				}
+			}
+		}
+	}
+	return sc
+}
+
+func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	sc := &container.SecretSyncConfig{
+		Enabled:         config["enabled"].(bool),
+		ForceSendFields: []string{"Enabled"},
+	}
+	if autoRotation, ok := config["rotation_config"]; ok {
+		if autoRotationList, ok := autoRotation.([]interface{}); ok {
+			if len(autoRotationList) > 0 {
+				autoRotationConfig := autoRotationList[0].(map[string]interface{})
+				if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
+					sc.RotationConfig = &container.SyncRotationConfig{
+						Enabled:          autoRotationConfig["enabled"].(bool),
+						RotationInterval: rotationInterval,
+						ForceSendFields:  []string{"Enabled"},
+					}
+				} else {
+					sc.RotationConfig = &container.SyncRotationConfig{
 						Enabled:         autoRotationConfig["enabled"].(bool),
 						ForceSendFields: []string{"Enabled"},
 					}
