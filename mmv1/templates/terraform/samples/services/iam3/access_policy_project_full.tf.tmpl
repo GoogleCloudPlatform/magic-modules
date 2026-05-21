@@ -36,7 +36,7 @@ resource "google_service_account" "excluded_sa" {
       time_sleep.wait_for_project_propagation
   ]
 }
-resource "google_iam_projects_access_policy" "{{$.PrimaryResourceId}}" {
+resource "google_iam_project_access_policy" "{{$.PrimaryResourceId}}" {
   provider          = google-beta
   project           = google_project.project.project_id
   location          = "global"
