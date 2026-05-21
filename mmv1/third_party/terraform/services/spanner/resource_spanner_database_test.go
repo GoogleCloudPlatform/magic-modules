@@ -754,3 +754,124 @@ resource "google_spanner_database" "database" {
 }
 `, context)
 }
+
+func TestAccSpannerDatabase_cmekReencryption(t *testing.T) {
+	t.Parallel()
+
+	// Grant the Spanner service account KMS permissions for the test project
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-spanner.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	// Bootstrap two separate KMS keys to test transitioning between them
+	kmsKey1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "europe-west1", "tf-test-cmek-reenc-key1-europe-west1")
+	kmsKey2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "europe-west1", "tf-test-cmek-reenc-key2-europe-west1")
+
+	context := map[string]interface{}{
+		"key_name_1":    kmsKey1.CryptoKey.Name,
+		"key_name_2":    kmsKey2.CryptoKey.Name,
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create a database without an encryption_config (GMEK)
+			{
+				Config: testAccSpannerDatabase_gmek(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_name"),
+				),
+			},
+			// Step 2: Update database to use CMEK (Key 1)
+			{
+				Config: testAccSpannerDatabase_cmekReencryption_1(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_name", kmsKey1.CryptoKey.Name),
+				),
+			},
+			// Step 3: Update database to use a different CMEK (Key 2)
+			{
+				Config: testAccSpannerDatabase_cmekReencryption_2(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_name", kmsKey2.CryptoKey.Name),
+				),
+			},
+			// Step 4: Revert database back to GMEK (remove encryption_config)
+			{
+				Config: testAccSpannerDatabase_gmek(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_name"),
+				),
+			},
+		},
+	})
+}
+
+// Configuration Template: No encryption_config (defaults to GMEK)
+func testAccSpannerDatabase_gmek(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name         = "tf-test-%{random_suffix}"
+  display_name = "Terraform test"
+  config       = "regional-europe-west1"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "database" {
+  instance            = google_spanner_instance.main.name
+  name                = "tf-test-cmek-db%{random_suffix}"
+  deletion_protection = false
+}
+`, context)
+}
+
+// Configuration Template: Uses KMS Key 1
+func testAccSpannerDatabase_cmekReencryption_1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name         = "tf-test-%{random_suffix}"
+  display_name = "Terraform test"
+  config       = "regional-europe-west1"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "database" {
+  instance            = google_spanner_instance.main.name
+  name                = "tf-test-cmek-db%{random_suffix}"
+  deletion_protection = false
+
+  encryption_config {
+    kms_key_name = "%{key_name_1}"
+  }
+}
+`, context)
+}
+
+// Configuration Template: Uses KMS Key 2
+func testAccSpannerDatabase_cmekReencryption_2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name         = "tf-test-%{random_suffix}"
+  display_name = "Terraform test"
+  config       = "regional-europe-west1"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "database" {
+  instance            = google_spanner_instance.main.name
+  name                = "tf-test-cmek-db%{random_suffix}"
+  deletion_protection = false
+
+  encryption_config {
+    kms_key_name = "%{key_name_2}"
+  }
+}
+`, context)
+}
+
