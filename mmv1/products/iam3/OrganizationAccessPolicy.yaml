@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-name: OrganizationsAccessPolicy
+name: OrganizationAccessPolicy
 min_version: beta
 description: |-
   Represents an IAM v3 Access Policy parented by a Google Cloud Organization. This policy
@@ -39,10 +39,10 @@ async:
 autogen_status: QWNjZXNzUG9saWN5QnlPcmdhbml6YXRpb25BbmRMb2NhdGlvbg==
 autogen_async: true
 samples:
-  - name: 'basic_access_policy_organization'
+  - name: 'access_policy_organization_test'
     primary_resource_id: 'example'
     steps:
-      - name: 'basic_access_policy_organization'
+      - name: 'access_policy_organization_minimal'
         test_env_vars:
           org_id: 'ORG_TARGET'
           billing_account: 'BILLING_ACCT'
@@ -50,18 +50,32 @@ samples:
           project_name: 'ap-project-'
           account_id: 'svc-acc-'
           access_policy_id: 'my-org-policy-'
-        vars:
-          display_name: 'Organization Access Policy'
-      - name: 'basic_access_policy_organization'
+      - name: 'access_policy_organization_full'
         test_env_vars:
-          org_id: 'ORG_ID'
+          org_id: 'ORG_TARGET'
           billing_account: 'BILLING_ACCT'
         resource_id_vars:
           project_name: 'ap-project-'
           account_id: 'svc-acc-'
+          excluded_account_id: 'exc-svc-acc-'
+          access_policy_id: 'my-org-policy-'
+        vars:
+          display_name: 'Organization Access Policy'
+          allow_rule_description: 'Allow rule for a service account with excluded principals'
+          deny_rule_description: 'Deny rule for all public principals except excluded principals'
+      - name: 'access_policy_organization_full'
+        test_env_vars:
+          org_id: 'ORG_TARGET'
+          billing_account: 'BILLING_ACCT'
+        resource_id_vars:
+          project_name: 'ap-project-'
+          account_id: 'svc-acc-'
+          excluded_account_id: 'exc-svc-acc-'
           access_policy_id: 'my-org-policy-'
         vars:
           display_name: 'Organization Access Policy Updated'
+          allow_rule_description: 'Updated Allow rule for a service account with excluded principals'
+          deny_rule_description: 'Updated Deny rule for all public principals except excluded principals'
     external_providers: ["time"]
 parameters:
   - name: organization

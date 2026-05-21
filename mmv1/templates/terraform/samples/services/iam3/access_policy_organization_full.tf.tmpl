@@ -30,14 +30,14 @@ resource "google_service_account" "test_sa" {
 }
 resource "google_service_account" "excluded_sa" {
   provider        = google-beta
-  account_id   = "exc-{{index $.ResourceIdVars "account_id"}}"
+  account_id   = "{{index $.ResourceIdVars "excluded_account_id"}}"
   display_name = "Excluded Service Account for Access Policy"
   project      = google_project.project.project_id
   depends_on = [
       time_sleep.wait_for_propagation
   ]
 }
-resource "google_iam_organizations_access_policy" "{{$.PrimaryResourceId}}" {
+resource "google_iam_organization_access_policy" "{{$.PrimaryResourceId}}" {
   provider          = google-beta
   organization      = "{{index $.TestEnvVars "org_id"}}"
   location          = "global"
@@ -45,7 +45,7 @@ resource "google_iam_organizations_access_policy" "{{$.PrimaryResourceId}}" {
   display_name      = "{{index $.Vars "display_name"}}"
   details {
     rules {
-      description = "Allow rule for a service account with excluded principals"
+      description = "{{index $.Vars "allow_rule_description"}}"
       effect      = "ALLOW"
       principals  = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test_sa.email}"]
       excluded_principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.excluded_sa.email}"]
@@ -58,7 +58,7 @@ resource "google_iam_organizations_access_policy" "{{$.PrimaryResourceId}}" {
       }
     }
     rules {
-      description = "Deny rule for all public principals except excluded principals"
+      description = "{{index $.Vars "deny_rule_description"}}"
       effect      = "DENY"
       principals  = ["principalSet://goog/public:all"]
       excluded_principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.excluded_sa.email}"]
@@ -73,6 +73,8 @@ resource "google_iam_organizations_access_policy" "{{$.PrimaryResourceId}}" {
   }
   depends_on = [
     google_service_account.test_sa,
+    google_service_account.excluded_sa,
     time_sleep.wait_for_propagation
   ]
 }
+
