@@ -65,6 +65,10 @@ resource "google_compute_forwarding_rule" "ilb" {
   target                = google_compute_region_target_http_proxy.default.id
   ip_protocol           = "TCP"
   port_range            = "80"
+
+  depends_on = [
+    google_compute_subnetwork.proxy
+  ]
 }
 
 resource "google_compute_network_firewall_policy" "fw_policy" {
@@ -99,5 +103,5 @@ resource "google_compute_network_firewall_policy_association" "global_assoc" {
   provider          = google-beta
   name              = "global-policy-assoc-%{random_suffix}"
   firewall_policy   = google_compute_network_firewall_policy.fw_policy.id
-  attachment_target = google_compute_network.net.self_link
+  attachment_target = google_compute_network.net.id
 }
