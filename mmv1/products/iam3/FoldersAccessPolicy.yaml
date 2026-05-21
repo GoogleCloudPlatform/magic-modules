@@ -39,10 +39,10 @@ async:
 autogen_status: QWNjZXNzUG9saWN5QnlGb2xkZXJBbmRMb2NhdGlvbg==
 autogen_async: true
 samples:
-  - name: 'basic_access_policy_folder'
+  - name: 'access_policy_folder_test'
     primary_resource_id: 'example'
     steps:
-      - name: 'basic_access_policy_folder'
+      - name: 'access_policy_folder_minimal'
         test_env_vars:
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
@@ -50,10 +50,22 @@ samples:
           folder_name: 'ap-folder-'
           project_name: 'ap-project-'
           account_id: 'svc-acc-'
+          access_policy_id: 'my-folder-policy-'
+      - name: 'access_policy_folder_full'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+        resource_id_vars:
+          folder_name: 'ap-folder-'
+          project_name: 'ap-project-'
+          account_id: 'svc-acc-'
+          excluded_account_id: 'exc-svc-acc-'
           access_policy_id: 'my-folder-policy-'
         vars:
           display_name: 'Folder Access Policy'
-      - name: 'basic_access_policy_folder'
+          allow_rule_description: 'Allow rule for a service account with excluded principals'
+          deny_rule_description: 'Deny rule for all public principals except excluded principals'
+      - name: 'access_policy_folder_full'
         test_env_vars:
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
@@ -61,9 +73,12 @@ samples:
           folder_name: 'ap-folder-'
           project_name: 'ap-project-'
           account_id: 'svc-acc-'
+          excluded_account_id: 'exc-svc-acc-'
           access_policy_id: 'my-folder-policy-'
         vars:
           display_name: 'Folder Access Policy Updated'
+          allow_rule_description: 'Updated Allow rule for a service account with excluded principals'
+          deny_rule_description: 'Updated Deny rule for all public principals except excluded principals'
     external_providers: ["time"]
 parameters:
   - name: folder

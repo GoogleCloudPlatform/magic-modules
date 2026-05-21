@@ -36,47 +36,17 @@ resource "google_service_account" "test_sa" {
       time_sleep.wait_for_propagation
   ]
 }
-resource "google_service_account" "excluded_sa" {
-  provider        = google-beta
-  account_id   = "exc-{{index $.ResourceIdVars "account_id"}}"
-  display_name = "Excluded Service Account for Access Policy"
-  project      = google_project.project.project_id
-  depends_on = [
-      time_sleep.wait_for_propagation
-  ]
-}
 resource "google_iam_folders_access_policy" "{{$.PrimaryResourceId}}" {
   provider          = google-beta
   folder            = google_folder.folder.folder_id
   location          = "global"
   access_policy_id  = "{{index $.ResourceIdVars "access_policy_id"}}"
-  display_name      = "{{index $.Vars "display_name"}}"
-  annotations    = {"foo": "bar"}
   details {
     rules {
-      description = "Allow rule for a service account with excluded principals"
       effect      = "ALLOW"
       principals  = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test_sa.email}"]
-      excluded_principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.excluded_sa.email}"]
       operation {
         permissions = ["eventarc.googleapis.com/messageBuses.publish"]
-      }
-      conditions {
-        service = "iam.googleapis.com"
-        expression   = "resource.matchTag('{{index $.TestEnvVars "org_id"}}/env', 'test')"
-      }
-    }
-    rules {
-      description = "Deny rule for all public principals except excluded principals"
-      effect      = "DENY"
-      principals  = ["principalSet://goog/public:all"]
-      excluded_principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.excluded_sa.email}"]
-      operation {
-        permissions = ["eventarc.googleapis.com/messageBuses.publish"]
-      }
-      conditions {
-        service = "iam.googleapis.com"
-        expression   = "!resource.matchTag('{{index $.TestEnvVars "org_id"}}/env', 'test')"
       }
     }
   }
