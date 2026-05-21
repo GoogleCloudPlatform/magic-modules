@@ -2215,6 +2215,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	// Fall back on internal ip if there is no external ip.  This makes sense in the situation where
+	// terraform is being used on a cloud instance and can therefore access the instances it creates
+	// via their internal ips.
 	networkInterfacesRaw, err := networkInterfacesToInterface(instance.NetworkInterfaces)
 	if err != nil {
 		return err
@@ -2242,6 +2245,8 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("Error setting partner metadata: %s", err)
 		}
 	}
+	// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
+	// To avoid diff, we need to set the value from the state not from API response.
 	if hadNanos {
 		scheduling := flattenScheduling(instance.Scheduling)
 		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
@@ -2452,7 +2457,7 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
 	if err := d.Set("scheduling", flattenScheduling(instance.Scheduling)); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
 	}
-	if err := d.Set("guest_accelerator", flattenGuestAccelerators(instance.GuestAccelerators)); err != nil {
+	if err := d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsToInterface(instance.GuestAccelerators))); err != nil {
 		return fmt.Errorf("Error setting guest_accelerator: %s", err)
 	}
 	var shieldedVmConfigMap map[string]interface{}
