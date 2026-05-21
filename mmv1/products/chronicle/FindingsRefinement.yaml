@@ -40,6 +40,32 @@ examples:
     vars:
       display_name: findings_refinement_display_name
 
+samples:
+  - name: 'chronicle_findings_refinement_update'
+    primary_resource_id: 'findings_refinement_example'
+    min_version: beta
+    steps:
+      - name: 'chronicle_findings_refinement_full'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        resource_id_vars:
+          display_name: findings_refinement_display_name
+        vars:
+          query: "network.dns.response = true"
+          outcome_variable: "risk_score"
+          outcome_filter_operator: "EQUAL"
+          outcome_value: "value1"
+      - name: 'chronicle_findings_refinement_full'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        resource_id_vars:
+          display_name: findings_refinement_display_name
+        vars:
+          query: "network.dns.response = true"
+          outcome_variable: "risk_score"
+          outcome_filter_operator: "CONTAINS"
+          outcome_value: "value2"    
+          
 parameters:
   - name: location
     type: String
