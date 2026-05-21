@@ -705,6 +705,7 @@ func flattenPrivateClusterConfig(cpec, pcc, nc interface{}) []map[string]interfa
 	if cpec != nil {
 		if c, ok := cpec.(map[string]interface{}); ok {
 			// Note the change in semantics from private to public endpoint.
+			r["enable_private_endpoint"] = true
 			if ipEndpointsConfig, ok := c["ipEndpointsConfig"].(map[string]interface{}); ok {
 				if v, ok := ipEndpointsConfig["enablePublicEndpoint"].(bool); ok {
 					r["enable_private_endpoint"] = !v
