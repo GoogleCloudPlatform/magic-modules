@@ -155,7 +155,6 @@ properties:
     type: NestedObject
     description: |
       Encryption configuration for the database
-    immutable: true
     properties:
       - name: 'kmsKeyName'
         type: String
