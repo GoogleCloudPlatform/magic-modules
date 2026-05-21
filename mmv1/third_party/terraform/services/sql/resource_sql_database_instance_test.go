@@ -2581,6 +2581,42 @@ func TestAccSqlDatabaseInstance_insights(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccSqlDatabaseInstance_performanceCaptureConfig(t *testing.T) {
+	t.Parallel()
+
+	masterID := acctest.RandInt(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_performanceCaptureConfig, masterID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.performance_capture_config.0.running_threads_threshold", "100"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_performanceCaptureConfig_update, masterID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.performance_capture_config.0.running_threads_threshold", "200"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+{{- end }}
+
 func TestAccSqlDatabaseInstance_insights_enhanced_postgres17(t *testing.T) {
 	t.Parallel()
 
@@ -8331,6 +8367,62 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
+
+{{- if ne $.TargetVersionName "ga" }}
+var testGoogleSqlDatabaseInstance_performanceCaptureConfig = `
+resource "google_sql_database_instance" "instance" {
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_9_7"
+  deletion_protection = false
+
+  settings {
+    edition = "ENTERPRISE"
+    tier    = "db-f1-micro"
+
+    insights_config {
+      query_insights_enabled  = true
+    }
+
+    performance_capture_config {
+      enabled                           = true
+      probing_interval_seconds          = 30
+      probe_threshold                   = 3
+      running_threads_threshold         = 100
+      seconds_behind_source_threshold   = 3600
+      transaction_duration_threshold    = 300
+    }
+  }
+}
+`
+
+var testGoogleSqlDatabaseInstance_performanceCaptureConfig_update = `
+resource "google_sql_database_instance" "instance" {
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_9_7"
+  deletion_protection = false
+
+  settings {
+    edition = "ENTERPRISE"
+    tier    = "db-f1-micro"
+
+    insights_config {
+      query_insights_enabled  = true
+    }
+
+    performance_capture_config {
+      enabled                           = true
+      probing_interval_seconds          = 40
+      probe_threshold                   = 4
+      running_threads_threshold         = 200
+      seconds_behind_source_threshold   = 3700
+      transaction_duration_threshold    = 600
+    }
+  }
+}
+`
+{{- end }}
 
 func testGoogleSqlDatabaseInstance_insights_enhanced_postgres17(instanceName string, enhanced bool) string {
 	return fmt.Sprintf(`resource "google_sql_database_instance" "instance" {
