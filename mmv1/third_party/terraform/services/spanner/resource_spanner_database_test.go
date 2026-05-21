@@ -760,7 +760,7 @@ func TestAccSpannerDatabase_cmekReencryption(t *testing.T) {
 	t.Parallel()
 
 	// Grant the Spanner service account KMS permissions for the test project
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-spanner.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -768,8 +768,8 @@ func TestAccSpannerDatabase_cmekReencryption(t *testing.T) {
 	})
 
 	// Bootstrap two separate KMS keys to test transitioning between them
-	kmsKey1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "europe-west1", "tf-test-cmek-reenc-key1-europe-west1")
-	kmsKey2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "europe-west1", "tf-test-cmek-reenc-key2-europe-west1")
+	kmsKey1 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "europe-west1", "tf-test-cmek-reenc-key1-europe-west1")
+	kmsKey2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "europe-west1", "tf-test-cmek-reenc-key2-europe-west1")
 
 	context := map[string]interface{}{
 		"key_name_1":    kmsKey1.CryptoKey.Name,
@@ -880,7 +880,7 @@ func TestAccSpannerDatabase_mrcmekReencryption(t *testing.T) {
 	t.Parallel()
 
 	// Grant the Spanner service account KMS permissions
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-spanner.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -888,9 +888,9 @@ func TestAccSpannerDatabase_mrcmekReencryption(t *testing.T) {
 	})
 
 	// Bootstrap keys in multiple regions
-	kmsKey1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-reenc-key1")
-	kmsKey2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-reenc-key2")
-	kmsKey3 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-reenc-key3")
+	kmsKey1 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-reenc-key1")
+	kmsKey2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-reenc-key2")
+	kmsKey3 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-reenc-key3")
 
 	context := map[string]interface{}{
 		"key_name_1":    kmsKey1.CryptoKey.Name,
