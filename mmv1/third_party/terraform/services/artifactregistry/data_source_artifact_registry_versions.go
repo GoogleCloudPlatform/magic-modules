@@ -102,7 +102,7 @@ func dataSourceArtifactRegistryVersionsRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	basePath, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"")
+	basePath, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config))
 	if err != nil {
 		return fmt.Errorf("Error setting Artifact Registry base path: %s", err)
 	}

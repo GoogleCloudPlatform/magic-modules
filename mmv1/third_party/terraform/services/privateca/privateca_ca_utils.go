@@ -204,7 +204,7 @@ func activateSubCAWithFirstPartyIssuer(config *transport_tpg.Config, d *schema.R
 		return err
 	}
 
-	PrivatecaBasePath, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"")
+	PrivatecaBasePath, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config))
 	if err != nil {
 		return err
 	}
