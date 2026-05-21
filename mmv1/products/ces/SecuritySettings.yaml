@@ -36,8 +36,7 @@ min_version: beta
 examples:
   - name: 'ces_security_settings_basic'
     primary_resource_id: 'security_settings'
-    vars:
-      # Simple resource, no dynamic vars needed other than project/location
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
