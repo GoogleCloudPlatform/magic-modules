@@ -3211,20 +3211,13 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 		if updateDuringStop {
 			// Lets be explicit about what we are changing in the patch call
-<<<<<<< HEAD
-			networkInterfacePatchObj := &compute.NetworkInterface{
-				Network:       networkInterface.Network,
-				Subnetwork:    networkInterface.Subnetwork,
-				AliasIpRanges: networkInterface.AliasIpRanges,
-{{ if ne $.TargetVersionName `ga` -}}
-				AliasIpv6Ranges: networkInterface.AliasIpv6Ranges,
-{{- end }}
-=======
 			networkInterfacePatchObj := map[string]interface{}{
 				"network":       networkInterface["network"],
 				"subnetwork":    networkInterface["subnetwork"],
 				"aliasIpRanges": networkInterface["aliasIpRanges"],
->>>>>>> 825d10820 (Migrate standalone function `compute_instance_helpers.go.tmpl` to use direct HTTP rather than a client library)
+{{- if ne $.TargetVersionName "ga" }}
+				"aliasIpv6Ranges": networkInterface["aliasIpv6Ranges"],
+{{- end }}
 			}
 
 			// network_ip can be inferred if not declared. Let's only patch if it's being changed by user
@@ -4696,28 +4689,6 @@ func isEmptyServiceAccountBlock(d *schema.ResourceData) bool {
 
 // Alias ip ranges cannot be removed and created at the same time. This checks if there are any unchanged alias ip ranges
 // to be kept in between the PATCH operations on Network Interface
-<<<<<<< HEAD
-func CheckForCommonAliasIp(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
-	return checkForCommonAliasIpRanges(old.AliasIpRanges, new.AliasIpRanges)
-}
-
-{{ if ne $.TargetVersionName `ga` -}}
-func CheckForCommonAliasIpv6(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
-	return checkForCommonAliasIpRanges(old.AliasIpv6Ranges, new.AliasIpv6Ranges)
-}
-{{- end }}
-
-func checkForCommonAliasIpRanges(old, new []*compute.AliasIpRange) []*compute.AliasIpRange {
-	newAliasIpMap := make(map[string]bool)
-	for _, ipRange := range new {
-		newAliasIpMap[ipRange.IpCidrRange] = true
-	}
-
-	resultAliasIpRanges := make([]*compute.AliasIpRange, 0)
-	for _, val := range old {
-		if newAliasIpMap[val.IpCidrRange] {
-			resultAliasIpRanges = append(resultAliasIpRanges, val)
-=======
 func CheckForCommonAliasIp(old, new map[string]interface{}) []interface{} {
 	newAliasIpMap := make(map[string]bool)
 	if newRanges, ok := new["aliasIpRanges"].([]interface{}); ok {
@@ -4727,7 +4698,6 @@ func CheckForCommonAliasIp(old, new map[string]interface{}) []interface{} {
 					newAliasIpMap[cidr] = true
 				}
 			}
->>>>>>> 825d10820 (Migrate standalone function `compute_instance_helpers.go.tmpl` to use direct HTTP rather than a client library)
 		}
 	}
 
@@ -4745,6 +4715,35 @@ func CheckForCommonAliasIp(old, new map[string]interface{}) []interface{} {
 	}
 	return result
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func CheckForCommonAliasIpv6(old, new map[string]interface{}) []interface{} {
+	newAliasIpMap := make(map[string]bool)
+	if newRanges, ok := new["aliasIpv6Ranges"].([]interface{}); ok {
+		for _, r := range newRanges {
+			if rm, ok := r.(map[string]interface{}); ok {
+				if cidr, ok := rm["ipCidrRange"].(string); ok {
+					newAliasIpMap[cidr] = true
+				}
+			}
+		}
+	}
+
+	var result []interface{}
+	if oldRanges, ok := old["aliasIpv6Ranges"].([]interface{}); ok {
+		for _, r := range oldRanges {
+			if rm, ok := r.(map[string]interface{}); ok {
+				if cidr, ok := rm["ipCidrRange"].(string); ok {
+					if newAliasIpMap[cidr] {
+						result = append(result, r)
+					}
+				}
+			}
+		}
+	}
+	return result
+}
+{{- end }}
 
 func updateDisk(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, patchUrl string, obj map[string]interface{}) error {
 	billingProject := project
