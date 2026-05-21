@@ -41,5 +41,14 @@ echo "Logs will be saved to: $LOG_DIR/$LOG_FILE"
 cd "$TGC_DIR"
 export WRITE_FILES=true
 make test-integration-local TESTPATH="$TEST_PATH" TESTARGS="-run=$TEST_TARGET" > "$LOG_DIR/$LOG_FILE" 2>&1
+TEST_EXIT_CODE=$?
 
-echo "Test execution complete (or failed). Check the log file for outputs."
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+    echo "Test execution failed with exit code $TEST_EXIT_CODE."
+    # Call our diagnostic python script
+    python3 /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/scripts/diagnose_test_failure.py "$LOG_DIR/$LOG_FILE" "$TGC_DIR/$TEST_PATH"
+    exit $TEST_EXIT_CODE
+else
+    echo "Test execution completed successfully."
+fi
+

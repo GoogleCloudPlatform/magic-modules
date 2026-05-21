@@ -160,8 +160,8 @@ By isolating the exact file where the data disappears, you avoid dead-ends and i
 - **Symptom**: Error message like `missing fields in resource ... after cai2hcl conversion: [field_name]`.
   - **Example**: `TestAccComputeBackendBucket_backendBucketSecurityPolicyExample_step1: missing fields in resource google_compute_backend_bucket.image_backend after cai2hcl conversion: [edge_security_policy]`
 - **Cause**: The field is part of the Terraform provider's schema but is not included in the asset data provided by Cloud Asset Inventory.
-- **Debug**: Check if the field exists in the CAI asset data by inspecting the test's JSON file. If the field is absent, it is not being provided in the CAI asset data.
-- **Solution**: Mark the field with `is_missing_in_cai: true` in the resource YAML file. This informs TGC that the field is not expected to be in the CAI input. Only add `is_missing_in_cai: true` if the field is missing in **ALL** of the resource's CAI asset JSON files. If the field exists in some CAI files but is missing in others, do not use this flag.
+- **Debug**: Check if the field exists in the CAI asset data by inspecting the test's JSON file. If the field is absent, verify its presence across other mock assets of the same resource by searching the cached metadata files in the `test_mata/tests_metadata_*.json` directory.
+- **Solution**: Mark the field with `is_missing_in_cai: true` in the resource YAML file. This informs TGC that the field is not expected to be in the CAI input. Only add `is_missing_in_cai: true` if the field is missing in **ALL** of the resource's CAI asset JSON files (meaning it is never supported or returned by the API/CAI for any subtype). If the field exists in some CAI files but is missing in others, do not use this flag.
 - **Example**: `is_missing_in_cai: true` for the field `edgeSecurityPolicy` in `BackendBucket.yaml`.
 
 #### 9. Incorrect CAI Asset Name Format
@@ -276,3 +276,10 @@ By isolating the exact file where the data disappears, you avoid dead-ends and i
 - **Symptom**: `panic: runtime error: slice bounds out of range` during integration test execution.
 - **Cause**: A CAI asset was dispatched to a converter that expects a different URL template (e.g., a regional asset path was sent to a converter expecting a zonal path). This typically happens when resources share a CAI asset type but are not correctly grouped or differentiated in the dispatcher.
 - **Solution**: Group the resources under the exact same CAI asset type by setting matching `cai_resource_kind` fields in their Magic Modules YAML files. This ensures the generator produces the automatic path-based dispatch logic (using `strings.Contains` for `"zones"` or `"regions"`) to correctly route the asset.
+
+#### 19. Field Missing Only in Specific Subtypes / Test Cases (Conditional Fields)
+- **Symptom**: Error message like `missing fields in resource ... after cai2hcl conversion: [field_name]`.
+- **Cause**: A field is defined in the HCL of the test configuration but is absent from the live CAI asset for specific subtypes or test cases (e.g., `vlan_tag8021q` on L2 dedicated attachments).
+- **Solution (Temporary)**: Configure the field with `is_missing_in_cai: true` in the Magic Modules YAML definition. While this field might only be missing in one specific test/subtype rather than all, using `is_missing_in_cai: true` is accepted as a **temporary solution** to unblock testing. We plan to improve the testing/mocking framework later to natively support conditional/subtype-specific CAI asset shapes.
+
+

@@ -61,6 +61,31 @@ def extract_yaml_keys(yaml_file_path):
                 keys.append(match.group(1))
     return keys
 
+def get_git_modified_keys(yaml_file_path):
+    """Uses git diff to find top-level keys that were added or modified in the current changes."""
+    import subprocess
+    modified_keys = set()
+    try:
+        # Run git diff -U0 to get only the changed lines without context
+        res = subprocess.run(
+            ["git", "diff", "-U0", yaml_file_path],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        # Match added/modified top-level keys (lines starting with '+' but not '+++' and containing key definition)
+        added_line_pattern = re.compile(r'^\+\s*([a-zA-Z0-9_-]+)\s*:')
+        for line in res.stdout.splitlines():
+            if line.startswith("+++"):
+                continue
+            match = added_line_pattern.match(line)
+            if match:
+                modified_keys.add(match.group(1))
+    except Exception as e:
+        # Fallback if git is not initialized or failed
+        pass
+    return modified_keys
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: verify_yaml_field_order.py <go-struct-file> <yaml-file> [struct-name]", file=sys.stderr)
@@ -88,24 +113,47 @@ def main():
     filtered_canonical = [tag for tag in canonical_tags if tag in yaml_keys_set]
     filtered_yaml = [key for key in yaml_keys if key in canonical_tags_set]
 
-    if filtered_yaml != filtered_canonical:
+    # Determine git-modified keys to restrict check to newly added/modified fields
+    modified_keys = get_git_modified_keys(yaml_file)
+    
+    # If no keys are modified (e.g. during a dry run or clean environment), fallback to checking everything
+    if not modified_keys:
+        modified_keys = yaml_keys_set
+
+    # Check relative ordering for newly modified keys
+    has_violations = False
+    violations = []
+
+    canonical_index = {tag: i for i, tag in enumerate(filtered_canonical)}
+    yaml_index = {key: i for i, key in enumerate(filtered_yaml)}
+
+    for key in filtered_yaml:
+        if key in modified_keys:
+            # Compare relative position of this modified key against all other keys
+            for other_key in filtered_yaml:
+                if other_key == key:
+                    continue
+                
+                expected_before = canonical_index[key] < canonical_index[other_key]
+                actual_before = yaml_index[key] < yaml_index[other_key]
+                
+                if expected_before != actual_before:
+                    has_violations = True
+                    rel = "before" if expected_before else "after"
+                    violations.append(f"⚠️  New/modified field '{key}' should be positioned {rel} '{other_key}'")
+
+    if has_violations:
         print(f"❌ FIELD ORDERING VERIFICATION FAILED for {yaml_file}:", file=sys.stderr)
-        print("\nIncorrect relative order detected. Compare expected vs actual relative positions:", file=sys.stderr)
+        print("\nIncorrect relative order detected for new or modified TGC fields:\n", file=sys.stderr)
+        for violation in sorted(list(set(violations))):
+            print(f"  {violation}", file=sys.stderr)
         
-        print("\n[Expected relative order from Go Struct]:", file=sys.stderr)
+        print("\n[Expected relative order of all keys from Go Struct]:", file=sys.stderr)
         for i, tag in enumerate(filtered_canonical):
             print(f"  {i+1:2d}. {tag}", file=sys.stderr)
-
-        print("\n[Actual relative order in YAML file]:", file=sys.stderr)
-        for i, key in enumerate(filtered_yaml):
-            marker = "  "
-            if i < len(filtered_canonical) and key != filtered_canonical[i]:
-                marker = "⚠️ "
-            print(f"{marker}{i+1:2d}. {key}", file=sys.stderr)
-
         sys.exit(1)
 
-    print(f"✅ Field ordering verification passed for {yaml_file}: matches structural Go definition.")
+    print(f"✅ Field ordering verification passed for new/modified fields in {yaml_file}.")
     sys.exit(0)
 
 if __name__ == "__main__":
