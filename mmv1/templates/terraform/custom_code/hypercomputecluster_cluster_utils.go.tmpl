@@ -8,7 +8,7 @@ func resourceHypercomputeclusterClusterResourceHash(v interface{}) int {
 }
 
 func hypercomputeclusterClusterCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-    if d.Id() == "" { // Only on create
+    if d.Id() == "" {
         v, ok := d.GetOk("network_resources")
         if !ok {
             return fmt.Errorf("network_resources: At least one network_resources entry must be specified for cluster creation")
