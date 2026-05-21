@@ -12,6 +12,7 @@
 # limitations under the License.
 ---
 name: OrganizationAccessPolicy
+api_resource_type_kind: AccessPolicy
 min_version: beta
 description: |-
   Represents an IAM v3 Access Policy parented by a Google Cloud Organization. This policy
@@ -162,7 +163,10 @@ properties:
                 Customer specified description of the rule. Must be less than or equal to
                 256 characters.
             - name: effect
-              type: String
+              type: Enum
+              enum_values:
+                - DENY
+                - ALLOW
               required: true
               description: |-
                 The effect of the rule.
@@ -198,6 +202,7 @@ properties:
                     type: String
                 - name: permissions
                   type: Array
+                  required: true
                   description: |-
                     The permissions that are explicitly affected by this rule. Each
                     permission uses the format `{service_fqdn}/{resource}.{verb}`, where
