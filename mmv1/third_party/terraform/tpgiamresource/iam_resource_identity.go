@@ -49,7 +49,7 @@ func ParseIamResourceIdentity(
 		}
 	}
 
-	if uriRe := buildUriFormatRegexp(rc.UriFormat, len(rc.Params)); uriRe != nil {
+	if uriRe := buildUriFormatRegexp(rc.UriFormat); uriRe != nil {
 		for i := len(rawVals) - 1; i >= 0; i-- {
 			if rawVals[i] == "" {
 				continue
@@ -92,11 +92,8 @@ func ParseIamResourceIdentity(
 	return fmt.Sprintf(rc.UriFormat, args...), nil
 }
 
-func buildUriFormatRegexp(uriFormat string, numParams int) *regexp.Regexp {
+func buildUriFormatRegexp(uriFormat string) *regexp.Regexp {
 	parts := strings.Split(uriFormat, "%s")
-	if len(parts)-1 != numParams {
-		return nil
-	}
 	var sb strings.Builder
 	sb.WriteString("^")
 	for i, part := range parts {
