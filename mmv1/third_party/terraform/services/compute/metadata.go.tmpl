@@ -80,6 +80,28 @@ func flattenMetadataBeta(metadata *compute.Metadata) map[string]string {
 	return metadataMap
 }
 
+// flattenMetadataFromApiMap converts the metadata map returned from the REST API
+// (via SendRequest) into the flat key/value map used by the Terraform schema.
+func flattenMetadataFromApiMap(metadata map[string]interface{}) map[string]string {
+	metadataMap := make(map[string]string)
+	if metadata == nil {
+		return metadataMap
+	}
+	items, _ := metadata["items"].([]interface{})
+	for _, itemRaw := range items {
+		item, ok := itemRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		key, _ := item["key"].(string)
+		value, _ := item["value"].(string)
+		if key != "" {
+			metadataMap[key] = value
+		}
+	}
+	return metadataMap
+}
+
 // This function differs from flattenMetadataBeta only in that it takes
 // compute.metadata rather than compute.metadata as an argument. It should
 // be removed in favour of flattenMetadataBeta if/when all resources using it get
