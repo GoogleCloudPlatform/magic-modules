@@ -197,7 +197,7 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 	stableNew := make([]interface{}, len(new))
 	placed := make(map[string]bool)
 
-	// Step 1: Place survivors that fit in their old slots
+	// 1: Place survivors that fit in their old slots
 	for _, r := range new {
 		if r == nil { continue }
 		m := r.(map[string]interface{})
@@ -211,7 +211,7 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 		}
 	}
 
-	// Step 2: Collect unplaced survivors and additions in the order they appear in 'new'
+	// 2: Collect unplaced survivors and additions in the order they appear in 'new'
 	var unplaced []interface{}
 	for _, r := range new {
 		if r == nil { continue }
@@ -222,7 +222,7 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, di
 		}
 	}
 
-	// Step 3: Fill the remaining gaps in 'stableNew' with unplaced items
+	// 3: Fill the remaining gaps in 'stableNew' with unplaced items
 	unplacedIdx := 0
 	for i := range stableNew {
 		if stableNew[i] == nil && unplacedIdx < len(unplaced) {
