@@ -17,10 +17,12 @@ description: |-
   Represents an IAM v3 Access Policy parented by a Google Cloud Organization. This policy
   defines rules that allow or deny access to resources within the specified organization based on principals and conditions.
   See the Cloud IAM documentation for more details on Access Policies.
+references:
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v3beta/organizations.locations.accessPolicies'
+id_format: organizations/{{organization}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
 base_url: organizations/{{organization}}/locations/{{location}}/accessPolicies
 self_link: organizations/{{organization}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
 create_url: organizations/{{organization}}/locations/{{location}}/accessPolicies?accessPolicyId={{access_policy_id}}
-update_mask: true
 update_verb: PATCH
 import_format:
   - organizations/{{organization}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
@@ -36,17 +38,30 @@ async:
   include_project: true
 autogen_status: QWNjZXNzUG9saWN5QnlPcmdhbml6YXRpb25BbmRMb2NhdGlvbg==
 autogen_async: true
-examples:
+samples:
   - name: 'basic_access_policy_organization'
     primary_resource_id: 'example'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    vars:
-      project_name: 'ap-project-'
-      account_id: 'svc-acc-'
-      access_policy_id: 'my-org-policy-'
-      display_name: 'Organization Access Policy'
+    steps:
+      - name: 'basic_access_policy_organization'
+        test_env_vars:
+          org_id: 'ORG_TARGET'
+          billing_account: 'BILLING_ACCT'
+        resource_id_vars:
+          project_name: 'ap-project-'
+          account_id: 'svc-acc-'
+          access_policy_id: 'my-org-policy-'
+        vars:
+          display_name: 'Organization Access Policy'
+      - name: 'basic_access_policy_organization'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+        resource_id_vars:
+          project_name: 'ap-project-'
+          account_id: 'svc-acc-'
+          access_policy_id: 'my-org-policy-'
+        vars:
+          display_name: 'Organization Access Policy Updated'
     external_providers: ["time"]
 parameters:
   - name: organization
@@ -121,27 +136,11 @@ properties:
               value_type:
                 type: NestedObject
                 properties:
-                  - name: description
-                    type: String
-                    description: |-
-                      Description of the expression. This is a longer text which
-                      describes the expression, e.g. when hovered over it in a UI.
                   - name: expression
                     type: String
                     description: |-
                       Textual representation of an expression in Common Expression Language
                       syntax.
-                  - name: location
-                    type: String
-                    description: |-
-                      String indicating the location of the expression for error
-                      reporting, e.g. a file name and a position in the file.
-                  - name: title
-                    type: String
-                    description: |-
-                      Title for the expression, i.e. a short string describing
-                      its purpose. This can be used e.g. in UIs which allow to enter the
-                      expression.
               key_name: service
             - name: description
               type: String
