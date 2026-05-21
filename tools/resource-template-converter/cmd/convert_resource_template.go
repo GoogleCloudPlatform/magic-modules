@@ -14,6 +14,8 @@ import (
 
 var resourceFileRegex = regexp.MustCompile(`mmv1/products/([^/]+)/([^/]+\.yaml)`)
 
+var filePath string
+
 var convertResourceTemplateCmd = &cobra.Command{
 	Use:   "convert-resource-template",
 	Short: "convert resource template from using examples to samples",
@@ -30,11 +32,11 @@ var convertResourceTemplateCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := args[0]
-		return exeCconvertResourceTemplate(root)
+		return exeCconvertResourceTemplate(root, filePath)
 	},
 }
 
-func exeCconvertResourceTemplate(basePath string) error {
+func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 	if _, err := os.Stat(filepath.Join(basePath, "mmv1")); os.IsNotExist(err) {
 		log.Fatalf("magic-modules directory structure not found. Please ensure this tool is run from 'magic-modules/tools/example-split'.")
 	}
@@ -43,6 +45,36 @@ func exeCconvertResourceTemplate(basePath string) error {
 	templatesPath := filepath.Join(basePath, "mmv1", "templates", "terraform")
 	examplesSourceDir := filepath.Join(templatesPath, "examples")
 	samplesDestDir := filepath.Join(templatesPath, "samples", "services")
+
+	if targetFile != "" {
+		resolvedPath := targetFile
+		if !filepath.IsAbs(resolvedPath) {
+			resolvedPath = filepath.Clean(filepath.Join(basePath, targetFile))
+		}
+
+		if _, err := os.Stat(resolvedPath); os.IsNotExist(err) {
+			return fmt.Errorf("target file does not exist: %s", resolvedPath)
+		}
+
+		matches := resourceFileRegex.FindStringSubmatch(resolvedPath)
+		if matches == nil {
+			return fmt.Errorf("file path %s does not match expected pattern mmv1/products/<service>/<resource>.yaml", resolvedPath)
+		}
+		serviceName := matches[1]
+
+		fmt.Printf("Processing single product YAML file: %s (service: %s)\n", resolvedPath, serviceName)
+
+		if err := copy.ProcessResourceFile(resolvedPath, serviceName, examplesSourceDir, samplesDestDir); err != nil {
+			return fmt.Errorf("error copying templates: %w", err)
+		}
+		if err := migrate.MigrateFile(resolvedPath, serviceName); err != nil {
+			return fmt.Errorf("failed to migrate file: %w", err)
+		}
+
+		fmt.Println("Processing complete.")
+		return nil
+	}
+
 	fmt.Printf("Starting processing of product YAML files in: %s\n", productsPath)
 
 	err := filepath.Walk(productsPath, func(path string, info os.FileInfo, err error) error {
@@ -78,5 +110,6 @@ func exeCconvertResourceTemplate(basePath string) error {
 }
 
 func init() {
+	convertResourceTemplateCmd.Flags().StringVarP(&filePath, "file", "f", "", "Path to a single resource yaml file to convert")
 	rootCmd.AddCommand(convertResourceTemplateCmd)
 }
