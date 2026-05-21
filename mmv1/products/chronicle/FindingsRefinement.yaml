@@ -26,6 +26,7 @@ create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/f
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
 update_mask: true
 update_verb: PATCH
+# The API does not support deletion of FindingsRefinements.
 exclude_delete: true
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
@@ -112,7 +113,7 @@ properties:
     type: String
     description: The timestamp of when the findings refinement was last updated.
     output: true
-  - name: findingsRefinementId
+  - name: findings_refinement_id
     type: String
     output: true
     immutable: true
