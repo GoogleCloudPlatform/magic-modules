@@ -2,19 +2,19 @@ package provider_test
 
 import (
 	"fmt"
-	"regexp"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -250,7 +250,7 @@ func TestAccProviderInvalidRepConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProviderInvalidRepConfig(),
+				Config:      testAccProviderInvalidRepConfig(),
 				ExpectError: regexp.MustCompile("conflict between prefer_global_endpoints and prefer_regional_endpoints"),
 			},
 		},
@@ -325,7 +325,7 @@ func testAccCheckComputeAddressDestroyProducer(t *testing.T) func(s *terraform.S
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/addresses/{{"{{"}}name{{"}}"}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/addresses/{{name}}")
 			if err != nil {
 				return err
 			}

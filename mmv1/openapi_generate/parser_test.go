@@ -25,7 +25,7 @@ func TestMapType(t *testing.T) {
 	}
 
 	petSchema := doc.Paths.Map()["/pets"].Post.RequestBody.Value.Content["application/json"].Schema
-	mmObject := WriteObject("pet", petSchema, propType(petSchema), false, make(map[string]bool))
+	mmObject := WriteObject("pet", petSchema, propType(petSchema), false, make(map[string]bool), make(map[*openapi3.Schema]bool))
 	if mmObject.KeyName == "" || mmObject.Type != "Map" {
 		t.Error("Failed to parse map type")
 	}

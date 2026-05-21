@@ -44,6 +44,13 @@ examples:
       app_id: app-id
       guardrail_display_name: my-guardrail
       guardrail_id: guardrail-id
+  - name: ces_guardrail_llm_prompt_security_fail_open
+    primary_resource_id: ces_guardrail_llm_prompt_security_fail_open
+    vars:
+      app_display_name: my-app
+      app_id: app-id
+      guardrail_display_name: my-guardrail
+      guardrail_id: guardrail-id
   - name: ces_guardrail_code_callback
     primary_resource_id: ces_guardrail_code_callback
     vars:
@@ -322,6 +329,14 @@ properties:
       Guardrail that blocks the conversation if the input is considered unsafe
       based on the LLM classification.
     properties:
+      - name: failOpen
+        type: Boolean
+        description: |-
+          Determines the behavior when the guardrail encounters an LLM error.
+          - If true: the guardrail is bypassed.
+          - If false (default): the guardrail triggers/blocks.
+          Note: If a custom policy is provided, this field is ignored in favor of
+          the policy's 'failOpen' configuration.
       - name: customPolicy
         type: NestedObject
         description: |-

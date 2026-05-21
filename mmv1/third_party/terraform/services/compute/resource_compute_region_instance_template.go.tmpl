@@ -600,6 +600,32 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							},
 						},
 
+						{{ if ne $.TargetVersionName `ga` -}}
+						"alias_ipv6_range": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `An array of alias IPv6 ranges for this network interface. Can only be specified for network interfaces on subnet-mode networks.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip_cidr_range": {
+										Type:             schema.TypeString,
+										Required:         true,
+										ForceNew:         true,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
+										Description:      `The IP CIDR range represented by this alias IPv6 range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /96) may be supplied, with a CIDR format resulting in an API error.`,
+									},
+									"subnetwork_range_name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `The subnetwork secondary range name specifying the secondary range from which to allocate the IP CIDR range for this alias IPv6 range. If left unspecified, the primary range of the subnetwork will be used.`,
+									},
+								},
+							},
+						},
+						{{- end }}
+
 						"stack_type": {
 							Type:         schema.TypeString,
 							Optional:     true,

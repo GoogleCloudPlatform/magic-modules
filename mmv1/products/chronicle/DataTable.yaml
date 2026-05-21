@@ -63,7 +63,7 @@ virtual_fields:
 
       Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
     type: String
-    #excluded from generation due to Universal Deletion Policy
+    # excluded from generation due to Universal Deletion Policy
     exclude: true
 
 parameters:

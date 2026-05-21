@@ -19,10 +19,7 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
 	"{{ $.ImportPath }}/tpgresource"
-{{- if $.FirstTestConfig.Sample.BootstrapIam }}
-	"{{ $.ImportPath }}/services/resourcemanager"
-{{- end }}
-{{- range $service, $alias := $.FirstTestConfig.Step.TestServiceDependencies }}
+{{- range $service, $alias := ($.FirstTestConfig.Step.TestServiceDependencies $.Runtime.ResourcePrefixServiceMap) }}
 	{{ $alias }} "{{ $.ImportPath  }}/services/{{ $service }}"
 {{- end }}
 )
