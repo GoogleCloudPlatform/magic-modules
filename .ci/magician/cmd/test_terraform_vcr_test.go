@@ -291,7 +291,7 @@ func TestAnalyticsComment(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatPostReplay(tc.data, new(strings.Builder))
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
@@ -363,7 +363,7 @@ func TestNonExercisedTestsComment(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatPostReplay(tc.data, new(strings.Builder))
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
@@ -377,10 +377,16 @@ func TestNonExercisedTestsComment(t *testing.T) {
 }
 
 func TestWithReplayFailedTests(t *testing.T) {
+	manyFailedTests := make([]string, 101)
+	for i := range manyFailedTests {
+		manyFailedTests[i] = "TestAccAlloydbBackup_alloydbBackupFullTestNewExample"
+	}
 	tests := []struct {
-		name         string
-		data         postReplay
-		wantContains []string
+		name               string
+		data               postReplay
+		wantContains       []string
+		wantNotContains    []string
+		wantStdoutContains []string
 	}{
 		{
 			name: "with failed tests",
@@ -391,18 +397,38 @@ func TestWithReplayFailedTests(t *testing.T) {
 			},
 			wantContains: []string{
 				"#### Action taken",
+				"Found 2 affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit.",
 				"<details>",
-				"<summary>Found 2 affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary>",
+				"<summary>Click here to see the affected tests</summary>",
 				"* a",
 				"* b",
 				"</details>",
 				"[Learn how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)",
 			},
 		},
+		{
+			name: "Too many failed tests",
+			data: postReplay{
+				ReplayingResult: vcr.Result{
+					FailedTests: manyFailedTests,
+				},
+				RunFullVCR: true,
+			},
+			wantContains: []string{
+				"More than 100 tests failed in replaying; this is too many to display on GitHub.",
+			},
+			wantNotContains: []string{manyFailedTests[0]},
+			wantStdoutContains: []string{
+				"Failed replaying tests",
+				manyFailedTests[0],
+			},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			sb := new(strings.Builder)
+			got, err := formatPostReplay(tc.data, sb)
+			gotStdout := sb.String()
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
@@ -410,6 +436,12 @@ func TestWithReplayFailedTests(t *testing.T) {
 				if !strings.Contains(got, wc) {
 					t.Errorf("formatPostReplay() returned %q, which does not contain %q", got, wc)
 				}
+			}
+			for _, s := range tc.wantNotContains {
+				assert.NotContains(t, got, s)
+			}
+			for _, s := range tc.wantStdoutContains {
+				assert.Contains(t, gotStdout, s)
 			}
 		})
 	}
@@ -433,7 +465,7 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 			wantContains: []string{
 				"> [!CAUTION]",
 				"🔴 Errors occurred during REPLAYING mode. Please check the build log for details.",
-				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_test.log)",
+				"View the [replaying VCR build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_test.log)",
 			},
 		},
 		{
@@ -446,13 +478,13 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 			},
 			wantContains: []string{
 				"🟢 **All tests passed in Replaying mode! No Recording was needed.**",
-				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_test.log)",
+				"View the [replaying VCR build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_test.log)",
 			},
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatPostReplay(tc.data, new(strings.Builder))
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
@@ -466,22 +498,62 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 }
 
 func TestRecordReplay(t *testing.T) {
+	manyRows := make([]VCRTestTableRow, 101)
+	for i := range manyRows {
+		manyRows[i] = VCRTestTableRow{
+			DisplayName:                   "TestAcc_a",
+			RecordingStatus:               "Passed",
+			RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log",
+			ReplayingAfterRecordingStatus: "Passed",
+		}
+	}
 	tests := []struct {
-		name         string
-		data         recordReplay
-		wantContains []string
+		name               string
+		data               recordReplay
+		wantContains       []string
+		wantNotContains    []string
+		wantStdoutContains []string
 	}{
 		{
 			name: "ReplayingAfterRecordingResult has failed tests",
 			data: recordReplay{
-				AttemptedTests: []string{"a", "b", "c", "d", "e"},
-				RecordingResult: vcr.Result{
-					PassedTests: []string{"a", "b", "c"},
-					FailedTests: []string{"d", "e"},
-				},
-				ReplayingAfterRecordingResult: vcr.Result{
-					PassedTests: []string{"a"},
-					FailedTests: []string{"b", "c"},
+				TestRows: []VCRTestTableRow{
+					{
+						DisplayName:                   "TestAcc_a",
+						RecordingStatus:               "Passed",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log",
+						ReplayingAfterRecordingStatus: "Passed",
+					},
+					{
+						DisplayName:                     "TestAcc_b",
+						RecordingStatus:                 "Passed",
+						RecordingLogUrl:                 "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log",
+						ReplayingAfterRecordingStatus:   "Failed",
+						ReplayingAfterRecordingErrorUrl: "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/b_replaying_test.log",
+						ReplayingAfterRecordingLogUrl:   "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/b.log",
+					},
+					{
+						DisplayName:                     "TestAcc_c",
+						RecordingStatus:                 "Passed",
+						RecordingLogUrl:                 "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log",
+						ReplayingAfterRecordingStatus:   "Failed",
+						ReplayingAfterRecordingErrorUrl: "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/c_replaying_test.log",
+						ReplayingAfterRecordingLogUrl:   "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/c.log",
+					},
+					{
+						DisplayName:                   "TestAcc_d",
+						RecordingStatus:               "Failed",
+						RecordingErrorUrl:             "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/d_recording_test.log",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/d.log",
+						ReplayingAfterRecordingStatus: "-",
+					},
+					{
+						DisplayName:                   "TestAcc_e",
+						RecordingStatus:               "Failed",
+						RecordingErrorUrl:             "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/e_recording_test.log",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/e.log",
+						ReplayingAfterRecordingStatus: "-",
+					},
 				},
 				HasTerminatedTests: true,
 				RecordingErr:       fmt.Errorf("some error"),
@@ -491,26 +563,39 @@ func TestRecordReplay(t *testing.T) {
 				Head:               "auto-pr-123",
 			},
 			wantContains: []string{
-				"| Test Name | Recording Mode | Replaying Rerun |",
-				"| `a` | 🟢 Passed [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log)] | 🟢 Passed |",
-				"| `b` | 🟢 Passed [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log)] | 🔴 Failed [[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/b_replaying_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/b.log)] |",
-				"| `c` | 🟢 Passed [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log)] | 🔴 Failed [[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/c_replaying_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/c.log)] |",
-				"| `d` | 🔴 Failed [[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/d_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/d.log)] | - |",
-				"| `e` | 🔴 Failed [[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/e_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/e.log)] | - |",
+				"| Recording Mode | Replaying Rerun | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log) | ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/b_replaying_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/b.log) | TestAcc_b |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log) | ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/c_replaying_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/c.log) | TestAcc_c |",
+				"| ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/d_recording_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/d.log) | - | TestAcc_d |",
+				"| ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/e_recording_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/e.log) | - | TestAcc_e |",
 
 				"Please address these issues to complete your PR",
-				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log) or the [debug logs folder](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording) for detailed results.",
+				"View the [recording VCR build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log) or the [debug logs folder](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording) for detailed results.",
 			},
 		},
 		{
 			name: "ReplayingAfterRecordingResult does not have failed tests",
 			data: recordReplay{
-				AttemptedTests: []string{"a", "b", "c"},
-				RecordingResult: vcr.Result{
-					PassedTests: []string{"a", "b", "c"},
-				},
-				ReplayingAfterRecordingResult: vcr.Result{
-					PassedTests: []string{"a", "b", "c"},
+				TestRows: []VCRTestTableRow{
+					{
+						DisplayName:                   "TestAcc_a",
+						RecordingStatus:               "Passed",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log",
+						ReplayingAfterRecordingStatus: "Passed",
+					},
+					{
+						DisplayName:                   "TestAcc_b",
+						RecordingStatus:               "Passed",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log",
+						ReplayingAfterRecordingStatus: "Passed",
+					},
+					{
+						DisplayName:                   "TestAcc_c",
+						RecordingStatus:               "Passed",
+						RecordingLogUrl:               "https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log",
+						ReplayingAfterRecordingStatus: "Passed",
+					},
 				},
 				AllRecordingPassed: true,
 				BuildID:            "build-123",
@@ -519,23 +604,52 @@ func TestRecordReplay(t *testing.T) {
 				LogBucket:          "ci-vcr-logs",
 			},
 			wantContains: []string{
-				"| Test Name | Recording Mode | Replaying Rerun |",
-				"| `a` | 🟢 Passed [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log)] | 🟢 Passed |",
-				"| `b` | 🟢 Passed [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log)] | 🟢 Passed |",
-				"| `c` | 🟢 Passed [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log)] | 🟢 Passed |",
+				"| Recording Mode | Replaying Rerun | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log) | ✅ | TestAcc_b |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log) | ✅ | TestAcc_c |",
 				"🟢 **All tests passed!**",
-				"View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log) or the [debug logs folder](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording) for detailed results.",
+				"View the [recording VCR build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log) or the [debug logs folder](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording) for detailed results.",
+			},
+		},
+		{
+			name: "Too many rows",
+			data: recordReplay{
+				TestRows:           manyRows,
+				AllRecordingPassed: true,
+				BuildID:            "build-123",
+				Head:               "auto-pr-123",
+				Version:            provider.Beta.String(),
+				LogBucket:          "ci-vcr-logs",
+			},
+			wantContains: []string{
+				"More than 100 tests ran in recording mode; this is too many to display on GitHub.",
+			},
+			wantNotContains: []string{
+				manyRows[0].DisplayName,
+			},
+			wantStdoutContains: []string{
+				"| Recording Mode | Replaying Rerun | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
 			},
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatRecordReplay(tc.data)
+			sb := new(strings.Builder)
+			got, err := formatRecordReplay(tc.data, sb)
+			gotStdout := sb.String()
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
-			for _, wc := range tc.wantContains {
-				assert.Contains(t, got, wc)
+			for _, s := range tc.wantContains {
+				assert.Contains(t, got, s)
+			}
+			for _, s := range tc.wantNotContains {
+				assert.NotContains(t, got, s)
+			}
+			for _, s := range tc.wantStdoutContains {
+				assert.Contains(t, gotStdout, s)
 			}
 		})
 	}

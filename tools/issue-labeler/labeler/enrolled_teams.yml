@@ -616,6 +616,9 @@ service/networkmanagement-connectivity-test:
 service/networkmanagement-insights:
   resources:
   - google_network_management_network_monitoring_provider
+service/networkmanagement-vpc-flow-logs:
+  resources:
+  - google_network_management_vpc_flow_logs_config
 service/networksecurity-intercept:
   resources:
   - google_network_security_intercept.*

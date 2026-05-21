@@ -314,7 +314,7 @@ region are guaranteed to support the same version.
     [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
     Structure is [documented below](#nested_secret_manager_config).
 
-* `secret_sync_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the
+* `secret_sync_config` - (Optional) Configuration for the
     [SecretSyncConfig](https://cloud.google.com/secret-manager/docs/sync-k8-secrets) feature.
     Structure is [documented below](#nested_secret_sync_config).
 
@@ -447,6 +447,14 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `rbac_binding_config` - (Optional)
   RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
 
+* `deletion_policy` - 
+  (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+  When a 'terraform destroy' or 'terraform apply' would delete the resource,
+  the command will fail if this field is set to "PREVENT" in Terraform state.
+  When set to "ABANDON", the command will remove the resource from Terraform
+  management without updating or deleting the resource in the API.
+  When set to "DELETE", deleting the resource is allowed.
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -462,6 +470,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     has based on the resource usage of the existing pods.
     It is enabled by default;
     set `disabled = true` to disable.
+
+* `agent_sandbox_config` - (Optional, Beta) Configuration for the Agent Sandbox addon. Structure is documented below:
+    * `enabled` - (Required) Whether the Agent Sandbox addon is enabled.
 
 * `http_load_balancing` - (Optional) The status of the HTTP (L7) load balancing
     controller addon, which makes it easy to set up HTTP load balancers for services in a
@@ -547,7 +558,7 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
    * `disable_multi_nic` When set to true, this disables multi-NIC support for the Lustre CSI driver. By default, GKE enables multi-NIC support, which allows the Lustre CSI driver to automatically detect and configure all suitable network interfaces on a node to maximize I/O performance for demanding workloads.
 
-* `pod_snapshot_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
+* `pod_snapshot_config` - (Optional) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -968,6 +979,8 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `enable_confidential_storage` - (Optional) Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
+* `gpudirect_strategy` - (Optional) The type of GPUDirect strategy to enable on the node. See the [GKE network docs](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/gpu-bandwidth-gpudirect-tcpx) for information on available modes.
+
 * `local_ssd_encryption_mode` - (Optional) Possible Local SSD encryption modes:
     Accepted values are:
     * `STANDARD_ENCRYPTION`: The given node will be encrypted using keys managed by Google infrastructure and the keys wll be deleted when the node is deleted.
@@ -1359,7 +1372,7 @@ notification_config {
 <a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
-* `rotation_config` (Optional) - config for secret manager auto rotation. Structure is [docuemented below](#rotation_config)
+* `rotation_config` (Optional) - config for secret manager auto rotation. Structure is [documented below](#rotation_config)
 
 <a name="rotation_config"></a>The `rotation_config` block supports:
 
@@ -1368,13 +1381,13 @@ notification_config {
 
 <a name="nested_secret_sync_config"></a>The `secret_sync_config` block supports:
 
-* `enabled` (Required, [Beta](../guides/provider_versions.html.markdown)) - Enable the Sync as K8s secret feature for this cluster.
-* `rotation_config` (Optional, [Beta](../guides/provider_versions.html.markdown)) - config for secret sync auto rotation. Structure is [docuemented below](#sync_rotation_config)
+* `enabled` (Required) - Enable the Sync as K8s secret feature for this cluster.
+* `rotation_config` (Optional) - config for secret sync auto rotation. Structure is [docuemented below](#sync_rotation_config)
 
 <a name="sync_rotation_config"></a>The `rotation_config` block supports:
 
-* `enabled` (Optional, [Beta](../guides/provider_versions.html.markdown)) - Enable the roation in Sync as K8s secret feature for this cluster.
-* `rotation_interval` (Optional, [Beta](../guides/provider_versions.html.markdown)) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
+* `enabled` (Optional) - Enable the roation in Sync as K8s secret feature for this cluster.
+* `rotation_interval` (Optional) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
 
 <a name="nested_user_managed_keys_config"></a>The `user_managed_keys_config` block supports:
 

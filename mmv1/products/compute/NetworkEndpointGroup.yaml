@@ -118,6 +118,7 @@ properties:
       - 'INTERNET_FQDN_PORT'
       - 'SERVERLESS'
       - 'PRIVATE_SERVICE_CONNECT'
+      - 'GCE_VM_IP_DEDICATED_BACKEND'
   - name: 'size'
     type: Integer
     description: Number of network endpoints in the network endpoint group.

@@ -28,7 +28,7 @@ delete_url: '{{env_id}}/references/{{name}}'
 import_format:
   - '{{env_id}}/references/{{name}}'
   - '{{env_id}}/{{name}}'
-      # Resource creation race
+# Resource creation race
 timeouts:
   insert_minutes: 1
   update_minutes: 20

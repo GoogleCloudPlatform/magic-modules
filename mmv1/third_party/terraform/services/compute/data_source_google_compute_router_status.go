@@ -1,0 +1,162 @@
+package compute
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleComputeRouterStatus() *schema.Resource {
+	routeElemSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeRoute().Schema)
+
+	return &schema.Resource{
+		Read: dataSourceComputeRouterStatusRead,
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:        schema.TypeString,
+				Description: "Name of the router to query.",
+				Required:    true,
+				Computed:    false,
+			},
+			"project": {
+				Type:        schema.TypeString,
+				Description: "Project ID of the target router.",
+				Optional:    true,
+				Computed:    false,
+			},
+			"region": {
+				Type:        schema.TypeString,
+				Description: "Region of the target router.",
+				Optional:    true,
+				Computed:    true,
+			},
+			"network": {
+				Type:        schema.TypeString,
+				Description: "URI of the network to which this router belongs.",
+				Computed:    true,
+			},
+			"best_routes": {
+				Type:        schema.TypeList,
+				Description: "Best routes for this router's network.",
+				Elem: &schema.Resource{
+					Schema: routeElemSchema,
+				},
+				Computed: true,
+			},
+			"best_routes_for_router": {
+				Type:        schema.TypeList,
+				Description: "Best routes learned by this router.",
+				Elem: &schema.Resource{
+					Schema: routeElemSchema,
+				},
+				Computed: true,
+			},
+		},
+	}
+}
+
+func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	region, err := tpgresource.GetRegion(d, config)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("region", region); err != nil {
+		return fmt.Errorf("Error setting region: %s", err)
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{name}}/getRouterStatus")
+	if err != nil {
+		return err
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return err
+	}
+
+	status, ok := res["result"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("Error parsing router status response: 'result' field not found or invalid")
+	}
+
+	if err := d.Set("network", status["network"]); err != nil {
+		return fmt.Errorf("Error setting network: %s", err)
+	}
+
+	if err := d.Set("best_routes", flattenRoutes(status["bestRoutes"])); err != nil {
+		return fmt.Errorf("Error setting best_routes: %s", err)
+	}
+
+	if err := d.Set("best_routes_for_router", flattenRoutes(status["bestRoutesForRouter"])); err != nil {
+		return fmt.Errorf("Error setting best_routes_for_router: %s", err)
+	}
+
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/routers/{{name}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	return nil
+}
+
+func flattenRoutes(routes interface{}) []map[string]interface{} {
+	routeList, ok := routes.([]interface{})
+	if !ok {
+		return nil
+	}
+
+	results := make([]map[string]interface{}, len(routeList))
+
+	for i, route := range routeList {
+		routeMap, ok := route.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		results[i] = map[string]interface{}{
+			"dest_range":          routeMap["destRange"],
+			"name":                routeMap["name"],
+			"network":             routeMap["network"],
+			"description":         routeMap["description"],
+			"next_hop_gateway":    routeMap["nextHopGateway"],
+			"next_hop_ilb":        routeMap["nextHopIlb"],
+			"next_hop_ip":         routeMap["nextHopIp"],
+			"next_hop_vpn_tunnel": routeMap["nextHopVpnTunnel"],
+			"priority":            routeMap["priority"],
+			"tags":                routeMap["tags"],
+			"next_hop_network":    routeMap["nextHopNetwork"],
+		}
+	}
+
+	return results
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_router_status",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRouterStatus(),
+	}.Register()
+}

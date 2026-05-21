@@ -1,0 +1,361 @@
+package compute_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+)
+
+func TestAccComputeTargetSslProxy_update(t *testing.T) {
+	target := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	sslPolicy := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	cert1 := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	cert2 := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	backend1 := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	backend2 := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-tssl-%s", acctest.RandString(t, 10))
+
+	resourceSuffix := acctest.RandString(t, 10)
+	var proxy map[string]interface{}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetSslProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeTargetSslProxy_basic1(target, sslPolicy, cert1, backend1, hc),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetSslProxyExists(
+						t, "google_compute_target_ssl_proxy.foobar", &proxy),
+					testAccCheckComputeTargetSslProxyHeader(t, "NONE", &proxy),
+					testAccCheckComputeTargetSslProxyHasSslCertificate(t, cert1, &proxy),
+				),
+			},
+			{
+				Config: testAccComputeTargetSslProxy_basic2(target, sslPolicy, cert1, cert2, backend1, backend2, hc),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetSslProxyExists(
+						t, "google_compute_target_ssl_proxy.foobar", &proxy),
+					testAccCheckComputeTargetSslProxyHeader(t, "PROXY_V1", &proxy),
+					testAccCheckComputeTargetSslProxyHasSslCertificate(t, cert2, &proxy),
+				),
+			},
+			{
+				Config: testAccComputeTargetSslProxy_certificateMap1(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetSslProxyExists(
+						t, "google_compute_target_ssl_proxy.with_certificate_map", &proxy),
+					testAccCheckComputeTargetSslProxyHasCertificateMap(t, "tf-test-certmap-1-"+resourceSuffix, &proxy),
+				),
+			},
+			{
+				Config: testAccComputeTargetSslProxy_certificateMap2(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetSslProxyExists(
+						t, "google_compute_target_ssl_proxy.with_certificate_map", &proxy),
+					testAccCheckComputeTargetSslProxyHasCertificateMap(t, "tf-test-certmap-2-"+resourceSuffix, &proxy),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckComputeTargetSslProxyExists(t *testing.T, n string, proxy *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		name := rs.Primary.Attributes["name"]
+
+		url := fmt.Sprintf("%sprojects/%s/global/targetSslProxies/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project, name)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return err
+		}
+
+		if res["name"] != name {
+			return fmt.Errorf("TargetSslProxy not found")
+		}
+
+		*proxy = res
+
+		return nil
+	}
+}
+
+func testAccCheckComputeTargetSslProxyHeader(t *testing.T, proxyHeader string, proxy *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if (*proxy)["proxyHeader"] != proxyHeader {
+			return fmt.Errorf("Wrong proxy header. Expected '%s', got '%s'", proxyHeader, (*proxy)["proxyHeader"])
+		}
+		return nil
+	}
+}
+
+func testAccCheckComputeTargetSslProxyHasSslCertificate(t *testing.T, cert string, proxy *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		certURL := fmt.Sprintf(canonicalSslCertificateTemplate, config.Project, cert)
+
+		sslCertificates, ok := (*proxy)["sslCertificates"].([]interface{})
+		if !ok {
+			return fmt.Errorf("Ssl certificates not found in TargetSslProxy")
+		}
+
+		for _, sslCertificate := range sslCertificates {
+			sslCertificateStr, ok := sslCertificate.(string)
+			if !ok {
+				return fmt.Errorf("Ssl certificate has unexpected type")
+			}
+			if tpgresource.ConvertSelfLinkToV1(sslCertificateStr) == certURL {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Ssl certificate not found: expected'%s'", certURL)
+	}
+}
+
+func testAccCheckComputeTargetSslProxyHasCertificateMap(t *testing.T, certificateMap string, proxy *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		wantCertMapURL := fmt.Sprintf(canonicalCertificateMapTemplate, config.Project, certificateMap)
+		certificateMapLink, ok := (*proxy)["certificateMap"].(string)
+		if !ok {
+			return fmt.Errorf("certificate map not found in TargetSslProxy")
+		}
+		gotCertMapURL := tpgresource.ConvertSelfLinkToV1(certificateMapLink)
+		if wantCertMapURL != gotCertMapURL {
+			return fmt.Errorf("certificate map not found: got %q, want %q", gotCertMapURL, wantCertMapURL)
+		}
+		return nil
+	}
+}
+
+func testAccComputeTargetSslProxy_basic1(target, sslPolicy, sslCert, backend, hc string) string {
+	return fmt.Sprintf(`
+resource "google_compute_target_ssl_proxy" "foobar" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "%s"
+  backend_service  = google_compute_backend_service.foo.self_link
+  ssl_certificates = [google_compute_ssl_certificate.foo.self_link]
+  proxy_header     = "NONE"
+  ssl_policy       = google_compute_ssl_policy.foo.self_link
+}
+
+resource "google_compute_ssl_policy" "foo" {
+  name            = "%s"
+  description     = "Resource created for Terraform acceptance testing"
+  min_tls_version = "TLS_1_2"
+  profile         = "MODERN"
+}
+
+resource "google_compute_ssl_certificate" "foo" {
+  name        = "%s"
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
+}
+
+resource "google_compute_backend_service" "foo" {
+  name          = "%s"
+  protocol      = "SSL"
+  health_checks = [google_compute_health_check.zero.self_link]
+}
+
+resource "google_compute_health_check" "zero" {
+  name               = "%s"
+  check_interval_sec = 1
+  timeout_sec        = 1
+  tcp_health_check {
+    port = "443"
+  }
+}
+`, target, sslPolicy, sslCert, backend, hc)
+}
+
+func testAccComputeTargetSslProxy_basic2(target, sslPolicy, sslCert1, sslCert2, backend1, backend2, hc string) string {
+	return fmt.Sprintf(`
+resource "google_compute_target_ssl_proxy" "foobar" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "%s"
+  backend_service  = google_compute_backend_service.bar.self_link
+  ssl_certificates = [google_compute_ssl_certificate.bar.name]
+  proxy_header     = "PROXY_V1"
+}
+
+resource "google_compute_ssl_policy" "foo" {
+  name            = "%s"
+  description     = "Resource created for Terraform acceptance testing"
+  min_tls_version = "TLS_1_2"
+  profile         = "MODERN"
+}
+
+resource "google_compute_ssl_certificate" "foo" {
+  name        = "%s"
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
+}
+
+resource "google_compute_ssl_certificate" "bar" {
+  name        = "%s"
+  private_key = file("test-fixtures/test.key")
+  certificate = file("test-fixtures/test.crt")
+}
+
+resource "google_compute_backend_service" "foo" {
+  name          = "%s"
+  protocol      = "SSL"
+  health_checks = [google_compute_health_check.zero.self_link]
+}
+
+resource "google_compute_backend_service" "bar" {
+  name          = "%s"
+  protocol      = "SSL"
+  health_checks = [google_compute_health_check.zero.self_link]
+}
+
+resource "google_compute_health_check" "zero" {
+  name               = "%s"
+  check_interval_sec = 1
+  timeout_sec        = 1
+  tcp_health_check {
+    port = "443"
+  }
+}
+`, target, sslPolicy, sslCert1, sslCert2, backend1, backend2, hc)
+}
+
+func testAccComputeTargetSslProxy_certificateMap1(id string) string {
+	return fmt.Sprintf(`
+resource "google_compute_target_ssl_proxy" "with_certificate_map" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "tf-test-ssl-proxy-%s"
+  backend_service  = google_compute_backend_service.foo.self_link
+	certificate_map = "//certificatemanager.googleapis.com/${google_certificate_manager_certificate_map.map1.id}"
+}
+
+resource "google_compute_backend_service" "foo" {
+  name          = "tf-test-backend-%s"
+  protocol      = "SSL"
+  health_checks = [google_compute_health_check.zero.self_link]
+}
+
+resource "google_compute_health_check" "zero" {
+  name               = "tf-test-check-%s"
+  check_interval_sec = 1
+  timeout_sec        = 1
+  tcp_health_check {
+    port = "443"
+  }
+}
+
+resource "google_certificate_manager_certificate_map" "map1" {
+  name = "tf-test-certmap-1-%s"
+}
+resource "google_certificate_manager_certificate_map_entry" "map_entry" {
+  name         = "tf-test-certmapentry-%s"
+  map          = google_certificate_manager_certificate_map.map1.name
+  certificates = [google_certificate_manager_certificate.certificate.id]
+  matcher      = "PRIMARY"
+}
+
+resource "google_certificate_manager_certificate" "certificate" {
+  name        = "tf-test-cert-%s"
+  scope       = "DEFAULT"
+  managed {
+    domains = [
+      google_certificate_manager_dns_authorization.instance.domain,
+    ]
+    dns_authorizations = [
+      google_certificate_manager_dns_authorization.instance.id,
+    ]
+  }
+}
+
+resource "google_certificate_manager_dns_authorization" "instance" {
+  name   = "tf-test-dnsauthz-%s"
+  domain = "mysite.com"
+}
+`, id, id, id, id, id, id, id)
+}
+
+func testAccComputeTargetSslProxy_certificateMap2(id string) string {
+	return fmt.Sprintf(`
+resource "google_compute_target_ssl_proxy" "with_certificate_map" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "tf-test-ssl-proxy-%s"
+  backend_service  = google_compute_backend_service.foo.self_link
+	certificate_map = "//certificatemanager.googleapis.com/${google_certificate_manager_certificate_map.map2.id}"
+}
+
+resource "google_compute_backend_service" "foo" {
+  name          = "tf-test-backend-%s"
+  protocol      = "SSL"
+  health_checks = [google_compute_health_check.zero.self_link]
+}
+
+resource "google_compute_health_check" "zero" {
+  name               = "tf-test-check-%s"
+  check_interval_sec = 1
+  timeout_sec        = 1
+  tcp_health_check {
+    port = "443"
+  }
+}
+
+resource "google_certificate_manager_certificate_map" "map1" {
+  name = "tf-test-certmap-1-%s"
+}
+
+resource "google_certificate_manager_certificate_map" "map2" {
+  name = "tf-test-certmap-2-%s"
+}
+
+resource "google_certificate_manager_certificate_map_entry" "map_entry" {
+  name         = "tf-test-certmapentry-%s"
+  map          = google_certificate_manager_certificate_map.map1.name
+  certificates = [google_certificate_manager_certificate.certificate.id]
+  matcher      = "PRIMARY"
+}
+
+resource "google_certificate_manager_certificate" "certificate" {
+  name        = "tf-test-cert-%s"
+  scope       = "DEFAULT"
+  managed {
+    domains = [
+      google_certificate_manager_dns_authorization.instance.domain,
+    ]
+    dns_authorizations = [
+      google_certificate_manager_dns_authorization.instance.id,
+    ]
+  }
+}
+
+resource "google_certificate_manager_dns_authorization" "instance" {
+  name   = "tf-test-dnsauthz-%s"
+  domain = "mysite.com"
+}
+`, id, id, id, id, id, id, id, id)
+}

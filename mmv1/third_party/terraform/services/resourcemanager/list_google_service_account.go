@@ -16,9 +16,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/iam/v1"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+func init() {
+	registry.FrameworkListResource{
+		Name:        "google_service_account",
+		ProductName: "resourcemanager",
+		Func:        NewGoogleServiceAccountListResource,
+	}.Register()
+}
 
 type GoogleServiceAccountListResource struct {
 	tpgresource.ListResourceMetadata
@@ -82,7 +91,7 @@ func flattenGoogleServiceAccountListItem(res map[string]interface{}, d *schema.R
 		return err
 	}
 	d.SetId(sa.Name)
-	return populateResourceData(d, &sa)
+	return populateResourceData(d, &sa, config)
 }
 
 func ListServiceAccounts(config *transport_tpg.Config, project string, callback func(rd *schema.ResourceData) error) error {
@@ -116,6 +125,7 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
 		Config:         config,
 		TempData:       d,
+		Resource:       ResourceGoogleServiceAccount(),
 		ListURL:        url,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,

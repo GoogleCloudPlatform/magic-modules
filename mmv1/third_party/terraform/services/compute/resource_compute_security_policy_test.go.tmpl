@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/recaptchaenterprise"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
@@ -161,7 +162,6 @@ func TestAccComputeSecurityPolicy_withPreconfiguredWafConfig(t *testing.T) {
 				ResourceName:      "google_compute_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"rule.1.preconfigured_waf_config.#", "rule.1.preconfigured_waf_config.0.%"}, // API will still return a empty object
 			},
 		},
 	})

@@ -64,7 +64,24 @@ func ResourceStorageBucket() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 			tpgresource.SetLabelsDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -694,7 +711,10 @@ func ResourceStorageBucket() *schema.Resource {
 					}
 					return false
 				},
-      },
+      		},
+      		//UDP schema start
+      		"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+      		//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1007,6 +1027,11 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error {
+	
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceStorageBucket) {
+	    return ResourceStorageBucket().Read(d, meta)
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1208,6 +1233,13 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error {
+	
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1349,6 +1381,35 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	if d.Id() == "" {
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("Error reading import identity: %s", err)
+		}
+		if identity == nil {
+			return nil, fmt.Errorf("import requires bucket name")
+		}
+
+		nameValue, ok := identity.GetOk("name")
+		if !ok || nameValue.(string) == "" {
+			return nil, fmt.Errorf("import requires bucket name")
+		}
+
+		name := nameValue.(string)
+		if err := d.Set("name", name); err != nil {
+			return nil, fmt.Errorf("Error setting name: %s", err)
+		}
+
+		if projectValue, ok := identity.GetOk("project"); ok && projectValue.(string) != "" {
+			if err := d.Set("project", projectValue.(string)); err != nil {
+				return nil, fmt.Errorf("Error setting project: %s", err)
+			}
+			d.SetId(fmt.Sprintf("%s/%s", projectValue.(string), name))
+		} else {
+			d.SetId(name)
+		}
+	}
+
 	// We need to support project/bucket_name and bucket_name formats. This will allow
 	// importing a bucket that is in a different project than the provider default.
 	// ParseImportID can't be used because having no project will cause an error but it
@@ -2443,11 +2504,11 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := tpgresource.SetLabels(res.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
-		return fmt.Errorf("Error setting terraform_labels: %s", err)
-	}
 	if err := d.Set("effective_labels", res.Labels); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("website", flattenBucketWebsite(res.Website)); err != nil {
 		return fmt.Errorf("Error setting website: %s", err)
@@ -2506,9 +2567,18 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("ip_filter", flattenBucketIpFilter(res.IpFilter)); err != nil {
 		return fmt.Errorf("Error setting ip_filter: %s", err)
 	}
+	
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	
 
 	d.SetId(res.Id)
-	return nil
+
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+    "name":    res.Name,
+    "project": d.Get("project").(string),
+})
 }
 
 func hierachicalNamespaceDiffSuppress(k, old, new string, r *schema.ResourceData) bool {

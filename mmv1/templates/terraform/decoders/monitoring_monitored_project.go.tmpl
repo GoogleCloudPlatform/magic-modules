@@ -17,7 +17,7 @@ config := meta.(*transport_tpg.Config)
 monitoredProjects, _ := res["monitoredProjects"].([]interface{})
 
 // Convert configured terraform monitored_project resource name to a ProjectNumber
-expectedProject, configProjectErr := config.NewResourceManagerClient(config.UserAgent).Projects.Get(d.Get("name").(string)).Do()
+expectedProject, configProjectErr := rmClient.NewClient(config, config.UserAgent).Projects.Get(d.Get("name").(string)).Do()
 if configProjectErr != nil {
 	return nil, configProjectErr
 }

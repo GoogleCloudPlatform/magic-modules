@@ -72,6 +72,8 @@ fields:
     api_field: 'disks.initializeParams.resourceManagerTags'
   - field: 'boot_disk.initialize_params.resource_policies'
     api_field: 'disks.initializeParams.resourcePolicies'
+  - field: 'boot_disk.initialize_params.replica_zones'
+    api_field: 'disks.initializeParams.replicaZones'
   - field: 'boot_disk.initialize_params.snapshot'
     api_field: 'disks.initializeParams.sourceSnapshot'
   - field: 'boot_disk.initialize_params.source_snapshot_encryption_key.kms_key_self_link'
@@ -154,6 +156,12 @@ fields:
     field: 'network_interface.alias_ip_range.ip_cidr_range'
   - api_field: 'networkInterfaces.aliasIpRanges.subnetworkRangeName'
     field: 'network_interface.alias_ip_range.subnetwork_range_name'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'networkInterfaces.aliasIpv6Ranges.ipCidrRange'
+    field: 'network_interface.alias_ipv6_range.ip_cidr_range'
+  - api_field: 'networkInterfaces.aliasIpv6Ranges.subnetworkRangeName'
+    field: 'network_interface.alias_ipv6_range.subnetwork_range_name'
+{{- end }}
   - api_field: 'networkInterfaces.internalIpv6PrefixLength'
     field: 'network_interface.internal_ipv6_prefix_length'
   - api_field: 'networkInterfaces.ipv6AccessConfigs.externalIpv6'
@@ -278,3 +286,5 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'eraseWindowsVssSignature'
 {{- end }}
+  - field: 'deletion_policy'
+    provider_only: true

@@ -78,7 +78,7 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
- # Make this a String for now since we don't have a good way to reference multiple resources.
+  # Make this a String for now since we don't have a good way to reference multiple resources.
   - name: 'bucket'
     type: String
     description: The bucket of the resource
