@@ -1773,7 +1773,7 @@ func getDisk(diskUri string, d *schema.ResourceData, config *transport_tpg.Confi
 		return nil, err
 	}
 
-	url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s", config.ComputeBasePath, source.Project, source.Zone, source.Name)
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s", transport_tpg.BaseUrl(Product, config), source.Project, source.Zone, source.Name)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
@@ -2583,7 +2583,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return fmt.Errorf("Error retrieving instance: %s", err)
 				}
 				inst["description"] = d.Get("description").(string)
-				updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instanceName)
+				updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config: config, Method: "PUT", Project: project, RawURL: updateURL, UserAgent: userAgent, Body: inst,
 				})
@@ -2630,7 +2630,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					"fingerprint": metaFingerprint,
 					"items":       metadataItems,
 				}
-				setMetaURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setMetadata", config.ComputeBasePath, project, zone, instanceName)
+				setMetaURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/setMetadata", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config: config, Method: "POST", Project: project, RawURL: setMetaURL, UserAgent: userAgent, Body: metadataBody,
 				})
@@ -2650,7 +2650,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("partner_metadata") {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				viewURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s?view=FULL", config.ComputeBasePath, project, zone, instanceName)
+				viewURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s?view=FULL", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 				inst, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config: config, Method: "GET", Project: project, RawURL: viewURL, UserAgent: userAgent,
 				})
@@ -2662,7 +2662,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				patchedPM := resourceInstancePatchPartnerMetadata(d, currentPM)
 				inst["partnerMetadata"] = patchedPM
 				inst["fingerprint"] = instFingerprint
-				updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instanceName)
+				updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config: config, Method: "PUT", Project: project, RawURL: updateURL, UserAgent: userAgent, Body: inst,
 				})
@@ -2744,7 +2744,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return fmt.Errorf("Error updating params: %s", err)
 				}
 				inst["params"] = params
-				updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instanceName)
+				updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config: config, Method: "PUT", Project: project, RawURL: updateURL, UserAgent: userAgent, Body: inst,
 				})
@@ -2911,7 +2911,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if err != nil {
 					return fmt.Errorf("Cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 				}
-				snURL := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", config.ComputeBasePath, sf.Project, sf.Region, sf.Name)
+				snURL := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s", transport_tpg.BaseUrl(Product, config), sf.Project, sf.Region, sf.Name)
 				resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
 					Method:    "GET",
@@ -3505,7 +3505,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 				inst["canIpForward"] = d.Get("can_ip_forward").(bool)
 				instName2, _ := inst["name"].(string)
-				updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instName2)
+				updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, config), project, zone, instName2)
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
 					Method:    "PUT",
@@ -3543,7 +3543,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			if desiredStatus == "RUNNING" {
 				if previousStatus == "SUSPENDED" {
-					resumeURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/resume", config.ComputeBasePath, project, zone, instanceName)
+					resumeURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/resume", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 					op, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 						Config:    config,
 						Method:    "POST",
@@ -3561,7 +3561,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					}
 				}
 			} else if desiredStatus == "TERMINATED" {
-				stopURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/stop", config.ComputeBasePath, project, zone, instanceName)
+				stopURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/stop", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 				op, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
 					Method:    "POST",
@@ -3573,7 +3573,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return err
 				}
 			} else if desiredStatus == "SUSPENDED" {
-				suspendURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/suspend", config.ComputeBasePath, project, zone, instanceName)
+				suspendURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/suspend", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 				op, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
 					Method:    "POST",
@@ -3805,7 +3805,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					inst["advancedMachineFeatures"] = expandAdvancedMachineFeatures(d)
 
 					instName3, _ := inst["name"].(string)
-					updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, instName3)
+					updateURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, config), project, zone, instName3)
 					op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 						Config:    config,
 						Method:    "PUT",
@@ -3926,7 +3926,7 @@ func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config
 
 	if len(encryptedDisks) > 0 {
 		requestBody := map[string]interface{}{"disks": encryptedDisks}
-		startURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/startWithEncryptionKey", config.ComputeBasePath, project, zone, instanceName)
+		startURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/startWithEncryptionKey", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -3936,7 +3936,7 @@ func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config
 			Body:      requestBody,
 		})
 	} else {
-		startURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/start", config.ComputeBasePath, project, zone, instanceName)
+		startURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/start", transport_tpg.BaseUrl(Product, config), project, zone, instanceName)
 		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -4172,7 +4172,7 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot delete instance %s: instance Deletion Protection is enabled. Set deletion_protection to false for this resource and run \"terraform apply\" before attempting to delete it.", d.Get("name").(string))
 	} else {
-		deleteURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, d.Get("name").(string))
+		deleteURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, config), project, zone, d.Get("name").(string))
 		op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "DELETE",
@@ -4189,7 +4189,7 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 		if opErr != nil {
 			// Refresh operation to check status
 			opName, _ := op["name"].(string)
-			refreshURL := fmt.Sprintf("%sprojects/%s/zones/%s/operations/%s", config.ComputeBasePath, project, zone, opName)
+			refreshURL := fmt.Sprintf("%sprojects/%s/zones/%s/operations/%s", transport_tpg.BaseUrl(Product, config), project, zone, opName)
 			refreshedOp, _ := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",
