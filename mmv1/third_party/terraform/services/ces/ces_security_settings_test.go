@@ -20,13 +20,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -41,7 +44,7 @@ func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) 
 				ResourceName:            "google_ces_security_settings.security_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "project"},
 			},
 			{
 				Config: testAccCESSecuritySettings_cesSecuritySettingsExample_update(context),
@@ -55,7 +58,7 @@ func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) 
 				ResourceName:            "google_ces_security_settings.security_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "project"},
 			},
 		},
 	})
@@ -67,23 +70,64 @@ func testAccCheckCESSecuritySettingsDestroyNoOp(s *terraform.State) error {
 
 func testAccCESSecuritySettings_cesSecuritySettingsExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider        = google-beta
+  project_id      = "tf-test-project-%{random_suffix}"
+  name            = "tf-test-project-%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "ces" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  service  = "ces.googleapis.com"
+}
+
 resource "google_ces_security_settings" "security_settings" {
   provider = google-beta
+  project  = google_project.project.project_id
   location = "us"
 
   endpoint_control_policy {
     enforcement_scope = "ALWAYS"
     allowed_origins   = ["https://example.com", "https://google.com"]
   }
+
+  depends_on = [google_project_service.ces]
 }
 `, context)
 }
 
 func testAccCESSecuritySettings_cesSecuritySettingsExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider        = google-beta
+  project_id      = "tf-test-project-%{random_suffix}"
+  name            = "tf-test-project-%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "ces" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  service  = "ces.googleapis.com"
+}
+
 resource "google_ces_security_settings" "security_settings" {
   provider = google-beta
+  project  = google_project.project.project_id
   location = "us"
+
+  endpoint_control_policy {
+    enforcement_scope = "VPCSC_ONLY"
+    allowed_origins   = ["https://google.com"]
+  }
+
+  depends_on = [google_project_service.ces]
 }
 `, context)
 }
