@@ -495,6 +495,34 @@ properties:
                   CIDR range for this alias IP range. If left
                   unspecified, the primary range of the subnetwork will
                   be used.
+        - name: 'aliasIpv6Ranges'
+          type: Array
+          description: |
+            An array of alias IPv6 ranges for this network interface. Can
+            only be specified for network interfaces on subnet-mode
+            networks.
+          min_version: beta
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'ipCidrRange'
+                type: String
+                description: |
+                  The IP CIDR range represented by this alias IPv6 range.
+                  This IP CIDR range must belong to the specified
+                  subnetwork and cannot contain IP addresses reserved by
+                  system or used by other network interfaces. This range
+                  may be a single IP address (e.g. 2001:db8:1234:5678::),
+                  a netmask (e.g. /96) or a CIDR format string
+                  (e.g. 2001:db8:1234:5678::/96).
+              - name: 'subnetworkRangeName'
+                type: String
+                description: |
+                  Optional subnetwork secondary range name specifying
+                  the secondary range from which to allocate the IP
+                  CIDR range for this alias IPv6 range. If left
+                  unspecified, the primary range of the subnetwork will
+                  be used.
         - name: 'internalIpv6PrefixLength'
           type: String
           description: |
