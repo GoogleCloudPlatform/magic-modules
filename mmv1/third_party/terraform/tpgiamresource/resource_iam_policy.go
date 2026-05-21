@@ -26,11 +26,6 @@ var IamPolicyBaseSchema = map[string]*schema.Schema{
 	},
 }
 
-// IamPolicyBaseIdentitySchema is intentionally empty: for IAM Policy resources
-// the entire identity is composed of the parent attributes (project, folder,
-// bucket, etc.) since there is one policy per parent.
-var IamPolicyBaseIdentitySchema = map[string]*schema.Schema{}
-
 func iamPolicyImport(resourceIdParser ResourceIdParserFunc, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.StateFunc {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		if resourceIdParser == nil {
