@@ -34,13 +34,7 @@ async:
   result:
     resource_inside_response: true
   type: OpAsync
-custom_code:
-  pre_delete: "templates/terraform/pre_delete/oracledatabase_goldengate_deployment.go.tmpl"
-virtual_fields:
-  - name: "deletion_protection"
-    type: Boolean
-    default_value: true
-    description: "Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail."
+deletion_policy_default: "PREVENT"
 autogen_status: R29sZGVuZ2F0ZURlcGxveW1lbnQ=
 autogen_async: true
 parameters:
@@ -550,12 +544,12 @@ examples:
       project: 'my-project'
       goldengate_deployment_id: 'my-deployment'
       odb_subnet: 'projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet'
-      deletion_protection: true
+      deletion_policy: 'PREVENT'
     ignore_read_extra:
-      - "deletion_protection"
+      - "deletion_policy"
     test_vars_overrides:
       project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
+      deletion_policy: '"DELETE"'
       goldengate_deployment_id: 'fmt.Sprintf("tf-ggdep-basic-%s", acctest.RandString(t, 10))'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: 'oracledatabase_goldengate_deployment_full'
@@ -565,13 +559,12 @@ examples:
       goldengate_deployment_id: 'my-deployment'
       odb_subnet: 'projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet'
       odb_network: 'projects/my-project/locations/us-east4/odbNetworks/my-network'
-      deletion_protection: true
+      deletion_policy: 'PREVENT'
     ignore_read_extra:
-      - "deletion_protection"
+      - "deletion_policy"
     test_vars_overrides:
       project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
+      deletion_policy: '"DELETE"'
       goldengate_deployment_id: 'fmt.Sprintf("tf-ggdep-full-%s", acctest.RandString(t, 10))'
       odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-      

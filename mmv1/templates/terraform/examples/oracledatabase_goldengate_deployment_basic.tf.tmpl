@@ -13,5 +13,5 @@ resource "google_oracle_database_goldengate_deployment" "{{$.PrimaryResourceId}}
       deployment     = "deployment"
     }
   }
-  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+  deletion_policy = "{{index $.Vars "deletion_policy"}}"
 }
