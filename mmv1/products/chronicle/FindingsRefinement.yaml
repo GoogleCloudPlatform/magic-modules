@@ -147,4 +147,3 @@ properties:
     type: String
     description: The timestamp of when the findings refinement was last updated.
     output: true
-  
