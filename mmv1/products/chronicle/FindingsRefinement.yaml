@@ -79,14 +79,6 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-  - name: findings_refinement_id
-    type: String
-    output: true
-    immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-    description: |-
-      Findings Refinement Id is the ID of the Findings Refinement.
-
 properties:
   - name: createTime
     type: String
@@ -147,3 +139,12 @@ properties:
     type: String
     description: The timestamp of when the findings refinement was last updated.
     output: true
+  - name: findings_refinement_id
+    type: String
+    output: true
+    immutable: true
+    api_name: name
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Findings Refinement Id is the ID of the Findings Refinement.
