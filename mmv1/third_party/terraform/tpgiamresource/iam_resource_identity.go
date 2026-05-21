@@ -105,7 +105,10 @@ func buildUriFormatRegexp(uriFormat string, numParams int) *regexp.Regexp {
 			if i == len(parts)-2 {
 				sb.WriteString("(.+)")
 			} else {
-				sb.WriteString("([^/]+)")
+				// Non-final params may themselves contain '/'
+				// (e.g. "organizations/{id}"). Use a non-greedy match so the
+				// literal separator that follows anchors the split.
+				sb.WriteString("(.+?)")
 			}
 		}
 	}
