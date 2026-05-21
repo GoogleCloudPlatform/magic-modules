@@ -239,3 +239,4 @@ properties:
             description: |
               The index of the ip in the header. Positive indices 0, 1, 2, 3 chooses indices from the left (first ips). Negative indices -1, -2, -3 chooses indices from the right (last ips).
             required: true
+            send_empty_value: true
