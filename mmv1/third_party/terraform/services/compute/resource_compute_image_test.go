@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -30,9 +30,9 @@ func TestAccComputeImage_withLicense(t *testing.T) {
 				Config: testAccComputeImage_license("image-test-" + acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:      "google_compute_image.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_image.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
@@ -284,9 +284,9 @@ func TestAccComputeImage_resolveImage(t *testing.T) {
 	fam := fmt.Sprintf("test-image-family-%s", rand)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeImage_resolving(name, fam),
@@ -308,17 +308,17 @@ func TestAccComputeImage_imageEncryptionKey(t *testing.T) {
 	kmsRingName := tpgresource.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeImage_imageEncryptionKey(kmsRingName, kmsKeyName, acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:            "google_compute_image.image",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_compute_image.image",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -389,7 +389,6 @@ func TestAccComputeImage_sourceDiskEncryptionKey(t *testing.T) {
 		},
 	})
 }
-
 
 func testAccCheckComputeImageResolution(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
