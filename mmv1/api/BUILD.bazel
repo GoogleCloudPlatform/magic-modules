@@ -7,6 +7,7 @@ go_library(
         "compiler.go",
         "product.go",
         "resource.go",
+        "runtime.go",
         "timeouts.go",
         "type.go",
     ],
