@@ -36,7 +36,9 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  constants: templates/terraform/custom_code/hypercomputecluster_cluster_storage_resources_hash.go.tmpl
+  constants: templates/terraform/custom_code/hypercomputecluster_cluster_utils.go.tmpl
+custom_diff:
+  - 'hypercomputeclusterClusterCustomizeDiff'
 autogen_status: Q2x1c3Rlcg==
 parameters:
   - name: location
