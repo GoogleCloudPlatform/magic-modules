@@ -14,7 +14,9 @@
 package ces_test
 
 import (
+	"log"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -37,7 +39,16 @@ func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) 
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckCESSecuritySettingsDestroyNoOp,
 		Steps: []resource.TestStep{
+			// Step 1: Spin up the project and enable the main CES wrapper API
 			{
+				Config: testAccCESSecuritySettings_cesSecuritySettingsExample_projectAndService(context),
+			},
+			// Step 2: Wait 30s in Go for regional endpoints to initialize, then apply the settings
+			{
+				PreConfig: func() {
+					log.Printf("[DEBUG] Waiting 30 seconds for CES regional endpoint propagation on new project...")
+					time.Sleep(30 * time.Second)
+				},
 				Config: testAccCESSecuritySettings_cesSecuritySettingsExample_full(context),
 			},
 			{
@@ -46,6 +57,7 @@ func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) 
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "project"},
 			},
+			// Step 3: Update the settings (testing standard allowed origins update)
 			{
 				Config: testAccCESSecuritySettings_cesSecuritySettingsExample_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -66,6 +78,25 @@ func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) 
 
 func testAccCheckCESSecuritySettingsDestroyNoOp(s *terraform.State) error {
 	return nil
+}
+
+func testAccCESSecuritySettings_cesSecuritySettingsExample_projectAndService(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider        = google-beta
+  project_id      = "tf-test-project-%{random_suffix}"
+  name            = "tf-test-project-%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "ces" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  service  = "ces.googleapis.com"
+}
+`, context)
 }
 
 func testAccCESSecuritySettings_cesSecuritySettingsExample_full(context map[string]interface{}) string {
