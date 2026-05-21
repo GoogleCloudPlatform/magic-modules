@@ -140,6 +140,7 @@ properties:
     description: The timestamp of when the findings refinement was last updated.
     output: true
   - name: findings_refinement_id
+    api_name: 'name'
     type: String
     output: true
     immutable: true
