@@ -162,7 +162,6 @@ properties:
         description: |
           Fully qualified name of the KMS key to use to encrypt this database. This key must exist
           in the same location as the Spanner Database.
-        immutable: true
         exactly_one_of:
           - encryption_config.0.kms_key_name
           - encryption_config.0.kms_key_names
