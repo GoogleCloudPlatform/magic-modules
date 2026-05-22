@@ -16,8 +16,8 @@ name: Instance
 description: A Managed Lustre instance
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/managed-lustre/docs/create-instance'
-  api: 'https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances'
+    Official Documentation: https://cloud.google.com/managed-lustre/docs/create-instance
+  api: https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances
 base_url: projects/{{project}}/locations/{{location}}/instances
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
@@ -32,19 +32,21 @@ timeouts:
   delete_minutes: 60
 sweeper:
   url_substitutions:
-    - location: "us-central1-a"
-    - location: "us-central1-c"
+    - location: us-central1-a
+    - location: us-central1-c
 custom_code:
-examples:
+samples:
   - name: lustre_instance_basic
-    primary_resource_id: 'instance'
-    vars:
-      name: 'my-instance'
-      address_name: 'my-ip-address-name'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "default-vpc")'
+    primary_resource_id: instance
+    steps:
+      - name: lustre_instance_basic
+        resource_id_vars:
+          address_name: my-ip-address-name
+          name: my-instance
+          network_name: my-network
+          subnetwork_name: my-subnetwork
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "default-vpc")
 autogen_async: true
 async:
   operation:

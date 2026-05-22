@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'MLEngine'
-display_name: 'ML Engine'
+name: MLEngine
+display_name: ML Engine
 versions:
-  - name: 'ga'
-    base_url: 'https://ml.googleapis.com/v1/'
+  - name: ga
+    base_url: https://ml.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

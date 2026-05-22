@@ -39,56 +39,63 @@ legacy_long_form_project: true
 custom_code:
   update_encoder: templates/terraform/update_encoder/compute_network_firewall_policy_rule.go.tmpl
   constants: templates/terraform/constants/network_firewall_policy_rule.go.tmpl
-examples:
+samples:
   - name: network_firewall_policy_rule
     primary_resource_id: primary
-    vars:
-      address_group: address-group
-      fw_policy: fw-policy
-      network: network
-      tag_key: tag-key
-      tag_value: tag-value
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      org_id: ORG_ID
-      project_name: PROJECT_NAME
-      service_acct: SERVICE_ACCT
+    steps:
+      - name: network_firewall_policy_rule
+        resource_id_vars:
+          address_group: address-group
+          fw_policy: fw-policy
+          network: network
+          tag_key: tag-key
+          tag_value: tag-value
+        test_env_vars:
+          org_id: ORG_ID
+          project_name: PROJECT_NAME
+          service_acct: SERVICE_ACCT
+        test_vars_overrides:
+          network: '"network" + randomSuffix'
   - name: network_firewall_policy_rule_network_scope_egress
-    primary_resource_id: primary
     min_version: beta
-    vars:
-      fw_policy: fw-policy
-    test_env_vars:
-      project_name: PROJECT_NAME
+    primary_resource_id: primary
+    steps:
+      - name: network_firewall_policy_rule_network_scope_egress
+        resource_id_vars:
+          fw_policy: fw-policy
+        test_env_vars:
+          project_name: PROJECT_NAME
   - name: network_firewall_policy_rule_network_scope_ingress
-    primary_resource_id: primary
     min_version: beta
-    vars:
-      fw_policy: fw-policy
-      network: network
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      project_name: PROJECT_NAME
+    primary_resource_id: primary
+    steps:
+      - name: network_firewall_policy_rule_network_scope_ingress
+        resource_id_vars:
+          fw_policy: fw-policy
+          network: network
+        test_env_vars:
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          network: '"network" + randomSuffix'
   - name: network_firewall_policy_rule_network_context_egress
     primary_resource_id: primary
-    vars:
-      fw_policy: fw-policy
-    test_env_vars:
-      project_name: PROJECT_NAME
+    steps:
+      - name: network_firewall_policy_rule_network_context_egress
+        resource_id_vars:
+          fw_policy: fw-policy
+        test_env_vars:
+          project_name: PROJECT_NAME
   - name: network_firewall_policy_rule_network_context_ingress
     primary_resource_id: primary
-    vars:
-      fw_policy: fw-policy
-      network: network
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      project_name: PROJECT_NAME
+    steps:
+      - name: network_firewall_policy_rule_network_context_ingress
+        resource_id_vars:
+          fw_policy: fw-policy
+          network: network
+        test_env_vars:
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          network: '"network" + randomSuffix'
 parameters:
   - name: firewallPolicy
     type: ResourceRef

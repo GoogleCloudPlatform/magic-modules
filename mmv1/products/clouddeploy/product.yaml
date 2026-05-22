@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Clouddeploy'
-display_name: 'Cloud Deploy'
+name: Clouddeploy
+display_name: Cloud Deploy
 versions:
-  - name: 'ga'
-    base_url: 'https://clouddeploy.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://clouddeploy.googleapis.com/v1/'
+  - name: ga
+    base_url: https://clouddeploy.googleapis.com/v1/
+  - name: beta
+    base_url: https://clouddeploy.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

@@ -16,26 +16,26 @@ name: MulticastDomain
 description: Create a multicast domain in the current project.
 references:
   guides:
-    'Create Multicast Domain': 'https://docs.cloud.google.com/vpc/docs/multicast/create-domains#create-domain'
-  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomains'
+    Create Multicast Domain: https://docs.cloud.google.com/vpc/docs/multicast/create-domains#create-domain
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomains
 base_url: projects/{{project}}/locations/{{location}}/multicastDomains
 update_mask: true
-self_link:
-  projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
-create_url:
-  projects/{{project}}/locations/{{location}}/multicastDomains?multicastDomainId={{multicast_domain_id}}
+self_link: projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
+create_url: projects/{{project}}/locations/{{location}}/multicastDomains?multicastDomainId={{multicast_domain_id}}
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 sweeper:
   url_substitutions:
-    - location: "global"
-examples:
+    - location: global
+samples:
   - name: network_services_multicast_domain_basic
     primary_resource_id: md_test
-    vars:
-      network_name: test-md-network
-      domain_name: test-md-domain
+    steps:
+      - name: network_services_multicast_domain_basic
+        resource_id_vars:
+          domain_name: test-md-domain
+          network_name: test-md-network
 autogen_async: true
 async:
   operation:
@@ -56,9 +56,7 @@ autogen_status: TXVsdGljYXN0RG9tYWlu
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the
-      resource within its parent collection as described in
-      https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
@@ -107,7 +105,7 @@ properties:
         immutable: true
   - name: createTime
     type: String
-    description: 'The timestamp when the multicast domain was created.'
+    description: The timestamp when the multicast domain was created.
     output: true
   - name: description
     type: String

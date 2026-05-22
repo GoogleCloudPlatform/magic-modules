@@ -24,31 +24,36 @@ import_format:
   - projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
 iam_policy:
   method_name_separator: ':'
-  iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  allowed_iam_role: 'roles/beyondcorp.securityGatewayUser'
-  parent_resource_attribute: 'security_gateway_id'
+  iam_conditions_request_type: QUERY_PARAM_NESTED
+  allowed_iam_role: roles/beyondcorp.securityGatewayUser
+  parent_resource_attribute: security_gateway_id
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}'
+    - projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
     - '{{security_gateway_id}}'
-examples:
+samples:
   - name: beyondcorp_security_gateway_basic
     primary_resource_id: example
-    region_override: 'global'
-    vars:
-      security_gateway_name: default
-    test_vars_overrides:
-      # for backward compatible
-      security_gateway_name: '"default" + randomSuffix'
+    steps:
+      - name: beyondcorp_security_gateway_basic
+        resource_id_vars:
+          security_gateway_name: default
+        test_vars_overrides:
+          security_gateway_name: '"default" + randomSuffix'
+    region_override: global
   - name: beyondcorp_security_gateway_logging
     primary_resource_id: example-logging
-    region_override: 'global'
-    vars:
-      security_gateway_name: default-logging
+    steps:
+      - name: beyondcorp_security_gateway_logging
+        resource_id_vars:
+          security_gateway_name: default-logging
+    region_override: global
   - name: beyondcorp_security_gateway_spa
     primary_resource_id: example-spa
-    region_override: 'global'
-    vars:
-      security_gateway_name: default-spa
+    steps:
+      - name: beyondcorp_security_gateway_spa
+        resource_id_vars:
+          security_gateway_name: default-spa
+    region_override: global
 autogen_async: true
 async:
   operation:
@@ -67,7 +72,7 @@ async:
   include_project: false
 autogen_status: U2VjdXJpdHlHYXRld2F5
 custom_code:
-  constants: 'templates/terraform/constants/beyondcorp_security_gateway.go.tmpl'
+  constants: templates/terraform/constants/beyondcorp_security_gateway.go.tmpl
 parameters:
   - name: location
     type: String
@@ -75,9 +80,9 @@ parameters:
     deprecation_message: '`location` is deprecated and will be removed in a future major release.'
     immutable: true
     url_param_only: true
-    default_value: 'global'
+    default_value: global
     validation:
-      regex: '^global$'
+      regex: ^global$
     required: false
   - name: securityGatewayId
     type: String
@@ -117,7 +122,7 @@ properties:
       Optional. Map of Hubs that represents regional data path deployment with GCP region
       as a key.
     key_name: region
-    set_hash_func: 'beyondcorpSecurityGatewayHubsHash'
+    set_hash_func: beyondcorpSecurityGatewayHubsHash
     value_type:
       type: NestedObject
       properties:
@@ -151,8 +156,7 @@ properties:
     output: true
   - name: delegatingServiceAccount
     type: String
-    description: |-
-      Service account used for operations that involve resources in consumer projects.
+    description: Service account used for operations that involve resources in consumer projects.
     output: true
   - name: proxyProtocolConfig
     type: NestedObject
@@ -175,9 +179,9 @@ properties:
                 type: Enum
                 description: The output type of the delegated user info.
                 enum_values:
-                  - 'PROTOBUF'
-                  - 'JSON'
-                  - 'NONE'
+                  - PROTOBUF
+                  - JSON
+                  - NONE
           - name: groupInfo
             type: NestedObject
             description: Group info configuration.
@@ -186,9 +190,9 @@ properties:
                 type: Enum
                 description: The output type of the delegated group info.
                 enum_values:
-                  - 'PROTOBUF'
-                  - 'JSON'
-                  - 'NONE'
+                  - PROTOBUF
+                  - JSON
+                  - NONE
           - name: deviceInfo
             type: NestedObject
             description: Device info configuration.
@@ -197,16 +201,16 @@ properties:
                 type: Enum
                 description: The output type of the delegated device info.
                 enum_values:
-                  - 'PROTOBUF'
-                  - 'JSON'
-                  - 'NONE'
+                  - PROTOBUF
+                  - JSON
+                  - NONE
           - name: outputType
             type: Enum
             description: Default output type for all enabled headers.
             enum_values:
-              - 'PROTOBUF'
-              - 'JSON'
-              - 'NONE'
+              - PROTOBUF
+              - JSON
+              - NONE
       - name: metadataHeaders
         type: KeyValuePairs
         description: |-
@@ -219,7 +223,7 @@ properties:
         type: Enum
         description: Gateway identity configuration.
         enum_values:
-          - 'RESOURCE_NAME'
+          - RESOURCE_NAME
       - name: clientIp
         type: Boolean
         description: Client IP configuration. The client IP address is included if true.
@@ -245,5 +249,4 @@ properties:
     send_empty_value: true
     allow_empty_object: true
     description: Settings related to Cloud Logging.
-    properties:
-      []  # Meant to be an empty object with no properties for now.
+    properties: [] # Meant to be an empty object with no properties for now.

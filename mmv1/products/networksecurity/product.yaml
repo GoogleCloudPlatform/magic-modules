@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'NetworkSecurity'
-display_name: 'Network Security'
+name: NetworkSecurity
+display_name: Network Security
 versions:
-  - name: 'beta'
-    base_url: 'https://networksecurity.googleapis.com/v1beta1/'
-  - name: 'ga'
-    base_url: 'https://networksecurity.googleapis.com/v1/'
+  - name: beta
+    base_url: https://networksecurity.googleapis.com/v1beta1/
+  - name: ga
+    base_url: https://networksecurity.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

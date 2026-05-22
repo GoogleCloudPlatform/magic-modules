@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'FirebaseExtensions'
-display_name: 'Firebase Extensions'
+name: FirebaseExtensions
+display_name: Firebase Extensions
 versions:
-  - name: 'beta'
-    base_url: 'https://firebaseextensions.googleapis.com/v1beta/'
+  - name: beta
+    base_url: https://firebaseextensions.googleapis.com/v1beta/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

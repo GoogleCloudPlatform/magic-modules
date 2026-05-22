@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Dataflow'
-display_name: 'Dataflow'
+name: Dataflow
+display_name: Dataflow
 versions:
-  - name: 'ga'
-    base_url: 'https://dataflow.googleapis.com/v1b3/'
+  - name: ga
+    base_url: https://dataflow.googleapis.com/v1b3/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-identity'
+  - https://www.googleapis.com/auth/cloud-identity

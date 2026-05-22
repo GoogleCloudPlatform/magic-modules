@@ -1,3 +1,4 @@
+---
 # Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,13 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-name: 'Iap'
-display_name: 'Identity-Aware Proxy'
+name: Iap
+display_name: Identity-Aware Proxy
 versions:
-  - name: 'ga'
-    base_url: 'https://iap.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://iap.googleapis.com/v1/'
+  - name: ga
+    base_url: https://iap.googleapis.com/v1/
+  - name: beta
+    base_url: https://iap.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

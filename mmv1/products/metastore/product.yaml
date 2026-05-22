@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'DataprocMetastore'
-display_name: 'Dataproc Metastore'
+name: DataprocMetastore
+display_name: Dataproc Metastore
 versions:
-  - name: 'beta'
-    base_url: 'https://metastore.googleapis.com/v1beta/'
-  - name: 'ga'
-    base_url: 'https://metastore.googleapis.com/v1/'
+  - name: beta
+    base_url: https://metastore.googleapis.com/v1beta/
+  - name: ga
+    base_url: https://metastore.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-identity'
+  - https://www.googleapis.com/auth/cloud-identity

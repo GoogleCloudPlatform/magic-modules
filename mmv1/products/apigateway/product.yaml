@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'ApiGateway'
-display_name: 'API Gateway'
+name: ApiGateway
+display_name: API Gateway
 versions:
-  - name: 'beta'
-    base_url: 'https://apigateway.googleapis.com/v1beta/'
+  - name: beta
+    base_url: https://apigateway.googleapis.com/v1beta/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:

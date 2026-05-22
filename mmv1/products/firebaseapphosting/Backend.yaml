@@ -23,41 +23,43 @@ delete_url: projects/{{project}}/locations/{{location}}/backends/{{backend_id}}?
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/backends/{{backend_id}}
 import_format:
-  - "projects/{{project}}/locations/{{location}}/backends/{{backend_id}}"
-  - "{{project}}/{{location}}/{{backend_id}}"
-  - "{{location}}/{{backend_id}}"
-examples:
+  - projects/{{project}}/locations/{{location}}/backends/{{backend_id}}
+  - '{{project}}/{{location}}/{{backend_id}}'
+  - '{{location}}/{{backend_id}}'
+samples:
   - name: firebase_app_hosting_backend_minimal
     primary_resource_id: example
-    vars:
-      backend_id: "mini"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-fah-minimal"'
-      # for backward compatible
-      backend_id: '"mini" + randomSuffix'
+    steps:
+      - name: firebase_app_hosting_backend_minimal
+        resource_id_vars:
+          backend_id: mini
+          service_act_id: firebase-app-hosting-compute
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          backend_id: '"mini" + randomSuffix'
+          service_act_id: '"tf-test-fah-minimal"'
   - name: firebase_app_hosting_backend_full
     primary_resource_id: example
-    vars:
-      backend_id: "full"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-fah-full"'
-      # for backward compatible
-      backend_id: '"full" + randomSuffix'
+    steps:
+      - name: firebase_app_hosting_backend_full
+        resource_id_vars:
+          backend_id: full
+          service_act_id: firebase-app-hosting-compute
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          backend_id: '"full" + randomSuffix'
+          service_act_id: '"tf-test-fah-full"'
   - name: firebase_app_hosting_backend_github
     primary_resource_id: example
-    vars:
-      backend_id: "my-backend-gh"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    exclude_test: true  # Can't establish a Github connection in automated tests.
+    exclude_test: true
+    steps:
+      - name: firebase_app_hosting_backend_github
+        resource_id_vars:
+          backend_id: my-backend-gh
+        test_env_vars:
+          project_id: PROJECT_NAME
 autogen_async: true
 async:
   operation:
@@ -65,7 +67,7 @@ async:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
@@ -98,8 +100,8 @@ properties:
       either be contained to a single region (REGIONAL_STRICT) or allowed to use
       App Hosting's global-replicated serving infrastructure (GLOBAL_ACCESS).
     enum_values:
-      - "REGIONAL_STRICT"
-      - "GLOBAL_ACCESS"
+      - REGIONAL_STRICT
+      - GLOBAL_ACCESS
     immutable: true
     required: true
   - name: appId

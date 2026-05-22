@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'Taxonomy'
+name: Taxonomy
 description: |
   A collection of policy tags that classify data along a common axis.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
-  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies'
+    Official Documentation: https://cloud.google.com/data-catalog/docs
+  api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/taxonomies'
+base_url: projects/{{project}}/locations/{{region}}/taxonomies
 self_link: '{{name}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{name}}'
@@ -33,23 +33,25 @@ timeouts:
 iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'taxonomy'
-  base_url: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: taxonomy
+  base_url: projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}
   import_format:
-    - 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
+    - projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}
     - '{{taxonomy}}'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/data_catalog_taxonomy.go.tmpl'
+  custom_import: templates/terraform/custom_import/data_catalog_taxonomy.go.tmpl
 sweeper:
   identifier_field: displayName
-examples:
-  - name: 'data_catalog_taxonomy_basic'
-    primary_resource_id: 'basic_taxonomy'
-    vars:
-      display_name: 'my_taxonomy'
+samples:
+  - name: data_catalog_taxonomy_basic
+    primary_resource_id: basic_taxonomy
+    steps:
+      - name: data_catalog_taxonomy_basic
+        resource_id_vars:
+          display_name: my_taxonomy
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: |
       Taxonomy location region.
@@ -58,13 +60,13 @@ parameters:
     immutable: true
     default_from_api: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Resource name of this taxonomy, whose format is:
       "projects/{project}/locations/{region}/taxonomies/{taxonomy}".
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User defined name of this taxonomy.
@@ -73,21 +75,21 @@ properties:
       and spaces; not start or end with spaces; and be at most 200 bytes
       long when encoded in UTF-8.
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description of this taxonomy. It must: contain only unicode characters,
       tabs, newlines, carriage returns and page breaks; and be at most 2000 bytes
       long when encoded in UTF-8. If not set, defaults to an empty description.
-  - name: 'activatedPolicyTypes'
+  - name: activatedPolicyTypes
     type: Array
     description: |
       A list of policy types that are activated for this taxonomy. If not set,
       defaults to an empty list.
- # TOOD: should this be enum or string
+    # TOOD: should this be enum or string
     item_type:
       type: Enum
-      description: 'Defines policy types where policy tag can be used for'
+      description: Defines policy types where policy tag can be used for
       enum_values:
-        - 'POLICY_TYPE_UNSPECIFIED'
-        - 'FINE_GRAINED_ACCESS_CONTROL'
+        - POLICY_TYPE_UNSPECIFIED
+        - FINE_GRAINED_ACCESS_CONTROL

@@ -15,8 +15,8 @@
 name: ApplicationEnvironment
 references:
   guides:
-    'Dataproc Intro': 'https://cloud.google.com/dataproc/'
-  api: 'https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.applicationEnvironments'
+    Dataproc Intro: https://cloud.google.com/dataproc/
+  api: https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.applicationEnvironments
 description: An ApplicationEnvironment contains shared configuration that may be referenced by multiple SparkApplications.
 base_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/applicationEnvironments
 create_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/applicationEnvironments?applicationEnvironmentId={{application_environment_id}}
@@ -27,13 +27,13 @@ import_format:
 parameters:
   - name: location
     type: String
-    description: 'The location of the application environment'
+    description: The location of the application environment
     url_param_only: true
     required: true
     immutable: true
   - name: serviceinstance
     type: String
-    description: 'The id of the service instance to which this application environment belongs.'
+    description: The id of the service instance to which this application environment belongs.
     url_param_only: true
     required: true
     immutable: true
@@ -42,23 +42,27 @@ parameters:
     description: 'The id of the application environment '
     url_param_only: true
     immutable: true
-examples:
-  - name: "dataprocgdc_applicationenvironment_basic"
-    primary_resource_id: "application-environment"
-    vars:
-      application_environment_id: "dp-tf-e2e-application-environment-basic"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+samples:
+  - name: dataprocgdc_applicationenvironment_basic
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20419
-  - name: "dataprocgdc_applicationenvironment"
-    primary_resource_id: "application-environment"
-    vars:
-      application_environment_id: "dp-tf-e2e-application-environment"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+    primary_resource_id: application-environment
+    steps:
+      - name: dataprocgdc_applicationenvironment_basic
+        resource_id_vars:
+          application_environment_id: dp-tf-e2e-application-environment-basic
+          project: my-project
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_applicationenvironment
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20419
+    primary_resource_id: application-environment
+    steps:
+      - name: dataprocgdc_applicationenvironment
+        resource_id_vars:
+          application_environment_id: dp-tf-e2e-application-environment
+          project: my-project
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
 update_verb: PATCH
 update_mask: true
 autogen_async: false
@@ -66,11 +70,11 @@ autogen_status: QXBwbGljYXRpb25FbnZpcm9ubWVudA==
 properties:
   - name: name
     type: String
-    description: "Identifier. The name of the application environment. Format: projects/{project}/locations/{location}/serviceInstances/{service_instance}/applicationEnvironments/{application_environment_id} "
+    description: 'Identifier. The name of the application environment. Format: projects/{project}/locations/{location}/serviceInstances/{service_instance}/applicationEnvironments/{application_environment_id} '
     output: true
   - name: uid
     type: String
-    description: "System generated unique identifier for this application environment, formatted as UUID4. "
+    description: 'System generated unique identifier for this application environment, formatted as UUID4. '
     output: true
   - name: displayName
     type: String
@@ -85,26 +89,20 @@ properties:
     output: true
   - name: labels
     type: KeyValueLabels
-    description: "The labels to associate with this application environment.
-      Labels may be used for filtering and billing tracking. "
+    description: 'The labels to associate with this application environment. Labels may be used for filtering and billing tracking. '
   - name: annotations
     type: KeyValueAnnotations
-    description: "The annotations to associate with this application environment.
-      Annotations may be used to store client information, but are not used by the
-      server."
+    description: The annotations to associate with this application environment. Annotations may be used to store client information, but are not used by the server.
   - name: sparkApplicationEnvironmentConfig
     type: NestedObject
     properties:
       - name: defaultProperties
         type: KeyValuePairs
-        description: "A map of default Spark properties to apply to workloads
-          in this application environment. These defaults may be overridden by per-application properties. "
+        description: 'A map of default Spark properties to apply to workloads in this application environment. These defaults may be overridden by per-application properties. '
       - name: defaultVersion
         type: String
-        description: "The default Dataproc version to use for applications submitted
-          to this application environment "
+        description: 'The default Dataproc version to use for applications submitted to this application environment '
     description: 'Represents the SparkApplicationEnvironmentConfig. '
   - name: namespace
     type: String
-    description: "The name of the namespace in which to create this ApplicationEnvironment. This
-      namespace must already exist in the cluster "
+    description: 'The name of the namespace in which to create this ApplicationEnvironment. This namespace must already exist in the cluster '

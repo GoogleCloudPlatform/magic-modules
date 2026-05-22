@@ -12,108 +12,111 @@
 # limitations under the License.
 
 ---
-name: 'SacRealm'
-description: "Secure Access Connect Realm resource"
+name: SacRealm
+description: Secure Access Connect Realm resource
 references:
   guides:
-    'QUICKSTART_TITLE': 'https://cloud.google.com/secure-access-connect/docs/overview'
-  api: 'https://cloud.google.com/secure-access-connect/docs/reference/network-security/rest/v1beta1/projects.locations.sacRealms'
+    QUICKSTART_TITLE: https://cloud.google.com/secure-access-connect/docs/overview
+  api: https://cloud.google.com/secure-access-connect/docs/reference/network-security/rest/v1beta1/projects.locations.sacRealms
 min_version: beta
-
-base_url: 'projects/{{project}}/locations/global/sacRealms'
-self_link: 'projects/{{project}}/locations/global/sacRealms/{{name}}'
+base_url: projects/{{project}}/locations/global/sacRealms
+self_link: projects/{{project}}/locations/global/sacRealms/{{name}}
 immutable: true
-create_url: 'projects/{{project}}/locations/global/sacRealms?sacRealmId={{name}}'
+create_url: projects/{{project}}/locations/global/sacRealms?sacRealmId={{name}}
 autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-examples:
-  - name: 'sac_realm_prisma_access'
+samples:
+  - name: sac_realm_prisma_access
     min_version: beta
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'sac-realm-name'
-  - name: 'sac_realm_symantec_cloud_swg'
+    primary_resource_id: default
+    steps:
+      - name: sac_realm_prisma_access
+        resource_id_vars:
+          resource_name: sac-realm-name
+  - name: sac_realm_symantec_cloud_swg
     min_version: beta
+    primary_resource_id: default
     exclude_test: true
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'sac-realm-name'
-      secret_path: 'secret-path'
+    steps:
+      - name: sac_realm_symantec_cloud_swg
+        resource_id_vars:
+          resource_name: sac-realm-name
+          secret_path: secret-path
 properties:
-  - name: 'name'
+  - name: name
     type: String
     required: true
     immutable: true
     description: |
       Identifier. Resource name.
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-  - name: 'createTime'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+  - name: createTime
     type: String
     description: Timestamp when the realm was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: Timestamp when the realm was last updated.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
-  - name: 'pairingKey'
+  - name: pairingKey
     type: NestedObject
     description: Key to be shared with SSE service provider during pairing.
     properties:
-      - name: 'key'
+      - name: key
         type: String
         description: Key value.
         output: true
-      - name: 'expireTime'
+      - name: expireTime
         type: String
         description: Timestamp in UTC of when this resource is considered expired. It expires 7 days after creation.
         output: true
     output: true
-  - name: 'securityService'
+  - name: securityService
     type: Enum
     description: SSE service provider associated with the realm.
     required: true
     immutable: true
     enum_values:
-      - 'SECURITY_SERVICE_UNSPECIFIED'
-      - 'PALO_ALTO_PRISMA_ACCESS'
-      - 'SYMANTEC_CLOUD_SWG'
-  - name: 'state'
+      - SECURITY_SERVICE_UNSPECIFIED
+      - PALO_ALTO_PRISMA_ACCESS
+      - SYMANTEC_CLOUD_SWG
+  - name: state
     type: Enum
     description: State of the realm.
     output: true
     enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'PENDING_PARTNER_ATTACHMENT'
-      - 'PARTNER_ATTACHED'
-      - 'PARTNER_DETACHED'
-      - 'KEY_EXPIRED'
-  - name: 'symantecOptions'
+      - STATE_UNSPECIFIED
+      - PENDING_PARTNER_ATTACHMENT
+      - PARTNER_ATTACHED
+      - PARTNER_DETACHED
+      - KEY_EXPIRED
+  - name: symantecOptions
     description: Configuration required for Symantec realms.
     type: NestedObject
     properties:
-      - name: 'availableSymantecSites'
+      - name: availableSymantecSites
         type: Array
         description: Symantec site IDs which the user can choose to connect to.
         output: true
         item_type:
           type: String
-      - name: 'secretPath'
+      - name: secretPath
         type: String
         description: |
           API Key used to call Symantec APIs on the user's behalf. Required if using Symantec Cloud SWG. P4SA account needs permissions granted to read this secret.
           A secret ID, secret name, or secret URI can be specified, but it will be parsed and stored as a secret URI in the form projects/{projectNumber}/secrets/my-secret.
-      - name: "symantecConnectionState"
+      - name: symantecConnectionState
         type: Enum
         description: Connection status to Symantec API
         output: true
         enum_values:
-          - 'SYMANTEC_CONNECTION_STATE_UNSPECIFIED'
-          - 'SUCCEEDED'
-          - 'READ_SECRET_FAILED'
-          - 'REQUEST_TO_SYMANTEC_FAILED'
+          - SYMANTEC_CONNECTION_STATE_UNSPECIFIED
+          - SUCCEEDED
+          - READ_SECRET_FAILED
+          - REQUEST_TO_SYMANTEC_FAILED

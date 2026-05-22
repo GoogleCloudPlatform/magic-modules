@@ -12,18 +12,18 @@
 # limitations under the License.
 
 ---
-name: 'IAMBeta'
-legacy_name: 'iam'
-display_name: 'Cloud IAM'
+name: IAMBeta
+legacy_name: iam
+display_name: Cloud IAM
 versions:
-  - name: 'beta'
-    base_url: 'https://iam.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://iam.googleapis.com/v1/'
+  - name: beta
+    base_url: https://iam.googleapis.com/v1/
+  - name: ga
+    base_url: https://iam.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/iam'
+  - https://www.googleapis.com/auth/iam
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:

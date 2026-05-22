@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'Redis'
-display_name: 'Memorystore (Redis)'
+name: Redis
+display_name: Memorystore (Redis)
 versions:
-  - name: 'ga'
-    base_url: 'https://redis.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://redis.googleapis.com/v1beta1/'
+  - name: ga
+    base_url: https://redis.googleapis.com/v1/
+  - name: beta
+    base_url: https://redis.googleapis.com/v1beta1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:

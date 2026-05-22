@@ -15,7 +15,7 @@
 name: PolicyOrchestratorForOrganization
 api_resource_type_kind: PolicyOrchestrator
 api_variant_patterns:
-  - 'organizations/{organization}/locations/{location}/policyOrchestrators/{policyOrchestrator}'
+  - organizations/{organization}/locations/{location}/policyOrchestrators/{policyOrchestrator}
 description: |
   PolicyOrchestrator helps managing project+zone level policy resources (e.g.
   OS Policy Assignments), by providing tools to create, update and delete them
@@ -28,23 +28,25 @@ update_verb: PATCH
 id_format: organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
 import_format:
   - organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
-examples:
+samples:
   - name: osconfigv2_policy_orchestrator_for_organization_basic
-    primary_resource_id: policy_orchestrator_for_organization
     bootstrap_iam:
-      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
-        role: "roles/osconfig.serviceAgent"
-      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
-        role: "roles/osconfig.rolloutServiceAgent"
-      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-progrollout.iam.gserviceaccount.com"
-        role: "roles/progressiverollout.serviceAgent"
-    vars:
-      policy_orchestrator_id: po-org
-      orchestrated_resource_id: test-orchestrated-resource-org
-      os_policy_id: test-os-policy-org
-    test_env_vars:
-      org_id: ORG_TARGET
-      zone: 'ZONE'
+      - member: serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com
+        role: roles/osconfig.serviceAgent
+      - member: serviceAccount:service-org-{organization_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com
+        role: roles/osconfig.rolloutServiceAgent
+      - member: serviceAccount:service-org-{organization_id}@gcp-sa-progrollout.iam.gserviceaccount.com
+        role: roles/progressiverollout.serviceAgent
+    primary_resource_id: policy_orchestrator_for_organization
+    steps:
+      - name: osconfigv2_policy_orchestrator_for_organization_basic
+        resource_id_vars:
+          orchestrated_resource_id: test-orchestrated-resource-org
+          os_policy_id: test-os-policy-org
+          policy_orchestrator_id: po-org
+        test_env_vars:
+          org_id: ORG_TARGET
+          zone: ZONE
 autogen_async: true
 async:
   operation:
@@ -52,7 +54,7 @@ async:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
@@ -128,8 +130,7 @@ properties:
                   properties:
                     - name: type_url
                       type: String
-                      description: |-
-                        A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
+                      description: A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
                     - name: value
                       type: String
           - name: state
@@ -214,8 +215,7 @@ properties:
                   properties:
                     - name: type_url
                       type: String
-                      description: |-
-                        A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
+                      description: A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
                     - name: value
                       type: String
           - name: state

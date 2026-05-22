@@ -12,26 +12,26 @@
 # limitations under the License.
 
 ---
-name: 'RecaptchaV3Config'
+name: RecaptchaV3Config
 api_resource_type_kind: RecaptchaConfig
 api_variant_patterns:
-  - 'projects/{project}/apps/{app}/recaptchaV3Config'
+  - projects/{project}/apps/{app}/recaptchaV3Config
 description: |
   An app's reCAPTCHA V3 configuration object.
 references:
   guides:
-    'Official Documentation': 'https://firebase.google.com/docs/app-check'
-  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.recaptchaV3Config'
+    Official Documentation: https://firebase.google.com/docs/app-check
+  api: https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.recaptchaV3Config
 docs:
-base_url: 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config'
-self_link: 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config'
-create_url: 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config?updateMask=tokenTtl,siteSecret'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/apps/{{app_id}}/recaptchaV3Config
+self_link: projects/{{project}}/apps/{{app_id}}/recaptchaV3Config
+create_url: projects/{{project}}/apps/{{app_id}}/recaptchaV3Config?updateMask=tokenTtl,siteSecret
+create_verb: PATCH
+update_verb: PATCH
 update_mask: true
 exclude_delete: true
 import_format:
-  - 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config'
+  - projects/{{project}}/apps/{{app_id}}/recaptchaV3Config
   - '{{project}}/{{app_id}}'
   - '{{app_id}}'
 timeouts:
@@ -39,24 +39,25 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'firebase_app_check_recaptcha_v3_config_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      # Don't add random suffix
-      token_ttl: '7200s'
-      # A valid secret, but is actually unusable
-      site_secret: '6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'token_ttl': '"7200s"'
-      'site_secret': '"6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX"'
-    # Need the time_sleep resource
-    external_providers: ["random", "time"]
+samples:
+  - name: firebase_app_check_recaptcha_v3_config_basic
+    external_providers:
+      - random
+      - time
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: firebase_app_check_recaptcha_v3_config_basic
+        resource_id_vars:
+          site_secret: 6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX
+          token_ttl: 7200s
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          site_secret: '"6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX"'
+          token_ttl: '"7200s"'
 parameters:
-  - name: 'app_id'
+  - name: app_id
     type: String
     description: |
       The ID of an
@@ -65,12 +66,12 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The relative resource name of the reCAPTCHA V3 configuration object
     output: true
-  - name: 'tokenTtl'
+  - name: tokenTtl
     type: String
     description: |
       Specifies the duration for which App Check tokens exchanged from reCAPTCHA V3 artifacts will be valid.
@@ -78,7 +79,7 @@ properties:
 
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
     default_from_api: true
-  - name: 'siteSecret'
+  - name: siteSecret
     type: String
     description: |
       The site secret used to identify your service for reCAPTCHA v3 verification.
@@ -86,7 +87,7 @@ properties:
     required: true
     ignore_read: true
     sensitive: true
-  - name: 'siteSecretSet'
+  - name: siteSecretSet
     type: Boolean
     description: |
       Whether the siteSecret was previously set. Since we will never return the siteSecret field, this field is the only way to find out whether it was previously set.

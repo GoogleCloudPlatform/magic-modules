@@ -23,29 +23,29 @@ import_format:
   - projects/{{project}}/locations/{{location}}/messageBuses/{{message_bus_id}}
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/publish-events/create-bus'
+    Official Documentation: https://cloud.google.com/eventarc/advanced/docs/publish-events/create-bus
   api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.messageBuses
 include_in_tgc_next: true
 description: |
   The Eventarc MessageBus resource
 async:
-  actions: ['create', 'update', 'delete']
+  actions: [create, update, delete]
   operation:
     base_url: '{{op_id}}'
   type: OpAsync
   result:
     resource_inside_response: true
 autogen_async: true
-examples:
+samples:
   - name: eventarc_message_bus_with_cmek
     primary_resource_id: primary
-    test_env_vars:
-      project_name: PROJECT_NAME
-    # We don't auto-generate tests since we can't support concurrent tests, as long as
-    # only one MessageBus is supported per project.
     exclude_test: true
+    steps:
+      - name: eventarc_message_bus_with_cmek
+        test_env_vars:
+          project_name: PROJECT_NAME
 tgc_tests:
-  - name: 'TestAccEventarcMessageBus/basic'
+  - name: TestAccEventarcMessageBus/basic
 parameters:
   - name: location
     type: String

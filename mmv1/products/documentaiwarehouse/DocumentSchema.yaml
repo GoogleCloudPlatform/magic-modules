@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'DocumentSchema'
+name: DocumentSchema
 api_variant_patterns:
-  - 'projects/{project}/locations/{location}/documentSchemas/{documentSchema}'
+  - projects/{project}/locations/{location}/documentSchemas/{documentSchema}
 description: |
   A document schema is used to define document structure.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/document-warehouse/docs/manage-document-schemas'
-  api: 'https://cloud.google.com/document-warehouse/docs/reference/rest/v1/projects.locations.documentSchemas'
+    Official Documentation: https://cloud.google.com/document-warehouse/docs/manage-document-schemas
+  api: https://cloud.google.com/document-warehouse/docs/reference/rest/v1/projects.locations.documentSchemas
 docs:
-base_url: 'projects/{{project_number}}/locations/{{location}}/documentSchemas'
+base_url: projects/{{project_number}}/locations/{{location}}/documentSchemas
 self_link: '{{name}}'
 delete_url: '{{name}}'
 immutable: true
@@ -31,21 +31,22 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/document_ai_warehouse_document_schema.go.tmpl'
-examples:
-  - name: 'document_ai_warehouse_document_schema_text'
-    primary_resource_id: 'example_text'
-    # docs only, testing is done in an update test
+  custom_import: templates/terraform/custom_import/document_ai_warehouse_document_schema.go.tmpl
+samples:
+  - name: document_ai_warehouse_document_schema_text
+    primary_resource_id: example_text
     exclude_test: true
+    steps:
+      - name: document_ai_warehouse_document_schema_text
 parameters:
-  - name: 'project_number'
+  - name: project_number
     type: String
     description: |
       The unique identifier of the project.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the resource.
@@ -53,21 +54,21 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the document schema.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       Name of the schema given by the user.
     required: true
-  - name: 'documentIsFolder'
+  - name: documentIsFolder
     type: Boolean
     description: |
       Tells whether the document is a folder or a typical document.
-  - name: 'propertyDefinitions'
+  - name: propertyDefinitions
     type: Array
     description: |
       Defines the metadata for a schema property.
@@ -75,92 +76,89 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           description: |
             The name of the metadata property.
           required: true
-        - name: 'displayName'
+        - name: displayName
           type: String
           description: |
             The display-name for the property, used for front-end.
-        - name: 'isRepeatable'
+        - name: isRepeatable
           type: Boolean
           description: |
             Whether the property can have multiple values.
-        - name: 'isFilterable'
+        - name: isFilterable
           type: Boolean
           description: |
             Whether the property can be filtered. If this is a sub-property, all the parent properties must be marked filterable.
-        - name: 'isSearchable'
+        - name: isSearchable
           type: Boolean
           description: |
             Indicates that the property should be included in a global search.
-        - name: 'isMetadata'
+        - name: isMetadata
           type: Boolean
           description: |
             Whether the property is user supplied metadata.
-        - name: 'isRequired'
+        - name: isRequired
           type: Boolean
           description: |
             Whether the property is mandatory.
-        - name: 'retrievalImportance'
+        - name: retrievalImportance
           type: Enum
           description: |
             Stores the retrieval importance.
           enum_values:
-            - 'HIGHEST'
-            - 'HIGHER'
-            - 'HIGH'
-            - 'MEDIUM'
-            - 'LOW'
-            - 'LOWEST'
-        - name: 'schemaSources'
+            - HIGHEST
+            - HIGHER
+            - HIGH
+            - MEDIUM
+            - LOW
+            - LOWEST
+        - name: schemaSources
           type: Array
           description: |
             The schema source information.
           item_type:
             type: NestedObject
             properties:
-              - name: 'name'
+              - name: name
                 type: String
                 description: |
                   The schema name in the source.
-              - name: 'processorType'
+              - name: processorType
                 type: String
                 description: |
                   The Doc AI processor type name.
         # select any one of the property types (integer, float, text, property, enum, dateTime, map, timestamp)
-        - name: 'integerTypeOptions'
+        - name: integerTypeOptions
           type: NestedObject
           description: |
             Integer property.
           send_empty_value: true
           allow_empty_object: true
-          properties:
-            []
-        - name: 'floatTypeOptions'
+          properties: []
+        - name: floatTypeOptions
           type: NestedObject
           description: |
             Float property.
           send_empty_value: true
           allow_empty_object: true
-          properties:
-            []
-        - name: 'textTypeOptions'
+          properties: []
+        - name: textTypeOptions
           type: NestedObject
           description: |
             Text/string property.
           send_empty_value: true
           allow_empty_object: true
-          properties:
-            []
-        - name: 'propertyTypeOptions'
+          properties: []
+        - name: propertyTypeOptions
           type: NestedObject
           description: |
             Nested structured data property.
           properties:
-            - name: 'propertyDefinitions'
+            - name: propertyDefinitions
               type: Array
               description: |
                 Defines the metadata for a schema property.
@@ -168,162 +166,153 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'name'
+                  - name: name
                     type: String
                     description: |
                       The name of the metadata property.
                     required: true
-                  - name: 'displayName'
+                  - name: displayName
                     type: String
                     description: |
                       The display-name for the property, used for front-end.
-                  - name: 'isRepeatable'
+                  - name: isRepeatable
                     type: Boolean
                     description: |
                       Whether the property can have multiple values.
-                  - name: 'isFilterable'
+                  - name: isFilterable
                     type: Boolean
                     description: |
                       Whether the property can be filtered. If this is a sub-property, all the parent properties must be marked filterable.
-                  - name: 'isSearchable'
+                  - name: isSearchable
                     type: Boolean
                     description: |
                       Indicates that the property should be included in a global search.
-                  - name: 'isMetadata'
+                  - name: isMetadata
                     type: Boolean
                     description: |
                       Whether the property is user supplied metadata.
-                  - name: 'isRequired'
+                  - name: isRequired
                     type: Boolean
                     description: |
                       Whether the property is mandatory.
-                  - name: 'retrievalImportance'
+                  - name: retrievalImportance
                     type: Enum
                     description: |
                       Stores the retrieval importance.
                     enum_values:
-                      - 'HIGHEST'
-                      - 'HIGHER'
-                      - 'HIGH'
-                      - 'MEDIUM'
-                      - 'LOW'
-                      - 'LOWEST'
-                  - name: 'schemaSources'
+                      - HIGHEST
+                      - HIGHER
+                      - HIGH
+                      - MEDIUM
+                      - LOW
+                      - LOWEST
+                  - name: schemaSources
                     type: Array
                     description: |
                       The schema source information.
                     item_type:
                       type: NestedObject
                       properties:
-                        - name: 'name'
+                        - name: name
                           type: String
                           description: |
                             The schema name in the source.
-                        - name: 'processorType'
+                        - name: processorType
                           type: String
                           description: |
                             The Doc AI processor type name.
-                  - name: 'integerTypeOptions'
+                  - name: integerTypeOptions
                     type: NestedObject
                     description: |
                       Integer property.
                     send_empty_value: true
                     allow_empty_object: true
-                    properties:
-                      []
-                  - name: 'floatTypeOptions'
+                    properties: []
+                  - name: floatTypeOptions
                     type: NestedObject
                     description: |
                       Float property.
                     send_empty_value: true
                     allow_empty_object: true
-                    properties:
-                      []
-                  - name: 'textTypeOptions'
+                    properties: []
+                  - name: textTypeOptions
                     type: NestedObject
                     description: |
                       Text property.
                     send_empty_value: true
                     allow_empty_object: true
-                    properties:
-                      []
-                  - name: 'enumTypeOptions'
+                    properties: []
+                  - name: enumTypeOptions
                     type: NestedObject
                     description: |
                       Enum/categorical property.
                     properties:
-                      - name: 'possibleValues'
+                      - name: possibleValues
                         type: Array
                         description: |
                           List of possible enum values.
                         required: true
                         item_type:
                           type: String
-                      - name: 'validationCheckDisabled'
+                      - name: validationCheckDisabled
                         type: Boolean
                         description: |
                           Make sure the enum property value provided in the document is in the possile value list during document creation. The validation check runs by default.
-                  - name: 'dateTimeTypeOptions'
+                  - name: dateTimeTypeOptions
                     type: NestedObject
                     description: |
                       Date time property. Not supported by CMEK compliant deployment.
                     send_empty_value: true
                     allow_empty_object: true
-                    properties:
-                      []
-                  - name: 'mapTypeOptions'
+                    properties: []
+                  - name: mapTypeOptions
                     type: NestedObject
                     description: |
                       Map property.
                     send_empty_value: true
                     allow_empty_object: true
-                    properties:
-                      []
-                  - name: 'timestampTypeOptions'
+                    properties: []
+                  - name: timestampTypeOptions
                     type: NestedObject
                     description: |
                       Timestamp property. Not supported by CMEK compliant deployment.
                     send_empty_value: true
                     allow_empty_object: true
-                    properties:
-                      []
-        - name: 'enumTypeOptions'
+                    properties: []
+        - name: enumTypeOptions
           type: NestedObject
           description: |
             Enum/categorical property.
           properties:
-            - name: 'possibleValues'
+            - name: possibleValues
               type: Array
               description: |
                 List of possible enum values.
               required: true
               item_type:
                 type: String
-            - name: 'validationCheckDisabled'
+            - name: validationCheckDisabled
               type: Boolean
               description: |
                 Make sure the enum property value provided in the document is in the possile value list during document creation. The validation check runs by default.
-        - name: 'dateTimeTypeOptions'
+        - name: dateTimeTypeOptions
           type: NestedObject
           description: |
             Date time property. Not supported by CMEK compliant deployment.
           send_empty_value: true
           allow_empty_object: true
-          properties:
-            []
-        - name: 'mapTypeOptions'
+          properties: []
+        - name: mapTypeOptions
           type: NestedObject
           description: |
             Map property.
           send_empty_value: true
           allow_empty_object: true
-          properties:
-            []
-        - name: 'timestampTypeOptions'
+          properties: []
+        - name: timestampTypeOptions
           type: NestedObject
           description: |
             Timestamp property. Not supported by CMEK compliant deployment.
           send_empty_value: true
           allow_empty_object: true
-          properties:
-            []
+          properties: []

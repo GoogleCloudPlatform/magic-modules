@@ -16,8 +16,8 @@ name: ServiceInstance
 description: A service instance is an instance of the Dataproc operator running on a GDC cluster.
 references:
   guides:
-    'Dataproc Intro': 'https://cloud.google.com/dataproc/'
-  api: 'https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.serviceInstances'
+    Dataproc Intro: https://cloud.google.com/dataproc/
+  api: https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.serviceInstances
 base_url: projects/{{project}}/locations/{{location}}/serviceInstances
 create_url: projects/{{project}}/locations/{{location}}/serviceInstances?serviceInstanceId={{service_instance_id}}
 self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
@@ -29,7 +29,7 @@ autogen_status: U2VydmljZUluc3RhbmNl
 exclude_sweeper: true
 sweeper:
   url_substitutions:
-    - region: "us-west2"
+    - region: us-west2
 parameters:
   - name: location
     type: String
@@ -39,25 +39,27 @@ parameters:
     immutable: true
   - name: serviceInstanceId
     type: String
-    description: "Id of the service instance."
+    description: Id of the service instance.
     url_param_only: true
     required: true
     immutable: true
 async:
-  actions: ['create', 'delete']
+  actions: [create, delete]
   type: OpAsync
   operation:
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
 immutable: true
-examples:
-  - name: "dataprocgdc_serviceinstance"
-    primary_resource_id: "service-instance"
-    vars:
-      service_instance_id: "tf-e2e-service-instance"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+samples:
+  - name: dataprocgdc_serviceinstance
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/21173
+    primary_resource_id: service-instance
+    steps:
+      - name: dataprocgdc_serviceinstance
+        resource_id_vars:
+          project: my-project
+          service_instance_id: tf-e2e-service-instance
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
 properties:
   - name: gdceCluster
     type: NestedObject
@@ -73,8 +75,7 @@ properties:
     output: true
   - name: uid
     type: String
-    description: "System generated unique identifier for this service instance,
-      formatted as UUID4. "
+    description: 'System generated unique identifier for this service instance, formatted as UUID4. '
     output: true
   - name: displayName
     type: String
@@ -117,14 +118,11 @@ properties:
     output: true
   - name: reconciling
     type: Boolean
-    description: "Whether the service instance is currently reconciling. True
-      if the current state of the resource does not match the intended state, and the
-      system is working to reconcile them, whether or not the change was user initiated."
+    description: Whether the service instance is currently reconciling. True if the current state of the resource does not match the intended state, and the system is working to reconcile them, whether or not the change was user initiated.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: "The labels to associate with this service instance. Labels
-      may be used for filtering and billing tracking. "
+    description: 'The labels to associate with this service instance. Labels may be used for filtering and billing tracking. '
   - name: sparkServiceInstanceConfig
     type: NestedObject
     properties: []
@@ -138,8 +136,5 @@ properties:
     description: 'Requested service account to associate with ServiceInstance. '
   - name: effectiveServiceAccount
     type: String
-    description: "Effective service account associated with ServiceInstance.
-      This will be the service_account if specified. Otherwise, it will be an automatically created
-      per-resource P4SA that also automatically has Fleet Workload. Identity bindings
-      applied. "
+    description: 'Effective service account associated with ServiceInstance. This will be the service_account if specified. Otherwise, it will be an automatically created per-resource P4SA that also automatically has Fleet Workload. Identity bindings applied. '
     output: true

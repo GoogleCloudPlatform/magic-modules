@@ -19,36 +19,36 @@ base_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups
 create_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects,labels,description
 update_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects,labels,description
 self_link: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+create_verb: PATCH
+update_verb: PATCH
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
-  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.global.hubs.groups'
+    Official Documentation: https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview
+  api: https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.global.hubs.groups
 async:
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
 # A handwritten sweeper is needed as the resource name can only be `default`, `center`, and `edge`.
 exclude_sweeper: true
-examples:
-  - name: 'network_connectivity_group_basic'
-    primary_resource_id: 'primary'
-    vars:
-      hub_name: "network-connectivity-hub1"
-      auto_accept_project_1_name: "foo"
-      auto_accept_project_2_name: "bar"
-    test_vars_overrides:
-      # for backward compatible
-      auto_accept_project_1_name: '"foo" + randomSuffix'
-      # for backward compatible
-      auto_accept_project_2_name: '"bar" + randomSuffix'
+samples:
+  - name: network_connectivity_group_basic
+    primary_resource_id: primary
+    steps:
+      - name: network_connectivity_group_basic
+        resource_id_vars:
+          auto_accept_project_1_name: foo
+          auto_accept_project_2_name: bar
+          hub_name: network-connectivity-hub1
+        test_vars_overrides:
+          auto_accept_project_1_name: '"foo" + randomSuffix'
+          auto_accept_project_2_name: '"bar" + randomSuffix'
 description: The NetworkConnectivity Group resource
 parameters:
-  - name: 'hub'
+  - name: hub
     type: ResourceRef
-    resource: 'Hub'
-    imports: 'id'
+    resource: Hub
+    imports: id
     description: |
       The name of the hub. Hub names must be unique. They use the following form: projects/{projectNumber}/locations/global/hubs/{hubId}
     immutable: true
@@ -58,15 +58,15 @@ parameters:
 properties:
   - name: name
     type: Enum
-    description: 'The name of the group. Group names must be unique.'
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    description: The name of the group. Group names must be unique.
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
     enum_values:
-      - 'default'
-      - 'center'
-      - 'edge'
+      - default
+      - center
+      - edge
   - name: createTime
     type: String
     description: Output only. The time the hub was created.
@@ -99,7 +99,7 @@ properties:
     properties:
       - name: autoAcceptProjects
         type: Array
-        description: 'A list of project ids or project numbers for which you want to enable auto-accept. The auto-accept setting is applied to spokes being created or updated in these projects.'
+        description: A list of project ids or project numbers for which you want to enable auto-accept. The auto-accept setting is applied to spokes being created or updated in these projects.
         required: true
         item_type:
           type: String

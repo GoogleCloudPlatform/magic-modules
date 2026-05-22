@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'DialogflowCX'
-display_name: 'Dialogflow CX'
+name: DialogflowCX
+display_name: Dialogflow CX
 versions:
-  - name: 'ga'
-    base_url: 'https://{{location}}-dialogflow.googleapis.com/v3/'
-  - name: 'beta'
-    base_url: 'https://{{location}}-dialogflow.googleapis.com/v3beta1/'
+  - name: ga
+    base_url: https://{{location}}-dialogflow.googleapis.com/v3/
+  - name: beta
+    base_url: https://{{location}}-dialogflow.googleapis.com/v3beta1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

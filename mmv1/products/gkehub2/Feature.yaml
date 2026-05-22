@@ -12,544 +12,572 @@
 # limitations under the License.
 
 ---
-name: 'Feature'
+name: Feature
 description: |
   Feature represents the settings and status of any Hub Feature.
 references:
   guides:
-    'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
-  api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.features'
+    Registering a Cluster: https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster
+  api: https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.features
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/features'
-self_link: 'projects/{{project}}/locations/{{location}}/features/{{name}}?return_partial_success=true'
-create_url: 'projects/{{project}}/locations/{{location}}/features?featureId={{name}}'
-delete_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
-update_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
-update_verb: 'PATCH'
+id_format: projects/{{project}}/locations/{{location}}/features/{{name}}
+base_url: projects/{{project}}/locations/{{location}}/features
+self_link: projects/{{project}}/locations/{{location}}/features/{{name}}?return_partial_success=true
+create_url: projects/{{project}}/locations/{{location}}/features?featureId={{name}}
+delete_url: projects/{{project}}/locations/{{location}}/features/{{name}}
+update_url: projects/{{project}}/locations/{{location}}/features/{{name}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/features/{{name}}'
+  - projects/{{project}}/locations/{{location}}/features/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 iam_policy:
   method_name_separator: ':'
-  parent_resource_attribute: 'name'
-  base_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
+  parent_resource_attribute: name
+  base_url: projects/{{project}}/locations/{{location}}/features/{{name}}
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/features/{{name}}'
+    - projects/{{project}}/locations/{{location}}/features/{{name}}
     - '{{name}}'
 include_in_tgc_next: true
 custom_code:
-  tgc_decoder: 'templates/tgc_next/decoders/gke_hub_feature.tmpl'
+  tgc_decoder: templates/tgc_next/decoders/gke_hub_feature.tmpl
   pre_create: templates/terraform/pre_create/gkehub_existing_feature.go.tmpl
   pre_delete: templates/terraform/pre_delete/gkehub_existing_feature.go.tmpl
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 legacy_long_form_project: true
-examples:
-  - name: 'gkehub_feature_multi_cluster_ingress'
-    primary_resource_id: 'feature'
+samples:
+  - name: gkehub_feature_multi_cluster_ingress
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'gkehub_feature_multi_cluster_service_discovery'
-    primary_resource_id: 'feature'
+    steps:
+      - name: gkehub_feature_multi_cluster_ingress
+  - name: gkehub_feature_multi_cluster_service_discovery
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'gkehub_feature_anthos_service_mesh'
-    primary_resource_id: 'feature'
+    steps:
+      - name: gkehub_feature_multi_cluster_service_discovery
+  - name: gkehub_feature_anthos_service_mesh
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'enable_fleet_observability_for_default_logs_with_COPY'
-    primary_resource_id: 'feature'
+    steps:
+      - name: gkehub_feature_anthos_service_mesh
+  - name: enable_fleet_observability_for_default_logs_with_COPY
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'enable_fleet_observability_for_scope_logs_with_MOVE'
-    primary_resource_id: 'feature'
+    steps:
+      - name: enable_fleet_observability_for_default_logs_with_COPY
+  - name: enable_fleet_observability_for_scope_logs_with_MOVE
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'enable_fleet_observability_for_both_default_and_scope_logs'
-    primary_resource_id: 'feature'
+    steps:
+      - name: enable_fleet_observability_for_scope_logs_with_MOVE
+  - name: enable_fleet_observability_for_both_default_and_scope_logs
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_service_mesh'
-    primary_resource_id: 'feature'
+    steps:
+      - name: enable_fleet_observability_for_both_default_and_scope_logs
+  - name: enable_fleet_default_member_config_service_mesh
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_configmanagement'
-    primary_resource_id: 'feature'
+    steps:
+      - name: enable_fleet_default_member_config_service_mesh
+  - name: enable_fleet_default_member_config_configmanagement
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller'
-    primary_resource_id: 'feature'
+    steps:
+      - name: enable_fleet_default_member_config_configmanagement
+  - name: enable_fleet_default_member_config_policycontroller
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller_full'
-    primary_resource_id: 'feature'
+    steps:
+      - name: enable_fleet_default_member_config_policycontroller
+  - name: enable_fleet_default_member_config_policycontroller_full
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller_minimal'
-    primary_resource_id: 'feature'
+    steps:
+      - name: enable_fleet_default_member_config_policycontroller_full
+  - name: enable_fleet_default_member_config_policycontroller_minimal
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'gkehub_feature_clusterupgrade'
-    primary_resource_id: 'feature'
+    steps:
+      - name: enable_fleet_default_member_config_policycontroller_minimal
+  - name: gkehub_feature_clusterupgrade
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'gkehub_feature_rbacrolebinding_actuation'
-    primary_resource_id: 'feature'
+    steps:
+      - name: gkehub_feature_clusterupgrade
+  - name: gkehub_feature_rbacrolebinding_actuation
+    primary_resource_id: feature
     exclude_test: true
-  - name: 'gkehub_feature_workload_identity'
-    primary_resource_id: 'feature'
-    vars:
-      workload_identity_pool_id: 'example-pool'
+    steps:
+      - name: gkehub_feature_rbacrolebinding_actuation
+  - name: gkehub_feature_workload_identity
     min_version: beta
+    primary_resource_id: feature
     exclude_test: true
+    steps:
+      - name: gkehub_feature_workload_identity
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: The location for the resource
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The full, unique name of this Feature resource
     url_param_only: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
-  - name: 'labels'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.tmpl
+  - name: labels
     type: KeyValueLabels
     description: GCP labels for this Feature.
-  - name: 'resourceState'
+  - name: resourceState
     type: NestedObject
     description: State of the Feature resource itself.
     output: true
     properties:
-      - name: 'state'
+      - name: state
         type: Enum
         description: The current state of the Feature resource in the Hub API.
         output: true
         enum_values:
-          - 'STATE_UNSPECIFIED'
-          - 'ENABLING'
-          - 'ACTIVE'
-          - 'DISABLING'
-          - 'UPDATING'
-          - 'SERVICE_UPDATING'
-      - name: 'hasResources'
+          - STATE_UNSPECIFIED
+          - ENABLING
+          - ACTIVE
+          - DISABLING
+          - UPDATING
+          - SERVICE_UPDATING
+      - name: hasResources
         type: Boolean
         description: Whether this Feature has outstanding resources that need to be cleaned up before it can be disabled.
         output: true
-  - name: 'spec'
+  - name: spec
     type: NestedObject
     description: Optional. Hub-wide Feature configuration. If this Feature does not support any Hub-wide configuration, this field may be unused.
     properties:
-      - name: 'multiclusteringress'
+      - name: multiclusteringress
         type: NestedObject
         description: Multicluster Ingress-specific spec.
         properties:
-          - name: 'configMembership'
+          - name: configMembership
             type: String
             description: 'Fully-qualified Membership name which hosts the MultiClusterIngress CRD. Example: `projects/foo-proj/locations/global/memberships/bar`'
             required: true
-      - name: 'fleetobservability'
+      - name: fleetobservability
         type: NestedObject
         description: Fleet Observability feature spec.
         properties:
-          - name: 'loggingConfig'
+          - name: loggingConfig
             type: NestedObject
-            description: 'Specified if fleet logging feature is enabled for the entire fleet. If UNSPECIFIED, fleet logging feature is disabled for the entire fleet.'
+            description: Specified if fleet logging feature is enabled for the entire fleet. If UNSPECIFIED, fleet logging feature is disabled for the entire fleet.
             properties:
-              - name: 'defaultConfig'
+              - name: defaultConfig
                 type: NestedObject
-                description: 'Specified if applying the default routing config to logs not specified in other configs.'
+                description: Specified if applying the default routing config to logs not specified in other configs.
                 properties:
-                  - name: 'mode'
+                  - name: mode
                     type: Enum
                     description: Specified if fleet logging feature is enabled.
                     enum_values:
-                      - 'MODE_UNSPECIFIED'
-                      - 'COPY'
-                      - 'MOVE'
-              - name: 'fleetScopeLogsConfig'
+                      - MODE_UNSPECIFIED
+                      - COPY
+                      - MOVE
+              - name: fleetScopeLogsConfig
                 type: NestedObject
-                description: 'Specified if applying the routing config to all logs for all fleet scopes.'
+                description: Specified if applying the routing config to all logs for all fleet scopes.
                 properties:
-                  - name: 'mode'
+                  - name: mode
                     type: Enum
                     description: Specified if fleet logging feature is enabled.
                     enum_values:
-                      - 'MODE_UNSPECIFIED'
-                      - 'COPY'
-                      - 'MOVE'
-      - name: 'clusterupgrade'
+                      - MODE_UNSPECIFIED
+                      - COPY
+                      - MOVE
+      - name: clusterupgrade
         type: NestedObject
         description: Clusterupgrade feature spec.
         properties:
-          - name: 'upstreamFleets'
+          - name: upstreamFleets
             type: Array
             description: |
               Specified if other fleet should be considered as a source of upgrades. Currently, at most one upstream fleet is allowed. The fleet name should be either fleet project number or id.
             required: true
             item_type:
               type: String
-          - name: 'postConditions'
+          - name: postConditions
             type: NestedObject
             description: |
               Post conditions to override for the specified upgrade.
             required: true
             default_from_api: true
             properties:
-              - name: 'soaking'
+              - name: soaking
                 type: String
                 description: |
                   Amount of time to "soak" after a rollout has been finished before marking it COMPLETE. Cannot exceed 30 days.
                 required: true
-          - name: 'gkeUpgradeOverrides'
+          - name: gkeUpgradeOverrides
             type: Array
             description: |
               Configuration overrides for individual upgrades.
             item_type:
               type: NestedObject
               properties:
-                - name: 'upgrade'
+                - name: upgrade
                   type: NestedObject
                   description: |
                     Which upgrade to override.
                   required: true
                   properties:
-                    - name: 'name'
+                    - name: name
                       type: String
                       description: |
                         Name of the upgrade, e.g., "k8s_control_plane". It should be a valid upgrade name. It must not exceet 99 characters.
                       required: true
-                    - name: 'version'
+                    - name: version
                       type: String
                       description: |
-                         Version of the upgrade, e.g., "1.22.1-gke.100". It should be a valid version. It must not exceet 99 characters.
+                        Version of the upgrade, e.g., "1.22.1-gke.100". It should be a valid version. It must not exceet 99 characters.
                       required: true
-                - name: 'postConditions'
+                - name: postConditions
                   type: NestedObject
                   description: |
                     Post conditions to override for the specified upgrade.
                   required: true
                   properties:
-                    - name: 'soaking'
+                    - name: soaking
                       type: String
                       description: |
                         Amount of time to "soak" after a rollout has been finished before marking it COMPLETE. Cannot exceed 30 days.
                       required: true
-      - name: 'rbacrolebindingactuation'
+      - name: rbacrolebindingactuation
         type: NestedObject
         description: RBACRolebinding Actuation feature spec.
         properties:
-          - name: 'allowedCustomRoles'
+          - name: allowedCustomRoles
             type: Array
-            description: 'The list of allowed custom roles (ClusterRoles). If a custom role is not part of this list, it cannot be used in a fleet scope RBACRoleBinding. If a custom role in this list is in use, it cannot be removed from the list until the scope RBACRolebindings using it are deleted.'
+            description: The list of allowed custom roles (ClusterRoles). If a custom role is not part of this list, it cannot be used in a fleet scope RBACRoleBinding. If a custom role in this list is in use, it cannot be removed from the list until the scope RBACRolebindings using it are deleted.
             item_type:
               type: String
-      - name: 'workloadidentity'
+      - name: workloadidentity
         type: NestedObject
         description: Workload Identity feature spec.
         properties:
-          - name: 'scopeTenancyPool'
+          - name: scopeTenancyPool
             type: String
             description: 'Pool to be used for Workload Identity. This pool in trust-domain mode is used with Fleet Tenancy, so that sameness can be enforced. ex: projects/example/locations/global/workloadidentitypools/custompool'
             required: true
-  - name: 'fleetDefaultMemberConfig'
+  - name: fleetDefaultMemberConfig
     type: NestedObject
     description: Optional. Fleet Default Membership Configuration.
     send_empty_value: true
     properties:
-      - name: 'mesh'
+      - name: mesh
         type: NestedObject
         description: Service Mesh spec
         properties:
-          - name: 'management'
+          - name: management
             type: Enum
-            description: 'Whether to automatically manage Service Mesh'
+            description: Whether to automatically manage Service Mesh
             required: true
             enum_values:
-              - 'MANAGEMENT_UNSPECIFIED'
-              - 'MANAGEMENT_AUTOMATIC'
-              - 'MANAGEMENT_MANUAL'
-      - name: 'configmanagement'
+              - MANAGEMENT_UNSPECIFIED
+              - MANAGEMENT_AUTOMATIC
+              - MANAGEMENT_MANUAL
+      - name: configmanagement
         type: NestedObject
         description: Config Management spec
         properties:
-          - name: 'version'
+          - name: version
             type: String
-            description: 'Version of Config Sync installed'
-          - name: 'management'
+            description: Version of Config Sync installed
+          - name: management
             type: Enum
-            description: 'Set this field to MANAGEMENT_AUTOMATIC to enable Config Sync auto-upgrades, and set this field to MANAGEMENT_MANUAL or MANAGEMENT_UNSPECIFIED to disable Config Sync auto-upgrades.'
+            description: Set this field to MANAGEMENT_AUTOMATIC to enable Config Sync auto-upgrades, and set this field to MANAGEMENT_MANUAL or MANAGEMENT_UNSPECIFIED to disable Config Sync auto-upgrades.
             enum_values:
-              - 'MANAGEMENT_UNSPECIFIED'
-              - 'MANAGEMENT_AUTOMATIC'
-              - 'MANAGEMENT_MANUAL'
-          - name: 'configSync'
+              - MANAGEMENT_UNSPECIFIED
+              - MANAGEMENT_AUTOMATIC
+              - MANAGEMENT_MANUAL
+          - name: configSync
             type: NestedObject
-            description: 'ConfigSync configuration for the cluster'
+            description: ConfigSync configuration for the cluster
             properties:
-              - name: 'sourceFormat'
+              - name: sourceFormat
                 type: String
-                description: 'Specifies whether the Config Sync Repo is in hierarchical or unstructured mode'
-              - name: 'enabled'
+                description: Specifies whether the Config Sync Repo is in hierarchical or unstructured mode
+              - name: enabled
                 type: Boolean
-                description: 'Enables the installation of ConfigSync. If set to true, ConfigSync resources will be created and the other ConfigSync fields will be applied if exist. If set to false, all other ConfigSync fields will be ignored, ConfigSync resources will be deleted. If omitted, ConfigSync resources will be managed depends on the presence of the git or oci field.'
-              - name: 'preventDrift'
+                description: Enables the installation of ConfigSync. If set to true, ConfigSync resources will be created and the other ConfigSync fields will be applied if exist. If set to false, all other ConfigSync fields will be ignored, ConfigSync resources will be deleted. If omitted, ConfigSync resources will be managed depends on the presence of the git or oci field.
+              - name: preventDrift
                 type: Boolean
-                description: 'Set to true to enable the Config Sync admission webhook to prevent drifts. If set to `false`, disables the Config Sync admission webhook and does not prevent drifts.'
-              - name: 'metricsGcpServiceAccountEmail'
+                description: Set to true to enable the Config Sync admission webhook to prevent drifts. If set to `false`, disables the Config Sync admission webhook and does not prevent drifts.
+              - name: metricsGcpServiceAccountEmail
                 type: String
-                description: 'The Email of the Google Cloud Service Account (GSA) used for exporting Config Sync metrics to Cloud Monitoring. The GSA should have the Monitoring Metric Writer(roles/monitoring.metricWriter) IAM role. The Kubernetes ServiceAccount `default` in the namespace `config-management-monitoring` should be bound to the GSA.'
-              - name: 'git'
+                description: The Email of the Google Cloud Service Account (GSA) used for exporting Config Sync metrics to Cloud Monitoring. The GSA should have the Monitoring Metric Writer(roles/monitoring.metricWriter) IAM role. The Kubernetes ServiceAccount `default` in the namespace `config-management-monitoring` should be bound to the GSA.
+              - name: git
                 type: NestedObject
-                description: 'Git repo configuration for the cluster'
+                description: Git repo configuration for the cluster
                 properties:
-                  - name: 'syncRepo'
+                  - name: syncRepo
                     type: String
-                    description: 'The URL of the Git repository to use as the source of truth'
-                  - name: 'syncBranch'
+                    description: The URL of the Git repository to use as the source of truth
+                  - name: syncBranch
                     type: String
                     description: 'The branch of the repository to sync from. Default: master'
-                  - name: 'policyDir'
+                  - name: policyDir
                     type: String
-                    description: 'The path within the Git repository that represents the top level of the repo to sync'
-                  - name: 'syncRev'
+                    description: The path within the Git repository that represents the top level of the repo to sync
+                  - name: syncRev
                     type: String
-                    description: 'Git revision (tag or hash) to check out. Default HEAD'
-                  - name: 'secretType'
+                    description: Git revision (tag or hash) to check out. Default HEAD
+                  - name: secretType
                     type: String
-                    description: 'Type of secret configured for access to the Git repo'
+                    description: Type of secret configured for access to the Git repo
                     required: true
-                  - name: 'httpsProxy'
+                  - name: httpsProxy
                     type: String
-                    description: 'URL for the HTTPS Proxy to be used when communicating with the Git repo'
-                  - name: 'gcpServiceAccountEmail'
+                    description: URL for the HTTPS Proxy to be used when communicating with the Git repo
+                  - name: gcpServiceAccountEmail
                     type: String
-                    description: 'The Google Cloud Service Account Email used for auth when secretType is gcpServiceAccount'
-                  - name: 'syncWaitSecs'
+                    description: The Google Cloud Service Account Email used for auth when secretType is gcpServiceAccount
+                  - name: syncWaitSecs
                     type: String
                     description: 'Period in seconds between consecutive syncs. Default: 15'
-              - name: 'oci'
+              - name: oci
                 type: NestedObject
-                description: 'OCI repo configuration for the cluster'
+                description: OCI repo configuration for the cluster
                 properties:
-                  - name: 'syncRepo'
+                  - name: syncRepo
                     type: String
-                    description: 'The OCI image repository URL for the package to sync from'
-                  - name: 'policyDir'
+                    description: The OCI image repository URL for the package to sync from
+                  - name: policyDir
                     type: String
                     description: 'The absolute path of the directory that contains the local resources. Default: the root directory of the image'
-                  - name: 'secretType'
+                  - name: secretType
                     type: String
-                    description: 'Type of secret configured for access to the Git repo'
+                    description: Type of secret configured for access to the Git repo
                     required: true
-                  - name: 'gcpServiceAccountEmail'
+                  - name: gcpServiceAccountEmail
                     type: String
-                    description: 'The Google Cloud Service Account Email used for auth when secretType is gcpServiceAccount'
-                  - name: 'syncWaitSecs'
+                    description: The Google Cloud Service Account Email used for auth when secretType is gcpServiceAccount
+                  - name: syncWaitSecs
                     type: String
                     description: 'Period in seconds between consecutive syncs. Default: 15'
-                  - name: 'version'
+                  - name: version
                     type: String
-                    description: 'Version of Config Sync installed'
-                    deprecation_message: 'The `configmanagement.config_sync.oci.version` field is deprecated and will be removed in a future major release. Please use `configmanagement.version` field to specify the version of Config Sync installed instead.'
-      - name: 'policycontroller'
+                    description: Version of Config Sync installed
+                    deprecation_message: The `configmanagement.config_sync.oci.version` field is deprecated and will be removed in a future major release. Please use `configmanagement.version` field to specify the version of Config Sync installed instead.
+      - name: policycontroller
         type: NestedObject
         description: Policy Controller spec
         properties:
-          - name: 'version'
+          - name: version
             type: String
-            description: 'Configures the version of Policy Controller'
+            description: Configures the version of Policy Controller
             default_from_api: true
-          - name: 'policyControllerHubConfig'
+          - name: policyControllerHubConfig
             type: NestedObject
-            description: 'Configuration of Policy Controller'
+            description: Configuration of Policy Controller
             required: true
             properties:
-              - name: 'installSpec'
+              - name: installSpec
                 type: Enum
-                description: 'Configures the mode of the Policy Controller installation'
+                description: Configures the mode of the Policy Controller installation
                 required: true
                 enum_values:
-                  - 'INSTALL_SPEC_UNSPECIFIED'
-                  - 'INSTALL_SPEC_NOT_INSTALLED'
-                  - 'INSTALL_SPEC_ENABLED'
-                  - 'INSTALL_SPEC_SUSPENDED'
-                  - 'INSTALL_SPEC_DETACHED'
-              - name: 'auditIntervalSeconds'
+                  - INSTALL_SPEC_UNSPECIFIED
+                  - INSTALL_SPEC_NOT_INSTALLED
+                  - INSTALL_SPEC_ENABLED
+                  - INSTALL_SPEC_SUSPENDED
+                  - INSTALL_SPEC_DETACHED
+              - name: auditIntervalSeconds
                 type: Integer
-                description: 'Interval for Policy Controller Audit scans (in seconds). When set to 0, this disables audit functionality altogether.'
+                description: Interval for Policy Controller Audit scans (in seconds). When set to 0, this disables audit functionality altogether.
                 default_from_api: true
-              - name: 'exemptableNamespaces'
+              - name: exemptableNamespaces
                 type: Array
-                description: 'The set of namespaces that are excluded from Policy Controller checks. Namespaces do not need to currently exist on the cluster.'
+                description: The set of namespaces that are excluded from Policy Controller checks. Namespaces do not need to currently exist on the cluster.
                 item_type:
                   type: String
-              - name: 'logDeniesEnabled'
+              - name: logDeniesEnabled
                 type: Boolean
-                description: 'Logs all denies and dry run failures.'
-              - name: 'mutationEnabled'
+                description: Logs all denies and dry run failures.
+              - name: mutationEnabled
                 type: Boolean
-                description: 'Enables the ability to mutate resources using Policy Controller.'
-              - name: 'referentialRulesEnabled'
+                description: Enables the ability to mutate resources using Policy Controller.
+              - name: referentialRulesEnabled
                 type: Boolean
-                description: 'Enables the ability to use Constraint Templates that reference to objects other than the object currently being evaluated.'
-              - name: 'monitoring'
+                description: Enables the ability to use Constraint Templates that reference to objects other than the object currently being evaluated.
+              - name: monitoring
                 type: NestedObject
-                description: 'Monitoring specifies the configuration of monitoring Policy Controller.'
+                description: Monitoring specifies the configuration of monitoring Policy Controller.
                 default_from_api: true
                 properties:
-                  - name: 'backends'
+                  - name: backends
                     type: Array
-                    description: 'Specifies the list of backends Policy Controller will export to. An empty list would effectively disable metrics export.'
+                    description: Specifies the list of backends Policy Controller will export to. An empty list would effectively disable metrics export.
                     default_from_api: true
                     item_type:
                       type: Enum
-                      description: 'required but unused'
+                      description: required but unused
                       enum_values:
-                        - 'MONITORING_BACKEND_UNSPECIFIED'
-                        - 'PROMETHEUS'
-                        - 'CLOUD_MONITORING'
-              - name: 'constraintViolationLimit'
+                        - MONITORING_BACKEND_UNSPECIFIED
+                        - PROMETHEUS
+                        - CLOUD_MONITORING
+              - name: constraintViolationLimit
                 type: Integer
-                description: 'The maximum number of audit violations to be stored in a constraint. If not set, the internal default of 20 will be used.'
-              - name: 'deploymentConfigs'
+                description: The maximum number of audit violations to be stored in a constraint. If not set, the internal default of 20 will be used.
+              - name: deploymentConfigs
                 type: Map
-                description: 'Map of deployment configs to deployments ("admission", "audit", "mutation").'
+                description: Map of deployment configs to deployments ("admission", "audit", "mutation").
                 default_from_api: true
-                key_name: 'component'
+                key_name: component
                 value_type:
-                  description: 'Configures deployment-specific options, such as high availability.'
+                  description: Configures deployment-specific options, such as high availability.
                   type: NestedObject
                   properties:
-                    - name: 'replicaCount'
+                    - name: replicaCount
                       type: Integer
-                      description: 'Pod replica count.'
+                      description: Pod replica count.
                       default_from_api: true
                       send_empty_value: false
-                    - name: 'containerResources'
+                    - name: containerResources
                       type: NestedObject
-                      description: 'Container resource requirements.'
+                      description: Container resource requirements.
                       properties:
-                        - name: 'limits'
+                        - name: limits
                           type: NestedObject
-                          description: 'Limits describes the maximum amount of compute resources allowed for use by the running container.'
+                          description: Limits describes the maximum amount of compute resources allowed for use by the running container.
                           properties:
-                            - name: 'memory'
+                            - name: memory
                               type: String
-                              description: 'Memory requirement expressed in Kubernetes resource units.'
-                            - name: 'cpu'
+                              description: Memory requirement expressed in Kubernetes resource units.
+                            - name: cpu
                               type: String
-                              description: 'CPU requirement expressed in Kubernetes resource units.'
-                        - name: 'requests'
+                              description: CPU requirement expressed in Kubernetes resource units.
+                        - name: requests
                           type: NestedObject
-                          description: 'Requests describes the amount of compute resources reserved for the container by the kube-scheduler.'
+                          description: Requests describes the amount of compute resources reserved for the container by the kube-scheduler.
                           properties:
-                            - name: 'memory'
+                            - name: memory
                               type: String
-                              description: 'Memory requirement expressed in Kubernetes resource units.'
-                            - name: 'cpu'
+                              description: Memory requirement expressed in Kubernetes resource units.
+                            - name: cpu
                               type: String
-                              description: 'CPU requirement expressed in Kubernetes resource units.'
-                    - name: 'podAffinity'
+                              description: CPU requirement expressed in Kubernetes resource units.
+                    - name: podAffinity
                       type: Enum
-                      description: 'Pod affinity configuration.'
+                      description: Pod affinity configuration.
                       default_from_api: true
                       enum_values:
-                        - 'AFFINITY_UNSPECIFIED'
-                        - 'NO_AFFINITY'
-                        - 'ANTI_AFFINITY'
-                    - name: 'podToleration'
+                        - AFFINITY_UNSPECIFIED
+                        - NO_AFFINITY
+                        - ANTI_AFFINITY
+                    - name: podToleration
                       type: Array
-                      description: 'Pod tolerations of node taints.'
+                      description: Pod tolerations of node taints.
                       api_name: podTolerations
                       item_type:
-                        description: 'required but unused'
+                        description: required but unused
                         type: NestedObject
                         properties:
-                          - name: 'key'
+                          - name: key
                             type: String
-                            description: 'Matches a taint key (not necessarily unique).'
-                          - name: 'operator'
+                            description: Matches a taint key (not necessarily unique).
+                          - name: operator
                             type: String
-                            description: 'Matches a taint operator.'
-                          - name: 'value'
+                            description: Matches a taint operator.
+                          - name: value
                             type: String
-                            description: 'Matches a taint value.'
-                          - name: 'effect'
+                            description: Matches a taint value.
+                          - name: effect
                             type: String
-                            description: 'Matches a taint effect.'
-              - name: 'policyContent'
+                            description: Matches a taint effect.
+              - name: policyContent
                 type: NestedObject
-                description: 'Specifies the desired policy content on the cluster.'
+                description: Specifies the desired policy content on the cluster.
                 # default_from_api: true
                 properties:
-                  - name: 'templateLibrary'
+                  - name: templateLibrary
                     type: NestedObject
-                    description: 'Configures the installation of the Template Library.'
+                    description: Configures the installation of the Template Library.
                     default_from_api: true
                     properties:
-                      - name: 'installation'
+                      - name: installation
                         type: Enum
-                        description: 'Configures the manner in which the template library is installed on the cluster.'
+                        description: Configures the manner in which the template library is installed on the cluster.
                         enum_values:
-                          - 'INSTALLATION_UNSPECIFIED'
-                          - 'NOT_INSTALLED'
-                          - 'ALL'
-                  - name: 'bundles'
+                          - INSTALLATION_UNSPECIFIED
+                          - NOT_INSTALLED
+                          - ALL
+                  - name: bundles
                     type: Map
-                    description: 'Configures which bundles to install and their corresponding install specs.'
-                    key_name: 'bundle'
+                    description: Configures which bundles to install and their corresponding install specs.
+                    key_name: bundle
                     value_type:
-                      description: 'The specification configuration for a single managed bundle.'
+                      description: The specification configuration for a single managed bundle.
                       type: NestedObject
                       properties:
-                        - name: 'exemptedNamespaces'
+                        - name: exemptedNamespaces
                           type: Array
-                          description: 'The set of namespaces to be exempted from the bundle.'
+                          description: The set of namespaces to be exempted from the bundle.
                           item_type:
                             type: String
-  - name: 'state'
+  - name: state
     type: NestedObject
     description: Output only. The Hub-wide Feature state
     output: true
     properties:
-      - name: 'state'
+      - name: state
         type: NestedObject
         description: Output only. The "running state" of the Feature in this Hub.
         output: true
         properties:
-          - name: 'code'
+          - name: code
             type: Enum
             description: The high-level, machine-readable status of this Feature.
             output: true
             enum_values:
-              - 'CODE_UNSPECIFIED'
-              - 'OK'
-              - 'WARNING'
-              - 'ERROR'
-          - name: 'description'
+              - CODE_UNSPECIFIED
+              - OK
+              - WARNING
+              - ERROR
+          - name: description
             type: String
             description: A human-readable description of the current status.
             output: true
-          - name: 'updateTime'
+          - name: updateTime
             type: String
             description: 'The time this status and any related Feature-specific details were updated. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z"'
             output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: Output only. When the Feature resource was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: Output only. When the Feature resource was last updated.
     output: true
-  - name: 'deleteTime'
+  - name: deleteTime
     type: String
     description: Output only. When the Feature resource was deleted.
     output: true

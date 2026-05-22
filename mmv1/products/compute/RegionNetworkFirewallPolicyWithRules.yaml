@@ -12,66 +12,69 @@
 # limitations under the License.
 
 ---
-name: 'RegionNetworkFirewallPolicyWithRules'
+name: RegionNetworkFirewallPolicyWithRules
 api_resource_type_kind: FirewallPolicy
-description: "The Compute NetworkFirewallPolicy with rules resource"
+description: The Compute NetworkFirewallPolicy with rules resource
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
-self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}'
-create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/regions/{{region}}/firewallPolicies
+self_link: projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}
+create_url: projects/{{project}}/regions/{{region}}/firewallPolicies
+update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
-  encoder: 'templates/terraform/encoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
-  decoder: 'templates/terraform/decoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
-  post_create: 'templates/terraform/post_create/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  constants: templates/terraform/constants/resource_compute_region_network_firewall_policy_with_rules.go.tmpl
+  encoder: templates/terraform/encoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl
+  update_encoder: templates/terraform/update_encoder/resource_compute_region_network_firewall_policy_with_rules.go.tmpl
+  decoder: templates/terraform/decoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl
+  post_create: templates/terraform/post_create/resource_compute_region_network_firewall_policy_with_rules.go.tmpl
 legacy_long_form_project: true
 sweeper:
   url_substitutions:
-    - region: "us-west2"
-examples:
-  - name: 'compute_region_network_firewall_policy_with_rules_full'
-    primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      network: 'network'
-      fw_policy: 'fw-policy'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'compute_region_network_firewall_policy_with_rules_roce'
-    primary_resource_id: 'policy'
-    vars:
-      policy_name: 'rnf-policy'
+    - region: us-west2
+samples:
+  - name: compute_region_network_firewall_policy_with_rules_full
+    primary_resource_id: primary
+    steps:
+      - name: compute_region_network_firewall_policy_with_rules_full
+        resource_id_vars:
+          address_group: address-group
+          fw_policy: fw-policy
+          network: network
+          tag_key: tag-key
+          tag_value: tag-value
+        test_env_vars:
+          org_id: ORG_ID
+        test_vars_overrides:
+          network: '"network" + randomSuffix'
+  - name: compute_region_network_firewall_policy_with_rules_roce
+    primary_resource_id: policy
+    steps:
+      - name: compute_region_network_firewall_policy_with_rules_roce
+        resource_id_vars:
+          policy_name: rnf-policy
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: The region of this resource.
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: String
     description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       User-provided name of the Network firewall policy.
@@ -82,15 +85,15 @@ properties:
       lowercase letter, or digit, except the last character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'networkFirewallPolicyId'
+  - name: networkFirewallPolicyId
     type: String
     description: The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: An optional description of this resource.
-  - name: 'policyType'
+  - name: policyType
     type: Enum
     immutable: true
     description: |
@@ -99,11 +102,11 @@ properties:
       Different policy types may support some of the Firewall Rules features.
     default_from_api: true
     enum_values:
-      - 'VPC_POLICY'
-      - 'RDMA_ROCE_POLICY'
-      - 'RDMA_FALCON_POLICY'
-      - 'ULL_POLICY'
-  - name: 'rule'
+      - VPC_POLICY
+      - RDMA_ROCE_POLICY
+      - RDMA_FALCON_POLICY
+      - ULL_POLICY
+  - name: rule
     type: Array
     description: A list of firewall policy rules.
     api_name: rules
@@ -111,99 +114,97 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'description'
+        - name: description
           type: String
           description: |
             A description of the rule.
-        - name: 'ruleName'
+        - name: ruleName
           type: String
           description: |
             An optional name for the rule. This field is not a unique identifier
             and can be updated.
-        - name: 'priority'
+        - name: priority
           type: Integer
           description: |
             An integer indicating the priority of a rule in the list. The priority must be a value
             between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
             highest priority and 2147483647 is the lowest priority.
           required: true
-        - name: 'match'
+        - name: match
           type: NestedObject
-          description:
-            A match condition that incoming traffic is evaluated against. If it
-            evaluates to true, the corresponding 'action' is enforced.
+          description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
           required: true
           properties:
-            - name: 'srcIpRanges'
+            - name: srcIpRanges
               type: Array
               description: |
                 Source IP address range in CIDR format. Required for
                 INGRESS rules.
               item_type:
                 type: String
-            - name: 'destIpRanges'
+            - name: destIpRanges
               type: Array
               description: |
                 Destination IP address range in CIDR format. Required for
                 EGRESS rules.
               item_type:
                 type: String
-            - name: 'srcAddressGroups'
+            - name: srcAddressGroups
               type: Array
               description: |
                 Address groups which should be matched against the traffic source.
                 Maximum number of source address groups is 10.
               item_type:
                 type: String
-            - name: 'destAddressGroups'
+            - name: destAddressGroups
               type: Array
               description: |
                 Address groups which should be matched against the traffic destination.
                 Maximum number of destination address groups is 10.
               item_type:
                 type: String
-            - name: 'srcFqdns'
+            - name: srcFqdns
               type: Array
               description: |
                 Fully Qualified Domain Name (FQDN) which should be matched against
                 traffic source. Maximum number of source fqdn allowed is 100.
               item_type:
                 type: String
-            - name: 'destFqdns'
+            - name: destFqdns
               type: Array
               description: |
                 Fully Qualified Domain Name (FQDN) which should be matched against
                 traffic destination. Maximum number of destination fqdn allowed is 100.
               item_type:
                 type: String
-            - name: 'srcNetworkScope'
+            - name: srcNetworkScope
               type: Enum
               description: |
                 Network scope of the traffic source.
               min_version: beta
               enum_values:
-                - 'INTERNET'
-                - 'INTRA_VPC'
-                - 'NON_INTERNET'
-                - 'VPC_NETWORKS'
-            - name: 'srcNetworks'
+                - INTERNET
+                - INTRA_VPC
+                - NON_INTERNET
+                - VPC_NETWORKS
+            - name: srcNetworks
               type: Array
               description: |
                 Networks of the traffic source. It can be either a full or partial url.
               min_version: beta
               item_type:
                 type: String
-            - name: 'destNetworkScope'
+            - name: destNetworkScope
               type: Enum
               description: |
                 Network scope of the traffic destination.
               min_version: beta
               enum_values:
-                - 'INTERNET'
-                - 'INTRA_VPC'
-                - 'NON_INTERNET'
-                - 'VPC_NETWORKS'
-            - name: 'srcRegionCodes'
+                - INTERNET
+                - INTRA_VPC
+                - NON_INTERNET
+                - VPC_NETWORKS
+            - name: srcRegionCodes
               type: Array
               description: |
                 Region codes whose IP addresses will be used to match for source
@@ -212,7 +213,7 @@ properties:
                 Maximum number of source region codes allowed is 5000.
               item_type:
                 type: String
-            - name: 'destRegionCodes'
+            - name: destRegionCodes
               type: Array
               description: |
                 Region codes whose IP addresses will be used to match for destination
@@ -221,21 +222,21 @@ properties:
                 Maximum number of destination region codes allowed is 5000.
               item_type:
                 type: String
-            - name: 'srcThreatIntelligences'
+            - name: srcThreatIntelligences
               type: Array
               description: |
                 Names of Network Threat Intelligence lists.
                 The IPs in these lists will be matched against traffic source.
               item_type:
                 type: String
-            - name: 'destThreatIntelligences'
+            - name: destThreatIntelligences
               type: Array
               description: |
                 Names of Network Threat Intelligence lists.
                 The IPs in these lists will be matched against traffic destination.
               item_type:
                 type: String
-            - name: 'layer4Config'
+            - name: layer4Config
               type: Array
               description: |
                 Pairs of IP protocols and ports that the rule should match.
@@ -244,7 +245,7 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'ipProtocol'
+                  - name: ipProtocol
                     type: String
                     description: |
                       The IP protocol to which this rule applies. The protocol
@@ -253,7 +254,7 @@ properties:
                       known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                       or the IP protocol number.
                     required: true
-                  - name: 'ports'
+                  - name: ports
                     type: Array
                     description: |
                       An optional list of ports to which this rule applies. This field
@@ -264,7 +265,7 @@ properties:
                       ["12345-12349"].
                     item_type:
                       type: String
-            - name: 'srcSecureTag'
+            - name: srcSecureTag
               type: Array
               description: |
                 List of secure tag values, which should be matched at the source
@@ -276,12 +277,12 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'name'
+                  - name: name
                     type: String
                     description: |
                       Name of the secure tag, created with TagManager's TagValue API.
                       @pattern tagValues/[0-9]+
-                  - name: 'state'
+                  - name: state
                     type: Enum
                     description: |
                       [Output Only] State of the secure tag, either `EFFECTIVE` or
@@ -289,9 +290,9 @@ properties:
                       or its network is deleted.
                     output: true
                     enum_values:
-                      - 'EFFECTIVE'
-                      - 'INEFFECTIVE'
-        - name: 'targetSecureTag'
+                      - EFFECTIVE
+                      - INEFFECTIVE
+        - name: targetSecureTag
           type: Array
           description: |
             A list of secure tags that controls which instances the firewall rule
@@ -309,12 +310,12 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: 'name'
+              - name: name
                 type: String
                 description: |
                   Name of the secure tag, created with TagManager's TagValue API.
                   @pattern tagValues/[0-9]+
-              - name: 'state'
+              - name: state
                 type: Enum
                 description: |
                   [Output Only] State of the secure tag, either `EFFECTIVE` or
@@ -322,87 +323,85 @@ properties:
                   or its network is deleted.
                 output: true
                 enum_values:
-                  - 'EFFECTIVE'
-                  - 'INEFFECTIVE'
-        - name: 'action'
+                  - EFFECTIVE
+                  - INEFFECTIVE
+        - name: action
           type: String
           description: |
             The Action to perform when the client connection triggers the rule. Can currently be either
             "allow", "deny", "apply_security_profile_group" or "goto_next".
           required: true
-        - name: 'direction'
+        - name: direction
           type: Enum
           description: |
             The direction in which this rule applies. If unspecified an INGRESS rule is created.
           enum_values:
-            - 'INGRESS'
-            - 'EGRESS'
-        - name: 'enableLogging'
+            - INGRESS
+            - EGRESS
+        - name: enableLogging
           type: Boolean
           description: |
             Denotes whether to enable logging for a particular rule.
             If logging is enabled, logs will be exported to the
             configured export destination in Stackdriver.
           send_empty_value: true
-        - name: 'targetServiceAccounts'
+        - name: targetServiceAccounts
           type: Array
           description: |
             A list of service accounts indicating the sets of
             instances that are applied with this rule.
           item_type:
             type: String
-        - name: 'securityProfileGroup'
+        - name: securityProfileGroup
           type: String
           description: |
             A fully-qualified URL of a SecurityProfile resource instance.
             Example:
             https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
             Must be specified if action is 'apply_security_profile_group'.
-        - name: 'tlsInspect'
+        - name: tlsInspect
           type: Boolean
           description: |
             Boolean flag indicating if the traffic should be TLS decrypted.
             It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
-        - name: 'disabled'
+        - name: disabled
           type: Boolean
           description: |
             Denotes whether the firewall policy rule is disabled. When set to true,
             the firewall policy rule is not enforced and traffic behaves as if it did
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
-  - name: 'predefinedRules'
+  - name: predefinedRules
     type: Array
     description: A list of firewall policy pre-defined rules.
     output: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'description'
+        - name: description
           type: String
           description: |
             A description of the rule.
           output: true
-        - name: 'ruleName'
+        - name: ruleName
           type: String
           description: |
             An optional name for the rule. This field is not a unique identifier
             and can be updated.
           output: true
-        - name: 'priority'
+        - name: priority
           type: Integer
           description: |
             An integer indicating the priority of a rule in the list. The priority must be a value
             between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
             highest priority and 2147483647 is the lowest priority.
           output: true
-        - name: 'match'
+        - name: match
           type: NestedObject
-          description:
-            A match condition that incoming traffic is evaluated against. If it
-            evaluates to true, the corresponding 'action' is enforced.
+          description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
           output: true
           properties:
-            - name: 'srcIpRanges'
+            - name: srcIpRanges
               type: Array
               description: |
                 Source IP address range in CIDR format. Required for
@@ -410,7 +409,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'destIpRanges'
+            - name: destIpRanges
               type: Array
               description: |
                 Destination IP address range in CIDR format. Required for
@@ -418,7 +417,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'srcAddressGroups'
+            - name: srcAddressGroups
               type: Array
               description: |
                 Address groups which should be matched against the traffic source.
@@ -426,7 +425,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'destAddressGroups'
+            - name: destAddressGroups
               type: Array
               description: |
                 Address groups which should be matched against the traffic destination.
@@ -434,7 +433,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'srcFqdns'
+            - name: srcFqdns
               type: Array
               description: |
                 Fully Qualified Domain Name (FQDN) which should be matched against
@@ -442,7 +441,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'destFqdns'
+            - name: destFqdns
               type: Array
               description: |
                 Fully Qualified Domain Name (FQDN) which should be matched against
@@ -450,7 +449,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'srcRegionCodes'
+            - name: srcRegionCodes
               type: Array
               description: |
                 Region codes whose IP addresses will be used to match for source
@@ -460,7 +459,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'destRegionCodes'
+            - name: destRegionCodes
               type: Array
               description: |
                 Region codes whose IP addresses will be used to match for destination
@@ -470,7 +469,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'srcThreatIntelligences'
+            - name: srcThreatIntelligences
               type: Array
               description: |
                 Names of Network Threat Intelligence lists.
@@ -478,7 +477,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'destThreatIntelligences'
+            - name: destThreatIntelligences
               type: Array
               description: |
                 Names of Network Threat Intelligence lists.
@@ -486,7 +485,7 @@ properties:
               output: true
               item_type:
                 type: String
-            - name: 'layer4Config'
+            - name: layer4Config
               type: Array
               description: |
                 Pairs of IP protocols and ports that the rule should match.
@@ -495,7 +494,7 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'ipProtocol'
+                  - name: ipProtocol
                     type: String
                     description: |
                       The IP protocol to which this rule applies. The protocol
@@ -504,7 +503,7 @@ properties:
                       known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                       or the IP protocol number.
                     output: true
-                  - name: 'ports'
+                  - name: ports
                     type: Array
                     description: |
                       An optional list of ports to which this rule applies. This field
@@ -516,7 +515,7 @@ properties:
                     output: true
                     item_type:
                       type: String
-            - name: 'srcSecureTag'
+            - name: srcSecureTag
               type: Array
               description: |
                 List of secure tag values, which should be matched at the source
@@ -529,13 +528,13 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'name'
+                  - name: name
                     type: String
                     description: |
                       Name of the secure tag, created with TagManager's TagValue API.
                       @pattern tagValues/[0-9]+
                     output: true
-                  - name: 'state'
+                  - name: state
                     type: Enum
                     description: |
                       [Output Only] State of the secure tag, either `EFFECTIVE` or
@@ -543,9 +542,9 @@ properties:
                       or its network is deleted.
                     output: true
                     enum_values:
-                      - 'EFFECTIVE'
-                      - 'INEFFECTIVE'
-        - name: 'targetSecureTag'
+                      - EFFECTIVE
+                      - INEFFECTIVE
+        - name: targetSecureTag
           type: Array
           description: |
             A list of secure tags that controls which instances the firewall rule
@@ -564,13 +563,13 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: 'name'
+              - name: name
                 type: String
                 description: |
                   Name of the secure tag, created with TagManager's TagValue API.
                   @pattern tagValues/[0-9]+
                 output: true
-              - name: 'state'
+              - name: state
                 type: Enum
                 description: |
                   [Output Only] State of the secure tag, either `EFFECTIVE` or
@@ -578,23 +577,23 @@ properties:
                   or its network is deleted.
                 output: true
                 enum_values:
-                  - 'EFFECTIVE'
-                  - 'INEFFECTIVE'
-        - name: 'action'
+                  - EFFECTIVE
+                  - INEFFECTIVE
+        - name: action
           type: String
           description: |
             The Action to perform when the client connection triggers the rule. Can currently be either
             "allow", "deny", "apply_security_profile_group" or "goto_next".
           output: true
-        - name: 'direction'
+        - name: direction
           type: Enum
           description: |
             The direction in which this rule applies. If unspecified an INGRESS rule is created.
           output: true
           enum_values:
-            - 'INGRESS'
-            - 'EGRESS'
-        - name: 'enableLogging'
+            - INGRESS
+            - EGRESS
+        - name: enableLogging
           type: Boolean
           description: |
             Denotes whether to enable logging for a particular rule.
@@ -602,7 +601,7 @@ properties:
             configured export destination in Stackdriver.
           output: true
           send_empty_value: true
-        - name: 'targetServiceAccounts'
+        - name: targetServiceAccounts
           type: Array
           description: |
             A list of service accounts indicating the sets of
@@ -610,7 +609,7 @@ properties:
           output: true
           item_type:
             type: String
-        - name: 'securityProfileGroup'
+        - name: securityProfileGroup
           type: String
           description: |
             A fully-qualified URL of a SecurityProfile resource instance.
@@ -618,13 +617,13 @@ properties:
             https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
             Must be specified if action is 'apply_security_profile_group'.
           output: true
-        - name: 'tlsInspect'
+        - name: tlsInspect
           type: Boolean
           description: |
             Boolean flag indicating if the traffic should be TLS decrypted.
             It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
           output: true
-        - name: 'disabled'
+        - name: disabled
           type: Boolean
           description: |
             Denotes whether the firewall policy rule is disabled. When set to true,
@@ -632,19 +631,19 @@ properties:
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
           output: true
-  - name: 'fingerprint'
+  - name: fingerprint
     type: Fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.
     output: true
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: Server-defined URL for the resource.
     output: true
-  - name: 'selfLinkWithId'
+  - name: selfLinkWithId
     type: String
     description: Server-defined URL for this resource with the resource id.
     output: true
-  - name: 'ruleTupleCount'
+  - name: ruleTupleCount
     type: Integer
     description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
     output: true

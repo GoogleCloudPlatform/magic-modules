@@ -12,107 +12,98 @@
 # limitations under the License.
 
 ---
-name: 'Registration'
+name: Registration
 description: |
   Registers a new domain name and creates a corresponding Registration resource.
 references:
   guides:
-    'Register a domain with Cloud Domains': 'https://cloud.google.com/domains/docs/buy-register-domain'
-  api: 'https://cloud.google.com/domains/docs/reference/rest/v1/projects.locations.registrations'
+    Register a domain with Cloud Domains: https://cloud.google.com/domains/docs/buy-register-domain
+  api: https://cloud.google.com/domains/docs/reference/rest/v1/projects.locations.registrations
 docs:
   warning: |
     The Terraform implementation of this resource will not actually delete a Registration during
     `terraform destroy`. Instead it will "abandon" the resource and remove it from state.
     For information on deleting a registered domain, see https://cloud.google.com/domains/docs/delete-domain
-id_format: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/registrations'
-self_link: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/registrations:register'
+id_format: projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}
+base_url: projects/{{project}}/locations/{{location}}/registrations
+self_link: projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}
+create_url: projects/{{project}}/locations/{{location}}/registrations:register
 # Cannot be deleted
 exclude_delete: true
 immutable: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
+  - projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/clouddomains_registration.go.tmpl'
-  encoder: 'templates/terraform/encoders/clouddomains_registration.go.tmpl'
-  post_create: 'templates/terraform/post_create/clouddomains_registration.go.tmpl'
-examples:
-  - name: 'clouddomains_registration_full'
-    primary_resource_id: 'my_registration'
-    # Must be tested in staging environment with all-time unique domains
+  constants: templates/terraform/constants/clouddomains_registration.go.tmpl
+  encoder: templates/terraform/encoders/clouddomains_registration.go.tmpl
+  post_create: templates/terraform/post_create/clouddomains_registration.go.tmpl
+samples:
+  - name: clouddomains_registration_full
+    primary_resource_id: my_registration
     exclude_test: true
-    # ignore_read_extra:
-    #   - 'contact_settings.0.registrant_contact.0.phone_number'
-    #   - 'contact_settings.0.registrant_contact.0.fax_number'
-    #   - 'contact_settings.0.registrant_contact.0.postal_address'
-    #   - 'contact_settings.0.admin_contact.0.phone_number'
-    #   - 'contact_settings.0.admin_contact.0.fax_number'
-    #   - 'contact_settings.0.admin_contact.0.postal_address'
-    #   - 'contact_settings.0.technical_contact.0.phone_number'
-    #   - 'contact_settings.0.technical_contact.0.fax_number'
-    #   - 'contact_settings.0.technical_contact.0.postal_address'
+    steps:
+      - name: clouddomains_registration_full
 parameters:
-  - name: 'location'
+  - name: location
     type: String
-    description: "The location for the resource"
+    description: The location for the resource
     url_param_only: true
     required: true
-  - name: 'domainName'
+  - name: domainName
     type: String
-    description: "Required. The domain name. Unicode domain names must be expressed in Punycode format."
+    description: Required. The domain name. Unicode domain names must be expressed in Punycode format.
     required: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
-    description: "Output only. Name of the Registration resource, in the format projects/*/locations/*/registrations/<domain_name>."
+    description: Output only. Name of the Registration resource, in the format projects/*/locations/*/registrations/<domain_name>.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
-    description: "Output only. Time at which the automation was created."
+    description: Output only. Time at which the automation was created.
     output: true
-  - name: 'expireTime'
+  - name: expireTime
     type: String
-    description: "Output only. Time at which the automation was updated."
+    description: Output only. Time at which the automation was updated.
     output: true
-  - name: 'state'
+  - name: state
     type: String
     description: Output only. The current state of the Registration.
     output: true
-  - name: 'issues'
+  - name: issues
     type: Array
     description: Output only. The set of issues with the Registration that require attention.
     output: true
     item_type:
       type: String
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Set of labels associated with the Registration.
-  - name: 'domainNotices'
+  - name: domainNotices
     type: Array
     description: The list of domain notices that you acknowledge. Possible value is HSTS_PRELOADED
     ignore_read: true
     item_type:
       type: String
-  - name: 'contactNotices'
+  - name: contactNotices
     type: Array
     description: The list of contact notices that the caller acknowledges. Possible value is PUBLIC_CONTACT_DATA_ACKNOWLEDGEMENT
     ignore_read: true
     item_type:
       type: String
-  - name: 'yearlyPrice'
+  - name: yearlyPrice
     type: NestedObject
     description: |
       Required. Yearly price to register or renew the domain. The value that should be put here can be obtained from
@@ -120,28 +111,28 @@ properties:
     required: true
     ignore_read: true
     properties:
-      - name: 'currencyCode'
+      - name: currencyCode
         type: String
         description: The three-letter currency code defined in ISO 4217.
-      - name: 'units'
+      - name: units
         type: String
         description: The whole units of the amount. For example if currencyCode is "USD", then 1 unit is one US dollar.
-  - name: 'supportedPrivacy'
+  - name: supportedPrivacy
     type: Array
     description: Output only. Set of options for the contactSettings.privacy field that this Registration supports.
     output: true
     item_type:
       type: String
-  - name: 'registerFailureReason'
+  - name: registerFailureReason
     type: String
     description: Output only. The reason the domain registration failed. Only set for domains in REGISTRATION_FAILED state.
     output: true
-  - name: 'managementSettings'
+  - name: managementSettings
     type: NestedObject
-    description: "Settings for management of the Registration, including renewal, billing, and transfer"
+    description: Settings for management of the Registration, including renewal, billing, and transfer
     default_from_api: true
     properties:
-      - name: 'renewalMethod'
+      - name: renewalMethod
         type: String
         description: |
           Output only. The actual renewal method for this Registration. When preferredRenewalMethod is set to AUTOMATIC_RENEWAL,
@@ -149,7 +140,7 @@ properties:
           or reported domain abuse. In such cases, check the issues field on the Registration. After the problem is resolved, the
           renewalMethod is automatically updated to preferredRenewalMethod in a few hours.
         output: true
-      - name: 'preferredRenewalMethod'
+      - name: preferredRenewalMethod
         type: String
         description: |
           The desired renewal method for this Registration. The actual renewalMethod is automatically updated to reflect this choice.
@@ -162,24 +153,24 @@ properties:
           the problem is resolved, the renewalMethod is automatically updated to preferredRenewalMethod in a few hours.
         default_from_api: true
         at_least_one_of:
-          - 'managementSettings.0.preferredRenewalMethod'
-          - 'managementSettings.0.transferLockState'
-      - name: 'transferLockState'
+          - managementSettings.0.preferredRenewalMethod
+          - managementSettings.0.transferLockState
+      - name: transferLockState
         type: String
         description: Controls whether the domain can be transferred to another registrar. Values are UNLOCKED or LOCKED.
         default_from_api: true
         at_least_one_of:
-          - 'managementSettings.0.preferredRenewalMethod'
-          - 'managementSettings.0.transferLockState'
-  - name: 'dnsSettings'
+          - managementSettings.0.preferredRenewalMethod
+          - managementSettings.0.transferLockState
+  - name: dnsSettings
     type: NestedObject
     description: Settings controlling the DNS configuration of the Registration.
     properties:
-      - name: 'customDns'
+      - name: customDns
         type: NestedObject
         description: Configuration for an arbitrary DNS provider.
         properties:
-          - name: 'nameServers'
+          - name: nameServers
             type: Array
             description: |
               Required. A list of name servers that store the DNS zone for this domain. Each name server is a domain
@@ -187,7 +178,7 @@ properties:
             required: true
             item_type:
               type: String
-          - name: 'dsRecords'
+          - name: dsRecords
             type: Array
             description: |
               The list of DS records for this domain, which are used to enable DNSSEC. The domain's DNS provider can provide
@@ -195,54 +186,54 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'keyTag'
+                - name: keyTag
                   type: Integer
                   description: The key tag of the record. Must be set in range 0 -- 65535.
-                - name: 'algorithm'
+                - name: algorithm
                   type: String
                   description: The algorithm used to generate the referenced DNSKEY.
-                - name: 'digestType'
+                - name: digestType
                   type: String
                   description: The hash function used to generate the digest of the referenced DNSKEY.
-                - name: 'digest'
+                - name: digest
                   type: String
                   description: The digest generated from the referenced DNSKEY.
-      - name: 'glueRecords'
+      - name: glueRecords
         type: Array
-        description: "The list of glue records for this Registration. Commonly empty."
+        description: The list of glue records for this Registration. Commonly empty.
         item_type:
           type: NestedObject
           properties:
-            - name: 'hostName'
+            - name: hostName
               type: String
-              description: "Required. Domain name of the host in Punycode format."
+              description: Required. Domain name of the host in Punycode format.
               required: true
-            - name: 'ipv4Addresses'
+            - name: ipv4Addresses
               type: Array
               description: |
                 List of IPv4 addresses corresponding to this host in the standard decimal format (e.g. 198.51.100.1).
                 At least one of ipv4_address and ipv6_address must be set.
               item_type:
                 type: String
-            - name: 'ipv6Addresses'
+            - name: ipv6Addresses
               type: Array
               description: |
                 List of IPv4 addresses corresponding to this host in the standard decimal format (e.g. 198.51.100.1).
                 At least one of ipv4_address and ipv6_address must be set.
               item_type:
                 type: String
-  - name: 'contactSettings'
+  - name: contactSettings
     type: NestedObject
     description: Required. Settings for contact information linked to the Registration.
     required: true
     properties:
-      - name: 'privacy'
+      - name: privacy
         type: String
         description: |
           Required. Privacy setting for the contacts associated with the Registration.
           Values are PUBLIC_CONTACT_DATA, PRIVATE_CONTACT_DATA, and REDACTED_CONTACT_DATA
         required: true
-      - name: 'registrantContact'
+      - name: registrantContact
         type: NestedObject
         description: |
           Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
@@ -251,53 +242,53 @@ properties:
           avoid domain suspension.
         required: true
         # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
-        custom_flatten: 'templates/terraform/custom_flatten/clouddomains_ignore_numbers_registrant.go.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/clouddomains_ignore_numbers_registrant.go.tmpl
         properties:
-          - name: 'email'
+          - name: email
             type: String
             description: Required. Email address of the contact.
             required: true
-          - name: 'phoneNumber'
+          - name: phoneNumber
             type: String
             description: Required. Phone number of the contact in international format. For example, "+1-800-555-0123".
             required: true
-          - name: 'faxNumber'
+          - name: faxNumber
             type: String
             description: Fax number of the contact in international format. For example, "+1-800-555-0123".
-          - name: 'postalAddress'
+          - name: postalAddress
             type: NestedObject
             description: Required. Postal address of the contact.
             required: true
             properties:
-              - name: 'regionCode'
+              - name: regionCode
                 type: String
                 description: |
                   Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
                   ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
                 required: true
-              - name: 'postalCode'
+              - name: postalCode
                 type: String
                 description: |
                   Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
                   they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
-              - name: 'administrativeArea'
+              - name: administrativeArea
                 type: String
                 description: |
                   Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state,
                   a province, an oblast, or a prefecture. Specifically, for Spain this is the province and not the autonomous community
                   (e.g. "Barcelona" and not "Catalonia"). Many countries don't use an administrative area in postal addresses. E.g. in Switzerland
                   this should be left unpopulated.
-              - name: 'locality'
+              - name: locality
                 type: String
                 description: |
                   Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
                   where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
-              - name: 'organization'
+              - name: organization
                 type: String
                 description: |
                   The name of the organization at the address.
-              - name: 'addressLines'
+              - name: addressLines
                 type: Array
                 description: |
                   Unstructured address lines describing the lower levels of an address.
@@ -308,14 +299,14 @@ properties:
                   the most specific line of an address can be selected based on the language.
                 item_type:
                   type: String
-              - name: 'recipients'
+              - name: recipients
                 type: Array
                 description: |
                   The recipient at the address. This field may, under certain circumstances, contain multiline information. For example,
                   it might contain "care of" information.
                 item_type:
                   type: String
-      - name: 'adminContact'
+      - name: adminContact
         type: NestedObject
         description: |
           Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
@@ -324,53 +315,53 @@ properties:
           avoid domain suspension.
         required: true
         # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
-        custom_flatten: 'templates/terraform/custom_flatten/clouddomains_ignore_numbers_admin.go.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/clouddomains_ignore_numbers_admin.go.tmpl
         properties:
-          - name: 'email'
+          - name: email
             type: String
             description: Required. Email address of the contact.
             required: true
-          - name: 'phoneNumber'
+          - name: phoneNumber
             type: String
             description: Required. Phone number of the contact in international format. For example, "+1-800-555-0123".
             required: true
-          - name: 'faxNumber'
+          - name: faxNumber
             type: String
             description: Fax number of the contact in international format. For example, "+1-800-555-0123".
-          - name: 'postalAddress'
+          - name: postalAddress
             type: NestedObject
             description: Required. Postal address of the contact.
             required: true
             properties:
-              - name: 'regionCode'
+              - name: regionCode
                 type: String
                 description: |
                   Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
                   ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
                 required: true
-              - name: 'postalCode'
+              - name: postalCode
                 type: String
                 description: |
                   Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
                   they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
-              - name: 'administrativeArea'
+              - name: administrativeArea
                 type: String
                 description: |
                   Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state,
                   a province, an oblast, or a prefecture. Specifically, for Spain this is the province and not the autonomous community
                   (e.g. "Barcelona" and not "Catalonia"). Many countries don't use an administrative area in postal addresses. E.g. in Switzerland
                   this should be left unpopulated.
-              - name: 'locality'
+              - name: locality
                 type: String
                 description: |
                   Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
                   where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
-              - name: 'organization'
+              - name: organization
                 type: String
                 description: |
                   The name of the organization at the address.
-              - name: 'addressLines'
+              - name: addressLines
                 type: Array
                 description: |
                   Unstructured address lines describing the lower levels of an address.
@@ -381,14 +372,14 @@ properties:
                   the most specific line of an address can be selected based on the language.
                 item_type:
                   type: String
-              - name: 'recipients'
+              - name: recipients
                 type: Array
                 description: |
                   The recipient at the address. This field may, under certain circumstances, contain multiline information. For example,
                   it might contain "care of" information.
                 item_type:
                   type: String
-      - name: 'technicalContact'
+      - name: technicalContact
         type: NestedObject
         description: |
           Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
@@ -397,53 +388,53 @@ properties:
           avoid domain suspension.
         required: true
         # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
-        custom_flatten: 'templates/terraform/custom_flatten/clouddomains_ignore_numbers_technical.go.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/clouddomains_ignore_numbers_technical.go.tmpl
         properties:
-          - name: 'email'
+          - name: email
             type: String
             description: Required. Email address of the contact.
             required: true
-          - name: 'phoneNumber'
+          - name: phoneNumber
             type: String
             description: Required. Phone number of the contact in international format. For example, "+1-800-555-0123".
             required: true
-          - name: 'faxNumber'
+          - name: faxNumber
             type: String
             description: Fax number of the contact in international format. For example, "+1-800-555-0123".
-          - name: 'postalAddress'
+          - name: postalAddress
             type: NestedObject
             description: Required. Postal address of the contact.
             required: true
             properties:
-              - name: 'regionCode'
+              - name: regionCode
                 type: String
                 description: |
                   Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
                   ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
                 required: true
-              - name: 'postalCode'
+              - name: postalCode
                 type: String
                 description: |
                   Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
                   they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
-              - name: 'administrativeArea'
+              - name: administrativeArea
                 type: String
                 description: |
                   Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state,
                   a province, an oblast, or a prefecture. Specifically, for Spain this is the province and not the autonomous community
                   (e.g. "Barcelona" and not "Catalonia"). Many countries don't use an administrative area in postal addresses. E.g. in Switzerland
                   this should be left unpopulated.
-              - name: 'locality'
+              - name: locality
                 type: String
                 description: |
                   Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
                   where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
-              - name: 'organization'
+              - name: organization
                 type: String
                 description: |
                   The name of the organization at the address.
-              - name: 'addressLines'
+              - name: addressLines
                 type: Array
                 description: |
                   Unstructured address lines describing the lower levels of an address.
@@ -454,7 +445,7 @@ properties:
                   the most specific line of an address can be selected based on the language.
                 item_type:
                   type: String
-              - name: 'recipients'
+              - name: recipients
                 type: Array
                 description: |
                   The recipient at the address. This field may, under certain circumstances, contain multiline information. For example,

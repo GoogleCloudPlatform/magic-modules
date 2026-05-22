@@ -18,10 +18,10 @@ base_url: projects/{{project}}/locations/{{location}}/templates
 references:
   guides:
     # These names are deliberately chosen to preserve this order after sorting
-    'Get started with server prompt templates': 'https://firebase.google.com/docs/ai-logic/server-prompt-templates/get-started'
-    'Product documentation for Firebase AI Logic': 'https://firebase.google.com/docs/ai-logic'
-    'Specification for Dotprompt format': 'https://google.github.io/dotprompt/getting-started'
-  api: 'https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates'
+    Get started with server prompt templates: https://firebase.google.com/docs/ai-logic/server-prompt-templates/get-started
+    Product documentation for Firebase AI Logic: https://firebase.google.com/docs/ai-logic
+    Specification for Dotprompt format: https://google.github.io/dotprompt/getting-started
+  api: https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{template_id}}
@@ -87,14 +87,18 @@ properties:
     description: Timestamp when the PromptTemplate was last updated.
     output: true
 min_version: beta
-examples:
+samples:
   - name: firebaseailogic_prompt_template_file
     min_version: beta
     primary_resource_id: file
-    vars:
-      template_id: 'file-template'
+    steps:
+      - name: firebaseailogic_prompt_template_file
+        resource_id_vars:
+          template_id: file-template
   - name: firebaseailogic_prompt_template_basic
     min_version: beta
     primary_resource_id: basic
-    vars:
-      template_id: 'basic-template'
+    steps:
+      - name: firebaseailogic_prompt_template_basic
+        resource_id_vars:
+          template_id: basic-template

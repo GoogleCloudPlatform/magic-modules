@@ -22,52 +22,53 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
-  - "{{project}}/{{location}}/{{backend}}/{{domain_id}}"
-  - "{{location}}/{{backend}}/{{domain_id}}"
+  - '{{project}}/{{location}}/{{backend}}/{{domain_id}}'
+  - '{{location}}/{{backend}}/{{domain_id}}'
 autogen_async: true
 async:
   operation:
     timeouts:
       update_minutes: 20
       delete_minutes: 20
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - update
     - delete
   type: PollAsync
   include_project: false
-  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   # Errors are on the Domain resource itself
   suppress_error: true
-examples:
+samples:
   - name: firebase_app_hosting_domain_minimal
     primary_resource_id: example
-    vars:
-      backend_id: 'domain-mini'
-      service_act_id: 'sa-id'
-      domain_id: example.com
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      domain_id: '"my-domain-m.com"'
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-domain-m"'
+    steps:
+      - name: firebase_app_hosting_domain_minimal
+        resource_id_vars:
+          backend_id: domain-mini
+          domain_id: example.com
+          service_act_id: sa-id
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          domain_id: '"my-domain-m.com"'
+          service_act_id: '"tf-test-domain-m"'
   - name: firebase_app_hosting_domain_full
     primary_resource_id: example
-    ignore_read_extra:
-      # This isn't guaranteed to be set right away.
-      - custom_domain_status
-    vars:
-      backend_id: 'domain-full'
-      service_act_id: 'sa-id'
-      domain_id: example.com
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      domain_id: '"my-domain.com"'
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-domain"'
+    steps:
+      - name: firebase_app_hosting_domain_full
+        resource_id_vars:
+          backend_id: domain-full
+          domain_id: example.com
+          service_act_id: sa-id
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          domain_id: '"my-domain.com"'
+          service_act_id: '"tf-test-domain"'
+        ignore_read_extra:
+          - custom_domain_status
 autogen_status: RG9tYWlu
 parameters:
   - name: location
@@ -162,10 +163,10 @@ properties:
                         output: true
                         description: |
                           A list of messages that carry the error details.
-                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
                         validation:
-                          function: 'validation.StringIsJSON'
+                          function: validation.StringIsJSON
                   - name: records
                     type: Array
                     description: Records on the domain.
@@ -259,10 +260,10 @@ properties:
                         output: true
                         description: |
                           A list of messages that carry the error details.
-                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
                         validation:
-                          function: 'validation.StringIsJSON'
+                          function: validation.StringIsJSON
                   - name: records
                     type: Array
                     description: Records on the domain.
@@ -344,10 +345,10 @@ properties:
               output: true
               description: |
                 A list of messages that carry the error details.
-              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+              custom_expand: templates/terraform/custom_expand/json_schema.tmpl
               validation:
-                function: 'validation.StringIsJSON'
+                function: validation.StringIsJSON
       - name: hostState
         type: String
         output: true

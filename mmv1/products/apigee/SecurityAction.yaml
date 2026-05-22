@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'SecurityAction'
+name: SecurityAction
 description: |
   A SecurityAction is rule that can be enforced at an environment level.
   The result is one of: - A denied API call - An explicitly allowed API call
@@ -20,43 +20,45 @@ description: |
   At least one condition is required to create a SecurityAction.
 references:
   guides:
-    'Creating security actions': 'https://cloud.google.com/apigee/docs/api-security/security-actions-api#create-security-actions'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.securityActions/create'
+    Creating security actions: https://cloud.google.com/apigee/docs/api-security/security-actions-api#create-security-actions
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.securityActions/create
 docs:
-base_url: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions'
-self_link: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}'
-create_url: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions?securityActionId={{security_action_id}}'
+base_url: organizations/{{org_id}}/environments/{{env_id}}/securityActions
+self_link: organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}
+create_url: organizations/{{org_id}}/environments/{{env_id}}/securityActions?securityActionId={{security_action_id}}
 immutable: true
 import_format:
-  - 'organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}'
-examples:
-  - name: 'apigee_security_action_basic'
-    vars:
-      network_name: 'my-network'
-      global_address_name: 'my-address'
-      environment_name: 'my-environment'
-      security_action_id: 'my-security-action'
-    primary_resource_id: 'apigee_security_action'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+  - organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}
+samples:
+  - name: apigee_security_action_basic
+    primary_resource_id: apigee_security_action
     exclude_test: true
+    steps:
+      - name: apigee_security_action_basic
+        resource_id_vars:
+          environment_name: my-environment
+          global_address_name: my-address
+          network_name: my-network
+          security_action_id: my-security-action
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The organization that this security action applies to.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'envId'
+  - name: envId
     type: String
     description: |
       The Apigee environment that this security action applies to.
     required: true
     immutable: true
     url_param_only: true
-  - name: 'securityActionId'
+  - name: securityActionId
     type: String
     description: |
       The ID to use for the SecurityAction, which will become the final component of the action's resource name.
@@ -65,33 +67,33 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional user provided description of the SecurityAction.
-  - name: 'state'
+  - name: state
     type: Enum
     description: |
       Only an ENABLED SecurityAction is enforced. An ENABLED SecurityAction past its expiration time will not be enforced.
     required: true
     enum_values:
-      - 'ENABLED'
-      - 'DISABLED'
-  - name: 'createTime'
+      - ENABLED
+      - DISABLED
+  - name: createTime
     type: String
     description: |
       The create time for this SecurityAction.
       Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits.
       Offsets other than "Z" are also accepted. Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The update time for this SecurityAction. This reflects when this SecurityAction changed states.
       Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits.
       Offsets other than "Z" are also accepted. Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
     output: true
-  - name: 'apiProxies'
+  - name: apiProxies
     type: Array
     description: |
       If unset, this would apply to all proxies in the environment.
@@ -101,19 +103,19 @@ properties:
       Several other restrictions apply on conditions and are detailed later.
     item_type:
       type: String
-  - name: 'conditionConfig'
+  - name: conditionConfig
     type: NestedObject
     required: true
     description: |
       A valid SecurityAction must contain at least one condition.
     properties:
-      - name: 'ipAddressRanges'
+      - name: ipAddressRanges
         type: Array
         description: |
           A list of IP addresses. This could be either IPv4 or IPv6. Limited to 100 per action.
         item_type:
           type: String
-      - name: 'botReasons'
+      - name: botReasons
         type: Array
         description: |
           A list of Bot Reasons. Current options: Flooder, Brute Guessor, Static Content Scraper,
@@ -121,97 +123,97 @@ properties:
           Search Engine Crawlers, Public Clouds, Public Cloud AWS, Public Cloud Azure, and Public Cloud Google.
         item_type:
           type: String
-      - name: 'httpMethods'
+      - name: httpMethods
         type: Array
         description: |
           Act only on particular HTTP methods. E.g. A read-only API can block POST/PUT/DELETE methods.
           Accepted values are: GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE and PATCH.
         item_type:
           type: String
-      - name: 'apiKeys'
+      - name: apiKeys
         type: Array
         description: |
           A list of API keys. Limit 1000 per action.
         item_type:
           type: String
-      - name: 'accessTokens'
+      - name: accessTokens
         type: Array
         description: |
           A list of accessTokens. Limit 1000 per action.
         item_type:
           type: String
-      - name: 'apiProducts'
+      - name: apiProducts
         type: Array
         description: |
           A list of API Products. Limit 1000 per action.
         item_type:
           type: String
-      - name: 'developerApps'
+      - name: developerApps
         type: Array
         description: |
           A list of developer apps. Limit 1000 per action.
         item_type:
           type: String
-      - name: 'developers'
+      - name: developers
         type: Array
         description: |
           A list of developers. Limit 1000 per action.
         item_type:
           type: String
-      - name: 'userAgents'
+      - name: userAgents
         type: Array
         description: |
           A list of user agents to deny. We look for exact matches. Limit 50 per action.
         item_type:
           type: String
-      - name: 'regionCodes'
+      - name: regionCodes
         type: Array
         description: |
           A list of countries/region codes to act on, e.g. US. This follows https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2.
         item_type:
           type: String
-      - name: 'asns'
+      - name: asns
         type: Array
         description: |
           A list of ASN numbers to act on, e.g. 23. https://en.wikipedia.org/wiki/Autonomous_system_(Internet)
           This uses int64 instead of uint32 because of https://linter.aip.dev/141/forbidden-types.
         item_type:
           type: String
-  - name: 'allow'
+  - name: allow
     type: NestedObject
     description: |
       Allow a request through if it matches this SecurityAction.
     exactly_one_of:
-      - 'allow'
-      - 'deny'
-      - 'flag'
+      - allow
+      - deny
+      - flag
     # empty object with no properties, see: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.securityActions#Allow
     allow_empty_object: true
     send_empty_value: true
     properties: []
-  - name: 'deny'
+  - name: deny
     type: NestedObject
     description: |
       Deny a request through if it matches this SecurityAction.
     exactly_one_of:
-      - 'allow'
-      - 'deny'
-      - 'flag'
+      - allow
+      - deny
+      - flag
     properties:
-      - name: 'responseCode'
+      - name: responseCode
         type: Integer
         description: |
           The HTTP response code if the Action = DENY.
-  - name: 'flag'
+  - name: flag
     type: NestedObject
     description: |
       Flag a request through if it matches this SecurityAction.
     exactly_one_of:
-      - 'allow'
-      - 'deny'
-      - 'flag'
+      - allow
+      - deny
+      - flag
     properties:
-      - name: 'headers'
+      - name: headers
         type: Array
         description: |
           A list of HTTP headers to be sent to the target in case of a FLAG SecurityAction.
@@ -220,15 +222,15 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'name'
+            - name: name
               type: String
               description: |
                 The header name to be sent to the target.
-            - name: 'value'
+            - name: value
               type: String
               description: |
                 The header value to be sent to the target.
-  - name: 'expireTime'
+  - name: expireTime
     type: String
     description: |
       The expiration for this SecurityAction.
@@ -236,11 +238,11 @@ properties:
       fractional digits. Offsets other than "Z" are also accepted.
       Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
     conflicts:
-      - 'ttl'
-  - name: 'ttl'
+      - ttl
+  - name: ttl
     type: String
     description: |
       The TTL for this SecurityAction.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
     conflicts:
-      - 'expireTime'
+      - expireTime

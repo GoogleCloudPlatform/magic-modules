@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'EndpointAttachment'
+name: EndpointAttachment
 description: |
   Apigee Endpoint Attachment.
 references:
   guides:
-    'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.endpointAttachments/create'
+    Creating an environment: https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.endpointAttachments/create
 docs:
-base_url: 'endpointAttachments'
+base_url: endpointAttachments
 self_link: '{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}'
 create_url: '{{org_id}}/endpointAttachments?endpointAttachmentId={{endpoint_attachment_id}}'
 delete_url: '{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}'
@@ -34,17 +34,17 @@ timeouts:
   delete_minutes: 30
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_endpoint_attachment.go.tmpl'
+  custom_import: templates/terraform/custom_import/apigee_endpoint_attachment.go.tmpl
 exclude_sweeper: true
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee instance,
@@ -52,7 +52,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'endpointAttachmentId'
+  - name: endpointAttachmentId
     type: String
     description: |
       ID of the endpoint attachment.
@@ -60,28 +60,28 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the Endpoint Attachment in the following format:
       organizations/{organization}/endpointAttachments/{endpointAttachment}.
     output: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       Location of the endpoint attachment.
     required: true
-  - name: 'host'
+  - name: host
     type: String
     description: |
       Host that can be used in either HTTP Target Endpoint directly, or as the host in Target Server.
     output: true
-  - name: 'serviceAttachment'
+  - name: serviceAttachment
     type: String
     description: |
       Format: projects/*/regions/*/serviceAttachments/*
     required: true
-  - name: 'connectionState'
+  - name: connectionState
     type: String
     description: |
       State of the endpoint attachment connection to the service attachment.

@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'Firebase'
-display_name: 'Firebase'
+name: Firebase
+display_name: Firebase
 versions:
-  - name: 'beta'
-    base_url: 'https://firebase.googleapis.com/v1beta1/'
+  - name: beta
+    base_url: https://firebase.googleapis.com/v1beta1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:

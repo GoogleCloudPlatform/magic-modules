@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Firestore'
-display_name: 'Firestore'
+name: Firestore
+display_name: Firestore
 versions:
-  - name: 'ga'
-    base_url: 'https://firestore.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://firestore.googleapis.com/v1/'
+  - name: ga
+    base_url: https://firestore.googleapis.com/v1/
+  - name: beta
+    base_url: https://firestore.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

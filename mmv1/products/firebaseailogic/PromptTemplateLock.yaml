@@ -25,22 +25,24 @@ immutable: true
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 exclude_sweeper: true
-examples:
+samples:
   - name: firebaseailogic_prompt_template_lock_basic
     min_version: beta
     primary_resource_id: basic_lock
-    vars:
-      template_id: 'lock-template'
-    test_env_vars:
-      project_id: PROJECT_NAME
+    steps:
+      - name: firebaseailogic_prompt_template_lock_basic
+        resource_id_vars:
+          template_id: lock-template
+        test_env_vars:
+          project_id: PROJECT_NAME
 create_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=true
 create_verb: POST
 delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=false
 delete_verb: POST
 custom_code:
   # We read the PromptTemplate to verify it is locked
-  post_read: 'templates/terraform/post_read/firebase_ai_logic_prompt_template_lock.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_ai_logic_prompt_template_lock.go.tmpl'
+  post_read: templates/terraform/post_read/firebase_ai_logic_prompt_template_lock.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/firebase_ai_logic_prompt_template_lock.go.tmpl
 parameters:
   - name: location
     type: String

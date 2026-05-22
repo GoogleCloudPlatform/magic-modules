@@ -32,11 +32,13 @@ async:
     resource_inside_response: true
 autogen_status: U291cmNl
 autogen_async: true
-examples:
-  - name: 'migration_center_source_basic'
-    primary_resource_id: 'default'
-    vars:
-      source_id: 'source-test'
+samples:
+  - name: migration_center_source_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_source_basic
+        resource_id_vars:
+          source_id: source-test
 parameters:
   - name: location
     type: String

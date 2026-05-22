@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'IntegrationConnectors'
-display_name: 'Integration Connectors'
+name: IntegrationConnectors
+display_name: Integration Connectors
 versions:
-  - name: 'ga'
-    base_url: 'https://connectors.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://connectors.googleapis.com/v1/'
+  - name: ga
+    base_url: https://connectors.googleapis.com/v1/
+  - name: beta
+    base_url: https://connectors.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

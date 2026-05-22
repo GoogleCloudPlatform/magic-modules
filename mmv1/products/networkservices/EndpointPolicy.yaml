@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'EndpointPolicy'
+name: EndpointPolicy
 description: |
   EndpointPolicy is a resource that helps apply desired configuration on the endpoints that match specific criteria.
 references:
   guides:
-  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.endpointPolicies'
+  api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.endpointPolicies
 docs:
-base_url: 'projects/{{project}}/locations/global/endpointPolicies'
-self_link: 'projects/{{project}}/locations/global/endpointPolicies/{{name}}'
-create_url: 'projects/{{project}}/locations/global/endpointPolicies?endpointPolicyId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/global/endpointPolicies
+self_link: projects/{{project}}/locations/global/endpointPolicies/{{name}}
+create_url: projects/{{project}}/locations/global/endpointPolicies?endpointPolicyId={{name}}
+update_verb: PATCH
 update_mask: true
 timeouts:
   insert_minutes: 30
@@ -30,8 +30,8 @@ timeouts:
   delete_minutes: 30
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
     timeouts:
@@ -41,17 +41,21 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_services_endpoint_policy_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-endpoint-policy'
-  - name: 'network_services_endpoint_policy_empty_match'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-endpoint-policy'
+samples:
+  - name: network_services_endpoint_policy_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_endpoint_policy_basic
+        resource_id_vars:
+          resource_name: my-endpoint-policy
+  - name: network_services_endpoint_policy_empty_match
+    primary_resource_id: default
+    steps:
+      - name: network_services_endpoint_policy_empty_match
+        resource_id_vars:
+          resource_name: my-endpoint-policy
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the EndpointPolicy resource.
@@ -59,88 +63,88 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the TcpRoute was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the TcpRoute was updated in UTC.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Set of label tags associated with the TcpRoute resource.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - name: 'authorizationPolicy'
+  - name: authorizationPolicy
     type: String
     description: |
       This field specifies the URL of AuthorizationPolicy resource that applies authorization policies to the inbound traffic at the matched endpoints.
-  - name: 'serverTlsPolicy'
+  - name: serverTlsPolicy
     type: String
     description: |
       A URL referring to ServerTlsPolicy resource. ServerTlsPolicy is used to determine the authentication policy to be applied to terminate the inbound traffic at the identified backends.
-  - name: 'clientTlsPolicy'
+  - name: clientTlsPolicy
     type: String
     description: |
       A URL referring to a ClientTlsPolicy resource. ClientTlsPolicy can be set to specify the authentication for traffic from the proxy to the actual endpoints.
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       The type of endpoint policy. This is primarily used to validate the configuration.
     required: true
     enum_values:
-      - 'SIDECAR_PROXY'
-      - 'GRPC_SERVER'
-  - name: 'trafficPortSelector'
+      - SIDECAR_PROXY
+      - GRPC_SERVER
+  - name: trafficPortSelector
     type: NestedObject
     description: |
       Port selector for the (matched) endpoints. If no port selector is provided, the matched config is applied to all ports.
     properties:
-      - name: 'ports'
+      - name: ports
         type: Array
         description: |
           List of ports. Can be port numbers or port range (example, [80-90] specifies all ports from 80 to 90, including 80 and 90) or named ports or * to specify all ports. If the list is empty, all ports are selected.
         required: true
         item_type:
           type: String
-  - name: 'endpointMatcher'
+  - name: endpointMatcher
     type: NestedObject
     description: |
       Required. A matcher that selects endpoints to which the policies should be applied.
     required: true
     properties:
-      - name: 'metadataLabelMatcher'
+      - name: metadataLabelMatcher
         type: NestedObject
         description: |
           The matcher is based on node metadata presented by xDS clients.
         required: true
         properties:
-          - name: 'metadataLabelMatchCriteria'
+          - name: metadataLabelMatchCriteria
             type: Enum
             description: |
               Specifies how matching should be done.
             required: true
             enum_values:
-              - 'MATCH_ANY'
-              - 'MATCH_ALL'
-          - name: 'metadataLabels'
+              - MATCH_ANY
+              - MATCH_ALL
+          - name: metadataLabels
             type: Array
             description: |
               The list of label value pairs that must match labels in the provided metadata based on filterMatchCriteria
             item_type:
               type: NestedObject
               properties:
-                - name: 'labelName'
+                - name: labelName
                   type: String
                   description: |
                     Required. Label name presented as key in xDS Node Metadata.
                   required: true
-                - name: 'labelValue'
+                - name: labelValue
                   type: String
                   description: |
                     Required. Label value presented as value corresponding to the above key, in xDS Node Metadata.

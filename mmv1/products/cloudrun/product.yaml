@@ -12,14 +12,14 @@
 # limitations under the License.
 
 ---
-name: 'CloudRun'
-display_name: 'Cloud Run'
+name: CloudRun
+display_name: Cloud Run
 versions:
-  - name: 'ga'
-    base_url: 'https://{{location}}-run.googleapis.com/'
-    cai_base_url: 'https://run.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://{{location}}-run.googleapis.com/'
-    cai_base_url: 'https://run.googleapis.com/v1/'
+  - name: ga
+    base_url: https://{{location}}-run.googleapis.com/
+    cai_base_url: https://run.googleapis.com/v1/
+  - name: beta
+    base_url: https://{{location}}-run.googleapis.com/
+    cai_base_url: https://run.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

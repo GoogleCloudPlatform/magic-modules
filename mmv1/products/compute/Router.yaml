@@ -12,97 +12,104 @@
 # limitations under the License.
 
 ---
-name: 'Router'
-kind: 'compute#router'
+name: Router
+kind: compute#router
 description: |
   Represents a Router resource.
 references:
   guides:
-    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+    Google Cloud Router: https://cloud.google.com/router/docs/
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/routers
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/routers'
+base_url: projects/{{project}}/regions/{{region}}/routers
 has_self_link: true
 # Since Terraform has separate resources for router, router interface, and
 # router peer, calling PUT on the router will delete the interface and peer.
 # Use patch instead.
-update_verb: 'PATCH'
-mutex: 'router/{{region}}/{{name}}'
+update_verb: PATCH
+mutex: router/{{region}}/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
+collection_url_key: items
 custom_code:
-  constants: 'templates/terraform/constants/router.go.tmpl'
+  constants: templates/terraform/constants/router.go.tmpl
 custom_diff:
-  - 'resourceComputeRouterCustomDiff'
+  - resourceComputeRouterCustomDiff
 sweeper:
   prefixes:
-    - "swg-autogen-router"  # Secure Web Proxy(SWP) auto-generated router prefix.
+    - swg-autogen-router # Secure Web Proxy(SWP) auto-generated router prefix.
   url_substitutions:
-    - region: "us-central1"
-    - region: "us-east1"
-    - region: "us-east4"
+    - region: us-central1
+    - region: us-east1
+    - region: us-east4
 include_in_tgc_next: true
-examples:
-  - name: 'router_basic'
-    primary_resource_id: 'foobar'
-    vars:
-      router_name: 'my-router'
-      network_name: 'my-network'
-    ignore_read_extra:
-      - 'advertisedIpRanges'
-  - name: 'compute_router_encrypted_interconnect'
-    primary_resource_id: 'encrypted-interconnect-router'
-    vars:
-      router_name: 'test-router'
-      network_name: 'test-network'
-    ignore_read_extra:
-      - 'advertisedIpRanges'
-  - name: 'compute_router_md5encrypted'
-    primary_resource_id: 'foobar'
-    vars:
-      router_name: 'test-router'
-      network_name: 'test-network'
-    exclude_docs: true
-    ignore_read_extra:
-      - 'advertisedIpRanges'
-  - name: 'router_ncc_gw'
+samples:
+  - name: router_basic
+    primary_resource_id: foobar
+    steps:
+      - name: router_basic
+        resource_id_vars:
+          network_name: my-network
+          router_name: my-router
+        ignore_read_extra:
+          - advertisedIpRanges
+  - name: compute_router_encrypted_interconnect
+    primary_resource_id: encrypted-interconnect-router
+    steps:
+      - name: compute_router_encrypted_interconnect
+        resource_id_vars:
+          network_name: test-network
+          router_name: test-router
+        ignore_read_extra:
+          - advertisedIpRanges
+  - name: compute_router_md5encrypted
+    primary_resource_id: foobar
+    exclude_basic_doc: true
+    steps:
+      - name: compute_router_md5encrypted
+        resource_id_vars:
+          network_name: test-network
+          router_name: test-router
+        ignore_read_extra:
+          - advertisedIpRanges
+  - name: router_ncc_gw
     min_version: beta
-    primary_resource_id: 'foobar'
-    vars:
-      router_name: 'my-router'
-      network_name: 'net-spoke'
-      hub_name: 'hub'
-      ncc_gw_name: 'my-ncc-gw'
-    test_vars_overrides:
-      # for backward compatible
-      hub_name: '"hub" + randomSuffix'
+    primary_resource_id: foobar
+    steps:
+      - name: router_ncc_gw
+        resource_id_vars:
+          hub_name: hub
+          ncc_gw_name: my-ncc-gw
+          network_name: net-spoke
+          router_name: my-router
+        test_vars_overrides:
+          hub_name: '"hub" + randomSuffix'
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: Region where the router resides.
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. The name must be 1-63 characters long, and
@@ -114,13 +121,13 @@ properties:
     required: true
     immutable: true
     validation:
-      function: 'verify.ValidateGCEName'
-  - name: 'description'
+      function: verify.ValidateGCEName
+  - name: description
     type: String
     description: |
       An optional description of this resource.
     send_empty_value: true
-  - name: 'network'
+  - name: network
     type: ResourceRef
     description: |
       A reference to the network to which this router belongs.
@@ -132,18 +139,18 @@ properties:
     # these fields to the Terraform resource (and then within that, decide
     # whether to deprecate router_interface and router_peer or leave them
     # alone).
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Network'
-    imports: 'selfLink'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Network
+    imports: selfLink
     conflicts:
       - nccGateway
-  - name: 'bgp'
+  - name: bgp
     type: NestedObject
     description: |
       BGP information specific to this router.
     send_empty_value: true
     properties:
-      - name: 'asn'
+      - name: asn
         type: Integer
         description: |
           Local BGP Autonomous System Number (ASN). Must be an RFC6996
@@ -152,16 +159,16 @@ properties:
           will have the same local ASN.
         required: true
         validation:
-          function: 'verify.ValidateRFC6996Asn'
-      - name: 'advertiseMode'
+          function: verify.ValidateRFC6996Asn
+      - name: advertiseMode
         type: Enum
         description: |
           User-specified flag to indicate which mode to use for advertisement.
-        default_value: "DEFAULT"
+        default_value: DEFAULT
         enum_values:
-          - 'DEFAULT'
-          - 'CUSTOM'
-      - name: 'advertisedGroups'
+          - DEFAULT
+          - CUSTOM
+      - name: advertisedGroups
         type: Array
         description: |
           User-specified list of prefix groups to advertise in custom mode.
@@ -175,7 +182,7 @@ properties:
         # TODO: #324 enum?
         item_type:
           type: String
-      - name: 'advertisedIpRanges'
+      - name: advertisedIpRanges
         type: Array
         description: |
           User-specified list of individual IP ranges to advertise in
@@ -188,19 +195,19 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'range'
+            - name: range
               type: String
               description: |
                 The IP range to advertise. The value must be a
                 CIDR-formatted string.
               required: true
               send_empty_value: true
-            - name: 'description'
+            - name: description
               type: String
               description: |
                 User-specified description for the IP range.
               send_empty_value: true
-      - name: 'keepaliveInterval'
+      - name: keepaliveInterval
         type: Integer
         description: |
           The interval in seconds between BGP keepalive messages that are sent
@@ -214,7 +221,7 @@ properties:
           between the two peers. If set, this value must be between 20 and 60.
           The default is 20.
         default_value: 20
-      - name: 'identifierRange'
+      - name: identifierRange
         type: String
         description: |
           Explicitly specifies a range of valid BGP Identifiers for this Router.
@@ -223,47 +230,47 @@ properties:
           not overlap with any IPv4 BGP session ranges. Other vendors commonly
           call this router ID.
         default_from_api: true
-  - name: 'encryptedInterconnectRouter'
+  - name: encryptedInterconnectRouter
     type: Boolean
     description: |
       Indicates if a router is dedicated for use with encrypted VLAN
       attachments (interconnectAttachments).
     immutable: true
-  - name: 'md5AuthenticationKeys'
+  - name: md5AuthenticationKeys
     ignore_read: true
     type: NestedObject
     description: |
       Keys used for MD5 authentication.
     properties:
-      - name: 'name'
+      - name: name
         type: String
         description: |
           Name used to identify the key. Must be unique within a router.
           Must be referenced by exactly one bgpPeer. Must comply with RFC1035.
         required: true
-      - name: 'key'
+      - name: key
         type: String
         description: |
           Value of the key used for MD5 authentication.
         required: true
-  - name: 'nccGateway'
+  - name: nccGateway
     type: ResourceRef
     description: |
       A URI of an NCC Gateway spoke
-    min_version: 'beta'
+    min_version: beta
     immutable: true
-    resource: 'Spoke'
-    custom_expand: 'templates/terraform/custom_expand/self_link_from_name_network_connectivity.tmpl'
+    resource: Spoke
+    custom_expand: templates/terraform/custom_expand/self_link_from_name_network_connectivity.tmpl
     conflicts:
       - network
-  - name: 'params'
+  - name: params
     type: NestedObject
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the router. Tag keys and values have the

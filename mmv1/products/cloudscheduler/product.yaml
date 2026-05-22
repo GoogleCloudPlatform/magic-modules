@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'CloudScheduler'
-display_name: 'Cloud Scheduler'
+name: CloudScheduler
+display_name: Cloud Scheduler
 versions:
-  - name: 'ga'
-    base_url: 'https://cloudscheduler.googleapis.com/v1/'
+  - name: ga
+    base_url: https://cloudscheduler.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

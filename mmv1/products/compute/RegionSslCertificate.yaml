@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'RegionSslCertificate'
+name: RegionSslCertificate
 api_resource_type_kind: SslCertificate
-kind: 'compute#sslCertificate'
+kind: compute#sslCertificate
 description: |
   A RegionSslCertificate resource, used for HTTPS load balancing. This resource
   provides a mechanism to upload an SSL key and certificate to
   the load balancer to serve secure connections from the user.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSslCertificates'
+    Official Documentation: https://cloud.google.com/load-balancing/docs/ssl-certificates
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/regionSslCertificates
 docs:
   optional_properties: |
     * `name_prefix` - (Optional) Creates a unique name beginning with the
@@ -33,7 +33,7 @@ docs:
      `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
      Resulting name for a `name_prefix` 38 - 54 characters:
      `name_prefix` + YYmmdd + 3 digit incremental counter
-base_url: 'projects/{{project}}/regions/{{region}}/sslCertificates'
+base_url: projects/{{project}}/regions/{{region}}/sslCertificates
 has_self_link: true
 immutable: true
 timeouts:
@@ -41,48 +41,54 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
+collection_url_key: items
 include_in_tgc_next: true
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
-  constants: 'templates/terraform/constants/compute_certificate.go.tmpl'
-examples:
-  - name: 'region_ssl_certificate_basic'
-    primary_resource_id: 'default'
-    ignore_read_extra:
-      - 'name_prefix'
-      # Uses id.UniqueId
+  extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.tmpl
+  constants: templates/terraform/constants/compute_certificate.go.tmpl
+samples:
+  - name: region_ssl_certificate_basic
     skip_vcr: true
-  - name: 'region_ssl_certificate_basic_writeonly'
-    primary_resource_id: 'default'
-    ignore_read_extra:
-      - 'name_prefix'
-      # Uses id.UniqueId
+    primary_resource_id: default
+    steps:
+      - name: region_ssl_certificate_basic
+        ignore_read_extra:
+          - name_prefix
+  - name: region_ssl_certificate_basic_writeonly
     skip_vcr: true
-  - name: 'region_ssl_certificate_random_provider'
-    primary_resource_id: 'default'
-    external_providers: ["random", "time"]
-    # Uses id.UniqueId
+    primary_resource_id: default
+    steps:
+      - name: region_ssl_certificate_basic_writeonly
+        ignore_read_extra:
+          - name_prefix
+  - name: region_ssl_certificate_random_provider
     skip_vcr: true
-  - name: 'region_ssl_certificate_target_https_proxies'
-    primary_resource_id: 'default'
-    vars:
-      region_target_https_proxy_name: 'test-proxy'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
-    ignore_read_extra:
-      - 'name_prefix'
-      # Uses id.UniqueId
+    external_providers:
+      - random
+      - time
+    primary_resource_id: default
+    steps:
+      - name: region_ssl_certificate_random_provider
+  - name: region_ssl_certificate_target_https_proxies
     skip_vcr: true
+    primary_resource_id: default
+    steps:
+      - name: region_ssl_certificate_target_https_proxies
+        resource_id_vars:
+          region_backend_service_name: backend-service
+          region_health_check_name: http-health-check
+          region_target_https_proxy_name: test-proxy
+          region_url_map_name: url-map
+        ignore_read_extra:
+          - name_prefix
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       The Region in which the created regional ssl certificate should reside.
@@ -90,12 +96,12 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'certificate'
+  - name: certificate
     type: String
     description: |
       The certificate in PEM format.
@@ -104,23 +110,23 @@ properties:
     required: true
     sensitive: true
     is_missing_in_cai: true
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
-  - name: 'expireTime'
+    description: An optional description of this resource.
+  - name: expireTime
     type: String
-    description: 'Expire time of the certificate in RFC3339 text format.'
+    description: Expire time of the certificate in RFC3339 text format.
     output: true
-  - name: 'certificate_id'
+  - name: certificate_id
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     api_name: id
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -133,17 +139,17 @@ properties:
 
       These are in the same namespace as the managed SSL certificates.
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/name_or_name_prefix.go.tmpl
     validation:
-      function: 'verify.ValidateGCEName'
-  - name: 'privateKey'
+      function: verify.ValidateGCEName
+  - name: privateKey
     type: String
-    description: 'The write-only private key in PEM format.'
+    description: The write-only private key in PEM format.
     required: true
     immutable: true
     ignore_read: true
     sensitive: true
     write_only: true
-    diff_suppress_func: 'sha256DiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'
+    diff_suppress_func: sha256DiffSuppress
+    custom_flatten: templates/terraform/custom_flatten/sha256.tmpl
     is_missing_in_cai: true

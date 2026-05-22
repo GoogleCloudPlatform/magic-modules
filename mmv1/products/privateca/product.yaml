@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Privateca'
-display_name: 'Certificate Authority Service'
+name: Privateca
+display_name: Certificate Authority Service
 versions:
-  - name: 'ga'
-    base_url: 'https://privateca.googleapis.com/v1/'
+  - name: ga
+    base_url: https://privateca.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

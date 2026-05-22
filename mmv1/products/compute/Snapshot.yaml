@@ -12,8 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'Snapshot'
-kind: 'compute#snapshot'
+name: Snapshot
+kind: compute#snapshot
 description: |
   Represents a Persistent Disk Snapshot resource.
 
@@ -29,12 +29,12 @@ description: |
   created a full image of the disk.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/disks/create-snapshots'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshots'
+    Official Documentation: https://cloud.google.com/compute/docs/disks/create-snapshots
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/snapshots
 docs:
-base_url: 'projects/{{project}}/global/snapshots'
+base_url: projects/{{project}}/global/snapshots
 has_self_link: true
-create_url: 'PRE_CREATE_REPLACE_ME/createSnapshot'
+create_url: PRE_CREATE_REPLACE_ME/createSnapshot
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -44,60 +44,68 @@ timeouts:
 # operation. we'll leave the object as global operation and use the disk's
 # zonal operation for the create action.
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   result:
     resource_inside_response: false
-collection_url_key: 'items'
+collection_url_key: items
 iam_policy:
-  parent_resource_attribute: 'name'
+  parent_resource_attribute: name
   import_format:
-    - 'projects/{{project}}/global/snapshots/{{name}}'
+    - projects/{{project}}/global/snapshots/{{name}}
     - '{{name}}'
 include_in_tgc_next: true
 custom_code:
-  tgc_decoder: 'templates/tgc_next/decoders/compute_snapshot.go.tmpl'
-  decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
+  tgc_decoder: templates/tgc_next/decoders/compute_snapshot.go.tmpl
+  decoder: templates/terraform/decoders/snapshot.go.tmpl
+  pre_create: templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl
 sweeper:
   url_substitutions:
-    - zone: "us-central1-a"
-examples:
-  - name: 'snapshot_basic'
-    primary_resource_id: 'snapshot'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-  - name: 'snapshot_basic_2'
-    primary_resource_id: 'snapshot'
-    min_version: 'beta'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-  - name: 'snapshot_basic_source_instant_snapshot'
-    primary_resource_id: 'snapshot'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-      instant_snapshot_name: 'my-instant-snapshot'
-  - name: 'snapshot_chainname'
-    primary_resource_id: 'snapshot'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-      chain_name: 'snapshot-chain'
+    - zone: us-central1-a
+samples:
+  - name: snapshot_basic
+    primary_resource_id: snapshot
+    steps:
+      - name: snapshot_basic
+        resource_id_vars:
+          disk_name: debian-disk
+          snapshot_name: my-snapshot
+  - name: snapshot_basic_2
+    min_version: beta
+    primary_resource_id: snapshot
+    steps:
+      - name: snapshot_basic_2
+        resource_id_vars:
+          disk_name: debian-disk
+          snapshot_name: my-snapshot
+  - name: snapshot_basic_source_instant_snapshot
+    primary_resource_id: snapshot
+    steps:
+      - name: snapshot_basic_source_instant_snapshot
+        resource_id_vars:
+          disk_name: debian-disk
+          instant_snapshot_name: my-instant-snapshot
+          snapshot_name: my-snapshot
+  - name: snapshot_chainname
+    primary_resource_id: snapshot
+    steps:
+      - name: snapshot_chainname
+        resource_id_vars:
+          chain_name: snapshot-chain
+          disk_name: debian-disk
+          snapshot_name: my-snapshot
 parameters:
-  - name: 'zone'
+  - name: zone
     type: ResourceRef
-    description: 'A reference to the zone where the disk is hosted.'
+    description: A reference to the zone where the disk is hosted.
     required: false
     immutable: true
     ignore_read: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Zone'
-    imports: 'name'
-  - name: 'snapshotEncryptionKey'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Zone
+    imports: name
+  - name: snapshotEncryptionKey
     type: NestedObject
     description: |
       Encrypts the snapshot using a customer-supplied encryption key.
@@ -115,40 +123,40 @@ parameters:
       key and you do not need to provide a key to use the snapshot later.
     immutable: true
     properties:
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         ignore_read: true
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.tmpl'
-      - name: 'rsaEncryptedKey'
+        custom_flatten: templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.tmpl
+      - name: rsaEncryptedKey
         type: String
         description: |
           Specifies an encryption key stored in Google Cloud KMS, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         ignore_read: true
         sensitive: true
-      - name: 'sha256'
+      - name: sha256
         type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
         # TODO Change to ResourceRef once KMS is in Magic Modules
-      - name: 'kmsKeySelfLink'
+      - name: kmsKeySelfLink
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
         api_name: kmsKeyName
-      - name: 'kmsKeyServiceAccount'
+      - name: kmsKeyServiceAccount
         type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
-    # ignore_read in providers - this is only used in Create
-  - name: 'sourceDiskEncryptionKey'
+        # ignore_read in providers - this is only used in Create
+  - name: sourceDiskEncryptionKey
     type: NestedObject
     description: |
       The customer-supplied encryption key of the source snapshot. Required
@@ -157,70 +165,70 @@ parameters:
     ignore_read: true
     immutable: true
     properties:
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         # The docs list this field but it is never returned.
         sensitive: true
-      - name: 'rsaEncryptedKey'
+      - name: rsaEncryptedKey
         type: String
         description: |
           Specifies an encryption key stored in Google Cloud KMS, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
-      - name: 'kmsKeySelfLink'
+      - name: kmsKeySelfLink
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
         api_name: kmsKeyName
-      - name: 'kmsKeyServiceAccount'
+      - name: kmsKeyServiceAccount
         type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
 properties:
-  - name: 'sourceDisk'
+  - name: sourceDisk
     type: ResourceRef
-    description: 'A reference to the disk used to create this snapshot.'
+    description: A reference to the disk used to create this snapshot.
     immutable: true
     # ignore_read in providers - this is only used in Create
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Disk'
-    imports: 'name'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Disk
+    imports: name
     default_from_api: true
     exactly_one_of:
-      - 'source_disk'
-      - 'source_instant_snapshot'
-  - name: 'sourceInstantSnapshot'
+      - source_disk
+      - source_instant_snapshot
+  - name: sourceInstantSnapshot
     type: ResourceRef
-    description: 'A reference to the instant snapshot used to create this snapshot.'
+    description: A reference to the instant snapshot used to create this snapshot.
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'InstantSnapshot'
-    imports: 'name'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: InstantSnapshot
+    imports: name
     ignore_read: true
     exactly_one_of:
-      - 'source_instant_snapshot'
-      - 'source_disk'
-  - name: 'creationTimestamp'
+      - source_instant_snapshot
+      - source_disk
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'snapshot_id'
+  - name: snapshot_id
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     api_name: id
     output: true
   # 'status' not useful for object convergence.
-  - name: 'diskSizeGb'
+  - name: diskSizeGb
     type: Integer
-    description: 'Size of the snapshot, specified in GB.'
+    description: Size of the snapshot, specified in GB.
     output: true
-  - name: 'chainName'
+  - name: chainName
     type: String
     description: |
       Creates the new snapshot in the snapshot chain labeled with the
@@ -229,7 +237,7 @@ properties:
       service owners who needs to create separate snapshot chains, for
       example, for chargeback tracking.  When you describe your snapshot
       resource, this field is visible only if it has a non-empty value.
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource; provided by the client when the resource is
@@ -241,12 +249,12 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     immutable: true
   # 'sourceDiskId' not useful for object convergence.
-  - name: 'storageBytes'
+  - name: storageBytes
     type: Integer
     description: |
       A size of the storage used by the snapshot. As snapshots share
@@ -254,14 +262,14 @@ properties:
       creation/deletion.
     output: true
   # 'storageBytesStatus' not useful for object convergence.
-  - name: 'storageLocations'
+  - name: storageLocations
     type: Array
     description: |
       Cloud Storage bucket storage location of the snapshot (regional or multi-regional).
     default_from_api: true
     item_type:
       type: String
-  - name: 'licenses'
+  - name: licenses
     type: Array
     description: |
       A list of public visible licenses that apply to this snapshot. This
@@ -269,37 +277,37 @@ properties:
       Windows image).  snapshotEncryptionKey nested object Encrypts the
       snapshot using a customer-supplied encryption key.
     output: true
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'license'
+      name: license
       type: ResourceRef
-      description: 'A reference to a license associated with this snapshot'
-      resource: 'License'
-      imports: 'selfLink'
-  - name: 'labels'
+      description: A reference to a license associated with this snapshot
+      resource: License
+      imports: selfLink
+  - name: labels
     type: KeyValueLabels
     description: Labels to apply to this Snapshot.
-    update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
-    update_verb: 'POST'
-  - name: 'labelFingerprint'
+    update_url: projects/{{project}}/global/snapshots/{{name}}/setLabels
+    update_verb: POST
+  - name: labelFingerprint
     type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource. Used
       internally during updates.
     output: true
-    update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
-    update_verb: 'POST'
-    key_expander: ''
-  - name: 'guestFlush'
+    update_url: projects/{{project}}/global/snapshots/{{name}}/setLabels
+    update_verb: POST
+    key_expander: ""
+  - name: guestFlush
     type: Boolean
     description: |
       Whether to attempt an application consistent snapshot by informing the OS to prepare for the snapshot process.
     ignore_read: true
-    min_version: 'beta'
-  - name: 'snapshotType'
+    min_version: beta
+  - name: snapshotType
     type: Enum
     description: |
       Indicates the type of the snapshot.
     enum_values:
-      - 'ARCHIVE'
-      - 'STANDARD'
+      - ARCHIVE
+      - STANDARD

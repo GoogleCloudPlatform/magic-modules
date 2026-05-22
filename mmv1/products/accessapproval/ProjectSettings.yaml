@@ -12,48 +12,52 @@
 # limitations under the License.
 
 ---
-name: 'ProjectSettings'
+name: ProjectSettings
 api_resource_type_kind: AccessApprovalSettings
 api_variant_patterns:
-  - 'projects/{project}/accessApprovalSettings'
-legacy_name: 'google_project_access_approval_settings'
+  - projects/{project}/accessApprovalSettings
+legacy_name: google_project_access_approval_settings
 description: |
   Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
 references:
   guides:
-  api: 'https://cloud.google.com/access-approval/docs/reference/rest/v1/projects'
+  api: https://cloud.google.com/access-approval/docs/reference/rest/v1/projects
 docs:
-base_url: 'projects/{{project_id}}/accessApprovalSettings'
-self_link: 'projects/{{project_id}}/accessApprovalSettings'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+base_url: projects/{{project_id}}/accessApprovalSettings
+self_link: projects/{{project_id}}/accessApprovalSettings
+create_verb: PATCH
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project_id}}/accessApprovalSettings'
+  - projects/{{project_id}}/accessApprovalSettings
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  pre_create: 'templates/terraform/update_mask.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/clear_project_access_approval_settings.go.tmpl'
-  post_create: 'templates/terraform/post_create/sleep_5_min.go.tmpl'
-  post_update: 'templates/terraform/post_create/sleep_5_min.go.tmpl'
-examples:
-  - name: 'project_access_approval_full'
-    primary_resource_id: 'project_access_approval'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
+  pre_create: templates/terraform/update_mask.go.tmpl
+  custom_delete: templates/terraform/custom_delete/clear_project_access_approval_settings.go.tmpl
+  post_create: templates/terraform/post_create/sleep_5_min.go.tmpl
+  post_update: templates/terraform/post_create/sleep_5_min.go.tmpl
+samples:
+  - name: project_access_approval_full
+    primary_resource_id: project_access_approval
     exclude_test: true
-  - name: 'project_access_approval_active_key_version'
-    primary_resource_id: 'project_access_approval'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
+    steps:
+      - name: project_access_approval_full
+        test_env_vars:
+          org_id: ORG_ID
+          project: PROJECT_NAME
+  - name: project_access_approval_active_key_version
+    primary_resource_id: project_access_approval
     exclude_test: true
+    steps:
+      - name: project_access_approval_active_key_version
+        test_env_vars:
+          org_id: ORG_ID
+          project: PROJECT_NAME
 parameters:
-  - name: 'project_id'
+  - name: project_id
     type: String
     description: |
       ID of the project of the access approval settings.
@@ -61,12 +65,12 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the settings. Format is "projects/{project_id}/accessApprovalSettings"
     output: true
-  - name: 'notificationEmails'
+  - name: notificationEmails
     type: Array
     description: |
       A list of email addresses to which notifications relating to approval requests should be sent.
@@ -77,7 +81,7 @@ properties:
     item_type:
       type: String
     max_size: 50
-  - name: 'enrolledServices'
+  - name: enrolledServices
     type: Array
     description: |
       A list of Google Cloud Services for which the given resource has Access Approval enrolled.
@@ -91,7 +95,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'cloudProduct'
+        - name: cloudProduct
           type: String
           description: |
             The product for which Access Approval will be enrolled. Allowed values are listed (case-sensitive):
@@ -106,30 +110,30 @@ properties:
               pubsub.googleapis.com
               storage.googleapis.com
           required: true
-        - name: 'enrollmentLevel'
+        - name: enrollmentLevel
           type: Enum
           description: |
             The enrollment level of the service.
-          default_value: "BLOCK_ALL"
+          default_value: BLOCK_ALL
           enum_values:
-            - 'BLOCK_ALL'
-  - name: 'enrolledAncestor'
+            - BLOCK_ALL
+  - name: enrolledAncestor
     type: Boolean
     description: |
       If the field is true, that indicates that at least one service is enrolled for Access Approval in one or more ancestors of the Project.
     output: true
-  - name: 'activeKeyVersion'
+  - name: activeKeyVersion
     type: String
     description: |
       The asymmetric crypto key version to use for signing approval requests.
       Empty active_key_version indicates that a Google-managed key should be used for signing.
       This property will be ignored if set by an ancestor of the resource, and new non-empty values may not be set.
-  - name: 'ancestorHasActiveKeyVersion'
+  - name: ancestorHasActiveKeyVersion
     type: Boolean
     description: |
       If the field is true, that indicates that an ancestor of this Project has set active_key_version.
     output: true
-  - name: 'invalidKeyVersion'
+  - name: invalidKeyVersion
     type: Boolean
     description: |
       If the field is true, that indicates that there is some configuration issue with the active_key_version
@@ -137,7 +141,7 @@ properties:
       correct permissions on it, etc.) This key version is not necessarily the effective key version at this level,
       as key versions are inherited top-down.
     output: true
-  - name: 'project'
+  - name: project
     type: String
     description: |
       Project id.

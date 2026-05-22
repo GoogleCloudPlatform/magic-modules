@@ -12,13 +12,13 @@
 # limitations under the License.
 
 ---
-name: 'BigQuery'
-legacy_name: 'bigquery'
-display_name: 'BigQuery'
+name: BigQuery
+legacy_name: bigquery
+display_name: BigQuery
 versions:
-  - name: 'ga'
-    base_url: 'https://bigquery.googleapis.com/bigquery/v2/'
-  - name: 'beta'
-    base_url: 'https://bigquery.googleapis.com/bigquery/v2/'
+  - name: ga
+    base_url: https://bigquery.googleapis.com/bigquery/v2/
+  - name: beta
+    base_url: https://bigquery.googleapis.com/bigquery/v2/
 scopes:
-  - 'https://www.googleapis.com/auth/bigquery'
+  - https://www.googleapis.com/auth/bigquery

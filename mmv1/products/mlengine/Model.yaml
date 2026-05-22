@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'Model'
+name: Model
 description: |
   Represents a machine learning solution.
 
@@ -20,11 +20,11 @@ description: |
   ready to receive prediction requests. The model itself is just a container.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/ai-platform/prediction/docs/deploying-models'
-  api: 'https://cloud.google.com/ai-platform/prediction/docs/reference/rest/v1/projects.models'
-deprecation_message: 'This resource is deprecated at the API level and will be removed in a future version of Terraform.'
-base_url: 'projects/{{project}}/models'
-self_link: 'projects/{{project}}/models/{{name}}'
+    Official Documentation: https://cloud.google.com/ai-platform/prediction/docs/deploying-models
+  api: https://cloud.google.com/ai-platform/prediction/docs/reference/rest/v1/projects.models
+deprecation_message: This resource is deprecated at the API level and will be removed in a future version of Terraform.
+base_url: projects/{{project}}/models
+self_link: projects/{{project}}/models/{{name}}
 # This resources is not updatable (outside of versions, which is a version-level method)
 immutable: true
 timeouts:
@@ -33,8 +33,8 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
-  actions: ['delete']
-  type: 'OpAsync'
+  actions: [delete]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
@@ -42,49 +42,51 @@ async:
 custom_code:
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'ml_model_basic'
+samples:
+  - name: ml_model_basic
+    primary_resource_id: default
     exclude_test: true
-    primary_resource_id: 'default'
-    vars:
-      model_name: 'default'
-    test_vars_overrides:
-      # for backward compatible
-      model_name: '"default" + randomSuffix'
-  - name: 'ml_model_full'
+    steps:
+      - name: ml_model_basic
+        resource_id_vars:
+          model_name: default
+        test_vars_overrides:
+          model_name: '"default" + randomSuffix'
+  - name: ml_model_full
+    primary_resource_id: default
     exclude_test: true
-    primary_resource_id: 'default'
-    vars:
-      model_name: 'default'
-    test_vars_overrides:
-      # for backward compatible
-      model_name: '"default" + randomSuffix'
+    steps:
+      - name: ml_model_full
+        resource_id_vars:
+          model_name: default
+        test_vars_overrides:
+          model_name: '"default" + randomSuffix'
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The name specified for the model.
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'description'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: description
     type: String
     description: The description specified for the model when it was created.
   # Ignoring most of defaultVersion.
   # Only name should be exposed. Use the Version resource to learn more
   # about versions.
-  - name: 'defaultVersion'
+  - name: defaultVersion
     type: NestedObject
     description: |
       The default version of the model. This version will be used to handle
       prediction requests that do not specify a version.
     properties:
-      - name: 'name'
+      - name: name
         type: String
         description: The name specified for the version when it was created.
         required: true
   # Even though only one region is supported, keeping this as an array
   # to future-proof it.
-  - name: 'regions'
+  - name: regions
     type: Array
     description: |
       The list of regions where the model is going to be deployed.
@@ -92,15 +94,12 @@ properties:
     item_type:
       type: String
     max_size: 1
-  - name: 'onlinePredictionLogging'
+  - name: onlinePredictionLogging
     type: Boolean
-    description:
-      If true, online prediction access logs are sent to StackDriver Logging.
-  - name: 'onlinePredictionConsoleLogging'
+    description: If true, online prediction access logs are sent to StackDriver Logging.
+  - name: onlinePredictionConsoleLogging
     type: Boolean
-    description:
-      If true, online prediction nodes send stderr and stdout streams to
-      Stackdriver Logging
-  - name: 'labels'
+    description: If true, online prediction nodes send stderr and stdout streams to Stackdriver Logging
+  - name: labels
     type: KeyValueLabels
     description: One or more labels that you can add, to organize your models.

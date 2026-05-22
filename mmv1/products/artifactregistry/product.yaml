@@ -12,19 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'ArtifactRegistry'
-display_name: 'Artifact Registry'
+name: ArtifactRegistry
+display_name: Artifact Registry
 versions:
-  - name: 'beta'
-    base_url: 'https://artifactregistry.googleapis.com/v1/'
-    rep_url: 'https://artifactregistry.{{location}}.rep.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://artifactregistry.googleapis.com/v1/'
-    rep_url: 'https://artifactregistry.{{location}}.rep.googleapis.com/v1/'
+  - name: beta
+    base_url: https://artifactregistry.googleapis.com/v1/
+    rep_url: https://artifactregistry.{{location}}.rep.googleapis.com/v1/
+  - name: ga
+    base_url: https://artifactregistry.googleapis.com/v1/
+    rep_url: https://artifactregistry.{{location}}.rep.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:

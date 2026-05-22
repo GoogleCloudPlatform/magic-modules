@@ -12,24 +12,24 @@
 # limitations under the License.
 
 ---
-name: 'Job'
-kind: 'bigquery#job'
+name: Job
+kind: bigquery#job
 description: |
   Jobs are actions that BigQuery runs on your behalf to load data, export data, query data, or copy data.
   Once a BigQuery job is created, it cannot be changed or deleted.
 references:
   guides:
-    'BigQuery Jobs Intro': 'https://cloud.google.com/bigquery/docs/jobs-overview'
-  api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs'
+    BigQuery Jobs Intro: https://cloud.google.com/bigquery/docs/jobs-overview
+  api: https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs
 docs:
-id_format: 'projects/{{project}}/jobs/{{job_id}}'
-base_url: 'projects/{{project}}/jobs'
-self_link: 'projects/{{project}}/jobs/{{job_id}}?location={{location}}'
+id_format: projects/{{project}}/jobs/{{job_id}}
+base_url: projects/{{project}}/jobs
+self_link: projects/{{project}}/jobs/{{job_id}}?location={{location}}
 exclude_delete: true
 immutable: true
 import_format:
-  - 'projects/{{project}}/jobs/{{job_id}}/location/{{location}}'
-  - 'projects/{{project}}/jobs/{{job_id}}'
+  - projects/{{project}}/jobs/{{job_id}}/location/{{location}}
+  - projects/{{project}}/jobs/{{job_id}}
   - '{{project}}/{{job_id}}'
   - '{{job_id}}'
 timeouts:
@@ -37,260 +37,272 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: 'PollAsync'
-  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  type: PollAsync
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: false
   target_occurrences: 1
-  actions: ['create']
+  actions: [create]
 custom_code:
-  constants: 'templates/terraform/constants/bigquery_job.go.tmpl'
-  encoder: 'templates/terraform/encoders/bigquery_job.go.tmpl'
+  constants: templates/terraform/constants/bigquery_job.go.tmpl
+  encoder: templates/terraform/encoders/bigquery_job.go.tmpl
 # exluding resource_identity due to dataset_id field
 exclude_identity_generation: true
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'bigquery_job_query'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_query'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_query_continuous'
-    exclude_docs: true
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_query_continuous'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
+samples:
+  - name: bigquery_job_query
+    primary_resource_id: job
+    steps:
+      - name: bigquery_job_query
+        resource_id_vars:
+          account_name: bqowner
+          job_id: job_query
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+        ignore_read_extra:
+          - etag
+          - status.0.state
+  - name: bigquery_job_query_continuous
     min_version: beta
-  - name: 'bigquery_job_query_table_reference'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_query'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    ignore_read_extra:
-      - 'etag'
-      - 'query.0.default_dataset.0.dataset_id'
-      - 'query.0.destination_table.0.table_id'
-      - 'status.0.state'
-  - name: 'bigquery_job_load'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_load'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_load_geojson'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_load'
-      # Keep small(er) to avoid downstream acctest having too-long a bucket name
-      bucket_name: 'bq-geojson'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_load_parquet'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_load'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_load_table_reference'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_load'
-    ignore_read_extra:
-      - 'etag'
-      - 'load.0.destination_table.0.table_id'
-      - 'status.0.state'
-    # there are a lot of examples for this resource, so omitting some that are similar to others
-    exclude_docs: true
-  - name: 'bigquery_job_copy'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_copy'
-      account_name: 'bqowner'
-      kms_key_name: 'example-key'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_copy_table_reference'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_copy'
-      account_name: 'bqowner'
-      kms_key_name: 'example-key'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    ignore_read_extra:
-      - 'etag'
-      - 'copy.0.destination_table.0.table_id'
-      - 'copy.0.source_tables.0.table_id'
-      - 'copy.0.source_tables.1.table_id'
-      - 'status.0.state'
-    # there are a lot of examples for this resource, so omitting some that are similar to others
-    exclude_docs: true
-  - name: 'bigquery_job_extract'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_extract'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_extract_table_reference'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_extract'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    ignore_read_extra:
-      - 'etag'
-      - 'extract.0.source_table.0.table_id'
-      - 'status.0.state'
-    # there are a lot of examples for this resource, so omitting some that are similar to others
-    exclude_docs: true
-  - name: 'bigquery_job_query_reservation'
-    exclude_docs: true
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
+    primary_resource_id: job
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_job_query_continuous
+        resource_id_vars:
+          job_id: job_query_continuous
+        ignore_read_extra:
+          - etag
+          - status.0.state
+  - name: bigquery_job_query_table_reference
+    primary_resource_id: job
+    steps:
+      - name: bigquery_job_query_table_reference
+        resource_id_vars:
+          account_name: bqowner
+          job_id: job_query
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+        ignore_read_extra:
+          - etag
+          - query.0.default_dataset.0.dataset_id
+          - query.0.destination_table.0.table_id
+          - status.0.state
+  - name: bigquery_job_load
+    primary_resource_id: job
+    steps:
+      - name: bigquery_job_load
+        resource_id_vars:
+          job_id: job_load
+        ignore_read_extra:
+          - etag
+          - status.0.state
+  - name: bigquery_job_load_geojson
+    primary_resource_id: job
+    steps:
+      - name: bigquery_job_load_geojson
+        resource_id_vars:
+          bucket_name: bq-geojson
+          job_id: job_load
+        test_env_vars:
+          project: PROJECT_NAME
+        ignore_read_extra:
+          - etag
+          - status.0.state
+  - name: bigquery_job_load_parquet
+    primary_resource_id: job
+    steps:
+      - name: bigquery_job_load_parquet
+        resource_id_vars:
+          job_id: job_load
+        ignore_read_extra:
+          - etag
+          - status.0.state
+  - name: bigquery_job_load_table_reference
+    primary_resource_id: job
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_job_load_table_reference
+        resource_id_vars:
+          job_id: job_load
+        ignore_read_extra:
+          - etag
+          - load.0.destination_table.0.table_id
+          - status.0.state
+  - name: bigquery_job_copy
+    primary_resource_id: job
+    steps:
+      - name: bigquery_job_copy
+        resource_id_vars:
+          account_name: bqowner
+          job_id: job_copy
+          kms_key_name: example-key
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name
+        ignore_read_extra:
+          - etag
+          - status.0.state
+  - name: bigquery_job_copy_table_reference
+    primary_resource_id: job
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_job_copy_table_reference
+        resource_id_vars:
+          account_name: bqowner
+          job_id: job_copy
+          kms_key_name: example-key
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name
+        ignore_read_extra:
+          - etag
+          - copy.0.destination_table.0.table_id
+          - copy.0.source_tables.0.table_id
+          - copy.0.source_tables.1.table_id
+          - status.0.state
+  - name: bigquery_job_extract
+    primary_resource_id: job
+    steps:
+      - name: bigquery_job_extract
+        resource_id_vars:
+          account_name: bqowner
+          job_id: job_extract
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+        ignore_read_extra:
+          - etag
+          - status.0.state
+  - name: bigquery_job_extract_table_reference
+    primary_resource_id: job
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_job_extract_table_reference
+        resource_id_vars:
+          account_name: bqowner
+          job_id: job_extract
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+        ignore_read_extra:
+          - etag
+          - extract.0.source_table.0.table_id
+          - status.0.state
+  - name: bigquery_job_query_reservation
     min_version: beta
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_query_reservation'
-      reservation_name: 'my-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    primary_resource_id: job
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_job_query_reservation
+        resource_id_vars:
+          job_id: job_query_reservation
+          reservation_name: my-reservation
+        test_env_vars:
+          project: PROJECT_NAME
+        ignore_read_extra:
+          - etag
+          - status.0.state
 parameters:
 properties:
-  - name: 'user_email'
+  - name: user_email
     type: String
     description: |
       Email address of the user who ran the job.
     output: true
-  - name: 'configuration'
+  - name: configuration
     type: NestedObject
-    description: 'Describes the job configuration.'
+    description: Describes the job configuration.
     required: true
     flatten_object: true
     properties:
-      - name: 'jobType'
+      - name: jobType
         type: String
         description: |
           The type of the job.
         output: true
-      - name: 'jobTimeoutMs'
+      - name: jobTimeoutMs
         type: String
         description: |
           Job timeout in milliseconds. If this time limit is exceeded, BigQuery may attempt to terminate the job.
-      - name: 'labels'
+      - name: labels
         type: KeyValueLabels
         description: |
           The labels associated with this job. You can use these to organize and group your jobs.
-      - name: 'query'
+      - name: query
         type: NestedObject
-        description: 'Configures a query job.'
+        description: Configures a query job.
         exactly_one_of:
-          - 'configuration.0.query'
-          - 'configuration.0.load'
-          - 'configuration.0.copy'
-          - 'configuration.0.extract'
+          - configuration.0.query
+          - configuration.0.load
+          - configuration.0.copy
+          - configuration.0.extract
         properties:
-          - name: 'query'
+          - name: query
             type: String
             description: |
               SQL query text to execute. The useLegacySql field can be used to indicate whether the query uses legacy SQL or standard SQL.
               *NOTE*: queries containing [DML language](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-manipulation-language)
               (`DELETE`, `UPDATE`, `MERGE`, `INSERT`) must specify `create_disposition = ""` and `write_disposition = ""`.
             required: true
-          - name: 'destinationTable'
+          - name: destinationTable
             type: NestedObject
             description: |
               Describes the table where the query results should be stored.
               This property must be set for large results that exceed the maximum response size.
               For queries that produce anonymous (cached) results, this field will be populated by BigQuery.
             default_from_api: true
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_query_destinationtable.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/bigquery_table_ref_query_destinationtable.go.tmpl
+            custom_expand: templates/terraform/custom_expand/bigquery_table_ref.go.tmpl
             properties:
-              - name: 'projectId'
+              - name: projectId
                 type: String
-                description: 'The ID of the project containing this table.'
+                description: The ID of the project containing this table.
                 required: false
                 default_from_api: true
-              - name: 'datasetId'
+              - name: datasetId
                 type: String
-                description: 'The ID of the dataset containing this table.'
+                description: The ID of the dataset containing this table.
                 required: false
                 default_from_api: true
-              - name: 'tableId'
+              - name: tableId
                 type: String
                 description: |
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          - name: 'userDefinedFunctionResources'
+                diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+          - name: userDefinedFunctionResources
             type: Array
             description: |
               Describes user-defined function resources used in the query.
             item_type:
               type: NestedObject
               properties:
-                - name: 'resourceUri'
+                - name: resourceUri
                   type: String
                   # TODO: exactly_one_of: resourceUri, inlineCode
-                  description:
-                    'A code resource to load from a Google Cloud Storage URI
-                    (gs://bucket/path).'
-                - name: 'inlineCode'
+                  description: A code resource to load from a Google Cloud Storage URI (gs://bucket/path).
+                - name: inlineCode
                   type: String
                   # TODO: exactly_one_of: resourceUri, inlineCode
                   description: |
                     An inline resource that contains code for a user-defined function (UDF).
                     Providing a inline code resource is equivalent to providing a URI for a file containing the same code.
-          - name: 'createDisposition'
+          - name: createDisposition
             type: Enum
             description: |
               Specifies whether the job is allowed to create new tables. The following values are supported:
               CREATE_IF_NEEDED: If the table does not exist, BigQuery creates the table.
               CREATE_NEVER: The table must already exist. If it does not, a 'notFound' error is returned in the job result.
               Creation, truncation and append actions occur as one atomic update upon job completion
-            default_value: "CREATE_IF_NEEDED"
+            default_value: CREATE_IF_NEEDED
             enum_values:
-              - 'CREATE_IF_NEEDED'
-              - 'CREATE_NEVER'
-          - name: 'writeDisposition'
+              - CREATE_IF_NEEDED
+              - CREATE_NEVER
+          - name: writeDisposition
             type: Enum
             description: |
               Specifies the action that occurs if the destination table already exists. The following values are supported:
@@ -299,77 +311,77 @@ properties:
               WRITE_EMPTY: If the table already exists and contains data, a 'duplicate' error is returned in the job result.
               Each action is atomic and only occurs if BigQuery is able to complete the job successfully.
               Creation, truncation and append actions occur as one atomic update upon job completion.
-            default_value: "WRITE_EMPTY"
+            default_value: WRITE_EMPTY
             enum_values:
-              - 'WRITE_TRUNCATE'
-              - 'WRITE_APPEND'
-              - 'WRITE_EMPTY'
-          - name: 'defaultDataset'
+              - WRITE_TRUNCATE
+              - WRITE_APPEND
+              - WRITE_EMPTY
+          - name: defaultDataset
             type: NestedObject
             description: |
               Specifies the default dataset to use for unqualified table names in the query. Note that this does not alter behavior of unqualified dataset names.
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_ref.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_ref.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_ref.go.tmpl
+            custom_expand: templates/terraform/custom_expand/bigquery_dataset_ref.go.tmpl
             properties:
-              - name: 'datasetId'
+              - name: datasetId
                 type: String
                 description: |
                   The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
                 required: true
-                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-              - name: 'projectId'
+                diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+              - name: projectId
                 type: String
-                description: 'The ID of the project containing this table.'
+                description: The ID of the project containing this table.
                 required: false
                 default_from_api: true
-          - name: 'priority'
+          - name: priority
             type: Enum
             description: |
               Specifies a priority for the query.
-            default_value: "INTERACTIVE"
+            default_value: INTERACTIVE
             enum_values:
-              - 'INTERACTIVE'
-              - 'BATCH'
-          - name: 'allowLargeResults'
+              - INTERACTIVE
+              - BATCH
+          - name: allowLargeResults
             type: Boolean
             description: |
               If true and query uses legacy SQL dialect, allows the query to produce arbitrarily large result tables at a slight cost in performance.
               Requires destinationTable to be set. For standard SQL queries, this flag is ignored and large results are always allowed.
               However, you must still set destinationTable when result size exceeds the allowed maximum response size.
-          - name: 'useQueryCache'
+          - name: useQueryCache
             type: Boolean
             description: |
               Whether to look for the result in the query cache. The query cache is a best-effort cache that will be flushed whenever
               tables in the query are modified. Moreover, the query cache is only available when a query does not have a destination table specified.
               The default value is true.
             default_value: true
-          - name: 'flattenResults'
+          - name: flattenResults
             type: Boolean
             description: |
               If true and query uses legacy SQL dialect, flattens all nested and repeated fields in the query results.
               allowLargeResults must be true if this is set to false. For standard SQL queries, this flag is ignored and results are never flattened.
-          - name: 'maximumBillingTier'
+          - name: maximumBillingTier
             type: Integer
             description: |
               Limits the billing tier for this job. Queries that have resource usage beyond this tier will fail (without incurring a charge).
               If unspecified, this will be set to your project default.
-          - name: 'maximumBytesBilled'
+          - name: maximumBytesBilled
             type: String
             description: |
               Limits the bytes billed for this job. Queries that will have bytes billed beyond this limit will fail (without incurring a charge).
               If unspecified, this will be set to your project default.
-          - name: 'useLegacySql'
+          - name: useLegacySql
             type: Boolean
             description: |
               Specifies whether to use BigQuery's legacy SQL dialect for this query. The default value is true.
               If set to false, the query will use BigQuery's standard SQL.
             send_empty_value: true
-          - name: 'parameterMode'
+          - name: parameterMode
             type: String
             description: |
               Standard SQL only. Set to POSITIONAL to use positional (?) query parameters or to NAMED to use named (@myparam) query parameters in this query.
-          - name: 'schemaUpdateOptions'
+          - name: schemaUpdateOptions
             type: Array
             description: |
               Allows the schema of the destination table to be updated as a side effect of the query job.
@@ -381,62 +393,60 @@ properties:
               ALLOW_FIELD_RELAXATION: allow relaxing a required field in the original schema to nullable.
             item_type:
               type: String
-          - name: 'destinationEncryptionConfiguration'
+          - name: destinationEncryptionConfiguration
             type: NestedObject
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl
             properties:
-              - name: 'kmsKeyName'
+              - name: kmsKeyName
                 type: String
                 description: |
                   Describes the Cloud KMS encryption key that will be used to protect destination BigQuery table.
                   The BigQuery Service Account associated with your project requires access to this encryption key.
                 required: true
-              - name: 'kmsKeyVersion'
+              - name: kmsKeyVersion
                 type: String
                 description: |
                   Describes the Cloud KMS encryption key version used to protect destination BigQuery table.
                 output: true
-          - name: 'scriptOptions'
+          - name: scriptOptions
             type: NestedObject
             description: |
               Options controlling the execution of scripts.
             properties:
-              - name: 'statementTimeoutMs'
+              - name: statementTimeoutMs
                 type: String
-                description: 'Timeout period for each statement in a script.'
+                description: Timeout period for each statement in a script.
                 at_least_one_of:
-                  - 'configuration.0.query.0.script_options.0.statement_timeout_ms'
-                  - 'configuration.0.query.0.script_options.0.statement_byte_budget'
-                  - 'configuration.0.query.0.script_options.0.key_result_statement'
-              - name: 'statementByteBudget'
+                  - configuration.0.query.0.script_options.0.statement_timeout_ms
+                  - configuration.0.query.0.script_options.0.statement_byte_budget
+                  - configuration.0.query.0.script_options.0.key_result_statement
+              - name: statementByteBudget
                 type: String
-                description:
-                  'Limit on the number of bytes billed per statement. Exceeding
-                  this budget results in an error.'
+                description: Limit on the number of bytes billed per statement. Exceeding this budget results in an error.
                 at_least_one_of:
-                  - 'configuration.0.query.0.script_options.0.statement_timeout_ms'
-                  - 'configuration.0.query.0.script_options.0.statement_byte_budget'
-                  - 'configuration.0.query.0.script_options.0.key_result_statement'
-              - name: 'keyResultStatement'
+                  - configuration.0.query.0.script_options.0.statement_timeout_ms
+                  - configuration.0.query.0.script_options.0.statement_byte_budget
+                  - configuration.0.query.0.script_options.0.key_result_statement
+              - name: keyResultStatement
                 type: Enum
                 description: |
                   Determines which statement in the script represents the "key result",
                   used to populate the schema and query results of the script job.
                 at_least_one_of:
-                  - 'configuration.0.query.0.script_options.0.statement_timeout_ms'
-                  - 'configuration.0.query.0.script_options.0.statement_byte_budget'
-                  - 'configuration.0.query.0.script_options.0.key_result_statement'
+                  - configuration.0.query.0.script_options.0.statement_timeout_ms
+                  - configuration.0.query.0.script_options.0.statement_byte_budget
+                  - configuration.0.query.0.script_options.0.key_result_statement
                 enum_values:
-                  - 'LAST'
-                  - 'FIRST_SELECT'
-          - name: 'continuous'
+                  - LAST
+                  - FIRST_SELECT
+          - name: continuous
             type: Boolean
             description: |
               Whether to run the query as continuous or a regular query.
             min_version: beta
-          - name: 'connectionProperties'
+          - name: connectionProperties
             type: Array
             description: |
               Connection properties to customize query behavior. Under JDBC, these correspond
@@ -445,7 +455,7 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'key'
+                - name: key
                   type: String
                   description: |
                     The key of the property to set. Currently supported connection properties:
@@ -455,21 +465,21 @@ properties:
                     * `query_label`: associates the query with a given job label
                     * `service_account`: indicates the service account to use to run a continuous query
                   required: true
-                - name: 'value'
+                - name: value
                   type: String
                   description: |
                     The value of the property to set.
                   required: true
-      - name: 'load'
+      - name: load
         type: NestedObject
-        description: 'Configures a load job.'
+        description: Configures a load job.
         exactly_one_of:
-          - 'configuration.0.query'
-          - 'configuration.0.load'
-          - 'configuration.0.copy'
-          - 'configuration.0.extract'
+          - configuration.0.query
+          - configuration.0.load
+          - configuration.0.copy
+          - configuration.0.extract
         properties:
-          - name: 'sourceUris'
+          - name: sourceUris
             type: Array
             description: |
               The fully-qualified URIs that point to your data in Google Cloud.
@@ -481,43 +491,43 @@ properties:
             required: true
             item_type:
               type: String
-          - name: 'destinationTable'
+          - name: destinationTable
             type: NestedObject
             description: |
               The destination table to load the data into.
             required: true
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_load_destinationtable.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/bigquery_table_ref_load_destinationtable.go.tmpl
+            custom_expand: templates/terraform/custom_expand/bigquery_table_ref.go.tmpl
             properties:
-              - name: 'projectId'
+              - name: projectId
                 type: String
-                description: 'The ID of the project containing this table.'
+                description: The ID of the project containing this table.
                 required: false
                 default_from_api: true
-              - name: 'datasetId'
+              - name: datasetId
                 type: String
-                description: 'The ID of the dataset containing this table.'
+                description: The ID of the dataset containing this table.
                 required: false
                 default_from_api: true
-              - name: 'tableId'
+              - name: tableId
                 type: String
                 description: |
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          - name: 'createDisposition'
+                diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+          - name: createDisposition
             type: Enum
             description: |
               Specifies whether the job is allowed to create new tables. The following values are supported:
               CREATE_IF_NEEDED: If the table does not exist, BigQuery creates the table.
               CREATE_NEVER: The table must already exist. If it does not, a 'notFound' error is returned in the job result.
               Creation, truncation and append actions occur as one atomic update upon job completion
-            default_value: "CREATE_IF_NEEDED"
+            default_value: CREATE_IF_NEEDED
             enum_values:
-              - 'CREATE_IF_NEEDED'
-              - 'CREATE_NEVER'
-          - name: 'writeDisposition'
+              - CREATE_IF_NEEDED
+              - CREATE_NEVER
+          - name: writeDisposition
             type: Enum
             description: |
               Specifies the action that occurs if the destination table already exists. The following values are supported:
@@ -526,12 +536,12 @@ properties:
               WRITE_EMPTY: If the table already exists and contains data, a 'duplicate' error is returned in the job result.
               Each action is atomic and only occurs if BigQuery is able to complete the job successfully.
               Creation, truncation and append actions occur as one atomic update upon job completion.
-            default_value: "WRITE_EMPTY"
+            default_value: WRITE_EMPTY
             enum_values:
-              - 'WRITE_TRUNCATE'
-              - 'WRITE_APPEND'
-              - 'WRITE_EMPTY'
-          - name: 'nullMarker'
+              - WRITE_TRUNCATE
+              - WRITE_APPEND
+              - WRITE_EMPTY
+          - name: nullMarker
             type: String
             description: |
               Specifies a string that represents a null value in a CSV file. For example, if you specify "\N", BigQuery interprets "\N" as a null value
@@ -539,7 +549,7 @@ properties:
               empty string is present for all data types except for STRING and BYTE. For STRING and BYTE columns, BigQuery interprets the empty string as
               an empty value.
             default_value: ""
-          - name: 'fieldDelimiter'
+          - name: fieldDelimiter
             type: String
             description: |
               The separator for fields in a CSV file. The separator can be any ISO-8859-1 single-byte character.
@@ -548,7 +558,7 @@ properties:
               data in its raw, binary state. BigQuery also supports the escape sequence "\t" to specify a tab separator.
               The default value is a comma (',').
             default_from_api: true
-          - name: 'skipLeadingRows'
+          - name: skipLeadingRows
             type: Integer
             description: |
               The number of rows at the top of a CSV file that BigQuery will skip when loading the data.
@@ -560,16 +570,16 @@ properties:
               skipLeadingRows = N > 0 - Autodetect skips N-1 rows and tries to detect headers in row N. If headers are not detected,
               row N is just skipped. Otherwise row N is used to extract column names for the detected schema.
             validation:
-              function: 'validation.IntAtLeast(0)'
+              function: validation.IntAtLeast(0)
             default_value: 0
-          - name: 'encoding'
+          - name: encoding
             type: String
             description: |
               The character encoding of the data. The supported values are UTF-8 or ISO-8859-1.
               The default value is UTF-8. BigQuery decodes the data after the raw, binary data
               has been split using the values of the quote and fieldDelimiter properties.
-            default_value: "UTF-8"
-          - name: 'quote'
+            default_value: UTF-8
+          - name: quote
             type: String
             description: |
               The value that is used to quote data sections in a CSV file. BigQuery converts the string to ISO-8859-1 encoding,
@@ -577,40 +587,40 @@ properties:
               The default value is a double-quote ('"'). If your data does not contain quoted sections, set the property value to an empty string.
               If your data contains quoted newline characters, you must also set the allowQuotedNewlines property to true.
             default_from_api: true
-          - name: 'maxBadRecords'
+          - name: maxBadRecords
             type: Integer
             description: |
               The maximum number of bad records that BigQuery can ignore when running the job. If the number of bad records exceeds this value,
               an invalid error is returned in the job result. The default value is 0, which requires that all records are valid.
             default_value: 0
-          - name: 'allowQuotedNewlines'
+          - name: allowQuotedNewlines
             type: Boolean
             description: |
               Indicates if BigQuery should allow quoted data sections that contain newline characters in a CSV file.
               The default value is false.
             default_value: false
-          - name: 'sourceFormat'
+          - name: sourceFormat
             type: String
             description: |
               The format of the data files. For CSV files, specify "CSV". For datastore backups, specify "DATASTORE_BACKUP".
               For newline-delimited JSON, specify "NEWLINE_DELIMITED_JSON". For Avro, specify "AVRO". For parquet, specify "PARQUET".
               For orc, specify "ORC". [Beta] For Bigtable, specify "BIGTABLE".
               The default value is CSV.
-            default_value: "CSV"
-          - name: 'jsonExtension'
+            default_value: CSV
+          - name: jsonExtension
             type: String
             description: |
               If sourceFormat is set to newline-delimited JSON, indicates whether it should be processed as a JSON variant such as GeoJSON.
               For a sourceFormat other than JSON, omit this field. If the sourceFormat is newline-delimited JSON: - for newline-delimited
               GeoJSON: set to GEOJSON.
-          - name: 'allowJaggedRows'
+          - name: allowJaggedRows
             type: Boolean
             description: |
               Accept rows that are missing trailing optional columns. The missing values are treated as nulls.
               If false, records with missing trailing columns are treated as bad records, and if there are too many bad records,
               an invalid error is returned in the job result. The default value is false. Only applicable to CSV, ignored for other formats.
             default_value: false
-          - name: 'ignoreUnknownValues'
+          - name: ignoreUnknownValues
             type: Boolean
             description: |
               Indicates if BigQuery should allow extra values that are not represented in the table schema.
@@ -620,7 +630,7 @@ properties:
               CSV: Trailing columns
               JSON: Named values that don't match any column names
             default_value: false
-          - name: 'projectionFields'
+          - name: projectionFields
             type: Array
             description: |
               If sourceFormat is set to "DATASTORE_BACKUP", indicates which entity properties to load into BigQuery from a Cloud Datastore backup.
@@ -628,11 +638,11 @@ properties:
               If any named property isn't found in the Cloud Datastore backup, an invalid error is returned in the job result.
             item_type:
               type: String
-          - name: 'autodetect'
+          - name: autodetect
             type: Boolean
             description: |
               Indicates if we should automatically infer the options and schema for CSV and JSON sources.
-          - name: 'schemaUpdateOptions'
+          - name: schemaUpdateOptions
             type: Array
             description: |
               Allows the schema of the destination table to be updated as a side effect of the load job if a schema is autodetected or
@@ -643,131 +653,131 @@ properties:
               ALLOW_FIELD_RELAXATION: allow relaxing a required field in the original schema to nullable.
             item_type:
               type: String
-          - name: 'timePartitioning'
+          - name: timePartitioning
             type: NestedObject
             description: |
               Time-based partitioning specification for the destination table.
             properties:
-              - name: 'type'
+              - name: type
                 type: String
                 description: |
                   The only type supported is DAY, which will generate one partition per day. Providing an empty string used to cause an error,
                   but in OnePlatform the field will be treated as unset.
                 required: true
-              - name: 'expirationMs'
+              - name: expirationMs
                 type: String
                 description: |
                   Number of milliseconds for which to keep the storage for a partition. A wrapper is used here because 0 is an invalid value.
-              - name: 'field'
+              - name: field
                 type: String
                 description: |
                   If not set, the table is partitioned by pseudo column '_PARTITIONTIME'; if set, the table is partitioned by this field.
                   The field must be a top-level TIMESTAMP or DATE field. Its mode must be NULLABLE or REQUIRED.
                   A wrapper is used here because an empty string is an invalid value.
-          - name: 'destinationEncryptionConfiguration'
+          - name: destinationEncryptionConfiguration
             type: NestedObject
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl
             properties:
-              - name: 'kmsKeyName'
+              - name: kmsKeyName
                 type: String
                 description: |
                   Describes the Cloud KMS encryption key that will be used to protect destination BigQuery table.
                   The BigQuery Service Account associated with your project requires access to this encryption key.
                 required: true
-              - name: 'kmsKeyVersion'
+              - name: kmsKeyVersion
                 type: String
                 description: |
                   Describes the Cloud KMS encryption key version used to protect destination BigQuery table.
                 output: true
-          - name: 'parquetOptions'
+          - name: parquetOptions
             type: NestedObject
             description: |
               Parquet Options for load and make external tables.
             properties:
-              - name: 'enumAsString'
+              - name: enumAsString
                 type: Boolean
                 description: |
                   If sourceFormat is set to PARQUET, indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.
-              - name: 'enableListInference'
+              - name: enableListInference
                 type: Boolean
                 description: |
                   If sourceFormat is set to PARQUET, indicates whether to use schema inference specifically for Parquet LIST logical type.
                 at_least_one_of:
-                  - 'configuration.0.load.0.parquet_options.0.enum_as_string'
-                  - 'configuration.0.load.0.parquet_options.0.enable_list_inference'
-      - name: 'copy'
+                  - configuration.0.load.0.parquet_options.0.enum_as_string
+                  - configuration.0.load.0.parquet_options.0.enable_list_inference
+      - name: copy
         type: NestedObject
-        description: 'Copies a table.'
+        description: Copies a table.
         exactly_one_of:
-          - 'configuration.0.query'
-          - 'configuration.0.load'
-          - 'configuration.0.copy'
-          - 'configuration.0.extract'
+          - configuration.0.query
+          - configuration.0.load
+          - configuration.0.copy
+          - configuration.0.extract
         properties:
-          - name: 'sourceTables'
+          - name: sourceTables
             type: Array
             description: |
               Source tables to copy.
             required: true
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_sourcetables.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref_array.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/bigquery_table_ref_copy_sourcetables.go.tmpl
+            custom_expand: templates/terraform/custom_expand/bigquery_table_ref_array.go.tmpl
             item_type:
               type: NestedObject
               properties:
-                - name: 'projectId'
+                - name: projectId
                   type: String
-                  description: 'The ID of the project containing this table.'
+                  description: The ID of the project containing this table.
                   required: false
                   default_from_api: true
-                - name: 'datasetId'
+                - name: datasetId
                   type: String
-                  description: 'The ID of the dataset containing this table.'
+                  description: The ID of the dataset containing this table.
                   required: false
                   default_from_api: true
-                - name: 'tableId'
+                - name: tableId
                   type: String
                   description: |
                     The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                     or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                   required: true
-                  diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          - name: 'destinationTable'
+                  diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+          - name: destinationTable
             type: NestedObject
-            description: 'The destination table.'
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_destinationtable.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.tmpl'
+            description: The destination table.
+            custom_flatten: templates/terraform/custom_flatten/bigquery_table_ref_copy_destinationtable.go.tmpl
+            custom_expand: templates/terraform/custom_expand/bigquery_table_ref.go.tmpl
             properties:
-              - name: 'projectId'
+              - name: projectId
                 type: String
-                description: 'The ID of the project containing this table.'
+                description: The ID of the project containing this table.
                 required: false
                 default_from_api: true
-              - name: 'datasetId'
+              - name: datasetId
                 type: String
-                description: 'The ID of the dataset containing this table.'
+                description: The ID of the dataset containing this table.
                 required: false
                 default_from_api: true
-              - name: 'tableId'
+              - name: tableId
                 type: String
                 description: |
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          - name: 'createDisposition'
+                diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+          - name: createDisposition
             type: Enum
             description: |
               Specifies whether the job is allowed to create new tables. The following values are supported:
               CREATE_IF_NEEDED: If the table does not exist, BigQuery creates the table.
               CREATE_NEVER: The table must already exist. If it does not, a 'notFound' error is returned in the job result.
               Creation, truncation and append actions occur as one atomic update upon job completion
-            default_value: "CREATE_IF_NEEDED"
+            default_value: CREATE_IF_NEEDED
             enum_values:
-              - 'CREATE_IF_NEEDED'
-              - 'CREATE_NEVER'
-          - name: 'writeDisposition'
+              - CREATE_IF_NEEDED
+              - CREATE_NEVER
+          - name: writeDisposition
             type: Enum
             description: |
               Specifies the action that occurs if the destination table already exists. The following values are supported:
@@ -776,163 +786,163 @@ properties:
               WRITE_EMPTY: If the table already exists and contains data, a 'duplicate' error is returned in the job result.
               Each action is atomic and only occurs if BigQuery is able to complete the job successfully.
               Creation, truncation and append actions occur as one atomic update upon job completion.
-            default_value: "WRITE_EMPTY"
+            default_value: WRITE_EMPTY
             enum_values:
-              - 'WRITE_TRUNCATE'
-              - 'WRITE_APPEND'
-              - 'WRITE_EMPTY'
-          - name: 'destinationEncryptionConfiguration'
+              - WRITE_TRUNCATE
+              - WRITE_APPEND
+              - WRITE_EMPTY
+          - name: destinationEncryptionConfiguration
             type: NestedObject
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl
             properties:
-              - name: 'kmsKeyName'
+              - name: kmsKeyName
                 type: String
                 description: |
                   Describes the Cloud KMS encryption key that will be used to protect destination BigQuery table.
                   The BigQuery Service Account associated with your project requires access to this encryption key.
                 required: true
-              - name: 'kmsKeyVersion'
+              - name: kmsKeyVersion
                 type: String
                 description: |
                   Describes the Cloud KMS encryption key version used to protect destination BigQuery table.
                 output: true
-      - name: 'extract'
+      - name: extract
         type: NestedObject
-        description: 'Configures an extract job.'
+        description: Configures an extract job.
         exactly_one_of:
-          - 'configuration.0.query'
-          - 'configuration.0.load'
-          - 'configuration.0.copy'
-          - 'configuration.0.extract'
+          - configuration.0.query
+          - configuration.0.load
+          - configuration.0.copy
+          - configuration.0.extract
         properties:
-          - name: 'destinationUris'
+          - name: destinationUris
             type: Array
             description: |
               A list of fully-qualified Google Cloud Storage URIs where the extracted table should be written.
             required: true
             item_type:
               type: String
-          - name: 'printHeader'
+          - name: printHeader
             type: Boolean
             description: |
               Whether to print out a header row in the results. Default is true.
             default_value: true
-          - name: 'fieldDelimiter'
+          - name: fieldDelimiter
             type: String
             description: |
               When extracting data in CSV format, this defines the delimiter to use between fields in the exported data.
               Default is ','
             default_from_api: true
-          - name: 'destinationFormat'
+          - name: destinationFormat
             type: String
             description: |
               The exported file format. Possible values include CSV, NEWLINE_DELIMITED_JSON and AVRO for tables and SAVED_MODEL for models.
               The default value for tables is CSV. Tables with nested or repeated fields cannot be exported as CSV.
               The default value for models is SAVED_MODEL.
             default_from_api: true
-          - name: 'compression'
+          - name: compression
             type: String
             description: |
               The compression type to use for exported files. Possible values include GZIP, DEFLATE, SNAPPY, and NONE.
               The default value is NONE. DEFLATE and SNAPPY are only supported for Avro.
-            default_value: "NONE"
-          - name: 'useAvroLogicalTypes'
+            default_value: NONE
+          - name: useAvroLogicalTypes
             type: Boolean
             description: |
               Whether to use logical types when extracting to AVRO format.
-          - name: 'sourceTable'
+          - name: sourceTable
             type: NestedObject
             description: |
               A reference to the table being exported.
             exactly_one_of:
-              - 'configuration.0.extract.0.source_table'
-              - 'configuration.0.extract.0.source_model'
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_extract_sourcetable.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.tmpl'
+              - configuration.0.extract.0.source_table
+              - configuration.0.extract.0.source_model
+            custom_flatten: templates/terraform/custom_flatten/bigquery_table_ref_extract_sourcetable.go.tmpl
+            custom_expand: templates/terraform/custom_expand/bigquery_table_ref.go.tmpl
             properties:
-              - name: 'projectId'
+              - name: projectId
                 type: String
-                description: 'The ID of the project containing this table.'
+                description: The ID of the project containing this table.
                 required: false
                 default_from_api: true
-              - name: 'datasetId'
+              - name: datasetId
                 type: String
-                description: 'The ID of the dataset containing this table.'
+                description: The ID of the dataset containing this table.
                 required: false
                 default_from_api: true
-              - name: 'tableId'
+              - name: tableId
                 type: String
                 description: |
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          - name: 'sourceModel'
+                diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+          - name: sourceModel
             type: NestedObject
             description: |
               A reference to the model being exported.
             exactly_one_of:
-              - 'configuration.0.extract.0.source_table'
-              - 'configuration.0.extract.0.source_model'
+              - configuration.0.extract.0.source_table
+              - configuration.0.extract.0.source_model
             properties:
-              - name: 'projectId'
+              - name: projectId
                 type: String
-                description: 'The ID of the project containing this model.'
+                description: The ID of the project containing this model.
                 required: true
-              - name: 'datasetId'
+              - name: datasetId
                 type: String
-                description: 'The ID of the dataset containing this model.'
+                description: The ID of the dataset containing this model.
                 required: true
-              - name: 'modelId'
+              - name: modelId
                 type: String
-                description: 'The ID of the model.'
+                description: The ID of the model.
                 required: true
-      - name: 'reservation'
+      - name: reservation
         type: String
         description: |
           The reservation that job would use. User can specify a reservation to execute the job. If this field is not set, reservation is determined based on the rules defined by the reservation assignments.
           The expected format is `projects/{project}/locations/{location}/reservations/{reservation}`.
         min_version: beta
-  - name: 'jobReference'
+  - name: jobReference
     type: NestedObject
     description: |
       Reference describing the unique-per-user name of the job.
     flatten_object: true
     properties:
-      - name: 'jobId'
+      - name: jobId
         type: String
         description: |
           The ID of the job. The ID must contain only letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). The maximum length is 1,024 characters.
         required: true
-      - name: 'location'
+      - name: location
         type: String
         description: |
           The geographic location of the job. The default value is US.
-        default_value: "US"
-  - name: 'status'
+        default_value: US
+  - name: status
     type: NestedObject
     description: |
       The status of this job. Examine this value when polling an asynchronous job to see if the job is complete.
     output: true
     properties:
-      - name: 'errorResult'
+      - name: errorResult
         type: NestedObject
         description: |
           Final error result of the job. If present, indicates that the job has completed and was unsuccessful.
         output: true
         properties:
-          - name: 'reason'
+          - name: reason
             type: String
             description: A short error code that summarizes the error.
-          - name: 'location'
+          - name: location
             type: String
             description: Specifies where the error occurred, if present.
-          - name: 'message'
+          - name: message
             type: String
             description: A human-readable description of the error.
-      - name: 'errors'
+      - name: errors
         type: Array
         description: |
           The first errors encountered during the running of the job. The final message
@@ -942,16 +952,16 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'reason'
+            - name: reason
               type: String
               description: A short error code that summarizes the error.
-            - name: 'location'
+            - name: location
               type: String
               description: Specifies where the error occurred, if present.
-            - name: 'message'
+            - name: message
               type: String
               description: A human-readable description of the error.
-      - name: 'state'
+      - name: state
         type: String
         description: |
           Running state of the job. Valid states include 'PENDING', 'RUNNING', and 'DONE'.

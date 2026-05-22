@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'DnsZone'
+name: DnsZone
 description: |
   Apigee Dns Zone.
 references:
   guides:
-    'Creating a DnsZone': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-dns'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.dnsZones/create'
+    Creating a DnsZone: https://cloud.google.com/apigee/docs/api-platform/get-started/create-dns
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.dnsZones/create
 docs:
-base_url: 'dnsZones'
+base_url: dnsZones
 self_link: '{{org_id}}/dnsZones/{{dns_zone_id}}'
 create_url: '{{org_id}}/dnsZones?dnsZoneId={{dns_zone_id}}'
 delete_url: '{{org_id}}/dnsZones/{{dns_zone_id}}'
@@ -34,30 +34,36 @@ timeouts:
   delete_minutes: 30
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 exclude_identity_generation: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_dns_zone.go.tmpl'
-examples:
-  - name: 'apigee_dns_zone_basic'
+  custom_import: templates/terraform/custom_import/apigee_dns_zone.go.tmpl
+samples:
+  - name: apigee_dns_zone_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_dns_zone_basic_test'
-    primary_resource_id: 'apigee_dns_zone'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    steps:
+      - name: apigee_dns_zone_basic
+  - name: apigee_dns_zone_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+      - time
+    min_version: beta
+    primary_resource_id: apigee_dns_zone
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_dns_zone_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 exclude_sweeper: true
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee instance,
@@ -65,7 +71,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'dnsZoneId'
+  - name: dnsZoneId
     type: String
     description: |
       ID of the dns zone.
@@ -73,34 +79,34 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the Dns Zone in the following format:
       organizations/{organization}/dnsZones/{dnsZone}.
     output: true
-  - name: 'domain'
+  - name: domain
     type: String
     description: |
       Doamin for the zone.
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description for the zone.
     required: true
-  - name: 'peeringConfig'
+  - name: peeringConfig
     type: NestedObject
     description: |
       Peering zone config
     required: true
     properties:
-      - name: 'targetProjectId'
+      - name: targetProjectId
         type: String
         description: |
           The ID of the project that contains the producer VPC network.
         required: true
-      - name: 'targetNetworkId'
+      - name: targetNetworkId
         type: String
         description: |
           The name of the producer VPC network.

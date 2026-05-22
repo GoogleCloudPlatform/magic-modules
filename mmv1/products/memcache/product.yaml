@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'Memcache'
-display_name: 'Memcache'
+name: Memcache
+display_name: Memcache
 versions:
-  - name: 'beta'
-    base_url: 'https://memcache.googleapis.com/v1beta2/'
-  - name: 'ga'
-    base_url: 'https://memcache.googleapis.com/v1/'
+  - name: beta
+    base_url: https://memcache.googleapis.com/v1beta2/
+  - name: ga
+    base_url: https://memcache.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:

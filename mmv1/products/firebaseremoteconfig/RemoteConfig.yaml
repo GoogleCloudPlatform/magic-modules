@@ -24,12 +24,14 @@ exclude_delete: true
 autogen_status: UmVtb3RlQ29uZmln
 references:
   guides:
-    'Remote Config Introduction': 'https://firebase.google.com/docs/remote-config'
-  api: 'https://firebase.google.com/docs/reference/remote-config/rest/v1/projects/getRemoteConfig'
-examples:
+    Remote Config Introduction: https://firebase.google.com/docs/remote-config
+  api: https://firebase.google.com/docs/reference/remote-config/rest/v1/projects/getRemoteConfig
+samples:
   - name: firebase_remote_config_basic
     primary_resource_id: basic
     exclude_test: true
+    steps:
+      - name: firebase_remote_config_basic
 custom_code:
   pre_create: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
   pre_update: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl

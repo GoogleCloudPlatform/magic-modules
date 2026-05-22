@@ -24,34 +24,39 @@ self_link: '{{parent}}/locations/{{location}}/floorSetting'
 create_url: '{{parent}}/locations/{{location}}/floorSetting'
 # This is a singleton resource that is already created, so create
 # is really an update, and therefore should be PATCHed.
-create_verb: 'PATCH'
+create_verb: PATCH
 update_url: '{{parent}}/locations/{{location}}/floorSetting'
-update_verb: 'PATCH'
+update_verb: PATCH
 # This is a singleton resource that cannot be deleted, so skip delete.
 exclude_delete: true
 import_format:
   - '{{parent}}/locations/{{location}}/floorSetting'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/modelarmorglobal_floorsetting.go.tmpl'
-  post_create: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
-  post_update: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
-examples:
-  # Excluding tests as they modify a singleton resource and hence will result in race conditions
-  - name: 'modelarmor_floorsetting_basic'
-    primary_resource_id: 'floorsetting-basic'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+  custom_import: templates/terraform/custom_import/modelarmorglobal_floorsetting.go.tmpl
+  post_create: templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl
+  post_update: templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl
+samples:
+  - name: modelarmor_floorsetting_basic
+    primary_resource_id: floorsetting-basic
     exclude_test: true
-  - name: 'modelarmor_floorsetting_filter_config'
-    primary_resource_id: 'floorsetting-filter-config'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: modelarmor_floorsetting_basic
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: modelarmor_floorsetting_filter_config
+    primary_resource_id: floorsetting-filter-config
     exclude_test: true
-  - name: 'modelarmor_floorsetting_ai_platform_metadata'
-    primary_resource_id: 'floorsetting-integrated-metadata'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: modelarmor_floorsetting_filter_config
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: modelarmor_floorsetting_ai_platform_metadata
+    primary_resource_id: floorsetting-integrated-metadata
     exclude_test: true
+    steps:
+      - name: modelarmor_floorsetting_ai_platform_metadata
+        test_env_vars:
+          project_id: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -62,11 +67,11 @@ parameters:
   - name: parent
     type: String
     description: |
-        Will be any one of these:
+      Will be any one of these:
 
-        * `projects/{project}`
-        * `folders/{folder}`
-        * `organizations/{organizationId}`
+      * `projects/{project}`
+      * `folders/{folder}`
+      * `organizations/{organizationId}`
     immutable: true
     url_param_only: true
     required: true
@@ -262,7 +267,7 @@ properties:
       - name: multiLanguageDetection
         type: NestedObject
         description: Metadata for multi language detection.
-        custom_flatten: 'templates/terraform/custom_flatten/modelarmor_floorsetting_multilanguage_detection.go.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/modelarmor_floorsetting_multilanguage_detection.go.tmpl
         properties:
           - name: enableMultiLanguageDetection
             type: Boolean

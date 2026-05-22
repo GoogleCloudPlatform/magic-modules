@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Biglake'
-display_name: 'Biglake'
+name: Biglake
+display_name: Biglake
 versions:
-  - name: 'ga'
-    base_url: 'https://biglake.googleapis.com/v1/'
+  - name: ga
+    base_url: https://biglake.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/bigquery'
+  - https://www.googleapis.com/auth/bigquery

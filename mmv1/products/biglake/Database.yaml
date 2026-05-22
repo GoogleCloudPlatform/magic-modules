@@ -12,19 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'Database'
+name: Database
 description: |
   Databases are containers of tables.
 references:
   guides:
-    'Manage open source metadata with BigLake Metastore': 'https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_databases'
-  api: 'https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases'
+    Manage open source metadata with BigLake Metastore: https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_databases
+  api: https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases
 docs:
 id_format: '{{catalog}}/databases/{{name}}'
 base_url: '{{catalog}}/databases'
 self_link: '{{catalog}}/databases/{{name}}'
 create_url: '{{catalog}}/databases?databaseId={{name}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{%catalog}}/databases/{{name}}'
@@ -33,22 +33,24 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'biglake_database'
-    primary_resource_id: 'database'
-    vars:
-      name: 'my_database'
-      catalog_id: 'my_catalog'
-      bucket_id: 'my_bucket'
+samples:
+  - name: biglake_database
+    primary_resource_id: database
+    steps:
+      - name: biglake_database
+        resource_id_vars:
+          bucket_id: my_bucket
+          catalog_id: my_catalog
+          name: my_database
 parameters:
-  - name: 'catalog'
+  - name: catalog
     type: String
     description: |
       The parent catalog.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the database.
@@ -56,7 +58,7 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       Output only. The creation time of the database. A timestamp in RFC3339
@@ -64,7 +66,7 @@ properties:
       digits. Examples: "2014-10-02T15:01:23Z" and
       "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       Output only. The last modification time of the database. A timestamp in
@@ -72,7 +74,7 @@ properties:
       fractional digits. Examples: "2014-10-02T15:01:23Z" and
       "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'deleteTime'
+  - name: deleteTime
     type: String
     description: |
       Output only. The deletion time of the database. Only set after the
@@ -80,7 +82,7 @@ properties:
       nanosecond resolution and up to nine fractional digits. Examples:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'expireTime'
+  - name: expireTime
     type: String
     description: |
       Output only. The time when this database is considered expired. Only set
@@ -88,22 +90,22 @@ properties:
       with nanosecond resolution and up to nine fractional digits. Examples:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'type'
+  - name: type
     type: String
     description: |
       The database type.
     required: true
-  - name: 'hiveOptions'
+  - name: hiveOptions
     type: NestedObject
     description: |
       Options of a Hive database.
     required: true
     properties:
-      - name: 'locationUri'
+      - name: locationUri
         type: String
         description: |
           Cloud Storage folder URI where the database data is stored, starting with "gs://".
-      - name: 'parameters'
+      - name: parameters
         type: KeyValuePairs
         description: |
           Stores user supplied Hive database parameters. An object containing a

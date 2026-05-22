@@ -23,13 +23,13 @@ import_format:
   - projects/{{project}}/locations/{{location}}/pipelines/{{pipeline_id}}
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/receive-events/create-enrollment'
+    Official Documentation: https://cloud.google.com/eventarc/advanced/docs/receive-events/create-enrollment
   api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.pipelines
 description: |
   The Eventarc Pipeline resource
 custom_code:
 async:
-  actions: ['create', 'update', 'delete']
+  actions: [create, update, delete]
   operation:
     base_url: '{{op_id}}'
   type: OpAsync
@@ -37,64 +37,76 @@ async:
     resource_inside_response: true
 autogen_async: true
 include_in_tgc_next: true
-examples:
+samples:
   - name: eventarc_pipeline_with_topic_destination
     primary_resource_id: primary
-    vars:
-      pipeline_name: some-pipeline
-      topic_name: some-topic
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: eventarc_pipeline_with_topic_destination
+        resource_id_vars:
+          pipeline_name: some-pipeline
+          topic_name: some-topic
+        test_env_vars:
+          project_id: PROJECT_NAME
   - name: eventarc_pipeline_with_http_destination
     primary_resource_id: primary
-    vars:
-      pipeline_name: some-pipeline
-      network_attachment_name: some-network-attachment
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+    steps:
+      - name: eventarc_pipeline_with_http_destination
+        resource_id_vars:
+          network_attachment_name: some-network-attachment
+          pipeline_name: some-pipeline
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          network_attachment_name: compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))
   - name: eventarc_pipeline_with_workflow_destination
     primary_resource_id: primary
-    vars:
-      pipeline_name: some-pipeline
-      workflow_name: some-workflow
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: eventarc_pipeline_with_workflow_destination
+        resource_id_vars:
+          pipeline_name: some-pipeline
+          workflow_name: some-workflow
+        test_env_vars:
+          project_id: PROJECT_NAME
   - name: eventarc_pipeline_with_oidc_and_json_format
     primary_resource_id: primary
-    vars:
-      pipeline_name: some-pipeline
-      network_attachment_name: some-network-attachment
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+    steps:
+      - name: eventarc_pipeline_with_oidc_and_json_format
+        resource_id_vars:
+          network_attachment_name: some-network-attachment
+          pipeline_name: some-pipeline
+        test_env_vars:
+          project_id: PROJECT_NAME
+          service_account: SERVICE_ACCT
+        test_vars_overrides:
+          network_attachment_name: compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))
   - name: eventarc_pipeline_with_oauth_and_protobuf_format
     primary_resource_id: primary
-    vars:
-      pipeline_name: some-pipeline
-      network_attachment_name: some-network-attachment
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+    steps:
+      - name: eventarc_pipeline_with_oauth_and_protobuf_format
+        resource_id_vars:
+          network_attachment_name: some-network-attachment
+          pipeline_name: some-pipeline
+        test_env_vars:
+          project_id: PROJECT_NAME
+          service_account: SERVICE_ACCT
+        test_vars_overrides:
+          network_attachment_name: compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))
   - name: eventarc_pipeline_with_cmek_and_avro_format
-    primary_resource_id: primary
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      pipeline_name: some-pipeline
-      network_attachment_name: some-network-attachment
-      key_name: some-key
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
-      'key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name'
+      - member: serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: primary
+    steps:
+      - name: eventarc_pipeline_with_cmek_and_avro_format
+        resource_id_vars:
+          key_name: some-key
+          network_attachment_name: some-network-attachment
+          pipeline_name: some-pipeline
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name
+          network_attachment_name: compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))
 parameters:
   - name: location
     type: String
@@ -148,8 +160,7 @@ properties:
         # The following fields are required since this is an empty NestedObject.
         send_empty_value: true
         allow_empty_object: true
-        properties:
-          []
+        properties: []
   - name: retryPolicy
     type: NestedObject
     default_from_api: true
@@ -165,7 +176,7 @@ properties:
     properties:
       - name: maxRetryDelay
         type: String
-        default_value: "60s"
+        default_value: 60s
         description: |-
           The maximum amount of seconds to wait between retry attempts. The value
           must be between 1 and 600.
@@ -179,7 +190,7 @@ properties:
           The default value for this field is 5.
       - name: minRetryDelay
         type: String
-        default_value: "5s"
+        default_value: 5s
         description: |-
           The minimum amount of seconds to wait between retry attempts. The value
           must be between 1 and 600.
@@ -300,8 +311,7 @@ properties:
               # The following fields are required since this is an empty NestedObject.
               send_empty_value: true
               allow_empty_object: true
-              properties:
-                []
+              properties: []
         - name: networkConfig
           type: NestedObject
           description: |-

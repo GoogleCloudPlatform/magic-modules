@@ -16,8 +16,8 @@ name: Service
 description: A Firebase Data Connect service.
 references:
   guides:
-    'Official Documentation': 'https://firebase.google.com/docs/data-connect'
-  api: 'https://firebase.google.com/docs/reference/data-connect/rest'
+    Official Documentation: https://firebase.google.com/docs/data-connect
+  api: https://firebase.google.com/docs/reference/data-connect/rest
 base_url: projects/{{project}}/locations/{{location}}/services
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/services/{{service_id}}
@@ -25,25 +25,29 @@ create_url: projects/{{project}}/locations/{{location}}/services?serviceId={{ser
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/services/{{service_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
+  - projects/{{project}}/locations/{{location}}/services/{{service_id}}
   - '{{project}}/{{location}}/{{service_id}}'
   - '{{location}}/{{service_id}}'
 include_in_tgc_next: true
-examples:
+samples:
   - name: firebasedataconnect_service_basic
     primary_resource_id: default
-    vars:
-      service_id: example-service
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: firebasedataconnect_service_basic
+        resource_id_vars:
+          service_id: example-service
+        test_env_vars:
+          project_id: PROJECT_NAME
   - name: firebasedataconnect_service_with_force_deletion
     primary_resource_id: default
-    vars:
-      service_id: example-service
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: firebasedataconnect_service_with_force_deletion
+        resource_id_vars:
+          service_id: example-service
+        test_env_vars:
+          project_id: PROJECT_NAME
+        ignore_read_extra:
+          - deletion_policy
 autogen_async: true
 async:
   operation:
@@ -51,7 +55,7 @@ async:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
@@ -61,7 +65,7 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: U2VydmljZQ==
-deletion_policy_default: "DEFAULT"
+deletion_policy_default: DEFAULT
 deletion_policy_custom_docs: true
 parameters:
   - name: location

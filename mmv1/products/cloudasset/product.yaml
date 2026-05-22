@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'CloudAsset'
-display_name: 'Cloud Asset Inventory'
+name: CloudAsset
+display_name: Cloud Asset Inventory
 versions:
-  - name: 'ga'
-    base_url: 'https://cloudasset.googleapis.com/v1/'
+  - name: ga
+    base_url: https://cloudasset.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

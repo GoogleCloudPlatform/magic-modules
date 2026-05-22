@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'Webhook'
+name: Webhook
 description: |
   Webhooks host the developer's business logic. During a session, webhooks allow the developer to use the data extracted by Dialogflow's natural language processing to generate dynamic responses, validate collected data, or trigger actions on the backend.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
-  api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.webhooks'
+    Official Documentation: https://cloud.google.com/dialogflow/cx/docs
+  api: https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.webhooks
 docs:
 id_format: '{{parent}}/webhooks/{{name}}'
 base_url: '{{parent}}/webhooks'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{parent}}/webhooks/{{name}}'
@@ -31,43 +31,55 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 custom_code:
-  pre_create: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
-  pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/dialogflowcx_webhook.go.tmpl'
+  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.tmpl
+  pre_read: templates/terraform/pre_create/dialogflow_set_location.go.tmpl
+  pre_update: templates/terraform/pre_create/dialogflow_set_location.go.tmpl
+  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.tmpl
+  custom_import: templates/terraform/custom_import/dialogflowcx_webhook.go.tmpl
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_webhook_standard'
-    primary_resource_id: 'standard_webhook'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_webhook_flexible'
-    primary_resource_id: 'flexible_webhook'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_webhook_service_directory_standard'
-    primary_resource_id: 'standard_webhook'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_webhook_service_directory_flexible'
-    primary_resource_id: 'flexible_webhook'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_webhook_with_service_account_auth'
-    primary_resource_id: 'webhook_use_service_account'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-  - name: 'dialogflowcx_webhook_service_directory_with_service_account_auth'
-    primary_resource_id: 'webhook_use_service_account'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
+samples:
+  - name: dialogflowcx_webhook_standard
+    primary_resource_id: standard_webhook
+    steps:
+      - name: dialogflowcx_webhook_standard
+        resource_id_vars:
+          agent_name: dialogflowcx-agent
+  - name: dialogflowcx_webhook_flexible
+    primary_resource_id: flexible_webhook
+    steps:
+      - name: dialogflowcx_webhook_flexible
+        resource_id_vars:
+          agent_name: dialogflowcx-agent
+  - name: dialogflowcx_webhook_service_directory_standard
+    primary_resource_id: standard_webhook
+    steps:
+      - name: dialogflowcx_webhook_service_directory_standard
+        resource_id_vars:
+          agent_name: dialogflowcx-agent
+  - name: dialogflowcx_webhook_service_directory_flexible
+    primary_resource_id: flexible_webhook
+    steps:
+      - name: dialogflowcx_webhook_service_directory_flexible
+        resource_id_vars:
+          agent_name: dialogflowcx-agent
+  - name: dialogflowcx_webhook_with_service_account_auth
+    primary_resource_id: webhook_use_service_account
+    steps:
+      - name: dialogflowcx_webhook_with_service_account_auth
+        resource_id_vars:
+          agent_name: dialogflowcx-agent
+        test_env_vars:
+          service_account: SERVICE_ACCT
+  - name: dialogflowcx_webhook_service_directory_with_service_account_auth
+    primary_resource_id: webhook_use_service_account
+    steps:
+      - name: dialogflowcx_webhook_service_directory_with_service_account_auth
+        resource_id_vars:
+          agent_name: dialogflowcx-agent
+        test_env_vars:
+          service_account: SERVICE_ACCT
 parameters:
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The agent to create a webhook for.
@@ -75,23 +87,23 @@ parameters:
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique identifier of the webhook.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'displayName'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
     type: String
     description: |
       The human-readable name of the webhook, unique within the agent.
     required: true
-  - name: 'timeout'
+  - name: timeout
     type: String
     description: |
       Webhook execution timeout.
-  - name: 'disabled'
+  - name: disabled
     type: Boolean
     description: |
       Indicates whether the webhook is disabled.
@@ -121,13 +133,13 @@ properties:
           HTTP method for the flexible webhook calls. Standard webhook always uses
           POST.
         enum_values:
-          - 'POST'
-          - 'GET'
-          - 'HEAD'
-          - 'PUT'
-          - 'DELETE'
-          - 'PATCH'
-          - 'OPTIONS'
+          - POST
+          - GET
+          - HEAD
+          - PUT
+          - DELETE
+          - PATCH
+          - OPTIONS
       - name: oauthConfig
         type: NestedObject
         description: |-
@@ -191,7 +203,7 @@ properties:
           When the same header name is specified in both `request_headers` and
           `secret_versions_for_request_headers`, the value in
           `secret_versions_for_request_headers` will be used.
-        key_name: 'key'
+        key_name: key
         value_type:
           type: NestedObject
           properties:
@@ -208,9 +220,9 @@ properties:
           agent](https://cloud.google.com/iam/docs/service-agents#dialogflow-service-agent).
           The generated token is sent in the Authorization header.
         enum_values:
-          - 'NONE'
-          - 'ID_TOKEN'
-          - 'ACCESS_TOKEN'
+          - NONE
+          - ID_TOKEN
+          - ACCESS_TOKEN
       - name: serviceAccountAuthConfig
         type: NestedObject
         description: Configuration for authentication using a service account.
@@ -232,17 +244,16 @@ properties:
         required: true
       - name: webhookType
         type: Enum
-        description: |-
-          Type of the webhook.
+        description: Type of the webhook.
         enum_values:
-          - 'STANDARD'
-          - 'FLEXIBLE'
-  - name: 'serviceDirectory'
+          - STANDARD
+          - FLEXIBLE
+  - name: serviceDirectory
     type: NestedObject
     description: |
       Configuration for a Service Directory service.
     properties:
-      - name: 'service'
+      - name: service
         type: String
         description: |
           The name of Service Directory service.
@@ -273,13 +284,13 @@ properties:
               HTTP method for the flexible webhook calls. Standard webhook always uses
               POST.
             enum_values:
-              - 'POST'
-              - 'GET'
-              - 'HEAD'
-              - 'PUT'
-              - 'DELETE'
-              - 'PATCH'
-              - 'OPTIONS'
+              - POST
+              - GET
+              - HEAD
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
           - name: oauthConfig
             type: NestedObject
             description: |-
@@ -343,7 +354,7 @@ properties:
               When the same header name is specified in both `request_headers` and
               `secret_versions_for_request_headers`, the value in
               `secret_versions_for_request_headers` will be used.
-            key_name: 'key'
+            key_name: key
             value_type:
               type: NestedObject
               properties:
@@ -360,9 +371,9 @@ properties:
               agent](https://cloud.google.com/iam/docs/service-agents#dialogflow-service-agent).
               The generated token is sent in the Authorization header.
             enum_values:
-              - 'NONE'
-              - 'ID_TOKEN'
-              - 'ACCESS_TOKEN'
+              - NONE
+              - ID_TOKEN
+              - ACCESS_TOKEN
           - name: serviceAccountAuthConfig
             type: NestedObject
             description: Configuration for authentication using a service account.
@@ -384,25 +395,24 @@ properties:
             required: true
           - name: webhookType
             type: Enum
-            description: |-
-              Type of the webhook.
+            description: Type of the webhook.
             enum_values:
-              - 'STANDARD'
-              - 'FLEXIBLE'
-  - name: 'startFlow'
+              - STANDARD
+              - FLEXIBLE
+  - name: startFlow
     type: String
     description: |
       Deprecated. Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
     output: true
-  - name: 'securitySettings'
+  - name: securitySettings
     type: String
     description: |
       Deprecated. Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
-  - name: 'enableStackdriverLogging'
+  - name: enableStackdriverLogging
     type: Boolean
     description: |
       Deprecated. Determines whether this agent should log conversation queries.
-  - name: 'enableSpellCorrection'
+  - name: enableSpellCorrection
     type: Boolean
     description: |
       Deprecated. Indicates if automatic spell correction is enabled in detect intent requests.

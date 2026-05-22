@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Alloydb'
-display_name: 'AlloyDB'
+name: Alloydb
+display_name: AlloyDB
 versions:
-  - name: 'beta'
-    base_url: 'https://alloydb.googleapis.com/v1beta/'
-  - name: 'ga'
-    base_url: 'https://alloydb.googleapis.com/v1/'
+  - name: beta
+    base_url: https://alloydb.googleapis.com/v1beta/
+  - name: ga
+    base_url: https://alloydb.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-identity'
+  - https://www.googleapis.com/auth/cloud-identity

@@ -38,79 +38,75 @@ async:
     base_url: '{{op_id}}'
 autogen_async: true
 include_in_tgc_next: true
-examples:
+samples:
   - name: database_migration_service_migration_job_mysql_to_mysql
     primary_resource_id: mysqltomysql
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
-      migration_id: my-migrationid
-      source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
-    test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+    steps:
+      - name: database_migration_service_migration_job_mysql_to_mysql
+        resource_id_vars:
+          destination_cp: destination-cp
+          destination_csql: destination-csql
+          migration_id: my-migrationid
+          source_cp: source-cp
+          source_csql: source-csql
+          source_sqldb_cert: cert
+          source_sqldb_pass: password
+          source_sqldb_user: username
+        test_vars_overrides:
+          source_sqldb_cert: '"cert" + randomSuffix'
+          source_sqldb_pass: '"password" + randomSuffix'
+          source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_postgres
     primary_resource_id: psqltopsql
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
-      migration_id: my-migrationid
-      source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
-    test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+    steps:
+      - name: database_migration_service_migration_job_postgres_to_postgres
+        resource_id_vars:
+          destination_cp: destination-cp
+          destination_csql: destination-csql
+          migration_id: my-migrationid
+          source_cp: source-cp
+          source_csql: source-csql
+          source_sqldb_cert: cert
+          source_sqldb_pass: password
+          source_sqldb_user: username
+        test_vars_overrides:
+          source_sqldb_cert: '"cert" + randomSuffix'
+          source_sqldb_pass: '"password" + randomSuffix'
+          source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_postgres_objects
     primary_resource_id: psqltopsqlobjects
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
-      migration_id: my-migrationid
-      source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
-    test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+    steps:
+      - name: database_migration_service_migration_job_postgres_to_postgres_objects
+        resource_id_vars:
+          destination_cp: destination-cp
+          destination_csql: destination-csql
+          migration_id: my-migrationid
+          source_cp: source-cp
+          source_csql: source-csql
+          source_sqldb_cert: cert
+          source_sqldb_pass: password
+          source_sqldb_user: username
+        test_vars_overrides:
+          source_sqldb_cert: '"cert" + randomSuffix'
+          source_sqldb_pass: '"password" + randomSuffix'
+          source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_alloydb
     primary_resource_id: psqltoalloydb
-    vars:
-      destination_alloydb: destination-alloydb
-      destination_cp: destination-cp
-      migration_id: my-migrationid
-      source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
-    test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+    steps:
+      - name: database_migration_service_migration_job_postgres_to_alloydb
+        resource_id_vars:
+          destination_alloydb: destination-alloydb
+          destination_cp: destination-cp
+          migration_id: my-migrationid
+          source_cp: source-cp
+          source_csql: source-csql
+          source_sqldb_cert: cert
+          source_sqldb_pass: password
+          source_sqldb_user: username
+        test_vars_overrides:
+          source_sqldb_cert: '"cert" + randomSuffix'
+          source_sqldb_pass: '"password" + randomSuffix'
+          source_sqldb_user: '"username" + randomSuffix'
 parameters:
   - name: migrationJobId
     type: String

@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'ServiceManagement'
-legacy_name: 'endpoints'
-display_name: 'Cloud Endpoints'
+name: ServiceManagement
+legacy_name: endpoints
+display_name: Cloud Endpoints
 versions:
-  - name: 'ga'
-    base_url: 'https://servicemanagement.googleapis.com/v1/'
+  - name: ga
+    base_url: https://servicemanagement.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloudplatform'
+  - https://www.googleapis.com/auth/cloudplatform

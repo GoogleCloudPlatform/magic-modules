@@ -12,53 +12,55 @@
 # limitations under the License.
 
 ---
-name: 'DomainMapping'
+name: DomainMapping
 description: |
   A domain serving an App Engine application.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/appengine/docs/standard/python/mapping-custom-domains'
-  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.domainMappings'
+    Official Documentation: https://cloud.google.com/appengine/docs/standard/python/mapping-custom-domains
+  api: https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.domainMappings
 docs:
-id_format: 'apps/{{project}}/domainMappings/{{domain_name}}'
-base_url: 'apps/{{project}}/domainMappings'
-self_link: 'apps/{{project}}/domainMappings/{{domain_name}}'
-update_verb: 'PATCH'
+id_format: apps/{{project}}/domainMappings/{{domain_name}}
+base_url: apps/{{project}}/domainMappings
+self_link: apps/{{project}}/domainMappings/{{domain_name}}
+update_verb: PATCH
 update_mask: true
-mutex: 'apps/{{project}}'
+mutex: apps/{{project}}
 import_format:
-  - 'apps/{{project}}/domainMappings/{{domain_name}}'
+  - apps/{{project}}/domainMappings/{{domain_name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-  decoder: 'templates/terraform/decoders/app_engine_domain_mapping.go.tmpl'
-examples:
-  - name: 'app_engine_domain_mapping_basic'
-    primary_resource_id: 'domain_mapping'
-    ignore_read_extra:
-      - 'ssl_settings.0.ssl_management_type'
+  decoder: templates/terraform/decoders/app_engine_domain_mapping.go.tmpl
+samples:
+  - name: app_engine_domain_mapping_basic
+    primary_resource_id: domain_mapping
+    steps:
+      - name: app_engine_domain_mapping_basic
+        ignore_read_extra:
+          - ssl_settings.0.ssl_management_type
 parameters:
-  - name: 'overrideStrategy'
+  - name: overrideStrategy
     type: Enum
     description: |
       Whether the domain creation should override any existing mappings for this domain.
       By default, overrides are rejected.
     url_param_only: true
     ignore_read: true
-    default_value: "STRICT"
+    default_value: STRICT
     enum_values:
-      - 'STRICT'
-      - 'OVERRIDE'
-  - name: 'domainName'
+      - STRICT
+      - OVERRIDE
+  - name: domainName
     type: String
     description: |
       Relative name of the domain serving the application. Example: example.com.
@@ -66,21 +68,21 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Full path to the DomainMapping resource in the API. Example: apps/myapp/domainMapping/example.com.
     output: true
-  - name: 'sslSettings'
+  - name: sslSettings
     type: NestedObject
     description: |
       SSL configuration for this domain. If unconfigured, this domain will not serve with SSL.
     default_from_api: true
     update_mask_fields:
-      - 'ssl_settings.certificate_id'
-      - 'ssl_settings.ssl_management_type'
+      - ssl_settings.certificate_id
+      - ssl_settings.ssl_management_type
     properties:
-      - name: 'certificateId'
+      - name: certificateId
         type: String
         description: |
           ID of the AuthorizedCertificate resource configuring SSL for the application. Clearing this field will
@@ -90,16 +92,16 @@ properties:
           authorized to administer the `AuthorizedCertificate` resource to manually map it to a DomainMapping resource.
           Example: 12345.
         default_from_api: true
-      - name: 'sslManagementType'
+      - name: sslManagementType
         type: Enum
         description: |
           SSL management type for this domain. If `AUTOMATIC`, a managed certificate is automatically provisioned.
           If `MANUAL`, `certificateId` must be manually specified in order to configure SSL for this domain.
         required: true
         enum_values:
-          - 'AUTOMATIC'
-          - 'MANUAL'
-      - name: 'pendingManagedCertificateId'
+          - AUTOMATIC
+          - MANUAL
+      - name: pendingManagedCertificateId
         type: Enum
         description: |
           ID of the managed `AuthorizedCertificate` resource currently being provisioned, if applicable. Until the new
@@ -109,9 +111,9 @@ properties:
           `certificateId` field with an update request.
         output: true
         enum_values:
-          - 'AUTOMATIC'
-          - 'MANUAL'
-  - name: 'resourceRecords'
+          - AUTOMATIC
+          - MANUAL
+  - name: resourceRecords
     type: Array
     description: |
       The resource records required to configure this domain mapping. These records must be added to the domain's DNS
@@ -120,19 +122,19 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           description: |
             Relative name of the object affected by this record. Only applicable for CNAME records. Example: 'www'.
-        - name: 'rrdata'
+        - name: rrdata
           type: String
           description: |
             Data for this record. Values vary by record type, as defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1).
-        - name: 'type'
+        - name: type
           type: Enum
           description: |
             Resource record type. Example: `AAAA`.
           enum_values:
-            - 'A'
-            - 'AAAA'
-            - 'CNAME'
+            - A
+            - AAAA
+            - CNAME

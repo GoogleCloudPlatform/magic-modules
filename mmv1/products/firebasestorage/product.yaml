@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'FirebaseStorage'
-display_name: 'Cloud Storage for Firebase'
+name: FirebaseStorage
+display_name: Cloud Storage for Firebase
 versions:
-  - name: 'beta'
-    base_url: 'https://firebasestorage.googleapis.com/v1beta/'
+  - name: beta
+    base_url: https://firebasestorage.googleapis.com/v1beta/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

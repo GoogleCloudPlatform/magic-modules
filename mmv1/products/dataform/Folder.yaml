@@ -12,53 +12,57 @@
 # limitations under the License.
 
 ---
-name: 'Folder'
+name: Folder
 description: |
   A resource represents a Dataform folder
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dataform/docs/'
-  api: 'https://cloud.google.com/dataform/reference/rest/v1/projects.locations.folders'
-self_link: 'projects/{{project}}/locations/{{region}}/folders/{{folder_id}}'
-create_url: 'projects/{{project}}/locations/{{region}}/folders'
-id_format: 'projects/{{project}}/locations/{{region}}/folders/{{folder_id}}'
+    Official Documentation: https://cloud.google.com/dataform/docs/
+  api: https://cloud.google.com/dataform/reference/rest/v1/projects.locations.folders
+self_link: projects/{{project}}/locations/{{region}}/folders/{{folder_id}}
+create_url: projects/{{project}}/locations/{{region}}/folders
+id_format: projects/{{project}}/locations/{{region}}/folders/{{folder_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{region}}/folders/{{folder_id}}'
+  - projects/{{project}}/locations/{{region}}/folders/{{folder_id}}
   - '{{name}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
 custom_code:
-  post_create: 'templates/terraform/post_create/dataform_folder.tmpl'
+  post_create: templates/terraform/post_create/dataform_folder.tmpl
 parameters:
-  - name: 'region'
+  - name: region
     type: String
-    description: 'A reference to the region'
+    description: A reference to the region
     required: true
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The Folder's name.
     output: true
     immutable: true
-  - name: 'folder_id'
-    api_name: 'name'
+  - name: folder_id
+    api_name: name
     type: String
     description: The unique identifier for the Folder.
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: Required. The Folder's user-friendly name.
     required: true
-  - name: 'containingFolder'
+  - name: containingFolder
     type: String
     description: |-
       Optional. The containing Folder resource name.
       Format: `projects/*/locations/*/folders/*` or `projects/*/locations/*/teamFolders/*`.
-examples:
-  - name: 'dataform_folder_basic'
-    primary_resource_id: 'dataform_folder_basic'
-  - name: 'dataform_folder_full'
-    primary_resource_id: 'dataform_folder_full'
+samples:
+  - name: dataform_folder_basic
+    primary_resource_id: dataform_folder_basic
+    steps:
+      - name: dataform_folder_basic
+  - name: dataform_folder_full
+    primary_resource_id: dataform_folder_full
+    steps:
+      - name: dataform_folder_full

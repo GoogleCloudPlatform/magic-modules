@@ -12,29 +12,29 @@
 # limitations under the License.
 
 ---
-name: 'BackupSchedule'
+name: BackupSchedule
 description: |
   A backup schedule for a Cloud Spanner Database.
   This resource is owned by the database it is backing up, and is deleted along with the database.
   The actual backups are not though.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/spanner/docs/backup'
-  api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases.backupSchedules'
+    Official Documentation: https://cloud.google.com/spanner/docs/backup
+  api: https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases.backupSchedules
 docs:
   warning: |
     This resource creates a Spanner Backup Schedule on a project that already has
     a Spanner database.
     This resource is owned by the database it is backing up, and is deleted along
     with the database. The actual backups are not though.
-id_format: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
-base_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules'
-self_link: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
-create_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules?backup_schedule_id={{name}}'
-update_verb: 'PATCH'
+id_format: projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}
+base_url: projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules
+self_link: projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}
+create_url: projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules?backup_schedule_id={{name}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
+  - projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}
   - '{{project}}/{{instance}}/{{database}}/{{name}}'
   - '{{instance}}/{{database}}/{{name}}'
 timeouts:
@@ -42,81 +42,85 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/spanner_schedule_backup.go.tmpl'
-  decoder: 'templates/terraform/decoders/spanner_schedule_backup.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/spanner_schedule_backup.go.tmpl'
-examples:
-  - name: 'spanner_backup_schedule_daily_full'
-    primary_resource_id: 'full-backup'
-    vars:
-      name: 'backup-schedule-id'
-      instance_name: 'instance-id'
-      database_name: 'database-id'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'spanner_backup_schedule_daily_incremental'
-    primary_resource_id: 'incremental-backup'
-    vars:
-      name: 'backup-schedule-id'
-      instance_name: 'instance-id'
-      database_name: 'database-id'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+  encoder: templates/terraform/encoders/spanner_schedule_backup.go.tmpl
+  decoder: templates/terraform/decoders/spanner_schedule_backup.go.tmpl
+  pre_update: templates/terraform/pre_update/spanner_schedule_backup.go.tmpl
+samples:
+  - name: spanner_backup_schedule_daily_full
+    primary_resource_id: full-backup
+    steps:
+      - name: spanner_backup_schedule_daily_full
+        resource_id_vars:
+          database_name: database-id
+          deletion_protection: "true"
+          instance_name: instance-id
+          name: backup-schedule-id
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: spanner_backup_schedule_daily_incremental
+    primary_resource_id: incremental-backup
+    steps:
+      - name: spanner_backup_schedule_daily_incremental
+        resource_id_vars:
+          database_name: database-id
+          deletion_protection: "true"
+          instance_name: instance-id
+          name: backup-schedule-id
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
 parameters:
-  - name: 'instance'
+  - name: instance
     type: ResourceRef
-    description: 'The instance to create the database on.'
+    description: The instance to create the database on.
     url_param_only: true
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Instance'
-    imports: 'name'
-  - name: 'database'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Instance
+    imports: name
+  - name: database
     type: ResourceRef
-    description: 'The database to create the backup schedule on.'
+    description: The database to create the backup schedule on.
     url_param_only: true
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Database'
-    imports: 'name'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Database
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       A unique identifier for the backup schedule, which cannot be changed after
       the backup schedule is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
     validation:
-      regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
-  - name: 'retentionDuration'
+      regex: ^[a-z][a-z0-9_\-]*[a-z0-9]$
+  - name: retentionDuration
     type: String
     description: |
       At what relative time in the future, compared to its creation time, the backup should be deleted, e.g. keep backups for 7 days.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: '3.5s'.
       You can set this to a value up to 366 days.
     required: true
-  - name: 'spec'
+  - name: spec
     type: NestedObject
     description: |
       Defines specifications of the backup schedule.
     send_empty_value: true
     allow_empty_object: true
     properties:
-      - name: 'cronSpec'
+      - name: cronSpec
         type: NestedObject
         description: |
           Cron style schedule specification..
         properties:
-          - name: 'text'
+          - name: text
             type: String
             description: |
               Textual representation of the crontab. User can customize the
@@ -130,7 +134,7 @@ properties:
                 0 2 * * *    : once a day at 2 past midnight in UTC.
                 0 2 * * 0    : once a week every Sunday at 2 past midnight in UTC.
                 0 2 8 * *    : once a month on 8th day at 2 past midnight in UTC.
-  - name: 'fullBackupSpec'
+  - name: fullBackupSpec
     type: NestedObject
     description: |
       The schedule creates only full backups..
@@ -138,11 +142,10 @@ properties:
     send_empty_value: true
     allow_empty_object: true
     exactly_one_of:
-      - 'fullBackupSpec'
-      - 'incrementalBackupSpec'
-    properties:
-      []
-  - name: 'incrementalBackupSpec'
+      - fullBackupSpec
+      - incrementalBackupSpec
+    properties: []
+  - name: incrementalBackupSpec
     type: NestedObject
     description: |
       The schedule creates incremental backup chains.
@@ -150,35 +153,34 @@ properties:
     send_empty_value: true
     allow_empty_object: true
     exactly_one_of:
-      - 'fullBackupSpec'
-      - 'incrementalBackupSpec'
-    properties:
-      []
-  - name: 'encryptionConfig'
+      - fullBackupSpec
+      - incrementalBackupSpec
+    properties: []
+  - name: encryptionConfig
     type: NestedObject
     description: |
       Configuration for the encryption of the backup schedule.
     default_from_api: true
     properties:
-      - name: 'encryptionType'
+      - name: encryptionType
         type: Enum
         description: |
           The encryption type of backups created by the backup schedule.
           Possible values are USE_DATABASE_ENCRYPTION, GOOGLE_DEFAULT_ENCRYPTION, or CUSTOMER_MANAGED_ENCRYPTION.
           If you use CUSTOMER_MANAGED_ENCRYPTION, you must specify a kmsKeyName or kmsKeyNames.
         enum_values:
-          - 'USE_DATABASE_ENCRYPTION'
-          - 'GOOGLE_DEFAULT_ENCRYPTION'
-          - 'CUSTOMER_MANAGED_ENCRYPTION'
+          - USE_DATABASE_ENCRYPTION
+          - GOOGLE_DEFAULT_ENCRYPTION
+          - CUSTOMER_MANAGED_ENCRYPTION
         required: true
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           The resource name of the Cloud KMS key to use for encryption.
           Format: 'projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}'
         conflicts:
           - encryption_config.0.kms_key_names
-      - name: 'kmsKeyNames'
+      - name: kmsKeyNames
         type: Array
         description: |
           Fully qualified name of the KMS keys to use to encrypt this database. The keys must exist

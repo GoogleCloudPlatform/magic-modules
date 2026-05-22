@@ -16,8 +16,8 @@ name: DataAccessScope
 description: A DataAccessScope is a boolean expression of data access labels used to restrict access to data for users.
 references:
   guides:
-    'Introduction to data RBAC': 'https://cloud.google.com/chronicle/docs/onboard/onboard-datarbac'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataAccessScopes'
+    Introduction to data RBAC: https://cloud.google.com/chronicle/docs/onboard/onboard-datarbac
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataAccessScopes
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessScopes
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessScopes/{{data_access_scope_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessScopes?dataAccessScopeId={{data_access_scope_id}}
@@ -27,47 +27,54 @@ import_format:
 update_verb: PATCH
 update_mask: true
 autogen_status: RGF0YUFjY2Vzc1Njb3Bl
-
-examples:
-  - name: 'chronicle_dataaccessscope_with_logtype'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_dataaccessscope_with_dataaccesslabel'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-      data_access_label_id: label-id
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_dataaccessscope_with_asset_namespace'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_dataaccessscope_with_ingestion_label'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_dataaccessscope_with_denied_labels'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-      data_access_label_id: label-id
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
-
+samples:
+  - name: chronicle_dataaccessscope_with_logtype
+    primary_resource_id: example
+    steps:
+      - name: chronicle_dataaccessscope_with_logtype
+        resource_id_vars:
+          data_access_scope_id: scope-id
+          description: scope-description
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+  - name: chronicle_dataaccessscope_with_dataaccesslabel
+    primary_resource_id: example
+    steps:
+      - name: chronicle_dataaccessscope_with_dataaccesslabel
+        resource_id_vars:
+          data_access_label_id: label-id
+          data_access_scope_id: scope-id
+          description: scope-description
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+  - name: chronicle_dataaccessscope_with_asset_namespace
+    primary_resource_id: example
+    steps:
+      - name: chronicle_dataaccessscope_with_asset_namespace
+        resource_id_vars:
+          data_access_scope_id: scope-id
+          description: scope-description
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+  - name: chronicle_dataaccessscope_with_ingestion_label
+    primary_resource_id: example
+    steps:
+      - name: chronicle_dataaccessscope_with_ingestion_label
+        resource_id_vars:
+          data_access_scope_id: scope-id
+          description: scope-description
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+  - name: chronicle_dataaccessscope_with_denied_labels
+    primary_resource_id: example
+    steps:
+      - name: chronicle_dataaccessscope_with_denied_labels
+        resource_id_vars:
+          data_access_label_id: label-id
+          data_access_scope_id: scope-id
+          description: scope-description
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String
@@ -108,8 +115,8 @@ properties:
       E.g.: A customer with scope with allowed labels A and B will be able
       to see data with labeled with A or B or (A and B).
     at_least_one_of:
-      - 'allowed_data_access_labels'
-      - 'allow_all'
+      - allowed_data_access_labels
+      - allow_all
     item_type:
       type: NestedObject
       properties:

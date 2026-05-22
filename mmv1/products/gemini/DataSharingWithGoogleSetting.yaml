@@ -25,13 +25,15 @@ import_format:
 mutex: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
 sweeper:
   url_substitutions:
-    - region: "global"
-examples:
+    - region: global
+samples:
   - name: gemini_data_sharing_with_google_setting_basic
     primary_resource_id: example
     exclude_test: true
-    vars:
-      data_sharing_with_google_setting_id: ls1-tf
+    steps:
+      - name: gemini_data_sharing_with_google_setting_basic
+        resource_id_vars:
+          data_sharing_with_google_setting_id: ls1-tf
 autogen_async: false
 autogen_status: RGF0YVNoYXJpbmdXaXRoR29vZ2xlU2V0dGluZw==
 parameters:
@@ -42,8 +44,7 @@ parameters:
     url_param_only: true
   - name: dataSharingWithGoogleSettingId
     type: String
-    description: |-
-      Id of the Data Sharing With Google Setting.
+    description: Id of the Data Sharing With Google Setting.
     immutable: true
     url_param_only: true
     required: true

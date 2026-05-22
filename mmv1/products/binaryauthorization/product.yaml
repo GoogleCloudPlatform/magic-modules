@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'BinaryAuthorization'
-display_name: 'Binary Authorization'
+name: BinaryAuthorization
+display_name: Binary Authorization
 versions:
-  - name: 'ga'
-    base_url: 'https://binaryauthorization.googleapis.com/v1/'
+  - name: ga
+    base_url: https://binaryauthorization.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

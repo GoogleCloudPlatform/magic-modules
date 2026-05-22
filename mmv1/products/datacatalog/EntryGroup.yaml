@@ -12,23 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'EntryGroup'
+name: EntryGroup
 description: |
   An EntryGroup resource represents a logical grouping of zero or more Data Catalog Entry resources.
-deprecation_message: >-
-  `google_data_catalog_entry_group` is deprecated and will be removed in a future major release.
-  Use `google_dataplex_entry_group` instead. For steps to transition
-  your Data Catalog users, workloads, and content to Dataplex Catalog, see
-  https://cloud.google.com/dataplex/docs/transition-to-dataplex-catalog.
+deprecation_message: '`google_data_catalog_entry_group` is deprecated and will be removed in a future major release. Use `google_dataplex_entry_group` instead. For steps to transition your Data Catalog users, workloads, and content to Dataplex Catalog, see https://cloud.google.com/dataplex/docs/transition-to-dataplex-catalog.'
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
-  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups'
+    Official Documentation: https://cloud.google.com/data-catalog/docs
+  api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/entryGroups'
+base_url: projects/{{project}}/locations/{{region}}/entryGroups
 self_link: '{{name}}'
-create_url: 'projects/{{project}}/locations/{{region}}/entryGroups?entryGroupId={{entry_group_id}}'
-update_verb: 'PATCH'
+create_url: projects/{{project}}/locations/{{region}}/entryGroups?entryGroupId={{entry_group_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{name}}'
@@ -38,25 +34,29 @@ timeouts:
   delete_minutes: 20
 iam_policy:
   method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'entry_group'
-  base_url: 'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: entry_group
+  base_url: projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}
   import_format:
-    - 'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}'
+    - projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}
     - '{{entry_group}}'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/data_catalog_entry_group.go.tmpl'
-examples:
-  - name: 'data_catalog_entry_group_basic'
-    primary_resource_id: 'basic_entry_group'
-    vars:
-      entry_group_id: 'my_group'
-  - name: 'data_catalog_entry_group_full'
-    primary_resource_id: 'basic_entry_group'
-    vars:
-      entry_group_id: 'my_group'
+  custom_import: templates/terraform/custom_import/data_catalog_entry_group.go.tmpl
+samples:
+  - name: data_catalog_entry_group_basic
+    primary_resource_id: basic_entry_group
+    steps:
+      - name: data_catalog_entry_group_basic
+        resource_id_vars:
+          entry_group_id: my_group
+  - name: data_catalog_entry_group_full
+    primary_resource_id: basic_entry_group
+    steps:
+      - name: data_catalog_entry_group_full
+        resource_id_vars:
+          entry_group_id: my_group
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: |
       EntryGroup location region.
@@ -65,7 +65,7 @@ parameters:
     immutable: true
     ignore_read: true
     default_from_api: true
-  - name: 'entryGroupId'
+  - name: entryGroupId
     type: String
     description: |
       The id of the entry group to create. The id must begin with a letter or underscore,
@@ -74,18 +74,18 @@ parameters:
     required: true
     immutable: true
     validation:
-      regex: '^[A-z_][A-z0-9_]{0,63}$'
+      regex: ^[A-z_][A-z0-9_]{0,63}$
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the entry group in URL format. Example: projects/{project}/locations/{location}/entryGroups/{entryGroupId}
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       A short name to identify the entry group, for example, "analytics data - jan 2011".
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Entry group description, which can consist of several sentences or paragraphs that describe entry group contents.

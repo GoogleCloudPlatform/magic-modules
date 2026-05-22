@@ -15,11 +15,11 @@
 name: LoggingSettingBinding
 api_resource_type_kind: SettingBinding
 api_variant_patterns:
-  - 'projects/{project}/locations/{location}/loggingSettings/{loggingSetting}/settingBindings/{settingBinding}'
+  - projects/{project}/locations/{location}/loggingSettings/{loggingSetting}/settingBindings/{settingBinding}
 description: The resource for managing Logging setting bindings for Admin Control.
 references:
   guides:
-    'Gemini Cloud Assist overview': 'https://cloud.google.com/gemini/docs/cloud-assist/overview'
+    Gemini Cloud Assist overview: https://cloud.google.com/gemini/docs/cloud-assist/overview
 base_url: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings
 self_link: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings/{{setting_binding_id}}
 create_url: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings?settingBindingId={{setting_binding_id}}
@@ -29,17 +29,18 @@ update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings/{{setting_binding_id}}
 mutex: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}
-examples:
+samples:
   - name: gemini_logging_setting_binding_basic
     primary_resource_id: example
     exclude_test: true
-    vars:
-      logging_setting_id: ls-tf1
-      setting_binding_id: ls-tf1b1
-      target: projects/980109375338
-    test_vars_overrides:
-      # for backward compatible
-      target: '"projects/980109375338" + randomSuffix'
+    steps:
+      - name: gemini_logging_setting_binding_basic
+        resource_id_vars:
+          logging_setting_id: ls-tf1
+          setting_binding_id: ls-tf1b1
+          target: projects/980109375338
+        test_vars_overrides:
+          target: '"projects/980109375338" + randomSuffix'
 autogen_async: true
 timeouts:
   insert_minutes: 90
@@ -75,8 +76,7 @@ parameters:
     required: true
   - name: settingBindingId
     type: String
-    description: |-
-      Id of the setting binding.
+    description: Id of the setting binding.
     immutable: true
     url_param_only: true
     required: true
@@ -90,10 +90,9 @@ properties:
     required: true
   - name: product
     type: Enum
-    description: |-
-      Product type of the setting binding.
+    description: Product type of the setting binding.
     enum_values:
-      - 'GEMINI_CODE_ASSIST'
+      - GEMINI_CODE_ASSIST
     default_from_api: true
   - name: name
     type: String

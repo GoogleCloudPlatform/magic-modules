@@ -23,29 +23,29 @@ import_format:
   - projects/{{project}}/locations/{{location}}/googleApiSources/{{google_api_source_id}}
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/publish-events/publish-events-google-sources'
+    Official Documentation: https://cloud.google.com/eventarc/advanced/docs/publish-events/publish-events-google-sources
   api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.googleApiSources
 include_in_tgc_next: true
 tgc_tests:
-  - name: 'TestAccEventarcMessageBus/updateGoogleApiSource'
+  - name: TestAccEventarcMessageBus/updateGoogleApiSource
 description: |
   The Eventarc GoogleApiSource resource
 async:
-  actions: ['create', 'update', 'delete']
+  actions: [create, update, delete]
   operation:
     base_url: '{{op_id}}'
   type: OpAsync
   result:
     resource_inside_response: true
 autogen_async: true
-examples:
+samples:
   - name: eventarc_google_api_source_with_cmek
     primary_resource_id: primary
-    test_env_vars:
-      project_name: PROJECT_NAME
-    # We don't auto-generate tests since we can't support concurrent tests, as long as
-    # only one GoogleApiSource and MessageBus is supported per project.
     exclude_test: true
+    steps:
+      - name: eventarc_google_api_source_with_cmek
+        test_env_vars:
+          project_name: PROJECT_NAME
 parameters:
   - name: location
     type: String

@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'CloudTasks'
-display_name: 'Cloud Tasks'
+name: CloudTasks
+display_name: Cloud Tasks
 versions:
-  - name: 'ga'
-    base_url: 'https://cloudtasks.googleapis.com/v2/'
+  - name: ga
+    base_url: https://cloudtasks.googleapis.com/v2/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

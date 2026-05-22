@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'AccessContextManager'
-display_name: 'Access Context Manager (VPC Service Controls)'
+name: AccessContextManager
+display_name: Access Context Manager (VPC Service Controls)
 versions:
-  - name: 'ga'
-    base_url: 'https://accesscontextmanager.googleapis.com/v1/'
+  - name: ga
+    base_url: https://accesscontextmanager.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:

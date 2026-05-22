@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'MuteConfig'
+name: MuteConfig
 api_variant_patterns:
-  - 'folders/{folder}/muteConfigs/{muteConfig}'
-  - 'organizations/{organization}/muteConfigs/{muteConfig}'
-  - 'projects/{project}/muteConfigs/{muteConfig}'
+  - folders/{folder}/muteConfigs/{muteConfig}
+  - organizations/{organization}/muteConfigs/{muteConfig}
+  - projects/{project}/muteConfigs/{muteConfig}
 description: |
   Mute Findings is a volume management feature in Security Command Center
   that lets you manually or programmatically hide irrelevant findings,
@@ -24,12 +24,12 @@ description: |
   findings based on criteria you specify.
 references:
   guides:
-  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.muteConfigs'
+  api: https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.muteConfigs
 docs:
 base_url: '{{parent}}/muteConfigs'
 self_link: '{{name}}'
 create_url: '{{parent}}/muteConfigs?muteConfigId={{mute_config_id}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{name}}'
@@ -38,25 +38,27 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/scc_mute_config.go.tmpl'
+  custom_import: templates/terraform/custom_import/scc_mute_config.go.tmpl
 # Skipping sweeper since this is a child resource
 exclude_sweeper: true
-examples:
-  - name: 'scc_mute_config'
-    primary_resource_id: 'default'
-    vars:
-      mute_config_id: 'my-config'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: scc_mute_config
+    primary_resource_id: default
+    steps:
+      - name: scc_mute_config
+        resource_id_vars:
+          mute_config_id: my-config
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
-  - name: 'muteConfigId'
+  - name: muteConfigId
     type: String
     description: |
       Unique identifier provided by the client within the parent scope.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       Resource name of the new mute configs's parent. Its format is
@@ -66,7 +68,7 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the mute config. Its format is
@@ -74,10 +76,10 @@ properties:
       folders/{folder}/muteConfigs/{configId},
       or projects/{project}/muteConfigs/{configId}
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: A description of the mute config.
-  - name: 'filter'
+  - name: filter
     type: String
     description: |
       An expression that defines the filter to apply across create/update
@@ -86,36 +88,36 @@ properties:
       If a filter contains project = X but is created under the
       project = Y scope, it might not match any findings.
     required: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The time at which the mute config was created. This field is set by
       the server and will be ignored if provided on config creation.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       Output only. The most recent time at which the mute config was
       updated. This field is set by the server and will be ignored if
       provided on config creation or update.
     output: true
-  - name: 'mostRecentEditor'
+  - name: mostRecentEditor
     type: String
     description: |
       Email address of the user who last edited the mute config. This
       field is set by the server and will be ignored if provided on
       config creation or update.
     output: true
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       The type of the mute config, which determines what type of mute state the config affects.
-    default_value: "DYNAMIC"
+    default_value: DYNAMIC
     enum_values:
-      - 'MUTE_CONFIG_TYPE_UNSPECIFIED'
-      - 'STATIC'
-      - 'DYNAMIC'
-  - name: 'expiryTime'
+      - MUTE_CONFIG_TYPE_UNSPECIFIED
+      - STATIC
+      - DYNAMIC
+  - name: expiryTime
     type: String
     description: |
       Optional. The expiry of the mute config. Only applicable for dynamic configs.

@@ -12,30 +12,30 @@
 # limitations under the License.
 
 ---
-name: 'Cluster'
+name: Cluster
 description: |
   Cluster contains information about a Google Distributed Cloud Edge Kubernetes cluster.
 references:
   guides:
-    'Create and manage clusters': 'https://cloud.google.com/distributed-cloud/edge/latest/docs/clusters'
-  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.clusters'
+    Create and manage clusters: https://cloud.google.com/distributed-cloud/edge/latest/docs/clusters
+  api: https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.clusters
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/clusters'
-self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/clusters?cluster_id={{name}}'
-update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/clusters
+self_link: projects/{{project}}/locations/{{location}}/clusters/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/clusters?cluster_id={{name}}
+update_url: projects/{{project}}/locations/{{location}}/clusters/{{name}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
+  - projects/{{project}}/locations/{{location}}/clusters/{{name}}
 timeouts:
   insert_minutes: 480
   update_minutes: 480
   delete_minutes: 480
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
     timeouts:
@@ -45,23 +45,23 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  # Skip the local control plane cluster test as we only have limited machine resources.
-  # Instead the local control plane cluster test will be tested in the node pool test.
-  - name: 'edgecontainer_local_control_plane_cluster'
-    primary_resource_id: 'default'
-    vars:
-      edgecontainer_cluster_name: 'local-control-plane-cluster'
+samples:
+  - name: edgecontainer_local_control_plane_cluster
+    primary_resource_id: default
     exclude_test: true
+    steps:
+      - name: edgecontainer_local_control_plane_cluster
+        resource_id_vars:
+          edgecontainer_cluster_name: local-control-plane-cluster
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the resource.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The GDCE cluster name.
@@ -69,20 +69,20 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       The time the cluster was created, in RFC3339 text format.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       The time the cluster was last updated, in RFC3339 text format.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: "User-defined labels for the edgecloud cluster."
-  - name: 'fleet'
+    description: User-defined labels for the edgecloud cluster.
+  - name: fleet
     type: NestedObject
     description: |
       Fleet related configuration.
@@ -92,7 +92,7 @@ properties:
     required: true
     immutable: true
     properties:
-      - name: 'project'
+      - name: project
         type: String
         description: |
           The name of the Fleet host project where this cluster will be registered.
@@ -100,14 +100,14 @@ properties:
           `projects/<project-number>`.
         required: true
         immutable: true
-      - name: 'membership'
+      - name: membership
         type: String
         description: |
           The name of the managed Hub Membership resource associated to this cluster.
           Membership names are formatted as
           `projects/<project-number>/locations/global/membership/<cluster-id>`.
         output: true
-  - name: 'networking'
+  - name: networking
     type: NestedObject
     description: |
       Fleet related configuration.
@@ -116,7 +116,7 @@ properties:
       consistent policies across your systems.
     required: true
     properties:
-      - name: 'clusterIpv4CidrBlocks'
+      - name: clusterIpv4CidrBlocks
         type: Array
         description: |
           All pods in the cluster are assigned an RFC1918 IPv4 address from these
@@ -126,7 +126,7 @@ properties:
         immutable: true
         item_type:
           type: String
-      - name: 'servicesIpv4CidrBlocks'
+      - name: servicesIpv4CidrBlocks
         type: Array
         description: |
           All services in the cluster are assigned an RFC1918 IPv4 address from these
@@ -136,7 +136,7 @@ properties:
         immutable: true
         item_type:
           type: String
-      - name: 'clusterIpv6CidrBlocks'
+      - name: clusterIpv6CidrBlocks
         type: Array
         description: |
           If specified, dual stack mode is enabled and all pods in the cluster are
@@ -146,7 +146,7 @@ properties:
         immutable: true
         item_type:
           type: String
-      - name: 'servicesIpv6CidrBlocks'
+      - name: servicesIpv6CidrBlocks
         type: Array
         description: |
           If specified, dual stack mode is enabled and all services in the cluster are
@@ -156,19 +156,19 @@ properties:
         immutable: true
         item_type:
           type: String
-      - name: 'networkType'
+      - name: networkType
         type: String
         description: |
           IP addressing type of this cluster i.e. SINGLESTACK_V4 vs DUALSTACK_V4_V6.
         output: true
-  - name: 'authorization'
+  - name: authorization
     type: NestedObject
     description: |
       RBAC policy that will be applied and managed by GEC.
     required: true
     immutable: true
     properties:
-      - name: 'adminUsers'
+      - name: adminUsers
         type: NestedObject
         description: |
           User that will be granted the cluster-admin role on the cluster, providing
@@ -176,77 +176,77 @@ properties:
           be expanded to allow multiple admins in the future.
         required: true
         properties:
-          - name: 'username'
+          - name: username
             type: String
             description: |
               An active Google username.
             required: true
-  - name: 'defaultMaxPodsPerNode'
+  - name: defaultMaxPodsPerNode
     type: Integer
     description: |
       The default maximum number of pods per node used if a maximum value is not
       specified explicitly for a node pool in this cluster. If unspecified, the
       Kubernetes default value will be used.
     default_from_api: true
-  - name: 'endpoint'
+  - name: endpoint
     type: String
     description: |
       The IP address of the Kubernetes API server.
     output: true
-  - name: 'port'
+  - name: port
     type: Integer
     description: |
       The port number of the Kubernetes API server.
     output: true
-  - name: 'clusterCaCertificate'
+  - name: clusterCaCertificate
     type: String
     description: |
       The PEM-encoded public certificate of the cluster's CA.
     sensitive: true
     output: true
-  - name: 'maintenancePolicy'
+  - name: maintenancePolicy
     type: NestedObject
     description: |
       Cluster-wide maintenance policy configuration.
     default_from_api: true
     properties:
-      - name: 'window'
+      - name: window
         type: NestedObject
         description: |
           Specifies the maintenance window in which maintenance may be performed.
         required: true
         properties:
-          - name: 'recurringWindow'
+          - name: recurringWindow
             type: NestedObject
             description: |
               Represents an arbitrary window of time that recurs.
             required: true
             properties:
-              - name: 'window'
+              - name: window
                 type: NestedObject
                 description: |
                   Represents an arbitrary window of time.
                 default_from_api: true
                 properties:
-                  - name: 'startTime'
+                  - name: startTime
                     type: Time
                     description: |
                       The time that the window first starts.
                     default_from_api: true
-                  - name: 'endTime'
+                  - name: endTime
                     type: Time
                     description: |
                       The time that the window ends. The end time must take place after the
                       start time.
                     default_from_api: true
-              - name: 'recurrence'
+              - name: recurrence
                 type: String
                 description: |
                   An RRULE (https://tools.ietf.org/html/rfc5545#section-3.8.5.3) for how
                   this window recurs. They go on for the span of time between the start and
                   end time.
                 default_from_api: true
-      - name: 'maintenanceExclusions'
+      - name: maintenanceExclusions
         type: Array
         description: |
           Exclusions to automatic maintenance. Non-emergency maintenance should not occur
@@ -256,106 +256,106 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'window'
+            - name: window
               type: NestedObject
               description: |
                 Represents an arbitrary window of time.
               default_from_api: true
               properties:
-                - name: 'startTime'
+                - name: startTime
                   type: Time
                   description: |
                     The time that the window first starts.
                   default_from_api: true
-                - name: 'endTime'
+                - name: endTime
                   type: Time
                   description: |
                     The time that the window ends. The end time must take place after the
                     start time.
                   default_from_api: true
-            - name: 'id'
+            - name: id
               type: String
               description: |
                 A unique (per cluster) id for the window.
               default_from_api: true
-  - name: 'controlPlaneVersion'
+  - name: controlPlaneVersion
     type: String
     description: |
       The control plane release version.
     output: true
-  - name: 'nodeVersion'
+  - name: nodeVersion
     type: String
     description: |
       The lowest release version among all worker nodes. This field can be empty
       if the cluster does not have any worker nodes.
     output: true
-  - name: 'controlPlane'
+  - name: controlPlane
     type: NestedObject
     description: |
       The configuration of the cluster control plane.
     properties:
-      - name: 'remote'
+      - name: remote
         type: NestedObject
         description: |
           Remote control plane configuration.
         immutable: true
         default_from_api: true
         exactly_one_of:
-          - 'control_plane.0.remote'
-          - 'control_plane.0.local'
+          - control_plane.0.remote
+          - control_plane.0.local
         properties:
-          - name: 'nodeLocation'
+          - name: nodeLocation
             type: String
             description: |
               Name of the Google Distributed Cloud Edge zones where this node pool
               will be created. For example: `us-central1-edge-customer-a`.
             immutable: true
             default_from_api: true
-      - name: 'local'
+      - name: local
         type: NestedObject
         description: |
           Local control plane configuration.
         immutable: true
         default_from_api: true
         exactly_one_of:
-          - 'control_plane.0.remote'
-          - 'control_plane.0.local'
+          - control_plane.0.remote
+          - control_plane.0.local
         properties:
-          - name: 'nodeLocation'
+          - name: nodeLocation
             type: String
             description: |
               Name of the Google Distributed Cloud Edge zones where this node pool
               will be created. For example: `us-central1-edge-customer-a`.
             immutable: true
             default_from_api: true
-          - name: 'nodeCount'
+          - name: nodeCount
             type: Integer
             description: |
               The number of nodes to serve as replicas of the Control Plane.
               Only 1 and 3 are supported.
             default_from_api: true
-          - name: 'machineFilter'
+          - name: machineFilter
             type: String
             description: |
               Only machines matching this filter will be allowed to host control
               plane nodes. The filtering language accepts strings like "name=<name>",
               and is documented here: [AIP-160](https://google.aip.dev/160).
-          - name: 'sharedDeploymentPolicy'
+          - name: sharedDeploymentPolicy
             type: Enum
             description: |
               Policy configuration about how user applications are deployed.
             default_from_api: true
             enum_values:
-              - 'SHARED_DEPLOYMENT_POLICY_UNSPECIFIED'
-              - 'ALLOWED'
-              - 'DISALLOWED'
-  - name: 'systemAddonsConfig'
+              - SHARED_DEPLOYMENT_POLICY_UNSPECIFIED
+              - ALLOWED
+              - DISALLOWED
+  - name: systemAddonsConfig
     type: NestedObject
     description: |
       Config that customers are allowed to define for GDCE system add-ons.
     default_from_api: true
     properties:
-      - name: 'ingress'
+      - name: ingress
         type: NestedObject
         description: |
           Config for the Ingress add-on which allows customers to create an Ingress
@@ -363,31 +363,31 @@ properties:
           consists of istiod and istio-ingress.
         default_from_api: true
         properties:
-          - name: 'disabled'
+          - name: disabled
             type: Boolean
             description: |
               Whether Ingress is disabled.
             default_from_api: true
-          - name: 'ipv4Vip'
+          - name: ipv4Vip
             type: String
             description: |
               Ingress VIP.
             default_from_api: true
-  - name: 'externalLoadBalancerIpv4AddressPools'
+  - name: externalLoadBalancerIpv4AddressPools
     type: Array
     description: |
       Address pools for cluster data plane external load balancing.
     default_from_api: true
     item_type:
       type: String
-  - name: 'controlPlaneEncryption'
+  - name: controlPlaneEncryption
     type: NestedObject
     description: |
       Remote control plane disk encryption options. This field is only used when
       enabling CMEK support.
     default_from_api: true
     properties:
-      - name: 'kmsKey'
+      - name: kmsKey
         type: String
         description: |
           The Cloud KMS CryptoKey e.g.
@@ -396,13 +396,13 @@ properties:
           Google-managed key will be used instead.
         immutable: true
         default_from_api: true
-      - name: 'kmsKeyActiveVersion'
+      - name: kmsKeyActiveVersion
         type: String
         description: |
           The Cloud KMS CryptoKeyVersion currently in use for protecting control
           plane disks. Only applicable if kms_key is set.
         output: true
-      - name: 'kmsKeyState'
+      - name: kmsKeyState
         type: String
         description: |
           Availability of the Cloud KMS CryptoKey. If not `KEY_AVAILABLE`, then
@@ -410,7 +410,7 @@ properties:
           caused by a lack of permissions to use the key, or if the key is disabled
           or deleted.
         output: true
-      - name: 'kmsStatus'
+      - name: kmsStatus
         type: NestedObject
         description: |
           Error status returned by Cloud KMS when using this key. This field may be
@@ -418,23 +418,20 @@ properties:
           If populated, this field contains the error status reported by Cloud KMS.
         output: true
         properties:
-          - name: 'code'
+          - name: code
             type: Integer
             description: The status code, which should be an enum value of google.rpc.Code.
             output: true
-          - name: 'message'
+          - name: message
             type: String
-            description:
-              A developer-facing error message, which should be in English.
-              Any user-facing error message should be localized and sent in
-              the google.rpc.Status.details field, or localized by the client.
+            description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
             output: true
-  - name: 'status'
+  - name: status
     type: String
     description: |
       Indicates the status of the cluster.
     output: true
-  - name: 'maintenanceEvents'
+  - name: maintenanceEvents
     type: Array
     description: |
       All the maintenance events scheduled for the cluster, including the ones
@@ -443,17 +440,17 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'uuid'
+        - name: uuid
           type: String
           description: |
             UUID of the maintenance event.
           output: true
-        - name: 'targetVersion'
+        - name: targetVersion
           type: String
           description: |
             The target version of the cluster.
           output: true
-        - name: 'operation'
+        - name: operation
           type: String
           description: |
             The operation for running the maintenance event. Specified in the format
@@ -461,56 +458,56 @@ properties:
             into multiple operations (e.g. due to maintenance windows), the latest
             one is recorded.
           output: true
-        - name: 'type'
+        - name: type
           type: String
           description: |
             Indicates the maintenance event type.
           output: true
-        - name: 'schedule'
+        - name: schedule
           type: String
           description: |
             The schedule of the maintenance event.
           output: true
-        - name: 'state'
+        - name: state
           type: String
           description: |
             Indicates the maintenance event state.
           output: true
-        - name: 'createTime'
+        - name: createTime
           type: Time
           description: |
             The time when the maintenance event request was created.
           output: true
-        - name: 'startTime'
+        - name: startTime
           type: Time
           description: |
             The time when the maintenance event started.
           output: true
-        - name: 'endTime'
+        - name: endTime
           type: Time
           description: |
             The time when the maintenance event ended, either successfully or not. If
             the maintenance event is split into multiple maintenance windows,
             end_time is only updated when the whole flow ends.
           output: true
-        - name: 'updateTime'
+        - name: updateTime
           type: Time
           description: |
             The time when the maintenance event message was updated.
           output: true
-  - name: 'targetVersion'
+  - name: targetVersion
     type: String
     description: |
       The target cluster version. For example: "1.5.0".
     default_from_api: true
-    update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}:upgrade'
-    update_verb: 'POST'
-  - name: 'releaseChannel'
+    update_url: projects/{{project}}/locations/{{location}}/clusters/{{name}}:upgrade
+    update_verb: POST
+  - name: releaseChannel
     type: Enum
     description: |
       The release channel a cluster is subscribed to.
     default_from_api: true
     enum_values:
-      - 'RELEASE_CHANNEL_UNSPECIFIED'
-      - 'NONE'
-      - 'REGULAR'
+      - RELEASE_CHANNEL_UNSPECIFIED
+      - NONE
+      - REGULAR

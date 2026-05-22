@@ -1,3 +1,4 @@
+---
 # Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,14 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-name: 'IAM3'
-legacy_name: 'iam'
-display_name: 'Cloud IAM'
+name: IAM3
+legacy_name: iam
+display_name: Cloud IAM
 versions:
-  - name: 'beta'
-    base_url: 'https://iam.googleapis.com/v3beta/'
-  - name: 'ga'
-    base_url: 'https://iam.googleapis.com/v3/'
+  - name: beta
+    base_url: https://iam.googleapis.com/v3beta/
+  - name: ga
+    base_url: https://iam.googleapis.com/v3/
 scopes:
-  - 'https://www.googleapis.com/auth/iam'
+  - https://www.googleapis.com/auth/iam

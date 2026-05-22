@@ -12,22 +12,22 @@
 # limitations under the License.
 
 ---
-name: 'OrganizationSecurityPolicyAssociation'
+name: OrganizationSecurityPolicyAssociation
 api_resource_type_kind: SecurityPolicy
-api_resource_field: 'associations'
+api_resource_field: associations
 description: |
   An association for the OrganizationSecurityPolicy.
 references:
   guides:
-    'Associating a policy with the organization or folder': 'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/organizationSecurityPolicies/addAssociation'
+    Associating a policy with the organization or folder: https://cloud.google.com/vpc/docs/using-firewall-policies#associate
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/organizationSecurityPolicies/addAssociation
 docs:
 id_format: '{{policy_id}}/association/{{name}}'
 base_url: '{{policy_id}}'
 self_link: '{{policy_id}}/getAssociation?name={{name}}'
 create_url: '{{policy_id}}/addAssociation'
 delete_url: '{{policy_id}}/removeAssociation?name={{name}}'
-delete_verb: 'POST'
+delete_verb: POST
 immutable: true
 import_format:
   - '{{%policy_id}}/association/{{name}}'
@@ -36,26 +36,30 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_create: 'templates/terraform/post_create/org_security_policy_association.go.tmpl'
-  post_delete: 'templates/terraform/post_create/org_security_policy_association.go.tmpl'
+  post_create: templates/terraform/post_create/org_security_policy_association.go.tmpl
+  post_delete: templates/terraform/post_create/org_security_policy_association.go.tmpl
   # TODO: Remove once b/154369201 is closed.
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-read_error_transform: 'transformSecurityPolicyAssociationReadError'
-examples:
-  - name: 'organization_security_policy_association_basic'
-    primary_resource_id: 'policy'
-    vars:
-      short_name: "my-short-name"
-    test_env_vars:
-      org_id: 'ORG_TARGET'
-  - name: 'organization_security_policy_association_excluded'
-    primary_resource_id: 'policy'
-    vars:
-      short_name: "my-short-name-excluded"
-    test_env_vars:
-      org_id: 'ORG_TARGET'
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
+read_error_transform: transformSecurityPolicyAssociationReadError
+samples:
+  - name: organization_security_policy_association_basic
+    primary_resource_id: policy
+    steps:
+      - name: organization_security_policy_association_basic
+        resource_id_vars:
+          short_name: my-short-name
+        test_env_vars:
+          org_id: ORG_TARGET
+  - name: organization_security_policy_association_excluded
+    primary_resource_id: policy
+    steps:
+      - name: organization_security_policy_association_excluded
+        resource_id_vars:
+          short_name: my-short-name-excluded
+        test_env_vars:
+          org_id: ORG_TARGET
 parameters:
-  - name: 'policyId'
+  - name: policyId
     type: String
     description: |
       The security policy ID of the association.
@@ -63,28 +67,28 @@ parameters:
     url_param_only: true
     required: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name for an association.
     required: true
-  - name: 'attachmentId'
+  - name: attachmentId
     type: String
     description: |
       The resource that the security policy is attached to.
     required: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       The display name of the security policy of the association.
     output: true
-  - name: 'excludedProjects'
+  - name: excludedProjects
     type: Array
     description: |
       A list of projects to exclude from the security policy.
     item_type:
       type: String
-  - name: 'excludedFolders'
+  - name: excludedFolders
     type: Array
     description: |
       A list of folders to exclude from the security policy.

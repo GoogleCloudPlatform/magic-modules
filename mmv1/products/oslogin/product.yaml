@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'OSLogin'
-display_name: 'OS Login'
+name: OSLogin
+display_name: OS Login
 versions:
-  - name: 'ga'
-    base_url: 'https://oslogin.googleapis.com/v1/'
+  - name: ga
+    base_url: https://oslogin.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
-  - 'https://www.googleapis.com/auth/compute'
+  - https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/compute

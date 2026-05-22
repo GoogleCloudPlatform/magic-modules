@@ -27,23 +27,24 @@ update_mask: true
 # This is a singleton resource that cannot be deleted, so skip delete.
 exclude_delete: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/googleChannelConfig'
+  - projects/{{project}}/locations/{{location}}/googleChannelConfig
   - '{{project}}/{{location}}'
   - '{{location}}'
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/eventarc/docs/use-cmek#enable-cmek-google-channel'
+    Official Documentation: https://cloud.google.com/eventarc/docs/use-cmek#enable-cmek-google-channel
   api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations
 include_in_tgc_next: true
 description: |
- The Eventarc GoogleChannelConfig resource
-examples:
+  The Eventarc GoogleChannelConfig resource
+samples:
   - name: eventarc_google_channel_config_with_cmek
     primary_resource_id: primary
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    # All tests are handwritten to ensure they don't run in parallel.
     exclude_test: true
+    steps:
+      - name: eventarc_google_channel_config_with_cmek
+        test_env_vars:
+          project_name: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -66,8 +67,7 @@ properties:
     type: String
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     description: Optional. Resource name of a KMS crypto key (managed by the user) used to encrypt/decrypt their event data. It must match the pattern `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
-
 tgc_tests:
-  - name: 'TestAccEventarcGoogleChannelConfig/basic'
-  - name: 'TestAccEventarcGoogleChannelConfig/cryptoKeyUpdate'
-  - name: 'TestAccEventarcGoogleChannelConfig/longForm'
+  - name: TestAccEventarcGoogleChannelConfig/basic
+  - name: TestAccEventarcGoogleChannelConfig/cryptoKeyUpdate
+  - name: TestAccEventarcGoogleChannelConfig/longForm

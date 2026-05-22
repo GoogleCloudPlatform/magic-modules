@@ -1,3 +1,5 @@
+---
+!ruby/object:Api::Resource
 # Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,29 +12,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
---- !ruby/object:Api::Resource
-name: 'SipTrunk'
-base_url: 'projects/{{project}}/locations/{{location}}/sipTrunks'
-create_url: 'projects/{{project}}/locations/{{location}}/sipTrunks'
-update_verb: 'PATCH'
+name: SipTrunk
+base_url: projects/{{project}}/locations/{{location}}/sipTrunks
+create_url: projects/{{project}}/locations/{{location}}/sipTrunks
+update_verb: PATCH
 update_mask: true
 description: |
   SipTrunk is the resource that represents a SIP trunk to connect to the Google Telephony Platform SIP trunking service.
 references:
-  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.sipTrunks'
+  api: https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.sipTrunks
 id_format: '{{name}}'
 self_link: '{{name}}'
 import_format:
   - '{{name}}'
 custom_code:
-  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-  pre_read: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
+  pre_create: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  pre_read: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  pre_update: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  pre_delete: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  custom_import: templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     url_param_only: true
     description: |
@@ -41,23 +41,23 @@ parameters:
     immutable: true
 properties:
   - type: String
-    name: 'name'
+    name: name
     description: |
       Identifier. The unique identifier of the SIP trunk.
     output: true
   - type: Array
-    name: 'expectedHostname'
+    name: expectedHostname
     description: |
       Required. The expected hostnames in the peer certificate from the partner that is used for TLS authentication.
     required: true
     item_type:
       type: String
   - type: String
-    name: 'displayName'
+    name: displayName
     description: |
       Optional. Human-readable alias for this trunk.
   - type: Array
-    name: 'connections'
+    name: connections
     description: |
       Output only. The connections of the SIP trunk.
     output: true
@@ -65,38 +65,40 @@ properties:
       type: NestedObject
       properties:
         - type: String
-          name: 'connectionId'
+          name: connectionId
           description: |
             Output only. The unique identifier of the connection.
           output: true
         - type: String
-          name: 'state'
+          name: state
           description: |
             Output only. The state of the connection.
           output: true
         - type: String
-          name: 'updateTime'
+          name: updateTime
           description: |
             Output only. The last update time of the connection.
           output: true
         - type: NestedObject
-          name: 'errorDetails'
+          name: errorDetails
           description: |
             Output only. The error details of the connection.
           output: true
           properties:
             - type: String
-              name: 'code'
+              name: code
               description: |
                 Output only. The error code.
               output: true
             - type: String
-              name: 'message'
+              name: message
               description: |
                 Output only. The error message.
               output: true
-examples:
-  - name: 'dialogflow_sip_trunk_basic'
-    primary_resource_id: 'basic_trunk'
-    vars:
-      trunk_name: 'basic-trunk'
+samples:
+  - name: dialogflow_sip_trunk_basic
+    primary_resource_id: basic_trunk
+    steps:
+      - name: dialogflow_sip_trunk_basic
+        resource_id_vars:
+          trunk_name: basic-trunk

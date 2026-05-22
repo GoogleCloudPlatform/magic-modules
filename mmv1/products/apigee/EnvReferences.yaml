@@ -12,14 +12,14 @@
 # limitations under the License.
 
 ---
-name: 'EnvReferences'
+name: EnvReferences
 api_resource_type_kind: Reference
 description: |
   An `Environment Reference` in Apigee.
 references:
   guides:
-    'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.references/create'
+    Creating an environment: https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.references/create
 docs:
 base_url: '{{env_id}}/references'
 self_link: '{{env_id}}/references/{{name}}'
@@ -35,20 +35,21 @@ timeouts:
   delete_minutes: 1
 autogen_async: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_environment_reference.go.tmpl'
+  custom_import: templates/terraform/custom_import/apigee_environment_reference.go.tmpl
 exclude_sweeper: true
-examples:
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_environment_reference_test'
-    primary_resource_id: 'apigee_environment_reference'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+samples:
+  - name: apigee_environment_reference_test
+    external_providers:
+      - time
+    primary_resource_id: apigee_environment_reference
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_environment_reference_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'envId'
+  - name: envId
     type: String
     description: |
       The Apigee environment group associated with the Apigee environment,
@@ -57,24 +58,24 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Required. The resource id of this reference. Values must match the regular expression [\w\s-.]+.
     required: true
     immutable: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Optional. A human-readable description of this reference.
     immutable: true
-  - name: 'resourceType'
+  - name: resourceType
     type: String
     description: |
       The type of resource referred to by this reference. Valid values are 'KeyStore' or 'TrustStore'.
     required: true
     immutable: true
-  - name: 'refers'
+  - name: refers
     type: String
     description: |
       Required. The id of the resource to which this reference refers. Must be the id of a resource that exists in the parent environment and is of the given resourceType.

@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Spanner'
-display_name: 'Cloud Spanner'
+name: Spanner
+display_name: Cloud Spanner
 versions:
-  - name: 'ga'
-    base_url: 'https://spanner.googleapis.com/v1/'
+  - name: ga
+    base_url: https://spanner.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/spanner.admin'
+  - https://www.googleapis.com/auth/spanner.admin

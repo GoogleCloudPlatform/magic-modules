@@ -30,18 +30,18 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  custom_delete: 'templates/terraform/custom_delete/clear_migration_center_settings.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+  custom_delete: templates/terraform/custom_delete/clear_migration_center_settings.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
 autogen_status: U2V0dGluZ3M=
 autogen_async: true
-examples:
-  - name: 'migration_center_settings_basic'
-    primary_resource_id: 'default'
-    # Exclude basic test as this is a singleton and conflicts with the update test
-    # The update test covers this scenario
+samples:
+  - name: migration_center_settings_basic
+    primary_resource_id: default
     exclude_test: true
-    vars:
-      pref_set_id: 'pref-set-test'
+    steps:
+      - name: migration_center_settings_basic
+        resource_id_vars:
+          pref_set_id: pref-set-test
 parameters:
   - name: location
     type: String

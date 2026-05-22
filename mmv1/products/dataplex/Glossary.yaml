@@ -12,13 +12,13 @@
 # limitations under the License.
 
 ---
-name: 'Glossary'
+name: Glossary
 description: |
   Represents a collection of categories and terms defined by the user. Glossary is a top level resource and is the GCP parent resource of all the categories and terms within it.
-base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/glossaries?glossary_id={{glossary_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}
+self_link: projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}
+create_url: projects/{{project}}/locations/{{location}}/glossaries?glossary_id={{glossary_id}}
+update_verb: PATCH
 update_mask: true
 timeouts:
   insert_minutes: 15
@@ -27,35 +27,39 @@ timeouts:
 autogen_async: true
 import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}']
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
 iam_policy:
   method_name_separator: ':'
-  parent_resource_attribute: 'glossary_id'
+  parent_resource_attribute: glossary_id
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
+    - projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}
     - '{{glossary_id}}'
 include_in_tgc_next: true
-examples:
-  - name: 'dataplex_glossary_basic'
-    primary_resource_id: 'glossary_test_id'
-    vars:
-      glossary_name: 'glossary-basic'
-  - name: 'dataplex_glossary_full'
-    primary_resource_id: 'glossary_test_id_full'
-    vars:
-      glossary_name: 'glossary-full'
+samples:
+  - name: dataplex_glossary_basic
+    primary_resource_id: glossary_test_id
+    steps:
+      - name: dataplex_glossary_basic
+        resource_id_vars:
+          glossary_name: glossary-basic
+  - name: dataplex_glossary_full
+    primary_resource_id: glossary_test_id_full
+    steps:
+      - name: dataplex_glossary_full
+        resource_id_vars:
+          glossary_name: glossary-full
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location where the glossary should reside.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'glossaryId'
+  - name: glossaryId
     type: String
     description: |
       The glossary id for creation.
@@ -63,48 +67,48 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the Glossary. Format: projects/{projectId}/locations/{locationId}/glossaries/{glossaryId}
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User friendly display name of the glossary. This is user-mutable. This will be same as the glossaryId, if not specified.
     required: false
-  - name: 'description'
+  - name: description
     type: String
     description: |
       The user-mutable description of the glossary.
     required: false
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       User-defined labels for the Glossary.
     required: false
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       System generated unique id for the Glossary. This ID will be different if the Glossary is deleted and re-created with the same name.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       The time at which the glossary was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       The time at which the glossary was last updated.
     output: true
-  - name: 'termCount'
+  - name: termCount
     type: Integer
     description: |
       The number of terms in the glossary.
     required: false
     output: true
-  - name: 'categoryCount'
+  - name: categoryCount
     type: Integer
     description: |
       The number of categories in the glossary.

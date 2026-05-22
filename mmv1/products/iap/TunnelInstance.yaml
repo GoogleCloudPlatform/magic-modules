@@ -12,39 +12,41 @@
 # limitations under the License.
 
 ---
-name: 'TunnelInstance'
+name: TunnelInstance
 description: |
   Only used to generate IAM resources
 # This resource is only used to generate IAM resources. They do not correspond to real
 # GCP resources, and should not be used to generate anything other than IAM support.
 exclude_resource: true
 docs:
-id_format: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
-base_url: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
-self_link: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
+id_format: projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}
+base_url: projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}
+self_link: projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}
 import_format:
-  - 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
-  - 'projects/{{project}}/zones/{{zone}}/instances/{{name}}'
+  - projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}
+  - projects/{{project}}/zones/{{zone}}/instances/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 iam_policy:
   method_name_separator: ':'
-  parent_resource_type: 'google_compute_instance'
-  fetch_iam_policy_verb: 'POST'
-  allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
-  parent_resource_attribute: 'instance'
-  iam_conditions_request_type: 'REQUEST_BODY'
+  parent_resource_type: google_compute_instance
+  fetch_iam_policy_verb: POST
+  allowed_iam_role: roles/iap.tunnelResourceAccessor
+  parent_resource_attribute: instance
+  iam_conditions_request_type: REQUEST_BODY
 custom_code:
-examples:
-  - name: 'instance_basic'
-    primary_resource_id: 'tunnelvm'
-    vars:
-      instance_name: 'tunnel-vm'
+samples:
+  - name: instance_basic
+    primary_resource_id: tunnelvm
+    steps:
+      - name: instance_basic
+        resource_id_vars:
+          instance_name: tunnel-vm
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: Name of the instance.
     required: true

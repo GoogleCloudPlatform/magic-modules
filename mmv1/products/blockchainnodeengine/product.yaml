@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'BlockchainNodeEngine'
-display_name: 'Blockchain Node Engine'
+name: BlockchainNodeEngine
+display_name: Blockchain Node Engine
 versions:
-  - name: 'ga'
-    base_url: 'https://blockchainnodeengine.googleapis.com/v1/'
+  - name: ga
+    base_url: https://blockchainnodeengine.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

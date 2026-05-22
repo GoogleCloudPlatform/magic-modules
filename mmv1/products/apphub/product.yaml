@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Apphub'
-display_name: 'App Hub'
+name: Apphub
+display_name: App Hub
 versions:
-  - name: 'ga'
-    base_url: 'https://apphub.googleapis.com/v1/'
+  - name: ga
+    base_url: https://apphub.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

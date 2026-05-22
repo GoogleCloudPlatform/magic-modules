@@ -13,12 +13,11 @@
 
 ---
 name: MulticastConsumerAssociation
-description: Create a multicast consumer association in the specified location
-  of the current project.
+description: Create a multicast consumer association in the specified location of the current project.
 references:
   guides:
-    'Create Multicast Consumer Association': 'https://docs.cloud.google.com/vpc/docs/multicast/enable-consumer-network#add-consumer'
-  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastConsumerAssociations'
+    Create Multicast Consumer Association: https://docs.cloud.google.com/vpc/docs/multicast/enable-consumer-network#add-consumer
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastConsumerAssociations
 base_url: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations/{{multicast_consumer_association_id}}
@@ -29,15 +28,17 @@ import_format:
   - projects/{{project}}/locations/{{location}}/multicastConsumerAssociations/{{multicast_consumer_association_id}}
 sweeper:
   url_substitutions:
-    - location: "us-central1-b"
-examples:
+    - location: us-central1-b
+samples:
   - name: network_services_multicast_consumer_association_basic
     primary_resource_id: mca_test
-    vars:
-      network_name: test-network-mca
-      domain_name: test-domain-mca
-      domain_activation_name: test-domain-activation-mca
-      consumer_association_name: test-consumer-association-mca
+    steps:
+      - name: network_services_multicast_consumer_association_basic
+        resource_id_vars:
+          consumer_association_name: test-consumer-association-mca
+          domain_activation_name: test-domain-activation-mca
+          domain_name: test-domain-mca
+          network_name: test-network-mca
 autogen_async: true
 async:
   operation:

@@ -12,32 +12,34 @@
 # limitations under the License.
 
 ---
-name: 'WidgetConfig'
-description: 'Represents a WidgetConfig.'
+name: WidgetConfig
+description: Represents a WidgetConfig.
 references:
-  api: 'https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1alpha/projects.locations.collections.engines.widgetConfigs'
-base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/widgetConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/widgetConfigs/{{widget_config_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/widgetConfigs/{{widget_config_id}}'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+  api: https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1alpha/projects.locations.collections.engines.widgetConfigs
+base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/widgetConfigs
+self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/widgetConfigs/{{widget_config_id}}
+create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/widgetConfigs/{{widget_config_id}}
+create_verb: PATCH
+update_verb: PATCH
 update_mask: true
 exclude_delete: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/widgetConfigs/{{widget_config_id}}'
+  - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/widgetConfigs/{{widget_config_id}}
 timeouts:
   insert_minutes: 5
   update_minutes: 5
-examples:
-  - name: 'discoveryengine_widgetconfig_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-      engine_id: 'engine-id'
+samples:
+  - name: discoveryengine_widgetconfig_basic
+    primary_resource_id: basic
+    steps:
+      - name: discoveryengine_widgetconfig_basic
+        resource_id_vars:
+          data_store_id: data-store-id
+          engine_id: engine-id
 custom_code:
-  pre_create: 'templates/terraform/pre_create/discoveryengine_widget_config.go.tmpl'
+  pre_create: templates/terraform/pre_create/discoveryengine_widget_config.go.tmpl
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the data store should reside. The value can
@@ -45,107 +47,106 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'collectionId'
+  - name: collectionId
     type: String
-    description: 'The collection ID.'
+    description: The collection ID.
     url_param_only: true
     immutable: true
-    default_value: 'default_collection'
-  - name: 'engineId'
+    default_value: default_collection
+  - name: engineId
     type: String
-    description: 'The engine ID.'
+    description: The engine ID.
     required: true
     url_param_only: true
     immutable: true
-  - name: 'widgetConfigId'
+  - name: widgetConfigId
     type: String
     description: |
       The unique ID to use for the WidgetConfig. Currently only accepts "default_search_widget_config".
     url_param_only: true
     immutable: true
-    default_value: 'default_search_widget_config'
+    default_value: default_search_widget_config
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The full resource name of the widget config. Format:
       `projects/{project}/locations/{location}/collections/{collection_id}/engines/{engine_id}/widgetConfigs/{widget_config_id}`.
     output: true
-  - name: 'configId'
+  - name: configId
     type: String
-    description: 'Output only. Unique obfuscated identifier of a WidgetConfig.'
+    description: Output only. Unique obfuscated identifier of a WidgetConfig.
     output: true
-  - name: 'accessSettings'
+  - name: accessSettings
     type: NestedObject
-    description: 'Describes widget access settings.'
+    description: Describes widget access settings.
     default_from_api: true
     properties:
-      - name: 'allowPublicAccess'
+      - name: allowPublicAccess
         type: Boolean
-        description: 'Whether public unauthenticated access is allowed.'
-      - name: 'allowlistedDomains'
+        description: Whether public unauthenticated access is allowed.
+      - name: allowlistedDomains
         type: Array
-        description: 'List of domains that are allowed to integrate the search widget.'
+        description: List of domains that are allowed to integrate the search widget.
         item_type:
           type: String
-      - name: 'enableWebApp'
+      - name: enableWebApp
         type: Boolean
-        description: 'Whether web app access is enabled.'
-      - name: 'workforceIdentityPoolProvider'
+        description: Whether web app access is enabled.
+      - name: workforceIdentityPoolProvider
         type: String
         description: |
           The workforce identity pool provider used to access the widget.
-      - name: 'languageCode'
+      - name: languageCode
         type: String
         description: |
           Language code for user interface. Use language tags defined by
           [BCP47](https://www.rfc-editor.org/rfc/bcp/bcp47.txt). If unset, the
           default language code is "en-US".
-
-  - name: 'uiSettings'
+  - name: uiSettings
     type: NestedObject
-    description: 'Describes general widget (or web app) UI settings as seen in the cloud console UI configuration page.'
+    description: Describes general widget (or web app) UI settings as seen in the cloud console UI configuration page.
     default_from_api: true
     properties:
-      - name: 'interactionType'
+      - name: interactionType
         type: Enum
-        description: 'Describes widget (or web app) interaction type'
+        description: Describes widget (or web app) interaction type
         enum_values:
-          - 'SEARCH_ONLY'
-          - 'SEARCH_WITH_ANSWER'
-          - 'SEARCH_WITH_FOLLOW_UPS'
-      - name: 'generativeAnswerConfig'
+          - SEARCH_ONLY
+          - SEARCH_WITH_ANSWER
+          - SEARCH_WITH_FOLLOW_UPS
+      - name: generativeAnswerConfig
         type: NestedObject
-        description: 'Describes generative answer configuration.'
+        description: Describes generative answer configuration.
         properties:
-          - name: 'resultCount'
+          - name: resultCount
             type: Integer
             description: |
               The number of top results to generate the answer from. Up to 10.
-          - name: 'modelVersion'
+          - name: modelVersion
             type: String
             description: |
               The model version used to generate the answer.
-          - name: 'modelPromptPreamble'
+          - name: modelPromptPreamble
             type: String
             description: |
               Text at the beginning of the prompt that instructs the model that generates the answer.
-          - name: 'maxRephraseSteps'
+          - name: maxRephraseSteps
             type: Integer
             description: |
               Max rephrase steps. The max number is 5 steps. If not set or
               set to < 1, it will be set to 1 by default.
-          - name: 'languageCode'
+          - name: languageCode
             type: String
             description: |
               Language code for Summary. Use language tags defined by
               [BCP47](https://www.rfc-editor.org/rfc/bcp/bcp47.txt). Note: This
               is an experimental feature.
-          - name: 'disableRelatedQuestions'
+          - name: disableRelatedQuestions
             type: Boolean
             description: |
               Whether generated answer contains suggested related questions.
-          - name: 'ignoreNonAnswerSeekingQuery'
+          - name: ignoreNonAnswerSeekingQuery
             type: Boolean
             description: |
               Specifies whether to filter out queries that are not answer-seeking.
@@ -153,74 +154,74 @@ properties:
               is classified as a non-answer seeking query.
               If this field is set to `true`, we skip generating answers for
               non-answer seeking queries and return fallback messages instead.
-          - name: 'ignoreAdversarialQuery'
+          - name: ignoreAdversarialQuery
             type: Boolean
             description: |
               Specifies whether to filter out queries that are adversarial.
-          - name: 'ignoreLowRelevantContent'
+          - name: ignoreLowRelevantContent
             type: Boolean
             description: |
               Specifies whether to filter out queries that are not relevant to the content.
-          - name: 'imageSource'
+          - name: imageSource
             type: Enum
-            description: 'Source of image returned in the answer.'
+            description: Source of image returned in the answer.
             enum_values:
-              - 'ALL_AVAILABLE_SOURCES'
-              - 'CORPUS_IMAGE_ONLY'
-              - 'FIGURE_GENERATION_ONLY'
-      - name: 'resultDescriptionType'
+              - ALL_AVAILABLE_SOURCES
+              - CORPUS_IMAGE_ONLY
+              - FIGURE_GENERATION_ONLY
+      - name: resultDescriptionType
         type: Enum
         description: |
           Controls whether result extract is display and how (snippet or extractive answer).
           Default to no result if unspecified.
         enum_values:
-          - 'SNIPPET'
-          - 'EXTRACTIVE_ANSWER'
-      - name: 'enableAutocomplete'
+          - SNIPPET
+          - EXTRACTIVE_ANSWER
+      - name: enableAutocomplete
         type: Boolean
-        description: 'Whether or not to enable autocomplete.'
-      - name: 'enableSafeSearch'
+        description: Whether or not to enable autocomplete.
+      - name: enableSafeSearch
         type: Boolean
-        description: 'Whether to enable safe search.'
-      - name: 'enableQualityFeedback'
+        description: Whether to enable safe search.
+      - name: enableQualityFeedback
         type: Boolean
         description: |
           Turn on or off collecting the search result quality feedback from end users.
-      - name: 'enableSearchAsYouType'
+      - name: enableSearchAsYouType
         type: Boolean
         description: |
           Whether to enable search-as-you-type behavior for the search widget.
-      - name: 'defaultSearchRequestOrderBy'
+      - name: defaultSearchRequestOrderBy
         type: String
         description: |
           The default ordering for search results if specified.
           Used to set SearchRequest#orderBy on applicable requests.
-      - name: 'dataStoreUiConfigs'
+      - name: dataStoreUiConfigs
         type: Array
-        description: 'Per data store configuration.'
+        description: Per data store configuration.
         item_type:
           type: NestedObject
           properties:
-            - name: 'name'
+            - name: name
               type: String
               description: |
                 The name of the data store. It should be data store resource name. Format:
                 `projects/{project}/locations/{location}/collections/{collectionId}/dataStores/{dataStoreId}`.
                 For APIs under `WidgetService`, such as [WidgetService.LookUpWidgetConfig][],
                 the project number and location part is erased in this field.
-            - name: 'facetField'
+            - name: facetField
               type: Array
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'field'
+                  - name: field
                     type: String
-                    description: 'Registered field name. The format is `field.abc`.'
+                    description: Registered field name. The format is `field.abc`.
                     required: true
-                  - name: 'displayName'
+                  - name: displayName
                     type: String
-                    description: 'The field name that end users will see.'
-            - name: 'fieldsUiComponentsMap'
+                    description: The field name that end users will see.
+            - name: fieldsUiComponentsMap
               type: Map
               description: |
                 'The key is the UI component. Currently supported `title`, `thumbnail`,
@@ -228,81 +229,81 @@ properties:
                 the field along with its device visibility. The 3 custom fields are optional
                 and can be added or removed.
                 `title`, `thumbnail`, `url` are required UI components that cannot be removed.
-              key_name: 'ui_component'
+              key_name: ui_component
               value_type:
                 type: NestedObject
                 description: |
                   The name of the field along with its device visibility and display template.
                 properties:
-                  - name: 'field'
+                  - name: field
                     type: String
-                    description: 'Registered field name. The format is `field.abc`.'
+                    description: Registered field name. The format is `field.abc`.
                     required: true
-                  - name: 'deviceVisibility'
+                  - name: deviceVisibility
                     type: Array
                     item_type:
                       type: Enum
                       enum_values:
-                        - 'MOBILE'
-                        - 'DESKTOP'
-                  - name: 'displayTemplate'
+                        - MOBILE
+                        - DESKTOP
+                  - name: displayTemplate
                     type: String
                     description: |
                       The template to customize how the field is displayed.
                       An example value would be a string that looks like: "Price: {value}".
-      - name: 'disableUserEventsCollection'
+      - name: disableUserEventsCollection
         type: Boolean
-        description: 'If set to true, the widget will not collect user events.'
-      - name: 'enableVisualContentSummary'
+        description: If set to true, the widget will not collect user events.
+      - name: enableVisualContentSummary
         type: Boolean
         description: |
           If set to true, the widget will enable visual content summary on applicable
           search requests. Only used by healthcare search.
-      - name: 'enablePeopleSearch'
+      - name: enablePeopleSearch
         type: Boolean
-        description: 'If set to true, the widget will enable people search.'
-      - name: 'enableCreateAgentButton'
+        description: If set to true, the widget will enable people search.
+      - name: enableCreateAgentButton
         type: Boolean
-        description: 'If set to true, the widget will enable the create agent button.'
-  - name: 'uiBranding'
+        description: If set to true, the widget will enable the create agent button.
+  - name: uiBranding
     type: NestedObject
     description: |
       Describes search widget UI branding settings, such as the widget title, logo,
       favicons, and colors.
     properties:
-      - name: 'logo'
+      - name: logo
         type: NestedObject
-        description: 'Logo image.'
+        description: Logo image.
         properties:
-          - name: 'url'
+          - name: url
             type: String
-            description: 'Image URL.'
+            description: Image URL.
             exactly_one_of:
-              - 'url'
-  - name: 'homepageSetting'
+              - url
+  - name: homepageSetting
     type: NestedObject
     description: |
       Describes the homepage setting of the widget. It includes all homepage related settings
       and configurations, such as shortcuts.
     properties:
-      - name: 'shortcuts'
+      - name: shortcuts
         type: Array
-        description: 'The shortcuts to display on the homepage.'
+        description: The shortcuts to display on the homepage.
         item_type:
           type: NestedObject
           properties:
-            - name: 'title'
+            - name: title
               type: String
-              description: 'Title of the shortcut.'
-            - name: 'icon'
+              description: Title of the shortcut.
+            - name: icon
               type: NestedObject
-              description: 'Icon URL of shortcut.'
+              description: Icon URL of shortcut.
               properties:
-                - name: 'url'
+                - name: url
                   type: String
-                  description: 'Image URL.'
+                  description: Image URL.
                   exactly_one_of:
-                    - 'url'
-            - name: 'destinationUri'
+                    - url
+            - name: destinationUri
               type: String
-              description: 'Destination URL of shortcut.'
+              description: Destination URL of shortcut.

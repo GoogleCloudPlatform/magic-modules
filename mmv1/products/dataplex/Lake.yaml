@@ -12,32 +12,34 @@
 # limitations under the License.
 
 ---
-name: 'Lake'
+name: Lake
 description: |
   Only used to generate IAM resources
 exclude_resource: true
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
+base_url: projects/{{project}}/locations/{{location}}/lakes/{{name}}
+self_link: projects/{{project}}/locations/{{location}}/lakes/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 iam_policy:
   method_name_separator: ':'
-  parent_resource_attribute: 'lake'
+  parent_resource_attribute: lake
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
+    - projects/{{project}}/locations/{{location}}/lakes/{{name}}
     - '{{name}}'
 custom_code:
-examples:
-  - name: 'dataplex_lake_primary'
-    primary_resource_id: 'example'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_lake_primary
+    primary_resource_id: example
+    steps:
+      - name: dataplex_lake_primary
+        test_env_vars:
+          project_name: PROJECT_NAME
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Dummy property.

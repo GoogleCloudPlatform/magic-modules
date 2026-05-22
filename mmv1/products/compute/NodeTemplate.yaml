@@ -12,18 +12,18 @@
 # limitations under the License.
 
 ---
-name: 'NodeTemplate'
-kind: 'compute#nodeTemplate'
+name: NodeTemplate
+kind: compute#nodeTemplate
 description: |
   Represents a NodeTemplate resource. Node templates specify properties
   for creating sole-tenant nodes, such as node type, vCPU and memory
   requirements, node affinity labels, and region.
 references:
   guides:
-    'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeTemplates'
+    Sole-Tenant Nodes: https://cloud.google.com/compute/docs/nodes/
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/nodeTemplates
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/nodeTemplates'
+base_url: projects/{{project}}/regions/{{region}}/nodeTemplates
 has_self_link: true
 immutable: true
 timeouts:
@@ -31,69 +31,77 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
+collection_url_key: items
 include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'node_template_basic'
-    primary_resource_id: 'template'
-    vars:
-      template_name: 'soletenant-tmpl'
-  - name: 'node_template_server_binding'
-    primary_resource_id: 'template'
-    vars:
-      template_name: 'soletenant-with-licenses'
-  - name: 'node_template_accelerators'
-    primary_resource_id: 'template'
-    vars:
-      template_name: 'soletenant-with-accelerators'
-  - name: 'node_template_disks'
-    primary_resource_id: 'template'
-    vars:
-      template_name: 'soletenant-with-disks'
+samples:
+  - name: node_template_basic
+    primary_resource_id: template
+    steps:
+      - name: node_template_basic
+        resource_id_vars:
+          template_name: soletenant-tmpl
+  - name: node_template_server_binding
+    primary_resource_id: template
+    steps:
+      - name: node_template_server_binding
+        resource_id_vars:
+          template_name: soletenant-with-licenses
+  - name: node_template_accelerators
+    primary_resource_id: template
+    steps:
+      - name: node_template_accelerators
+        resource_id_vars:
+          template_name: soletenant-with-accelerators
+  - name: node_template_disks
+    primary_resource_id: template
+    steps:
+      - name: node_template_disks
+        resource_id_vars:
+          template_name: soletenant-with-disks
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       Region where nodes using the node template will be created.
       If it is not provided, the provider region is used.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'selfLink'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: selfLink
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional textual description of the resource.'
-  - name: 'name'
+    description: An optional textual description of the resource.
+  - name: name
     type: String
-    description: 'Name of the resource.'
+    description: Name of the resource.
     required: true
-  - name: 'nodeAffinityLabels'
+  - name: nodeAffinityLabels
     type: KeyValuePairs
     description: |
       Labels to use for node affinity, which will be used in
       instance scheduling.
-  - name: 'nodeType'
+  - name: nodeType
     type: String
     description: |
       Node type to use for nodes group that are created from this template.
       Only one of nodeTypeFlexibility and nodeType can be specified.
     conflicts:
       - node_type_flexibility
-  - name: 'nodeTypeFlexibility'
+  - name: nodeTypeFlexibility
     type: NestedObject
     description: |
       Flexible properties for the desired node type. Node groups that
@@ -103,33 +111,33 @@ properties:
     conflicts:
       - node_type
     properties:
-      - name: 'cpus'
+      - name: cpus
         type: String
         description: |
           Number of virtual CPUs to use.
         at_least_one_of:
-          - 'node_type_flexibility.0.cpus'
-          - 'node_type_flexibility.0.memory'
-      - name: 'memory'
+          - node_type_flexibility.0.cpus
+          - node_type_flexibility.0.memory
+      - name: memory
         type: String
         description: |
           Physical memory available to the node, defined in MB.
         at_least_one_of:
-          - 'node_type_flexibility.0.cpus'
-          - 'node_type_flexibility.0.memory'
-      - name: 'localSsd'
+          - node_type_flexibility.0.cpus
+          - node_type_flexibility.0.memory
+      - name: localSsd
         type: String
         description: |
           Use local SSD
         output: true
-  - name: 'serverBinding'
+  - name: serverBinding
     type: NestedObject
     description: |
       The server binding policy for nodes using this template. Determines
       where the nodes should restart following a maintenance event.
     default_from_api: true
     properties:
-      - name: 'type'
+      - name: type
         type: Enum
         description: |
           Type of server binding policy. If `RESTART_NODE_ON_ANY_SERVER`,
@@ -146,9 +154,9 @@ properties:
           nodes will experience outages while maintenance is applied.
         required: true
         enum_values:
-          - 'RESTART_NODE_ON_ANY_SERVER'
-          - 'RESTART_NODE_ON_MINIMAL_SERVERS'
-  - name: 'accelerators'
+          - RESTART_NODE_ON_ANY_SERVER
+          - RESTART_NODE_ON_MINIMAL_SERVERS
+  - name: accelerators
     type: Array
     description: |
       List of the type and count of accelerator cards attached to the
@@ -156,25 +164,25 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'acceleratorCount'
+        - name: acceleratorCount
           type: Integer
           description: |
             The number of the guest accelerator cards exposed to this
             node template.
-        - name: 'acceleratorType'
+        - name: acceleratorType
           type: String
           description: |
             Full or partial URL of the accelerator type resource to expose
             to this node template.
-  - name: 'cpuOvercommitType'
+  - name: cpuOvercommitType
     type: Enum
     description: |
       CPU overcommit.
-    default_value: "NONE"
+    default_value: NONE
     enum_values:
-      - 'ENABLED'
-      - 'NONE'
-  - name: 'disks'
+      - ENABLED
+      - NONE
+  - name: disks
     type: Array
     description: |
       List of the type, size and count of disks attached to the
@@ -182,15 +190,15 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'diskCount'
+        - name: diskCount
           type: Integer
           description: |
             Specifies the number of such disks.
-        - name: 'diskType'
+        - name: diskType
           type: String
           description: |
             Specifies the desired disk type on the node. This disk type must be a local storage type (e.g.: local-ssd). Note that for nodeTemplates, this should be the name of the disk type and not its URL.
-        - name: 'diskSizeGb'
+        - name: diskSizeGb
           type: Integer
           description: |
             Specifies the size of the disk in base-2 GB.

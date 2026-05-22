@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Integrations'
-display_name: 'Application Integration'
+name: Integrations
+display_name: Application Integration
 versions:
-  - name: 'ga'
-    base_url: 'https://integrations.googleapis.com/v1/'
+  - name: ga
+    base_url: https://integrations.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

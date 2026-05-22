@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Storage'
-display_name: 'Cloud Storage'
+name: Storage
+display_name: Cloud Storage
 versions:
-  - name: 'ga'
-    base_url: 'https://storage.googleapis.com/storage/v1/'
+  - name: ga
+    base_url: https://storage.googleapis.com/storage/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/devstorage.full_control'
+  - https://www.googleapis.com/auth/devstorage.full_control

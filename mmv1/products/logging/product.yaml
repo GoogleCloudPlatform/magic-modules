@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Logging'
-display_name: 'Cloud (Stackdriver) Logging'
+name: Logging
+display_name: Cloud (Stackdriver) Logging
 versions:
-  - name: 'ga'
-    base_url: 'https://logging.googleapis.com/v2/'
+  - name: ga
+    base_url: https://logging.googleapis.com/v2/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

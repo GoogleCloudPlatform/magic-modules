@@ -12,39 +12,45 @@
 # limitations under the License.
 
 ---
-name: 'SecurityFeedback'
+name: SecurityFeedback
 description: |
   Represents a feedback report from an Advanced API Security customer.
   Manages customer feedback about ML models.
 references:
   guides:
-    'Create a SecurityFeedback': 'https://docs.cloud.google.com/apigee/docs/api-security/abuse-detection#exclude-traffic-from-abuse-detection'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityFeedback/create'
+    Create a SecurityFeedback: https://docs.cloud.google.com/apigee/docs/api-security/abuse-detection#exclude-traffic-from-abuse-detection
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityFeedback/create
 base_url: '{{org_id}}/securityFeedback'
 self_link: '{{org_id}}/securityFeedback/{{feedback_id}}'
 create_url: '{{org_id}}/securityFeedback?security_feedback_id={{feedback_id}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 import_format:
   - '{{org_id}}/securityFeedback/{{feedback_id}}'
   - '{{org_id}}/{{feedback_id}}'
 custom_code:
-  custom_import: "templates/terraform/custom_import/apigee_security_feedback.go.tmpl"
+  custom_import: templates/terraform/custom_import/apigee_security_feedback.go.tmpl
 # we'll exlude from due to custom_import
 exclude_identity_generation: true
-examples:
-  - name: 'apigee_security_feedback_basic'
-    vars:
-      security_feedback_id: 'my-feedback'
+samples:
+  - name: apigee_security_feedback_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_security_feedback_basic_test'
-    primary_resource_id: 'security_feedback'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+    steps:
+      - name: apigee_security_feedback_basic
+        resource_id_vars:
+          security_feedback_id: my-feedback
+  - name: apigee_security_feedback_basic_test
+    external_providers:
+      - time
+    primary_resource_id: security_feedback
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_security_feedback_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee Security Feedback,
@@ -52,7 +58,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'feedbackId'
+  - name: feedbackId
     type: String
     description: |
       Resource ID of the security feedback.
@@ -60,16 +66,16 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the security feedback resource,
       in the format `organizations/{{org_name}}/securityFeedback/{{feedback_id}}`.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: The display name of the feedback.
-  - name: 'feedbackContexts'
+  - name: feedbackContexts
     type: Array
     description: |
       One or more attribute/value pairs for constraining the feedback.
@@ -83,8 +89,8 @@ properties:
             The attribute the user is providing feedback about.
           required: true
           enum_values:
-            - 'ATTRIBUTE_ENVIRONMENTS'
-            - 'ATTRIBUTE_IP_ADDRESS_RANGES'
+            - ATTRIBUTE_ENVIRONMENTS
+            - ATTRIBUTE_IP_ADDRESS_RANGES
         - name: values
           type: Array
           description: |
@@ -92,29 +98,29 @@ properties:
           required: true
           item_type:
             type: String
-  - name: 'feedbackType'
+  - name: feedbackType
     type: Enum
     description: The type of feedback being submitted.
     required: true
     enum_values:
-      - 'EXCLUDED_DETECTION'
-  - name: 'createTime'
+      - EXCLUDED_DETECTION
+  - name: createTime
     type: String
     description: The time when this specific feedback id was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: The time when this specific feedback id was updated.
     output: true
-  - name: 'reason'
+  - name: reason
     type: Enum
     description: The reason for the feedback.
     enum_values:
-      - 'INTERNAL_SYSTEM'
-      - 'NON_RISK_CLIENT'
-      - 'NAT'
-      - 'PENETRATION_TEST'
-      - 'OTHER'
-  - name: 'comment'
+      - INTERNAL_SYSTEM
+      - NON_RISK_CLIENT
+      - NAT
+      - PENETRATION_TEST
+      - OTHER
+  - name: comment
     type: String
     description: Optional text the user can provide for additional, unstructured context.

@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'BigqueryDatapolicy'
-display_name: 'BigQuery Data Policy'
+name: BigqueryDatapolicy
+display_name: BigQuery Data Policy
 versions:
-  - name: 'beta'
-    base_url: 'https://bigquerydatapolicy.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://bigquerydatapolicy.googleapis.com/v1/'
+  - name: beta
+    base_url: https://bigquerydatapolicy.googleapis.com/v1/
+  - name: ga
+    base_url: https://bigquerydatapolicy.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

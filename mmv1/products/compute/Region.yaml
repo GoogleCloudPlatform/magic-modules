@@ -12,8 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'Region'
-kind: 'compute#region'
+name: Region
+kind: compute#region
 description: |
   Represents a Region resource. A region is a specific geographical
   location where you can run your resources. Each region has one or more
@@ -22,50 +22,50 @@ description: |
 exclude: true
 readonly: true
 docs:
-base_url: 'projects/{{project}}/regions'
+base_url: projects/{{project}}/regions
 has_self_link: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-collection_url_key: 'items'
+collection_url_key: items
 custom_code:
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'deprecated'
+  - name: deprecated
     type: NestedObject
-    description: 'The deprecation state of this resource.'
+    description: The deprecation state of this resource.
     output: true
     properties:
-      - name: 'deleted'
+      - name: deleted
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DELETED.
-      - name: 'deprecated'
+      - name: deprecated
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DEPRECATED.
         output: true
-      - name: 'obsolete'
+      - name: obsolete
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to OBSOLETE.
         output: true
-      - name: 'replacement'
+      - name: replacement
         type: String
         description: |
           The URL of the suggested replacement for a deprecated resource. The
           suggested replacement resource must be the same kind of resource as
           the deprecated resource.
         output: true
-      - name: 'state'
+      - name: state
         type: Enum
         description: |
           The deprecation state of this resource. This can be DEPRECATED,
@@ -76,56 +76,54 @@ properties:
           and result in an error.
         output: true
         enum_values:
-          - 'DEPRECATED'
-          - 'OBSOLETE'
-          - 'DELETED'
-  - name: 'description'
+          - DEPRECATED
+          - OBSOLETE
+          - DELETED
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     output: true
-  - name: 'id'
+  - name: id
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     output: true
-  - name: 'name'
+  - name: name
     type: String
-    description: 'Name of the resource.'
-  - name: 'quotas'
+    description: Name of the resource.
+  - name: quotas
     type: Array
-    description: 'Quotas assigned to this region.'
+    description: Quotas assigned to this region.
     output: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'metric'
+        - name: metric
           type: String
-          description: 'Name of the quota metric.'
+          description: Name of the quota metric.
           output: true
-        - name: 'limit'
+        - name: limit
           type: Double
-          description: 'Quota limit for this metric.'
+          description: Quota limit for this metric.
           output: true
-        - name: 'usage'
+        - name: usage
           type: Double
-          description: 'Current usage of this metric.'
+          description: Current usage of this metric.
           output: true
-        - name: 'owner'
+        - name: owner
           type: String
-          description:
-            'Owning resource. This is the resource on which this quota is
-            applied.'
+          description: Owning resource. This is the resource on which this quota is applied.
           output: true
-  - name: 'status'
+  - name: status
     type: Enum
     description: |
       Status of the region, either UP or DOWN.
     output: true
     enum_values:
-      - 'UP'
-      - 'DOWN'
-  - name: 'zones'
+      - UP
+      - DOWN
+  - name: zones
     type: Array
-    description: 'List of zones within the region'
+    description: List of zones within the region
     output: true
     item_type:
       type: String

@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'ResponsePolicy'
-kind: 'dns#responsePolicy'
+name: ResponsePolicy
+kind: dns#responsePolicy
 description: |
   A Response Policy is a collection of selectors that apply to queries
   made against one or more Virtual Private Cloud networks.
 docs:
-base_url: 'projects/{{project}}/responsePolicies'
-self_link: 'projects/{{project}}/responsePolicies/{{response_policy_name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/responsePolicies
+self_link: projects/{{project}}/responsePolicies/{{response_policy_name}}
+update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -28,61 +28,58 @@ timeouts:
 identity:
   - responsePolicyName
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/response_policy_detach_network_gke.tmpl'
-examples:
-  - name: 'dns_response_policy_basic'
-    primary_resource_id: 'example-response-policy'
-    vars:
-      response_policy_name: 'example-response-policy'
-      network_1_name: 'network-1'
-      network_2_name: 'network-2'
-      cluster_1_name: 'cluster-1'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+  pre_delete: templates/terraform/pre_delete/response_policy_detach_network_gke.tmpl
+samples:
+  - name: dns_response_policy_basic
+    primary_resource_id: example-response-policy
+    steps:
+      - name: dns_response_policy_basic
+        resource_id_vars:
+          cluster_1_name: cluster-1
+          deletion_protection: "true"
+          network_1_name: network-1
+          network_2_name: network-2
+          response_policy_name: example-response-policy
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
 parameters:
 properties:
-  - name: 'responsePolicyName'
+  - name: responsePolicyName
     type: String
-    description:
-      The user assigned name for this Response Policy, such as
-      `myresponsepolicy`.
+    description: The user assigned name for this Response Policy, such as `myresponsepolicy`.
     required: true
     immutable: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       The description of the response policy, such as `My new response policy`.
     required: false
-    default_value: "Managed by Terraform"
-  - name: 'networks'
+    default_value: Managed by Terraform
+  - name: networks
     type: Array
-    description:
-      'The list of network names specifying networks to which this policy is
-      applied.'
+    description: The list of network names specifying networks to which this policy is applied.
     send_empty_value: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'networkUrl'
+        - name: networkUrl
           type: String
           description: |
             The fully qualified URL of the VPC network to bind to.
             This should be formatted like
             `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
           required: true
-          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-          custom_expand: 'templates/terraform/custom_expand/network_full_url.tmpl'
-  - name: 'gkeClusters'
+          diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+          custom_expand: templates/terraform/custom_expand/network_full_url.tmpl
+  - name: gkeClusters
     type: Array
-    description:
-      'The list of Google Kubernetes Engine clusters that can see this zone.'
+    description: The list of Google Kubernetes Engine clusters that can see this zone.
     item_type:
       type: NestedObject
       properties:
-        - name: 'gkeClusterName'
+        - name: gkeClusterName
           type: String
           description: |
             The resource name of the cluster to bind this ManagedZone to.

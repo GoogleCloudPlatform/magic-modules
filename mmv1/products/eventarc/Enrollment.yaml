@@ -18,7 +18,7 @@ description: |
   The Eventarc Enrollment resource
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/receive-events/create-enrollment'
+    Official Documentation: https://cloud.google.com/eventarc/advanced/docs/receive-events/create-enrollment
   api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.enrollments
 base_url: projects/{{project}}/locations/{{location}}/enrollments
 update_mask: true
@@ -30,7 +30,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/enrollments/{{enrollment_id}}
 autogen_async: true
 async:
-  actions: ['create', 'update', 'delete']
+  actions: [create, update, delete]
   operation:
     timeouts:
       insert_minutes: 20
@@ -40,20 +40,22 @@ async:
   type: OpAsync
   result:
     resource_inside_response: true
-examples:
+samples:
   - name: eventarc_enrollment_with_pipeline_destination
     primary_resource_id: primary
-    vars:
-      enrollment_id: some-enrollment
-      pipeline_id: some-pipeline
-      message_bus_id: some-message-bus
-      network_attachment_name: some-network-attachment
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
     exclude_test: true
+    steps:
+      - name: eventarc_enrollment_with_pipeline_destination
+        resource_id_vars:
+          enrollment_id: some-enrollment
+          message_bus_id: some-message-bus
+          network_attachment_name: some-network-attachment
+          pipeline_id: some-pipeline
+        test_env_vars:
+          project_id: PROJECT_NAME
 tgc_tests:
-  - name: 'TestAccEventarcMessageBus/enrollment'
-  - name: 'TestAccEventarcMessageBus/updateEnrollment'
+  - name: TestAccEventarcMessageBus/enrollment
+  - name: TestAccEventarcMessageBus/updateEnrollment
 parameters:
   - name: location
     type: String

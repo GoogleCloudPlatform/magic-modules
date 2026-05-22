@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'Gkeonprem'
-display_name: 'Anthos On-Prem'
+name: Gkeonprem
+display_name: Anthos On-Prem
 versions:
-  - name: 'beta'
-    base_url: 'https://gkeonprem.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://gkeonprem.googleapis.com/v1/'
+  - name: beta
+    base_url: https://gkeonprem.googleapis.com/v1/
+  - name: ga
+    base_url: https://gkeonprem.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:

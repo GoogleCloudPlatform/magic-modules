@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'RestoreChannel'
+name: RestoreChannel
 description: |
   A RestoreChannel imposes constraints on where backups can be restored.
   The RestoreChannel should be in the same project and region
@@ -20,12 +20,12 @@ description: |
   destination_project.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
-  api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.restoreChannels'
+    Official Documentation: https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke
+  api: https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.restoreChannels
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/restoreChannels'
-create_url: 'projects/{{project}}/locations/{{location}}/restoreChannels?restoreChannelId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/restoreChannels
+create_url: projects/{{project}}/locations/{{location}}/restoreChannels?restoreChannelId={{name}}
+update_verb: PATCH
 update_mask: true
 timeouts:
   insert_minutes: 5
@@ -33,25 +33,27 @@ timeouts:
   delete_minutes: 5
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'gkebackup_restorechannel_basic'
-    primary_resource_id: 'basic'
-    vars:
-      name: 'basic-channel'
-      destination_project: 'projects/24240755850'
-    test_vars_overrides:
-      'destination_project': '"projects/24240755850"'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: gkebackup_restorechannel_basic
+    primary_resource_id: basic
+    steps:
+      - name: gkebackup_restorechannel_basic
+        resource_id_vars:
+          destination_project: projects/24240755850
+          name: basic-channel
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          destination_project: '"projects/24240755850"'
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The region of the Restore Channel.
@@ -59,20 +61,20 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The full name of the RestoreChannel Resource.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
-  - name: 'uid'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/shortname_to_url.go.tmpl
+  - name: uid
     type: String
     description: |
       Server generated, unique identifier of UUID format.
     output: true
-  - name: 'destinationProject'
+  - name: destinationProject
     type: String
     description: |
       The project where Backups will be restored.
@@ -80,17 +82,17 @@ properties:
       {project} can be project number or project id.
     required: true
     immutable: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       User specified descriptive string for this RestoreChannel.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Description: A set of custom labels supplied by the user.
       A list of key->value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - name: 'etag'
+  - name: etag
     type: String
     description: |
       etag is used for optimistic concurrency control as a way to help prevent simultaneous
@@ -100,7 +102,7 @@ properties:
       and systems are expected to put that etag in the request to restoreChannels.patch or
       restoreChannels.delete to ensure that their change will be applied to the same version of the resource.
     output: true
-  - name: 'destinationProjectId'
+  - name: destinationProjectId
     type: String
     description: |
       The project_id where Backups will be restored.

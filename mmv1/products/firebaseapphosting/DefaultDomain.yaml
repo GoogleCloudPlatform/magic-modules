@@ -26,46 +26,49 @@ exclude_delete: true
 exclude_sweeper: true
 import_format:
   - projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
-  - "{{project}}/{{location}}/{{backend}}/{{domain_id}}"
-  - "{{location}}/{{backend}}/{{domain_id}}"
-examples:
+  - '{{project}}/{{location}}/{{backend}}/{{domain_id}}'
+  - '{{location}}/{{backend}}/{{domain_id}}'
+samples:
   - name: firebase_app_hosting_default_domain_minimal
     primary_resource_id: example
-    vars:
-      backend_id: 'dd-mini'
-      service_act_id: 'service-account'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-dd-mi"'
+    steps:
+      - name: firebase_app_hosting_default_domain_minimal
+        resource_id_vars:
+          backend_id: dd-mini
+          service_act_id: service-account
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          service_act_id: '"tf-test-dd-mi"'
   - name: firebase_app_hosting_default_domain_full
     primary_resource_id: example
-    vars:
-      backend_id: 'dd-full'
-      service_act_id: 'service-account'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-dd-full"'
+    steps:
+      - name: firebase_app_hosting_default_domain_full
+        resource_id_vars:
+          backend_id: dd-full
+          service_act_id: service-account
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          service_act_id: '"tf-test-dd-full"'
   - name: firebase_app_hosting_default_domain_disabled
     primary_resource_id: example
-    vars:
-      backend_id: 'dd-disabled'
-      service_act_id: 'service-account'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-dd-disabled"'
+    steps:
+      - name: firebase_app_hosting_default_domain_disabled
+        resource_id_vars:
+          backend_id: dd-disabled
+          service_act_id: service-account
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          service_act_id: '"tf-test-dd-disabled"'
 autogen_async: true
 async:
   operation:
     timeouts:
       insert_minutes: 20
       update_minutes: 20
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - update
@@ -89,8 +92,7 @@ parameters:
     required: true
   - name: domainId
     type: String
-    description: |-
-      Id of the domain. For default domain, it should be {{backend}}--{{project_id}}.{{location}}.hosted.app
+    description: Id of the domain. For default domain, it should be {{backend}}--{{project_id}}.{{location}}.hosted.app
     immutable: true
     url_param_only: true
     required: true

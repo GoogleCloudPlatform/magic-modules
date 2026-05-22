@@ -12,9 +12,9 @@
 # limitations under the License.
 
 ---
-name: 'RegionBackendService'
+name: RegionBackendService
 api_resource_type_kind: BackendService
-kind: 'compute#backendService'
+kind: compute#backendService
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
   machines that will serve traffic for load balancing.
@@ -23,173 +23,206 @@ description: |
   Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backend Count example.
 references:
   guides:
-    'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
-  api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
+    Internal TCP/UDP Load Balancing: https://cloud.google.com/compute/docs/load-balancing/internal/
+  api: https://cloud.google.com/compute/docs/reference/latest/regionBackendServices
 docs:
-cai_resource_kind: 'RegionBackendService'
-base_url: 'projects/{{project}}/regions/{{region}}/backendServices'
+cai_resource_kind: RegionBackendService
+base_url: projects/{{project}}/regions/{{region}}/backendServices
 has_self_link: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
+collection_url_key: items
 iam_policy:
-  allowed_iam_role: 'roles/compute.admin'
-  parent_resource_attribute: 'name'
-  iam_conditions_request_type: 'QUERY_PARAM'
-  min_version: 'beta'
+  allowed_iam_role: roles/compute.admin
+  parent_resource_attribute: name
+  iam_conditions_request_type: QUERY_PARAM
+  min_version: beta
 include_in_tgc_next: true
 custom_code:
-  constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
-  encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
-  decoder: 'templates/terraform/decoders/region_backend_service.go.tmpl'
-  post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
-  tgc_decoder: 'templates/tgc_next/decoders/compute_region_backend_service.go.tmpl'
+  constants: templates/terraform/constants/region_backend_service.go.tmpl
+  encoder: templates/terraform/encoders/region_backend_service.go.tmpl
+  decoder: templates/terraform/decoders/region_backend_service.go.tmpl
+  post_create: templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl
+  tgc_decoder: templates/tgc_next/decoders/compute_region_backend_service.go.tmpl
 custom_diff:
-  - 'customDiffRegionBackendService'
+  - customDiffRegionBackendService
 schema_version: 1
-migrate_state: 'tpgresource.MigrateStateNoop'
+migrate_state: tpgresource.MigrateStateNoop
 sweeper:
   url_substitutions:
-    - region: "us-west2"
-    - region: "us-central1"
-    - region: "europe-west4"
-    - region: "europe-west1"
-    - region: "us-west1"
-examples:
-  - name: 'region_backend_service_basic'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_external_iap'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'tf-test-region-service-external'
-  - name: 'region_backend_service_ilb_round_robin'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_external'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_external_weighted'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ilb_ring_hash'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ilb_stateful_session_affinity'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_balancing_mode'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      rigm_name: 'rbs-rigm'
-      region_health_check_name: 'rbs-health-check'
-      network_name: 'rbs-net'
-  - name: 'region_backend_service_connection_tracking'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ip_address_selection_policy'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ilb_custom_metrics'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      default_neg_name: 'network-endpoint'
-      health_check_name: 'rbs-health-check'
-      network_name: 'network'
-    test_vars_overrides:
-      # for backward compatible
-      network_name: '"network" + randomSuffix'
-  - name: 'region_backend_service_dynamic_backend_count'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'health-check'
-      instance_group_name: 'instance_group'
-      network_name: 'network'
-    test_vars_overrides:
-      # for backward compatible
-      network_name: '"network" + randomSuffix'
+    - region: us-west2
+    - region: us-central1
+    - region: europe-west4
+    - region: europe-west1
+    - region: us-west1
+samples:
+  - name: region_backend_service_basic
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_basic
+        resource_id_vars:
+          health_check_name: rbs-health-check
+          region_backend_service_name: region-service
+  - name: region_backend_service_external_iap
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_external_iap
+        resource_id_vars:
+          region_backend_service_name: tf-test-region-service-external
+  - name: region_backend_service_ilb_round_robin
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_ilb_round_robin
+        resource_id_vars:
+          health_check_name: rbs-health-check
+          region_backend_service_name: region-service
+  - name: region_backend_service_external
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_external
+        resource_id_vars:
+          health_check_name: rbs-health-check
+          region_backend_service_name: region-service
+  - name: region_backend_service_external_weighted
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_external_weighted
+        resource_id_vars:
+          health_check_name: rbs-health-check
+          region_backend_service_name: region-service
+  - name: region_backend_service_ilb_ring_hash
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_ilb_ring_hash
+        resource_id_vars:
+          health_check_name: rbs-health-check
+          region_backend_service_name: region-service
+  - name: region_backend_service_ilb_stateful_session_affinity
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_ilb_stateful_session_affinity
+        resource_id_vars:
+          health_check_name: rbs-health-check
+          region_backend_service_name: region-service
+  - name: region_backend_service_balancing_mode
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_balancing_mode
+        resource_id_vars:
+          network_name: rbs-net
+          region_backend_service_name: region-service
+          region_health_check_name: rbs-health-check
+          rigm_name: rbs-rigm
+  - name: region_backend_service_connection_tracking
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_connection_tracking
+        resource_id_vars:
+          health_check_name: rbs-health-check
+          region_backend_service_name: region-service
+  - name: region_backend_service_ip_address_selection_policy
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_ip_address_selection_policy
+        resource_id_vars:
+          health_check_name: rbs-health-check
+          region_backend_service_name: region-service
+  - name: region_backend_service_ilb_custom_metrics
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_ilb_custom_metrics
+        resource_id_vars:
+          default_neg_name: network-endpoint
+          health_check_name: rbs-health-check
+          network_name: network
+          region_backend_service_name: region-service
+        test_vars_overrides:
+          network_name: '"network" + randomSuffix'
+  - name: region_backend_service_dynamic_backend_count
+    primary_resource_id: default
     exclude_test: true
-  - name: 'region_backend_service_dynamic_forwarding'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_cloud_run'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-  - name: 'region_backend_service_ha_policy'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      network_name: 'rbs-net'
-  - name: 'region_backend_service_ha_policy_manual_leader'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      network_name: 'rbs-net'
-      subnetwork_name: 'rbs-subnet'
-      instance_name: 'rbs-instance'
-      neg_name: 'rbs-neg'
-  - name: 'region_backend_service_tls_settings'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'health-check'
-      authentication_name: 'authentication'
-    test_vars_overrides:
-      # for backward compatible
-      authentication_name: '"authentication" + randomSuffix'
+    steps:
+      - name: region_backend_service_dynamic_backend_count
+        resource_id_vars:
+          health_check_name: health-check
+          instance_group_name: instance_group
+          network_name: network
+          region_backend_service_name: region-service
+        test_vars_overrides:
+          network_name: '"network" + randomSuffix'
+  - name: region_backend_service_dynamic_forwarding
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_dynamic_forwarding
+        resource_id_vars:
+          region_backend_service_name: region-service
+  - name: region_backend_service_dynamic_forwarding_forward_proxy_cloud_run
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_dynamic_forwarding_forward_proxy_cloud_run
+        resource_id_vars:
+          region_backend_service_name: region-service
+  - name: region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding
+        resource_id_vars:
+          region_backend_service_name: region-service
+  - name: region_backend_service_ha_policy
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_ha_policy
+        resource_id_vars:
+          network_name: rbs-net
+          region_backend_service_name: region-service
+  - name: region_backend_service_ha_policy_manual_leader
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_ha_policy_manual_leader
+        resource_id_vars:
+          instance_name: rbs-instance
+          neg_name: rbs-neg
+          network_name: rbs-net
+          region_backend_service_name: region-service
+          subnetwork_name: rbs-subnet
+  - name: region_backend_service_tls_settings
+    primary_resource_id: default
+    steps:
+      - name: region_backend_service_tls_settings
+        resource_id_vars:
+          authentication_name: authentication
+          health_check_name: health-check
+          region_backend_service_name: region-service
+        test_vars_overrides:
+          authentication_name: '"authentication" + randomSuffix'
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       The Region in which the created backend service should reside.
       If it is not provided, the provider region is used.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'affinityCookieTtlSec'
+  - name: affinityCookieTtlSec
     type: Integer
     description: |
       Lifetime of cookies in seconds if session_affinity is
@@ -198,30 +231,30 @@ properties:
       maximum allowed value for TTL is one day.
 
       When the load balancing scheme is INTERNAL, this field is not used.
-  - name: 'backend'
+  - name: backend
     type: Array
     description: |
       The set of backends that serve this RegionBackendService.
     api_name: backends
     is_set: true
-    set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
+    set_hash_func: resourceGoogleComputeBackendServiceBackendHash
     item_type:
       type: NestedObject
       properties:
-        - name: 'balancingMode'
+        - name: balancingMode
           type: Enum
           description: |
             Specifies the balancing mode for this backend.
 
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
-          default_value: "UTILIZATION"
+          default_value: UTILIZATION
           enum_values:
-            - 'UTILIZATION'
-            - 'RATE'
-            - 'CONNECTION'
-            - 'CUSTOM_METRICS'
-        - name: 'capacityScaler'
+            - UTILIZATION
+            - RATE
+            - CONNECTION
+            - CUSTOM_METRICS
+        - name: capacityScaler
           type: Double
           description: |
             A multiplier applied to the group's maximum servicing capacity
@@ -235,18 +268,18 @@ properties:
             A setting of 0 means the group is completely drained, offering
             0% of its available Capacity. Valid range is [0.0,1.0].
           send_empty_value: true
-        - name: 'description'
+        - name: description
           type: String
           description: |
             An optional description of this resource.
             Provide this property when you create the resource.
-        - name: 'failover'
+        - name: failover
           type: Boolean
           description: |
             This field designates whether this is a failover backend. More
             than one failover backend can be configured for a given RegionBackendService.
           default_from_api: true
-        - name: 'group'
+        - name: group
           type: String
           description: |
             The fully-qualified URL of an Instance Group or Network Endpoint
@@ -270,9 +303,9 @@ properties:
             Group resource using the fully-qualified URL, rather than a
             partial URL.
           required: true
-          diff_suppress_func: 'tpgresource.CompareSelfLinkCanonicalPaths'
-          custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
-        - name: 'maxConnections'
+          diff_suppress_func: tpgresource.CompareSelfLinkCanonicalPaths
+          custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.tmpl
+        - name: maxConnections
           type: Integer
           description: |
             The max number of simultaneous connections for the group. Can
@@ -282,7 +315,7 @@ properties:
             For CONNECTION mode, either maxConnections or one
             of maxConnectionsPerInstance or maxConnectionsPerEndpoint,
             as appropriate for group type, must be set.
-        - name: 'maxConnectionsPerInstance'
+        - name: maxConnectionsPerInstance
           type: Integer
           description: |
             The max number of simultaneous connections that a single
@@ -293,7 +326,7 @@ properties:
             Can be used in either CONNECTION or UTILIZATION balancing modes.
             For CONNECTION mode, either maxConnections or
             maxConnectionsPerInstance must be set.
-        - name: 'maxConnectionsPerEndpoint'
+        - name: maxConnectionsPerEndpoint
           type: Integer
           description: |
             The max number of simultaneous connections that a single backend
@@ -304,7 +337,7 @@ properties:
             used in either CONNECTION or UTILIZATION balancing modes. For
             CONNECTION mode, either maxConnections or
             maxConnectionsPerEndpoint must be set.
-        - name: 'maxRate'
+        - name: maxRate
           type: Integer
           description: |
             The max requests per second (RPS) of the group. Cannot be set
@@ -314,7 +347,7 @@ properties:
             but required if RATE mode. Either maxRate or one
             of maxRatePerInstance or maxRatePerEndpoint, as appropriate for
             group type, must be set.
-        - name: 'maxRatePerInstance'
+        - name: maxRatePerInstance
           type: Double
           description: |
             The max requests per second (RPS) that a single backend
@@ -322,7 +355,7 @@ properties:
             the group. Can be used in either balancing mode. For RATE mode,
             either maxRate or maxRatePerInstance must be set. Cannot be set
             for INTERNAL backend services.
-        - name: 'maxRatePerEndpoint'
+        - name: maxRatePerEndpoint
           type: Double
           description: |
             The max requests per second (RPS) that a single backend network
@@ -330,35 +363,35 @@ properties:
             the group. Can be used in either balancing mode. For RATE mode,
             either maxRate or maxRatePerEndpoint must be set. Cannot be set
             for INTERNAL backend services.
-        - name: 'maxUtilization'
+        - name: maxUtilization
           type: Double
           description: |
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
             Cannot be set for INTERNAL backend services.
-        - name: 'maxInFlightRequests'
+        - name: maxInFlightRequests
           type: Integer
           description: |
             Defines a maximum number of in-flight requests for the whole NEG
             or instance group. Not available if backend's balancingMode is RATE
             or CONNECTION.
           default_from_api: true
-          min_version: 'beta'
-        - name: 'maxInFlightRequestsPerInstance'
+          min_version: beta
+        - name: maxInFlightRequestsPerInstance
           type: Integer
           description: |
             Defines a maximum number of in-flight requests for a single VM.
             Not available if backend's balancingMode is RATE or CONNECTION.
           default_from_api: true
-          min_version: 'beta'
-        - name: 'maxInFlightRequestsPerEndpoint'
+          min_version: beta
+        - name: maxInFlightRequestsPerEndpoint
           type: Integer
           description: |
             Defines a maximum number of in-flight requests for a single endpoint.
             Not available if backend's balancingMode is RATE or CONNECTION.
           default_from_api: true
-          min_version: 'beta'
-        - name: 'trafficDuration'
+          min_version: beta
+        - name: trafficDuration
           type: Enum
           description: |
             This field specifies how long a connection should be kept alive for:
@@ -366,17 +399,17 @@ properties:
               seconds to finish.
             - SHORT: Most requests are expected to finish with a sub-second latency.
           enum_values:
-            - 'LONG'
-            - 'SHORT'
-          min_version: 'beta'
-        - name: 'customMetrics'
+            - LONG
+            - SHORT
+          min_version: beta
+        - name: customMetrics
           type: Array
           description: |
             The set of custom metrics that are used for <code>CUSTOM_METRICS</code> BalancingMode.
           item_type:
             type: NestedObject
             properties:
-              - name: 'name'
+              - name: name
                 type: String
                 required: true
                 description: |
@@ -389,52 +422,52 @@ properties:
                   field can only be used for a global or regional backend service with the
                   loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
                   <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
-              - name: 'dryRun'
+              - name: dryRun
                 type: Boolean
                 required: true
                 description: |
                   If true, the metric data is collected and reported to Cloud
                   Monitoring, but is not used for load balancing.
-              - name: 'maxUtilization'
+              - name: maxUtilization
                 type: Double
                 description: |
                   Optional parameter to define a target utilization for the Custom Metrics
                   balancing mode. The valid range is <code>[0.0, 1.0]</code>.
                 default_value: 0.8
-  - name: 'circuitBreakers'
+  - name: circuitBreakers
     type: NestedObject
     description: |
       Settings controlling the volume of connections to a backend service. This field
       is applicable only when the `load_balancing_scheme` is set to INTERNAL_MANAGED
       and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
     properties:
-      - name: 'connectTimeout'
+      - name: connectTimeout
         type: NestedObject
         description: |
           The timeout for new network connections to hosts.
-        min_version: 'beta'
+        min_version: beta
         at_least_one_of:
-          - 'circuit_breakers.0.connect_timeout'
-          - 'circuit_breakers.0.max_requests_per_connection'
-          - 'circuit_breakers.0.max_connections'
-          - 'circuit_breakers.0.max_pending_requests'
-          - 'circuit_breakers.0.max_requests'
-          - 'circuit_breakers.0.max_retries'
+          - circuit_breakers.0.connect_timeout
+          - circuit_breakers.0.max_requests_per_connection
+          - circuit_breakers.0.max_connections
+          - circuit_breakers.0.max_pending_requests
+          - circuit_breakers.0.max_requests
+          - circuit_breakers.0.max_retries
         properties:
-          - name: 'seconds'
+          - name: seconds
             type: Integer
             description: |
               Span of time at a resolution of a second.
               Must be from 0 to 315,576,000,000 inclusive.
             required: true
-          - name: 'nanos'
+          - name: nanos
             type: Integer
             description: |
               Span of time that's a fraction of a second at nanosecond
               resolution. Durations less than one second are represented
               with a 0 seconds field and a positive nanos field. Must
               be from 0 to 999,999,999 inclusive.
-      - name: 'maxRequestsPerConnection'
+      - name: maxRequestsPerConnection
         type: Integer
         description: |
           Maximum requests for a single backend connection. This parameter
@@ -442,65 +475,65 @@ properties:
           not specified, there is no limit. Setting this parameter to 1
           will effectively disable keep alive.
         at_least_one_of:
-          - 'circuit_breakers.0.connect_timeout'
-          - 'circuit_breakers.0.max_requests_per_connection'
-          - 'circuit_breakers.0.max_connections'
-          - 'circuit_breakers.0.max_pending_requests'
-          - 'circuit_breakers.0.max_requests'
-          - 'circuit_breakers.0.max_retries'
-      - name: 'maxConnections'
+          - circuit_breakers.0.connect_timeout
+          - circuit_breakers.0.max_requests_per_connection
+          - circuit_breakers.0.max_connections
+          - circuit_breakers.0.max_pending_requests
+          - circuit_breakers.0.max_requests
+          - circuit_breakers.0.max_retries
+      - name: maxConnections
         type: Integer
         description: |
           The maximum number of connections to the backend cluster.
           Defaults to 1024.
         at_least_one_of:
-          - 'circuit_breakers.0.connect_timeout'
-          - 'circuit_breakers.0.max_requests_per_connection'
-          - 'circuit_breakers.0.max_connections'
-          - 'circuit_breakers.0.max_pending_requests'
-          - 'circuit_breakers.0.max_requests'
-          - 'circuit_breakers.0.max_retries'
+          - circuit_breakers.0.connect_timeout
+          - circuit_breakers.0.max_requests_per_connection
+          - circuit_breakers.0.max_connections
+          - circuit_breakers.0.max_pending_requests
+          - circuit_breakers.0.max_requests
+          - circuit_breakers.0.max_retries
         default_value: 1024
-      - name: 'maxPendingRequests'
+      - name: maxPendingRequests
         type: Integer
         description: |
           The maximum number of pending requests to the backend cluster.
           Defaults to 1024.
         at_least_one_of:
-          - 'circuit_breakers.0.connect_timeout'
-          - 'circuit_breakers.0.max_requests_per_connection'
-          - 'circuit_breakers.0.max_connections'
-          - 'circuit_breakers.0.max_pending_requests'
-          - 'circuit_breakers.0.max_requests'
-          - 'circuit_breakers.0.max_retries'
+          - circuit_breakers.0.connect_timeout
+          - circuit_breakers.0.max_requests_per_connection
+          - circuit_breakers.0.max_connections
+          - circuit_breakers.0.max_pending_requests
+          - circuit_breakers.0.max_requests
+          - circuit_breakers.0.max_retries
         default_value: 1024
-      - name: 'maxRequests'
+      - name: maxRequests
         type: Integer
         description: |
           The maximum number of parallel requests to the backend cluster.
           Defaults to 1024.
         at_least_one_of:
-          - 'circuit_breakers.0.connect_timeout'
-          - 'circuit_breakers.0.max_requests_per_connection'
-          - 'circuit_breakers.0.max_connections'
-          - 'circuit_breakers.0.max_pending_requests'
-          - 'circuit_breakers.0.max_requests'
-          - 'circuit_breakers.0.max_retries'
+          - circuit_breakers.0.connect_timeout
+          - circuit_breakers.0.max_requests_per_connection
+          - circuit_breakers.0.max_connections
+          - circuit_breakers.0.max_pending_requests
+          - circuit_breakers.0.max_requests
+          - circuit_breakers.0.max_retries
         default_value: 1024
-      - name: 'maxRetries'
+      - name: maxRetries
         type: Integer
         description: |
           The maximum number of parallel retries to the backend cluster.
           Defaults to 3.
         at_least_one_of:
-          - 'circuit_breakers.0.connect_timeout'
-          - 'circuit_breakers.0.max_requests_per_connection'
-          - 'circuit_breakers.0.max_connections'
-          - 'circuit_breakers.0.max_pending_requests'
-          - 'circuit_breakers.0.max_requests'
-          - 'circuit_breakers.0.max_retries'
+          - circuit_breakers.0.connect_timeout
+          - circuit_breakers.0.max_requests_per_connection
+          - circuit_breakers.0.max_connections
+          - circuit_breakers.0.max_pending_requests
+          - circuit_breakers.0.max_requests
+          - circuit_breakers.0.max_retries
         default_value: 3
-  - name: 'consistentHash'
+  - name: consistentHash
     type: NestedObject
     description: |
       Consistent Hash-based load balancing can be used to provide soft session
@@ -514,7 +547,7 @@ properties:
         * `protocol` is set to HTTP, HTTPS, HTTP2 or H2C
         * `locality_lb_policy` is set to MAGLEV or RING_HASH
     properties:
-      - name: 'httpCookie'
+      - name: httpCookie
         type: NestedObject
         description: |
           Hash is based on HTTP Cookie. This field describes a HTTP cookie
@@ -522,58 +555,58 @@ properties:
           balancer. If the cookie is not present, it will be generated.
           This field is applicable if the sessionAffinity is set to HTTP_COOKIE.
         at_least_one_of:
-          - 'consistent_hash.0.http_cookie'
-          - 'consistent_hash.0.http_header_name'
-          - 'consistent_hash.0.minimum_ring_size'
+          - consistent_hash.0.http_cookie
+          - consistent_hash.0.http_header_name
+          - consistent_hash.0.minimum_ring_size
         properties:
-          - name: 'ttl'
+          - name: ttl
             type: NestedObject
             description: |
               Lifetime of the cookie.
             at_least_one_of:
-              - 'consistent_hash.0.http_cookie.0.ttl'
-              - 'consistent_hash.0.http_cookie.0.name'
-              - 'consistent_hash.0.http_cookie.0.path'
+              - consistent_hash.0.http_cookie.0.ttl
+              - consistent_hash.0.http_cookie.0.name
+              - consistent_hash.0.http_cookie.0.path
             properties:
-              - name: 'seconds'
+              - name: seconds
                 type: Integer
                 description: |
                   Span of time at a resolution of a second.
                   Must be from 0 to 315,576,000,000 inclusive.
                 required: true
-              - name: 'nanos'
+              - name: nanos
                 type: Integer
                 description: |
                   Span of time that's a fraction of a second at nanosecond
                   resolution. Durations less than one second are represented
                   with a 0 seconds field and a positive nanos field. Must
                   be from 0 to 999,999,999 inclusive.
-          - name: 'name'
+          - name: name
             type: String
             description: |
               Name of the cookie.
             at_least_one_of:
-              - 'consistent_hash.0.http_cookie.0.ttl'
-              - 'consistent_hash.0.http_cookie.0.name'
-              - 'consistent_hash.0.http_cookie.0.path'
-          - name: 'path'
+              - consistent_hash.0.http_cookie.0.ttl
+              - consistent_hash.0.http_cookie.0.name
+              - consistent_hash.0.http_cookie.0.path
+          - name: path
             type: String
             description: |
               Path to set for the cookie.
             at_least_one_of:
-              - 'consistent_hash.0.http_cookie.0.ttl'
-              - 'consistent_hash.0.http_cookie.0.name'
-              - 'consistent_hash.0.http_cookie.0.path'
-      - name: 'httpHeaderName'
+              - consistent_hash.0.http_cookie.0.ttl
+              - consistent_hash.0.http_cookie.0.name
+              - consistent_hash.0.http_cookie.0.path
+      - name: httpHeaderName
         type: String
         description: |
           The hash based on the value of the specified header field.
           This field is applicable if the sessionAffinity is set to HEADER_FIELD.
         at_least_one_of:
-          - 'consistent_hash.0.http_cookie'
-          - 'consistent_hash.0.http_header_name'
-          - 'consistent_hash.0.minimum_ring_size'
-      - name: 'minimumRingSize'
+          - consistent_hash.0.http_cookie
+          - consistent_hash.0.http_header_name
+          - consistent_hash.0.minimum_ring_size
+      - name: minimumRingSize
         type: Integer
         description: |
           The minimum number of virtual nodes to use for the hash ring.
@@ -583,47 +616,47 @@ properties:
           virtual node.
           Defaults to 1024.
         at_least_one_of:
-          - 'consistent_hash.0.http_cookie'
-          - 'consistent_hash.0.http_header_name'
-          - 'consistent_hash.0.minimum_ring_size'
+          - consistent_hash.0.http_cookie
+          - consistent_hash.0.http_header_name
+          - consistent_hash.0.minimum_ring_size
         default_value: 1024
-  - name: 'cdnPolicy'
+  - name: cdnPolicy
     type: NestedObject
-    description: 'Cloud CDN configuration for this BackendService.'
+    description: Cloud CDN configuration for this BackendService.
     default_from_api: true
     properties:
-      - name: 'cacheKeyPolicy'
+      - name: cacheKeyPolicy
         type: NestedObject
-        description: 'The CacheKeyPolicy for this CdnPolicy.'
+        description: The CacheKeyPolicy for this CdnPolicy.
         at_least_one_of:
-          - 'cdn_policy.0.cache_key_policy'
-          - 'cdn_policy.0.signed_url_cache_max_age_sec'
+          - cdn_policy.0.cache_key_policy
+          - cdn_policy.0.signed_url_cache_max_age_sec
         properties:
-          - name: 'includeHost'
+          - name: includeHost
             type: Boolean
             description: |
               If true requests to different hosts will be cached separately.
             send_empty_value: true
             at_least_one_of:
-              - 'cdn_policy.0.cache_key_policy.0.include_host'
-              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
-              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
-              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
-          - name: 'includeProtocol'
+              - cdn_policy.0.cache_key_policy.0.include_host
+              - cdn_policy.0.cache_key_policy.0.include_protocol
+              - cdn_policy.0.cache_key_policy.0.include_query_string
+              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+          - name: includeProtocol
             type: Boolean
             description: |
               If true, http and https requests will be cached separately.
             send_empty_value: true
             at_least_one_of:
-              - 'cdn_policy.0.cache_key_policy.0.include_host'
-              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
-              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
-              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
-          - name: 'includeQueryString'
+              - cdn_policy.0.cache_key_policy.0.include_host
+              - cdn_policy.0.cache_key_policy.0.include_protocol
+              - cdn_policy.0.cache_key_policy.0.include_query_string
+              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+          - name: includeQueryString
             type: Boolean
             description: |
               If true, include query string parameters in the cache key
@@ -635,13 +668,13 @@ properties:
               key entirely.
             send_empty_value: true
             at_least_one_of:
-              - 'cdn_policy.0.cache_key_policy.0.include_host'
-              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
-              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
-              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
-          - name: 'queryStringBlacklist'
+              - cdn_policy.0.cache_key_policy.0.include_host
+              - cdn_policy.0.cache_key_policy.0.include_protocol
+              - cdn_policy.0.cache_key_policy.0.include_query_string
+              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+          - name: queryStringBlacklist
             type: Array
             description: |
               Names of query string parameters to exclude in cache keys.
@@ -653,15 +686,15 @@ properties:
             is_set: true
             send_empty_value: true
             at_least_one_of:
-              - 'cdn_policy.0.cache_key_policy.0.include_host'
-              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
-              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
-              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+              - cdn_policy.0.cache_key_policy.0.include_host
+              - cdn_policy.0.cache_key_policy.0.include_protocol
+              - cdn_policy.0.cache_key_policy.0.include_query_string
+              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_named_cookies
             item_type:
               type: String
-          - name: 'queryStringWhitelist'
+          - name: queryStringWhitelist
             type: Array
             description: |
               Names of query string parameters to include in cache keys.
@@ -673,29 +706,29 @@ properties:
             is_set: true
             send_empty_value: true
             at_least_one_of:
-              - 'cdn_policy.0.cache_key_policy.0.include_host'
-              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
-              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
-              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+              - cdn_policy.0.cache_key_policy.0.include_host
+              - cdn_policy.0.cache_key_policy.0.include_protocol
+              - cdn_policy.0.cache_key_policy.0.include_query_string
+              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_named_cookies
             item_type:
               type: String
-          - name: 'includeNamedCookies'
+          - name: includeNamedCookies
             type: Array
             description: |
               Names of cookies to include in cache keys.
             send_empty_value: true
             at_least_one_of:
-              - 'cdn_policy.0.cache_key_policy.0.include_host'
-              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
-              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
-              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
-              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+              - cdn_policy.0.cache_key_policy.0.include_host
+              - cdn_policy.0.cache_key_policy.0.include_protocol
+              - cdn_policy.0.cache_key_policy.0.include_query_string
+              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_named_cookies
             item_type:
               type: String
-      - name: 'signedUrlCacheMaxAgeSec'
+      - name: signedUrlCacheMaxAgeSec
         type: Integer
         description: |
           Maximum number of seconds the response to a signed URL request
@@ -709,32 +742,32 @@ properties:
           existing Cache-Control header. The actual headers served in
           responses will not be altered.
         at_least_one_of:
-          - 'cdn_policy.0.cache_key_policy'
-          - 'cdn_policy.0.signed_url_cache_max_age_sec'
+          - cdn_policy.0.cache_key_policy
+          - cdn_policy.0.signed_url_cache_max_age_sec
         default_value: 3600
-      - name: 'defaultTtl'
+      - name: defaultTtl
         type: Integer
         description: |
           Specifies the default TTL for cached content served by this origin for responses
           that do not have an existing valid TTL (max-age or s-max-age).
         default_from_api: true
-      - name: 'maxTtl'
+      - name: maxTtl
         type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
-      - name: 'clientTtl'
+      - name: clientTtl
         type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
-      - name: 'negativeCaching'
+      - name: negativeCaching
         type: Boolean
         description: |
           Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
         default_from_api: true
         send_empty_value: true
-      - name: 'negativeCachingPolicy'
+      - name: negativeCachingPolicy
         type: Array
         description: |
           Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
@@ -742,41 +775,40 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'code'
+            - name: code
               type: Integer
               description: |
                 The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
                 can be specified as values, and you cannot specify a status code more than once.
-            - name: 'ttl'
+            - name: ttl
               type: Integer
               description: |
                 The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                 (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
-              min_version: 'beta'
-      - name: 'cacheMode'
+              min_version: beta
+      - name: cacheMode
         type: Enum
         description: |
           Specifies the cache setting for all responses from this backend.
           The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
         default_from_api: true
         enum_values:
-          - 'USE_ORIGIN_HEADERS'
-          - 'FORCE_CACHE_ALL'
-          - 'CACHE_ALL_STATIC'
-      - name: 'serveWhileStale'
+          - USE_ORIGIN_HEADERS
+          - FORCE_CACHE_ALL
+          - CACHE_ALL_STATIC
+      - name: serveWhileStale
         type: Integer
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
-
         default_from_api: true
         send_empty_value: true
-  - name: 'connectionDraining'
+  - name: connectionDraining
     type: NestedObject
     description: |
       Settings for connection draining
     flatten_object: true
     properties:
-      - name: 'connection_draining_timeout_sec'
+      - name: connection_draining_timeout_sec
         type: Integer
         description: |
           Time for which instance will be drained (not accept new
@@ -784,22 +816,22 @@ properties:
         api_name: drainingTimeoutSec
         send_empty_value: true
         default_value: 300
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
     description: |
       Creation timestamp in RFC3339 text format.
     output: true
   # customRequestHeaders only supported for EXTERNAL load balancing
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource.
-  - name: 'failoverPolicy'
+  - name: failoverPolicy
     type: NestedObject
     description: |
       Policy for failovers.
     properties:
-      - name: 'disableConnectionDrainOnFailover'
+      - name: disableConnectionDrainOnFailover
         type: Boolean
         description: |
           On failover or failback, this field indicates whether connection drain
@@ -812,10 +844,10 @@ properties:
           The default is false.
         default_from_api: true
         at_least_one_of:
-          - 'failover_policy.0.disable_connection_drain_on_failover'
-          - 'failover_policy.0.drop_traffic_if_unhealthy'
-          - 'failover_policy.0.failover_ratio'
-      - name: 'dropTrafficIfUnhealthy'
+          - failover_policy.0.disable_connection_drain_on_failover
+          - failover_policy.0.drop_traffic_if_unhealthy
+          - failover_policy.0.failover_ratio
+      - name: dropTrafficIfUnhealthy
         type: Boolean
         description: |
           This option is used only when no healthy VMs are detected in the primary
@@ -825,10 +857,10 @@ properties:
         default_from_api: true
         send_empty_value: true
         at_least_one_of:
-          - 'failover_policy.0.disable_connection_drain_on_failover'
-          - 'failover_policy.0.drop_traffic_if_unhealthy'
-          - 'failover_policy.0.failover_ratio'
-      - name: 'failoverRatio'
+          - failover_policy.0.disable_connection_drain_on_failover
+          - failover_policy.0.drop_traffic_if_unhealthy
+          - failover_policy.0.failover_ratio
+      - name: failoverRatio
         type: Double
         description: |
           The value of the field must be in [0, 1]. If the ratio of the healthy
@@ -840,20 +872,20 @@ properties:
           VMs with the best effort, or to all VMs when no VM is healthy.
           This field is only used with l4 load balancing.
         at_least_one_of:
-          - 'failover_policy.0.disable_connection_drain_on_failover'
-          - 'failover_policy.0.drop_traffic_if_unhealthy'
-          - 'failover_policy.0.failover_ratio'
-  - name: 'enableCDN'
+          - failover_policy.0.disable_connection_drain_on_failover
+          - failover_policy.0.drop_traffic_if_unhealthy
+          - failover_policy.0.failover_ratio
+  - name: enableCDN
     type: Boolean
     description: |
       If true, enable Cloud CDN for this RegionBackendService.
-  - name: 'fingerprint'
+  - name: fingerprint
     type: Fingerprint
     description: |
       Fingerprint of this resource. A hash of the contents stored in this
       object. This field is used in optimistic locking.
     output: true
-  - name: 'healthChecks'
+  - name: healthChecks
     type: Array
     description: |
       The set of URLs to HealthCheck resources for health checking
@@ -863,20 +895,18 @@ properties:
       A health check must be specified unless the backend service uses an internet
       or serverless NEG as a backend.
     is_set: true
-    set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
-    custom_flatten: 'templates/terraform/custom_flatten/guard_self_link_array.go.tmpl'
+    set_hash_func: tpgresource.SelfLinkRelativePathHash
+    custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.tmpl
     item_type:
       type: String
     min_size: 1
     max_size: 1
-  - name: 'generated_id'
+  - name: generated_id
     type: Integer
-    description:
-      'The unique identifier for the resource. This identifier is defined by the
-      server.'
+    description: The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
     output: true
-  - name: 'iap'
+  - name: iap
     type: NestedObject
     description: |
       Settings for enabling Cloud Identity Aware Proxy.
@@ -884,39 +914,39 @@ properties:
     default_from_api: true
     send_empty_value: true
     properties:
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
         description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
         required: true
         send_empty_value: true
-      - name: 'oauth2ClientId'
+      - name: oauth2ClientId
         type: String
         description: |
           OAuth2 Client ID for IAP
         send_empty_value: true
-        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
-      - name: 'oauth2ClientSecret'
+        diff_suppress_func: tpgresource.EmptyOrDefaultStringSuppress(" ")
+      - name: oauth2ClientSecret
         type: String
         description: |
           OAuth2 Client Secret for IAP
         ignore_read: true
         sensitive: true
         send_empty_value: true
-      - name: 'oauth2ClientSecretSha256'
+      - name: oauth2ClientSecretSha256
         type: String
         description: |
           OAuth2 Client Secret SHA-256 for IAP
         sensitive: true
         output: true
-  - name: 'ipAddressSelectionPolicy'
+  - name: ipAddressSelectionPolicy
     type: Enum
     description: |
       Specifies preference of traffic to the backend (from the proxy and from the client for proxyless gRPC).
     enum_values:
-      - 'IPV4_ONLY'
-      - 'PREFER_IPV6'
-      - 'IPV6_ONLY'
-  - name: 'loadBalancingScheme'
+      - IPV4_ONLY
+      - PREFER_IPV6
+      - IPV6_ONLY
+  - name: loadBalancingScheme
     type: Enum
     description: |
       Indicates what kind of load balancing this regional backend service
@@ -924,14 +954,14 @@ properties:
       balancing cannot be used with the other(s). For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
     immutable: true
-    default_value: "INTERNAL"
+    default_value: INTERNAL
     enum_values:
-      - 'EXTERNAL'
-      - 'EXTERNAL_MANAGED'
-      - 'INTERNAL'
-      - 'INTERNAL_MANAGED'
-      - 'INTERNAL_SELF_MANAGED'
-  - name: 'localityLbPolicy'
+      - EXTERNAL
+      - EXTERNAL_MANAGED
+      - INTERNAL
+      - INTERNAL_MANAGED
+      - INTERNAL_SELF_MANAGED
+  - name: localityLbPolicy
     type: Enum
     description: |
       The load balancing algorithm used within the scope of the locality.
@@ -998,15 +1028,15 @@ properties:
       by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
       field set to true.
     enum_values:
-      - 'ROUND_ROBIN'
-      - 'LEAST_REQUEST'
-      - 'RING_HASH'
-      - 'RANDOM'
-      - 'ORIGINAL_DESTINATION'
-      - 'MAGLEV'
-      - 'WEIGHTED_MAGLEV'
-      - 'WEIGHTED_ROUND_ROBIN'
-  - name: 'name'
+      - ROUND_ROBIN
+      - LEAST_REQUEST
+      - RING_HASH
+      - RANDOM
+      - ORIGINAL_DESTINATION
+      - MAGLEV
+      - WEIGHTED_MAGLEV
+      - WEIGHTED_ROUND_ROBIN
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -1018,14 +1048,14 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'customMetrics'
+  - name: customMetrics
     type: Array
     description: |
       List of custom metrics that are used for the WEIGHTED_ROUND_ROBIN locality_lb_policy.
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           required: true
           description: |
@@ -1038,31 +1068,31 @@ properties:
             field can only be used for a global or regional backend service with the
             loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
             <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
-        - name: 'dryRun'
+        - name: dryRun
           type: Boolean
           required: true
           description: |
             If true, the metric data is not used for load balancing.
-  - name: 'networkPassThroughLbTrafficPolicy'
+  - name: networkPassThroughLbTrafficPolicy
     type: NestedObject
     description: |
       Configures traffic steering properties of internal passthrough Network Load Balancers.
     properties:
-      - name: 'zonalAffinity'
+      - name: zonalAffinity
         type: NestedObject
         description: |
           When configured, new connections are load balanced across healthy backend endpoints in the local zone.
         properties:
-          - name: 'spillover'
+          - name: spillover
             type: Enum
             description: |
               This field indicates whether zonal affinity is enabled or not.
             enum_values:
-              - 'ZONAL_AFFINITY_DISABLED'
-              - 'ZONAL_AFFINITY_SPILL_CROSS_ZONE'
-              - 'ZONAL_AFFINITY_STAY_WITHIN_ZONE'
-            default_value: 'ZONAL_AFFINITY_DISABLED'
-          - name: 'spilloverRatio'
+              - ZONAL_AFFINITY_DISABLED
+              - ZONAL_AFFINITY_SPILL_CROSS_ZONE
+              - ZONAL_AFFINITY_STAY_WITHIN_ZONE
+            default_value: ZONAL_AFFINITY_DISABLED
+          - name: spilloverRatio
             type: Double
             description: |
               The value of the field must be in [0, 1]. When the ratio of the count of healthy backend endpoints in a zone
@@ -1070,182 +1100,182 @@ properties:
               distributes new connections to all healthy endpoints in the local zone only. When the ratio of the count
               of healthy backend endpoints in a zone to the count of backend endpoints in that same zone is below this
               threshold, the load balancer distributes all new connections to all healthy endpoints across all zones.
-  - name: 'outlierDetection'
+  - name: outlierDetection
     type: NestedObject
     description: |
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       This field is applicable only when the `load_balancing_scheme` is set
       to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
     properties:
-      - name: 'baseEjectionTime'
+      - name: baseEjectionTime
         type: NestedObject
         description: |
           The base time that a host is ejected for. The real time is equal to the base
           time multiplied by the number of times the host has been ejected. Defaults to
           30000ms or 30s.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
         properties:
-          - name: 'seconds'
+          - name: seconds
             type: Integer
             description: |
               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
               inclusive.
             required: true
-          - name: 'nanos'
+          - name: nanos
             type: Integer
             description: |
               Span of time that's a fraction of a second at nanosecond resolution. Durations
               less than one second are represented with a 0 `seconds` field and a positive
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
-      - name: 'consecutiveErrors'
+      - name: consecutiveErrors
         type: Integer
         description: |
           Number of errors before a host is ejected from the connection pool. When the
           backend host is accessed over HTTP, a 5xx return code qualifies as an error.
           Defaults to 5.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-      - name: 'consecutiveGatewayFailure'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+      - name: consecutiveGatewayFailure
         type: Integer
         description: |
           The number of consecutive gateway failures (502, 503, 504 status or connection
           errors that are mapped to one of those status codes) before a consecutive
           gateway failure ejection occurs. Defaults to 5.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-      - name: 'enforcingConsecutiveErrors'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+      - name: enforcingConsecutiveErrors
         type: Integer
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive 5xx. This setting can be used to disable
           ejection or to ramp it up slowly. Defaults to 100.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-      - name: 'enforcingConsecutiveGatewayFailure'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+      - name: enforcingConsecutiveGatewayFailure
         type: Integer
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive gateway failures. This setting can be
           used to disable ejection or to ramp it up slowly. Defaults to 0.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-      - name: 'enforcingSuccessRate'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+      - name: enforcingSuccessRate
         type: Integer
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through success rate statistics. This setting can be used to
           disable ejection or to ramp it up slowly. Defaults to 100.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-      - name: 'interval'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+      - name: interval
         type: NestedObject
         description: |
           Time interval between ejection sweep analysis. This can result in both new
           ejections as well as hosts being returned to service. Defaults to 10 seconds.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
         properties:
-          - name: 'seconds'
+          - name: seconds
             type: Integer
             description: |
               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
               inclusive.
             required: true
-          - name: 'nanos'
+          - name: nanos
             type: Integer
             description: |
               Span of time that's a fraction of a second at nanosecond resolution. Durations
               less than one second are represented with a 0 `seconds` field and a positive
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
-      - name: 'maxEjectionPercent'
+      - name: maxEjectionPercent
         type: Integer
         description: |
           Maximum percentage of hosts in the load balancing pool for the backend service
           that can be ejected. Defaults to 10%.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-      - name: 'successRateMinimumHosts'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+      - name: successRateMinimumHosts
         type: Integer
         description: |
           The number of hosts in a cluster that must have enough request volume to detect
@@ -1253,18 +1283,18 @@ properties:
           detection via success rate statistics is not performed for any host in the
           cluster. Defaults to 5.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-      - name: 'successRateRequestVolume'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+      - name: successRateRequestVolume
         type: Integer
         description: |
           The minimum number of total requests that must be collected in one interval (as
@@ -1273,18 +1303,18 @@ properties:
           detection via success rate statistics is not performed for that host. Defaults
           to 100.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-      - name: 'successRateStdevFactor'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+      - name: successRateStdevFactor
         type: Integer
         description: |
           This factor is used to determine the ejection threshold for success rate outlier
@@ -1294,18 +1324,18 @@ properties:
           by a thousand to get a double. That is, if the desired factor is 1.9, the
           runtime value should be 1900. Defaults to 1900.
         at_least_one_of:
-          - 'outlier_detection.0.base_ejection_time'
-          - 'outlier_detection.0.consecutive_errors'
-          - 'outlier_detection.0.consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_consecutive_errors'
-          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
-          - 'outlier_detection.0.enforcing_success_rate'
-          - 'outlier_detection.0.interval'
-          - 'outlier_detection.0.max_ejection_percent'
-          - 'outlier_detection.0.success_rate_minimum_hosts'
-          - 'outlier_detection.0.success_rate_request_volume'
-          - 'outlier_detection.0.success_rate_stdev_factor'
-  - name: 'portName'
+          - outlier_detection.0.base_ejection_time
+          - outlier_detection.0.consecutive_errors
+          - outlier_detection.0.consecutive_gateway_failure
+          - outlier_detection.0.enforcing_consecutive_errors
+          - outlier_detection.0.enforcing_consecutive_gateway_failure
+          - outlier_detection.0.enforcing_success_rate
+          - outlier_detection.0.interval
+          - outlier_detection.0.max_ejection_percent
+          - outlier_detection.0.success_rate_minimum_hosts
+          - outlier_detection.0.success_rate_request_volume
+          - outlier_detection.0.success_rate_stdev_factor
+  - name: portName
     type: String
     description: |
       A named port on a backend instance group representing the port for
@@ -1316,7 +1346,7 @@ properties:
       default of "http" if not given.
       Must be omitted when the loadBalancingScheme is INTERNAL (Internal TCP/UDP Load Balancing).
     default_from_api: true
-  - name: 'protocol'
+  - name: protocol
     type: Enum
     description: |
       The protocol this BackendService uses to communicate with backends.
@@ -1325,89 +1355,89 @@ properties:
       for more information.
     default_from_api: true
     enum_values:
-      - 'HTTP'
-      - 'HTTPS'
-      - 'HTTP2'
-      - 'TCP'
-      - 'SSL'
-      - 'UDP'
-      - 'GRPC'
-      - 'UNSPECIFIED'
-      - 'H2C'
-  - name: 'securityPolicy'
+      - HTTP
+      - HTTPS
+      - HTTP2
+      - TCP
+      - SSL
+      - UDP
+      - GRPC
+      - UNSPECIFIED
+      - H2C
+  - name: securityPolicy
     type: String
     description: |
       The security policy associated with this backend service.
-    update_url: 'projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy'
-    update_verb: 'POST'
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'sessionAffinity'
+    update_url: projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy
+    update_verb: POST
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: sessionAffinity
     type: Enum
     description: |
       Type of session affinity to use. The default is NONE. Session affinity is
       not applicable if the protocol is UDP.
     default_from_api: true
     enum_values:
-      - 'NONE'
-      - 'CLIENT_IP'
-      - 'CLIENT_IP_PORT_PROTO'
-      - 'CLIENT_IP_PROTO'
-      - 'GENERATED_COOKIE'
-      - 'HEADER_FIELD'
-      - 'HTTP_COOKIE'
-      - 'CLIENT_IP_NO_DESTINATION'
-      - 'STRONG_COOKIE_AFFINITY'
-  - name: 'strongSessionAffinityCookie'
+      - NONE
+      - CLIENT_IP
+      - CLIENT_IP_PORT_PROTO
+      - CLIENT_IP_PROTO
+      - GENERATED_COOKIE
+      - HEADER_FIELD
+      - HTTP_COOKIE
+      - CLIENT_IP_NO_DESTINATION
+      - STRONG_COOKIE_AFFINITY
+  - name: strongSessionAffinityCookie
     type: NestedObject
     description: |
       Describes the HTTP cookie used for stateful session affinity. This field is applicable and required if the sessionAffinity is set to STRONG_COOKIE_AFFINITY.
     properties:
-      - name: 'ttl'
+      - name: ttl
         type: NestedObject
         description: |
           Lifetime of the cookie.
         at_least_one_of:
-          - 'strong_session_affinity_cookie.0.ttl'
-          - 'strong_session_affinity_cookie.0.name'
-          - 'strong_session_affinity_cookie.0.path'
+          - strong_session_affinity_cookie.0.ttl
+          - strong_session_affinity_cookie.0.name
+          - strong_session_affinity_cookie.0.path
         properties:
-          - name: 'seconds'
+          - name: seconds
             type: Integer
             description: |
               Span of time at a resolution of a second.
               Must be from 0 to 315,576,000,000 inclusive.
             required: true
-          - name: 'nanos'
+          - name: nanos
             type: Integer
             description: |
               Span of time that's a fraction of a second at nanosecond
               resolution. Durations less than one second are represented
               with a 0 seconds field and a positive nanos field. Must
               be from 0 to 999,999,999 inclusive.
-      - name: 'name'
+      - name: name
         type: String
         description: |
           Name of the cookie.
         at_least_one_of:
-          - 'strong_session_affinity_cookie.0.ttl'
-          - 'strong_session_affinity_cookie.0.name'
-          - 'strong_session_affinity_cookie.0.path'
-      - name: 'path'
+          - strong_session_affinity_cookie.0.ttl
+          - strong_session_affinity_cookie.0.name
+          - strong_session_affinity_cookie.0.path
+      - name: path
         type: String
         description: |
           Path to set for the cookie.
         at_least_one_of:
-          - 'strong_session_affinity_cookie.0.ttl'
-          - 'strong_session_affinity_cookie.0.name'
-          - 'strong_session_affinity_cookie.0.path'
-  - name: 'connectionTrackingPolicy'
+          - strong_session_affinity_cookie.0.ttl
+          - strong_session_affinity_cookie.0.name
+          - strong_session_affinity_cookie.0.path
+  - name: connectionTrackingPolicy
     type: NestedObject
     description: |
       Connection Tracking configuration for this BackendService.
       This is available only for Layer 4 Internal Load Balancing and
       Network Load Balancing.
     properties:
-      - name: 'idleTimeoutSec'
+      - name: idleTimeoutSec
         type: Integer
         description: |
           Specifies how long to keep a Connection Tracking entry while there is
@@ -1417,7 +1447,7 @@ properties:
 
           For NLB the minimum(default) is 60 seconds and the maximum is 16 hours.
         default_from_api: true
-      - name: 'trackingMode'
+      - name: trackingMode
         type: Enum
         description: |
           Specifies the key used for connection tracking. There are two options:
@@ -1426,11 +1456,11 @@ properties:
 
           `PER_SESSION`: The Connection Tracking is performed as per the
           configured Session Affinity. It matches the configured Session Affinity.
-        default_value: "PER_CONNECTION"
+        default_value: PER_CONNECTION
         enum_values:
-          - 'PER_CONNECTION'
-          - 'PER_SESSION'
-      - name: 'connectionPersistenceOnUnhealthyBackends'
+          - PER_CONNECTION
+          - PER_SESSION
+      - name: connectionPersistenceOnUnhealthyBackends
         type: Enum
         description: |
           Specifies connection persistence when backends are unhealthy.
@@ -1449,15 +1479,15 @@ properties:
           If set to `ALWAYS_PERSIST`, existing connections always persist on
           unhealthy backends regardless of protocol and session affinity. It is
           generally not recommended to use this mode overriding the default.
-        default_value: "DEFAULT_FOR_PROTOCOL"
+        default_value: DEFAULT_FOR_PROTOCOL
         enum_values:
-          - 'DEFAULT_FOR_PROTOCOL'
-          - 'NEVER_PERSIST'
-          - 'ALWAYS_PERSIST'
-      - name: 'enableStrongAffinity'
+          - DEFAULT_FOR_PROTOCOL
+          - NEVER_PERSIST
+          - ALWAYS_PERSIST
+      - name: enableStrongAffinity
         type: Boolean
         description: Enable Strong Session Affinity for Network Load Balancing. This option is not available publicly.
-  - name: 'timeoutSec'
+  - name: timeoutSec
     type: Integer
     description: |
       The backend service timeout has a different meaning depending on the type of load balancer.
@@ -1465,23 +1495,23 @@ properties:
       The default is 30 seconds.
       The full range of timeout values allowed goes from 1 through 2,147,483,647 seconds.
     default_from_api: true
-  - name: 'logConfig'
+  - name: logConfig
     type: NestedObject
     description: |
       This field denotes the logging options for the load balancer traffic served by this backend service.
       If logging is enabled, logs will be exported to Stackdriver.
     default_from_api: true
     properties:
-      - name: 'enable'
+      - name: enable
         type: Boolean
         description: |
           Whether to enable logging for the load balancer traffic served by this backend service.
         send_empty_value: true
         at_least_one_of:
-          - 'log_config.0.enable'
-          - 'log_config.0.sample_rate'
-          - 'log_config.0.optional_mode'
-      - name: 'sampleRate'
+          - log_config.0.enable
+          - log_config.0.sample_rate
+          - log_config.0.optional_mode
+      - name: sampleRate
         type: Double
         description: |
           This field can only be specified if logging is enabled for this backend service. The value of
@@ -1489,57 +1519,57 @@ properties:
           where 1.0 means all logged requests are reported and 0.0 means no logged requests are reported.
           The default value is 1.0.
         at_least_one_of:
-          - 'log_config.0.enable'
-          - 'log_config.0.sample_rate'
-          - 'log_config.0.optional_mode'
-        diff_suppress_func: 'suppressWhenDisabled'
+          - log_config.0.enable
+          - log_config.0.sample_rate
+          - log_config.0.optional_mode
+        diff_suppress_func: suppressWhenDisabled
         default_value: 1.0
-      - name: 'optionalMode'
+      - name: optionalMode
         type: Enum
         description: |
           Specifies the optional logging mode for the load balancer traffic.
           Supported values: INCLUDE_ALL_OPTIONAL, EXCLUDE_ALL_OPTIONAL, CUSTOM.
         enum_values:
-          - 'INCLUDE_ALL_OPTIONAL'
-          - 'EXCLUDE_ALL_OPTIONAL'
-          - 'CUSTOM'
+          - INCLUDE_ALL_OPTIONAL
+          - EXCLUDE_ALL_OPTIONAL
+          - CUSTOM
         at_least_one_of:
-          - 'log_config.0.enable'
-          - 'log_config.0.sample_rate'
-          - 'log_config.0.optional_mode'
+          - log_config.0.enable
+          - log_config.0.sample_rate
+          - log_config.0.optional_mode
         default_from_api: true
-      - name: 'optionalFields'
+      - name: optionalFields
         type: Array
         description: |
           Specifies the fields to include in logging. This field can only be specified if logging is enabled for this backend service.
         item_type:
           type: String
         default_from_api: true
-  - name: 'network'
+  - name: network
     type: ResourceRef
     description: |
       The URL of the network to which this backend service belongs.
       This field must be set for Internal Passthrough Network Load Balancers when the haPolicy is enabled, and for External Passthrough Network Load Balancers when the haPolicy fastIpMove is enabled.
       This field can only be specified when the load balancing scheme is set to INTERNAL, or when the load balancing scheme is set to EXTERNAL and haPolicy fastIpMove is enabled.
       Changes to this field force recreation of the resource.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Network'
-    imports: 'selfLink'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Network
+    imports: selfLink
     immutable: true
-  - name: 'subsetting'
+  - name: subsetting
     type: NestedObject
     description: |
       Subsetting configuration for this BackendService. Currently this is applicable only for Internal TCP/UDP load balancing and Internal HTTP(S) load balancing.
-    min_version: 'beta'
+    min_version: beta
     properties:
-      - name: 'policy'
+      - name: policy
         type: Enum
         description: |
           The algorithm used for subsetting.
         required: true
         enum_values:
-          - 'CONSISTENT_HASH_SUBSETTING'
-      - name: 'subsetSize'
+          - CONSISTENT_HASH_SUBSETTING
+      - name: subsetSize
         type: Integer
         description: |
           The number of backends per backend group assigned to each proxy instance or each service mesh client.
@@ -1549,48 +1579,48 @@ properties:
           If you do not provide this value, Cloud Load Balancing will calculate it dynamically to optimize the number
           of proxies/clients visible to each backend and vice versa.
           Must be greater than 0. If subsetSize is larger than the number of backends/endpoints, then subsetting is disabled.
-  - name: 'dynamicForwarding'
+  - name: dynamicForwarding
     type: NestedObject
     description: |
       Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
       feature which together with Service Extension allows customized and complex routing logic.
     min_version: beta
     properties:
-      - name: 'ipPortSelection'
+      - name: ipPortSelection
         type: NestedObject
         description: |
           IP:PORT based dynamic forwarding configuration.
         min_version: beta
         properties:
-          - name: 'enabled'
+          - name: enabled
             type: Boolean
             min_version: beta
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
-      - name: 'forwardProxy'
+      - name: forwardProxy
         type: NestedObject
         description: |
           Dynamic Forwarding Proxy configuration.
         min_version: beta
         properties:
-          - name: 'enabled'
+          - name: enabled
             type: Boolean
             min_version: beta
             description: |
               A boolean flag enabling dynamic forwarding proxy.
             immutable: true
             required: true
-          - name: 'proxyMode'
+          - name: proxyMode
             type: Enum
             min_version: beta
             description: |
               Determines the dynamic forwarding proxy mode
             enum_values:
-              - 'DIRECT_FORWARDING'
-              - 'CLOUD_RUN'
+              - DIRECT_FORWARDING
+              - CLOUD_RUN
             required: true
-  - name: 'haPolicy'
+  - name: haPolicy
     type: NestedObject
     description: |
       Configures self-managed High Availability (HA) for External and Internal Protocol Forwarding.
@@ -1607,7 +1637,7 @@ properties:
       - failoverPolicy
       - healthChecks
     properties:
-      - name: 'fastIPMove'
+      - name: fastIPMove
         type: Enum
         is_missing_in_cai: true
         description: |
@@ -1627,38 +1657,38 @@ properties:
                        are quickly delivered to that VM.
         immutable: true
         enum_values:
-          - 'DISABLED'
-          - 'GARP_RA'
-      - name: 'leader'
+          - DISABLED
+          - GARP_RA
+      - name: leader
         type: NestedObject
         description: |
           Selects one of the network endpoints attached to the backend NEGs of this service as the
           active endpoint (the leader) that receives all traffic.
         properties:
-          - name: 'backendGroup'
+          - name: backendGroup
             type: ResourceRef
             is_missing_in_cai: true
             description: |
               A fully-qualified URL of the zonal Network Endpoint Group (NEG) that the leader is
               attached to.
-          - name: 'networkEndpoint'
+          - name: networkEndpoint
             type: NestedObject
             description: |
               The network endpoint within the leader.backendGroup that is designated as the leader.
             properties:
-              - name: 'instance'
+              - name: instance
                 type: String
                 description: |
                   The name of the VM instance of the leader network endpoint. The instance must
                   already be attached to the NEG specified in the haPolicy.leader.backendGroup.
-  - name: 'params'
+  - name: params
     type: NestedObject
     ignore_read: true
     immutable: true
     description: |
       Additional params passed with the request, but not persisted as part of resource payload
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the region backend service. Tag keys and values have the
@@ -1667,19 +1697,19 @@ properties:
         api_name: resourceManagerTags
         ignore_read: true
         immutable: true
-  - name: 'tlsSettings'
+  - name: tlsSettings
     type: NestedObject
     description: |
       Configuration for Backend Authenticated TLS and mTLS. May only be specified when the backend protocol is SSL, HTTPS or HTTP2.
     properties:
-      - name: 'sni'
+      - name: sni
         type: String
         description: |
           Server Name Indication - see RFC3546 section 3.1. If set, the load balancer sends this string as the SNI hostname in the
           TLS connection to the backend, and requires that this string match a Subject Alternative Name (SAN) in the backend's
           server certificate. With a Regional Internet NEG backend, if the SNI is specified here, the load balancer uses it
           regardless of whether the Regional Internet NEG is specified with FQDN or IP address and port.
-      - name: 'subjectAltNames'
+      - name: subjectAltNames
         type: Array
         description: |
           A list of Subject Alternative Names (SANs) that the Load Balancer verifies during a TLS handshake with the backend.
@@ -1690,19 +1720,19 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'dnsName'
+            - name: dnsName
               type: String
               description: The SAN specified as a DNS Name.
               exactly_one_of:
                 - tlsSettings.0.uniform_resource_identifier
                 - tlsSettings.0.dns_name
-            - name: 'uniformResourceIdentifier'
+            - name: uniformResourceIdentifier
               type: String
               description: The SAN specified as a URI.
               exactly_one_of:
                 - tlsSettings.0.uniform_resource_identifier
                 - tlsSettings.0.dns_name
-      - name: 'authenticationConfig'
+      - name: authenticationConfig
         type: String
         description: |
           Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.

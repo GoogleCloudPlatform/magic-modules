@@ -12,17 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'ServiceConsumers'
-legacy_name: 'google_endpoints_service_consumers'
+name: ServiceConsumers
+legacy_name: google_endpoints_service_consumers
 description: |
   A service that is managed by Google Service Management
 exclude_resource: true
 docs:
-id_format: 'services/{{service_name}}/consumers/{{consumer_project}}'
-base_url: 'services/{{service_name}}/consumers/{{consumer_project}}'
-self_link: 'services/{{service_name}}/consumers/{{consumer_project}}'
+id_format: services/{{service_name}}/consumers/{{consumer_project}}
+base_url: services/{{service_name}}/consumers/{{consumer_project}}
+self_link: services/{{service_name}}/consumers/{{consumer_project}}
 import_format:
-  - 'services/{{service_name}}/consumers/{{consumer_project}}'
+  - services/{{service_name}}/consumers/{{consumer_project}}
   - '{{consumer_project}}'
 timeouts:
   insert_minutes: 20
@@ -30,31 +30,31 @@ timeouts:
   delete_minutes: 20
 iam_policy:
   method_name_separator: ':'
-  parent_resource_type: 'google_endpoints_service'
-  fetch_iam_policy_verb: 'POST'
-  allowed_iam_role: 'roles/servicemanagement.serviceController'
-  parent_resource_attribute: 'consumer_project'
-  example_config_body: 'templates/terraform/iam/example_config_body/service_management_consumer.tf.tmpl'
+  parent_resource_type: google_endpoints_service
+  fetch_iam_policy_verb: POST
+  allowed_iam_role: roles/servicemanagement.serviceController
+  parent_resource_attribute: consumer_project
+  sample_config_body: templates/terraform/iam/example_config_body/service_management_consumer.tf.tmpl
 custom_code:
-examples:
-  - name: 'endpoints_iam'
-    primary_resource_id: 'endpoints_service'
-    vars:
-      name: 'endpoint'
-    test_vars_overrides:
-      # for backward compatible
-      name: '"endpoint" + randomSuffix'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-      consumer_project: 'PROJECT_NAME'
+samples:
+  - name: endpoints_iam
+    primary_resource_id: endpoints_service
+    steps:
+      - name: endpoints_iam
+        resource_id_vars:
+          name: endpoint
+        test_env_vars:
+          consumer_project: PROJECT_NAME
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          name: '"endpoint" + randomSuffix'
 parameters:
 properties:
-  - name: 'serviceName'
+  - name: serviceName
     type: String
     description: The name of the service.
     required: true
-  - name: 'consumerProject'
+  - name: consumerProject
     type: String
-    description:
-      The service consumer project ID which you are granting permission to
+    description: The service consumer project ID which you are granting permission to
     required: true

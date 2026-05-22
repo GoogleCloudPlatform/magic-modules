@@ -13,12 +13,11 @@
 
 ---
 name: MulticastGroupProducerActivation
-description: Create a multicast group producer activation in the specified
-  location of the current project.
+description: Create a multicast group producer activation in the specified location of the current project.
 references:
   guides:
-    'Create Multicast Group Producer Activation': 'https://docs.cloud.google.com/vpc/docs/multicast/enable-producer-network#activate-producer'
-  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupProducerActivations'
+    Create Multicast Group Producer Activation: https://docs.cloud.google.com/vpc/docs/multicast/enable-producer-network#activate-producer
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupProducerActivations
 base_url: projects/{{project}}/locations/{{location}}/multicastGroupProducerActivations
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastGroupProducerActivations/{{multicast_group_producer_activation_id}}
@@ -29,19 +28,21 @@ import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupProducerActivations/{{multicast_group_producer_activation_id}}
 sweeper:
   url_substitutions:
-    - location: "us-central1-b"
-examples:
+    - location: us-central1-b
+samples:
   - name: network_services_multicast_group_producer_activation_basic
     primary_resource_id: mgpa_test
-    vars:
-      network_name: test-network-mgpa
-      domain_name: test-domain-mgpa
-      domain_activation_name: test-domain-activation-mgpa
-      producer_association_name: test-producer-association-mgpa
-      internal_range_name: test-internal-range-mgpa
-      group_range_name: test-group-range-mgpa
-      group_range_activation_name: test-mgra-mgpa
-      group_producer_activation_name: test-mgpa-mgpa
+    steps:
+      - name: network_services_multicast_group_producer_activation_basic
+        resource_id_vars:
+          domain_activation_name: test-domain-activation-mgpa
+          domain_name: test-domain-mgpa
+          group_producer_activation_name: test-mgpa-mgpa
+          group_range_activation_name: test-mgra-mgpa
+          group_range_name: test-group-range-mgpa
+          internal_range_name: test-internal-range-mgpa
+          network_name: test-network-mgpa
+          producer_association_name: test-producer-association-mgpa
 autogen_async: true
 async:
   operation:
@@ -79,8 +80,7 @@ parameters:
 properties:
   - name: createTime
     type: String
-    description: |-
-      The timestamp when the multicast group producer activation was created.
+    description: The timestamp when the multicast group producer activation was created.
     output: true
   - name: description
     type: String

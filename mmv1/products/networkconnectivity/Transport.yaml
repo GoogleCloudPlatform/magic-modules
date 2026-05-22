@@ -12,154 +12,156 @@
 # limitations under the License.
 
 ---
-name: 'Transport'
+name: Transport
 description: |
   The Transport resource is a top-level resource used by customers to control Partner Cross-Cloud Interconnect (CCI) connections.
 references:
   guides:
-    'Official Documentation': 'https://docs.cloud.google.com/sdk/gcloud/reference/network-connectivity/transports'
-  api: 'https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.transports'
+    Official Documentation: https://docs.cloud.google.com/sdk/gcloud/reference/network-connectivity/transports
+  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.transports
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/transports'
-self_link: 'projects/{{project}}/locations/{{region}}/transports/{{name}}'
-create_url: 'projects/{{project}}/locations/{{region}}/transports?transportId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{region}}/transports
+self_link: projects/{{project}}/locations/{{region}}/transports/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/transports?transportId={{name}}
+update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete']
-  type: 'OpAsync'
+  actions: [create, delete]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
-examples:
-  - name: 'network_connectivity_transport_basic'
-    primary_resource_id: 'primary'
-    vars:
-      transport_name: 'basic-transport'
-      network_name: 'my-vpc-network'
+collection_url_key: items
+samples:
+  - name: network_connectivity_transport_basic
+    primary_resource_id: primary
+    steps:
+      - name: network_connectivity_transport_basic
+        resource_id_vars:
+          network_name: my-vpc-network
+          transport_name: basic-transport
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: |
       The region of this resource. This is required to construct the resource name, but is not sent to the API since the region is already contained in the parent field.
     required: true
     url_param_only: true
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource.
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource, see google.aip.dev/122 for resource naming.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'remoteProfile'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: remoteProfile
     type: String
     description: |
       Resource URL of the remoteTransportProfile that this Transport is
       connecting to.
     required: true
     immutable: true
-  - name: 'providedActivationKey'
+  - name: providedActivationKey
     type: String
     description: |
       Key used for establishing a connection with the remote transport. This key can only be provided if the profile supports an INPUT key flow and the resource is in the PENDING_KEY state.
-  - name: 'generatedActivationKey'
+  - name: generatedActivationKey
     type: String
     description: |
       [Output only] Google-generated activation key. This is only output if the selected profile supports an OUTPUT key flow. Inputting this to the provider is only valid while the resource is in a PENDING_KEY state. Once the provider has accepted the key, the resource will move to the CONFIGURING state.
     output: true
-  - name: 'bandwidth'
+  - name: bandwidth
     type: String
     description: |
       Bandwidth of the Transport. This must be one of the supported bandwidths for the remote profile.
     default_from_api: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
-  - name: 'stackType'
+  - name: stackType
     type: Enum
     description: |
       IP version stack for the established connectivity.
     default_from_api: true
     enum_values:
-      - 'IPV4_IPV6'
-      - 'IPV4_ONLY'
-  - name: 'state'
+      - IPV4_IPV6
+      - IPV4_ONLY
+  - name: state
     type: Enum
     description: |
       [Output Only] State of the underlying connectivity.
     output: true
     enum_values:
-      - 'CREATING'
-      - 'PENDING_CONFIG'
-      - 'PENDING_KEY'
-      - 'ACTIVE'
-      - 'DELETING'
-      - 'DEPROVISIONED'
-  - name: 'mtuLimit'
+      - CREATING
+      - PENDING_CONFIG
+      - PENDING_KEY
+      - ACTIVE
+      - DELETING
+      - DEPROVISIONED
+  - name: mtuLimit
     type: Integer
     description: |
       [Output only] The maximum transmission unit (MTU) of a packet that can be sent over this transport.
-  - name: 'adminEnabled'
+  - name: adminEnabled
     type: Boolean
     description: |
       Administrative state of the underlying connectivity. If set to true (default), connectivity should be available between your environments. If set to false, the connectivity over these links is disabled. Disabling your Transport does not affect billing, and retains the underlying network bandwidth associated with the connectivity.
-    min_version: 'beta'
+    min_version: beta
     send_empty_value: true
     default_value: true
-  - name: 'network'
+  - name: network
     type: ResourceRef
     description: |
       Resource URL of the Network that will be peered with this Transport. This field must be provided during resource creation and cannot be changed.
     immutable: true
-    resource: 'Network'
-    imports: 'selfLink'
+    resource: Network
+    imports: selfLink
     required: true
-  - name: 'advertisedRoutes'
+  - name: advertisedRoutes
     type: Array
     description: |
       List of IP Prefixes that will be advertised to the remote provider. Both IPv4 and IPv6 addresses are supported.
     item_type:
       type: String
-  - name: 'remoteAccountId'
+  - name: remoteAccountId
     type: String
     description: |
       The user supplied account id for the CSP associated with the remote profile.
-  - name: 'peeringNetwork'
+  - name: peeringNetwork
     type: String
     description: |
       VPC Network URI that was created for the VPC Peering connection to the provided `network`. If VPC Peering is disconnected, this can be used to re-establish.
     output: true
-  - name: 'hub'
+  - name: hub
     type: ResourceRef
     description: |
       The NCC Hub that the Transport should attach to. The hub must be in the same project as the Transport.
-    min_version: 'beta'
-    resource: 'Hub'
-    imports: 'selfLink'
+    min_version: beta
+    resource: Hub
+    imports: selfLink
     immutable: true
-  - name: 'pscRoutingEnabled'
+  - name: pscRoutingEnabled
     type: Boolean
     description: |
       Controls whether a Routing VPC Spoke should be created and attached to the NCC Hub.
-    min_version: 'beta'
+    min_version: beta
     send_empty_value: true
     default_value: false
     immutable: true
-  - name: 'autoAccept'
+  - name: autoAccept
     type: Boolean
     description: |
       Controls whether resources proposed by the Transport are automatically accepted on behalf of the user.
-    min_version: 'beta'
+    min_version: beta
     send_empty_value: true
     default_value: false
     immutable: true

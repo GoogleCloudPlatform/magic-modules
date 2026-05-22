@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'DataLossPrevention'
-display_name: 'Data Loss Prevention'
+name: DataLossPrevention
+display_name: Data Loss Prevention
 versions:
-  - name: 'ga'
-    base_url: 'https://dlp.googleapis.com/v2/'
+  - name: ga
+    base_url: https://dlp.googleapis.com/v2/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

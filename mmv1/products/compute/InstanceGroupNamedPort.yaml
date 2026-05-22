@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'InstanceGroupNamedPort'
+name: InstanceGroupNamedPort
 api_resource_type_kind: InstanceGroup
 api_variant_patterns:
-  - 'projects/{project}/zones/{zone}/instanceGroups/{instanceGroup}'
+  - projects/{project}/zones/{zone}/instanceGroups/{instanceGroup}
 description: |
   Mange the named ports setting for a managed instance group without
   managing the group as whole. This resource is primarily intended for use
@@ -23,26 +23,26 @@ description: |
   tools.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroup'
+    Official Documentation: https://cloud.google.com/compute/docs/instance-groups/
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroup
 docs:
-id_format: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}'
-base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
-self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
-create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
-delete_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
-delete_verb: 'POST'
+id_format: projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}
+base_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}
+self_link: projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}
+create_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts
+delete_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts
+delete_verb: POST
 immutable: true
-mutex: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
+mutex: projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}
 import_format:
-  - 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}'
+  - projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
@@ -56,32 +56,33 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
-  encoder: 'templates/terraform/encoders/normalize_group.go.tmpl'
-examples:
-  - name: 'instance_group_named_port_gke'
-    primary_resource_id: 'my_port'
-    vars:
-      network_name: 'container-network'
-      subnetwork_name: 'container-subnetwork'
-      gke_cluster_name: 'my-cluster'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-      # Multiple fine-grained resources
+  encoder: templates/terraform/encoders/normalize_group.go.tmpl
+samples:
+  - name: instance_group_named_port_gke
     skip_vcr: true
+    primary_resource_id: my_port
+    steps:
+      - name: instance_group_named_port_gke
+        resource_id_vars:
+          deletion_protection: "true"
+          gke_cluster_name: my-cluster
+          network_name: container-network
+          subnetwork_name: container-subnetwork
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
 parameters:
-  - name: 'group'
+  - name: group
     type: ResourceRef
     description: |
       The name of the instance group.
     url_param_only: true
     required: true
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
-    resource: 'InstanceGroup'
-    imports: 'name'
-  - name: 'zone'
+    diff_suppress_func: tpgresource.CompareResourceNames
+    resource: InstanceGroup
+    imports: name
+  - name: zone
     type: ResourceRef
     description: |
       The zone of the instance group.
@@ -89,16 +90,16 @@ parameters:
     required: false
     ignore_read: true
     default_from_api: true
-    resource: 'Zone'
-    imports: 'name'
+    resource: Zone
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name for this named port. The name must be 1-63 characters
       long, and comply with RFC1035.
     required: true
-  - name: 'port'
+  - name: port
     type: Integer
     description: The port number, which can be a value between 1 and 65535.
     required: true

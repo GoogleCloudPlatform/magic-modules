@@ -12,29 +12,31 @@
 # limitations under the License.
 
 ---
-name: 'Schema'
+name: Schema
 description: |
   NextSchema is a collection of SchemaVersions.
 references:
-  api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.schemas'
+  api: https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.schemas
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/schemas'
-self_link: 'projects/{{project}}/locations/{{location}}/schemas/{{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/schemas
+self_link: projects/{{project}}/locations/{{location}}/schemas/{{name}}
+update_verb: PATCH
 update_mask: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/documentai_schema.go.tmpl'
-examples:
-  - name: 'documentai_schema'
-    primary_resource_id: 'schema'
-    vars:
-      display_name: 'my-schema'
+  test_check_destroy: templates/terraform/custom_check_destroy/documentai_schema.go.tmpl
+samples:
+  - name: documentai_schema
+    primary_resource_id: schema
+    steps:
+      - name: documentai_schema
+        resource_id_vars:
+          display_name: my-schema
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the resource.
@@ -42,26 +44,26 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the Schema.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'displayName'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
     type: String
     description: |
       The user-defined name of the Schema.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       The Google Cloud labels for the Schema.
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       The time when the Schema was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       The time when the Schema was last updated.

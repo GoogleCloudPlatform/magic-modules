@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'SecureSourceManager'
-display_name: 'Secure Source Manager'
+name: SecureSourceManager
+display_name: Secure Source Manager
 versions:
-  - name: 'ga'
-    base_url: 'https://securesourcemanager.googleapis.com/v1/'
+  - name: ga
+    base_url: https://securesourcemanager.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

@@ -24,33 +24,41 @@ import_format:
   - projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}
 iam_policy:
   method_name_separator: ':'
-  iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  allowed_iam_role: 'roles/beyondcorp.securityGatewayUser'
-  parent_resource_attribute: 'application_id'
+  iam_conditions_request_type: QUERY_PARAM_NESTED
+  allowed_iam_role: roles/beyondcorp.securityGatewayUser
+  parent_resource_attribute: application_id
   import_format:
-    - 'projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}'
+    - projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}
     - '{{application_id}}'
-examples:
+samples:
   - name: beyondcorp_security_gateway_application_basic
     primary_resource_id: example
-    vars:
-      security_gateway_name: default-sg
-      application_name: google-sga
+    steps:
+      - name: beyondcorp_security_gateway_application_basic
+        resource_id_vars:
+          application_name: google-sga
+          security_gateway_name: default-sg
   - name: beyondcorp_security_gateway_application_vpc
     primary_resource_id: example
-    vars:
-      security_gateway_name: default-sg
-      application_name: my-vm-service2
+    steps:
+      - name: beyondcorp_security_gateway_application_vpc
+        resource_id_vars:
+          application_name: my-vm-service2
+          security_gateway_name: default-sg
   - name: beyondcorp_security_gateway_application_spa_api
     primary_resource_id: example-spa
-    vars:
-      security_gateway_name: default-sg-spa-api
-      application_discovery_name: app-discovery
+    steps:
+      - name: beyondcorp_security_gateway_application_spa_api
+        resource_id_vars:
+          application_discovery_name: app-discovery
+          security_gateway_name: default-sg-spa-api
   - name: beyondcorp_security_gateway_application_spa_proxy
     primary_resource_id: example-spa
-    vars:
-      security_gateway_name: default-sg-spa-proxy
-      application_proxy_name: app-proxy
+    steps:
+      - name: beyondcorp_security_gateway_application_spa_proxy
+        resource_id_vars:
+          application_proxy_name: app-proxy
+          security_gateway_name: default-sg-spa-proxy
 autogen_async: true
 async:
   operation:
@@ -191,9 +199,9 @@ properties:
                       type: Enum
                       description: The output type of the delegated user info.
                       enum_values:
-                        - 'PROTOBUF'
-                        - 'JSON'
-                        - 'NONE'
+                        - PROTOBUF
+                        - JSON
+                        - NONE
                 - name: groupInfo
                   type: NestedObject
                   send_empty_value: true
@@ -204,9 +212,9 @@ properties:
                       type: Enum
                       description: The output type of the delegated group info.
                       enum_values:
-                        - 'PROTOBUF'
-                        - 'JSON'
-                        - 'NONE'
+                        - PROTOBUF
+                        - JSON
+                        - NONE
                 - name: deviceInfo
                   type: NestedObject
                   send_empty_value: true
@@ -217,16 +225,16 @@ properties:
                       type: Enum
                       description: The output type of the delegated device info.
                       enum_values:
-                        - 'PROTOBUF'
-                        - 'JSON'
-                        - 'NONE'
+                        - PROTOBUF
+                        - JSON
+                        - NONE
                 - name: outputType
                   type: Enum
                   description: Default output type for all enabled headers.
                   enum_values:
-                    - 'PROTOBUF'
-                    - 'JSON'
-                    - 'NONE'
+                    - PROTOBUF
+                    - JSON
+                    - NONE
             - name: metadataHeaders
               type: KeyValuePairs
               description: |-
@@ -239,7 +247,7 @@ properties:
               type: Enum
               description: Gateway identity configuration.
               enum_values:
-                - 'RESOURCE_NAME'
+                - RESOURCE_NAME
             - name: clientIp
               type: Boolean
               description: Client IP configuration. The client IP address is included if true.
@@ -247,8 +255,8 @@ properties:
     type: Enum
     description: Type of the external application.
     enum_values:
-      - 'PROXY_GATEWAY'
-      - 'API_GATEWAY'
+      - PROXY_GATEWAY
+      - API_GATEWAY
   - name: name
     type: String
     description: Identifier. Name of the resource.

@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'CloudRunV2'
-display_name: 'Cloud Run (v2 API)'
+name: CloudRunV2
+display_name: Cloud Run (v2 API)
 versions:
-  - name: 'ga'
-    base_url: 'https://run.googleapis.com/v2/'
-  - name: 'beta'
-    base_url: 'https://run.googleapis.com/v2/'
+  - name: ga
+    base_url: https://run.googleapis.com/v2/
+  - name: beta
+    base_url: https://run.googleapis.com/v2/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
