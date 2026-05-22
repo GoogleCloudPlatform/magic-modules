@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"gopkg.in/yaml.v3"
 )
 
@@ -65,30 +64,108 @@ func MigrateFile(filePath, serviceName string) error {
 
 	// Transformation 1: `examples` -> `samples`
 	var newSamplesNodes []*yaml.Node
-	if examplesNode != nil {
-		var oldExamples []*resource.Examples
-		if err := examplesNode.Decode(&oldExamples); err != nil {
-			return fmt.Errorf("failed to decode examples: %w", err)
-		}
+	if examplesNode != nil && examplesNode.Kind == yaml.SequenceNode {
+		for _, exampleMapNode := range examplesNode.Content {
+			if exampleMapNode.Kind != yaml.MappingNode {
+				continue
+			}
 
-		if len(oldExamples) > 0 {
-			migratedSamples := transformExamplesToSamples(oldExamples, filePath, serviceName)
-			for _, sample := range migratedSamples {
-				sampleBytes, err := yaml.Marshal(sample)
-				if err != nil {
-					return fmt.Errorf("failed to marshal migrated sample: %w", err)
-				}
-				var sampleNode yaml.Node
-				if err := yaml.Unmarshal(sampleBytes, &sampleNode); err != nil {
-					return fmt.Errorf("failed to unmarshal sample back to node: %w", err)
-				}
-				// The result of unmarshaling a map is a DocumentNode whose first content is the MappingNode
-				if len(sampleNode.Content) > 0 {
-					newSamplesNodes = append(newSamplesNodes, sampleNode.Content[0])
+			var nameVal, configPathVal string
+			for i := 0; i < len(exampleMapNode.Content); i += 2 {
+				k := exampleMapNode.Content[i].Value
+				v := exampleMapNode.Content[i+1].Value
+				if k == "name" {
+					nameVal = v
+				} else if k == "config_path" {
+					configPathVal = v
 				}
 			}
-			madeChanges = true
+
+			var newConfigPath string
+			if configPathVal != "" && serviceName != "" {
+				templateName := filepath.Base(configPathVal)
+				calculatedPath := path.Join("templates/terraform/samples/services", serviceName, templateName)
+				defaultPath := path.Join("templates/terraform/samples/services", serviceName, fmt.Sprintf("%s.tf.tmpl", nameVal))
+				if calculatedPath != defaultPath {
+					newConfigPath = calculatedPath
+				}
+			}
+
+			samplesContent := []*yaml.Node{}
+			stepContent := []*yaml.Node{}
+
+			for i := 0; i < len(exampleMapNode.Content); i += 2 {
+				keyNode := exampleMapNode.Content[i]
+				valNode := exampleMapNode.Content[i+1]
+
+				switch keyNode.Value {
+				case "name":
+					samplesContent = append(samplesContent, keyNode, valNode)
+					stepContent = append(stepContent, cloneNode(keyNode), cloneNode(valNode))
+
+				case "min_version":
+					samplesContent = append(samplesContent, keyNode, valNode)
+					stepContent = append(stepContent, cloneNode(keyNode), cloneNode(valNode))
+
+				case "config_path":
+					if newConfigPath != "" {
+						valNode.Value = newConfigPath
+						valNode.Style = 0
+						valNode.Tag = "!!str"
+						stepContent = append(stepContent, keyNode, valNode)
+					}
+
+				case "vars":
+					keyNode.Value = "resource_id_vars"
+					stepContent = append(stepContent, keyNode, valNode)
+
+				case "test_env_vars", "test_vars_overrides", "oics_vars_overrides", "ignore_read_extra", "exclude_import_test":
+					stepContent = append(stepContent, keyNode, valNode)
+
+				case "exclude_docs":
+					keyNode.Value = "exclude_basic_doc"
+					samplesContent = append(samplesContent, keyNode, valNode)
+
+				default:
+					samplesContent = append(samplesContent, keyNode, valNode)
+				}
+			}
+
+			// Construct Step Mapping Node
+			stepMapNode := &yaml.Node{
+				Kind:    yaml.MappingNode,
+				Tag:     "!!map",
+				Content: stepContent,
+			}
+
+			// Construct Steps Sequence Node
+			stepsSeqNode := &yaml.Node{
+				Kind:    yaml.SequenceNode,
+				Tag:     "!!seq",
+				Content: []*yaml.Node{stepMapNode},
+			}
+
+			// Add Steps to Sample
+			stepsKeyNode := &yaml.Node{
+				Kind:  yaml.ScalarNode,
+				Tag:   "!!str",
+				Value: "steps",
+			}
+			samplesContent = append(samplesContent, stepsKeyNode, stepsSeqNode)
+
+			// Construct final Sample Mapping Node
+			sampleNode := &yaml.Node{
+				Kind:        yaml.MappingNode,
+				Tag:         "!!map",
+				Content:     samplesContent,
+				HeadComment: exampleMapNode.HeadComment,
+				LineComment: exampleMapNode.LineComment,
+				FootComment: exampleMapNode.FootComment,
+			}
+
+			newSamplesNodes = append(newSamplesNodes, sampleNode)
 		}
+		madeChanges = true
 	}
 
 	if madeChanges { // This means examples were found and processed
@@ -180,59 +257,16 @@ func MigrateFile(filePath, serviceName string) error {
 	return nil
 }
 
-// ... (Keep the existing transformExamplesToSamples function) ...
-// PATCH-START: transformExamplesToSamples
-func transformExamplesToSamples(oldExamples []*resource.Examples, filePath, serviceName string) []*resource.Sample {
-	newSamples := make([]*resource.Sample, len(oldExamples))
-	for i, old := range oldExamples {
-		var newConfigPath string
-
-		if serviceName != "" {
-			var templateName string
-			if old.ConfigPath != "" {
-				templateName = filepath.Base(old.ConfigPath)
-				calculatedPath := path.Join("templates/terraform/samples/services", serviceName, templateName)
-
-				// If the calculated path differs from the default convention, set it explicitly
-				defaultPath := path.Join("templates/terraform/samples/services", serviceName, fmt.Sprintf("%s.tf.tmpl", old.Name))
-				if calculatedPath != defaultPath {
-					newConfigPath = calculatedPath
-				}
-			}
-		} else {
-			newConfigPath = old.ConfigPath
-		}
-		steps := []*resource.Step{
-			{
-				Name:              old.Name,
-				ConfigPath:        newConfigPath,
-				ResourceIdVars:    old.Vars,
-				TestEnvVars:       old.TestEnvVars,
-				TestVarsOverrides: old.TestVarsOverrides,
-				OicsVarsOverrides: old.OicsVarsOverrides,
-				MinVersion:        old.MinVersion,
-				IgnoreReadExtra:   old.IgnoreReadExtra,
-				ExcludeImportTest: old.ExcludeImportTest,
-			},
-		}
-		newSamples[i] = &resource.Sample{
-			Name:                old.Name,
-			SkipVcr:             old.SkipVcr,
-			SkipTest:            old.SkipTest,
-			SkipFunc:            old.SkipFunc,
-			ExcludeTest:         old.ExcludeTest,
-			ExcludeBasicDoc:     old.ExcludeDocs,
-			ExternalProviders:   old.ExternalProviders,
-			BootstrapIam:        old.BootstrapIam,
-			MinVersion:          old.MinVersion,
-			PrimaryResourceId:   old.PrimaryResourceId,
-			PrimaryResourceType: old.PrimaryResourceType,
-			RegionOverride:      old.RegionOverride,
-			TGCSkipTest:         old.TGCSkipTest,
-			Steps:               steps,
+func cloneNode(n *yaml.Node) *yaml.Node {
+	if n == nil {
+		return nil
+	}
+	res := *n
+	if len(n.Content) > 0 {
+		res.Content = make([]*yaml.Node, len(n.Content))
+		for i, child := range n.Content {
+			res.Content[i] = cloneNode(child)
 		}
 	}
-	return newSamples
+	return &res
 }
-
-// PATCH-END: transformExamplesToSamples
