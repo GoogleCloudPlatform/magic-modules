@@ -109,6 +109,7 @@ properties:
       provide the same key if you use the machine image later (e.g. to create a
       instance from the image)
     min_version: beta
+    immutable: true
     properties:
       - name: rawKey
         type: String
@@ -116,6 +117,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         min_version: beta
+        sensitive: true
       - name: sha256
         type: String
         description: |

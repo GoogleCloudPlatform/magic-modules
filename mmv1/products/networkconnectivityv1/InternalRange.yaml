@@ -44,6 +44,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  custom_delete: templates/terraform/custom_delete/internal_range_detach.go.tmpl
 examples:
   - name: 'network_connectivity_internal_ranges_basic'
     primary_resource_id: 'default'

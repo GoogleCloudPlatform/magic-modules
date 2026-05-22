@@ -201,6 +201,35 @@ func TestAccComputeRegionInstanceTemplate_IPv6(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeRegionInstanceTemplate_aliasIpv6Range(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate map[string]interface{}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_aliasIpv6Range(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeRegionInstanceTemplateHasAliasIpv6Range(&instanceTemplate, "/96"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+{{- end }}
+
 func TestAccComputeRegionInstanceTemplate_networkTier(t *testing.T) {
 	t.Parallel()
 
@@ -2426,6 +2455,31 @@ func testAccCheckComputeRegionInstanceTemplateContainsLabel(instanceTemplate *ma
 		return nil
 	}
 }
+{{- if ne $.TargetVersionName `ga` }}
+func testAccCheckComputeRegionInstanceTemplateHasAliasIpv6Range(instanceTemplate *map[string]interface{}, iPCidrRange string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rawNic := range instanceTemplateNetworkInterfaces(instanceTemplate) {
+			nic, ok := rawNic.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			aliasRanges, _ := nic["aliasIpv6Ranges"].([]interface{})
+			for _, rawRange := range aliasRanges {
+				aliasIpRange, ok := rawRange.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				ipRange, _ := aliasIpRange["ipCidrRange"].(string)
+				if ipRange == iPCidrRange || tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", ipRange, iPCidrRange, nil) {
+					return nil
+				}
+			}
+		}
+
+		return fmt.Errorf("Alias ipv6 range with cidr %s not present", iPCidrRange)
+	}
+}
+{{- end }}
 
 func testAccCheckComputeRegionInstanceTemplateHasAliasIpRange(instanceTemplate *map[string]interface{}, subnetworkRangeName, iPCidrRange string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -5273,5 +5327,48 @@ resource "google_compute_region_instance_template" "foobar" {
   }
 }
 `, suffix)
+}
+
+func testAccComputeRegionInstanceTemplate_aliasIpv6Range(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "custom-test" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+  enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "custom-test" {
+  name             = "tf-test-subnetwork-%s"
+  region           = "us-central1"
+  network          = google_compute_network.custom-test.id
+  stack_type       = "IPV6_ONLY"
+  ipv6_access_type = "INTERNAL"
+
+  secondary_ip_range {
+    range_name    = "v6-ula"
+    ip_version    = "IPV6"
+  }
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name         = "tf-test-template-%s"
+  machine_type = "e2-medium"
+  region       = "us-central1"
+
+  disk {
+    source_image = "debian-cloud/debian-11"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.custom-test.name
+    stack_type = "IPV6_ONLY"
+    alias_ipv6_range {
+      ip_cidr_range         = "/96"
+    }
+  }
+}
+`, suffix, suffix, suffix)
 }
 {{- end }}
