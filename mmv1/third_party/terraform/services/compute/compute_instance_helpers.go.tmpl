@@ -53,7 +53,7 @@ func expandAliasIpRanges(ranges []interface{}) []*compute.AliasIpRange {
 	return ipRanges
 }
 
-func flattenAliasIpRange(d *schema.ResourceData, ranges []*compute.AliasIpRange, i int) []map[string]interface{} {
+func flattenAliasIpRange(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
 	prefix := fmt.Sprintf("network_interface.%d", i)
 
 	configData := []map[string]interface{}{}
@@ -62,10 +62,11 @@ func flattenAliasIpRange(d *schema.ResourceData, ranges []*compute.AliasIpRange,
 	}
 
 	apiData := make([]map[string]interface{}, 0, len(ranges))
-	for _, ipRange := range ranges {
+	for _, raw := range ranges {
+		ipRange := raw.(map[string]interface{})
 		apiData = append(apiData, map[string]interface{}{
-			"ip_cidr_range":         ipRange.IpCidrRange,
-			"subnetwork_range_name": ipRange.SubnetworkRangeName,
+			"ip_cidr_range":         ipRange["ipCidrRange"].(string),
+			"subnetwork_range_name": ipRange["subnetworkRangeName"].(string),
 		})
 	}
 
@@ -594,6 +595,14 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		}
 		region = subnet.Region
 
+		aliasRanges := make([]interface{}, len(iface.AliasIpRanges))
+		for j, ar := range iface.AliasIpRanges {
+			aliasRanges[j] = map[string]interface{}{
+				"ipCidrRange":         ar.IpCidrRange,
+				"subnetworkRangeName": ar.SubnetworkRangeName,
+			}
+		}
+
 		flattened[i] = map[string]interface{}{
 			"network_ip":          iface.NetworkIP,
 			"network":             tpgresource.ConvertSelfLinkToV1(iface.Network),
@@ -602,7 +611,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"subnetwork":          tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
 			"subnetwork_project":  subnet.Project,
 			"access_config":       ac,
-			"alias_ip_range":      flattenAliasIpRange(d, iface.AliasIpRanges, i),
+			"alias_ip_range":      flattenAliasIpRange(d, aliasRanges, i),
 			{{ if ne $.TargetVersionName `ga` -}}
 			"alias_ipv6_range":     flattenIpv6AliasRange(d, iface.AliasIpv6Ranges, i),
 			{{- end }}
