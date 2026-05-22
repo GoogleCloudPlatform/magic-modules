@@ -110,11 +110,11 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 						{{- end }}
 						},
 					),
-					listScope.Capture(map[string]acctest.ScopeSource{
+					listScope.Capture(map[string]string{
 					{{- range $scope := $.ListScopeProperties }}
 						{{- if $scope.Required }}
 							{{- $n := underscore $scope.Name }}
-						"{{ $n }}": {Resource: "{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}", Attr: "{{ $n }}"},
+						"{{ $n }}": "{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
 						{{- end }}
 					{{- end }}
 					}),

@@ -131,37 +131,40 @@ func (c *ListDisplayName) CheckValue() knownvalue.Check {
 	})
 }
 
-type ScopeSource struct {
-	Resource string
-	Attr string
-}
 
 type ListScopeCapture struct {
-	sources map[string]ScopeSource
+	// scope name -> resource address. The state attribute read for each
+	// resource is assumed to be the scope name itself.
+	sources map[string]string
 	values  map[string]string
 }
 
-func (c *ListScopeCapture) Capture(sources map[string]ScopeSource) resource.TestCheckFunc {
-	c.sources = sources
+func (c *ListScopeCapture) Capture(scopeToResource map[string]string) resource.TestCheckFunc {
+	c.sources = scopeToResource
 	c.values = map[string]string{}
 	return func(s *terraform.State) error {
-		for scope, src := range sources {
-			rs, ok := s.RootModule().Resources[src.Resource]
+		for scope, addr := range scopeToResource {
+			rs, ok := s.RootModule().Resources[addr]
 			if !ok {
-				return fmt.Errorf("list scope %q: resource %q not found in state", scope, src.Resource)
+				return fmt.Errorf("list scope %q: resource %q not found in state", scope, addr)
 			}
-			attr := src.Attr
-			if attr == "" {
-				attr = "name"
-			}
-			v, ok := rs.Primary.Attributes[attr]
+			v, ok := rs.Primary.Attributes[scope]
 			if !ok || v == "" {
-				return fmt.Errorf("list scope %q: attribute %q on %s is empty", scope, attr, src.Resource)
+				return fmt.Errorf("list scope %q: attribute %q on %s is empty", scope, scope, addr)
 			}
 			c.values[scope] = v
 		}
 		return nil
 	}
+}
+
+func (c *ListScopeCapture) AsConfigVariables() config.Variables {
+	out := config.Variables{}
+	for scope := range c.sources {
+		s := scope // pin loop variable for closure
+		out[s] = lazyStringVariable{get: func() string { return c.values[s] }}
+	}
+	return out
 }
 
 type lazyStringVariable struct {
@@ -170,20 +173,6 @@ type lazyStringVariable struct {
 
 func (v lazyStringVariable) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.get())
-}
-
-func (c *ListScopeCapture) AsConfigVariables() config.Variables {
-	out := config.Variables{}
-	for scope := range c.sources {
-		s := scope // pin loop variable for closure
-		out[s] = lazyStringVariable{get: func() string {
-			if c.values == nil {
-				return ""
-			}
-			return c.values[s]
-		}}
-	}
-	return out
 }
 
 
