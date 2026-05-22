@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Config'
-display_name: 'Infrastructure Manager'
-versions:
-  - name: 'ga'
-    base_url: 'https://config.googleapis.com/v1/'
+name: Config
+display_name: Infrastructure Manager
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://config.googleapis.com/v1/

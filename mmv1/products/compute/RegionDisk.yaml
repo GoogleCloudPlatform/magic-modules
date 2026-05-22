@@ -12,9 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'RegionDisk'
+name: RegionDisk
 api_resource_type_kind: Disk
-kind: 'compute#disk'
 description: |
   Persistent disks are durable storage devices that function similarly to
   the physical disks in a desktop or a server. Compute Engine manages the
@@ -33,75 +32,96 @@ description: |
   affordable storage with consistent performance characteristics.
 references:
   guides:
-    'Adding or Resizing Regional Persistent Disks': 'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionDisks'
+    Adding or Resizing Regional Persistent Disks: https://cloud.google.com/compute/docs/disks/regional-persistent-disk
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/regionDisks
 docs:
-cai_resource_kind: 'RegionDisk'
-base_url: 'projects/{{project}}/regions/{{region}}/disks'
-has_self_link: true
+base_url: projects/{{project}}/regions/{{region}}/disks
 immutable: true
+has_self_link: true
+collection_url_key: items
+iam_policy:
+  parent_resource_attribute: name
+  base_url: projects/{{project}}/regions/{{region}}/disks/{{name}}
+  import_format:
+    - projects/{{project}}/regions/{{region}}/disks/{{name}}
+    - '{{name}}'
+kind: compute#disk
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_diff:
+  - customdiff.ForceNewIfChange("size", IsDiskShrinkage)
+  - hyperDiskIopsUpdateDiffSuppress
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-collection_url_key: 'items'
-iam_policy:
-  parent_resource_attribute: 'name'
-  base_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
-  import_format:
-    - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
-    - '{{name}}'
 include_in_tgc_next: true
+cai_resource_kind: RegionDisk
 custom_code:
-  constants: 'templates/terraform/constants/region_disk.go.tmpl'
-  encoder: 'templates/terraform/encoders/disk.tmpl'
-  decoder: 'templates/terraform/decoders/disk.tmpl'
-  custom_update: 'templates/terraform/custom_update/region_disk_update.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
-  post_import: 'templates/terraform/post_import/disk.go.tmpl'
-  post_read: 'templates/terraform/post_read/disk.go.tmpl'
-custom_diff:
-  - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
-  - 'hyperDiskIopsUpdateDiffSuppress'
-examples:
-  - name: 'region_disk_basic'
-    primary_resource_id: 'regiondisk'
-    vars:
-      region_disk_name: 'my-region-disk'
-      disk_name: 'my-disk'
-      snapshot_name: 'my-snapshot'
-  - name: 'region_disk_async'
-    primary_resource_id: 'primary'
-    vars:
-      region_disk_name: 'primary-region-disk'
-      secondary_region_disk_name: 'secondary-region-disk'
-  - name: 'region_disk_features'
-    primary_resource_id: 'regiondisk'
-    vars:
-      region_disk_name: 'my-region-features-disk'
-  - name: 'region_disk_hyperdisk_balanced_ha_write_many'
-    primary_resource_id: 'primary'
-    vars:
-      region_disk_name: 'my-region-hyperdisk'
+  encoder: templates/terraform/encoders/disk.tmpl
+  update_encoder: templates/terraform/update_encoder/hyper_disk.go.tmpl
+  decoder: templates/terraform/decoders/disk.tmpl
+  constants: templates/terraform/constants/region_disk.go.tmpl
+  post_read: templates/terraform/post_read/disk.go.tmpl
+  custom_update: templates/terraform/custom_update/region_disk_update.go.tmpl
+  pre_delete: templates/terraform/pre_delete/detach_disk.tmpl
+  post_import: templates/terraform/post_import/disk.go.tmpl
+samples:
+  - name: region_disk_basic
+    primary_resource_id: regiondisk
+    steps:
+      - name: region_disk_basic
+        resource_id_vars:
+          region_disk_name: my-region-disk
+          disk_name: my-disk
+          snapshot_name: my-snapshot
+  - name: region_disk_async
+    primary_resource_id: primary
+    steps:
+      - name: region_disk_async
+        resource_id_vars:
+          region_disk_name: primary-region-disk
+          secondary_region_disk_name: secondary-region-disk
+  - name: region_disk_features
+    primary_resource_id: regiondisk
+    steps:
+      - name: region_disk_features
+        resource_id_vars:
+          region_disk_name: my-region-features-disk
+  - name: region_disk_hyperdisk_balanced_ha_write_many
+    primary_resource_id: primary
+    steps:
+      - name: region_disk_hyperdisk_balanced_ha_write_many
+        resource_id_vars:
+          region_disk_name: my-region-hyperdisk
+virtual_fields:
+  - name: create_snapshot_before_destroy
+    type: Boolean
+    default_value: false
+    description: |
+      If set to true, a snapshot of the disk will be created before it is destroyed.
+      If your disk is encrypted with customer managed encryption keys these will be reused for the snapshot creation.
+      The name of the snapshot by default will be `{{disk-name}}-YYYYMMDD-HHmm`
+  - name: create_snapshot_before_destroy_prefix
+    type: String
+    description: |
+      This will set a custom name prefix for the snapshot that's created when the disk is deleted.
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
-    description: 'A reference to the region where the disk resides.'
+    description: A reference to the region where the disk resides.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
-  - name: 'snapshot'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
+  - name: snapshot
     type: ResourceRef
     description: |
       The source snapshot used to create this disk. You can provide this as
@@ -113,10 +133,10 @@ parameters:
       * `global/snapshots/snapshot`
       * `snapshot`
     api_name: sourceSnapshot
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Snapshot'
-    imports: 'selfLink'
-  - name: 'image'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Snapshot
+    imports: selfLink
+  - name: image
     type: String
     description: |
       The image from which to initialize this disk. This can be
@@ -130,9 +150,9 @@ parameters:
       These images can be referred by family name here.
     api_name: sourceImage
     immutable: true
-    diff_suppress_func: 'DiskImageDiffSuppress'
+    diff_suppress_func: DiskImageDiffSuppress
 properties:
-  - name: 'diskEncryptionKey'
+  - name: diskEncryptionKey
     type: NestedObject
     description: |
       Encrypts the disk using a customer-supplied encryption key.
@@ -149,14 +169,14 @@ properties:
       you do not need to provide a key to use the disk later.
     immutable: true
     properties:
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
         is_missing_in_cai: true
-      - name: 'rsaEncryptedKey'
+      - name: rsaEncryptedKey
         type: String
         description: |
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
@@ -164,18 +184,18 @@ properties:
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
         is_missing_in_cai: true
-      - name: 'sha256'
+      - name: sha256
         type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
         # TODO Change to ResourceRef once KMS is in Magic Modules
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-  - name: 'sourceImageEncryptionKey'
+  - name: sourceImageEncryptionKey
     type: NestedObject
     description: |
       The customer-supplied encryption key of the source image. Required if
@@ -183,14 +203,14 @@ properties:
     immutable: true
     ignore_read: true
     properties:
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
         is_missing_in_cai: true
-      - name: 'rsaEncryptedKey'
+      - name: rsaEncryptedKey
         type: String
         description: |
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
@@ -198,23 +218,23 @@ properties:
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
         is_missing_in_cai: true
-      - name: 'sha256'
+      - name: sha256
         type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
         # TODO Change to ResourceRef once KMS is in Magic Modules
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-      - name: 'kmsKeyServiceAccount'
+      - name: kmsKeyServiceAccount
         type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
-  - name: 'sourceImageId'
+  - name: sourceImageId
     type: String
     description: |
       The ID value of the image used to create this disk. This value
@@ -223,7 +243,7 @@ properties:
       that was later deleted and recreated under the same name, the source
       image ID would identify the exact version of the image that was used.
     output: true
-  - name: 'sourceSnapshotEncryptionKey'
+  - name: sourceSnapshotEncryptionKey
     type: NestedObject
     description: |
       The customer-supplied encryption key of the source snapshot. Required
@@ -231,25 +251,25 @@ properties:
       key.
     immutable: true
     properties:
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
         # TODO Change to ResourceRef once KMS is in Magic Modules
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-        min_version: 'beta'
-      - name: 'sha256'
+        min_version: beta
+      - name: sha256
         type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-  - name: 'sourceSnapshotId'
+  - name: sourceSnapshotId
     type: String
     description: |
       The unique ID of the snapshot used to create this disk. This value
@@ -259,39 +279,39 @@ properties:
       snapshot ID would identify the exact version of the snapshot that was
       used.
     output: true
-  - name: 'labelFingerprint'
+  - name: labelFingerprint
     type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource.  Used
       internally during updates.
     output: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
-    update_verb: 'POST'
-    key_expander: ''
-  - name: 'creationTimestamp'
+    update_url: projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels
+    update_verb: POST
+    key_expander: ""
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - name: 'lastAttachTimestamp'
+  - name: lastAttachTimestamp
     type: Time
-    description: 'Last attach timestamp in RFC3339 text format.'
+    description: Last attach timestamp in RFC3339 text format.
     output: true
-  - name: 'lastDetachTimestamp'
+  - name: lastDetachTimestamp
     type: Time
-    description: 'Last detach timestamp in RFC3339 text format.'
+    description: Last detach timestamp in RFC3339 text format.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Labels to apply to this disk.  A list of key->value pairs.
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
-    update_verb: 'POST'
-  - name: 'name'
+    update_url: projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels
+    update_verb: POST
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -303,7 +323,7 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'size'
+  - name: size
     type: Integer
     description: |
       Size of the persistent disk, specified in GB. You can specify this
@@ -316,22 +336,22 @@ properties:
       or the size of the snapshot.
     api_name: sizeGb
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/resize'
-    update_verb: 'POST'
-  - name: 'users'
+    update_url: projects/{{project}}/regions/{{region}}/disks/{{name}}/resize
+    update_verb: POST
+  - name: users
     type: Array
     description: |
       Links to the users of the disk (attached instances) in form:
       project/zones/zone/instances/instance
     output: true
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'user'
+      name: user
       type: ResourceRef
-      description: 'A reference to a user of this disk'
-      resource: 'Instance'
-      imports: 'selfLink'
-  - name: 'physicalBlockSizeBytes'
+      description: A reference to a user of this disk
+      resource: Instance
+      imports: selfLink
+  - name: physicalBlockSizeBytes
     type: Integer
     description: |
       Physical block size of the persistent disk, in bytes. If not present
@@ -340,42 +360,42 @@ properties:
       If an unsupported value is requested, the error message will list
       the supported values for the caller's project.
     default_from_api: true
-  - name: 'replicaZones'
+  - name: replicaZones
     type: Array
-    description: 'URLs of the zones where the disk should be replicated to.'
+    description: URLs of the zones where the disk should be replicated to.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'zone'
+      name: zone
       type: ResourceRef
       description: |
         A reference to a zone where the disk should be replicated to.
-      resource: 'Zone'
-      imports: 'selfLink'
+      resource: Zone
+      imports: selfLink
     min_size: 2
     max_size: 2
-  - name: 'type'
+  - name: type
     type: ResourceRef
     description: |
       URL of the disk type resource describing which disk type to use to
       create the disk. Provide this when creating the disk.
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    default_value: "pd-standard"
-    resource: 'RegionDiskType'
-    imports: 'selfLink'
-  - name: 'interface'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    default_value: pd-standard
+    resource: RegionDiskType
+    imports: selfLink
+  - name: interface
     type: String
     description: |
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-    min_version: 'beta'
+    min_version: beta
     # interface is removed using url_param_only to preserve schema definition
     # and prevent sending or reading in API requests
     url_param_only: true
-    diff_suppress_func: 'AlwaysDiffSuppress'
-    default_value: "SCSI"
+    diff_suppress_func: AlwaysDiffSuppress
+    default_value: SCSI
     deprecation_message: '`interface` is deprecated and will be removed in a future major release. This field is no longer used and can be safely removed from your configurations; disk interfaces are automatically determined on attachment.'
-  - name: 'sourceDisk'
+  - name: sourceDisk
     type: String
     description: |
       The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
@@ -387,30 +407,30 @@ properties:
       * projects/{project}/regions/{region}/disks/{disk}
       * zones/{zone}/disks/{disk}
       * regions/{region}/disks/{disk}
-    diff_suppress_func: 'sourceDiskDiffSuppress'
-  - name: 'DiskId'
+    diff_suppress_func: sourceDiskDiffSuppress
+  - name: DiskId
     type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
     output: true
-  - name: 'sourceDiskId'
+  - name: sourceDiskId
     type: String
     description: |
       The ID value of the disk used to create this image. This value may
       be used to determine whether the image was taken from the current
       or a previous instance of a given disk name.
     output: true
-  - name: 'asyncPrimaryDisk'
+  - name: asyncPrimaryDisk
     type: NestedObject
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+    diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
     properties:
-      - name: 'disk'
+      - name: disk
         type: String
         description: |
           Primary disk for asynchronous disk replication.
         required: true
-  - name: 'guestOsFeatures'
+  - name: guestOsFeatures
     type: Array
     description: |
       A list of features to enable on the guest operating system.
@@ -420,38 +440,38 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'type'
+        - name: type
           type: Enum
           description: |
             The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
           required: true
           enum_values:
-            - 'MULTI_IP_SUBNET'
-            - 'SECURE_BOOT'
-            - 'SEV_CAPABLE'
-            - 'UEFI_COMPATIBLE'
-            - 'VIRTIO_SCSI_MULTIQUEUE'
-            - 'WINDOWS'
-            - 'GVNIC'
-            - 'SEV_LIVE_MIGRATABLE'
-            - 'SEV_SNP_CAPABLE'
-            - 'SUSPEND_RESUME_COMPATIBLE'
-            - 'TDX_CAPABLE'
-            - 'SEV_LIVE_MIGRATABLE_V2'
-            - 'SNP_SVSM_CAPABLE'
-  - name: 'licenses'
+            - MULTI_IP_SUBNET
+            - SECURE_BOOT
+            - SEV_CAPABLE
+            - UEFI_COMPATIBLE
+            - VIRTIO_SCSI_MULTIQUEUE
+            - WINDOWS
+            - GVNIC
+            - SEV_LIVE_MIGRATABLE
+            - SEV_SNP_CAPABLE
+            - SUSPEND_RESUME_COMPATIBLE
+            - TDX_CAPABLE
+            - SEV_LIVE_MIGRATABLE_V2
+            - SNP_SVSM_CAPABLE
+  - name: licenses
     type: Array
     description: Any applicable license URI.
     immutable: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'license'
+      name: license
       type: ResourceRef
-      description: 'An applicable license URI'
-      resource: 'License'
-      imports: 'selfLink'
-  - name: 'accessMode'
+      description: An applicable license URI
+      resource: License
+      imports: selfLink
+  - name: accessMode
     type: String
     description: |
       The access mode of the disk.
@@ -463,41 +483,29 @@ properties:
     required: false
     immutable: false
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=accessMode'
-    update_verb: 'PATCH'
-  - name: 'provisionedIops'
+    update_url: projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=accessMode
+    update_verb: PATCH
+  - name: provisionedIops
     type: Integer
     description: |
       Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second
       that the disk can handle. Values must be between 10,000 and 120,000.
       For more details, see the Extreme persistent disk [documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
-    update_verb: 'PATCH'
-  - name: 'provisionedThroughput'
+    update_url: projects/{{project}}/regions/{{region}}/disks/{{name}}
+    update_verb: PATCH
+  - name: provisionedThroughput
     type: Integer
     description: |
       Indicates how much throughput to provision for the disk. This sets the number of throughput
       mb per second that the disk can handle. Values must be greater than or equal to 1.
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
-    update_verb: 'PATCH'
-  - name: 'eraseWindowsVssSignature'
+    update_url: projects/{{project}}/regions/{{region}}/disks/{{name}}
+    update_verb: PATCH
+  - name: eraseWindowsVssSignature
     type: Boolean
     description: |
       Specifies whether the disk restored from a source snapshot should erase Windows specific VSS signature.
-    min_version: 'beta'
+    min_version: beta
     ignore_read: true
     default_value: false
-virtual_fields:
-  - name: 'create_snapshot_before_destroy'
-    type: Boolean
-    default_value: false
-    description: |
-      If set to true, a snapshot of the disk will be created before it is destroyed.
-      If your disk is encrypted with customer managed encryption keys these will be reused for the snapshot creation.
-      The name of the snapshot by default will be `{{disk-name}}-YYYYMMDD-HHmm`
-  - name: 'create_snapshot_before_destroy_prefix'
-    type: String
-    description: |
-      This will set a custom name prefix for the snapshot that's created when the disk is deleted.

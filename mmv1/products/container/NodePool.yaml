@@ -12,118 +12,118 @@
 # limitations under the License.
 
 ---
-name: 'NodePool'
-include_in_tgc_next: true
+name: NodePool
+description: NodePool
 exclude_resource: true
-description: 'NodePool'
+include_in_tgc_next: true
 tgc_tests:
-  - name: 'TestAccContainerNodePool_withUpgradeSettings'
-    skip: 'data issue'
-  - name: 'TestAccContainerNodePool_withTaintsUpdate'
-    skip: 'data issue'
-  - name: 'TestAccContainerNodePool_regionalAutoscaling'
-    skip: 'data issue'
+  - name: TestAccContainerNodePool_withUpgradeSettings
+    skip: data issue
+  - name: TestAccContainerNodePool_withTaintsUpdate
+    skip: data issue
+  - name: TestAccContainerNodePool_regionalAutoscaling
+    skip: data issue
 properties:
-  - name: 'name'
-    type: 'String'
-    description: 'The name of the node pool.'
-  - name: 'nodeCount'
-    type: 'Integer'
-    description: 'The initial node count for the pool.'
+  - name: name
+    type: String
+    description: The name of the node pool.
+  - name: nodeCount
+    type: Integer
+    description: The initial node count for the pool.
     ignore_read: true
-  - name: 'namePrefix'
-    type: 'String'
-    description: 'The prefix of the node pool name.'
+  - name: namePrefix
+    type: String
+    description: The prefix of the node pool name.
     ignore_read: true
-  - name: 'version'
-    type: 'String'
-    description: 'The version of the node pool.'
+  - name: version
+    type: String
+    description: The version of the node pool.
     ignore_read: true
-  - name: 'nodeConfig'
-    type: 'NestedObject'
-    description: 'Configuration for the nodes in the pool.'
+  - name: nodeConfig
+    type: NestedObject
+    description: Configuration for the nodes in the pool.
     properties:
-      - name: 'guest_accelerator'
-        type: 'Array'
-        api_name: 'accelerators'
-        description: 'A list of hardware accelerators to be attached to each node.'
+      - name: guest_accelerator
+        type: Array
+        api_name: accelerators
+        description: A list of hardware accelerators to be attached to each node.
         ignore_read: true
         item_type:
-          type: 'NestedObject'
+          type: NestedObject
           properties:
-            - name: 'count'
-              type: 'Integer'
-              description: 'The number of the accelerator cards exposed to an instance.'
+            - name: count
+              type: Integer
+              description: The number of the accelerator cards exposed to an instance.
               ignore_read: true
-            - name: 'type'
-              type: 'String'
-              description: 'The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.'
+            - name: type
+              type: String
+              description: The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.
               ignore_read: true
-            - name: 'gpuPartitionSize'
-              type: 'String'
-              description: 'Size of partitions to create on the GPU. Supported values are described in the NVIDIA mig user guide.'
+            - name: gpuPartitionSize
+              type: String
+              description: Size of partitions to create on the GPU. Supported values are described in the NVIDIA mig user guide.
               ignore_read: true
-            - name: 'gpuDriverInstallationConfig'
-              type: 'NestedObject'
-              description: 'Configuration for GPU driver installation.'
+            - name: gpuDriverInstallationConfig
+              type: NestedObject
+              description: Configuration for GPU driver installation.
               ignore_read: true
               properties:
-                - name: 'gpuDriverVersion'
-                  type: 'String'
-                  description: 'Mode for how the GPU driver is installed.'
-      - name: 'bootDisk'
-        type: 'NestedObject'
-        description: 'Configuration for the boot disk.'
+                - name: gpuDriverVersion
+                  type: String
+                  description: Mode for how the GPU driver is installed.
+      - name: bootDisk
+        type: NestedObject
+        description: Configuration for the boot disk.
         properties:
-          - name: 'provisioned_iops'
-            api_name: 'provisionedIops'
-            type: 'Integer'
+          - name: provisioned_iops
+            api_name: provisionedIops
+            type: Integer
             is_missing_in_cai: true
-          - name: 'provisioned_throughput'
-            api_name: 'provisionedThroughput'
-            type: 'Integer'
+          - name: provisioned_throughput
+            api_name: provisionedThroughput
+            type: Integer
             is_missing_in_cai: true
-      - name: 'linuxNodeConfig'
-        type: 'NestedObject'
-        description: 'Parameters for Linux node configuration.'
+      - name: linuxNodeConfig
+        type: NestedObject
+        description: Parameters for Linux node configuration.
         properties:
-          - name: 'accurateTimeConfig'
-            type: 'NestedObject'
-            description: 'Accurate time configuration.'
+          - name: accurateTimeConfig
+            type: NestedObject
+            description: Accurate time configuration.
             properties:
-              - name: 'enablePtpKvmTimeSync'
-                type: 'Boolean'
-                description: 'Enable PTP KVM time sync.'
+              - name: enablePtpKvmTimeSync
+                type: Boolean
+                description: Enable PTP KVM time sync.
                 is_missing_in_cai: true
-      - name: 'taint'
-        type: 'Array'
-        api_name: 'taints'
-        description: 'Taints to be applied to nodes in the pool.'
+      - name: taint
+        type: Array
+        api_name: taints
+        description: Taints to be applied to nodes in the pool.
         ignore_read: true
         item_type:
-          type: 'NestedObject'
+          type: NestedObject
           properties:
-            - name: 'key'
-              type: 'String'
-              description: 'The key of the taint.'
+            - name: key
+              type: String
+              description: The key of the taint.
               ignore_read: true
-            - name: 'value'
-              type: 'String'
-              description: 'The value of the taint.'
+            - name: value
+              type: String
+              description: The value of the taint.
               ignore_read: true
-            - name: 'effect'
-              type: 'String'
-              description: 'The effect of the taint.'
+            - name: effect
+              type: String
+              description: The effect of the taint.
               ignore_read: true
-  - name: 'networkConfig'
-    type: 'NestedObject'
-    description: 'Networking configuration for this NodePool.'
+  - name: networkConfig
+    type: NestedObject
+    description: Networking configuration for this NodePool.
     properties:
-      - name: 'createPodRange'
-        type: 'Boolean'
-        description: 'Whether to create a new range for pod IPs in this node pool.'
+      - name: createPodRange
+        type: Boolean
+        description: Whether to create a new range for pod IPs in this node pool.
         ignore_read: true
-      - name: 'acceleratorNetworkProfile'
-        type: 'String'
-        description: 'Accelerator network profile for this NodePool.'
+      - name: acceleratorNetworkProfile
+        type: String
+        description: Accelerator network profile for this NodePool.
         is_missing_in_cai: true

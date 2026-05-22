@@ -12,177 +12,193 @@
 # limitations under the License.
 
 ---
-name: 'Instance'
-include_in_tgc_next: true
-kind: 'securesourcemanager#instance'
-description: 'Instances are deployed to an available Google Cloud region and are accessible via their web interface.'
+name: Instance
+description: Instances are deployed to an available Google Cloud region and are accessible via their web interface.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/create-instance'
-  api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.instances'
+    Official Documentation: https://cloud.google.com/secure-source-manager/docs/create-instance
+  api: https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.instances
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+base_url: projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}
 immutable: true
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: roles/securesourcemanager.instanceManager
+  admin_iam_role: roles/securesourcemanager.instanceOwner
+  parent_resource_attribute: instance_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+    - '{{instance_id}}'
+kind: securesourcemanager#instance
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+  - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
   - '{{instance_id}}'
 timeouts:
   insert_minutes: 120
   update_minutes: 120
   delete_minutes: 120
-autogen_async: true
 async:
-  actions: ['create', 'delete']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 120
       update_minutes: 120
       delete_minutes: 120
+    base_url: '{{op_id}}'
+  actions: [create, delete]
   result:
     resource_inside_response: false
-iam_policy:
-  method_name_separator: ':'
-  allowed_iam_role: 'roles/securesourcemanager.instanceManager'
-  admin_iam_role: 'roles/securesourcemanager.instanceOwner'
-  parent_resource_attribute: 'instance_id'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
-    - '{{instance_id}}'
+deletion_policy_default: PREVENT
+autogen_async: true
+include_in_tgc_next: true
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl'
-deletion_policy_default: "PREVENT"
-examples:
-  - name: 'secure_source_manager_instance_basic'
-    primary_resource_id: 'default'
-    vars:
-      instance_id: 'my-instance'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_cmek'
-    primary_resource_id: 'default'
-    vars:
-      instance_id: 'my-instance'
-      kms_key_name: 'my-key'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_private_trusted_cert'
-    primary_resource_id: 'default'
-    vars:
-      instance_id: 'my-instance'
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-    exclude_docs: true
-  - name: 'secure_source_manager_instance_private'
-    primary_resource_id: 'default'
-    vars:
-      instance_id: 'my-instance'
-      ca_pool_id: 'ca-pool'
-      root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    external_providers: ["time"]
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_private_custom_host'
-    primary_resource_id: 'default'
-    vars:
-      instance_id: 'my-instance'
-      ca_pool_id: 'ca-pool'
-      root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    external_providers: ["time"]
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_private_psc_backend'
-    primary_resource_id: 'default'
-    vars:
-      network_id: 'my-network'
-      subnet_id: 'my-subnet'
-      neg_id: 'my-neg'
-      backend_id: 'my-backend-service'
-      proxy_subnet_id: 'my-proxy-subnet'
-      target_proxy_id: 'my-target-proxy'
-      fw_rule_to_target_proxy_id: 'fw-rule-target-proxy'
-      dns_zone_id: 'my-dns-zone'
-      instance_id: 'my-instance'
-      ca_pool_id: 'ca-pool'
-      root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    external_providers: ["time"]
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_private_psc_endpoint'
-    primary_resource_id: 'default'
-    vars:
-      network_id: 'my-network'
-      subnet_id: 'my-subnet'
-      address_id: 'my-address'
-      fw_rule_to_service_attachment_id: 'fw-rule-service-attachment'
-      dns_zone_id: 'my-dns-zone'
-      instance_id: 'my-instance'
-      ca_pool_id: 'ca-pool'
-      root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    external_providers: ["time"]
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_workforce_identity_federation'
-    primary_resource_id: 'default'
-    vars:
-      instance_id: 'my-instance'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
+  pre_delete: templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl
+samples:
+  - name: secure_source_manager_instance_basic
+    primary_resource_id: default
+    steps:
+      - name: secure_source_manager_instance_basic
+        resource_id_vars:
+          instance_id: my-instance
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - update_time
+          - deletion_policy
+  - name: secure_source_manager_instance_cmek
+    primary_resource_id: default
+    steps:
+      - name: secure_source_manager_instance_cmek
+        resource_id_vars:
+          instance_id: my-instance
+          kms_key_name: my-key
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - update_time
+          - deletion_policy
+  - name: secure_source_manager_instance_private_trusted_cert
+    primary_resource_id: default
+    exclude_basic_doc: true
+    steps:
+      - name: secure_source_manager_instance_private_trusted_cert
+        resource_id_vars:
+          instance_id: my-instance
+        ignore_read_extra:
+          - update_time
+          - deletion_policy
+  - name: secure_source_manager_instance_private
+    primary_resource_id: default
+    external_providers: [time]
+    steps:
+      - name: secure_source_manager_instance_private
+        resource_id_vars:
+          instance_id: my-instance
+          ca_pool_id: ca-pool
+          root_ca_id: root-ca
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - update_time
+          - deletion_policy
+  - name: secure_source_manager_instance_private_custom_host
+    primary_resource_id: default
+    external_providers: [time]
+    steps:
+      - name: secure_source_manager_instance_private_custom_host
+        resource_id_vars:
+          instance_id: my-instance
+          ca_pool_id: ca-pool
+          root_ca_id: root-ca
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - update_time
+          - deletion_policy
+  - name: secure_source_manager_instance_private_psc_backend
+    primary_resource_id: default
+    external_providers: [time]
+    steps:
+      - name: secure_source_manager_instance_private_psc_backend
+        resource_id_vars:
+          network_id: my-network
+          subnet_id: my-subnet
+          neg_id: my-neg
+          backend_id: my-backend-service
+          proxy_subnet_id: my-proxy-subnet
+          target_proxy_id: my-target-proxy
+          fw_rule_to_target_proxy_id: fw-rule-target-proxy
+          dns_zone_id: my-dns-zone
+          instance_id: my-instance
+          ca_pool_id: ca-pool
+          root_ca_id: root-ca
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - update_time
+          - deletion_policy
+  - name: secure_source_manager_instance_private_psc_endpoint
+    primary_resource_id: default
+    external_providers: [time]
+    steps:
+      - name: secure_source_manager_instance_private_psc_endpoint
+        resource_id_vars:
+          network_id: my-network
+          subnet_id: my-subnet
+          address_id: my-address
+          fw_rule_to_service_attachment_id: fw-rule-service-attachment
+          dns_zone_id: my-dns-zone
+          instance_id: my-instance
+          ca_pool_id: ca-pool
+          root_ca_id: root-ca
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - update_time
+          - deletion_policy
+  - name: secure_source_manager_instance_workforce_identity_federation
+    primary_resource_id: default
+    steps:
+      - name: secure_source_manager_instance_workforce_identity_federation
+        resource_id_vars:
+          instance_id: my-instance
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - update_time
+          - deletion_policy
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location for the Instance.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'instance_id'
+  - name: instance_id
     type: String
     description: |
       The name for the Instance.
@@ -190,129 +206,129 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the Instance.
     immutable: true
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the Instance was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the Instance was updated in UTC.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Labels as key value pairs.
-  - name: 'state'
+  - name: state
     type: Enum
     description: |
       The current state of the Instance.
     output: true
     enum_values:
-      - 'CREATING'
-      - 'ACTIVE'
-      - 'DELETING'
-      - 'PAUSED'
-      - 'UNKNOWN'
-  - name: 'hostConfig'
+      - CREATING
+      - ACTIVE
+      - DELETING
+      - PAUSED
+      - UNKNOWN
+  - name: hostConfig
     type: NestedObject
     description: |
       A list of hostnames for this instance.
     output: true
     properties:
-      - name: 'html'
+      - name: html
         type: String
-        description: 'HTML hostname.'
+        description: HTML hostname.
         output: true
-      - name: 'api'
+      - name: api
         type: String
-        description: 'API hostname.'
+        description: API hostname.
         output: true
-      - name: 'gitHttp'
+      - name: gitHttp
         type: String
-        description: 'Git HTTP hostname.'
+        description: Git HTTP hostname.
         output: true
-      - name: 'gitSsh'
+      - name: gitSsh
         type: String
-        description: 'Git SSH hostname.'
+        description: Git SSH hostname.
         output: true
-  - name: 'stateNote'
+  - name: stateNote
     type: Enum
     description: |
       Provides information about the current instance state.
     output: true
     enum_values:
-      - 'STATE_NOTE_UNSPECIFIED'
-      - 'PAUSED_CMEK_UNAVAILABLE'
-      - 'INSTANCE_RESUMING'
-  - name: 'kmsKey'
+      - STATE_NOTE_UNSPECIFIED
+      - PAUSED_CMEK_UNAVAILABLE
+      - INSTANCE_RESUMING
+  - name: kmsKey
     type: String
     description: |
       Customer-managed encryption key name, in the format projects/*/locations/*/keyRings/*/cryptoKeys/*.
     immutable: true
-  - name: 'privateConfig'
+  - name: privateConfig
     type: NestedObject
     description: |
       Private settings for private instance.
     immutable: true
     properties:
-      - name: 'isPrivate'
+      - name: isPrivate
         type: Boolean
         description: |
           'Indicate if it's private instance.'
         required: true
         immutable: true
-      - name: 'customHostConfig'
+      - name: customHostConfig
         type: NestedObject
         description: |
           Custom host configuration for the instance.
         properties:
-          - name: 'html'
+          - name: html
             type: String
-            description: 'HTML hostname.'
+            description: HTML hostname.
             required: true
-          - name: 'api'
+          - name: api
             type: String
-            description: 'API hostname.'
+            description: API hostname.
             required: true
-          - name: 'gitHttp'
+          - name: gitHttp
             type: String
-            description: 'Git HTTP hostname.'
+            description: Git HTTP hostname.
             required: true
-          - name: 'gitSsh'
+          - name: gitSsh
             type: String
-            description: 'Git SSH hostname.'
+            description: Git SSH hostname.
             required: true
-      - name: 'caPool'
+      - name: caPool
         type: String
         description: |
           CA pool resource, resource must in the format of `projects/{project}/locations/{location}/caPools/{ca_pool}`.
         immutable: true
-      - name: 'httpServiceAttachment'
+      - name: httpServiceAttachment
         type: String
         description: |
           Service Attachment for HTTP, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
         output: true
-      - name: 'sshServiceAttachment'
+      - name: sshServiceAttachment
         type: String
         description: |
           Service Attachment for SSH, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
         output: true
-  - name: 'workforceIdentityFederationConfig'
+  - name: workforceIdentityFederationConfig
     type: NestedObject
     description: |
       Configuration for Workforce Identity Federation to support third party identity provider.
       If unset, defaults to the Google OIDC IdP.
     immutable: true
     properties:
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
         description: |
           'Whether Workforce Identity Federation is enabled.'
