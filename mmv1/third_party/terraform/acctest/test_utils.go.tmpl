@@ -5,7 +5,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -133,15 +132,13 @@ func (c *ListDisplayName) CheckValue() knownvalue.Check {
 
 
 type ListScopeCapture struct {
-	// scope name -> resource address. The state attribute read for each
-	// resource is assumed to be the scope name itself.
-	sources map[string]string
-	values  map[string]string
+	vars config.Variables
 }
 
 func (c *ListScopeCapture) Capture(scopeToResource map[string]string) resource.TestCheckFunc {
-	c.sources = scopeToResource
-	c.values = map[string]string{}
+	if c.vars == nil {
+		c.vars = config.Variables{}
+	}
 	return func(s *terraform.State) error {
 		for scope, addr := range scopeToResource {
 			rs, ok := s.RootModule().Resources[addr]
@@ -152,27 +149,17 @@ func (c *ListScopeCapture) Capture(scopeToResource map[string]string) resource.T
 			if !ok || v == "" {
 				return fmt.Errorf("list scope %q: attribute %q on %s is empty", scope, scope, addr)
 			}
-			c.values[scope] = v
+			c.vars[scope] = config.StringVariable(v)
 		}
 		return nil
 	}
 }
 
 func (c *ListScopeCapture) AsConfigVariables() config.Variables {
-	out := config.Variables{}
-	for scope := range c.sources {
-		s := scope // pin loop variable for closure
-		out[s] = lazyStringVariable{get: func() string { return c.values[s] }}
+	if c.vars == nil {
+		c.vars = config.Variables{}
 	}
-	return out
-}
-
-type lazyStringVariable struct {
-	get func() string
-}
-
-func (v lazyStringVariable) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.get())
+	return c.vars
 }
 
 
