@@ -162,25 +162,6 @@ func (s *Step) TestServiceDependencies(resourcePrefixServiceMap map[string]strin
 	return deps
 }
 
-// ResolveScopeVarKey returns the Nprintf context key that supplies the value
-// for a list-query scope (e.g. "bucket"). It checks the step's vars,
-// resource_id_vars, test_env_vars, and test_vars_overrides for a key whose
-// underscore-separated tokens end with one of: [scope], [scope,"name"], or
-// [scope,"id"]. Returns scopeName unchanged when nothing matches.
-func (s *Step) ResolveScopeVarKey(scopeName string) string {
-	candidates := []string{scopeName, scopeName + "_name", scopeName + "_id"}
-	for _, cand := range candidates {
-		for _, m := range []map[string]string{s.ResourceIdVars, s.TestEnvVars} {
-			for varVal := range m {
-				if varVal == cand || strings.HasSuffix(varVal, "_"+cand) {
-					return varVal
-				}
-			}
-		}
-	}
-	return scopeName
-}
-
 func (s *Step) Validate(rName, sName string) (es []error) {
 	for k := range s.Vars {
 		if _, exists := s.ResourceIdVars[k]; exists {
