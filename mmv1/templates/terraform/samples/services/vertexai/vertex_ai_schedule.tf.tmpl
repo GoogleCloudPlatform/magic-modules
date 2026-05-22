@@ -8,10 +8,10 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_vertex_ai_schedule" "{{$.PrimaryResourceId}}" {
-  display_name              = "test-schedule-updated"
-  region                    = "us-central1"
-  max_concurrent_run_count = 3
-  cron                      = "*/10 * * * *"
+  display_name             = "{{index $.Vars "display_name"}}"
+  region                   = "us-central1"
+  max_concurrent_run_count = {{index $.Vars "max_concurrent_run_count"}}
+  cron                     = "{{index $.Vars "cron"}}"
 
   create_pipeline_job_request {
     parent = "projects/${data.google_project.project.project_id}/locations/us-central1"
@@ -27,7 +27,7 @@ resource "google_vertex_ai_schedule" "{{$.PrimaryResourceId}}" {
           }
         }
         schemaVersion = "2.1.0"
-        sdkVersion = "kfp-2.0.0"
+        sdkVersion    = "kfp-2.0.0"
       })
 
       runtime_config {
