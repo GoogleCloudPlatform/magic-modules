@@ -5,22 +5,30 @@ It also reformats product YAML files.
 
 ---
 
-## Quick Start
+## Quick Start & Execution Methods
 
-### 1. Build the Tool
-From the root of the `magic-modules` repository, run:
+You can run the tool directly without building it (recommended), or build it as a binary.
+
+### Method A: Direct Execution (Recommended)
+No compilation step is required. Run the tool directly using `go run` from the `tools/resource-template-converter` directory:
+```bash
+cd tools/resource-template-converter
+go run main.go convert-resource-template [flags] <path_to_repository_root>
+```
+
+### Method B: Building a Binary
+If you prefer to build a standalone binary executable:
 ```bash
 cd tools/resource-template-converter
 go build -o bin/convert-resource-template main.go
+
+# Run the built binary:
+./bin/convert-resource-template convert-resource-template [flags] <path_to_repository_root>
 ```
 
 ---
 
 ## Usage Instructions
-
-```bash
-./bin/convert-resource-template convert-resource-template [flags] <path_to_repository_root>
-```
 
 ### Positional Arguments
 1. `<path_to_repository_root>` (Required): Path to the root of the repository you want to process (e.g., `<path_to_magic_modules_repository>`).
@@ -31,20 +39,22 @@ go build -o bin/convert-resource-template main.go
 
 ---
 
-## Real-World Examples
+## Real-World Examples (Using `go run`)
+
+All examples below are executed from the `tools/resource-template-converter` directory.
 
 ### Example 1: Single File Migration
 To migrate a single resource YAML file:
 ```bash
-./bin/convert-resource-template convert-resource-template \
+go run main.go convert-resource-template \
   -f mmv1/products/vertexai/Dataset.yaml \
   <path_to_magic_modules_repository>
 ```
 
-### Single File Migration with PR Verification
-To migrate a single public product YAML file safely if active PR updated in the last 2 months touches this file:
+### Example 2: Single File Migration with PR Verification
+To migrate a single public product YAML file safely only if there is no active PR updated in the last 2 months touching it:
 ```bash
-./bin/convert-resource-template convert-resource-template \
+go run main.go convert-resource-template \
   --skip-open-pr \
   -f mmv1/products/hypercomputecluster/Cluster.yaml \
   <path_to_magic_modules_repository>
@@ -59,7 +69,7 @@ To migrate a single public product YAML file safely if active PR updated in the 
 ### Example 3: Bulk Repository Conversion (Excluding Active PR Files)
 To safely bulk-migrate all product files in the repository:
 ```bash
-./bin/convert-resource-template convert-resource-template \
+go run main.go convert-resource-template \
   --skip-open-pr \
   <path_to_magic_modules_repository>
 ```
