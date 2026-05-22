@@ -156,7 +156,7 @@ func MigrateFile(filePath, serviceName string) error {
 	}
 
 	newYAMLContent := buf.String()
-	
+
 	var finalContent string
 	if headerMatch != "" {
 		if !strings.Contains(headerMatch, "---") {
@@ -192,7 +192,7 @@ func transformExamplesToSamples(oldExamples []*resource.Examples, filePath, serv
 			if old.ConfigPath != "" {
 				templateName = filepath.Base(old.ConfigPath)
 				calculatedPath := path.Join("templates/terraform/samples/services", serviceName, templateName)
-				
+
 				// If the calculated path differs from the default convention, set it explicitly
 				defaultPath := path.Join("templates/terraform/samples/services", serviceName, fmt.Sprintf("%s.tf.tmpl", old.Name))
 				if calculatedPath != defaultPath {
@@ -236,5 +236,3 @@ func transformExamplesToSamples(oldExamples []*resource.Examples, filePath, serv
 }
 
 // PATCH-END: transformExamplesToSamples
-
-
