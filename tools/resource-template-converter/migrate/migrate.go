@@ -126,8 +126,12 @@ func MigrateFile(filePath, serviceName string) error {
 					keyNode.Value = "exclude_basic_doc"
 					samplesContent = append(samplesContent, keyNode, valNode)
 
-				default:
+				case "skip_vcr", "skip_test", "skip_func", "exclude_test", "external_providers", "bootstrap_iam", "primary_resource_id", "primary_resource_type", "region_override", "tgc_skip_test":
 					samplesContent = append(samplesContent, keyNode, valNode)
+
+				default:
+					// Discard unrecognized, deprecated, or typo fields (e.g., primary_resource_name, exclude_from_docs)
+					// to ensure the generated YAML strictly adheres to the target Sample/Step structs.
 				}
 			}
 

@@ -209,3 +209,115 @@ examples:
 		t.Errorf("expected vars comment to be preserved, got:\n%s", updatedYaml)
 	}
 }
+
+func TestMigrateFile_DiscardPrimaryResourceName(t *testing.T) {
+	// Set up a temporary directory structure
+	tmpDir, err := ioutil.TempDir("", "mm-discard-test")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	productsDir := filepath.Join(tmpDir, "mmv1", "products", "datacatalog")
+	if err := os.MkdirAll(productsDir, 0755); err != nil {
+		t.Fatalf("failed to create products dir: %v", err)
+	}
+
+	examplesDir := filepath.Join(tmpDir, "mmv1", "templates", "terraform", "examples")
+	if err := os.MkdirAll(examplesDir, 0755); err != nil {
+		t.Fatalf("failed to create examples dir: %v", err)
+	}
+
+	// Create resource YAML file with primary_resource_name inside examples
+	yamlPath := filepath.Join(productsDir, "PolicyTag.yaml")
+	yamlContent := `---
+name: PolicyTag
+examples:
+  - name: data_catalog_taxonomies_policy_tag_basic
+    primary_resource_id: basic_policy_tag
+    primary_resource_name: fmt.Sprintf("tf_test_my_policy_tag%s", context["random_suffix"])
+    vars:
+      taxonomy_display_name: taxonomy_display_name
+`
+	if err := ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644); err != nil {
+		t.Fatalf("failed to write yaml file: %v", err)
+	}
+
+	tmplPath := filepath.Join(examplesDir, "data_catalog_taxonomies_policy_tag_basic.tf.tmpl")
+	if err := ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644); err != nil {
+		t.Fatalf("failed to write tmpl file: %v", err)
+	}
+
+	// Run migration
+	err = MigrateFile(yamlPath, "datacatalog")
+	if err != nil {
+		t.Fatalf("MigrateFile failed: %v", err)
+	}
+
+	// Verify YAML content and that primary_resource_name was discarded
+	updatedYamlBytes, err := ioutil.ReadFile(yamlPath)
+	if err != nil {
+		t.Fatalf("failed to read updated yaml: %v", err)
+	}
+	updatedYaml := string(updatedYamlBytes)
+
+	if strings.Contains(updatedYaml, "primary_resource_name") {
+		t.Errorf("expected primary_resource_name to be discarded, but it was present in the migrated YAML:\n%s", updatedYaml)
+	}
+}
+
+func TestMigrateFile_DiscardUnrecognizedFields(t *testing.T) {
+	// Set up a temporary directory structure
+	tmpDir, err := ioutil.TempDir("", "mm-unrecognized-test")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	productsDir := filepath.Join(tmpDir, "mmv1", "products", "artifactregistry")
+	if err := os.MkdirAll(productsDir, 0755); err != nil {
+		t.Fatalf("failed to create products dir: %v", err)
+	}
+
+	examplesDir := filepath.Join(tmpDir, "mmv1", "templates", "terraform", "examples")
+	if err := os.MkdirAll(examplesDir, 0755); err != nil {
+		t.Fatalf("failed to create examples dir: %v", err)
+	}
+
+	// Create resource YAML file with exclude_from_docs inside examples
+	yamlPath := filepath.Join(productsDir, "Rule.yaml")
+	yamlContent := `---
+name: Rule
+examples:
+  - name: artifact_registry_rule_full
+    primary_resource_id: my-rule
+    exclude_from_docs: true
+    vars:
+      repository_id: my-repository
+`
+	if err := ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644); err != nil {
+		t.Fatalf("failed to write yaml file: %v", err)
+	}
+
+	tmplPath := filepath.Join(examplesDir, "artifact_registry_rule_full.tf.tmpl")
+	if err := ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644); err != nil {
+		t.Fatalf("failed to write tmpl file: %v", err)
+	}
+
+	// Run migration
+	err = MigrateFile(yamlPath, "artifactregistry")
+	if err != nil {
+		t.Fatalf("MigrateFile failed: %v", err)
+	}
+
+	// Verify YAML content and that exclude_from_docs was discarded
+	updatedYamlBytes, err := ioutil.ReadFile(yamlPath)
+	if err != nil {
+		t.Fatalf("failed to read updated yaml: %v", err)
+	}
+	updatedYaml := string(updatedYamlBytes)
+
+	if strings.Contains(updatedYaml, "exclude_from_docs") {
+		t.Errorf("expected exclude_from_docs to be discarded, but it was present in the migrated YAML:\n%s", updatedYaml)
+	}
+}
