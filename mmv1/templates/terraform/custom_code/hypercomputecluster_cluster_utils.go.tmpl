@@ -14,13 +14,13 @@ func hypercomputeclusterClusterCustomizeDiff(_ context.Context, d *schema.Resour
             return fmt.Errorf("network_resources: At least one network_resources entry must be specified for cluster creation")
         }
 
-        networkMap, ok := v.(map[string]interface{})
+        networkSet, ok := v.(*schema.Set)
         if !ok {
-             return fmt.Errorf("network_resources: internal error - unexpected type: %T, expected map[string]interface{}", v)
+             return fmt.Errorf("network_resources: internal error - unexpected type: %T, expected *schema.Set", v)
         }
 
-        if len(networkMap) == 0 {
-            return fmt.Errorf("network_resources: network_resources map is empty, at least one entry must be specified for cluster creation")
+        if networkSet.Len() == 0 {
+            return fmt.Errorf("network_resources: network_resources set is empty, at least one entry must be specified for cluster creation")
         }
     }
     return nil
