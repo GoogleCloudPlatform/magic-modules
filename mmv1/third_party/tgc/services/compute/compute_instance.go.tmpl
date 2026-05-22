@@ -9,6 +9,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -134,9 +135,17 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
-	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	networkInterfacesIface, err := expandNetworkInterfaces(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
+	}
+	niJSON, err := json.Marshal(networkInterfacesIface)
+	if err != nil {
+		return nil, fmt.Errorf("Error marshaling network interfaces: %s", err)
+	}
+	var networkInterfaces []*compute.NetworkInterface
+	if err := json.Unmarshal(niJSON, &networkInterfaces); err != nil {
+		return nil, fmt.Errorf("Error unmarshaling network interfaces: %s", err)
 	}
 
 	accels, err := expandInstanceGuestAccelerators(d, config)

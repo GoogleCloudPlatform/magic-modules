@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -501,16 +502,43 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
 
+		acJSON, err := json.Marshal(expandAccessConfigs(data["access_config"].([]interface{})))
+		if err != nil {
+			return nil, fmt.Errorf("Error marshaling access configs: %s", err)
+		}
+		var ac []*compute.AccessConfig
+		if err := json.Unmarshal(acJSON, &ac); err != nil {
+			return nil, fmt.Errorf("Error unmarshaling access configs: %s", err)
+		}
+
+		aliasJSON, err := json.Marshal(expandAliasIpRanges(data["alias_ip_range"].([]interface{})))
+		if err != nil {
+			return nil, fmt.Errorf("Error marshaling alias ip ranges: %s", err)
+		}
+		var aliasRanges []*compute.AliasIpRange
+		if err := json.Unmarshal(aliasJSON, &aliasRanges); err != nil {
+			return nil, fmt.Errorf("Error unmarshaling alias ip ranges: %s", err)
+		}
+
+		ipv6AcJSON, err := json.Marshal(expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})))
+		if err != nil {
+			return nil, fmt.Errorf("Error marshaling ipv6 access configs: %s", err)
+		}
+		var ipv6Ac []*compute.AccessConfig
+		if err := json.Unmarshal(ipv6AcJSON, &ipv6Ac); err != nil {
+			return nil, fmt.Errorf("Error unmarshaling ipv6 access configs: %s", err)
+		}
+
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:                data["network_ip"].(string),
 			Network:                  network,
 			Subnetwork:               subnetwork,
-			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
-			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			AccessConfigs:            ac,
+			AliasIpRanges:            aliasRanges,
 			NicType:                  data["nic_type"].(string),
 			StackType:                data["stack_type"].(string),
 			QueueCount:               int64(data["queue_count"].(int)),
-			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			Ipv6AccessConfigs:        ipv6Ac,
 			Ipv6Address:              data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
 		}

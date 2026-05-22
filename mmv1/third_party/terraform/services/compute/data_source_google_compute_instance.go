@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -58,7 +59,15 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	// Set the networks
 	// Use the first external IP found for the default connection info.
-	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, instance.NetworkInterfaces)
+	niJSON, err := json.Marshal(instance.NetworkInterfaces)
+	if err != nil {
+		return fmt.Errorf("Error marshaling network interfaces: %s", err)
+	}
+	var networkInterfacesIface []interface{}
+	if err := json.Unmarshal(niJSON, &networkInterfacesIface); err != nil {
+		return fmt.Errorf("Error unmarshaling network interfaces: %s", err)
+	}
+	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, networkInterfacesIface)
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,8 @@
 package compute
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
@@ -1486,8 +1488,25 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 	var internalIP, externalIP string
 
 	for i, iface := range networkInterfaces {
+		acJSON, err := json.Marshal(iface.AccessConfigs)
+		if err != nil {
+			return nil, "", "", fmt.Errorf("Error marshaling access configs: %s", err)
+		}
+		var acIface []interface{}
+		if err := json.Unmarshal(acJSON, &acIface); err != nil {
+			return nil, "", "", fmt.Errorf("Error unmarshaling access configs: %s", err)
+		}
 		var ac []map[string]interface{}
-		ac, externalIP = flattenAccessConfigs(iface.AccessConfigs)
+		ac, externalIP = flattenAccessConfigs(acIface)
+
+		ipv6AcJSON, err := json.Marshal(iface.Ipv6AccessConfigs)
+		if err != nil {
+			return nil, "", "", fmt.Errorf("Error marshaling ipv6 access configs: %s", err)
+		}
+		var ipv6AcIface []interface{}
+		if err := json.Unmarshal(ipv6AcJSON, &ipv6AcIface); err != nil {
+			return nil, "", "", fmt.Errorf("Error unmarshaling ipv6 access configs: %s", err)
+		}
 
 		flattened[i] = map[string]interface{}{
 			"network_ip":                  iface.NetworkIP,
@@ -1495,7 +1514,7 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 			"alias_ip_range":              flattenAliasIpRangeTgc(iface.AliasIpRanges),
 			"nic_type":                    iface.NicType,
 			"stack_type":                  iface.StackType,
-			"ipv6_access_config":          flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
+			"ipv6_access_config":          flattenIpv6AccessConfigs(ipv6AcIface),
 			"ipv6_address":                iface.Ipv6Address,
 			"network":                     tpgresource.ConvertSelfLinkToV1(iface.Network),
 			"subnetwork":                  tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
