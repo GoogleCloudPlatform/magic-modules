@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'DefaultSupportedIdpConfig'
-include_in_tgc_next: true
+name: DefaultSupportedIdpConfig
 description: |
   Configurations options for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
 
@@ -21,32 +20,33 @@ description: |
   [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
   the marketplace prior to using this resource.
 docs:
-base_url: 'projects/{{project}}/defaultSupportedIdpConfigs'
-self_link: 'projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}'
-create_url: 'projects/{{project}}/defaultSupportedIdpConfigs?idpId={{idp_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/defaultSupportedIdpConfigs
+self_link: projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}
+create_url: projects/{{project}}/defaultSupportedIdpConfigs?idpId={{idp_id}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}'
+  - projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'identity_platform_default_supported_idp_config_basic'
-    primary_resource_id: 'idp_config'
-    # Skip test due to operating on singleton and the handwritten update test handles this
-    # If we could spin up a project and enable identity platform we could test this separately
+samples:
+  - name: identity_platform_default_supported_idp_config_basic
     exclude_test: true
+    primary_resource_id: idp_config
+    steps:
+      - name: identity_platform_default_supported_idp_config_basic
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the DefaultSupportedIdpConfig resource
     output: true
-  - name: 'idpId'
+  - name: idpId
     type: String
     description: |
       ID of the IDP. Possible values include:
@@ -70,21 +70,20 @@ properties:
       * `twitter.com`
 
       * `yahoo.com`
-
     url_param_only: true
     required: true
     immutable: true
-  - name: 'clientId'
+  - name: clientId
     type: String
     description: |
       OAuth client ID
     required: true
-  - name: 'clientSecret'
+  - name: clientSecret
     type: String
     description: |
       OAuth client secret
     required: true
-  - name: 'enabled'
+  - name: enabled
     type: Boolean
     description: |
       If this IDP allows the user to sign in

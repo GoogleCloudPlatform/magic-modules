@@ -12,110 +12,131 @@
 # limitations under the License.
 
 ---
-name: 'ServiceAttachment'
-kind: 'compute#ServiceAttachment'
+name: ServiceAttachment
 description: |
   Represents a ServiceAttachment resource.
 references:
   guides:
-    'Configuring Private Service Connect to access services': 'https://cloud.google.com/vpc/docs/configure-private-service-connect-services'
-  api: 'https://cloud.google.com/compute/docs/reference/beta/serviceAttachments'
+    Configuring Private Service Connect to access services: https://cloud.google.com/vpc/docs/configure-private-service-connect-services
+  api: https://cloud.google.com/compute/docs/reference/beta/serviceAttachments
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/serviceAttachments'
+base_url: projects/{{project}}/regions/{{region}}/serviceAttachments
 has_self_link: true
-update_verb: 'PATCH'
+update_verb: PATCH
+kind: compute#ServiceAttachment
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  url_substitutions:
+    - region: us-west2
+    - region: us-central1
+    - region: europe-west4
+    - region: us-east1
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
 include_in_tgc_next: true
 custom_code:
-  constants: 'templates/terraform/constants/compute_service_attachment.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
-  encoder: 'templates/terraform/encoders/compute_service_attachment.go.tmpl'
-sweeper:
-  url_substitutions:
-    - region: "us-west2"
-    - region: "us-central1"
-    - region: "europe-west4"
-    - region: "us-east1"
-examples:
-  - name: 'service_attachment_basic'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - name: 'service_attachment_explicit_projects'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - name: 'service_attachment_explicit_networks'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_network_name: 'psc-ilb-consumer-network'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - name: 'service_attachment_reconcile_connections'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - name: 'service_attachment_tunneling_config'
-    primary_resource_id: 'psc_ilb_service_attachment'
+  encoder: templates/terraform/encoders/compute_service_attachment.go.tmpl
+  update_encoder: templates/terraform/update_encoder/compute_service_attachment.go.tmpl
+  constants: templates/terraform/constants/compute_service_attachment.go.tmpl
+samples:
+  - name: service_attachment_basic
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+      - name: service_attachment_basic
+        resource_id_vars:
+          consumer_address_name: psc-ilb-consumer-address
+          consumer_forwarding_rule_name: psc-ilb-consumer-forwarding-rule
+          nat_subnetwork_name: psc-ilb-nat
+          network_name: psc-ilb-network
+          producer_forwarding_rule_name: producer-forwarding-rule
+          producer_health_check_name: producer-service-health-check
+          producer_service_name: producer-service
+          producer_subnetwork_name: psc-ilb-producer-subnetwork
+          service_attachment_name: my-psc-ilb
+  - name: service_attachment_explicit_projects
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+      - name: service_attachment_explicit_projects
+        resource_id_vars:
+          consumer_address_name: psc-ilb-consumer-address
+          consumer_forwarding_rule_name: psc-ilb-consumer-forwarding-rule
+          nat_subnetwork_name: psc-ilb-nat
+          network_name: psc-ilb-network
+          producer_forwarding_rule_name: producer-forwarding-rule
+          producer_health_check_name: producer-service-health-check
+          producer_service_name: producer-service
+          producer_subnetwork_name: psc-ilb-producer-subnetwork
+          service_attachment_name: my-psc-ilb
+  - name: service_attachment_explicit_networks
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+      - name: service_attachment_explicit_networks
+        resource_id_vars:
+          consumer_address_name: psc-ilb-consumer-address
+          consumer_forwarding_rule_name: psc-ilb-consumer-forwarding-rule
+          consumer_network_name: psc-ilb-consumer-network
+          nat_subnetwork_name: psc-ilb-nat
+          network_name: psc-ilb-network
+          producer_forwarding_rule_name: producer-forwarding-rule
+          producer_health_check_name: producer-service-health-check
+          producer_service_name: producer-service
+          producer_subnetwork_name: psc-ilb-producer-subnetwork
+          service_attachment_name: my-psc-ilb
+  - name: service_attachment_reconcile_connections
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+      - name: service_attachment_reconcile_connections
+        resource_id_vars:
+          consumer_address_name: psc-ilb-consumer-address
+          consumer_forwarding_rule_name: psc-ilb-consumer-forwarding-rule
+          nat_subnetwork_name: psc-ilb-nat
+          network_name: psc-ilb-network
+          producer_forwarding_rule_name: producer-forwarding-rule
+          producer_health_check_name: producer-service-health-check
+          producer_service_name: producer-service
+          producer_subnetwork_name: psc-ilb-producer-subnetwork
+          service_attachment_name: my-psc-ilb
+  - name: service_attachment_tunneling_config
     min_version: beta
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-  - name: 'service_attachment_cross_region_ilb'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      name: 'sa'
-    test_vars_overrides:
-      # for backward compatible
-      name: '"sa" + randomSuffix'
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+      - name: service_attachment_tunneling_config
+        resource_id_vars:
+          nat_subnetwork_name: psc-ilb-nat
+          network_name: psc-ilb-network
+          producer_forwarding_rule_name: producer-forwarding-rule
+          producer_health_check_name: producer-service-health-check
+          producer_service_name: producer-service
+          producer_subnetwork_name: psc-ilb-producer-subnetwork
+          service_attachment_name: my-psc-ilb
+        min_version: beta
+  - name: service_attachment_cross_region_ilb
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+      - name: service_attachment_cross_region_ilb
+        resource_id_vars:
+          name: sa
+        test_vars_overrides:
+          name: '"sa" + randomSuffix'
+virtual_fields:
+  - name: send_propagated_connection_limit_if_zero
+    description: |
+      Controls the behavior of propagated_connection_limit.
+      When false, setting propagated_connection_limit to zero causes the provider to use to the API's default value.
+      When true, the provider will set propagated_connection_limit to zero.
+      Defaults to false.
+    type: Boolean
+    default_value: false
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       URL of the region where the resource resides.
@@ -123,11 +144,11 @@ parameters:
     immutable: true
     ignore_read: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. The name must be 1-63 characters long, and
@@ -138,46 +159,46 @@ properties:
       except the last character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource.
-  - name: 'fingerprint'
+  - name: fingerprint
     type: Fingerprint
     description: |
       Fingerprint of this resource. This field is used internally during
       updates of this resource.
     output: true
-  - name: 'pscServiceAttachmentId'
+  - name: pscServiceAttachmentId
     type: NestedObject
     description: |
       An 128-bit global unique ID of the PSC service attachment.
     output: true
     properties:
-      - name: 'high'
+      - name: high
         type: String
         description: |
           The high 64 bits of the PSC service attachment ID.
         output: true
-      - name: 'low'
+      - name: low
         type: String
         description: |
           The low 64 bits of the PSC service attachment ID.
         output: true
-  - name: 'showNatIps'
+  - name: showNatIps
     type: Boolean
     description: |
       NOTE: This field is temporarily non-functional due to an underlying API issue.
       Any value provided here will be ignored until the API issue is resolved, expected around 2026-03.
       [If true, show NAT IPs of all connected endpoints.]
     url_param_only: true
-  - name: 'connectionPreference'
+  - name: connectionPreference
     type: String
     description: |
       The connection preference to use for this service attachment. Valid
       values include "ACCEPT_AUTOMATIC", "ACCEPT_MANUAL".
     required: true
-  - name: 'connectedEndpoints'
+  - name: connectedEndpoints
     type: Array
     description: |
       An array of the consumer forwarding rules connected to this service
@@ -186,33 +207,33 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'endpoint'
+        - name: endpoint
           type: String
           description: |
             The URL of the consumer forwarding rule.
           output: true
-        - name: 'status'
+        - name: status
           type: String
           description: |
             The status of the connection from the consumer forwarding rule to
             this service attachment.
           output: true
-        - name: 'consumerNetwork'
+        - name: consumerNetwork
           type: String
           description: |
             The url of the consumer network.
           output: true
-        - name: 'pscConnectionId'
+        - name: pscConnectionId
           type: String
           description: |
             The PSC connection id of the connected endpoint.
           output: true
-        - name: 'propagatedConnectionCount'
+        - name: propagatedConnectionCount
           type: Integer
           description: |
             The number of consumer Network Connectivity Center spokes that the connected Private Service Connect endpoint has propagated to.
           output: true
-        - name: 'natIps'
+        - name: natIps
           type: Array
           description: |
             NOTE: This field is temporarily non-functional due to an underlying API issue.
@@ -221,35 +242,35 @@ properties:
           output: true
           item_type:
             type: String
-  - name: 'targetService'
+  - name: targetService
     type: String
     description: |
       The URL of a service serving the endpoint identified by this service attachment.
     required: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/service_attachment_target_service.go.tmpl'
-  - name: 'natSubnets'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/service_attachment_target_service.go.tmpl
+  - name: natSubnets
     type: Array
     description: |
       An array of subnets that is provided for NAT in this service attachment.
     required: true
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'subnet'
+      name: subnet
       type: ResourceRef
       description: |
         A subnet that is provided for NAT in this service attachment.
-      resource: 'Subnetwork'
-      imports: 'selfLink'
-  - name: 'enableProxyProtocol'
+      resource: Subnetwork
+      imports: selfLink
+  - name: enableProxyProtocol
     type: Boolean
     description: |
       If true, enable the proxy protocol which is for supplying client TCP/IP
       address data in TCP connections that traverse proxies on their way to
       destination servers.
     required: true
-  - name: 'domainNames'
+  - name: domainNames
     type: Array
     description: |
       If specified, the domain name will be used during the integration between
@@ -259,31 +280,31 @@ properties:
     immutable: true
     item_type:
       type: String
-  - name: 'tunnelingConfig'
+  - name: tunnelingConfig
     type: NestedObject
     description: |
       Tunneling configuration for this service attachment.
     min_version: beta
     ignore_read: true
     properties:
-      - name: 'routingMode'
+      - name: routingMode
         type: String
         description: |
           The routing mode for tunneling traffic.
-      - name: 'encapsulationProfile'
+      - name: encapsulationProfile
         type: String
         description: |
           The encapsulation profile for tunneling traffic.
-  - name: 'consumerRejectLists'
+  - name: consumerRejectLists
     type: Array
     description: |
       An array of projects that are not allowed to connect to this service
       attachment.
     send_empty_value: true
-    is_missing_in_cai: true  # Ignored in TGC tests due to timing issues in CAI updates where the field disappears in intermediate steps.
+    is_missing_in_cai: true # Ignored in TGC tests due to timing issues in CAI updates where the field disappears in intermediate steps.
     item_type:
       type: String
-  - name: 'consumerAcceptLists'
+  - name: consumerAcceptLists
     type: Array
     description: |
       An array of projects that are allowed to connect to this service
@@ -294,35 +315,35 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'projectIdOrNum'
+        - name: projectIdOrNum
           type: String
           # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             A project that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
           is_missing_in_cai: true
-        - name: 'networkUrl'
+        - name: networkUrl
           type: String
           # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             The network that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
-          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-        - name: 'endpointUrl'
+          diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+        - name: endpointUrl
           type: String
           description: |
             The endpoint that is allowed to connect to this service attachment.
             Only one of project_id_or_num, network_url and endpoint_url may be set.
-          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
           is_missing_in_cai: true
-        - name: 'connectionLimit'
+        - name: connectionLimit
           type: Integer
           description: |
             The number of consumer forwarding rules the consumer project can
             create.
           required: true
           is_missing_in_cai: true
-  - name: 'reconcileConnections'
+  - name: reconcileConnections
     type: Boolean
     description: |
       This flag determines whether a consumer accept/reject list change can reconcile the statuses of existing ACCEPTED or REJECTED PSC endpoints.
@@ -331,7 +352,7 @@ properties:
       If true, update will affect both PENDING and ACCEPTED/REJECTED PSC endpoints. For example, an ACCEPTED PSC endpoint will be moved to REJECTED if its project is added to the reject list.
     default_from_api: true
     send_empty_value: true
-  - name: 'propagatedConnectionLimit'
+  - name: propagatedConnectionLimit
     type: Integer
     description: |
       The number of consumer spokes that connected Private Service Connect endpoints can be propagated to through Network Connectivity Center.
@@ -342,12 +363,3 @@ properties:
 
       If unspecified, the default propagated connection limit is 250. To explicitly send a zero value, set `send_propagated_connection_limit_if_zero = true`.
     default_from_api: true
-virtual_fields:
-  - name: 'send_propagated_connection_limit_if_zero'
-    description: |
-      Controls the behavior of propagated_connection_limit.
-      When false, setting propagated_connection_limit to zero causes the provider to use to the API's default value.
-      When true, the provider will set propagated_connection_limit to zero.
-      Defaults to false.
-    type: Boolean
-    default_value: false

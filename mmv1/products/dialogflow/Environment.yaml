@@ -1,19 +1,18 @@
 ---
 name: Environment
-description: >
-  Represents an environment for an agent. You can create multiple
-  versions of your agent and publish them to separate environments.
+description: |
+  Represents an environment for an agent. You can create multiple versions of your agent and publish them to separate environments.
 references:
   guides:
     Official Documentation: https://cloud.google.com/dialogflow/docs/
   api: https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent.environments
 docs: null
-id_format: projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
 base_url: projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
-create_url: projects/{{project}}/locations/{{location}}/agent/environments/?environmentId={{environmentid}}
 self_link: projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
-update_verb: PATCH
+create_url: projects/{{project}}/locations/{{location}}/agent/environments/?environmentId={{environmentid}}
 update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
 import_format:
   - projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
 timeouts:
@@ -21,16 +20,18 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 exclude_sweeper: true
-examples:
+samples:
   - name: dialogflow_environment_basic
-    primary_resource_id: basic_environment
-    vars:
-      project_id: my-proj
-    test_env_vars:
-      org_id: ORG_ID
-      billing_acct: BILLING_ACCT
     external_providers:
       - time
+    primary_resource_id: basic_environment
+    steps:
+      - name: dialogflow_environment_basic
+        resource_id_vars:
+          project_id: my-proj
+        test_env_vars:
+          billing_acct: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
   - name: environmentid
     type: String
@@ -52,11 +53,9 @@ properties:
       The developer-provided description for this environment.
   - name: agentVersion
     type: String
-    description: >
+    description: |
       The agent version loaded into this environment. Supported formats:
-
       - projects/<Project ID>/agent/versions/<Version ID>
-
       - projects/<Project ID>/locations/<Location ID>/agent/versions/<Version ID>
   - name: state
     type: Enum
@@ -74,9 +73,8 @@ properties:
     properties:
       - name: enableTextToSpeech
         type: Boolean
-        description: >
-          Indicates whether text to speech is enabled. Even when this field
-          is false, other settings in this proto are still retained.
+        description: |
+          Indicates whether text to speech is enabled. Even when this field is false, other settings in this proto are still retained.
       - name: outputAudioEncoding
         type: Enum
         description: |
@@ -95,9 +93,8 @@ properties:
           The synthesis sample rate (in hertz) for this audio.
       - name: synthesizeSpeechConfigs
         type: Map
-        description: >
-          Configuration of how speech should be synthesized, mapping from
-          language to SynthesizeSpeechConfig.
+        description: |
+          Configuration of how speech should be synthesized, mapping from language to SynthesizeSpeechConfig.
         key_name: language
         value_type:
           type: NestedObject
@@ -108,21 +105,16 @@ properties:
                 Speaking rate/speed, in the range [0.25, 4.0].
             - type: Double
               name: pitch
-              description: >
-                Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20
-                semitones from the original pitch. -20 means decrease 20
-                semitones from the original pitch.
+              description: |
+                Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20 semitones from the original pitch. -20 means decrease 20 semitones from the original pitch.
             - type: Double
               name: volumeGainDb
-              description: >
-                Volume gain (in dB) of the normal native volume supported by the
-                specific voice.
+              description: |
+                Volume gain (in dB) of the normal native volume supported by the specific voice.
             - type: Array
               name: effectsProfileId
-              description: >
-                An identifier which selects 'audio effects' profiles that are
-                applied on (post synthesized) text to speech. Effects are
-                applied on top of each other in the order they are given.
+              description: |
+                An identifier which selects 'audio effects' profiles that are applied on (post synthesized) text to speech. Effects are applied on top of each other in the order they are given.
               item_type:
                 type: String
             - type: NestedObject
@@ -150,12 +142,9 @@ properties:
     properties:
       - name: name
         type: String
-        description: >
-          The unique identifier of the fulfillment. Supports the following
-          formats:
-
+        description: |
+          The unique identifier of the fulfillment. Supports the following formats:
           - projects/<Project ID>/agent/fulfillment
-
           - projects/<Project ID>/locations/<Location ID>/agent/fulfillment
       - name: displayName
         type: String
@@ -163,9 +152,8 @@ properties:
           The human-readable name of the fulfillment, unique within the agent.
       - name: features
         type: Array
-        description: >
-          The field defines whether the fulfillment is enabled for certain
-          features.
+        description: |
+          The field defines whether the fulfillment is enabled for certain features.
         item_type:
           type: NestedObject
           properties:
@@ -184,9 +172,8 @@ properties:
         properties:
           - name: uri
             type: String
-            description: >
-              The fulfillment URI for receiving POST requests. It must use https
-              protocol.
+            description: |
+              The fulfillment URI for receiving POST requests. It must use https protocol.
             required: true
           - name: username
             type: String
@@ -198,5 +185,5 @@ properties:
               The password for HTTP Basic authentication.
           - name: requestHeaders
             type: KeyValuePairs
-            description: >
+            description: |
               The HTTP request headers to send together with fulfillment requests

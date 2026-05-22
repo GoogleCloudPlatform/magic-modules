@@ -12,42 +12,52 @@
 # limitations under the License.
 
 ---
-name: 'EncryptionSpec'
+name: EncryptionSpec
 description: |
   Initializes a location-level encryption key specification.
 references:
   guides:
-    'Official Documentation': 'https://docs.cloud.google.com/contact-center/insights/docs/cmek'
-  api: 'https://docs.cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.encryptionSpec'
-
-base_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec'
-self_link: 'projects/{{project}}/locations/{{location}}/encryptionSpec'
-
-create_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec:initialize'
-
-exclude_delete: true
+    Official Documentation: https://docs.cloud.google.com/contact-center/insights/docs/cmek
+  api: https://docs.cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.encryptionSpec
+base_url: projects/{{project}}/locations/{{location}}/encryptionSpec
 immutable: true
-
+self_link: projects/{{project}}/locations/{{location}}/encryptionSpec
+create_url: projects/{{project}}/locations/{{location}}/encryptionSpec:initialize
 async:
-  actions: ['create']
   operation:
     base_url: '{{op_id}}'
-
+  actions: [create]
+exclude_delete: true
 custom_code:
-  pre_create: 'templates/terraform/pre_create/contactcenterinsights_encryption_spec_pre_create.go.tmpl'
-  pre_read: 'templates/terraform/pre_create/contactcenterinsights_set_endpoint.go.tmpl'
-
+  pre_create: templates/terraform/pre_create/contactcenterinsights_encryption_spec_pre_create.go.tmpl
+  pre_read: templates/terraform/pre_create/contactcenterinsights_set_endpoint.go.tmpl
+samples:
+  - name: contact_center_insights_encryption_spec_basic
+    external_providers:
+      - time
+    min_version: beta
+    primary_resource_id: my-encryption-spec
+    steps:
+      - name: contact_center_insights_encryption_spec_basic
+        resource_id_vars:
+          kms_key: my-key
+          kms_keyring: my-keyring
+          project_id: my-proj
+        test_env_vars:
+          billing_acct: BILLING_ACCT
+          org_id: ORG_ID
+        min_version: beta
+        exclude_import_test: true
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     ignore_read: true
     url_param_only: true
     description: |
       The location in which the encryptionSpec is to be initialized.
-
 properties:
-  - name: 'kmsKey'
+  - name: kmsKey
     type: String
     required: true
     immutable: true
@@ -56,18 +66,3 @@ properties:
       If empty, the resource is secured by the default Google encryption key.
       Only the key in the same location as this resource is allowed to be used for encryption.
       Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}
-
-examples:
-  - name: "contact_center_insights_encryption_spec_basic"
-    primary_resource_id: "my-encryption-spec"
-    min_version: "beta"
-    exclude_import_test: true
-    vars:
-      project_id: 'my-proj'
-      kms_keyring: 'my-keyring'
-      kms_key: 'my-key'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_acct: 'BILLING_ACCT'
-    external_providers:
-      - "time"

@@ -12,35 +12,35 @@
 # limitations under the License.
 
 ---
-name: 'MachineType'
-kind: 'compute#machineType'
+name: MachineType
 description: |
   Represents a MachineType resource. Machine types determine the virtualized
   hardware specifications of your virtual machine instances, such as the
   amount of memory or number of virtual CPUs.
-exclude: true
-readonly: true
 docs:
-base_url: 'projects/{{project}}/zones/{{zone}}/machineTypes'
+base_url: projects/{{project}}/zones/{{zone}}/machineTypes
+exclude: true
 has_self_link: true
+collection_url_key: items
+kind: compute#machineType
+readonly: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-collection_url_key: 'items'
 custom_code:
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'deprecated'
+  - name: deprecated
     type: NestedObject
-    description: 'The deprecation status associated with this machine type.'
+    description: The deprecation status associated with this machine type.
     output: true
     properties:
-      - name: 'deleted'
+      - name: deleted
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the state of this
@@ -48,7 +48,7 @@ properties:
           informational and the status will not change unless the client
           explicitly changes it.
         output: true
-      - name: 'deprecated'
+      - name: deprecated
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the state of this
@@ -56,7 +56,7 @@ properties:
           informational and the status will not change unless the client
           explicitly changes it.
         output: true
-      - name: 'obsolete'
+      - name: obsolete
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the state of this
@@ -64,14 +64,14 @@ properties:
           informational and the status will not change unless the client
           explicitly changes it.
         output: true
-      - name: 'replacement'
+      - name: replacement
         type: String
         description: |
           The URL of the suggested replacement for a deprecated resource.
           The suggested replacement resource must be the same kind of
           resource as the deprecated resource.
         output: true
-      - name: 'state'
+      - name: state
         type: Enum
         description: |
           The deprecation state of this resource. This can be DEPRECATED,
@@ -82,49 +82,49 @@ properties:
           will be rejected and result in an error.
         output: true
         enum_values:
-          - 'DEPRECATED'
-          - 'OBSOLETE'
-          - 'DELETED'
-  - name: 'description'
+          - DEPRECATED
+          - OBSOLETE
+          - DELETED
+  - name: description
     type: String
-    description: 'An optional textual description of the resource.'
+    description: An optional textual description of the resource.
     output: true
-  - name: 'guestCpus'
+  - name: guestCpus
     type: Integer
     description: |
       The number of virtual CPUs that are available to the instance.
     output: true
-  - name: 'id'
+  - name: id
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     output: true
-  - name: 'isSharedCpu'
+  - name: isSharedCpu
     type: Boolean
     description: |
       Whether this machine type has a shared CPU. See Shared-core machine
       types for more information.
     output: true
-  - name: 'maximumPersistentDisks'
+  - name: maximumPersistentDisks
     type: Integer
-    description: 'Maximum persistent disks allowed.'
+    description: Maximum persistent disks allowed.
     output: true
-  - name: 'maximumPersistentDisksSizeGb'
+  - name: maximumPersistentDisksSizeGb
     type: Integer
-    description: 'Maximum total persistent disks size (GB) allowed.'
+    description: Maximum total persistent disks size (GB) allowed.
     output: true
-  - name: 'memoryMb'
+  - name: memoryMb
     type: Integer
     description: |
       The amount of physical memory available to the instance, defined in
       MB.
     output: true
-  - name: 'name'
+  - name: name
     type: String
-    description: 'Name of the resource.'
-  - name: 'zone'
+    description: Name of the resource.
+  - name: zone
     type: ResourceRef
-    description: 'The zone the machine type is defined.'
+    description: The zone the machine type is defined.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Zone'
-    imports: 'name'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Zone
+    imports: name

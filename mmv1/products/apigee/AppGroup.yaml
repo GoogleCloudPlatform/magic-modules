@@ -12,48 +12,60 @@
 # limitations under the License.
 
 ---
-name: "AppGroup"
+name: AppGroup
 description: |
   An `AppGroup` in Apigee.
 references:
   guides:
-    "Organizing client app ownership": "https://cloud.google.com/apigee/docs/api-platform/publish/organizing-client-app-ownership"
-  api: "https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups"
+    Organizing client app ownership: https://cloud.google.com/apigee/docs/api-platform/publish/organizing-client-app-ownership
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups
 docs:
-base_url: "{{org_id}}/appgroups"
-self_link: "{{org_id}}/appgroups/{{name}}"
+base_url: '{{org_id}}/appgroups'
+self_link: '{{org_id}}/appgroups/{{name}}'
 import_format:
-  - "{{org_id}}/appgroups/{{name}}"
-  - "{{org_id}}/{{name}}"
+  - '{{org_id}}/appgroups/{{name}}'
+  - '{{org_id}}/{{name}}'
 custom_code:
-  custom_import: "templates/terraform/custom_import/apigee_app_group.go.tmpl"
-examples:
-  - name: "apigee_app_group_basic"
-    vars:
-      app_group_name: "my-app-group"
+  custom_import: templates/terraform/custom_import/apigee_app_group.go.tmpl
+samples:
+  - name: apigee_app_group_basic
     exclude_test: true
-  - name: "apigee_app_group_basic_test"
-    primary_resource_id: "apigee_app_group"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
-    exclude_docs: true
+    primary_resource_id: ""
+    steps:
+      - name: apigee_app_group_basic
+        resource_id_vars:
+          app_group_name: my-app-group
+  - name: apigee_app_group_basic_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: "apigee_app_group_with_attributes"
-    vars:
-      app_group_name: "my-app-group"
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    primary_resource_id: apigee_app_group
+    steps:
+      - name: apigee_app_group_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+  - name: apigee_app_group_with_attributes
     exclude_test: true
-  - name: "apigee_app_group_with_attributes_test"
-    primary_resource_id: "apigee_app_group"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
-    exclude_docs: true
+    primary_resource_id: ""
+    steps:
+      - name: apigee_app_group_with_attributes
+        resource_id_vars:
+          app_group_name: my-app-group
+  - name: apigee_app_group_with_attributes_test
     skip_vcr: true
-    external_providers: ["time"]
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    primary_resource_id: apigee_app_group
+    steps:
+      - name: apigee_app_group_with_attributes_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: "orgId"
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee app group,
@@ -62,62 +74,62 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: "appGroupId"
+  - name: appGroupId
     type: String
     description: |
       Internal identifier that cannot be edited
     output: true
-  - name: "name"
+  - name: name
     type: String
     description: |
       Name of the AppGroup. Characters you can use in the name are restricted to: A-Z0-9._-$ %.
     required: true
     immutable: true
-  - name: "channelUri"
+  - name: channelUri
     type: String
     description: |
       A reference to the associated storefront/marketplace.
-  - name: "channelId"
+  - name: channelId
     type: String
     description: |
       Channel identifier identifies the owner maintaining this grouping.
-  - name: "displayName"
+  - name: displayName
     type: String
     description: |
       App group name displayed in the UI
-  - name: "organization"
+  - name: organization
     type: String
     description: |
       App group name displayed in the UI
     output: true
-  - name: "status"
+  - name: status
     type: Enum
     description: |
       Valid values are active or inactive. Note that the status of the AppGroup should be updated via UpdateAppGroupRequest by setting the action as active or inactive.
     enum_values:
       - active
       - inactive
-  - name: "attributes"
+  - name: attributes
     type: Array
     description: |
       A list of attributes
     item_type:
       type: NestedObject
       properties:
-        - name: "name"
+        - name: name
           type: String
           description: |
             Key of the attribute
-        - name: "value"
+        - name: value
           type: String
           description: |
             Value of the attribute
-  - name: "createdAt"
+  - name: createdAt
     type: String
     description: |
       Created time as milliseconds since epoch.
     output: true
-  - name: "lastModifiedAt"
+  - name: lastModifiedAt
     type: String
     description: |
       Modified time as milliseconds since epoch.

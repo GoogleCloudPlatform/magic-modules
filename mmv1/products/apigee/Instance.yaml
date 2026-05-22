@@ -12,20 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'Instance'
+name: Instance
 description: |
   An `Instance` is the runtime dataplane in Apigee.
 references:
   guides:
-    'Creating a runtime instance': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-instance'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create'
+    Creating a runtime instance: https://cloud.google.com/apigee/docs/api-platform/get-started/create-instance
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create
 docs:
 base_url: '{{org_id}}/instances'
-self_link: '{{org_id}}/instances/{{name}}'
-update_verb: 'PATCH'
-update_mask: true
 immutable: false
-mutex: '{{org_id}}/apigeeInstances'
+self_link: '{{org_id}}/instances/{{name}}'
+update_mask: true
+update_verb: PATCH
 import_format:
   - '{{org_id}}/instances/{{name}}'
   - '{{org_id}}/{{name}}'
@@ -33,94 +32,110 @@ timeouts:
   insert_minutes: 60
   update_minutes: 20
   delete_minutes: 60
-autogen_async: true
+mutex: '{{org_id}}/apigeeInstances'
+exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
-custom_code:
-  constants: 'templates/terraform/constants/apigee_instance.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/apigee_instance.go.tmpl'
 error_retry_predicates:
-  - 'transport_tpg.IsApigeeRetryableError'
-exclude_sweeper: true
+  - transport_tpg.IsApigeeRetryableError
+autogen_async: true
 include_in_tgc_next: true
-examples:
-  - name: 'apigee_instance_basic'
-    vars:
-      instance_name: 'my-instance-name'
+custom_code:
+  constants: templates/terraform/constants/apigee_instance.go.tmpl
+  custom_import: templates/terraform/custom_import/apigee_instance.go.tmpl
+samples:
+  - name: apigee_instance_basic
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_instance_basic_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    # Resource creation race
+    primary_resource_id: ""
+    steps:
+      - name: apigee_instance_basic
+        resource_id_vars:
+          instance_name: my-instance-name
+  - name: apigee_instance_basic_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_instance_cidr_range'
-    vars:
-      instance_name: 'my-instance-name'
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    primary_resource_id: apigee_instance
+    steps:
+      - name: apigee_instance_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+  - name: apigee_instance_cidr_range
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_instance_cidr_range_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    # Resource creation race
+    primary_resource_id: ""
+    steps:
+      - name: apigee_instance_cidr_range
+        resource_id_vars:
+          instance_name: my-instance-name
+  - name: apigee_instance_cidr_range_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_instance_ip_range'
-    vars:
-      instance_name: 'my-instance-name'
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    primary_resource_id: apigee_instance
+    steps:
+      - name: apigee_instance_cidr_range_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+  - name: apigee_instance_ip_range
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_instance_ip_range_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    # Resource creation race
+    primary_resource_id: ""
+    steps:
+      - name: apigee_instance_ip_range
+        resource_id_vars:
+          instance_name: my-instance-name
+  - name: apigee_instance_ip_range_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_instance_full'
-    vars:
-      instance_name: 'my-instance-name'
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    primary_resource_id: apigee_instance
+    steps:
+      - name: apigee_instance_ip_range_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+  - name: apigee_instance_full
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_instance_full_test'
-    primary_resource_id: 'apigee_instance'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    # Resource creation race
+    primary_resource_id: ""
+    steps:
+      - name: apigee_instance_full
+        resource_id_vars:
+          instance_name: my-instance-name
+  - name: apigee_instance_full_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_instance_service_attachment_basic_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    # Resource creation race
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    min_version: beta
+    primary_resource_id: apigee_instance
+    steps:
+      - name: apigee_instance_full_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+        min_version: beta
+  - name: apigee_instance_service_attachment_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    primary_resource_id: apigee_instance
+    steps:
+      - name: apigee_instance_service_attachment_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee instance,
@@ -129,26 +144,26 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Resource ID of the instance.
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       Required. Compute Engine location where the instance resides.
     required: true
     immutable: true
-  - name: 'peeringCidrRange'
+  - name: peeringCidrRange
     type: String
     description: |
       The size of the CIDR block range that will be reserved by the instance. For valid values,
       see [CidrRange](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances#CidrRange) on the documentation.
     immutable: true
     default_from_api: true
-  - name: 'ipRange'
+  - name: ipRange
     type: String
     description: |
       IP range represents the customer-provided CIDR block of length 22 that will be used for
@@ -160,33 +175,33 @@ properties:
       Input format: "a.b.c.d/22"
     immutable: true
     ignore_read: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description of the instance.
     immutable: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       Display name of the instance.
     immutable: true
-  - name: 'diskEncryptionKeyName'
+  - name: diskEncryptionKeyName
     type: String
     description: |
       Customer Managed Encryption Key (CMEK) used for disk and volume encryption. Required for Apigee paid subscriptions only.
       Use the following format: `projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)`
     immutable: true
-  - name: 'host'
+  - name: host
     type: String
     description: |
       Output only. Hostname or IP address of the exposed Apigee endpoint used by clients to connect to the service.
     output: true
-  - name: 'port'
+  - name: port
     type: String
     description: |
       Output only. Port number of the exposed Apigee endpoint.
     output: true
-  - name: 'consumerAcceptList'
+  - name: consumerAcceptList
     type: Array
     description: |
       Optional. Customer accept list represents the list of projects (id/number) on customer
@@ -195,30 +210,30 @@ properties:
       project associated with the Apigee organization will be included to the list.
     required: false
     default_from_api: true
-    diff_suppress_func: 'projectListDiffSuppress'
+    diff_suppress_func: projectListDiffSuppress
     item_type:
       type: String
-  - name: 'serviceAttachment'
+  - name: serviceAttachment
     type: String
     description: |
       Output only. Resource name of the service attachment created for the instance in
       the format: projects/*/regions/*/serviceAttachments/* Apigee customers can privately
       forward traffic to this service attachment using the PSC endpoints.
     output: true
-  - name: 'accessLoggingConfig'
+  - name: accessLoggingConfig
     type: NestedObject
     immutable: true
     description: |
       Access logging configuration enables the access logging feature at the instance.
       Apigee customers can enable access logging to ship the access logs to their own project's cloud logging.
     properties:
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
         required: true
         immutable: true
         description: |
           Boolean flag that specifies whether the customer access log feature is enabled.
-      - name: 'filter'
+      - name: filter
         type: String
         immutable: true
         description: |

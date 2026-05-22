@@ -12,49 +12,53 @@
 # limitations under the License.
 
 ---
-name: 'OrganizationSecurityPolicy'
+name: OrganizationSecurityPolicy
 api_resource_type_kind: SecurityPolicy
 description: |
   Organization security policies are used to control incoming/outgoing traffic.
 references:
   guides:
-    'Creating a firewall policy': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-policy'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/organizationSecurityPolicies'
+    Creating a firewall policy: https://cloud.google.com/vpc/docs/using-firewall-policies#create-policy
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/organizationSecurityPolicies
 docs:
-id_format: 'locations/global/securityPolicies/{{policy_id}}'
-base_url: 'locations/global/securityPolicies?parentId={{parent}}'
-self_link: 'locations/global/securityPolicies/{{policy_id}}'
-create_url: 'locations/global/securityPolicies?parentId={{parent}}'
-update_verb: 'PATCH'
+base_url: locations/global/securityPolicies?parentId={{parent}}
+self_link: locations/global/securityPolicies/{{policy_id}}
+create_url: locations/global/securityPolicies?parentId={{parent}}
+update_verb: PATCH
+id_format: locations/global/securityPolicies/{{policy_id}}
 import_format:
-  - 'locations/global/securityPolicies/{{policy_id}}'
+  - locations/global/securityPolicies/{{policy_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  post_create: 'templates/terraform/post_create/org_security_policy.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/org_security_policy.go.tmpl'
-  post_update: 'templates/terraform/post_update/org_security_policy.go.tmpl'
-  # TODO: Remove once b/154369201 is closed.
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 # excluding identity due to policy_id value inconsistency
 exclude_identity_generation: true
-examples:
-  - name: 'organization_security_policy_basic'
-    primary_resource_id: 'policy'
-    vars:
-      short_name: "my-short-name"
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'organization_security_policy_with_advanced_options'
-    primary_resource_id: 'policy'
-    vars:
-      sec_policy_name: 'security-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+custom_code:
+  post_create: templates/terraform/post_create/org_security_policy.go.tmpl
+  post_update: templates/terraform/post_update/org_security_policy.go.tmpl
+  post_delete: templates/terraform/post_delete/org_security_policy.go.tmpl
+  # TODO: Remove once b/154369201 is closed.
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
+samples:
+  - name: organization_security_policy_basic
+    primary_resource_id: policy
+    steps:
+      - name: organization_security_policy_basic
+        resource_id_vars:
+          short_name: my-short-name
+        test_env_vars:
+          org_id: ORG_ID
+  - name: organization_security_policy_with_advanced_options
+    primary_resource_id: policy
+    steps:
+      - name: organization_security_policy_with_advanced_options
+        resource_id_vars:
+          sec_policy_name: security-policy
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The parent of this OrganizationSecurityPolicy in the Cloud Resource Hierarchy.
@@ -62,34 +66,34 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User-provided name of the organization security policy. The name should be unique in the organization in which the security policy is created. This should only be used when SecurityPolicyType is FIREWALL.
     immutable: true
     ignore_read: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A textual description for the organization security policy.
-  - name: 'shortName'
+  - name: shortName
     type: String
     description: |
       User-provided name of the organization security policy. The name should be unique in the organization in which the security policy is created. This should only be used when SecurityPolicyType is CLOUD_ARMOR.
     immutable: true
-  - name: 'fingerprint'
+  - name: fingerprint
     type: Fingerprint
     description: |
       Fingerprint of this resource. This field is used internally during
       updates of this resource.
     output: true
-  - name: 'policy_id'
+  - name: policy_id
     type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
     output: true
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       The type indicates the intended use of the security policy. This field can be set only at resource creation time.
@@ -98,55 +102,55 @@ properties:
     immutable: true
     default_from_api: true
     enum_values:
-      - 'FIREWALL'
-      - 'CLOUD_ARMOR'
-      - 'CLOUD_ARMOR_EDGE'
-      - 'CLOUD_ARMOR_INTERNAL_SERVICE'
-      - 'CLOUD_ARMOR_NETWORK'
-  - name: 'advancedOptionsConfig'
+      - FIREWALL
+      - CLOUD_ARMOR
+      - CLOUD_ARMOR_EDGE
+      - CLOUD_ARMOR_INTERNAL_SERVICE
+      - CLOUD_ARMOR_NETWORK
+  - name: advancedOptionsConfig
     type: NestedObject
     description: |
       Additional options for this security policy.
     properties:
-      - name: 'jsonParsing'
+      - name: jsonParsing
         type: Enum
         description: |
           JSON body parsing. Supported values include: "DISABLED", "STANDARD", "STANDARD_WITH_GRAPHQL".
         enum_values:
-          - 'DISABLED'
-          - 'STANDARD'
-          - 'STANDARD_WITH_GRAPHQL'
-      - name: 'jsonCustomConfig'
+          - DISABLED
+          - STANDARD
+          - STANDARD_WITH_GRAPHQL
+      - name: jsonCustomConfig
         type: NestedObject
-        description: 'Custom JSON parsing configurations.'
+        description: Custom JSON parsing configurations.
         properties:
-          - name: 'contentTypes'
+          - name: contentTypes
             type: Array
             item_type:
               type: String
-            description: 'A list of content types to be parsed as JSON.'
+            description: A list of content types to be parsed as JSON.
             is_set: true
             required: true
-      - name: 'logLevel'
+      - name: logLevel
         type: Enum
         description: 'Logging level. Supported values include: "NORMAL", "VERBOSE".'
         enum_values:
-          - 'NORMAL'
-          - 'VERBOSE'
-      - name: 'userIpRequestHeaders'
+          - NORMAL
+          - VERBOSE
+      - name: userIpRequestHeaders
         type: Array
         item_type:
           type: String
-        description: 'An optional list of case-insensitive request header names to use for resolving the client source IP address.'
+        description: An optional list of case-insensitive request header names to use for resolving the client source IP address.
         is_set: true
-      - name: 'requestBodyInspectionSize'
+      - name: requestBodyInspectionSize
         type: Enum
         description: |
           The maximum request size chosen by the customer with Waf enabled. Values supported are "8KB", "16KB", "32KB", "48KB" and "64KB".
           Values are case insensitive.
         enum_values:
-          - "8KB"
-          - "16KB"
-          - "32KB"
-          - "48KB"
-          - "64KB"
+          - 8KB
+          - 16KB
+          - 32KB
+          - 48KB
+          - 64KB

@@ -12,91 +12,95 @@
 # limitations under the License.
 
 ---
-name: 'User'
-description: 'A database user in an AlloyDB cluster.'
+name: User
+description: A database user in an AlloyDB cluster.
 references:
   guides:
-    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
-  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.users/create'
+    AlloyDB: https://cloud.google.com/alloydb/docs/
+  api: https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.users/create
 docs:
 base_url: '{{cluster}}/users'
 self_link: '{{cluster}}/users/{{user_id}}'
 create_url: '{{cluster}}/users?userId={{user_id}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/users/{{user_id}}'
+  - projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/users/{{user_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-custom_code:
-  custom_import: 'templates/terraform/custom_import/alloydb_user.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/alloydb_user.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 # exluding resource_identity due to custom_import
 exclude_identity_generation: true
-examples:
-  - name: 'alloydb_user_builtin'
-    primary_resource_id: 'user1'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_user_name: 'user1'
-      alloydb_user_pass: 'user_secret'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      # for backward compatible
-      alloydb_user_name: '"user1" + randomSuffix'
-    ignore_read_extra:
-      - 'password'
+autogen_async: true
+custom_code:
+  pre_update: templates/terraform/pre_update/alloydb_user.go.tmpl
+  custom_import: templates/terraform/custom_import/alloydb_user.go.tmpl
+samples:
+  - name: alloydb_user_builtin
     exclude_test: true
-  - name: 'alloydb_user_builtin_test'
-    primary_resource_id: 'user1'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_user_name: 'user1'
-      alloydb_user_pass: 'user_secret'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-      # for backward compatible
-      alloydb_user_name: '"user1" + randomSuffix'
-    ignore_read_extra:
-      - 'password'
-    exclude_docs: true
-  - name: 'alloydb_user_iam'
-    primary_resource_id: 'user2'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_user_name: 'user2@foo.com'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      # for backward compatible
-      alloydb_user_name: '"user2@foo.com" + randomSuffix'
+    primary_resource_id: user1
+    steps:
+      - name: alloydb_user_builtin
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_cluster_pass: cluster_secret
+          alloydb_instance_name: alloydb-instance
+          alloydb_user_name: user1
+          alloydb_user_pass: user_secret
+          network_name: alloydb-network
+        test_vars_overrides:
+          alloydb_user_name: '"user1" + randomSuffix'
+        ignore_read_extra:
+          - password
+  - name: alloydb_user_builtin_test
+    exclude_basic_doc: true
+    primary_resource_id: user1
+    steps:
+      - name: alloydb_user_builtin_test
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_cluster_pass: cluster_secret
+          alloydb_instance_name: alloydb-instance
+          alloydb_user_name: user1
+          alloydb_user_pass: user_secret
+          network_name: alloydb-network
+        test_vars_overrides:
+          alloydb_user_name: '"user1" + randomSuffix'
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+        ignore_read_extra:
+          - password
+  - name: alloydb_user_iam
     exclude_test: true
-  - name: 'alloydb_user_iam_test'
-    primary_resource_id: 'user2'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_user_name: 'user2@foo.com'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-      # for backward compatible
-      alloydb_user_name: '"user2@foo.com" + randomSuffix'
-    exclude_docs: true
+    primary_resource_id: user2
+    steps:
+      - name: alloydb_user_iam
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_cluster_pass: cluster_secret
+          alloydb_instance_name: alloydb-instance
+          alloydb_user_name: user2@foo.com
+          network_name: alloydb-network
+        test_vars_overrides:
+          alloydb_user_name: '"user2@foo.com" + randomSuffix'
+  - name: alloydb_user_iam_test
+    exclude_basic_doc: true
+    primary_resource_id: user2
+    steps:
+      - name: alloydb_user_iam_test
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_cluster_pass: cluster_secret
+          alloydb_instance_name: alloydb-instance
+          alloydb_user_name: user2@foo.com
+          network_name: alloydb-network
+        test_vars_overrides:
+          alloydb_user_name: '"user2@foo.com" + randomSuffix'
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
 parameters:
-  - name: 'cluster'
+  - name: cluster
     type: ResourceRef
     description: |
       Identifies the alloydb cluster. Must be in the format
@@ -104,38 +108,38 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    resource: 'Cluster'
-    imports: 'name'
-  - name: 'userId'
+    resource: Cluster
+    imports: name
+  - name: userId
     type: String
     description: |
       The database role name of the user.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'userType'
+  - name: userType
     type: Enum
     description: |
       The type of this user.
     required: true
     immutable: true
     enum_values:
-      - 'ALLOYDB_BUILT_IN'
-      - 'ALLOYDB_IAM_USER'
+      - ALLOYDB_BUILT_IN
+      - ALLOYDB_IAM_USER
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource in the form of projects/{project}/locations/{location}/clusters/{cluster}/users/{user}.
     output: true
-  - name: 'password'
+  - name: password
     type: String
     description: |
       Password for this database user.
     sensitive: true
     ignore_read: true
     write_only: true
-  - name: 'databaseRoles'
+  - name: databaseRoles
     type: Array
     description: |
       List of database roles this database user has.

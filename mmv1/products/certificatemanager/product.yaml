@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'CertificateManager'
-display_name: 'Certificate Manager'
-versions:
-  - name: 'beta'
-    base_url: 'https://certificatemanager.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://certificatemanager.googleapis.com/v1/'
+name: CertificateManager
+display_name: Certificate Manager
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-identity'
+  - https://www.googleapis.com/auth/cloud-identity
+versions:
+  - name: beta
+    base_url: https://certificatemanager.googleapis.com/v1/
+  - name: ga
+    base_url: https://certificatemanager.googleapis.com/v1/

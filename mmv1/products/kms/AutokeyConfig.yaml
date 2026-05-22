@@ -12,86 +12,89 @@
 # limitations under the License.
 
 ---
-name: 'AutokeyConfig'
+name: AutokeyConfig
 # This resource is currently in public preview.
 description: |
   `AutokeyConfig` is a singleton resource used to configure the auto-provisioning
   flow of CryptoKeys for CMEK.
-
 
   ~> **Note:** AutokeyConfigs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed AutokeyConfig will remove it from state but
   *will not delete the resource from the project.*
 references:
   guides:
-    'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
-  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/AutokeyConfig'
+    Cloud KMS with Autokey: https://cloud.google.com/kms/docs/kms-with-autokey
+  api: https://cloud.google.com/kms/docs/reference/rest/v1/AutokeyConfig
 docs:
-id_format: 'folders/{{folder}}/autokeyConfig'
-base_url: 'folders/{{folder}}/autokeyConfig'
-self_link: 'folders/{{folder}}/autokeyConfig'
+base_url: folders/{{folder}}/autokeyConfig
+self_link: folders/{{folder}}/autokeyConfig
 # This is a singleton resource that is already created, so create
 # is really an update, and therefore should be PATCHed.
-create_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode'
-create_verb: 'PATCH'
-update_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode'
-update_verb: 'PATCH'
-delete_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode'
-delete_verb: 'PATCH'
+create_url: folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode
+delete_url: folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode
+update_url: folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode
+create_verb: PATCH
+update_verb: PATCH
+delete_verb: PATCH
+id_format: folders/{{folder}}/autokeyConfig
 import_format:
-  - 'folders/{{folder}}/autokeyConfig'
+  - folders/{{folder}}/autokeyConfig
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  constants: 'templates/terraform/constants/autokey_config_folder_diff.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/kms_autokey_config_folder.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/kms_autokey_config_folder.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/kms_autokey_config_folder.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/kms_autokey_config_folder.go.tmpl'
-  post_create: 'templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl'
-  post_update: 'templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/kms_autokey_config.go.tmpl'
 # Using a handwritten sweeper because of pre_delete.
 exclude_sweeper: true
 include_in_tgc_next: true
-examples:
-  - name: 'kms_autokey_config_all'
-    primary_resource_id: 'example-autokeyconfig'
-    # test depends upon google_project_service_identity service which is still in beta, so we need to keep test limited to beta
-    min_version: 'beta'
-    vars:
-      folder_name: 'folder-cfg'
-      key_project_name: 'key-proj'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["random", "time"]
+custom_code:
+  constants: templates/terraform/constants/autokey_config_folder_diff.go.tmpl
+  pre_create: templates/terraform/pre_create/kms_autokey_config_folder.go.tmpl
+  post_create: templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl
+  pre_read: templates/terraform/pre_read/kms_autokey_config_folder.go.tmpl
+  pre_update: templates/terraform/pre_update/kms_autokey_config_folder.go.tmpl
+  post_update: templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl
+  pre_delete: templates/terraform/pre_delete/kms_autokey_config_folder.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/kms_autokey_config.go.tmpl
+samples:
+  - name: kms_autokey_config_all
+    external_providers:
+      - random
+      - time
+    min_version: beta
+    primary_resource_id: example-autokeyconfig
+    steps:
+      - name: kms_autokey_config_all
+        resource_id_vars:
+          folder_name: folder-cfg
+          key_project_name: key-proj
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+        min_version: beta
 parameters:
-  - name: 'folder'
+  - name: folder
     type: String
     description: |
       The folder for which to retrieve config.
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: 'folderPrefixSuppress'
+    diff_suppress_func: folderPrefixSuppress
 properties:
-  - name: 'keyProject'
+  - name: keyProject
     type: String
     description: |
       The target key project for a given folder where KMS Autokey will provision a
       CryptoKey for any new KeyHandle the Developer creates. Should have the form
       `projects/<project_id_or_number>`.
-  - name: 'etag'
+  - name: etag
     type: String
-    description: 'The etag of the AutokeyConfig for optimistic concurrency control.'
+    description: The etag of the AutokeyConfig for optimistic concurrency control.
     output: true
-  - name: 'keyProjectResolutionMode'
+  - name: keyProjectResolutionMode
     type: Enum
-    description: 'How Autokey determines which project to use when provisioning CMEK keys.'
+    description: How Autokey determines which project to use when provisioning CMEK keys.
     enum_values:
-      - 'DEDICATED_KEY_PROJECT'
-      - 'RESOURCE_PROJECT'
-      - 'DISABLED'
+      - DEDICATED_KEY_PROJECT
+      - RESOURCE_PROJECT
+      - DISABLED

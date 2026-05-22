@@ -1,0 +1,4 @@
+resource "google_kms_key_ring" "{{$.PrimaryResourceId}}" {
+  name     = "keyring-example"
+  location = "global"
+}

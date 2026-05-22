@@ -12,51 +12,55 @@
 # limitations under the License.
 
 ---
-name: 'ScopeRBACRoleBinding'
+name: ScopeRBACRoleBinding
 api_resource_type_kind: RBACRoleBinding
 description: |
   RBACRoleBinding represents a rbacrolebinding across the Fleet.
 references:
   guides:
-    'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
-  api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.scopes.rbacrolebindings'
+    Registering a Cluster: https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster
+  api: https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.scopes.rbacrolebindings
 docs:
-id_format: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}'
-base_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings'
-self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}'
-create_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/?rbacrolebinding_id={{scope_rbac_role_binding_id}}'
-update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings
+self_link: projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}
+create_url: projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/?rbacrolebinding_id={{scope_rbac_role_binding_id}}
+update_url: projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}
 update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}
 import_format:
-  - 'projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}'
+  - projects/{{project}}/locations/global/scopes/{{scope_id}}/rbacrolebindings/{{scope_rbac_role_binding_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-custom_code:
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'gkehub_scope_rbac_role_binding_basic'
-    primary_resource_id: 'scope_rbac_role_binding'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'gkehub_scope_rbac_custom_role_binding_basic'
-    primary_resource_id: 'scope_rbac_role_binding'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+custom_code:
+samples:
+  - name: gkehub_scope_rbac_role_binding_basic
+    primary_resource_id: scope_rbac_role_binding
+    steps:
+      - name: gkehub_scope_rbac_role_binding_basic
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: gkehub_scope_rbac_custom_role_binding_basic
     exclude_test: true
+    primary_resource_id: scope_rbac_role_binding
+    steps:
+      - name: gkehub_scope_rbac_custom_role_binding_basic
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
-  - name: 'scope_id'
+  - name: scope_id
     type: String
     description: |
       Id of the scope
@@ -64,56 +68,56 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'scopeRbacRoleBindingId'
+  - name: scopeRbacRoleBindingId
     type: String
     description: |
       The client-provided identifier of the RBAC Role Binding.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the RBAC Role Binding
     output: true
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       Google-generated UUID for this resource.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the RBAC Role Binding was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the RBAC Role Binding was updated in UTC.
     output: true
-  - name: 'deleteTime'
+  - name: deleteTime
     type: Time
     description: |
       Time the RBAC Role Binding was deleted in UTC.
     output: true
-  - name: 'state'
+  - name: state
     type: NestedObject
     description: |
       State of the RBAC Role Binding resource.
     output: true
     properties:
-      - name: 'code'
+      - name: code
         type: Enum
         description: |
           Code describes the state of a RBAC Role Binding resource.
         output: true
         enum_values:
-          - 'CODE_UNSPECIFIED'
-          - 'CREATING'
-          - 'READY'
-          - 'DELETING'
-          - 'UPDATING'
-  - name: 'user'
+          - CODE_UNSPECIFIED
+          - CREATING
+          - READY
+          - DELETING
+          - UPDATING
+  - name: user
     type: String
     description: |
       Principal that is be authorized in the cluster (at least of one the oneof
@@ -121,43 +125,43 @@ properties:
       user is the name of the user as seen by the kubernetes cluster, example
       "alice" or "alice@domain.tld"
     exactly_one_of:
-      - 'user'
-      - 'group'
-  - name: 'group'
+      - user
+      - group
+  - name: group
     type: String
     description: |
       Principal that is be authorized in the cluster (at least of one the oneof
       is required). Updating one will unset the other automatically.
       group is the group, as seen by the kubernetes cluster.
     exactly_one_of:
-      - 'user'
-      - 'group'
-  - name: 'role'
+      - user
+      - group
+  - name: role
     type: NestedObject
     description: |
       Role to bind to the principal.
     required: true
     properties:
-      - name: 'predefinedRole'
+      - name: predefinedRole
         type: Enum
         description: |
           PredefinedRole is an ENUM representation of the default Kubernetes Roles
         enum_values:
-          - 'UNKNOWN'
-          - 'ADMIN'
-          - 'EDIT'
-          - 'VIEW'
+          - UNKNOWN
+          - ADMIN
+          - EDIT
+          - VIEW
         exactly_one_of:
-          - 'role.0.predefined_role'
-          - 'role.0.custom_role'
-      - name: 'customRole'
+          - role.0.predefined_role
+          - role.0.custom_role
+      - name: customRole
         type: String
         description: |
           CustomRole is the custom Kubernetes ClusterRole to be used. The custom role format must be allowlisted in the rbacrolebindingactuation feature and RFC 1123 compliant.
         exactly_one_of:
-          - 'role.0.predefined_role'
-          - 'role.0.custom_role'
-  - name: 'labels'
+          - role.0.predefined_role
+          - role.0.custom_role
+  - name: labels
     type: KeyValueLabels
     description: |
       Labels for this ScopeRBACRoleBinding.

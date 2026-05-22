@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: "DeveloperApp"
+name: DeveloperApp
 description: |
   Creates an app associated with a developer.
   This API associates the developer app with the specified API product
@@ -20,54 +20,54 @@ description: |
   inside that API product.
 references:
   guides:
-    "Creating a developer": "https://cloud.google.com/apigee/docs/api-platform/publish/creating-apps-surface-your-api"
-  api: "https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps"
+    Creating a developer: https://cloud.google.com/apigee/docs/api-platform/publish/creating-apps-surface-your-api
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps
 docs:
-base_url: "{{org_id}}/developers/{{developer_email}}/apps"
-self_link: "{{org_id}}/developers/{{developer_email}}/apps/{{name}}"
+base_url: '{{org_id}}/developers/{{developer_email}}/apps'
+self_link: '{{org_id}}/developers/{{developer_email}}/apps/{{name}}'
 update_mask: false
-update_verb: "PUT"
+update_verb: PUT
 import_format:
-  - "{{org_id}}/developers/{{developer_email}}/apps/{{name}}"
+  - '{{org_id}}/developers/{{developer_email}}/apps/{{name}}'
 custom_code:
-  decoder: "templates/terraform/decoders/apigee_developer_app.go.tmpl"
-  custom_import: "templates/terraform/custom_import/apigee_developer_app.go.tmpl"
-examples:
-  - name: "apigee_developer_app_basic"
-    primary_resource_id: "apigee_developer_app"
-    vars:
-      api_product_name: "sample-api"
-      developer_app_name: "sample-app"
-      developer_email: "john.doe@acme.com"
-      instance_name: "instance"
-    test_vars_overrides:
-      # for backward compatible
-      developer_email: '"john.doe@acme.com" + randomSuffix'
-      # for backward compatible
-      instance_name: '"instance" + randomSuffix'
+  decoder: templates/terraform/decoders/apigee_developer_app.go.tmpl
+  custom_import: templates/terraform/custom_import/apigee_developer_app.go.tmpl
+samples:
+  - name: apigee_developer_app_basic
     exclude_test: true
-  - name: "apigee_developer_app_basic_test"
-    primary_resource_id: "apigee_developer_app"
-    vars:
-      api_product_name: "sample-api"
-      developer_app_name: "sample-app"
-      developer_email: "john.doe@acme.com"
-      instance_name: "instance"
-      project_name: "prj"
-    test_vars_overrides:
-      # for backward compatible
-      developer_email: '"john.doe@acme.com" + randomSuffix'
-      # for backward compatible
-      instance_name: '"instance" + randomSuffix'
-      # for backward compatible
-      project_name: '"prj" + randomSuffix'
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
+    primary_resource_id: apigee_developer_app
+    steps:
+      - name: apigee_developer_app_basic
+        resource_id_vars:
+          api_product_name: sample-api
+          developer_app_name: sample-app
+          developer_email: john.doe@acme.com
+          instance_name: instance
+        test_vars_overrides:
+          developer_email: '"john.doe@acme.com" + randomSuffix'
+          instance_name: '"instance" + randomSuffix'
+  - name: apigee_developer_app_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+      - time
+    primary_resource_id: apigee_developer_app
+    steps:
+      - name: apigee_developer_app_basic_test
+        resource_id_vars:
+          api_product_name: sample-api
+          developer_app_name: sample-app
+          developer_email: john.doe@acme.com
+          instance_name: instance
+          project_name: prj
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+        test_vars_overrides:
+          developer_email: '"john.doe@acme.com" + randomSuffix'
+          instance_name: '"instance" + randomSuffix'
+          project_name: '"prj" + randomSuffix'
 parameters:
-  - name: "orgId"
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee instance,
@@ -75,7 +75,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: "developer_email"
+  - name: developer_email
     type: String
     description: |
       Email address of the developer.
@@ -85,24 +85,24 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: "name"
+  - name: name
     type: String
     description: |
       Name of the developer app.
     required: true
-  - name: "appFamily"
+  - name: appFamily
     type: String
     description: |
       Developer app family.
     immutable: true
     default_from_api: true
-  - name: "callbackUrl"
+  - name: callbackUrl
     type: String
     description: |
       Callback URL used by OAuth 2.0 authorization servers to communicate
       authorization codes back to developer apps.
     required: true
-  - name: "keyExpiresIn"
+  - name: keyExpiresIn
     type: String
     description: |
       Expiration time, in milliseconds, for the consumer key that is generated
@@ -110,16 +110,15 @@ properties:
       the API key never expires. The expiration time can't be updated after it is set.
     default_value: "-1"
     immutable: true
-  - name: "apiProducts"
+  - name: apiProducts
     type: Array
     description: |
       List of API products associated with the developer app.
     item_type:
       type: String
     is_set: true
-  - name: "scopes"
+  - name: scopes
     type: Array
-
     description: |
       Scopes to apply to the developer app.
       The specified scopes must already exist for the API product that
@@ -127,50 +126,50 @@ properties:
     item_type:
       type: String
     is_set: true
-  - name: "developerId"
+  - name: developerId
     type: String
     description: |
       ID of the developer.
     output: true
-  - name: "status"
+  - name: status
     type: String
     description: |
       Status of the credential. Valid values include approved or revoked.
     # This can be set but it needs to be updated through other APIs.
     immutable: true
     default_from_api: true
-  - name: "attributes"
+  - name: attributes
     type: Array
     description: |
       Developer attributes (name/value pairs). The custom attribute limit is 18.
     item_type:
       type: NestedObject
       properties:
-        - name: "name"
+        - name: name
           type: String
           description: |
             Key of the attribute
-        - name: "value"
+        - name: value
           type: String
           description: |
             Value of the attribute
-  - name: "appId"
+  - name: appId
     type: String
     description: |
       ID of the developer app. This ID is not user specified but is
       automatically generated on app creation. appId is a UUID.
     output: true
-  - name: "createdAt"
+  - name: createdAt
     type: String
     description: |
       Time at which the developer was created in milliseconds since epoch.
     output: true
-  - name: "lastModifiedAt"
+  - name: lastModifiedAt
     type: String
     description: |
       Time at which the developer was last modified in milliseconds since epoch.
     output: true
-  - name: "credentials"
+  - name: credentials
     type: Array
     description: |
       Output only. Set of credentials for the developer app consisting of
@@ -179,33 +178,33 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: "consumerKey"
+        - name: consumerKey
           type: String
           description: |
             Consumer key.
           output: true
-        - name: "consumerSecret"
+        - name: consumerSecret
           type: String
           description: |
             Secret key.
           sensitive: true
           output: true
-        - name: "expiresAt"
+        - name: expiresAt
           type: String
           description: |
             Time the credential will expire in milliseconds since epoch.
           output: true
-        - name: "issuedAt"
+        - name: issuedAt
           type: String
           description: |
             Time the credential was issued in milliseconds since epoch.
           output: true
-        - name: "status"
+        - name: status
           type: String
           description: |
             Status of the credential. Valid values include approved or revoked.
           output: true
-        - name: "scopes"
+        - name: scopes
           type: Array
           description: |
             List of scopes to apply to the app.
@@ -214,7 +213,7 @@ properties:
           item_type:
             type: String
           output: true
-        - name: "apiProducts"
+        - name: apiProducts
           type: Array
           description: |
             List of API products this credential can be used for.
@@ -222,17 +221,17 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: "apiproduct"
+              - name: apiproduct
                 type: String
                 description: |
                   Name of the API product.
                 output: true
-              - name: "status"
+              - name: status
                 type: String
                 description: |
                   Status of the API product. Valid values are approved or revoked.
                 output: true
-        - name: "attributes"
+        - name: attributes
           type: Array
           description: |
             Developer attributes (name/value pairs). The custom attribute limit is 18.
@@ -240,12 +239,12 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: "name"
+              - name: name
                 type: String
                 description: |
                   Key of the attribute
                 output: true
-              - name: "value"
+              - name: value
                 type: String
                 description: |
                   Value of the attribute
