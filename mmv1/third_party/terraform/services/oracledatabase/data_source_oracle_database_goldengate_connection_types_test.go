@@ -1,12 +1,15 @@
 package oracledatabase_test
 
 import (
+	"flag"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
+
+var oracleProject = flag.String("oracle_project", "oci-terraform-testing-prod", "The project to use for Oracle Database tests")
 
 func TestAccOracleDatabaseGoldengateConnectionTypes_basic(t *testing.T) {
 	t.Parallel()
@@ -15,7 +18,7 @@ func TestAccOracleDatabaseGoldengateConnectionTypes_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOracleDatabaseGoldengateConnectionTypesConfig(),
+				Config: testAccOracleDatabaseGoldengateConnectionTypesConfig(getTestProject()),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_goldengate_connection_types.my_connection_types", "goldengate_connection_types.#"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_goldengate_connection_types.my_connection_types", "goldengate_connection_types.0.connection_type"),
@@ -26,10 +29,18 @@ func TestAccOracleDatabaseGoldengateConnectionTypes_basic(t *testing.T) {
 	})
 }
 
-func testAccOracleDatabaseGoldengateConnectionTypesConfig() string {
+func testAccOracleDatabaseGoldengateConnectionTypesConfig(project string) string {
 	return fmt.Sprintf(`
 data "google_oracle_database_goldengate_connection_types" "my_connection_types" {
 	location = "us-east4"
+	project  = "%s"
 }
-`)
+`, project)
+}
+
+func getTestProject() string {
+	if !flag.Parsed() {
+		flag.Parse()
+	}
+	return *oracleProject
 }
