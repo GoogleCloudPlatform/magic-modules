@@ -169,4 +169,3 @@ func TestReadOnlyPropagation(t *testing.T) {
 		}
 	}
 }
-
