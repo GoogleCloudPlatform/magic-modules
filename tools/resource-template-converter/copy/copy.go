@@ -53,10 +53,30 @@ func ProcessResourceFile(filePath, serviceName, examplesSourceDir, samplesDestDi
 			sourceFileName = fmt.Sprintf("%s.tf.tmpl", example.Name)
 		}
 
-		sourcePath := filepath.Join(examplesSourceDir, sourceFileName)
+		var sourcePath string
+		searchPaths := []string{
+			filepath.Join(examplesSourceDir, sourceFileName),
+		}
+		if example.ConfigPath != "" {
+			searchPaths = append(searchPaths,
+				filepath.Join(examplesSourceDir, example.ConfigPath),
+				filepath.Join(examplesSourceDir, "templates", "terraform", example.ConfigPath),
+			)
+		}
+		// Support private overrides structure
+		searchPaths = append(searchPaths,
+			filepath.Join(examplesSourceDir, "examples", sourceFileName),
+			filepath.Join(examplesSourceDir, "templates", "terraform", "examples", sourceFileName),
+		)
 
-		// Check if the source template file actually exists.
-		if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
+		for _, p := range searchPaths {
+			if _, err := os.Stat(p); err == nil {
+				sourcePath = p
+				break
+			}
+		}
+
+		if sourcePath == "" {
 			// Skip if the template doesn't exist.
 			continue
 		}

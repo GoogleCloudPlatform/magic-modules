@@ -8,13 +8,15 @@ import (
 	"regexp"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/copy"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/github"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/migrate"
 	"github.com/spf13/cobra"
 )
 
-var resourceFileRegex = regexp.MustCompile(`mmv1/products/([^/]+)/([^/]+\.yaml)`)
+var resourceFileRegex = regexp.MustCompile(`(?:mmv1/)?products/([^/]+)/([^/]+\.yaml)`)
 
 var filePath string
+var skipOpenPR bool
 
 var convertResourceTemplateCmd = &cobra.Command{
 	Use:   "convert-resource-template",
@@ -37,14 +39,33 @@ var convertResourceTemplateCmd = &cobra.Command{
 }
 
 func exeCconvertResourceTemplate(basePath string, targetFile string) error {
-	if _, err := os.Stat(filepath.Join(basePath, "mmv1")); os.IsNotExist(err) {
-		log.Fatalf("magic-modules directory structure not found. Please ensure this tool is run from 'magic-modules/tools/example-split'.")
+	var productsPath, examplesSourceDir, samplesDestDir string
+
+	if _, err := os.Stat(filepath.Join(basePath, "mmv1")); err == nil {
+		// Public magic-modules repository
+		productsPath = filepath.Join(basePath, "mmv1", "products")
+		templatesPath := filepath.Join(basePath, "mmv1", "templates", "terraform")
+		examplesSourceDir = filepath.Join(templatesPath, "examples")
+		samplesDestDir = filepath.Join(templatesPath, "samples", "services")
+	} else if _, err := os.Stat(filepath.Join(basePath, "products")); err == nil {
+		// EAP private overrides repository
+		productsPath = filepath.Join(basePath, "products")
+		examplesSourceDir = basePath
+		samplesDestDir = filepath.Join(basePath, "templates", "terraform", "samples", "services")
+	} else {
+		log.Fatalf("Neither 'mmv1' nor 'products' directory structure found. Please ensure this tool is run from a magic-modules or magic-modules-private-overrides directory.")
 	}
 
-	productsPath := filepath.Join(basePath, "mmv1", "products")
-	templatesPath := filepath.Join(basePath, "mmv1", "templates", "terraform")
-	examplesSourceDir := filepath.Join(templatesPath, "examples")
-	samplesDestDir := filepath.Join(templatesPath, "samples", "services")
+	var touchedFiles map[string][]int
+	if skipOpenPR {
+		fmt.Println("Fetching open PRs updated in the last 2 months from GitHub...")
+		var err error
+		touchedFiles, err = github.GetFilesTouchedByOpenPRs()
+		if err != nil {
+			return fmt.Errorf("failed to get touched files from open PRs: %w", err)
+		}
+		fmt.Printf("Successfully fetched open PRs. Found %d modified files in open PRs.\n", len(touchedFiles))
+	}
 
 	if targetFile != "" {
 		resolvedPath := targetFile
@@ -61,6 +82,15 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 			return fmt.Errorf("file path %s does not match expected pattern mmv1/products/<service>/<resource>.yaml", resolvedPath)
 		}
 		serviceName := matches[1]
+
+		relPath, err := filepath.Rel(basePath, resolvedPath)
+		if err == nil && skipOpenPR {
+			normPath := github.NormalizePath(relPath)
+			if prs, touched := touchedFiles[normPath]; touched {
+				fmt.Printf("Skipping single target file %s: modified in active open PR(s) %v\n", targetFile, prs)
+				return nil
+			}
+		}
 
 		fmt.Printf("Processing single product YAML file: %s (service: %s)\n", resolvedPath, serviceName)
 
@@ -89,6 +119,15 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 			}
 			serviceName := matches[1]
 
+			relPath, err := filepath.Rel(basePath, path)
+			if err == nil && skipOpenPR {
+				normPath := github.NormalizePath(relPath)
+				if prs, touched := touchedFiles[normPath]; touched {
+					log.Printf("Skipping file %s: modified in active open PR(s) %v\n", path, prs)
+					return nil
+				}
+			}
+
 			if err := copy.ProcessResourceFile(path, serviceName, examplesSourceDir, samplesDestDir); err != nil {
 				log.Printf("Error copying templates registered in file %s: %v\n", path, err)
 				// Continue processing other files even if one fails.
@@ -111,5 +150,6 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 
 func init() {
 	convertResourceTemplateCmd.Flags().StringVarP(&filePath, "file", "f", "", "Path to a single resource yaml file to convert")
+	convertResourceTemplateCmd.Flags().BoolVar(&skipOpenPR, "skip-open-pr", false, "Skip files modified by active open PRs updated in the last 2 months")
 	rootCmd.AddCommand(convertResourceTemplateCmd)
 }
