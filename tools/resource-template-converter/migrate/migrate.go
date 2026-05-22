@@ -6,81 +6,18 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
+	"reflect"
 	"regexp"
+	"slices"
+	"strconv"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"gopkg.in/yaml.v3"
 )
 
-// ... (Keep the existing structs IamMember, Step, Sample, OldExample) ...
 // PATCH-START: existing structs
-type IamMember struct {
-	Member string `yaml:"member"`
-	Role   string `yaml:"role"`
-}
-
-type Step struct {
-	Name                  string            `yaml:"name,omitempty"`
-	ConfigPath            string            `yaml:"config_path,omitempty"`
-	MinVersion            string            `yaml:"min_version,omitempty"`
-	GenerateDoc           bool              `yaml:"generate_doc,omitempty"`
-	ResourceIdVars        map[string]string `yaml:"resource_id_vars,omitempty"`
-	Vars                  map[string]string `yaml:"vars,omitempty"`
-	TestEnvVars           map[string]string `yaml:"test_env_vars,omitempty"`
-	TestVarsOverrides     map[string]string `yaml:"test_vars_overrides,omitempty"`
-	OicsVarsOverrides     map[string]string `yaml:"oics_vars_overrides,omitempty"`
-	IgnoreReadExtra       []string          `yaml:"ignore_read_extra,omitempty"`
-	ExcludeImportTest     bool              `yaml:"exclude_import_test,omitempty"`
-	IncludeStepDoc        bool              `yaml:"include_step_doc,omitempty"` // Opt-in for ANY step
-	DocumentationHCLText  string            `yaml:"-"`
-	TestHCLText           string            `yaml:"-"`
-	OicsHCLText           string            `yaml:"-"`
-	PrimaryResourceId     string            `yaml:"-"`
-	ProductName           string            `yaml:"-"`
-}
-
-type Sample struct {
-	Name                string      `yaml:"name"`
-	SkipVcr             bool        `yaml:"skip_vcr,omitempty"`
-	SkipFunc            string      `yaml:"skip_func,omitempty"`
-	SkipTest            string      `yaml:"skip_test,omitempty"`
-	ExternalProviders   []string    `yaml:"external_providers,omitempty"`
-	BootstrapIam        []IamMember `yaml:"bootstrap_iam,omitempty"`
-	MinVersion          string      `yaml:"min_version,omitempty"`
-	TargetVersionName   string      `yaml:"-"`
-	PrimaryResourceId   string      `yaml:"primary_resource_id"`
-	PrimaryResourceType string      `yaml:"primary_resource_type,omitempty"`
-	ExcludeTest         bool        `yaml:"exclude_test,omitempty"`
-	ExcludeBasicDoc     bool        `yaml:"exclude_basic_doc,omitempty"` // Opt-out for FIRST step
-	Steps               []Step      `yaml:"steps"`
-	NewConfigFuncs      []Step      `yaml:"-"`
-	RegionOverride      string      `yaml:"region_override,omitempty"`
-	TGCSkipTest         string      `yaml:"tgc_skip_test,omitempty"`
-}
-
-type OldExample struct {
-	Name                  string            `yaml:"name"`
-	PrimaryResourceId     string            `yaml:"primary_resource_id"`
-	PrimaryResourceType   string            `yaml:"primary_resource_type,omitempty"`
-	BootstrapIam          []IamMember       `yaml:"bootstrap_iam,omitempty"`
-	Vars                  map[string]string `yaml:"vars"`
-	TestEnvVars           map[string]string `yaml:"test_env_vars,omitempty"`
-	TestVarsOverrides     map[string]string `yaml:"test_vars_overrides,omitempty"`
-	OicsVarsOverrides     map[string]string `yaml:"oics_vars_overrides,omitempty"`
-	MinVersion            string            `yaml:"min_version,omitempty"`
-	IgnoreReadExtra       []string          `yaml:"ignore_read_extra,omitempty"`
-	ExcludeTest           bool              `yaml:"exclude_test,omitempty"`
-	ExcludeDocs           bool              `yaml:"exclude_docs,omitempty"`
-	ExcludeImportTest     bool              `yaml:"exclude_import_test,omitempty"`
-	RegionOverride        string            `yaml:"region_override,omitempty"`
-	ConfigPath            string            `yaml:"config_path,omitempty"`
-	SkipVcr               bool              `yaml:"skip_vcr,omitempty"`
-	SkipFunc              string            `yaml:"skip_func,omitempty"`
-	SkipTest              string            `yaml:"skip_test,omitempty"`
-	ExternalProviders     []string          `yaml:"external_providers,omitempty"`
-	TGCSkipTest           string            `yaml:"tgc_skip_test,omitempty"`
-}
-
 // PATCH-END: existing structs
 
 func MigrateFile(filePath, serviceName string) error {
@@ -133,7 +70,7 @@ func MigrateFile(filePath, serviceName string) error {
 	// Transformation 1: `examples` -> `samples`
 	var newSamplesNodes []*yaml.Node
 	if examplesNode != nil {
-		var oldExamples []OldExample
+		var oldExamples []*resource.Examples
 		if err := examplesNode.Decode(&oldExamples); err != nil {
 			return fmt.Errorf("failed to decode examples: %w", err)
 		}
@@ -211,23 +148,37 @@ func MigrateFile(filePath, serviceName string) error {
 		}
 	}
 
-	if madeChanges {
-		var buf bytes.Buffer
-		yamlEncoder := yaml.NewEncoder(&buf)
-		yamlEncoder.SetIndent(2) // v3 supports SetIndent
-		if err := yamlEncoder.Encode(&rootNode); err != nil {
-			return fmt.Errorf("failed to marshal updated root node for %s: %w", filePath, err)
-		}
+	sortMappingNode(resourceMapNode, rootKeyOrder)
 
-		newYAMLContent := buf.String()
-		finalContent := newYAMLContent
-		if headerMatch != "" {
+	stripStringQuotes(&rootNode)
+
+	var buf bytes.Buffer
+	yamlEncoder := yaml.NewEncoder(&buf)
+	yamlEncoder.SetIndent(2) // v3 supports SetIndent
+	if err := yamlEncoder.Encode(&rootNode); err != nil {
+		return fmt.Errorf("failed to marshal updated root node for %s: %w", filePath, err)
+	}
+
+	newYAMLContent := buf.String()
+	
+	var finalContent string
+	if headerMatch != "" {
+		if !strings.Contains(headerMatch, "---") {
+			finalContent = headerMatch + "---\n" + newYAMLContent
+		} else {
 			finalContent = headerMatch + newYAMLContent
 		}
+	} else {
+		finalContent = "---\n" + newYAMLContent
+	}
 
-		if err := ioutil.WriteFile(filePath, []byte(finalContent), 0644); err != nil {
-			return fmt.Errorf("failed to write updated file %s: %w", filePath, err)
-		}
+	newlineRegex := regexp.MustCompile(`\n{3,}`)
+	finalContent = newlineRegex.ReplaceAllString(finalContent, "\n\n")
+
+	finalContent = strings.TrimRight(finalContent, " \t\r\n") + "\n"
+
+	if err := ioutil.WriteFile(filePath, []byte(finalContent), 0644); err != nil {
+		return fmt.Errorf("failed to write updated file %s: %w", filePath, err)
 	}
 
 	return nil
@@ -235,8 +186,8 @@ func MigrateFile(filePath, serviceName string) error {
 
 // ... (Keep the existing transformExamplesToSamples function) ...
 // PATCH-START: transformExamplesToSamples
-func transformExamplesToSamples(oldExamples []OldExample, filePath, serviceName string) []Sample {
-	newSamples := make([]Sample, len(oldExamples))
+func transformExamplesToSamples(oldExamples []*resource.Examples, filePath, serviceName string) []*resource.Sample {
+	newSamples := make([]*resource.Sample, len(oldExamples))
 	for i, old := range oldExamples {
 		var newConfigPath string
 
@@ -244,40 +195,209 @@ func transformExamplesToSamples(oldExamples []OldExample, filePath, serviceName 
 			var templateName string
 			if old.ConfigPath != "" {
 				templateName = filepath.Base(old.ConfigPath)
-				newConfigPath = path.Join("templates/terraform/samples/services", serviceName, templateName)
+				calculatedPath := path.Join("templates/terraform/samples/services", serviceName, templateName)
+				
+				// If the calculated path differs from the default convention, set it explicitly
+				defaultPath := path.Join("templates/terraform/samples/services", serviceName, fmt.Sprintf("%s.tf.tmpl", old.Name))
+				if calculatedPath != defaultPath {
+					newConfigPath = calculatedPath
+				}
 			}
 		} else {
 			newConfigPath = old.ConfigPath
 		}
-		newSamples[i] = Sample{
+		steps := []*resource.Step{
+			{
+				Name:              old.Name,
+				ConfigPath:        newConfigPath,
+				ResourceIdVars:    old.Vars,
+				TestEnvVars:       old.TestEnvVars,
+				TestVarsOverrides: old.TestVarsOverrides,
+				OicsVarsOverrides: old.OicsVarsOverrides,
+				MinVersion:        old.MinVersion,
+				IgnoreReadExtra:   old.IgnoreReadExtra,
+				ExcludeImportTest: old.ExcludeImportTest,
+			},
+		}
+		newSamples[i] = &resource.Sample{
 			Name:                old.Name,
 			SkipVcr:             old.SkipVcr,
-			SkipFunc:            old.SkipFunc,
 			SkipTest:            old.SkipTest,
+			SkipFunc:            old.SkipFunc,
+			ExcludeTest:         old.ExcludeTest,
+			ExcludeBasicDoc:     old.ExcludeDocs,
 			ExternalProviders:   old.ExternalProviders,
 			BootstrapIam:        old.BootstrapIam,
 			MinVersion:          old.MinVersion,
 			PrimaryResourceId:   old.PrimaryResourceId,
 			PrimaryResourceType: old.PrimaryResourceType,
-			ExcludeBasicDoc:     old.ExcludeDocs,
-			ExcludeTest:         old.ExcludeTest,
 			RegionOverride:      old.RegionOverride,
 			TGCSkipTest:         old.TGCSkipTest,
-			Steps: []Step{
-				{
-					Name:                  old.Name,
-					ConfigPath:            newConfigPath,
-					ResourceIdVars:        old.Vars,
-					TestEnvVars:           old.TestEnvVars,
-					TestVarsOverrides:     old.TestVarsOverrides,
-					OicsVarsOverrides:     old.OicsVarsOverrides,
-					IgnoreReadExtra:       old.IgnoreReadExtra,
-					ExcludeImportTest:     old.ExcludeImportTest,
-				},
-			},
+			Steps:               steps,
 		}
 	}
 	return newSamples
 }
 
 // PATCH-END: transformExamplesToSamples
+
+func stripStringQuotes(node *yaml.Node) {
+	if node.Kind == yaml.ScalarNode && node.Tag == "!!str" {
+		if isKeyword(node.Value) {
+			node.Style = yaml.DoubleQuotedStyle
+		} else if isNumber(node.Value) {
+			if node.Style == 0 {
+				node.Style = yaml.DoubleQuotedStyle
+			}
+		} else {
+			node.Style = 0
+		}
+	}
+
+	for _, child := range node.Content {
+		stripStringQuotes(child)
+	}
+}
+
+func isKeyword(val string) bool {
+	lower := strings.ToLower(val)
+	switch lower {
+	case "true", "false", "null", "yes", "no", "on", "off", "y", "n":
+		return true
+	}
+	return false
+}
+
+func isNumber(val string) bool {
+	_, err := strconv.ParseFloat(val, 64)
+	return err == nil
+}
+
+var rootKeyOrder []string
+var nestedKeyOrders = make(map[string][]string)
+
+func init() {
+	// Prepend "name" at the top as the visual baseline for resource configurations
+	rootKeyOrder = append([]string{"name"}, getYamlStructFieldOrder(api.Resource{})...)
+
+	nestedKeyOrders["timeouts"] = getYamlStructFieldOrder(api.Timeouts{})
+	nestedKeyOrders["sweeper"] = getYamlStructFieldOrder(resource.Sweeper{})
+	nestedKeyOrders["ensure_value"] = getYamlStructFieldOrder(resource.EnsureValue{})
+	nestedKeyOrders["parent"] = getYamlStructFieldOrder(resource.ParentResource{})
+	nestedKeyOrders["async"] = getYamlStructFieldOrder(api.Async{})
+	nestedKeyOrders["operation"] = getYamlStructFieldOrder(api.Operation{})
+	nestedKeyOrders["iam_policy"] = getYamlStructFieldOrder(resource.IamPolicy{})
+	nestedKeyOrders["custom_code"] = getYamlStructFieldOrder(resource.CustomCode{})
+}
+
+func sortMappingNode(mappingNode *yaml.Node, keyOrder []string) {
+	if mappingNode.Kind != yaml.MappingNode {
+		return
+	}
+
+	type pair struct {
+		key   *yaml.Node
+		value *yaml.Node
+	}
+	var pairs []pair
+	for i := 0; i < len(mappingNode.Content); i += 2 {
+		keyNode := mappingNode.Content[i]
+		valNode := mappingNode.Content[i+1]
+
+		// Recursively sort child structures
+		if order, exists := nestedKeyOrders[keyNode.Value]; exists {
+			sortMappingNode(valNode, order)
+		} else if keyNode.Value == "operation" {
+			sortMappingNode(valNode, nestedKeyOrders["operation"])
+		} else if keyNode.Value == "parent" {
+			sortMappingNode(valNode, nestedKeyOrders["parent"])
+		} else if keyNode.Value == "ensure_value" {
+			sortMappingNode(valNode, nestedKeyOrders["ensure_value"])
+		}
+
+		pairs = append(pairs, pair{key: keyNode, value: valNode})
+	}
+
+	if len(keyOrder) == 0 {
+		return
+	}
+
+	orderMap := make(map[string]int)
+	for idx, keyName := range keyOrder {
+		orderMap[keyName] = idx
+	}
+
+	slices.SortFunc(pairs, func(a, b pair) int {
+		idxA, okA := orderMap[a.key.Value]
+		idxB, okB := orderMap[b.key.Value]
+
+		if okA && okB {
+			return idxA - idxB
+		}
+		if okA {
+			return -1
+		}
+		if okB {
+			return 1
+		}
+		return strings.Compare(a.key.Value, b.key.Value)
+	})
+
+	newContent := make([]*yaml.Node, 0, len(mappingNode.Content))
+	for _, p := range pairs {
+		newContent = append(newContent, p.key, p.value)
+	}
+	mappingNode.Content = newContent
+}
+
+func getYamlStructFieldOrder(structObj interface{}) []string {
+	t := reflect.TypeOf(structObj)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return nil
+	}
+
+	var fields []string
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+
+		// Recursively handle embedded structs (e.g., TGCResource)
+		if field.Anonymous && field.Type.Kind() == reflect.Struct {
+			embeddedFields := getYamlStructFieldOrder(reflect.New(field.Type).Elem().Interface())
+			for _, ef := range embeddedFields {
+				if !slices.Contains(fields, ef) {
+					fields = append(fields, ef)
+				}
+			}
+			continue
+		}
+
+		tag := field.Tag.Get("yaml")
+		var keyName string
+		if tag == "" || tag == "-" {
+			if tag == "-" {
+				continue
+			}
+			// If the field is exported and has no tag, Go yaml defaults to lowercase field name
+			if field.PkgPath == "" {
+				keyName = strings.ToLower(field.Name)
+			} else {
+				continue
+			}
+		} else {
+			parts := strings.Split(tag, ",")
+			keyName = parts[0]
+		}
+
+		if keyName == "" {
+			continue // Ignore tags like `,inline`
+		}
+
+		if !slices.Contains(fields, keyName) {
+			fields = append(fields, keyName)
+		}
+	}
+	return fields
+}
