@@ -12,62 +12,66 @@
 # limitations under the License.
 
 ---
-name: 'ProjectAutokeyConfig'
+name: ProjectAutokeyConfig
 # This resource is currently in public preview.
 description: |
   `ProjectAutokeyConfig` is a singleton resource used to configure the auto-provisioning
   flow of CryptoKeys for CMEK.
-
 
   ~> **Note:** ProjectAutokeyConfigs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed ProjectAutokeyConfigs will remove it from state but
   *will not delete the resource from the project.*
 references:
   guides:
-    'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
-  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/AutokeyConfig'
+    Cloud KMS with Autokey: https://cloud.google.com/kms/docs/kms-with-autokey
+  api: https://cloud.google.com/kms/docs/reference/rest/v1/AutokeyConfig
 docs:
-id_format: 'projects/{{project}}/autokeyConfig'
-base_url: 'projects/{{project}}/autokeyConfig'
-self_link: 'projects/{{project}}/autokeyConfig'
+base_url: projects/{{project}}/autokeyConfig
+self_link: projects/{{project}}/autokeyConfig
 # This is a singleton resource that is already created, so create
 # is really an update, and therefore should be PATCHed.
-create_url: 'projects/{{project}}/autokeyConfig?updateMask=keyProjectResolutionMode'
-create_verb: 'PATCH'
-update_url: 'projects/{{project}}/autokeyConfig?updateMask=keyProjectResolutionMode'
-update_verb: 'PATCH'
-delete_url: 'projects/{{project}}/autokeyConfig?updateMask=keyProjectResolutionMode'
-delete_verb: 'PATCH'
+create_url: projects/{{project}}/autokeyConfig?updateMask=keyProjectResolutionMode
+delete_url: projects/{{project}}/autokeyConfig?updateMask=keyProjectResolutionMode
+update_url: projects/{{project}}/autokeyConfig?updateMask=keyProjectResolutionMode
+create_verb: PATCH
+update_verb: PATCH
+delete_verb: PATCH
+id_format: projects/{{project}}/autokeyConfig
 import_format:
-  - 'projects/{{project}}/autokeyConfig'
+  - projects/{{project}}/autokeyConfig
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  post_create: 'templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl'
-  post_update: 'templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/kms_project_autokey_config.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'kms_autokey_config_project'
-    primary_resource_id: 'example-autokeyconfig-project'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    vars:
-      resource_project_name: 'my-project'
-    external_providers: ["random", "time"]
+custom_code:
+  post_create: templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl
+  post_update: templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/kms_project_autokey_config.go.tmpl
+samples:
+  - name: kms_autokey_config_project
+    external_providers:
+      - random
+      - time
+    min_version: beta
+    primary_resource_id: example-autokeyconfig-project
+    steps:
+      - name: kms_autokey_config_project
+        resource_id_vars:
+          resource_project_name: my-project
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+        min_version: beta
 parameters:
 properties:
-  - name: 'etag'
+  - name: etag
     type: String
-    description: 'The etag of the AutokeyConfig for optimistic concurrency control.'
+    description: The etag of the AutokeyConfig for optimistic concurrency control.
     output: true
-  - name: 'keyProjectResolutionMode'
+  - name: keyProjectResolutionMode
     type: Enum
-    description: 'How Autokey determines which project to use when provisioning CMEK keys.'
+    description: How Autokey determines which project to use when provisioning CMEK keys.
     enum_values:
-      - 'RESOURCE_PROJECT'
-      - 'DISABLED'
+      - RESOURCE_PROJECT
+      - DISABLED

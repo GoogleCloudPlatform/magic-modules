@@ -12,96 +12,98 @@
 # limitations under the License.
 
 ---
-name: 'FeatureGroup'
+name: FeatureGroup
 description: Vertex AI Feature Group.
 references:
   guides:
-    'Creating a Feature Group': 'https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-featuregroup'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureGroups'
+    Creating a Feature Group: https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-featuregroup
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureGroups
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/featureGroups'
-self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{name}}'
-create_url: 'projects/{{project}}/locations/{{region}}/featureGroups?featureGroupId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{region}}/featureGroups
+self_link: projects/{{project}}/locations/{{region}}/featureGroups/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/featureGroups?featureGroupId={{name}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: feature_group
+  sample_config_body: templates/terraform/iam/example_config_body/vertex_ai_feature_group.tf.tmpl
+  import_format:
+    - projects/{{project}}/locations/{{region}}/featureGroups/{{name}}
+  min_version: beta
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'feature_group'
-  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_feature_group.tf.tmpl'
-  import_format:
-    - 'projects/{{project}}/locations/{{region}}/featureGroups/{{name}}'
-  min_version: 'beta'
 custom_code:
-examples:
-  - name: 'vertex_ai_feature_group'
-    primary_resource_id: 'feature_group'
-    vars:
-      job_id: 'job_load'
-      feature_group_name: 'example_feature_group'
-    ignore_read_extra:
-      - 'description'
+samples:
+  - name: vertex_ai_feature_group
+    primary_resource_id: feature_group
+    steps:
+      - name: vertex_ai_feature_group
+        resource_id_vars:
+          feature_group_name: example_feature_group
+          job_id: job_load
+        ignore_read_extra:
+          - description
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: The region of feature group. eg us-central1
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The resource name of the Feature Group.
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'createTime'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: createTime
     type: String
     description: The timestamp of when the FeatureGroup was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: The timestamp of when the FeatureGroup was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: 'etag'
+  - name: etag
     type: String
     description: Used to perform consistent read-modify-write updates.
     ignore_read: true
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your FeatureGroup.
-  - name: 'description'
+  - name: description
     type: String
     description: The description of the FeatureGroup.
     # When API starts returning description, this line should be removed.
-    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_feature_group_ignore_description.go.tmpl'
-  - name: 'bigQuery'
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_feature_group_ignore_description.go.tmpl
+  - name: bigQuery
     type: NestedObject
     description: Indicates that features for this group come from BigQuery Table/View. By default treats the source as a sparse time series source, which is required to have an entityId and a feature_timestamp column in the source.
     update_mask_fields:
-      - 'bigQuery.entityIdColumns'
+      - bigQuery.entityIdColumns
     properties:
-      - name: 'bigQuerySource'
+      - name: bigQuerySource
         type: NestedObject
         description: The BigQuery source URI that points to either a BigQuery Table or View.
         required: true
         immutable: true
         properties:
-          - name: 'inputUri'
+          - name: inputUri
             type: String
             description: 'BigQuery URI to a table, up to 2000 characters long. For example: `bq://projectId.bqDatasetId.bqTableId.`'
             required: true
-      - name: 'entityIdColumns'
+      - name: entityIdColumns
         type: Array
         description: Columns to construct entityId / row keys. If not provided defaults to entityId.
         item_type:

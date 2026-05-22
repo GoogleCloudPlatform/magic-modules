@@ -16,18 +16,94 @@ name: SparkApplication
 description: A Spark application is a single Spark workload run on a GDC cluster.
 references:
   guides:
-    'Dataproc Intro': 'https://cloud.google.com/dataproc/'
-  api: 'https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.serviceInstances.sparkApplications'
+    Dataproc Intro: https://cloud.google.com/dataproc/
+  api: https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.serviceInstances.sparkApplications
+base_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
+create_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications?sparkApplicationId={{spark_application_id}}
+id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete]
+autogen_status: U3BhcmtBcHBsaWNhdGlvbg==
+autogen_async: true
+samples:
+  - name: dataprocgdc_sparkapplication_basic
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
+    primary_resource_id: spark-application
+    steps:
+      - name: dataprocgdc_sparkapplication_basic
+        resource_id_vars:
+          project: my-project
+          spark_application_id: tf-e2e-spark-app-basic
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
+    primary_resource_id: spark-application
+    steps:
+      - name: dataprocgdc_sparkapplication
+        resource_id_vars:
+          application_environment_id: tf-e2e-spark-app-env
+          project: my-project
+          spark_application_id: tf-e2e-spark-app
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication_pyspark
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
+    primary_resource_id: spark-application
+    steps:
+      - name: dataprocgdc_sparkapplication_pyspark
+        resource_id_vars:
+          project: my-project
+          spark_application_id: tf-e2e-pyspark-app
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication_sparkr
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
+    primary_resource_id: spark-application
+    steps:
+      - name: dataprocgdc_sparkapplication_sparkr
+        resource_id_vars:
+          project: my-project
+          spark_application_id: tf-e2e-sparkr-app
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication_sparksql
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
+    primary_resource_id: spark-application
+    steps:
+      - name: dataprocgdc_sparkapplication_sparksql
+        resource_id_vars:
+          project: my-project
+          spark_application_id: tf-e2e-sparksql-app
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication_sparksql_query_file
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
+    primary_resource_id: spark-application
+    steps:
+      - name: dataprocgdc_sparkapplication_sparksql_query_file
+        resource_id_vars:
+          project: my-project
+          spark_application_id: tf-e2e-sparksql-app
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
 parameters:
   - name: location
     type: String
-    description: 'The location of the spark application.'
+    description: The location of the spark application.
     url_param_only: true
     required: true
     immutable: true
   - name: serviceinstance
     type: String
-    description: 'The id of the service instance to which this spark application belongs.'
+    description: The id of the service instance to which this spark application belongs.
     url_param_only: true
     required: true
     immutable: true
@@ -37,200 +113,115 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-async:
-  actions: ['create', 'delete']
-  type: OpAsync
-  operation:
-    base_url: "{{op_id}}"
-immutable: true
-examples:
-  - name: "dataprocgdc_sparkapplication_basic"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-spark-app-basic"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
-    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-spark-app"
-      application_environment_id: "tf-e2e-spark-app-env"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
-    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication_pyspark"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-pyspark-app"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
-    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication_sparkr"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-sparkr-app"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
-    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication_sparksql"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-sparksql-app"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
-    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication_sparksql_query_file"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-sparksql-app"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
-    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-base_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications
-create_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications?sparkApplicationId={{spark_application_id}}
-self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
-id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
-import_format:
-  - projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
-autogen_async: true
-autogen_status: U3BhcmtBcHBsaWNhdGlvbg==
 properties:
   - name: pysparkApplicationConfig
     type: NestedObject
     exactly_one_of:
-      - 'pyspark_application_config'
-      - 'spark_application_config'
-      - 'spark_sql_application_config'
-      - 'spark_r_application_config'
+      - pyspark_application_config
+      - spark_application_config
+      - spark_sql_application_config
+      - spark_r_application_config
     properties:
       - name: mainPythonFileUri
         type: String
-        description: "The HCFS URI of the main Python file to use as the driver.
-          Must be a .py file. "
+        description: 'The HCFS URI of the main Python file to use as the driver. Must be a .py file. '
         required: true
       - name: args
         type: Array
         item_type:
           type: String
-        description: "The arguments to pass to the driver.  Do not include arguments, such
-          as `--conf`, that can be set as job properties, since a collision may occur
-          that causes an incorrect job submission. "
+        description: 'The arguments to pass to the driver.  Do not include arguments, such as `--conf`, that can be set as job properties, since a collision may occur that causes an incorrect job submission. '
       - name: pythonFileUris
         type: Array
         item_type:
           type: String
-        description: "HCFS file URIs of Python files to pass to the PySpark framework.
-          Supported file types: .py, .egg, and .zip. "
+        description: 'HCFS file URIs of Python files to pass to the PySpark framework. Supported file types: .py, .egg, and .zip. '
       - name: jarFileUris
         type: Array
         item_type:
           type: String
-        description: "HCFS URIs of jar files to add to the CLASSPATHs of the Python
-          driver and tasks. "
+        description: 'HCFS URIs of jar files to add to the CLASSPATHs of the Python driver and tasks. '
       - name: fileUris
         type: Array
         item_type:
           type: String
-        description: "HCFS URIs of files to be placed in the working directory
-          of each executor. Useful for naively parallel tasks. "
+        description: 'HCFS URIs of files to be placed in the working directory of each executor. Useful for naively parallel tasks. '
       - name: archiveUris
         type: Array
         item_type:
           type: String
-        description: "HCFS URIs of archives to be extracted into the working
-          directory of each executor. Supported file types: .jar, .tar, .tar.gz, .tgz,
-          and .zip. "
+        description: 'HCFS URIs of archives to be extracted into the working directory of each executor. Supported file types: .jar, .tar, .tar.gz, .tgz, and .zip. '
     description: 'Represents the PySparkApplicationConfig. '
   - name: sparkApplicationConfig
     type: NestedObject
     exactly_one_of:
-      - 'pyspark_application_config'
-      - 'spark_application_config'
-      - 'spark_sql_application_config'
-      - 'spark_r_application_config'
+      - pyspark_application_config
+      - spark_application_config
+      - spark_sql_application_config
+      - spark_r_application_config
     properties:
       - name: mainJarFileUri
         type: String
         description: 'The HCFS URI of the jar file that contains the main class. '
       - name: mainClass
         type: String
-        description: "The name of the driver main class. The jar file that contains the
-          class must be in the classpath or specified in `jar_file_uris`. "
+        description: 'The name of the driver main class. The jar file that contains the class must be in the classpath or specified in `jar_file_uris`. '
       - name: args
         type: Array
         item_type:
           type: String
-        description: "The arguments to pass to the driver. Do not include arguments that
-          can be set as application properties, such as `--conf`, since a collision can
-          occur that causes an incorrect application submission. "
+        description: 'The arguments to pass to the driver. Do not include arguments that can be set as application properties, such as `--conf`, since a collision can occur that causes an incorrect application submission. '
       - name: jarFileUris
         type: Array
         item_type:
           type: String
-        description: "HCFS URIs of jar files to add to the classpath of the Spark
-          driver and tasks. "
+        description: 'HCFS URIs of jar files to add to the classpath of the Spark driver and tasks. '
       - name: fileUris
         type: Array
         item_type:
           type: String
-        description: "HCFS URIs of files to be placed in the working directory
-          of each executor. "
+        description: 'HCFS URIs of files to be placed in the working directory of each executor. '
       - name: archiveUris
         type: Array
         item_type:
           type: String
-        description: "HCFS URIs of archives to be extracted into the working
-          directory of each executor. Supported file types: `.jar`, `.tar`, `.tar.gz`,
-          `.tgz`, and `.zip`. "
+        description: 'HCFS URIs of archives to be extracted into the working directory of each executor. Supported file types: `.jar`, `.tar`, `.tar.gz`, `.tgz`, and `.zip`. '
     description: 'Represents the SparkApplicationConfig. '
   - name: sparkRApplicationConfig
     type: NestedObject
     exactly_one_of:
-      - 'pyspark_application_config'
-      - 'spark_application_config'
-      - 'spark_sql_application_config'
-      - 'spark_r_application_config'
+      - pyspark_application_config
+      - spark_application_config
+      - spark_sql_application_config
+      - spark_r_application_config
     properties:
       - name: mainRFileUri
         type: String
-        description: "The HCFS URI of the main R file to use as the driver. Must
-          be a .R file. "
+        description: 'The HCFS URI of the main R file to use as the driver. Must be a .R file. '
         required: true
       - name: args
         type: Array
         item_type:
           type: String
-        description: "The arguments to pass to the driver.  Do not include arguments, such
-          as `--conf`, that can be set as job properties, since a collision may occur
-          that causes an incorrect job submission. "
+        description: 'The arguments to pass to the driver.  Do not include arguments, such as `--conf`, that can be set as job properties, since a collision may occur that causes an incorrect job submission. '
       - name: fileUris
         type: Array
         item_type:
           type: String
-        description: "HCFS URIs of files to be placed in the working directory
-          of each executor. Useful for naively parallel tasks. "
+        description: 'HCFS URIs of files to be placed in the working directory of each executor. Useful for naively parallel tasks. '
       - name: archiveUris
         type: Array
         item_type:
           type: String
-        description: "HCFS URIs of archives to be extracted into the working
-          directory of each executor. Supported file types: .jar, .tar, .tar.gz, .tgz,
-          and .zip. "
+        description: 'HCFS URIs of archives to be extracted into the working directory of each executor. Supported file types: .jar, .tar, .tar.gz, .tgz, and .zip. '
     description: 'Represents the SparkRApplicationConfig. '
   - name: sparkSqlApplicationConfig
     type: NestedObject
     exactly_one_of:
-      - 'pyspark_application_config'
-      - 'spark_application_config'
-      - 'spark_sql_application_config'
-      - 'spark_r_application_config'
+      - pyspark_application_config
+      - spark_application_config
+      - spark_sql_application_config
+      - spark_r_application_config
     properties:
       - name: queryFileUri
         type: String
@@ -242,13 +233,12 @@ properties:
             type: Array
             item_type:
               type: String
-            description: 'The queries to run.'
+            description: The queries to run.
             required: true
         description: 'Represents a list of queries. '
       - name: scriptVariables
         type: KeyValuePairs
-        description: "Mapping of query variable names to values (equivalent
-          to the Spark SQL command: SET `name=\"value\";`). "
+        description: 'Mapping of query variable names to values (equivalent to the Spark SQL command: SET `name="value";`). '
       - name: jarFileUris
         type: Array
         item_type:
@@ -257,12 +247,11 @@ properties:
     description: 'Represents the SparkRApplicationConfig. '
   - name: name
     type: String
-    description: "Identifier. The name of the application. Format: projects/{project}/locations/{location}/serviceInstances/{service_instance}/sparkApplications/{application} "
+    description: 'Identifier. The name of the application. Format: projects/{project}/locations/{location}/serviceInstances/{service_instance}/sparkApplications/{application} '
     output: true
   - name: uid
     type: String
-    description: "System generated unique identifier for this application,
-      formatted as UUID4. "
+    description: 'System generated unique identifier for this application, formatted as UUID4. '
     output: true
   - name: displayName
     type: String
@@ -290,27 +279,21 @@ properties:
     output: true
   - name: reconciling
     type: Boolean
-    description: "Whether the application is currently reconciling. True
-      if the current state of the resource does not match the intended state, and the
-      system is working to reconcile them, whether or not the change was user initiated."
+    description: Whether the application is currently reconciling. True if the current state of the resource does not match the intended state, and the system is working to reconcile them, whether or not the change was user initiated.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: "The labels to associate with this application. Labels may
-      be used for filtering and billing tracking. "
+    description: 'The labels to associate with this application. Labels may be used for filtering and billing tracking. '
   - name: annotations
     type: KeyValueAnnotations
-    description: "The annotations to associate with this application. Annotations
-      may be used to store client information, but are not used by the server. "
+    description: 'The annotations to associate with this application. Annotations may be used to store client information, but are not used by the server. '
   - name: outputUri
     type: String
-    description: "An HCFS URI pointing to the location of stdout and stdout
-      of the application Mainly useful for Pantheon and gcloud Not in scope for private GA "
+    description: 'An HCFS URI pointing to the location of stdout and stdout of the application Mainly useful for Pantheon and gcloud Not in scope for private GA '
     output: true
   - name: monitoringEndpoint
     type: String
-    description: "URL for a monitoring UI for this application (for eventual
-      Spark PHS/UI support) Out of scope for private GA "
+    description: 'URL for a monitoring UI for this application (for eventual Spark PHS/UI support) Out of scope for private GA '
     output: true
   - name: properties
     type: KeyValuePairs
@@ -324,16 +307,12 @@ properties:
     description: 'The Dataproc version of this application. '
   - name: applicationEnvironment
     type: String
-    description: 'An ApplicationEnvironment from which to inherit configuration
-      properties. '
+    description: 'An ApplicationEnvironment from which to inherit configuration properties. '
   - name: namespace
     type: String
-    description: "The Kubernetes namespace in which to create the application. This
-      namespace must already exist on the cluster. "
+    description: 'The Kubernetes namespace in which to create the application. This namespace must already exist on the cluster. '
   - name: dependencyImages
     type: Array
     item_type:
       type: String
-    description: "List of container image uris for additional file dependencies. Dependent
-      files are sequentially copied from each image. If a file with the same name exists
-      in 2 images then the file from later image is used. "
+    description: 'List of container image uris for additional file dependencies. Dependent files are sequentially copied from each image. If a file with the same name exists in 2 images then the file from later image is used. '

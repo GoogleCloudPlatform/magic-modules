@@ -16,8 +16,8 @@ name: Retrohunt
 description: Retrohunt is an execution of a Rule over a time range in the past.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules.retrohunts'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules.retrohunts
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
@@ -25,34 +25,34 @@ create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/r
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
-exclude_delete: true
-autogen_status: UmV0cm9odW50
-
-custom_code:
-  post_create: 'templates/terraform/post_create/chronicle_retrohunt_id.go.tmpl'
-examples:
-  - name: 'chronicle_retrohunt_basic'
-    primary_resource_id: example
-    exclude_import_test: true
-    skip_vcr: true
-    vars:
-      start_time: '2025-01-01T00:00:00Z'
-      end_time: '2025-01-01T12:00:00Z'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    test_vars_overrides:
-      start_time: 'time.Now().Add(time.Hour * (-12)).Format(time.RFC3339)'
-      end_time: 'time.Now().Add(time.Hour * (-1)).Format(time.RFC3339)'
-
+exclude_sweeper: true
 async:
-  actions: [create]
   type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
-exclude_sweeper: true
+  actions: [create]
+exclude_delete: true
+autogen_status: UmV0cm9odW50
+custom_code:
+  post_create: templates/terraform/post_create/chronicle_retrohunt_id.go.tmpl
+samples:
+  - name: chronicle_retrohunt_basic
+    skip_vcr: true
+    primary_resource_id: example
+    steps:
+      - name: chronicle_retrohunt_basic
+        resource_id_vars:
+          end_time: "2025-01-01T12:00:00Z"
+          start_time: "2025-01-01T00:00:00Z"
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        test_vars_overrides:
+          end_time: time.Now().Add(time.Hour * (-1)).Format(time.RFC3339)
+          start_time: time.Now().Add(time.Hour * (-12)).Format(time.RFC3339)
+        exclude_import_test: true
 parameters:
   - name: location
     type: String
@@ -73,7 +73,7 @@ parameters:
     type: String
     description: The retrohunt ID of the Retrohunt. A retrohunt is an execution of a Rule over a time range in the past.
     default_from_api: true
-    custom_flatten: "templates/terraform/custom_flatten/id_from_name.tmpl"
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
 properties:
   - name: progressPercentage
     type: Double
@@ -102,13 +102,11 @@ properties:
       - name: startTime
         type: String
         required: true
-        description: |-
-          Inclusive start of the interval.
+        description: Inclusive start of the interval.
       - name: endTime
         type: String
         required: true
-        description: |-
-          Exclusive end of the interval.
+        description: Exclusive end of the interval.
   - name: executionInterval
     type: NestedObject
     description: |-

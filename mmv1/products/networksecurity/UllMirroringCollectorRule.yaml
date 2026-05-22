@@ -15,6 +15,7 @@
 name: UllMirroringCollectorRule
 description: UllMirroringCollectorRule is a resource that defines what traffic should be mirrored.
 base_url: projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector}}/rules
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector}}/rules/{{ull_mirroring_collector_rule_id}}
 create_url: projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector}}/rules?ullMirroringCollectorRuleId={{ull_mirroring_collector_rule_id}}
 update_mask: true
@@ -32,20 +33,21 @@ async:
     resource_inside_response: true
 autogen_status: VWxsTWlycm9yaW5nQ29sbGVjdG9yUnVsZQ==
 autogen_async: true
-examples:
-  - name: 'network_security_ull_mirroring_collector_rule_basic'
-    config_path: 'templates/terraform/examples/network_security_ull_mirroring_collector_rule_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      subnetwork_name: 'example-subnet'
-      health_check_name: 'example-hc'
-      backend_service_name: 'example-bs'
-      forwarding_rule_name: 'example-fwr'
-      ull_mirroring_engine_id: 'example-ull-eng'
-      ull_mirroring_collector_id: 'example-ull-col'
-      ull_mirroring_collector_rule_id: 'example-ull-rule'
+samples:
+  - name: network_security_ull_mirroring_collector_rule_basic
     exclude_test: true
+    primary_resource_id: default
+    steps:
+      - name: network_security_ull_mirroring_collector_rule_basic
+        resource_id_vars:
+          backend_service_name: example-bs
+          forwarding_rule_name: example-fwr
+          health_check_name: example-hc
+          network_name: example-network
+          subnetwork_name: example-subnet
+          ull_mirroring_collector_id: example-ull-col
+          ull_mirroring_collector_rule_id: example-ull-rule
+          ull_mirroring_engine_id: example-ull-eng
 parameters:
   - name: location
     type: String
@@ -118,4 +120,3 @@ properties:
     type: String
     description: '[Output only] Update time stamp'
     output: true
-min_version: beta

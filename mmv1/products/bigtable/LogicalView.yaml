@@ -12,71 +12,66 @@
 # limitations under the License.
 
 ---
-name: 'LogicalView'
-kind: 'bigtable#logicalView'
+name: LogicalView
 description: |
   A logical view object that can be referenced in SQL queries.
 references:
   guides:
-  api: 'https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/projects.instances.logicalViews'
+  api: https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/projects.instances.logicalViews
 docs:
-id_format: 'projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}'
-base_url: 'projects/{{project}}/instances/{{instance}}/logicalViews?logicalViewId={{logical_view_id}}'
-self_link: 'projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}'
-create_url: 'projects/{{project}}/instances/{{instance}}/logicalViews?logicalViewId={{logical_view_id}}'
-update_url: 'projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/instances/{{instance}}/logicalViews?logicalViewId={{logical_view_id}}
+self_link: projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}
+create_url: projects/{{project}}/instances/{{instance}}/logicalViews?logicalViewId={{logical_view_id}}
+delete_url: projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}
+update_url: projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}
 update_mask: true
-delete_url: 'projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}'
+update_verb: PATCH
+kind: bigtable#logicalView
+id_format: projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}
 import_format:
-  - 'projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}'
+  - projects/{{project}}/instances/{{instance}}/logicalViews/{{logical_view_id}}
 timeouts:
   insert_minutes: 120
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
-examples:
-  - name: 'bigtable_logical_view'
-    primary_resource_id: 'logical_view'
-    vars:
-      instance_name: 'bt-instance'
-      table_name: 'bt-table'
-      logical_view_name: 'bt-logical-view'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
+samples:
+  - name: bigtable_logical_view
     skip_vcr: true
+    primary_resource_id: logical_view
+    steps:
+      - name: bigtable_logical_view
+        resource_id_vars:
+          deletion_protection: "true"
+          instance_name: bt-instance
+          logical_view_name: bt-logical-view
+          table_name: bt-table
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
 parameters:
-  - name: 'logicalViewId'
+  - name: logicalViewId
     type: String
-    description:
-      'The unique name of the logical view in the form
-      `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+    description: The unique name of the logical view in the form `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'instance'
+  - name: instance
     type: String
-    description: 'The name of the instance to create the logical view within.'
+    description: The name of the instance to create the logical view within.
     url_param_only: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    diff_suppress_func: tpgresource.CompareResourceNames
 properties:
-  - name: 'name'
+  - name: name
     type: String
-    description:
-      'The unique name of the requested logical view. Values are of the form
-      `projects/<project>/instances/<instance>/logicalViews/<logicalViewId>`.'
+    description: The unique name of the requested logical view. Values are of the form `projects/<project>/instances/<instance>/logicalViews/<logicalViewId>`.
     output: true
-  - name: 'query'
+  - name: query
     type: String
-    description:
-      'The logical view''s select query.'
+    description: The logical view's select query.
     required: true
-  - name: 'deletionProtection'
+  - name: deletionProtection
     type: Boolean
-    description:
-      'Set to true to make the logical view protected against deletion.'
+    description: Set to true to make the logical view protected against deletion.

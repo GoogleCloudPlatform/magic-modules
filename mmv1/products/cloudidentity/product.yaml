@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'CloudIdentity'
-display_name: 'Cloud Identity'
-versions:
-  - name: 'ga'
-    base_url: 'https://cloudidentity.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://cloudidentity.googleapis.com/v1beta1/'
+name: CloudIdentity
+display_name: Cloud Identity
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-identity'
+  - https://www.googleapis.com/auth/cloud-identity
+versions:
+  - name: ga
+    base_url: https://cloudidentity.googleapis.com/v1/
+  - name: beta
+    base_url: https://cloudidentity.googleapis.com/v1beta1/

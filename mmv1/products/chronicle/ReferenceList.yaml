@@ -16,28 +16,28 @@ name: ReferenceList
 description: Reference lists are user-defined lists of values which users can use in multiple Rules.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.referenceLists'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.referenceLists
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists/{{reference_list_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists?referenceListId={{reference_list_id}}
+update_mask: true
+update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists/{{reference_list_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists/{{reference_list_id}}
-update_verb: PATCH
-update_mask: true
 exclude_delete: true
 autogen_status: UmVmZXJlbmNlTGlzdA==
-
-examples:
-  - name: 'chronicle_referencelist_basic'
-    primary_resource_id: 'example'
-    vars:
-      reference_list_id: reference_list_id
-      data_access_scope_id: scope-id
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
+samples:
+  - name: chronicle_referencelist_basic
+    primary_resource_id: example
+    steps:
+      - name: chronicle_referencelist_basic
+        resource_id_vars:
+          data_access_scope_id: scope-id
+          reference_list_id: reference_list_id
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String
@@ -107,7 +107,7 @@ properties:
               "projects/{project}/locations/{location}/instances/{instance}/dataAccessScopes/{scope_name}".
             item_type:
               type: String
-            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+            diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
   - name: displayName
     type: String
     description: Output only. The unique display name of the reference list.
@@ -128,7 +128,6 @@ properties:
   - name: syntaxType
     type: String
     description: |2-
-
       Possible values:
       REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING
       REFERENCE_LIST_SYNTAX_TYPE_REGEX

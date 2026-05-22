@@ -13,53 +13,48 @@
 
 ---
 name: DashboardChart
-description: >
-  A chart resource used within a NativeDashboard. Its lifecycle (Create, Update, Delete) is
-  managed via custom methods on the NativeDashboard resource.
+description: |
+  A chart resource used within a NativeDashboard. Its lifecycle (Create, Update, Delete) is managed via custom methods on the NativeDashboard resource.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dashboardCharts'
-
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dashboardCharts
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts/{{chart_id}}
-create_url: "{{native_dashboard}}:addChart"
-
-update_url: "{{native_dashboard}}:editChart"
+create_url: '{{native_dashboard}}:addChart'
+delete_url: '{{native_dashboard}}:removeChart'
+update_url: '{{native_dashboard}}:editChart'
 update_verb: POST
-
-delete_url: "{{native_dashboard}}:removeChart"
 delete_verb: POST
-
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts/{{chart_id}}
-
 custom_code:
-  pre_delete: "templates/terraform/pre_delete/chronicle_dashboard_chart.go.tmpl"
-  pre_update: "templates/terraform/pre_update/chronicle_dashboard_chart_dashboard_query.go.tmpl"
-  update_encoder: "templates/terraform/update_encoder/chronicle_dashboard_chart_edit_mask.go.tmpl"
-  decoder: "templates/terraform/decoders/chronicle_dashboard_chart.go.tmpl"
-
-examples:
+  update_encoder: templates/terraform/update_encoder/chronicle_dashboard_chart_edit_mask.go.tmpl
+  decoder: templates/terraform/decoders/chronicle_dashboard_chart.go.tmpl
+  pre_update: templates/terraform/pre_update/chronicle_dashboard_chart_dashboard_query.go.tmpl
+  pre_delete: templates/terraform/pre_delete/chronicle_dashboard_chart.go.tmpl
+samples:
   - name: chronicle_dashboardchart_basic
     primary_resource_id: my_chart
-    ignore_read_extra:
-      - "dashboardUserData.0.lastViewedTime"
-    vars:
-      chart_display_name: "testchart_1"
-    test_env_vars:
-      chronicle_id: "CHRONICLE_ID"
-
+    steps:
+      - name: chronicle_dashboardchart_basic
+        resource_id_vars:
+          chart_display_name: testchart_1
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        ignore_read_extra:
+          - dashboardUserData.0.lastViewedTime
   - name: chronicle_dashboardchart_full
     primary_resource_id: my_chart
-    ignore_read_extra:
-      - "dashboardUserData.0.lastViewedTime"
-    vars:
-      dashboard_name: "dashboard_1"
-      dashboard_description: "dashboard_description"
-    test_env_vars:
-      chronicle_id: "CHRONICLE_ID"
-
+    steps:
+      - name: chronicle_dashboardchart_full
+        resource_id_vars:
+          dashboard_description: dashboard_description
+          dashboard_name: dashboard_1
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        ignore_read_extra:
+          - dashboardUserData.0.lastViewedTime
 parameters:
   - name: location
     type: String
@@ -73,25 +68,21 @@ parameters:
     description: The ID of the Chronicle instance.
     immutable: true
     url_param_only: true
-
 properties:
   - name: nativeDashboard
     type: String
     description: The parent NativeDashboard resource name, formatted as projects/{project}/locations/{location}/instances/{instance}/nativeDashboards/{dashboard_id}
     url_param_only: true
     immutable: true
-
   - name: name
     type: String
     output: true
     description: The full resource name of the DashboardChart.
-
   - name: chartId
     type: String
-    custom_flatten: "templates/terraform/custom_flatten/id_from_name.tmpl"
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
     output: true
     description: The unique identifier of the chart, automatically extracted from the full resource name.
-
   - name: dashboardQuery
     type: NestedObject
     ignore_read: true
@@ -128,19 +119,18 @@ properties:
                 type: Enum
                 required: true
                 enum_values:
-                  - 'SECOND'
-                  - 'MINUTE'
-                  - 'HOUR'
-                  - 'DAY'
-                  - 'WEEK'
-                  - 'MONTH'
-                  - 'YEAR'
+                  - SECOND
+                  - MINUTE
+                  - HOUR
+                  - DAY
+                  - WEEK
+                  - MONTH
+                  - YEAR
                 description: The time unit for the relative range.
       - name: etag
         type: String
         output: true
         description: This checksum is computed by the server.
-
   - name: chartLayout
     type: NestedObject
     description: The layout of this chart within the NativeDashboard.
@@ -158,7 +148,6 @@ properties:
       - name: spanY
         type: Integer
         required: true
-
   - name: dashboardChart
     type: NestedObject
     description: Core configuration details for the DashboardChart.
@@ -179,19 +168,19 @@ properties:
       - name: tileType
         type: Enum
         enum_values:
-          - 'TILE_TYPE_UNSPECIFIED'
-          - 'TILE_TYPE_VISUALIZATION'
-          - 'TILE_TYPE_BUTTON'
-          - 'TILE_TYPE_MARKDOWN'
+          - TILE_TYPE_UNSPECIFIED
+          - TILE_TYPE_VISUALIZATION
+          - TILE_TYPE_BUTTON
+          - TILE_TYPE_MARKDOWN
         description: Type of tile (e.g., visualization, button, markdown).
       - name: chartDatasource
         type: NestedObject
-        diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+        diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
         description: Query and datasource used in the chart.
         properties:
           - name: dataSources
             type: Array
-            diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+            diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
             description: |
               Name(s) of the datasource used in the chart. Available values include:
               'UDM', 'ENTITY', 'INGESTION_METRICS', 'RULE_DETECTIONS', 'RULESETS',
@@ -206,7 +195,7 @@ properties:
       - name: visualization
         type: NestedObject
         required: true
-        diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+        diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
         description: Visualization config for a chart.
         properties:
           - name: xAxes
@@ -217,10 +206,10 @@ properties:
                 - name: axisType
                   type: Enum
                   enum_values:
-                    - 'VALUE'
-                    - 'CATEGORY'
-                    - 'TIME'
-                    - 'LOG'
+                    - VALUE
+                    - CATEGORY
+                    - TIME
+                    - LOG
                 - name: displayName
                   type: String
                 - name: min
@@ -237,10 +226,10 @@ properties:
                 - name: axisType
                   type: Enum
                   enum_values:
-                    - 'VALUE'
-                    - 'CATEGORY'
-                    - 'TIME'
-                    - 'LOG'
+                    - VALUE
+                    - CATEGORY
+                    - TIME
+                    - LOG
                 - name: displayName
                   type: String
                 - name: min
@@ -251,20 +240,20 @@ properties:
                   default_from_api: true
           - name: series
             type: Array
-            diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+            diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
             item_type:
               type: NestedObject
               properties:
                 - name: seriesType
                   type: Enum
                   enum_values:
-                    - 'LINE'
-                    - 'BAR'
-                    - 'PIE'
-                    - 'TEXT'
-                    - 'MAP'
-                    - 'GAUGE'
-                    - 'SCATTERPLOT'
+                    - LINE
+                    - BAR
+                    - PIE
+                    - TEXT
+                    - MAP
+                    - GAUGE
+                    - SCATTERPLOT
                 - name: seriesName
                   type: String
                   description: User specified series label.
@@ -279,16 +268,16 @@ properties:
                 - name: seriesStackStrategy
                   type: Enum
                   enum_values:
-                    - 'SAMESIGN'
-                    - 'ALL'
-                    - 'POSITIVE'
-                    - 'NEGATIVE'
+                    - SAMESIGN
+                    - ALL
+                    - POSITIVE
+                    - NEGATIVE
                 - name: encode
                   type: NestedObject
                   properties:
                     - name: x
                       type: String
-                    - name: y
+                    - name: "y"
                       type: String
                     - name: value
                       type: String
@@ -300,16 +289,16 @@ properties:
                   type: String
                 - name: dataLabel
                   send_empty_value: true
-                  diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+                  diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
                   type: NestedObject
                   properties:
                     - name: show
                       type: Boolean
-                      diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+                      diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
                       description: Whether to show data label.
                 - name: radius
                   type: Array
-                  diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+                  diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
                   item_type:
                     type: String
                 - name: itemStyle
@@ -389,24 +378,24 @@ properties:
                     - name: metricFormat
                       type: Enum
                       enum_values:
-                        - 'METRIC_FORMAT_UNSPECIFIED'
-                        - 'METRIC_FORMAT_NUMBER'
-                        - 'METRIC_FORMAT_PLAIN_TEXT'
+                        - METRIC_FORMAT_UNSPECIFIED
+                        - METRIC_FORMAT_NUMBER
+                        - METRIC_FORMAT_PLAIN_TEXT
                     - name: showMetricTrend
                       type: Boolean
                     - name: metricDisplayTrend
                       type: Enum
                       enum_values:
-                        - 'METRIC_DISPLAY_TREND_UNSPECIFIED'
-                        - 'METRIC_DISPLAY_TREND_ABSOLUTE_VALUE'
-                        - 'METRIC_DISPLAY_TREND_PERCENTAGE'
-                        - 'METRIC_DISPLAY_TREND_ABSOLUTE_VALUE_AND_PERCENTAGE'
+                        - METRIC_DISPLAY_TREND_UNSPECIFIED
+                        - METRIC_DISPLAY_TREND_ABSOLUTE_VALUE
+                        - METRIC_DISPLAY_TREND_PERCENTAGE
+                        - METRIC_DISPLAY_TREND_ABSOLUTE_VALUE_AND_PERCENTAGE
                     - name: metricTrendType
                       type: Enum
                       enum_values:
-                        - 'METRIC_TREND_TYPE_UNSPECIFIED'
-                        - 'METRIC_TREND_TYPE_REGULAR'
-                        - 'METRIC_TREND_TYPE_INVERSE'
+                        - METRIC_TREND_TYPE_UNSPECIFIED
+                        - METRIC_TREND_TYPE_REGULAR
+                        - METRIC_TREND_TYPE_INVERSE
           - name: tooltip
             type: NestedObject
             properties:
@@ -415,12 +404,12 @@ properties:
               - name: tooltipTrigger
                 type: Enum
                 enum_values:
-                  - 'TOOLTIP_TRIGGER_UNSPECIFIED'
-                  - 'TOOLTIP_TRIGGER_NONE'
-                  - 'TOOLTIP_TRIGGER_ITEM'
-                  - 'TOOLTIP_TRIGGER_AXIS'
+                  - TOOLTIP_TRIGGER_UNSPECIFIED
+                  - TOOLTIP_TRIGGER_NONE
+                  - TOOLTIP_TRIGGER_ITEM
+                  - TOOLTIP_TRIGGER_AXIS
           - name: legends
-            diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+            diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
             type: Array
             item_type:
               type: NestedObject
@@ -451,14 +440,14 @@ properties:
                 - name: legendOrient
                   type: Enum
                   enum_values:
-                    - 'VERTICAL'
-                    - 'HORIZONTAL'
+                    - VERTICAL
+                    - HORIZONTAL
                 - name: legendAlign
                   type: Enum
                   enum_values:
-                    - 'AUTO'
-                    - 'LEFT'
-                    - 'RIGHT'
+                    - AUTO
+                    - LEFT
+                    - RIGHT
                 - name: padding
                   type: Array
                   default_from_api: true
@@ -488,10 +477,10 @@ properties:
                     - name: columnRenderType
                       type: Enum
                       enum_values:
-                        - 'RENDER_TYPE_UNSPECIFIED'
-                        - 'RENDER_TYPE_TEXT'
-                        - 'RENDER_TYPE_ICON'
-                        - 'RENDER_TYPE_ICON_AND_TEXT'
+                        - RENDER_TYPE_UNSPECIFIED
+                        - RENDER_TYPE_TEXT
+                        - RENDER_TYPE_ICON
+                        - RENDER_TYPE_ICON_AND_TEXT
               - name: columnTooltipSettings
                 type: Array
                 item_type:
@@ -526,10 +515,10 @@ properties:
                   - name: buttonStyle
                     type: Enum
                     enum_values:
-                      - 'BUTTON_STYLE_UNSPECIFIED'
-                      - 'BUTTON_STYLE_FILLED'
-                      - 'BUTTON_STYLE_OUTLINED'
-                      - 'BUTTON_STYLE_TRANSPARENT'
+                      - BUTTON_STYLE_UNSPECIFIED
+                      - BUTTON_STYLE_FILLED
+                      - BUTTON_STYLE_OUTLINED
+                      - BUTTON_STYLE_TRANSPARENT
           - name: markdown
             type: NestedObject
             description: Markdown config if tileType is TILE_TYPE_MARKDOWN.
@@ -544,7 +533,7 @@ properties:
                     type: String
           - name: seriesColumn
             type: Array
-            diff_suppress_func: "tpgresource.EmptyOrUnsetBlockDiffSuppress"
+            diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
             item_type:
               type: String
           - name: groupingType
@@ -564,10 +553,10 @@ properties:
               - name: plotMode
                 type: Enum
                 enum_values:
-                  - 'PLOT_MODE_UNSPECIFIED'
-                  - 'PLOT_MODE_POINTS'
-                  - 'PLOT_MODE_HEATMAP'
-                  - 'PLOT_MODE_BOTH'
+                  - PLOT_MODE_UNSPECIFIED
+                  - PLOT_MODE_POINTS
+                  - PLOT_MODE_HEATMAP
+                  - PLOT_MODE_BOTH
               - name: mapPosition
                 type: NestedObject
                 properties:
@@ -585,9 +574,9 @@ properties:
                   - name: pointSizeType
                     type: Enum
                     enum_values:
-                      - 'POINT_SIZE_TYPE_UNSPECIFIED'
-                      - 'POINT_SIZE_TYPE_FIXED'
-                      - 'POINT_SIZE_TYPE_PROPORTIONAL_TO_SIZE'
+                      - POINT_SIZE_TYPE_UNSPECIFIED
+                      - POINT_SIZE_TYPE_FIXED
+                      - POINT_SIZE_TYPE_PROPORTIONAL_TO_SIZE
                   - name: color
                     type: String
           - name: thresholdColoringEnabled
@@ -601,9 +590,9 @@ properties:
                 - name: visualMapType
                   type: Enum
                   enum_values:
-                    - 'VISUAL_MAP_TYPE_UNSPECIFIED'
-                    - 'CONTINUOUS'
-                    - 'PIECEWISE'
+                    - VISUAL_MAP_TYPE_UNSPECIFIED
+                    - CONTINUOUS
+                    - PIECEWISE
                 - name: pieces
                   type: Array
                   item_type:
@@ -677,24 +666,24 @@ properties:
                                     - name: filterOperator
                                       type: Enum
                                       enum_values:
-                                        - 'EQUAL'
-                                        - 'NOT_EQUAL'
-                                        - 'IN'
-                                        - 'GREATER_THAN'
-                                        - 'GREATER_THAN_OR_EQUAL_TO'
-                                        - 'LESS_THAN'
-                                        - 'LESS_THAN_OR_EQUAL_TO'
-                                        - 'BETWEEN'
-                                        - 'PAST'
-                                        - 'IS_NULL'
-                                        - 'IS_NOT_NULL'
-                                        - 'STARTS_WITH'
-                                        - 'ENDS_WITH'
-                                        - 'DOES_NOT_STARTS_WITH'
-                                        - 'DOES_NOT_ENDS_WITH'
-                                        - 'NOT_IN'
-                                        - 'CONTAINS'
-                                        - 'DOES_NOT_CONTAIN'
+                                        - EQUAL
+                                        - NOT_EQUAL
+                                        - IN
+                                        - GREATER_THAN
+                                        - GREATER_THAN_OR_EQUAL_TO
+                                        - LESS_THAN
+                                        - LESS_THAN_OR_EQUAL_TO
+                                        - BETWEEN
+                                        - PAST
+                                        - IS_NULL
+                                        - IS_NOT_NULL
+                                        - STARTS_WITH
+                                        - ENDS_WITH
+                                        - DOES_NOT_STARTS_WITH
+                                        - DOES_NOT_ENDS_WITH
+                                        - NOT_IN
+                                        - CONTAINS
+                                        - DOES_NOT_CONTAIN
                     - name: externalLink
                       type: NestedObject
                       properties:
@@ -757,24 +746,24 @@ properties:
                                     - name: filterOperator
                                       type: Enum
                                       enum_values:
-                                        - 'EQUAL'
-                                        - 'NOT_EQUAL'
-                                        - 'IN'
-                                        - 'GREATER_THAN'
-                                        - 'GREATER_THAN_OR_EQUAL_TO'
-                                        - 'LESS_THAN'
-                                        - 'LESS_THAN_OR_EQUAL_TO'
-                                        - 'BETWEEN'
-                                        - 'PAST'
-                                        - 'IS_NULL'
-                                        - 'IS_NOT_NULL'
-                                        - 'STARTS_WITH'
-                                        - 'ENDS_WITH'
-                                        - 'DOES_NOT_STARTS_WITH'
-                                        - 'DOES_NOT_ENDS_WITH'
-                                        - 'NOT_IN'
-                                        - 'CONTAINS'
-                                        - 'DOES_NOT_CONTAIN'
+                                        - EQUAL
+                                        - NOT_EQUAL
+                                        - IN
+                                        - GREATER_THAN
+                                        - GREATER_THAN_OR_EQUAL_TO
+                                        - LESS_THAN
+                                        - LESS_THAN_OR_EQUAL_TO
+                                        - BETWEEN
+                                        - PAST
+                                        - IS_NULL
+                                        - IS_NOT_NULL
+                                        - STARTS_WITH
+                                        - ENDS_WITH
+                                        - DOES_NOT_STARTS_WITH
+                                        - DOES_NOT_ENDS_WITH
+                                        - NOT_IN
+                                        - CONTAINS
+                                        - DOES_NOT_CONTAIN
                     - name: externalLink
                       type: NestedObject
                       properties:

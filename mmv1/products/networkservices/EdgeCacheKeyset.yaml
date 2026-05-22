@@ -12,52 +12,55 @@
 # limitations under the License.
 
 ---
-name: 'EdgeCacheKeyset'
+name: EdgeCacheKeyset
 description: |
   EdgeCacheKeyset represents a collection of public keys used for validating signed requests.
 references:
   guides:
-    'Create keysets': 'https://cloud.google.com/media-cdn/docs/create-keyset'
-  api: 'https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheKeysets'
+    Create keysets: https://cloud.google.com/media-cdn/docs/create-keyset
+  api: https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheKeysets
 docs:
-base_url: 'projects/{{project}}/locations/global/edgeCacheKeysets'
-self_link: 'projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}'
-create_url: 'projects/{{project}}/locations/global/edgeCacheKeysets?edgeCacheKeysetId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/global/edgeCacheKeysets
+self_link: projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}
+create_url: projects/{{project}}/locations/global/edgeCacheKeysets?edgeCacheKeysetId={{name}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}'
+  - projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}
 timeouts:
   insert_minutes: 90
   update_minutes: 90
   delete_minutes: 90
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 90
       update_minutes: 90
       delete_minutes: 90
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-custom_code:
 error_abort_predicates:
-
-  - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'network_services_edge_cache_keyset_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-keyset'
-  - name: 'network_services_edge_cache_keyset_dual_token'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-keyset'
-      secret_name: 'secret-name'
+  - transport_tpg.Is429QuotaError
+custom_code:
+samples:
+  - name: network_services_edge_cache_keyset_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_edge_cache_keyset_basic
+        resource_id_vars:
+          resource_name: my-keyset
+  - name: network_services_edge_cache_keyset_dual_token
+    primary_resource_id: default
+    steps:
+      - name: network_services_edge_cache_keyset_dual_token
+        resource_id_vars:
+          resource_name: my-keyset
+          secret_name: secret-name
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource; provided by the client when the resource is created.
@@ -67,14 +70,14 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A human-readable description of the resource.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'Set of label tags associated with the EdgeCache resource.'
-  - name: 'public_key'
+    description: Set of label tags associated with the EdgeCache resource.
+  - name: public_key
     type: Array
     description: |
       An ordered list of Ed25519 public keys to use for validating signed requests.
@@ -86,31 +89,31 @@ properties:
       Ensure that the private key is kept secret, and that only authorized users can add public keys to a keyset.
     api_name: publicKeys
     at_least_one_of:
-      - 'public_key'
-      - 'validation_shared_keys'
+      - public_key
+      - validation_shared_keys
     item_type:
       type: NestedObject
       properties:
-        - name: 'id'
+        - name: id
           type: String
           description: |
             The ID of the public key. The ID must be 1-63 characters long, and comply with RFC1035.
             The name must be 1-64 characters long, and match the regular expression [a-zA-Z][a-zA-Z0-9_-]*
             which means the first character must be a letter, and all following characters must be a dash, underscore, letter or digit.
           required: true
-        - name: 'value'
+        - name: value
           type: String
           description: |
             The base64-encoded value of the Ed25519 public key. The base64 encoding can be padded (44 bytes) or unpadded (43 bytes).
             Representations or encodings of the public key other than this will be rejected with an error.
           sensitive: true
-        - name: 'managed'
+        - name: managed
           type: Boolean
           description: |
             Set to true to have the CDN automatically manage this public key value.
     min_size: 1
     max_size: 3
-  - name: 'validationSharedKeys'
+  - name: validationSharedKeys
     type: Array
     description: |
       An ordered list of shared keys to use for validating signed requests.
@@ -118,12 +121,12 @@ properties:
       You can rotate keys by appending (pushing) a new key to the list of `validation_shared_keys` and removing any superseded keys.
       You must specify `public_keys` or `validation_shared_keys` (or both). The keys in `public_keys` are checked first.
     at_least_one_of:
-      - 'public_key'
-      - 'validation_shared_keys'
+      - public_key
+      - validation_shared_keys
     item_type:
       type: NestedObject
       properties:
-        - name: 'secretVersion'
+        - name: secretVersion
           type: String
           description: |
             The name of the secret version in Secret Manager.

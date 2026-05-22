@@ -12,18 +12,18 @@
 # limitations under the License.
 
 ---
-name: 'Notebooks'
-display_name: 'Cloud AI Notebooks'
-versions:
-  - name: 'ga'
-    base_url: 'https://notebooks.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://notebooks.googleapis.com/v1/'
-scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+name: Notebooks
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+display_name: Cloud AI Notebooks
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://notebooks.googleapis.com/v1/
+  - name: beta
+    base_url: https://notebooks.googleapis.com/v1/

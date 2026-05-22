@@ -13,37 +13,24 @@
 
 ---
 name: MulticastGroupConsumerActivation
-description: Create a multicast group consumer activation in the specified
-  location of the current project.
+description: Create a multicast group consumer activation in the specified location of the current project.
 references:
   guides:
-    'Create Multicast Group Consumer Activation': 'https://docs.cloud.google.com/vpc/docs/multicast/enable-consumer-network#activate-consumer'
-  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupConsumerActivations'
+    Create Multicast Group Consumer Activation: https://docs.cloud.google.com/vpc/docs/multicast/enable-consumer-network#activate-consumer
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupConsumerActivations
 base_url: projects/{{project}}/locations/{{location}}/multicastGroupConsumerActivations
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastGroupConsumerActivations/{{multicast_group_consumer_activation_id}}
 create_url: projects/{{project}}/locations/{{location}}/multicastGroupConsumerActivations?multicastGroupConsumerActivationId={{multicast_group_consumer_activation_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/multicastGroupConsumerActivations/{{multicast_group_consumer_activation_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupConsumerActivations/{{multicast_group_consumer_activation_id}}
 sweeper:
   url_substitutions:
-    - location: "us-central1-b"
-examples:
-  - name: network_services_multicast_group_consumer_activation_basic
-    primary_resource_id: mgca_test
-    vars:
-      network_name: test-network-mgca
-      domain_name: test-domain-mgca
-      domain_activation_name: test-domain-activation-mgca
-      consumer_association_name: test-consumer-association-mgca
-      internal_range_name: test-internal-range-mgca
-      group_range_name: test-group-range-mgca
-      group_range_activation_name: test-mgra-mgca
-      group_consumer_activation_name: test-mgca-mgca
-autogen_async: true
+    - location: us-central1-b
 async:
+  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
@@ -54,11 +41,25 @@ async:
     - create
     - delete
     - update
-  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: TXVsdGljYXN0R3JvdXBDb25zdW1lckFjdGl2YXRpb24=
+autogen_async: true
+samples:
+  - name: network_services_multicast_group_consumer_activation_basic
+    primary_resource_id: mgca_test
+    steps:
+      - name: network_services_multicast_group_consumer_activation_basic
+        resource_id_vars:
+          consumer_association_name: test-consumer-association-mgca
+          domain_activation_name: test-domain-activation-mgca
+          domain_name: test-domain-mgca
+          group_consumer_activation_name: test-mgca-mgca
+          group_range_activation_name: test-mgra-mgca
+          group_range_name: test-group-range-mgca
+          internal_range_name: test-internal-range-mgca
+          network_name: test-network-mgca
 parameters:
   - name: location
     type: String

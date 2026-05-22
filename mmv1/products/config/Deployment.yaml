@@ -12,145 +12,132 @@
 # limitations under the License.
 
 ---
-name: 'Deployment'
+name: Deployment
 description: |
   A group of Google Cloud resources described by a Terraform blueprint.
 references:
-  api: 'https://cloud.google.com/infrastructure-manager/docs/reference/rest/v1/projects.locations.deployments'
+  api: https://cloud.google.com/infrastructure-manager/docs/reference/rest/v1/projects.locations.deployments
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/deployments/{{name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/deployments'
-self_link: 'projects/{{project}}/locations/{{location}}/deployments/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/deployments?deploymentId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/deployments
+self_link: projects/{{project}}/locations/{{location}}/deployments/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/deployments?deploymentId={{name}}
+delete_url: projects/{{project}}/locations/{{location}}/deployments/{{name}}?force={{force_destroy}}
 update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/deployments/{{name}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/deployments/{{name}}'
-delete_url: 'projects/{{project}}/locations/{{location}}/deployments/{{name}}?force={{force_destroy}}'
+  - projects/{{project}}/locations/{{location}}/deployments/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-
+autogen_async: true
+samples:
+  - name: config_deployment_basic
+    exclude_test: true
+    primary_resource_id: default
+    steps:
+      - name: config_deployment_basic
+        resource_id_vars:
+          deployment_name: my-deployment
+          service_account_email: my-service-account@my-project.iam.gserviceaccount.com
 virtual_fields:
-  - name: 'force_destroy'
+  - name: force_destroy
     type: Boolean
     default_value: false
-    description: "If true, deletes the deployment and its nested resources."
-
-examples:
-  - name: 'config_deployment_basic'
-    primary_resource_id: 'default'
-    exclude_test: true # Acceptance tests are handwritten in resource_config_deployment_test.go due to complex prerequisites (IAM, fixtures).
-    vars:
-      deployment_name: 'my-deployment'
-      service_account_email: 'my-service-account@my-project.iam.gserviceaccount.com'
-
+    description: If true, deletes the deployment and its nested resources.
 parameters:
-  - name: 'location'
+  - name: location
     type: String
-    description: "The location for the resource"
+    description: The location for the resource
     url_param_only: true
     required: true
     immutable: true
-
 properties:
-  - name: 'name'
+  - name: name
     type: String
-    description: "The user-specified ID of the deployment."
+    description: The user-specified ID of the deployment.
     url_param_only: true
     required: true
     immutable: true
-
-  - name: 'serviceAccount'
+  - name: serviceAccount
     type: String
-    description: "Required. User-specified Service Account (SA) credentials to be used when actuating resources."
+    description: Required. User-specified Service Account (SA) credentials to be used when actuating resources.
     required: true
-
-  - name: 'terraformBlueprint'
+  - name: terraformBlueprint
     type: NestedObject
-    description: "A bundle of HCL files in a GCS bucket or Git repo."
+    description: A bundle of HCL files in a GCS bucket or Git repo.
     required: true
     properties:
-      - name: 'gcsSource'
+      - name: gcsSource
         type: String
-        description: "URI of a GCS object containing the zipped Terraform blueprint."
-        exactly_one_of: ['gcsSource', 'gitSource']
-      - name: 'gitSource'
+        description: URI of a GCS object containing the zipped Terraform blueprint.
+        exactly_one_of: [gcsSource, gitSource]
+      - name: gitSource
         type: NestedObject
-        description: "Public Git repository containing the blueprint."
-        exactly_one_of: ['gcsSource', 'gitSource']
+        description: Public Git repository containing the blueprint.
+        exactly_one_of: [gcsSource, gitSource]
         properties:
-          - name: 'repo'
+          - name: repo
             type: String
-            description: "Repository URL."
+            description: Repository URL.
             required: true
-          - name: 'directory'
+          - name: directory
             type: String
-            description: "Subdirectory within the repo."
-          - name: 'ref'
+            description: Subdirectory within the repo.
+          - name: ref
             type: String
-            description: "Git reference (branch or tag)."
-      - name: 'inputValues'
+            description: Git reference (branch or tag).
+      - name: inputValues
         type: Map
-        description: "Input variables for the Terraform blueprint."
-        key_name: 'variable_name'
+        description: Input variables for the Terraform blueprint.
+        key_name: variable_name
         value_type:
           type: NestedObject
           properties:
-            - name: 'inputValue'
+            - name: inputValue
               type: String
-              description: "The value of the variable."
+              description: The value of the variable.
               required: true
-              custom_expand: 'templates/terraform/custom_expand/config_input_value.go.tmpl'
-              custom_flatten: 'templates/terraform/custom_flatten/config_input_value.go.tmpl'
-
-  - name: 'labels'
+              custom_expand: templates/terraform/custom_expand/config_input_value.go.tmpl
+              custom_flatten: templates/terraform/custom_flatten/config_input_value.go.tmpl
+  - name: labels
     type: KeyValueLabels
-    description: "Optional. User-defined metadata for the deployment."
-
-  - name: 'annotations'
+    description: Optional. User-defined metadata for the deployment.
+  - name: annotations
     type: KeyValueAnnotations
-    description: "Optional. Arbitrary key-value metadata storage."
-
-  - name: 'tfVersionConstraint'
+    description: Optional. Arbitrary key-value metadata storage.
+  - name: tfVersionConstraint
     type: String
-    description: "Optional constraint on the Terraform version."
-
-  - name: 'artifactsGcsBucket'
+    description: Optional constraint on the Terraform version.
+  - name: artifactsGcsBucket
     type: String
-    description: "Location for Cloud Build logs and artifacts."
-
-  - name: 'workerPool'
+    description: Location for Cloud Build logs and artifacts.
+  - name: workerPool
     type: String
-    description: "Custom Cloud Build worker pool resource name."
-
-  - name: 'importExistingResources'
+    description: Custom Cloud Build worker pool resource name.
+  - name: importExistingResources
     type: Boolean
-    description: "If true, attempts to automatically import resources on 409 conflict."
-
-  - name: 'quotaValidation'
+    description: If true, attempts to automatically import resources on 409 conflict.
+  - name: quotaValidation
     type: Enum
-    description: "Controls quota checks."
+    description: Controls quota checks.
     enum_values:
-      - 'ENABLED'
-      - 'ENFORCED'
-
+      - ENABLED
+      - ENFORCED
   # Output only fields
-  - name: 'state'
+  - name: state
     type: String
-    description: "Output only. Current state of the deployment."
+    description: Output only. Current state of the deployment.
     output: true
-
-  - name: 'latestRevision'
+  - name: latestRevision
     type: String
-    description: "Output only. Revision name most recently applied."
+    description: Output only. Revision name most recently applied.
     output: true
