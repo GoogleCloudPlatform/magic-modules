@@ -1435,26 +1435,13 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		instanceProperties["tags"] = tagsMap
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
-		cicMap, err := tpgresource.ConvertToMap(cic)
-		if err != nil {
-			return fmt.Errorf("Error converting confidentialInstanceConfig: %s", err)
-		}
-		instanceProperties["confidentialInstanceConfig"] = cicMap
+		instanceProperties["confidentialInstanceConfig"] = cic
 	}
 	if sic := expandShieldedVmConfigs(d); sic != nil {
-		// Build manually to preserve false boolean values (ForceSendFields workaround)
-		instanceProperties["shieldedInstanceConfig"] = map[string]interface{}{
-			"enableSecureBoot":          sic.EnableSecureBoot,
-			"enableVtpm":                sic.EnableVtpm,
-			"enableIntegrityMonitoring": sic.EnableIntegrityMonitoring,
-		}
+		instanceProperties["shieldedInstanceConfig"] = sic
 	}
 	if amf := expandAdvancedMachineFeatures(d); amf != nil {
-		amfMap, err := tpgresource.ConvertToMap(amf)
-		if err != nil {
-			return fmt.Errorf("Error converting advancedMachineFeatures: %s", err)
-		}
-		instanceProperties["advancedMachineFeatures"] = amfMap
+		instanceProperties["advancedMachineFeatures"] = amf
 	}
 	if reservationAffinity != nil {
 		raMap, err := tpgresource.ConvertToMap(reservationAffinity)
@@ -1476,11 +1463,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		instanceProperties["partnerMetadata"] = pmIface
 	}
 	if dd := expandDisplayDevice(d); dd != nil {
-		ddMap, err := tpgresource.ConvertToMap(dd)
-		if err != nil {
-			return fmt.Errorf("Error converting displayDevice: %s", err)
-		}
-		instanceProperties["displayDevice"] = ddMap
+		instanceProperties["displayDevice"] = dd
 	}
 	{{- end }}
 	if _, ok := d.GetOk("effective_labels"); ok {
@@ -1764,24 +1747,47 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		}
 	}
 	if instanceTemplate.Properties.ShieldedInstanceConfig != nil {
-		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instanceTemplate.Properties.ShieldedInstanceConfig)); err != nil {
+		sic := instanceTemplate.Properties.ShieldedInstanceConfig
+		shieldedVmConfigMap := map[string]interface{}{
+			"enableSecureBoot":          sic.EnableSecureBoot,
+			"enableVtpm":                sic.EnableVtpm,
+			"enableIntegrityMonitoring": sic.EnableIntegrityMonitoring,
+		}
+		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedVmConfigMap)); err != nil {
 			return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 		}
 	}
 
 	if instanceTemplate.Properties.ConfidentialInstanceConfig != nil {
-		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instanceTemplate.Properties.ConfidentialInstanceConfig)); err != nil {
+		cic := instanceTemplate.Properties.ConfidentialInstanceConfig
+		confidentialConfigMap := map[string]interface{}{
+			"enableConfidentialCompute": cic.EnableConfidentialCompute,
+			"confidentialInstanceType":  cic.ConfidentialInstanceType,
+		}
+		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(confidentialConfigMap)); err != nil {
 			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 		}
 	}
 	if instanceTemplate.Properties.AdvancedMachineFeatures != nil {
-		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instanceTemplate.Properties.AdvancedMachineFeatures)); err != nil {
+		amf := instanceTemplate.Properties.AdvancedMachineFeatures
+		advancedMachineFeaturesMap := map[string]interface{}{
+			"enableNestedVirtualization": amf.EnableNestedVirtualization,
+			"threadsPerCore":             amf.ThreadsPerCore,
+			"turboMode":                  amf.TurboMode,
+			"visibleCoreCount":           amf.VisibleCoreCount,
+			"performanceMonitoringUnit":  amf.PerformanceMonitoringUnit,
+			"enableUefiNetworking":       amf.EnableUefiNetworking,
+		}
+		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(advancedMachineFeaturesMap)); err != nil {
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	if instanceTemplate.Properties.DisplayDevice != nil {
-		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
+		displayDeviceMap := map[string]interface{}{
+			"enableDisplay": instanceTemplate.Properties.DisplayDevice.EnableDisplay,
+		}
+		if err = d.Set("enable_display", flattenEnableDisplay(displayDeviceMap)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}

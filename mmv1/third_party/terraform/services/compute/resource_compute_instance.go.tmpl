@@ -1887,40 +1887,76 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 	}
 
 	// Create the instance information
-	return &compute.Instance{
-		CanIpForward:               d.Get("can_ip_forward").(bool),
-		Description:                d.Get("description").(string),
-		Disks:                      disks,
-		MachineType:                machineTypeUrl,
-		Metadata:                   metadata,
+	inst := &compute.Instance{
+		CanIpForward:             d.Get("can_ip_forward").(bool),
+		Description:              d.Get("description").(string),
+		Disks:                    disks,
+		MachineType:              machineTypeUrl,
+		Metadata:                 metadata,
 		{{- if ne $.TargetVersionName "ga" }}
-		PartnerMetadata:            PartnerMetadata,
+		PartnerMetadata:          PartnerMetadata,
 		{{- end }}
-		Name:                       d.Get("name").(string),
-		NetworkInterfaces:          networkInterfaces,
-		NetworkPerformanceConfig:   networkPerformanceConfig,
-		Tags:                       resourceInstanceTags(d),
-		Params:                     params,
-		Labels:                     tpgresource.ExpandEffectiveLabels(d),
-		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
-		GuestAccelerators:          accels,
-		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
-		Scheduling:                 scheduling,
-		DeletionProtection:         d.Get("deletion_protection").(bool),
-		Hostname:                   d.Get("hostname").(string),
-		ForceSendFields:            []string{"CanIpForward", "DeletionProtection"},
-		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
-		DisplayDevice:              expandDisplayDevice(d),
-		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
-		ReservationAffinity:        reservationAffinity,
-		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
+		Name:                     d.Get("name").(string),
+		NetworkInterfaces:        networkInterfaces,
+		NetworkPerformanceConfig: networkPerformanceConfig,
+		Tags:                     resourceInstanceTags(d),
+		Params:                   params,
+		Labels:                   tpgresource.ExpandEffectiveLabels(d),
+		ServiceAccounts:          expandServiceAccounts(d.Get("service_account").([]interface{})),
+		GuestAccelerators:        accels,
+		MinCpuPlatform:           d.Get("min_cpu_platform").(string),
+		Scheduling:               scheduling,
+		DeletionProtection:       d.Get("deletion_protection").(bool),
+		Hostname:                 d.Get("hostname").(string),
+		ForceSendFields:          []string{"CanIpForward", "DeletionProtection"},
+		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
+		ReservationAffinity:      reservationAffinity,
+		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
+		InstanceEncryptionKey:    expandComputeInstanceEncryptionKey(d),
 		{{- if ne $.TargetVersionName `ga` }}
-		EraseWindowsVssSignature:   d.Get("erase_windows_vss_signature").(bool),
+		EraseWindowsVssSignature: d.Get("erase_windows_vss_signature").(bool),
 		{{- end }}
-	}, nil
+	}
+	if cic := expandConfidentialInstanceConfig(d); cic != nil {
+		inst.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
+			EnableConfidentialCompute: cic["enableConfidentialCompute"].(bool),
+			ConfidentialInstanceType:  cic["confidentialInstanceType"].(string),
+		}
+	}
+	if amf := expandAdvancedMachineFeatures(d); amf != nil {
+		advancedMachineFeatures := &compute.AdvancedMachineFeatures{
+			EnableNestedVirtualization: amf["enableNestedVirtualization"].(bool),
+			EnableUefiNetworking:       amf["enableUefiNetworking"].(bool),
+		}
+		if v, ok := amf["threadsPerCore"]; ok {
+			advancedMachineFeatures.ThreadsPerCore = v.(int64)
+		}
+		if v, ok := amf["turboMode"]; ok {
+			advancedMachineFeatures.TurboMode = v.(string)
+		}
+		if v, ok := amf["visibleCoreCount"]; ok {
+			advancedMachineFeatures.VisibleCoreCount = v.(int64)
+		}
+		if v, ok := amf["performanceMonitoringUnit"]; ok {
+			advancedMachineFeatures.PerformanceMonitoringUnit = v.(string)
+		}
+		inst.AdvancedMachineFeatures = advancedMachineFeatures
+	}
+	if sic := expandShieldedVmConfigs(d); sic != nil {
+		inst.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
+			EnableSecureBoot:          sic["enableSecureBoot"].(bool),
+			EnableVtpm:                sic["enableVtpm"].(bool),
+			EnableIntegrityMonitoring: sic["enableIntegrityMonitoring"].(bool),
+			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		}
+	}
+	if dd := expandDisplayDevice(d); dd != nil {
+		inst.DisplayDevice = &compute.DisplayDevice{
+			EnableDisplay:   dd["enableDisplay"].(bool),
+			ForceSendFields: []string{"EnableDisplay"},
+		}
+	}
+	return inst, nil
 }
 
 var computeInstanceStatus = []string{
@@ -2365,10 +2401,22 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("guest_accelerator", flattenGuestAccelerators(instance.GuestAccelerators)); err != nil {
 		return fmt.Errorf("Error setting guest_accelerator: %s", err)
 	}
-	if err := d.Set("shielded_instance_config", flattenShieldedVmConfig(instance.ShieldedInstanceConfig)); err != nil {
+	var shieldedVmConfigMap map[string]interface{}
+	if instance.ShieldedInstanceConfig != nil {
+		shieldedVmConfigMap = map[string]interface{}{
+			"enableSecureBoot":          instance.ShieldedInstanceConfig.EnableSecureBoot,
+			"enableVtpm":                instance.ShieldedInstanceConfig.EnableVtpm,
+			"enableIntegrityMonitoring": instance.ShieldedInstanceConfig.EnableIntegrityMonitoring,
+		}
+	}
+	if err := d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedVmConfigMap)); err != nil {
 		return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 	}
-	if err := d.Set("enable_display", flattenEnableDisplay(instance.DisplayDevice)); err != nil {
+	var displayDeviceMap map[string]interface{}
+	if instance.DisplayDevice != nil {
+		displayDeviceMap = map[string]interface{}{"enableDisplay": instance.DisplayDevice.EnableDisplay}
+	}
+	if err := d.Set("enable_display", flattenEnableDisplay(displayDeviceMap)); err != nil {
 		return fmt.Errorf("Error setting enable_display: %s", err)
 	}
 	if err := d.Set("cpu_platform", instance.CpuPlatform); err != nil {
@@ -2407,10 +2455,28 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("current_status", instance.Status); err != nil {
 		return fmt.Errorf("Error setting current_status: %s", err)
 	}
-	if err := d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)); err != nil {
+	var confidentialConfigMap map[string]interface{}
+	if instance.ConfidentialInstanceConfig != nil {
+		confidentialConfigMap = map[string]interface{}{
+			"enableConfidentialCompute": instance.ConfidentialInstanceConfig.EnableConfidentialCompute,
+			"confidentialInstanceType":  instance.ConfidentialInstanceConfig.ConfidentialInstanceType,
+		}
+	}
+	if err := d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(confidentialConfigMap)); err != nil {
 		return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 	}
-	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)); err != nil {
+	var advancedMachineFeaturesMap map[string]interface{}
+	if instance.AdvancedMachineFeatures != nil {
+		advancedMachineFeaturesMap = map[string]interface{}{
+			"enableNestedVirtualization": instance.AdvancedMachineFeatures.EnableNestedVirtualization,
+			"threadsPerCore":             instance.AdvancedMachineFeatures.ThreadsPerCore,
+			"turboMode":                  instance.AdvancedMachineFeatures.TurboMode,
+			"visibleCoreCount":           instance.AdvancedMachineFeatures.VisibleCoreCount,
+			"performanceMonitoringUnit":  instance.AdvancedMachineFeatures.PerformanceMonitoringUnit,
+			"enableUefiNetworking":       instance.AdvancedMachineFeatures.EnableUefiNetworking,
+		}
+	}
+	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(advancedMachineFeaturesMap)); err != nil {
 		return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 	}
 	if d.Get("desired_status") != "" {
@@ -3686,10 +3752,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if d.HasChange("shielded_instance_config") {
 			shieldedVmConfig := expandShieldedVmConfigs(d)
 
-			body, err := tpgresource.ConvertToMap(shieldedVmConfig)
-			if err != nil {
-				return fmt.Errorf("Error converting shielded vm config: %s", err)
-			}
 			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateShieldedInstanceConfig")
 			if err != nil {
 				return fmt.Errorf("Error generating URL: %s", err)
@@ -3700,7 +3762,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				Project:   project,
 				RawURL:    url,
 				UserAgent: userAgent,
-				Body:      body,
+				Body:      shieldedVmConfig,
 			})
 			if err != nil {
 				return fmt.Errorf("Error updating shielded vm config: %s", err)
@@ -3757,7 +3819,27 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 						return fmt.Errorf("Error retrieving instance: %s", err)
 					}
 
-					instance.AdvancedMachineFeatures = expandAdvancedMachineFeatures(d)
+					if amf := expandAdvancedMachineFeatures(d); amf != nil {
+						advancedMachineFeatures := &compute.AdvancedMachineFeatures{
+							EnableNestedVirtualization: amf["enableNestedVirtualization"].(bool),
+							EnableUefiNetworking:       amf["enableUefiNetworking"].(bool),
+						}
+						if v, ok := amf["threadsPerCore"]; ok {
+							advancedMachineFeatures.ThreadsPerCore = v.(int64)
+						}
+						if v, ok := amf["turboMode"]; ok {
+							advancedMachineFeatures.TurboMode = v.(string)
+						}
+						if v, ok := amf["visibleCoreCount"]; ok {
+							advancedMachineFeatures.VisibleCoreCount = v.(int64)
+						}
+						if v, ok := amf["performanceMonitoringUnit"]; ok {
+							advancedMachineFeatures.PerformanceMonitoringUnit = v.(string)
+						}
+						instance.AdvancedMachineFeatures = advancedMachineFeatures
+					} else {
+						instance.AdvancedMachineFeatures = nil
+					}
 
 					op, err := NewClient(config, userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
 					if err != nil {

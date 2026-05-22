@@ -145,28 +145,59 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}
 
 	// Create the instance information
-	return &compute.Instance{
-		CanIpForward:            d.Get("can_ip_forward").(bool),
-		Description:             d.Get("description").(string),
-		Disks:                   disks,
-		MachineType:             machineTypeUrl,
-		Metadata:                metadata,
-		Name:                    d.Get("name").(string),
-		Zone:                    d.Get("zone").(string),
-		NetworkInterfaces:       networkInterfaces,
-		Tags:                    resourceInstanceTags(d),
-		Labels:                  tpgresource.ExpandLabels(d),
-		ServiceAccounts:         expandServiceAccounts(d.Get("service_account").([]interface{})),
-		GuestAccelerators:       accels,
-		MinCpuPlatform:          d.Get("min_cpu_platform").(string),
-		Scheduling:              scheduling,
-		DeletionProtection:      d.Get("deletion_protection").(bool),
-		Hostname:                d.Get("hostname").(string),
-		ForceSendFields:         []string{"CanIpForward", "DeletionProtection"},
-		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
-		DisplayDevice:           expandDisplayDevice(d),
-		AdvancedMachineFeatures: expandAdvancedMachineFeatures(d),
-	}, nil
+	inst := &compute.Instance{
+		CanIpForward:       d.Get("can_ip_forward").(bool),
+		Description:        d.Get("description").(string),
+		Disks:              disks,
+		MachineType:        machineTypeUrl,
+		Metadata:           metadata,
+		Name:               d.Get("name").(string),
+		Zone:               d.Get("zone").(string),
+		NetworkInterfaces:  networkInterfaces,
+		Tags:               resourceInstanceTags(d),
+		Labels:             tpgresource.ExpandLabels(d),
+		ServiceAccounts:    expandServiceAccounts(d.Get("service_account").([]interface{})),
+		GuestAccelerators:  accels,
+		MinCpuPlatform:     d.Get("min_cpu_platform").(string),
+		Scheduling:         scheduling,
+		DeletionProtection: d.Get("deletion_protection").(bool),
+		Hostname:           d.Get("hostname").(string),
+		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
+	}
+	if sic := expandShieldedVmConfigs(d); sic != nil {
+		inst.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
+			EnableSecureBoot:          sic["enableSecureBoot"].(bool),
+			EnableVtpm:                sic["enableVtpm"].(bool),
+			EnableIntegrityMonitoring: sic["enableIntegrityMonitoring"].(bool),
+			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		}
+	}
+	if dd := expandDisplayDevice(d); dd != nil {
+		inst.DisplayDevice = &compute.DisplayDevice{
+			EnableDisplay:   dd["enableDisplay"].(bool),
+			ForceSendFields: []string{"EnableDisplay"},
+		}
+	}
+	if amf := expandAdvancedMachineFeatures(d); amf != nil {
+		advancedMachineFeatures := &compute.AdvancedMachineFeatures{
+			EnableNestedVirtualization: amf["enableNestedVirtualization"].(bool),
+			EnableUefiNetworking:       amf["enableUefiNetworking"].(bool),
+		}
+		if v, ok := amf["threadsPerCore"]; ok {
+			advancedMachineFeatures.ThreadsPerCore = v.(int64)
+		}
+		if v, ok := amf["turboMode"]; ok {
+			advancedMachineFeatures.TurboMode = v.(string)
+		}
+		if v, ok := amf["visibleCoreCount"]; ok {
+			advancedMachineFeatures.VisibleCoreCount = v.(int64)
+		}
+		if v, ok := amf["performanceMonitoringUnit"]; ok {
+			advancedMachineFeatures.PerformanceMonitoringUnit = v.(string)
+		}
+		inst.AdvancedMachineFeatures = advancedMachineFeatures
+	}
+	return inst, nil
 }
 
 func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {

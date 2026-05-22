@@ -83,8 +83,20 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 
 	hclData["scheduling"] = flattenSchedulingTgc(instance.Scheduling)
 	hclData["guest_accelerator"] = flattenGuestAcceleratorsTgc(instance.GuestAccelerators)
-	hclData["shielded_instance_config"] = flattenShieldedVmConfig(instance.ShieldedInstanceConfig)
-	hclData["enable_display"] = flattenEnableDisplay(instance.DisplayDevice)
+	var shieldedVmConfigMap map[string]interface{}
+	if instance.ShieldedInstanceConfig != nil {
+		shieldedVmConfigMap = map[string]interface{}{
+			"enableSecureBoot":          instance.ShieldedInstanceConfig.EnableSecureBoot,
+			"enableVtpm":                instance.ShieldedInstanceConfig.EnableVtpm,
+			"enableIntegrityMonitoring": instance.ShieldedInstanceConfig.EnableIntegrityMonitoring,
+		}
+	}
+	hclData["shielded_instance_config"] = flattenShieldedVmConfig(shieldedVmConfigMap)
+	var displayDeviceMap map[string]interface{}
+	if instance.DisplayDevice != nil {
+		displayDeviceMap = map[string]interface{}{"enableDisplay": instance.DisplayDevice.EnableDisplay}
+	}
+	hclData["enable_display"] = flattenEnableDisplay(displayDeviceMap)
 	hclData["min_cpu_platform"] = instance.MinCpuPlatform
 
 	// Only convert the field when its value is not default false
@@ -95,8 +107,26 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	hclData["name"] = instance.Name
 	hclData["description"] = instance.Description
 	hclData["hostname"] = instance.Hostname
-	hclData["confidential_instance_config"] = flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)
-	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)
+	var confidentialConfigMap map[string]interface{}
+	if instance.ConfidentialInstanceConfig != nil {
+		confidentialConfigMap = map[string]interface{}{
+			"enableConfidentialCompute": instance.ConfidentialInstanceConfig.EnableConfidentialCompute,
+			"confidentialInstanceType":  instance.ConfidentialInstanceConfig.ConfidentialInstanceType,
+		}
+	}
+	hclData["confidential_instance_config"] = flattenConfidentialInstanceConfig(confidentialConfigMap)
+	var advancedMachineFeaturesMap map[string]interface{}
+	if instance.AdvancedMachineFeatures != nil {
+		advancedMachineFeaturesMap = map[string]interface{}{
+			"enableNestedVirtualization": instance.AdvancedMachineFeatures.EnableNestedVirtualization,
+			"threadsPerCore":             instance.AdvancedMachineFeatures.ThreadsPerCore,
+			"turboMode":                  instance.AdvancedMachineFeatures.TurboMode,
+			"visibleCoreCount":           instance.AdvancedMachineFeatures.VisibleCoreCount,
+			"performanceMonitoringUnit":  instance.AdvancedMachineFeatures.PerformanceMonitoringUnit,
+			"enableUefiNetworking":       instance.AdvancedMachineFeatures.EnableUefiNetworking,
+		}
+	}
+	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(advancedMachineFeaturesMap)
 	hclData["reservation_affinity"] = flattenReservationAffinityTgc(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = strings.TrimSuffix(instance.KeyRevocationActionType, "_ON_KEY_REVOCATION")
 	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)
