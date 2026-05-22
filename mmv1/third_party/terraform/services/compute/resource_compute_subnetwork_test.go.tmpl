@@ -445,7 +445,7 @@ func TestAccComputeSubnetwork_secondaryIpRanges_sendEmpty(t *testing.T) {
 func TestAccComputeSubnetwork_secondaryIpv6Ranges(t *testing.T) {
 	t.Parallel()
 
-	var subnetwork compute.Subnetwork
+	var subnetwork map[string]interface{}
 	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	subnetworkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	papName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
