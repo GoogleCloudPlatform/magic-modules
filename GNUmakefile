@@ -111,8 +111,11 @@ tf-oics: mm_binary
 		$(MM_BINARY) --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_args);\
 
 test:
-	cd mmv1; \
-		go test ./...
+	if [ "$(USE_BAZEL)" != "1" ]; then \
+		cd mmv1 && go test ./...; \
+	else \
+		bazel test //...;\
+	fi
 
 validate_environment: check_parameters check_safe_build
 
