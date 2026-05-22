@@ -218,8 +218,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest(t *test
 	})
 }
 
-// Step 1: Create with identity_type=ANY_IDENTITY, operations (storage), method_selectors (wildcard)
-// Covers: identity_type, operations.service_name, method_selectors.method, resources (permission tested in step3 with bigquery)
+// step 1: create
 func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step1(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
@@ -243,8 +242,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 `, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
-// Step 2: Update to identity_type=ANY_USER_ACCOUNT + sources (access_level), roles instead of operations
-// Covers update of: identity_type (changed), sources.access_level, roles (replaces operations)
+// step 2: change identity_type, swap to access_level source and roles
 func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
@@ -278,8 +276,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 `, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
-// Step 3: Update to sources.resource (project), operations with different service + method_selectors
-// Covers update of: sources.resource, operations.service_name (changed), method_selectors.method, method_selectors.permission
+// step 3: switch to project resource source and permission selector
 func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step3(org, policyTitle, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 %s

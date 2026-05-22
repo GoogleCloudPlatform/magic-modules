@@ -217,8 +217,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest(t *testi
 	})
 }
 
-// Step 1: Create with identity_type=ANY_USER_ACCOUNT, operations (storage), method_selectors (wildcard)
-// Covers: identity_type, operations.service_name, method_selectors.method (permission tested in step3 with bigquery)
+// step 1: create
 func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step1(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
@@ -241,8 +240,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 `, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
-// Step 2: Update to identity_type=ANY_SERVICE_ACCOUNT + source_restriction + sources (resource), roles + resources
-// Covers update of: identity_type (changed), source_restriction, sources.resource, resources, roles
+// step 2: update identity_type, add source_restriction/sources/roles/resources
 func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 %s
@@ -265,8 +263,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 `, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber)
 }
 
-// Step 3: Update to sources (access_level) + external_resources + operations (bigquery, permission selector)
-// Covers update of: sources.access_level, external_resources, operations.service_name (changed), method_selectors.permission
+// step 3: switch to access_level source, external_resources, permission selector
 func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step3(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
@@ -294,6 +291,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
     source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
+    resources          = []
     external_resources = ["s3://bucket-update-test"]
     operations {
       service_name = "bigquery.googleapis.com"

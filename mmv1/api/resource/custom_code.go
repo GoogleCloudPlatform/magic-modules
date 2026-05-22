@@ -52,12 +52,6 @@ type CustomCode struct {
 	// can be updated - in that case, use a custom expander.
 	UpdateEncoder string `yaml:"update_encoder,omitempty"`
 
-	// The patch update encoder is used inside PatchUpdateEncoder for
-	// nested_query resources with modify_by_patch. Unlike UpdateEncoder,
-	// this template is inlined (not wrapped in a standalone function)
-	// and has access to PatchUpdateEncoder-scope variables like item and idx.
-	PatchUpdateEncoder string `yaml:"patch_update_encoder,omitempty"`
-
 	// The decoder is the opposite of the encoder - it's called
 	// after the Read succeeds, rather than before Create / Update
 	// are called.  Like with encoders, the decoder should not

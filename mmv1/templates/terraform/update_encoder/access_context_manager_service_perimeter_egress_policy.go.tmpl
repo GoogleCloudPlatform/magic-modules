@@ -1,9 +1,4 @@
-// Enforce API constraints: the Terraform SDK DiffSuppressFunc on certain
-// fields can cause d.Get/d.GetChange to return stale state values even when
-// they have been removed from the config. These checks ensure the PATCH
-// payload complies with the API validation rules.
-//
-// 1. When identityType is not IDENTITY_TYPE_UNSPECIFIED, identities must be empty.
+// API requires identities to be empty when identityType is set.
 if egressFrom, ok := obj["egressFrom"].(map[string]interface{}); ok {
 	if identityType, ok := egressFrom["identityType"].(string); ok {
 		if identityType != "" && identityType != "IDENTITY_TYPE_UNSPECIFIED" {
@@ -11,37 +6,8 @@ if egressFrom, ok := obj["egressFrom"].(map[string]interface{}); ok {
 		}
 	}
 }
-// 2. resources and external_resources are mutually exclusive in egressTo.
-if egressTo, ok := obj["egressTo"].(map[string]interface{}); ok {
-	hasResources := false
-	hasExternalResources := false
-	if r, ok := egressTo["resources"]; ok {
-		if rs, ok := r.([]interface{}); ok && len(rs) > 0 {
-			hasResources = true
-		}
-	}
-	if er, ok := egressTo["externalResources"]; ok {
-		if ers, ok := er.([]interface{}); ok && len(ers) > 0 {
-			hasExternalResources = true
-		}
-	}
-	if hasResources && hasExternalResources {
-		if itemEgressTo, ok := item["egressTo"].(map[string]interface{}); ok {
-			itemResources, _ := itemEgressTo["resources"].([]interface{})
-			objResources, _ := egressTo["resources"].([]interface{})
-			itemExtRes, _ := itemEgressTo["externalResources"].([]interface{})
-			objExtRes, _ := egressTo["externalResources"].([]interface{})
-			if reflect.DeepEqual(objResources, itemResources) && !reflect.DeepEqual(objExtRes, itemExtRes) {
-				egressTo["resources"] = []interface{}{}
-			} else if reflect.DeepEqual(objExtRes, itemExtRes) && !reflect.DeepEqual(objResources, itemResources) {
-				egressTo["externalResources"] = []interface{}{}
-			}
-		}
-	}
-}
 
-// Sync ResourceData state with corrected obj so that FindNestedObjectInList
-// in the subsequent Read uses up-to-date values for matching.
+// Sync ResourceData so the subsequent Read matches the corrected obj.
 config := meta.(*transport_tpg.Config)
 if egressFromVal, ok := obj["egressFrom"]; ok {
 	flattenedEgressFrom := flattenNestedAccessContextManagerServicePerimeterEgressPolicyEgressFrom(egressFromVal, d, config)
@@ -51,3 +17,5 @@ if egressToVal, ok := obj["egressTo"]; ok {
 	flattenedEgressTo := flattenNestedAccessContextManagerServicePerimeterEgressPolicyEgressTo(egressToVal, d, config)
 	d.Set("egress_to", flattenedEgressTo)
 }
+
+return obj, nil
