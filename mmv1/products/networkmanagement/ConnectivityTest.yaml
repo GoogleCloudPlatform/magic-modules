@@ -21,12 +21,11 @@ references:
   guides:
     Official Documentation: https://cloud.google.com/network-intelligence-center/docs
   api: https://cloud.google.com/network-intelligence-center/docs/connectivity-tests/reference/networkmanagement/rest/v1/projects.locations.global.connectivityTests
+id_format: projects/{{project}}/locations/global/connectivityTests/{{name}}
 base_url: projects/{{project}}/locations/global/connectivityTests
 create_url: projects/{{project}}/locations/global/connectivityTests?testId={{name}}
-update_mask: true
 update_verb: PATCH
-filename_override: connectivity_test_resource
-id_format: projects/{{project}}/locations/global/connectivityTests/{{name}}
+update_mask: true
 timeouts:
   insert_minutes: 5
   update_minutes: 5
@@ -36,26 +35,31 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_async: true
-examples:
+samples:
   - name: network_management_connectivity_test_instances
     primary_resource_id: instance-test
-    vars:
-      dest_instance: dest-vm
-      network_name: conn-test-net
-      primary_resource_name: conn-test-instances
-      source_instance: source-vm
+    steps:
+      - name: network_management_connectivity_test_instances
+        resource_id_vars:
+          dest_instance: dest-vm
+          network_name: conn-test-net
+          primary_resource_name: conn-test-instances
+          source_instance: source-vm
   - name: network_management_connectivity_test_addresses
     primary_resource_id: address-test
-    vars:
-      dest_addr: dest-addr
-      network: connectivity-vpc
-      primary_resource_name: conn-test-addr
-      source_addr: src-addr
+    steps:
+      - name: network_management_connectivity_test_addresses
+        resource_id_vars:
+          dest_addr: dest-addr
+          network: connectivity-vpc
+          primary_resource_name: conn-test-addr
+          source_addr: src-addr
   - name: network_management_connectivity_test_endpoints
     primary_resource_id: endpoints-test
-    vars:
-      primary_resource_name: conn-test-endpoints
+    steps:
+      - name: network_management_connectivity_test_endpoints
+        resource_id_vars:
+          primary_resource_name: conn-test-endpoints
 properties:
   - name: name
     type: String
@@ -254,3 +258,5 @@ properties:
   - name: bypassFirewallChecks
     type: Boolean
     description: Whether the analysis should skip firewall checking. Default value is false.
+autogen_async: true
+filename_override: connectivity_test_resource

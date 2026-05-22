@@ -12,23 +12,22 @@
 # limitations under the License.
 
 ---
-name: 'DataCollector'
+name: DataCollector
 description: |
   A `DataCollector` collects and stores data from the runtime for use in
   Analytics custom reports or API monetization. Data collectors are scoped
   to an Apigee organization.
 references:
   guides:
-    'Creating a data collector': 'https://cloud.google.com/apigee/docs/api-platform/analytics/custom-reports'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.datacollectors'
+    Creating a data collector: https://cloud.google.com/apigee/docs/api-platform/analytics/custom-reports
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.datacollectors
 docs:
 base_url: '{{org_id}}/datacollectors'
 self_link: '{{org_id}}/datacollectors/{{data_collector_id}}'
 create_url: '{{org_id}}/datacollectors?dataCollectorId={{data_collector_id}}'
 update_url: '{{org_id}}/datacollectors/{{data_collector_id}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
-delete_url: '{{org_id}}/datacollectors/{{data_collector_id}}'
 import_format:
   - '{{org_id}}/datacollectors/{{data_collector_id}}'
   - '{{org_id}}/{{data_collector_id}}'
@@ -37,23 +36,29 @@ timeouts:
   update_minutes: 1
   delete_minutes: 1
 custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_data_collector.go.tmpl'
-examples:
-  - name: 'apigee_data_collector_basic'
-    vars:
-      network_name: 'apigee-network'
-      range_name: 'apigee-range'
-      data_collector_id: 'dc_my_data_collector'
+  custom_import: templates/terraform/custom_import/apigee_data_collector.go.tmpl
+samples:
+  - name: apigee_data_collector_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_data_collector_basic_test'
-    primary_resource_id: 'apigee_data_collector'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+    steps:
+      - name: apigee_data_collector_basic
+        resource_id_vars:
+          data_collector_id: dc_my_data_collector
+          network_name: apigee-network
+          range_name: apigee-range
+  - name: apigee_data_collector_basic_test
+    external_providers:
+      - time
+    primary_resource_id: apigee_data_collector
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_data_collector_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee data collector,
@@ -61,7 +66,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'dataCollectorId'
+  - name: dataCollectorId
     type: String
     description: |
       The ID for the data collector. Must begin with `dc_`.
@@ -69,37 +74,38 @@ parameters:
     required: true
     immutable: true
     validation:
-      regex: '^dc_[a-zA-Z0-9_]+$'
+      regex: ^dc_[a-zA-Z0-9_]+$
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the data collector, in the format
       `organizations/{{org_name}}/datacollectors/{{data_collector_id}}`.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A description of the data collector.
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       The type of data this data collector will collect.
     required: true
     immutable: true
     enum_values:
-      - 'BOOLEAN'
-      - 'DATETIME'
-      - 'FLOAT'
-      - 'INTEGER'
-      - 'STRING'
-  - name: 'createdAt'
+      - BOOLEAN
+      - DATETIME
+      - FLOAT
+      - INTEGER
+      - STRING
+  - name: createdAt
     type: String
     description: |
       The time at which the data collector was created in milliseconds since the epoch.
     output: true
-  - name: 'lastModifiedAt'
+  - name: lastModifiedAt
     type: String
     description: |
       The time at which the data collector was last modified in milliseconds since the epoch.
     output: true
+delete_url: '{{org_id}}/datacollectors/{{data_collector_id}}'

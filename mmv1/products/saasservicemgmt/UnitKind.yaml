@@ -14,31 +14,31 @@
 ---
 name: UnitKind
 description: A UnitKind serves as a template or type definition for a group of Units. Units that belong to the same UnitKind are managed together, follow the same release model, and are typically updated together through rollouts.
+min_version: beta
+id_format: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 base_url: projects/{{project}}/locations/{{location}}/unitKinds
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 create_url: projects/{{project}}/locations/{{location}}/unitKinds?unitKindId={{unit_kind_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
-min_version: beta
-examples:
+samples:
   - name: saas_runtime_unit_kind_basic
-    primary_resource_id: "example"
-    min_version: 'beta'
-    vars:
-      saas_name: example-saas
-      cluster_unitkind_name: cluster-unitkind
-      app_unitkind_name: app-unitkind
-      release_name: example-release
-    test_env_vars:
-      project: 'PROJECT_NAME'
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
-autogen_async: false
-autogen_status: VW5pdEtpbmQ=
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    primary_resource_id: example
+    steps:
+      - name: saas_runtime_unit_kind_basic
+        resource_id_vars:
+          app_unitkind_name: app-unitkind
+          cluster_unitkind_name: cluster-unitkind
+          release_name: example-release
+          saas_name: example-saas
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -213,3 +213,5 @@ properties:
       change to the resource made by users must refresh this value.
       Changes to a resource made by the service should refresh this value.
     output: true
+autogen_async: false
+autogen_status: VW5pdEtpbmQ=

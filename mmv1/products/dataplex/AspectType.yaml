@@ -12,25 +12,24 @@
 # limitations under the License.
 
 ---
-name: 'AspectType'
+name: AspectType
 description: |
- An Aspect Type is a template for creating Aspects.
+  An Aspect Type is a template for creating Aspects.
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/aspectTypes?aspectTypeId={{aspect_type_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}
+self_link: projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}
+create_url: projects/{{project}}/locations/{{location}}/aspectTypes?aspectTypeId={{aspect_type_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}'
+  - projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}
 timeouts:
   insert_minutes: 5
   update_minutes: 5
   delete_minutes: 5
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
     timeouts:
@@ -39,93 +38,90 @@ async:
       delete_minutes: 5
   result:
     resource_inside_response: false
-iam_policy:
-  exclude_import_test: true
-  method_name_separator: ':'
-  parent_resource_attribute: 'aspect_type_id'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}'
-    - '{{aspect_type_id}}'
 custom_code:
-examples:
-  - name: 'dataplex_aspect_type_basic'
-    primary_resource_id: 'test_aspect_type_basic'
-    vars:
-      aspect_type_name: 'aspect-type-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_aspect_type_full'
-    primary_resource_id: 'test_aspect_type_full'
-    vars:
-      aspect_type_name: 'aspect-type-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_aspect_type_basic
+    primary_resource_id: test_aspect_type_basic
+    steps:
+      - name: dataplex_aspect_type_basic
+        resource_id_vars:
+          aspect_type_name: aspect-type-basic
+        test_env_vars:
+          project_name: PROJECT_NAME
+  - name: dataplex_aspect_type_full
+    primary_resource_id: test_aspect_type_full
+    steps:
+      - name: dataplex_aspect_type_full
+        resource_id_vars:
+          aspect_type_name: aspect-type-full
+        test_env_vars:
+          project_name: PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location where aspect type will be created in.
     url_param_only: true
     immutable: true
-  - name: 'aspectTypeId'
+  - name: aspectTypeId
     type: String
     description: |
       The aspect type id of the aspect type.
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The relative resource name of the AspectType, of the form: projects/{project_number}/locations/{location_id}/aspectTypes/{aspect_type_id}
     output: true
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       System generated globally unique ID for the AspectType. This ID will be different if the AspectType is deleted and re-created with the same name.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       The time when the AspectType was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       The time when the AspectType was last updated.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description of the AspectType.
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User friendly display name.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       User-defined labels for the AspectType.
-  - name: 'metadataTemplate'
+  - name: metadataTemplate
     type: String
     description: |
       MetadataTemplate of the Aspect.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
     validation:
-      function: 'validation.StringIsJSON'
-  - name: 'transferStatus'
+      function: validation.StringIsJSON
+  - name: transferStatus
     type: Enum
     description: |
       Denotes the transfer status of the Aspect Type. It is unspecified
       for Aspect Type created from Dataplex API.
     output: true
     enum_values:
-      - 'TRANSFER_STATUS_UNSPECIFIED'
-      - 'TRANSFER_STATUS_MIGRATED'
-      - 'TRANSFER_STATUS_TRANSFERRED'
-  - name: 'dataClassification'
+      - TRANSFER_STATUS_UNSPECIFIED
+      - TRANSFER_STATUS_MIGRATED
+      - TRANSFER_STATUS_TRANSFERRED
+  - name: dataClassification
     type: Enum
     description: |
       Classifies the data stored by the aspect.
@@ -133,7 +129,15 @@ properties:
       while `METADATA_AND_DATA` indicates data derived content.
       <br><br>
     enum_values:
-      - 'DATA_CLASSIFICATION_UNSPECIFIED'
-      - 'METADATA_AND_DATA'
+      - DATA_CLASSIFICATION_UNSPECIFIED
+      - METADATA_AND_DATA
     immutable: true
-    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("DATA_CLASSIFICATION_UNSPECIFIED")'
+    diff_suppress_func: tpgresource.EmptyOrDefaultStringSuppress("DATA_CLASSIFICATION_UNSPECIFIED")
+autogen_async: true
+iam_policy:
+  exclude_import_test: true
+  method_name_separator: ':'
+  parent_resource_attribute: aspect_type_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}
+    - '{{aspect_type_id}}'

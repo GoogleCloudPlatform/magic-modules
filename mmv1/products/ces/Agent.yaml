@@ -17,34 +17,40 @@ description: Description
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/agents
 self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/agents/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/agents?agentId={{agent_id}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/agents/{{name}}
-examples:
+samples:
   - name: ces_agent_basic
     primary_resource_id: ces_agent_basic
-    vars:
-      agent_display_name: my-agent
-      agent_id: agent-id
-      app_display_name: my-app
-      app_id: app-id
-      child_agent_id: child-agent-id
-      toolset_id: toolset-id
+    steps:
+      - name: ces_agent_basic
+        resource_id_vars:
+          agent_display_name: my-agent
+          agent_id: agent-id
+          app_display_name: my-app
+          app_id: app-id
+          child_agent_id: child-agent-id
+          toolset_id: toolset-id
   - name: ces_agent_remote_dialogflow_agent
     primary_resource_id: ces_agent_remote_dialogflow_agent
-    vars:
-      agent_display_name: my-agent
-      agent_id: agent-id
-      app_display_name: my-app
-      app_id: app-id
+    steps:
+      - name: ces_agent_remote_dialogflow_agent
+        resource_id_vars:
+          agent_display_name: my-agent
+          agent_id: agent-id
+          app_display_name: my-app
+          app_id: app-id
   - name: ces_agent_remote_dialogflow_agent_interruption
     primary_resource_id: ces_agent_remote_dialogflow_agent_interruption
-    vars:
-      agent_display_name: my-agent
-      agent_id: agent-id
-      app_display_name: my-app
-      app_id: app-id
+    steps:
+      - name: ces_agent_remote_dialogflow_agent_interruption
+        resource_id_vars:
+          agent_display_name: my-agent
+          agent_id: agent-id
+          app_display_name: my-app
+          app_id: app-id
 parameters:
   - name: location
     type: String

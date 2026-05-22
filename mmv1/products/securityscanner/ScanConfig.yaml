@@ -15,27 +15,29 @@
 name: ScanConfig
 description: |
   A ScanConfig resource contains the configurations to launch a scan.
+min_version: beta
 references:
   guides:
     Using Cloud Security Scanner: https://cloud.google.com/security-scanner/docs/scanning
   api: https://cloud.google.com/security-scanner/docs/reference/rest/v1beta/projects.scanConfigs
 base_url: projects/{{project}}/scanConfigs
-min_version: beta
 self_link: '{{name}}'
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
 custom_code:
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
-examples:
+samples:
   - name: scan_config_basic
-    primary_resource_id: scan-config
     min_version: beta
-    vars:
-      address_name: scan-basic-static-ip
-      scan_config_name: terraform-scan-config
+    primary_resource_id: scan-config
+    steps:
+      - name: scan_config_basic
+        resource_id_vars:
+          address_name: scan-basic-static-ip
+          scan_config_name: terraform-scan-config
 properties:
   - name: name
     type: String

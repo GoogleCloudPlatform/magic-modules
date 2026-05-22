@@ -12,13 +12,13 @@
 # limitations under the License.
 
 ---
-name: 'BigqueryReservation'
-legacy_name: 'bigquery'
-display_name: 'BigQuery Reservation'
-versions:
-  - name: 'beta'
-    base_url: 'https://bigqueryreservation.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://bigqueryreservation.googleapis.com/v1/'
+name: BigqueryReservation
+display_name: BigQuery Reservation
+legacy_name: bigquery
 scopes:
-  - 'https://www.googleapis.com/auth/bigquery'
+  - https://www.googleapis.com/auth/bigquery
+versions:
+  - name: beta
+    base_url: https://bigqueryreservation.googleapis.com/v1/
+  - name: ga
+    base_url: https://bigqueryreservation.googleapis.com/v1/

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'Group'
+name: Group
 description: |
   The description of a dynamic collection of monitored resources. Each group
   has a filter that is matched against monitored resources and their
@@ -20,13 +20,13 @@ description: |
   resource, then that resource is a member of that group.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/monitoring/groups/'
-  api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.groups'
+    Official Documentation: https://cloud.google.com/monitoring/groups/
+  api: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.groups
 docs:
 id_format: '{{name}}'
-base_url: 'v3/projects/{{project}}/groups'
-self_link: 'v3/{{name}}'
-mutex: 'stackdriver/groups/{{project}}'
+base_url: v3/projects/{{project}}/groups
+self_link: v3/{{name}}
+mutex: stackdriver/groups/{{project}}
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
@@ -35,59 +35,59 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-error_retry_predicates:
-
-  - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'monitoring_group_basic'
-    primary_resource_id: 'basic'
-    vars:
-      display_name: 'MonitoringGroup'
-    test_vars_overrides:
-      # for backward compatible
-      display_name: '"MonitoringGroup" + randomSuffix'
-  - name: 'monitoring_group_subgroup'
-    primary_resource_id: 'subgroup'
-    vars:
-      display_name: 'MonitoringParentGroup'
-      display_name2: 'MonitoringSubGroup'
-    test_vars_overrides:
-      # for backward compatible
-      display_name: '"MonitoringParentGroup" + randomSuffix'
-      # for backward compatible
-      display_name2: '"MonitoringSubGroup" + randomSuffix'
+  custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
+samples:
+  - name: monitoring_group_basic
+    primary_resource_id: basic
+    steps:
+      - name: monitoring_group_basic
+        resource_id_vars:
+          display_name: MonitoringGroup
+        test_vars_overrides:
+          display_name: '"MonitoringGroup" + randomSuffix'
+  - name: monitoring_group_subgroup
+    primary_resource_id: subgroup
+    steps:
+      - name: monitoring_group_subgroup
+        resource_id_vars:
+          display_name: MonitoringParentGroup
+          display_name2: MonitoringSubGroup
+        test_vars_overrides:
+          display_name: '"MonitoringParentGroup" + randomSuffix'
+          display_name2: '"MonitoringSubGroup" + randomSuffix'
 parameters:
 properties:
-  - name: 'parentName'
+  - name: parentName
     type: String
     # TODO chrisst - turn into self-reference if possible.
     description: |
       The name of the group's parent, if it has one. The format is
       "projects/{project_id_or_number}/groups/{group_id}". For
       groups with no parent, parentName is the empty string, "".
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-  - name: 'name'
+    diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+  - name: name
     type: String
     description: |
       A unique identifier for this group. The format is
       "projects/{project_id_or_number}/groups/{group_id}".
     output: true
-  - name: 'isCluster'
+  - name: isCluster
     type: Boolean
     description: |
       If true, the members of this group are considered to be a
       cluster. The system can perform additional analysis on
       groups that are clusters.
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       A user-assigned name for this group, used only for display
       purposes.
     required: true
-  - name: 'filter'
+  - name: filter
     type: String
     description: |
       The filter used to determine which monitored resources
       belong to this group.
     required: true
+error_retry_predicates:
+  - transport_tpg.IsMonitoringConcurrentEditError

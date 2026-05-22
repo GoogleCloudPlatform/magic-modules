@@ -34,21 +34,25 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_async: true
-include_in_tgc_next: true
-examples:
+samples:
   - name: blockchain_nodes_basic
     primary_resource_id: default_node
-    vars:
-      blockchain_node_id: blockchain_basic_node
+    steps:
+      - name: blockchain_nodes_basic
+        resource_id_vars:
+          blockchain_node_id: blockchain_basic_node
   - name: blockchain_nodes_geth_details
     primary_resource_id: default_node_geth
-    vars:
-      blockchain_node_id: blockchain_geth_node
+    steps:
+      - name: blockchain_nodes_geth_details
+        resource_id_vars:
+          blockchain_node_id: blockchain_geth_node
   - name: blockchain_nodes_beacon_fee_recipient
     primary_resource_id: default_node_beacon_fee
-    vars:
-      blockchain_node_id: beacon_fee_node
+    steps:
+      - name: blockchain_nodes_beacon_fee_recipient
+        resource_id_vars:
+          blockchain_node_id: beacon_fee_node
 parameters:
   - name: location
     type: String
@@ -215,3 +219,5 @@ properties:
     immutable: true
     enum_values:
       - ETHEREUM
+autogen_async: true
+include_in_tgc_next: true

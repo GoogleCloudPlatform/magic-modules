@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'Database'
+name: Database
 description: |
   A Cloud Firestore Database.
 
@@ -23,165 +23,180 @@ description: |
   [here](https://cloud.google.com/firestore/docs/app-engine-requirement).
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/firestore/docs/'
-  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases'
+    Official Documentation: https://cloud.google.com/firestore/docs/
+  api: https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases
 docs:
-id_format: 'projects/{{project}}/databases/{{name}}'
-base_url: 'projects/{{project}}/databases'
-create_url: 'projects/{{project}}/databases?databaseId={{name}}'
-update_verb: 'PATCH'
+id_format: projects/{{project}}/databases/{{name}}
+base_url: projects/{{project}}/databases
+create_url: projects/{{project}}/databases?databaseId={{name}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/databases/{{name}}'
+  - projects/{{project}}/databases/{{name}}
   - '{{project}}/{{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'update']
-  type: 'OpAsync'
+  actions: [create, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/firestore_database.go.tmpl'
-# TODO: remove this default in the 8.0.0 major release
-deletion_policy_default: "ABANDON"
-examples:
-  - name: 'firestore_default_database'
-    primary_resource_id: 'database'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
+  pre_delete: templates/terraform/pre_delete/firestore_database.go.tmpl
+samples:
+  - name: firestore_default_database
+    primary_resource_id: database
     exclude_test: true
-  - name: 'firestore_database'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_database_with_tags'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'database-with-tags-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-      tag_key_id: 'keyname'
-      tag_value_id: 'valuename'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-      # for backward compatible
-      tag_key_id: '"keyname" + randomSuffix'
-      # for backward compatible
-      tag_value_id: '"valuename" + randomSuffix'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
+    steps:
+      - name: firestore_default_database
+        test_env_vars:
+          project_id: PROJECT_NAME
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_database
+    primary_resource_id: database
+    steps:
+      - name: firestore_database
+        resource_id_vars:
+          database_id: database-id
+          delete_protection_state: DELETE_PROTECTION_ENABLED
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_database_with_tags
+    primary_resource_id: database
     exclude_test: true
-  - name: 'firestore_cmek_database'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'cmek-database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-      kms_key_ring_name: 'kms-key-ring'
-      kms_key_name: 'kms-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_default_database_in_datastore_mode'
-    primary_resource_id: 'datastore_mode_database'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
+    steps:
+      - name: firestore_database_with_tags
+        resource_id_vars:
+          database_id: database-with-tags-id
+          delete_protection_state: DELETE_PROTECTION_ENABLED
+          tag_key_id: keyname
+          tag_value_id: valuename
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+          tag_key_id: '"keyname" + randomSuffix'
+          tag_value_id: '"valuename" + randomSuffix'
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_cmek_database
+    primary_resource_id: database
+    steps:
+      - name: firestore_cmek_database
+        resource_id_vars:
+          database_id: cmek-database-id
+          delete_protection_state: DELETE_PROTECTION_ENABLED
+          kms_key_name: kms-key
+          kms_key_ring_name: kms-key-ring
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_default_database_in_datastore_mode
+    primary_resource_id: datastore_mode_database
     exclude_test: true
-  - name: 'firestore_database_in_datastore_mode'
-    primary_resource_id: 'datastore_mode_database'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_cmek_database_in_datastore_mode'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'cmek-database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-      kms_key_ring_name: 'kms-key-ring'
-      kms_key_name: 'kms-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_database_enterprise'
-    primary_resource_id: 'enterprise-db'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_database_data_access'
+    steps:
+      - name: firestore_default_database_in_datastore_mode
+        test_env_vars:
+          project_id: PROJECT_NAME
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_database_in_datastore_mode
+    primary_resource_id: datastore_mode_database
+    steps:
+      - name: firestore_database_in_datastore_mode
+        resource_id_vars:
+          database_id: database-id
+          delete_protection_state: DELETE_PROTECTION_ENABLED
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_cmek_database_in_datastore_mode
+    primary_resource_id: database
+    steps:
+      - name: firestore_cmek_database_in_datastore_mode
+        resource_id_vars:
+          database_id: cmek-database-id
+          delete_protection_state: DELETE_PROTECTION_ENABLED
+          kms_key_name: kms-key
+          kms_key_ring_name: kms-key-ring
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_database_enterprise
+    primary_resource_id: enterprise-db
+    steps:
+      - name: firestore_database_enterprise
+        resource_id_vars:
+          database_id: database-id
+          delete_protection_state: DELETE_PROTECTION_ENABLED
+        test_env_vars:
+          project_id: PROJECT_NAME
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_database_data_access
+    primary_resource_id: firestore_access_database
     exclude_test: true
-    primary_resource_id: 'firestore_access_database'
-    vars:
-      database_id: 'data-access-database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_database_data_access_test'
-    exclude_docs: true
-    primary_resource_id: 'firestore_access_database_test'
-    vars:
-      database_id: 'data-access-database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
+    steps:
+      - name: firestore_database_data_access
+        resource_id_vars:
+          database_id: data-access-database-id
+        test_env_vars:
+          project_id: PROJECT_NAME
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
+  - name: firestore_database_data_access_test
+    primary_resource_id: firestore_access_database_test
+    exclude_basic_doc: true
+    steps:
+      - name: firestore_database_data_access_test
+        resource_id_vars:
+          database_id: data-access-database-id
+        test_env_vars:
+          project_id: PROJECT_NAME
+        ignore_read_extra:
+          - project
+          - etag
+          - deletion_policy
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The ID to use for the database, which will become the final
@@ -192,16 +207,16 @@ properties:
       "(default)" database id is also valid.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
-  - name: 'locationId'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/shortname_to_url.go.tmpl
+  - name: locationId
     type: String
     description: |
       The location of the database. Available locations are listed at
       https://cloud.google.com/firestore/docs/locations.
     required: true
     immutable: true
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       The type of the database.
@@ -209,9 +224,9 @@ properties:
       for information about how to choose.
     required: true
     enum_values:
-      - 'FIRESTORE_NATIVE'
-      - 'DATASTORE_MODE'
-  - name: 'databaseEdition'
+      - FIRESTORE_NATIVE
+      - DATASTORE_MODE
+  - name: databaseEdition
     type: Enum
     description: |
       The database edition. When set to 'ENTERPRISE', then type must be set to
@@ -221,9 +236,9 @@ properties:
     # Picking a database edition is an irreversible decision
     immutable: true
     enum_values:
-      - 'STANDARD'
-      - 'ENTERPRISE'
-  - name: 'firestoreDataAccessMode'
+      - STANDARD
+      - ENTERPRISE
+  - name: firestoreDataAccessMode
     type: Enum
     description: |
       The Firestore API data access mode to use for this database. Can only be
@@ -231,9 +246,9 @@ properties:
     default_from_api: true
     immutable: true
     enum_values:
-      - 'DATA_ACCESS_MODE_ENABLED'
-      - 'DATA_ACCESS_MODE_DISABLED'
-  - name: 'mongodbCompatibleDataAccessMode'
+      - DATA_ACCESS_MODE_ENABLED
+      - DATA_ACCESS_MODE_DISABLED
+  - name: mongodbCompatibleDataAccessMode
     type: Enum
     description: |
       The MongoDB compatible API data access mode to use for this database. Can
@@ -241,9 +256,9 @@ properties:
     default_from_api: true
     immutable: true
     enum_values:
-      - 'DATA_ACCESS_MODE_ENABLED'
-      - 'DATA_ACCESS_MODE_DISABLED'
-  - name: 'realtimeUpdatesMode'
+      - DATA_ACCESS_MODE_ENABLED
+      - DATA_ACCESS_MODE_DISABLED
+  - name: realtimeUpdatesMode
     type: Enum
     description: |
       The Realtime Updates mode to use for this database. Can only be specified
@@ -251,26 +266,26 @@ properties:
     default_from_api: true
     immutable: true
     enum_values:
-      - 'REALTIME_UPDATES_MODE_ENABLED'
-      - 'REALTIME_UPDATES_MODE_DISABLED'
-  - name: 'concurrencyMode'
+      - REALTIME_UPDATES_MODE_ENABLED
+      - REALTIME_UPDATES_MODE_DISABLED
+  - name: concurrencyMode
     type: Enum
     description: |
       The concurrency control mode to use for this database.
     default_from_api: true
     enum_values:
-      - 'OPTIMISTIC'
-      - 'PESSIMISTIC'
-      - 'OPTIMISTIC_WITH_ENTITY_GROUPS'
-  - name: 'appEngineIntegrationMode'
+      - OPTIMISTIC
+      - PESSIMISTIC
+      - OPTIMISTIC_WITH_ENTITY_GROUPS
+  - name: appEngineIntegrationMode
     type: Enum
     description: |
       The App Engine integration mode to use for this database.
     default_from_api: true
     enum_values:
-      - 'ENABLED'
-      - 'DISABLED'
-  - name: 'pointInTimeRecoveryEnablement'
+      - ENABLED
+      - DISABLED
+  - name: pointInTimeRecoveryEnablement
     type: Enum
     description: |
       Whether to enable the PITR feature on this database.
@@ -278,11 +293,11 @@ properties:
       versionRetentionPeriod and earliestVersionTime can be used to determine the supported versions. These include reads against any timestamp within the past hour
       and reads against 1-minute snapshots beyond 1 hour and within 7 days.
       If `POINT_IN_TIME_RECOVERY_DISABLED` is selected, reads are supported on any version of the data from within the past 1 hour.
-    default_value: "POINT_IN_TIME_RECOVERY_DISABLED"
+    default_value: POINT_IN_TIME_RECOVERY_DISABLED
     enum_values:
-      - 'POINT_IN_TIME_RECOVERY_ENABLED'
-      - 'POINT_IN_TIME_RECOVERY_DISABLED'
-  - name: 'keyPrefix'
+      - POINT_IN_TIME_RECOVERY_ENABLED
+      - POINT_IN_TIME_RECOVERY_DISABLED
+  - name: keyPrefix
     type: String
     description: |
       Output only. The keyPrefix for this database.
@@ -290,7 +305,7 @@ properties:
       that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.
       This value may be empty in which case the appid to use for URL-encoded keys is the project_id (eg: foo instead of v~foo).
     output: true
-  - name: 'deleteProtectionState'
+  - name: deleteProtectionState
     type: Enum
     description: |
       State of delete protection for the database.
@@ -299,32 +314,32 @@ properties:
       **Note:** Additionally, to delete this database using `terraform destroy`, `deletion_policy` must be set to `DELETE`.
     default_from_api: true
     enum_values:
-      - 'DELETE_PROTECTION_STATE_UNSPECIFIED'
-      - 'DELETE_PROTECTION_ENABLED'
-      - 'DELETE_PROTECTION_DISABLED'
-  - name: 'etag'
+      - DELETE_PROTECTION_STATE_UNSPECIFIED
+      - DELETE_PROTECTION_ENABLED
+      - DELETE_PROTECTION_DISABLED
+  - name: etag
     type: Fingerprint
     description: |
       Output only. This checksum is computed by the server based on the value of other fields,
       and may be sent on update and delete requests to ensure the client has an
       up-to-date value before proceeding.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       Output only. The timestamp at which this database was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       Output only. The timestamp at which this database was most recently updated.
     output: true
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       Output only. The system-generated UUID4 for this Database.
     output: true
-  - name: 'versionRetentionPeriod'
+  - name: versionRetentionPeriod
     type: String
     description: |
       Output only. The period during which past versions of data are retained in the database.
@@ -332,22 +347,22 @@ properties:
       If the PITR feature is enabled, the retention period is 7 days. Otherwise, the retention period is 1 hour.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
     output: true
-  - name: 'earliestVersionTime'
+  - name: earliestVersionTime
     type: String
     description: |
       Output only. The earliest timestamp at which older versions of the data can be read from the database. See versionRetentionPeriod above; this field is populated with now - versionRetentionPeriod.
       This value is continuously updated, and becomes stale the moment it is queried. If you are using this value to recover data, make sure to account for the time from the moment when the value is queried to the moment when you initiate the recovery.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'cmekConfig'
+  - name: cmekConfig
     type: NestedObject
     description: |
-       The CMEK (Customer Managed Encryption Key) configuration for a Firestore
-       database. If not present, the database is secured by the default Google
-       encryption key.
+      The CMEK (Customer Managed Encryption Key) configuration for a Firestore
+      database. If not present, the database is secured by the default Google
+      encryption key.
     immutable: true
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           The resource ID of a Cloud KMS key. If set, the database created will
@@ -365,19 +380,19 @@ properties:
           https://cloud.google.com/kms/docs/getting-resource-ids#getting_the_id_for_a_key_and_version.
         required: true
         immutable: true
-      - name: 'activeKeyVersion'
+      - name: activeKeyVersion
         type: Array
         description: |
-           Currently in-use KMS key versions (https://cloud.google.com/kms/docs/resource-hierarchy#key_versions).
-           During key rotation (https://cloud.google.com/kms/docs/key-rotation), there can be
-           multiple in-use key versions.
+          Currently in-use KMS key versions (https://cloud.google.com/kms/docs/resource-hierarchy#key_versions).
+          During key rotation (https://cloud.google.com/kms/docs/key-rotation), there can be
+          multiple in-use key versions.
 
-           The expected format is
-           `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{key_version}`.
+          The expected format is
+          `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{key_version}`.
         output: true
         item_type:
           type: String
-  - name: 'tags'
+  - name: tags
     type: KeyValuePairs
     description: |
       Input only. A map of resource manager tags. Resource manager tag keys
@@ -388,3 +403,6 @@ properties:
       the `google_tags_tag_value` resource.
     immutable: true
     ignore_read: true
+autogen_async: true
+# TODO: remove this default in the 8.0.0 major release
+deletion_policy_default: ABANDON

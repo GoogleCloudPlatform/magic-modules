@@ -17,17 +17,18 @@ description: A single question to be scored by the Insights QA feature.
 base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions
 self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions/{{name}}
-autogen_status: UWFRdWVzdGlvbg==
-examples:
+samples:
   - name: contact_center_insights_qa_question_basic
     primary_resource_id: default
-    vars:
-      scorecard_id: qa-scorecard
-      revision_id: qa-revision
+    steps:
+      - name: contact_center_insights_qa_question_basic
+        resource_id_vars:
+          revision_id: qa-revision
+          scorecard_id: qa-scorecard
 parameters:
   - name: location
     type: String
@@ -42,7 +43,6 @@ parameters:
     immutable: true
     url_param_only: true
   - name: revision
-
     type: String
     required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
@@ -109,7 +109,7 @@ properties:
       Format:
       projects/{project}/locations/{location}/qaScorecards/{qa_scorecard}/revisions/{revision}/qaQuestions/{qa_question}
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: order
     type: Integer
     description: Defines the order of the question within its parent scorecard revision.
@@ -191,3 +191,4 @@ properties:
     type: String
     description: The most recent time at which the question was updated.
     output: true
+autogen_status: UWFRdWVzdGlvbg==

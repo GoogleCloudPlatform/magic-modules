@@ -17,16 +17,17 @@ description: A QaScorecard represents a collection of questions to be scored dur
 base_url: projects/{{project}}/locations/{{location}}/qaScorecards
 self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard_id}}
 create_url: projects/{{project}}/locations/{{location}}/qaScorecards?qaScorecardId={{qa_scorecard_id}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard_id}}
-autogen_status: UWFTY29yZWNhcmQ=
-examples:
+samples:
   - name: contact_center_insights_qa_scorecard_basic
     primary_resource_id: default
-    vars:
-      scorecard_id: qa-scorecard
+    steps:
+      - name: contact_center_insights_qa_scorecard_basic
+        resource_id_vars:
+          scorecard_id: qa-scorecard
 parameters:
   - name: location
     type: String
@@ -80,3 +81,4 @@ properties:
     type: String
     description: The most recent time at which the scorecard was updated.
     output: true
+autogen_status: UWFTY29yZWNhcmQ=

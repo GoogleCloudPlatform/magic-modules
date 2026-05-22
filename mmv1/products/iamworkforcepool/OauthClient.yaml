@@ -19,14 +19,14 @@ description: |
   token from Google Cloud.
 references:
   guides:
-    "Managing OAuth clients": "https://cloud.google.com/iam/docs/workforce-manage-oauth-app#manage-clients"
-  api: "https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.oauthClients"
+    Managing OAuth clients: https://cloud.google.com/iam/docs/workforce-manage-oauth-app#manage-clients
+  api: https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.oauthClients
+id_format: projects/{{project}}/locations/{{location}}/oauthClients/{{oauth_client_id}}
 base_url: projects/{{project}}/locations/{{location}}/oauthClients
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/oauthClients/{{oauth_client_id}}
 create_url: projects/{{project}}/locations/{{location}}/oauthClients?oauthClientId={{oauth_client_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/oauthClients/{{oauth_client_id}}
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/oauthClients/{{oauth_client_id}}
 timeouts:
@@ -34,17 +34,18 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: "templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl"
-  test_check_destroy: "templates/terraform/custom_check_destroy/iam_oauth_client.go.tmpl"
-  post_create: "templates/terraform/post_create/sleep.go.tmpl"
-  post_update: "templates/terraform/post_create/sleep.go.tmpl"
-  post_delete: "templates/terraform/post_create/sleep.go.tmpl"
-exclude_sweeper: true
-examples:
-  - name: "iam_oauth_client_full"
-    primary_resource_id: "example"
-    vars:
-      oauth_client_id: "example-client-id"
+  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/iam_oauth_client.go.tmpl
+  post_create: templates/terraform/post_create/sleep.go.tmpl
+  post_update: templates/terraform/post_create/sleep.go.tmpl
+  post_delete: templates/terraform/post_create/sleep.go.tmpl
+samples:
+  - name: iam_oauth_client_full
+    primary_resource_id: example
+    steps:
+      - name: iam_oauth_client_full
+        resource_id_vars:
+          oauth_client_id: example-client-id
 parameters:
   - name: location
     type: String
@@ -151,3 +152,4 @@ properties:
     required: true
     item_type:
       type: String
+exclude_sweeper: true

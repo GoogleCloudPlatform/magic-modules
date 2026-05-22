@@ -16,13 +16,13 @@ name: App
 description: Customer Engagement Suite App
 references:
   api: https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1/projects.locations.apps
+id_format: projects/{{project}}/locations/{{location}}/apps/{{name}}
 base_url: projects/{{project}}/locations/{{location}}/apps
 self_link: projects/{{project}}/locations/{{location}}/apps/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/apps?appId={{app_id}}
-update_mask: true
 update_verb: PATCH
-mutex: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}'
-id_format: projects/{{project}}/locations/{{location}}/apps/{{name}}
+update_mask: true
+mutex: projects/{{project}}/locations/{{location}}/apps/{{app_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{name}}
 async:
@@ -33,19 +33,21 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: QXBw
-autogen_async: true
-examples:
+samples:
   - name: ces_app_basic
     primary_resource_id: ces_app_basic
-    vars:
-      app_id: app-id
-      display_name: my-app
+    steps:
+      - name: ces_app_basic
+        resource_id_vars:
+          app_id: app-id
+          display_name: my-app
   - name: ces_app_ambient_sound_gcs_uri
     primary_resource_id: ces_app_ambient_sound_gcs_uri
-    vars:
-      app_id: app-id
-      display_name: my-app-ambient-sound-gcs-uri
+    steps:
+      - name: ces_app_ambient_sound_gcs_uri
+        resource_id_vars:
+          app_id: app-id
+          display_name: my-app-ambient-sound-gcs-uri
 parameters:
   - name: location
     type: String
@@ -640,3 +642,5 @@ properties:
         description: |-
           The passphrase to decrypt the private key.
           Should be left unset if the private key is not encrypted.
+autogen_async: true
+autogen_status: QXBw

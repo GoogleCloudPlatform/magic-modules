@@ -13,6 +13,7 @@
 
 ---
 name: BackendServiceSignedUrlKey
+kind: compute#BackendServiceSignedUrlKey
 api_resource_type_kind: BackendService
 description: |
   A key for signing Cloud CDN signed URLs for Backend Services.
@@ -21,37 +22,25 @@ references:
     Using Signed URLs: https://cloud.google.com/cdn/docs/using-signed-urls/
   api: https://cloud.google.com/compute/docs/reference/rest/v1/backendServices
 base_url: projects/{{project}}/global/backendServices/{{backend_service}}
-immutable: true
 self_link: projects/{{project}}/global/backendServices/{{backend_service}}
 create_url: projects/{{project}}/global/backendServices/{{backend_service}}/addSignedUrlKey
-delete_url: projects/{{project}}/global/backendServices/{{backend_service}}/deleteSignedUrlKey?keyName={{name}}
-delete_verb: POST
-identity:
-  - name
-nested_query:
-  keys:
-    - cdnPolicy
-    - signedUrlKeyNames
-  is_list_of_ids: true
-  modify_by_patch: false
-kind: compute#BackendServiceSignedUrlKey
 mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
-exclude_import: true
 async:
   operation:
     base_url: '{{op_id}}'
-exclude_tgc: true
-examples:
+samples:
   - name: backend_service_signed_url_key
-    primary_resource_id: backend_key
-    exclude_test: true
-    vars:
-      backend_name: my-backend-service
-      igm_name: my-webservers
-      key_name: test-key
     external_providers:
       - random
       - time
+    primary_resource_id: backend_key
+    exclude_test: true
+    steps:
+      - name: backend_service_signed_url_key
+        resource_id_vars:
+          backend_name: my-backend-service
+          igm_name: my-webservers
+          key_name: test-key
 parameters:
   - name: backendService
     type: ResourceRef
@@ -82,3 +71,16 @@ properties:
     immutable: true
     sensitive: true
     ignore_read: true
+delete_url: projects/{{project}}/global/backendServices/{{backend_service}}/deleteSignedUrlKey?keyName={{name}}
+delete_verb: POST
+exclude_import: true
+exclude_tgc: true
+identity:
+  - name
+immutable: true
+nested_query:
+  keys:
+    - cdnPolicy
+    - signedUrlKeyNames
+  is_list_of_ids: true
+  modify_by_patch: false

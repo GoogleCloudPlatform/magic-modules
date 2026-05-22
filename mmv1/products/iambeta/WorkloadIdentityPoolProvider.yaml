@@ -12,92 +12,110 @@
 # limitations under the License.
 
 ---
-name: 'WorkloadIdentityPoolProvider'
+name: WorkloadIdentityPoolProvider
 description: A configuration for an external identity provider.
 references:
   guides:
-    'Managing workload identity providers': 'https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#managing_workload_identity_providers'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools.providers'
+    Managing workload identity providers: https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#managing_workload_identity_providers
+  api: https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools.providers
 docs:
-base_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers'
-self_link: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}'
-create_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers?workloadIdentityPoolProviderId={{workload_identity_pool_provider_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers
+self_link: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}
+create_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers?workloadIdentityPoolProviderId={{workload_identity_pool_provider_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}'
-include_in_tgc_next: true
+  - projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/iam_workload_identity_pool_provider.go.tmpl'
-  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
-  tgc_decoder: 'templates/tgc_next/decoders/iam_workload_identity_pool_provider.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_provider.go.tmpl'
-examples:
-  - name: 'iam_workload_identity_pool_provider_aws_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_aws_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_github_actions'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_oidc_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_oidc_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_saml_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_saml_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_oidc_upload_key'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_x509_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_x509_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
+  constants: templates/terraform/constants/iam_workload_identity_pool_provider.go.tmpl
+  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
+  tgc_decoder: templates/tgc_next/decoders/iam_workload_identity_pool_provider.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/iam_workload_identity_pool_provider.go.tmpl
+samples:
+  - name: iam_workload_identity_pool_provider_aws_basic
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_aws_basic
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_aws_full
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_aws_full
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_github_actions
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_github_actions
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_oidc_basic
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_oidc_basic
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_oidc_full
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_oidc_full
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_saml_basic
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_saml_basic
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_saml_full
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_saml_full
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_oidc_upload_key
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_oidc_upload_key
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_x509_basic
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_x509_basic
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_x509_full
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_provider_x509_full
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_provider_id: example-prvdr
 parameters:
 properties:
-  - name: 'workloadIdentityPoolId'
+  - name: workloadIdentityPoolId
     type: String
     description: |
       The ID used for the pool, which is the final component of the pool resource name. This
@@ -106,7 +124,7 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'workloadIdentityPoolProviderId'
+  - name: workloadIdentityPoolProviderId
     type: String
     description: |
       The ID for the provider, which becomes the final component of the resource name. This
@@ -116,8 +134,8 @@ properties:
     required: true
     immutable: true
     validation:
-      function: 'ValidateWorkloadIdentityPoolProviderId'
-  - name: 'state'
+      function: ValidateWorkloadIdentityPoolProviderId
+  - name: state
     type: Enum
     description: |
       The state of the provider.
@@ -129,27 +147,27 @@ properties:
         until it is permanently deleted.
     output: true
     enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'ACTIVE'
-      - 'DELETED'
-  - name: 'displayName'
+      - STATE_UNSPECIFIED
+      - ACTIVE
+      - DELETED
+  - name: displayName
     type: String
     description: A display name for the provider. Cannot exceed 32 characters.
-  - name: 'description'
+  - name: description
     type: String
     description: A description for the provider. Cannot exceed 256 characters.
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the provider as
       `projects/{project_number}/locations/global/workloadIdentityPools/{workload_identity_pool_id}/providers/{workload_identity_pool_provider_id}`.
     output: true
-  - name: 'disabled'
+  - name: disabled
     type: Boolean
     description: |
       Whether the provider is disabled. You cannot use a disabled provider to exchange tokens.
       However, existing tokens still grant access.
-  - name: 'attributeMapping'
+  - name: attributeMapping
     type: KeyValuePairs
     description: |
       Maps attributes from authentication credentials issued by an external identity provider
@@ -212,7 +230,7 @@ properties:
           ```
           {"google.subject": "assertion.sub"}
           ```
-  - name: 'attributeCondition'
+  - name: attributeCondition
     type: String
     description: |
       [A Common Expression Language](https://github.com/google/cel-spec) expression, in
@@ -234,37 +252,33 @@ properties:
       ```
       "'admins' in google.groups"
       ```
-  - name: 'aws'
+  - name: aws
     type: NestedObject
-    description:
-      An Amazon Web Services identity provider. Not compatible with the property
-      oidc or saml.
+    description: An Amazon Web Services identity provider. Not compatible with the property oidc or saml.
     exactly_one_of:
-      - 'aws'
-      - 'oidc'
-      - 'saml'
-      - 'x509'
+      - aws
+      - oidc
+      - saml
+      - x509
     properties:
-      - name: 'accountId'
+      - name: accountId
         type: String
         description: The AWS account ID.
         required: true
-  - name: 'oidc'
+  - name: oidc
     type: NestedObject
-    description:
-      An OpenId Connect 1.0 identity provider. Not compatible with the property
-      aws or saml.
+    description: An OpenId Connect 1.0 identity provider. Not compatible with the property aws or saml.
     update_mask_fields:
-      - 'oidc.allowed_audiences'
-      - 'oidc.issuer_uri'
-      - 'oidc.jwks_json'
+      - oidc.allowed_audiences
+      - oidc.issuer_uri
+      - oidc.jwks_json
     exactly_one_of:
-      - 'aws'
-      - 'oidc'
-      - 'saml'
-      - 'x509'
+      - aws
+      - oidc
+      - saml
+      - x509
     properties:
-      - name: 'allowedAudiences'
+      - name: allowedAudiences
         type: Array
         description: |
           Acceptable values for the `aud` field (audience) in the OIDC token. Token exchange
@@ -281,11 +295,11 @@ properties:
           ```
         item_type:
           type: String
-      - name: 'issuerUri'
+      - name: issuerUri
         type: String
         description: The OIDC issuer URL.
         required: true
-      - name: 'jwksJson'
+      - name: jwksJson
         type: String
         description: |
           OIDC JWKs in JSON String format. For details on definition of a
@@ -312,35 +326,33 @@ properties:
           }
           ```
         required: false
-        diff_suppress_func: 'jwksJsonDiffSuppress'
+        diff_suppress_func: jwksJsonDiffSuppress
         is_missing_in_cai: true
-  - name: 'saml'
+  - name: saml
     type: NestedObject
-    description:
-      An SAML 2.0 identity provider. Not compatible with the property
-      oidc or aws.
+    description: An SAML 2.0 identity provider. Not compatible with the property oidc or aws.
     exactly_one_of:
-      - 'aws'
-      - 'oidc'
-      - 'saml'
-      - 'x509'
+      - aws
+      - oidc
+      - saml
+      - x509
     properties:
-      - name: 'idpMetadataXml'
+      - name: idpMetadataXml
         type: String
         description: SAML Identity provider configuration metadata xml doc.
         required: true
-  - name: 'x509'
+  - name: x509
     type: NestedObject
     description: |
       An X.509-type identity provider represents a CA. It is trusted to assert a
       client identity if the client has a certificate that chains up to this CA.
     exactly_one_of:
-      - 'aws'
-      - 'oidc'
-      - 'saml'
-      - 'x509'
+      - aws
+      - oidc
+      - saml
+      - x509
     properties:
-      - name: 'trustStore'
+      - name: trustStore
         type: NestedObject
         description: |
           A Trust store, use this trust store as a wrapper to config the trust
@@ -350,7 +362,7 @@ properties:
           supported.
         required: true
         properties:
-          - name: 'trustAnchors'
+          - name: trustAnchors
             type: Array
             description: |
               List of Trust Anchors to be used while performing validation
@@ -360,12 +372,12 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'pemCertificate'
+                - name: pemCertificate
                   type: String
                   description: |
                     PEM certificate of the PKI used for validation. Must only contain one
                     ca certificate(either root or intermediate cert).
-          - name: 'intermediateCas'
+          - name: intermediateCas
             type: Array
             description: |
               Set of intermediate CA certificates used for building the trust chain to
@@ -374,8 +386,10 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'pemCertificate'
+                - name: pemCertificate
                   type: String
                   description: |
                     PEM certificate of the PKI used for validation. Must only contain one
                     ca certificate(either root or intermediate cert).
+autogen_async: true
+include_in_tgc_next: true

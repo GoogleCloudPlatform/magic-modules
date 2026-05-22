@@ -12,53 +12,17 @@
 # limitations under the License.
 
 ---
-name: 'OdbNetwork'
+name: OdbNetwork
 description: An OdbNetwork resource which represents a private network providing connectivity between OracleDatabase resources and Google Cloud VPC network.
 references:
   guides:
-    'OracleDatabase@Google Cloud': https://cloud.google.com/oracle/database/docs/overview'
-base_url: 'projects/{{project}}/locations/{{location}}/odbNetworks'
-immutable: true
-self_link: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/odbNetworks?odbNetworkId={{odb_network_id}}'
-id_format: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}'
+    OracleDatabase@Google Cloud: https://cloud.google.com/oracle/database/docs/overview'
+id_format: projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}
+base_url: projects/{{project}}/locations/{{location}}/odbNetworks
+self_link: projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}
+create_url: projects/{{project}}/locations/{{location}}/odbNetworks?odbNetworkId={{odb_network_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}'
-custom_code:
-  pre_delete: 'templates/terraform/pre_delete/oracledatabase_odbnetwork.go.tmpl'
-examples:
-  - name: oracledatabase_odbnetwork_basic
-    primary_resource_id: my-odbnetwork
-    vars:
-      project: my-project
-      odb_network_id: my-odbnetwork
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      project: '"oci-terraform-testing-prod"'
-      odb_network_id: 'fmt.Sprintf("tf-test-odbnetwork-%s", acctest.RandString(t, 10))'
-  - name: oracledatabase_odbnetwork_full
-    primary_resource_id: my-odbnetwork
-    vars:
-      project: my-project
-      odb_network_id: my-odbnetwork
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      project: '"oci-terraform-testing-prod"'
-      odb_network_id: 'fmt.Sprintf("tf-test-odbnetwork-full-%s", acctest.RandString(t, 10))'
-virtual_fields:
-  - name: 'deletion_protection'
-    type: Boolean
-    default_value: true
-    description: 'Whether or not to allow Terraform to destroy the instance.
-    Unless this field is set to false in Terraform state, a terraform destroy
-    or terraform apply that would delete the instance will fail.'
-autogen_async: true
+  - projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}
 async:
   operation:
     timeouts:
@@ -74,7 +38,37 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: T2RiTmV0d29yaw==
+custom_code:
+  pre_delete: templates/terraform/pre_delete/oracledatabase_odbnetwork.go.tmpl
+samples:
+  - name: oracledatabase_odbnetwork_basic
+    primary_resource_id: my-odbnetwork
+    steps:
+      - name: oracledatabase_odbnetwork_basic
+        resource_id_vars:
+          deletion_protection: "true"
+          odb_network_id: my-odbnetwork
+          project: my-project
+        test_vars_overrides:
+          deletion_protection: "false"
+          odb_network_id: fmt.Sprintf("tf-test-odbnetwork-%s", acctest.RandString(t, 10))
+          project: '"oci-terraform-testing-prod"'
+        ignore_read_extra:
+          - deletion_protection
+  - name: oracledatabase_odbnetwork_full
+    primary_resource_id: my-odbnetwork
+    steps:
+      - name: oracledatabase_odbnetwork_full
+        resource_id_vars:
+          deletion_protection: "true"
+          odb_network_id: my-odbnetwork
+          project: my-project
+        test_vars_overrides:
+          deletion_protection: "false"
+          odb_network_id: fmt.Sprintf("tf-test-odbnetwork-full-%s", acctest.RandString(t, 10))
+          project: '"oci-terraform-testing-prod"'
+        ignore_read_extra:
+          - deletion_protection
 parameters:
   - name: location
     type: String
@@ -133,3 +127,11 @@ properties:
       TERMINATING
       FAILED
     output: true
+autogen_async: true
+autogen_status: T2RiTmV0d29yaw==
+immutable: true
+virtual_fields:
+  - name: deletion_protection
+    type: Boolean
+    default_value: true
+    description: Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.

@@ -1,0 +1,16 @@
+resource "google_cloud_identity_policy" "{{$.PrimaryResourceId}}" {
+    provider = google-beta
+
+    customer = "customers/C01234567"
+
+    policy_query {
+        org_unit = "orgUnits/03abcxyz"
+        group = "groups/0123456789"
+        query = "true"
+    }
+
+    setting {
+        type = "something.googleapis.com/SettingType"
+	value_json = jsonencode({enabled = true})
+    }
+}

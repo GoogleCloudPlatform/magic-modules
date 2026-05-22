@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'AppRootAgentAssociation'
+name: AppRootAgentAssociation
 api_resource_type_kind: App
 description: |
   Sets the root agent of a CES App after both the app and the agent have
@@ -27,34 +27,34 @@ description: |
   `google_ces_app`. Add `lifecycle { ignore_changes = [root_agent] }` to
   your `google_ces_app` resource to prevent Terraform from detecting drift
   and clearing the field on every plan.
-base_url: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}?updateMask=rootAgent'
-create_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}?updateMask=rootAgent'
-update_verb: 'PATCH'
-delete_url: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}?updateMask=rootAgent'
-delete_verb: 'PATCH'
-id_format: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}/agents/{{agent_id}}'
+id_format: projects/{{project}}/locations/{{location}}/apps/{{app_id}}/agents/{{agent_id}}
+base_url: projects/{{project}}/locations/{{location}}/apps/{{app_id}}
+self_link: projects/{{project}}/locations/{{location}}/apps/{{app_id}}
+create_url: projects/{{project}}/locations/{{location}}/apps/{{app_id}}?updateMask=rootAgent
+create_verb: PATCH
+update_url: projects/{{project}}/locations/{{location}}/apps/{{app_id}}?updateMask=rootAgent
+update_verb: PATCH
+mutex: projects/{{project}}/locations/{{location}}/apps/{{app_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}/agents/{{agent_id}}'
-mutex: 'projects/{{project}}/locations/{{location}}/apps/{{app_id}}'
+  - projects/{{project}}/locations/{{location}}/apps/{{app_id}}/agents/{{agent_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_create: 'templates/terraform/custom_create/ces_app_root_agent_association.go.tmpl'
-  custom_update: 'templates/terraform/custom_update/ces_app_root_agent_association.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/ces_app_root_agent_association.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/ces_app_root_agent_association.go.tmpl'
-  post_read: 'templates/terraform/post_read/ces_app_root_agent_association.go.tmpl'
-examples:
-  - name: 'ces_app_root_agent_association_basic'
-    primary_resource_id: 'association'
-    vars:
-      app_id: 'app-id'
-      agent_id: 'agent-id'
+  custom_create: templates/terraform/custom_create/ces_app_root_agent_association.go.tmpl
+  custom_update: templates/terraform/custom_update/ces_app_root_agent_association.go.tmpl
+  custom_delete: templates/terraform/custom_delete/ces_app_root_agent_association.go.tmpl
+  custom_import: templates/terraform/custom_import/ces_app_root_agent_association.go.tmpl
+  post_read: templates/terraform/post_read/ces_app_root_agent_association.go.tmpl
+samples:
+  - name: ces_app_root_agent_association_basic
+    primary_resource_id: association
+    steps:
+      - name: ces_app_root_agent_association_basic
+        resource_id_vars:
+          agent_id: agent-id
+          app_id: app-id
 parameters:
   - name: location
     type: String
@@ -78,3 +78,5 @@ properties:
       root agent of the app.
     required: true
     ignore_read: true
+delete_url: projects/{{project}}/locations/{{location}}/apps/{{app_id}}?updateMask=rootAgent
+delete_verb: PATCH

@@ -13,6 +13,7 @@
 
 ---
 name: SourceRepresentationInstance
+kind: sql#instance
 api_resource_type_kind: DatabaseInstance
 description: |
   A source representation instance is a Cloud SQL instance that represents
@@ -20,34 +21,31 @@ description: |
   Cloud Console and appears the same as a regular Cloud SQL instance, but it
   contains no data, requires no configuration or maintenance, and does not
   affect billing. You cannot update the source representation instance.
-base_url: projects/{{project}}/instances
-immutable: true
-kind: sql#instance
 id_format: projects/{{project}}/instances/{{name}}
-sweeper:
-  ensure_value:
-    field: settings.deletionProtectionEnabled
-    value: "false"
-    include_full_resource: true
+base_url: projects/{{project}}/instances
 async:
   operation:
     base_url: projects/{{project}}/operations/{{op_id}}
 custom_code:
   encoder: templates/terraform/encoders/sql_source_representation_instance.go.tmpl
   decoder: templates/terraform/decoders/sql_source_representation_instance.go.tmpl
-examples:
+samples:
   - name: sql_source_representation_instance_basic
     primary_resource_id: instance
-    ignore_read_extra:
-      - password
-    vars:
-      name: my-instance
+    steps:
+      - name: sql_source_representation_instance_basic
+        resource_id_vars:
+          name: my-instance
+        ignore_read_extra:
+          - password
   - name: sql_source_representation_instance_postgres
     primary_resource_id: instance
-    ignore_read_extra:
-      - password
-    vars:
-      name: my-instance
+    steps:
+      - name: sql_source_representation_instance_postgres
+        resource_id_vars:
+          name: my-instance
+        ignore_read_extra:
+          - password
 properties:
   - name: name
     type: String
@@ -111,3 +109,9 @@ properties:
         type: String
         description: |
           The private key file for the client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
+immutable: true
+sweeper:
+  ensure_value:
+    field: settings.deletionProtectionEnabled
+    value: "false"
+    include_full_resource: true

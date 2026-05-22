@@ -13,57 +13,58 @@
 
 ---
 name: NodeGroup
+kind: compute#NodeGroup
 description: |
   Represents a NodeGroup resource to manage a group of sole-tenant nodes.
 references:
   guides:
     Sole-Tenant Nodes: https://cloud.google.com/compute/docs/nodes/
   api: https://cloud.google.com/compute/docs/reference/rest/v1/nodeGroups
-base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
-has_self_link: true
-create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME
-update_mask: true
-update_verb: PATCH
-collection_url_key: items
-kind: compute#NodeGroup
 id_format: projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}
-sweeper:
-  url_substitutions:
-    - zone: us-central1-f
-    - zone: us-central1-a
+base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
+create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME
+update_verb: PATCH
+update_mask: true
 async:
   operation:
     base_url: '{{op_id}}'
-include_in_tgc_next: true
 custom_code:
   constants: templates/terraform/constants/compute_node_group.go.tmpl
   pre_create: templates/terraform/pre_create/compute_node_group_url_replace.go.tmpl
-examples:
+samples:
   - name: node_group_basic
     primary_resource_id: nodes
-    vars:
-      group_name: soletenant-group
-      template_name: soletenant-tmpl
+    steps:
+      - name: node_group_basic
+        resource_id_vars:
+          group_name: soletenant-group
+          template_name: soletenant-tmpl
   - name: node_group_maintenance_interval
-    primary_resource_id: nodes
     min_version: beta
-    vars:
-      group_name: soletenant-group
-      template_name: soletenant-tmpl
+    primary_resource_id: nodes
+    steps:
+      - name: node_group_maintenance_interval
+        resource_id_vars:
+          group_name: soletenant-group
+          template_name: soletenant-tmpl
   - name: node_group_autoscaling_policy
     primary_resource_id: nodes
-    vars:
-      group_name: soletenant-group
-      template_name: soletenant-tmpl
+    steps:
+      - name: node_group_autoscaling_policy
+        resource_id_vars:
+          group_name: soletenant-group
+          template_name: soletenant-tmpl
   - name: node_group_share_settings
     primary_resource_id: nodes
-    vars:
-      group_name: soletenant-group
-      guest_project_id: project-id
-      guest_project_name: project-name
-      template_name: soletenant-tmpl
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: node_group_share_settings
+        resource_id_vars:
+          group_name: soletenant-group
+          guest_project_id: project-id
+          guest_project_name: project-name
+          template_name: soletenant-tmpl
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
   - name: zone
     type: ResourceRef
@@ -200,3 +201,10 @@ properties:
       - AS_NEEDED
       - RECURRENT
     default_from_api: true
+collection_url_key: items
+has_self_link: true
+include_in_tgc_next: true
+sweeper:
+  url_substitutions:
+    - zone: us-central1-f
+    - zone: us-central1-a

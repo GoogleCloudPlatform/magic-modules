@@ -12,18 +12,18 @@
 # limitations under the License.
 
 ---
-name: 'Envgroup'
+name: Envgroup
 api_resource_type_kind: EnvironmentGroup
 description: |
   An `Environment group` in Apigee.
 references:
   guides:
-    'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/create'
+    Creating an environment: https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/create
 docs:
 base_url: '{{org_id}}/envgroups'
 self_link: '{{org_id}}/envgroups/{{name}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{org_id}}/envgroups/{{name}}'
@@ -32,35 +32,36 @@ timeouts:
   insert_minutes: 30
   update_minutes: 20
   delete_minutes: 30
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_environment_group.go.tmpl'
-exclude_sweeper: true
-examples:
-  - name: 'apigee_environment_group_basic'
-    vars:
-      envgroup_name: 'my-envgroup'
+  custom_import: templates/terraform/custom_import/apigee_environment_group.go.tmpl
+samples:
+  - name: apigee_environment_group_basic
+    primary_resource_id: ""
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_environment_group_basic_test'
-    primary_resource_id: 'apigee_environment_group'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    # Resource creation race
+    steps:
+      - name: apigee_environment_group_basic
+        resource_id_vars:
+          envgroup_name: my-envgroup
+  - name: apigee_environment_group_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+      - time
+    primary_resource_id: apigee_environment_group
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_environment_group_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee environment group,
@@ -69,16 +70,18 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource ID of the environment group.
     required: true
     immutable: true
-  - name: 'hostnames'
+  - name: hostnames
     type: Array
     description: |
       Hostnames of the environment group.
     required: false
     item_type:
       type: String
+autogen_async: true
+exclude_sweeper: true

@@ -12,8 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'Image'
-kind: 'compute#image'
+name: Image
+kind: compute#image
 description: |
   Represents an Image resource.
 
@@ -33,64 +33,62 @@ description: |
   to create an instance.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/images'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/images'
+    Official Documentation: https://cloud.google.com/compute/docs/images
+  api: https://cloud.google.com/compute/docs/reference/v1/images
 docs:
-base_url: 'projects/{{project}}/global/images'
-has_self_link: true
-immutable: true
+base_url: projects/{{project}}/global/images
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
-iam_policy:
-  allowed_iam_role: 'roles/compute.imageUser'
-  parent_resource_attribute: 'image'
-  iam_conditions_request_type: 'QUERY_PARAM'
-include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'image_basic'
-    primary_resource_id: 'example'
-    vars:
-      disk_name: 'example-disk'
-      image_name: 'example-image'
-  - name: 'image_guest_os'
-    primary_resource_id: 'example'
-    vars:
-      disk_name: 'example-disk'
-      image_name: 'example-image'
-  - name: 'image_basic_storage_location'
-    primary_resource_id: 'example'
-    vars:
-      disk_name: 'example-disk'
-      image_name: 'example-sl-image'
+samples:
+  - name: image_basic
+    primary_resource_id: example
+    steps:
+      - name: image_basic
+        resource_id_vars:
+          disk_name: example-disk
+          image_name: example-image
+  - name: image_guest_os
+    primary_resource_id: example
+    steps:
+      - name: image_guest_os
+        resource_id_vars:
+          disk_name: example-disk
+          image_name: example-image
+  - name: image_basic_storage_location
+    primary_resource_id: example
+    steps:
+      - name: image_basic_storage_location
+        resource_id_vars:
+          disk_name: example-disk
+          image_name: example-sl-image
 parameters:
 properties:
-  - name: 'archiveSizeBytes'
+  - name: archiveSizeBytes
     type: Integer
     description: |
       Size of the image tar.gz archive stored in Google Cloud Storage (in
       bytes).
     output: true
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - name: 'storageLocations'
+  - name: storageLocations
     type: Array
     description: |
       Cloud Storage bucket storage location of the image
@@ -99,14 +97,14 @@ properties:
     default_from_api: true
     item_type:
       type: String
-  - name: 'diskSizeGb'
+  - name: diskSizeGb
     type: Integer
     description: |
       Size of the image when restored onto a persistent disk (in GB).
     # TODO: Build family support.
     # Families use a different API
     default_from_api: true
-  - name: 'family'
+  - name: family
     type: String
     description: |
       The name of the image family to which this image belongs. You can
@@ -114,7 +112,7 @@ properties:
       image name. The image family always returns its latest image that is
       not deprecated. The name of the image family must comply with
       RFC1035.
-  - name: 'guestOsFeatures'
+  - name: guestOsFeatures
     type: Array
     description: |
       A list of features to enable on the guest operating system.
@@ -124,27 +122,27 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'type'
+        - name: type
           type: Enum
           description: |
             The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
           required: true
           enum_values:
-            - 'MULTI_IP_SUBNET'
-            - 'SECURE_BOOT'
-            - 'SEV_CAPABLE'
-            - 'UEFI_COMPATIBLE'
-            - 'VIRTIO_SCSI_MULTIQUEUE'
-            - 'WINDOWS'
-            - 'GVNIC'
-            - 'IDPF'
-            - 'SEV_LIVE_MIGRATABLE'
-            - 'SEV_SNP_CAPABLE'
-            - 'SUSPEND_RESUME_COMPATIBLE'
-            - 'TDX_CAPABLE'
-            - 'SEV_LIVE_MIGRATABLE_V2'
-            - 'SNP_SVSM_CAPABLE'
-  - name: 'imageEncryptionKey'
+            - MULTI_IP_SUBNET
+            - SECURE_BOOT
+            - SEV_CAPABLE
+            - UEFI_COMPATIBLE
+            - VIRTIO_SCSI_MULTIQUEUE
+            - WINDOWS
+            - GVNIC
+            - IDPF
+            - SEV_LIVE_MIGRATABLE
+            - SEV_SNP_CAPABLE
+            - SUSPEND_RESUME_COMPATIBLE
+            - TDX_CAPABLE
+            - SEV_LIVE_MIGRATABLE_V2
+            - SNP_SVSM_CAPABLE
+  - name: imageEncryptionKey
     type: NestedObject
     description: |
       Encrypts the image using a customer-supplied encryption key.
@@ -154,47 +152,47 @@ properties:
       disk from the image)
     immutable: true
     properties:
-      - name: 'kmsKeySelfLink'
+      - name: kmsKeySelfLink
         type: String
         description: |
           The self link of the encryption key that is stored in Google Cloud
           KMS.
         api_name: kmsKeyName
-        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
-      - name: 'kmsKeyServiceAccount'
+        diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+        custom_flatten: templates/terraform/custom_flatten/image_kms_key_name.go.tmpl
+      - name: kmsKeyServiceAccount
         type: String
         description: |
           The service account being used for the encryption request for the
           given KMS key. If absent, the Compute Engine default service
           account is used.
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         ignore_read: true
         sensitive: true
-      - name: 'rsaEncryptedKey'
+      - name: rsaEncryptedKey
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         ignore_read: true
         sensitive: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Labels to apply to this Image.
-    update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
-    update_verb: 'POST'
-  - name: "params"
+    update_url: projects/{{project}}/global/images/{{name}}/setLabels
+    update_verb: POST
+  - name: params
     type: NestedObject
     ignore_read: true
     immutable: true
     description: |
       Additional params passed with the request, but not persisted as part of resource payload.
     properties:
-      - name: "resourceManagerTags"
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the image. Tag keys and values have the
@@ -204,30 +202,30 @@ properties:
           The field is immutable and causes resource replacement when mutated. This field is only
           set at create time and modifying this field after creation will trigger recreation.
           To apply tags to an existing resource, see the google_tags_tag_binding resource.
-        api_name: "resourceManagerTags"
+        api_name: resourceManagerTags
         ignore_read: true
         immutable: true
-  - name: 'labelFingerprint'
+  - name: labelFingerprint
     type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource. Used
       internally during updates.
     output: true
-    update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
-    update_verb: 'POST'
-    key_expander: ''
-  - name: 'licenses'
+    update_url: projects/{{project}}/global/images/{{name}}/setLabels
+    update_verb: POST
+    key_expander: ""
+  - name: licenses
     type: Array
     description: Any applicable license URI.
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'license'
+      name: license
       type: ResourceRef
-      description: 'An applicable license URI'
-      resource: 'License'
-      imports: 'selfLink'
-  - name: 'name'
+      description: An applicable license URI
+      resource: License
+      imports: selfLink
+  - name: name
     type: String
     description: |
       Name of the resource; provided by the client when the resource is
@@ -238,30 +236,30 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the
       last character, which cannot be a dash.
     required: true
-  - name: 'rawDisk'
+  - name: rawDisk
     type: NestedObject
     description: The parameters of the raw disk image.
     ignore_read: true
     properties:
-      - name: 'containerType'
+      - name: containerType
         type: Enum
         description: |
           The format used to encode and transmit the block device, which
           should be TAR. This is just a container and transmission format
           and not a runtime format. Provided by the client when the disk
           image is created.
-        default_value: "TAR"
+        default_value: TAR
         enum_values:
-          - 'TAR'
-      - name: 'sha1'
+          - TAR
+      - name: sha1
         type: String
         description: |
           An optional SHA1 checksum of the disk image before unpackaging.
           This is provided by the client when the disk image is created.
         api_name: sha1Checksum
-        diff_suppress_func: 'tpgresource.Base64DiffSuppress'
+        diff_suppress_func: tpgresource.Base64DiffSuppress
       # TODO: Figure out cross-module ResourceRefs
-      - name: 'source'
+      - name: source
         type: String
         description: |
           The full Google Cloud Storage URL where disk storage is stored
@@ -269,16 +267,16 @@ properties:
           but not both.
         required: true
         is_missing_in_cai: true
-  - name: 'sourceDisk'
+  - name: sourceDisk
     type: ResourceRef
     description: |
       The source disk to create this image based on.
       You must provide either this property or the
       rawDisk.source property but not both to create an image.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Disk'
-    imports: 'selfLink'
-  - name: 'sourceDiskEncryptionKey'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Disk
+    imports: selfLink
+  - name: sourceDiskEncryptionKey
     type: NestedObject
     ignore_read: true
     description: |
@@ -286,37 +284,37 @@ properties:
       the source disk is protected by a customer-supplied encryption key.
     immutable: true
     properties:
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         sensitive: true
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-      - name: 'rsaEncryptedKey'
+      - name: rsaEncryptedKey
         type: String
         sensitive: true
         description: |
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
-      - name: 'kmsKeySelfLink'
+      - name: kmsKeySelfLink
         type: String
         api_name: kmsKeyName
-        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
+        diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+        custom_flatten: templates/terraform/custom_flatten/image_kms_key_name.go.tmpl
         description: |
           The self link of the encryption key used to decrypt this resource. Also called KmsKeyName
           in the cloud console. Your project's Compute Engine System service account
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-      - name: 'kmsKeyServiceAccount'
+      - name: kmsKeyServiceAccount
         type: String
         description: |
           The service account being used for the encryption request for the
           given KMS key. If absent, the Compute Engine default service
           account is used.
-  - name: 'sourceImage'
+  - name: sourceImage
     type: ResourceRef
     description: |
       URL of the source image used to create this image. In order to create an image, you must provide the full or partial
@@ -326,10 +324,10 @@ properties:
       * This property
       * The rawDisk.source URL
       * The sourceDisk URL
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Image'
-    imports: 'selfLink'
-  - name: 'sourceImageEncryptionKey'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Image
+    imports: selfLink
+  - name: sourceImageEncryptionKey
     type: NestedObject
     ignore_read: true
     description: |
@@ -337,37 +335,37 @@ properties:
       the source image is protected by a customer-supplied encryption key.
     immutable: true
     properties:
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         sensitive: true
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-      - name: 'rsaEncryptedKey'
+      - name: rsaEncryptedKey
         type: String
         sensitive: true
         description: |
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
-      - name: 'kmsKeySelfLink'
+      - name: kmsKeySelfLink
         type: String
         api_name: kmsKeyName
-        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
+        diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+        custom_flatten: templates/terraform/custom_flatten/image_kms_key_name.go.tmpl
         description: |
           The self link of the encryption key used to decrypt this resource. Also called KmsKeyName
           in the cloud console. Your project's Compute Engine System service account
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-      - name: 'kmsKeyServiceAccount'
+      - name: kmsKeyServiceAccount
         type: String
         description: |
           The service account being used for the encryption request for the
           given KMS key. If absent, the Compute Engine default service
           account is used.
-  - name: 'sourceSnapshot'
+  - name: sourceSnapshot
     type: ResourceRef
     description: |
       URL of the source snapshot used to create this image.
@@ -379,81 +377,81 @@ properties:
       * The sourceImage URL
       * The rawDisk.source URL
       * The sourceDisk URL
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Snapshot'
-    imports: 'selfLink'
-  - name: 'shieldedInstanceInitialState'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Snapshot
+    imports: selfLink
+  - name: shieldedInstanceInitialState
     type: NestedObject
     description: Set the secure boot keys of shielded instance.
     default_from_api: true
     properties:
-      - name: 'pk'
+      - name: pk
         type: NestedObject
         description: The Platform Key (PK).
         properties:
-          - name: 'content'
+          - name: content
             type: String
             description: |
               The raw content in the secure keys file.
 
               A base64-encoded string.
             required: true
-            diff_suppress_func: 'tpgresource.Base64DiffSuppress'
-          - name: 'fileType'
+            diff_suppress_func: tpgresource.Base64DiffSuppress
+          - name: fileType
             type: String
             description: The file type of source file.
-      - name: 'keks'
+      - name: keks
         type: Array
         description: The Key Exchange Key (KEK).
         item_type:
           type: NestedObject
           properties:
-            - name: 'content'
+            - name: content
               type: String
               description: |
                 The raw content in the secure keys file.
 
                 A base64-encoded string.
               required: true
-              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
-            - name: 'fileType'
+              diff_suppress_func: tpgresource.Base64DiffSuppress
+            - name: fileType
               type: String
               description: The file type of source file.
-      - name: 'dbs'
+      - name: dbs
         type: Array
         description: The Key Database (db).
         item_type:
           type: NestedObject
           properties:
-            - name: 'content'
+            - name: content
               type: String
               description: |
                 The raw content in the secure keys file.
 
                 A base64-encoded string.
               required: true
-              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
-            - name: 'fileType'
+              diff_suppress_func: tpgresource.Base64DiffSuppress
+            - name: fileType
               type: String
               description: The file type of source file.
-      - name: 'dbxs'
+      - name: dbxs
         type: Array
         description: The forbidden key database (dbx).
         item_type:
           type: NestedObject
           properties:
-            - name: 'content'
+            - name: content
               type: String
               description: |
                 The raw content in the secure keys file.
 
                 A base64-encoded string.
               required: true
-              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
-            - name: 'fileType'
+              diff_suppress_func: tpgresource.Base64DiffSuppress
+            - name: fileType
               type: String
               description: The file type of source file.
-  - name: "sourceSnapshotEncryptionKey"
+  - name: sourceSnapshotEncryptionKey
     type: NestedObject
     ignore_read: true
     description: |
@@ -461,33 +459,41 @@ properties:
       the source snapshot is protected by a customer-supplied encryption key.
     immutable: true
     properties:
-      - name: 'rawKey'
+      - name: rawKey
         type: String
         sensitive: true
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-      - name: 'rsaEncryptedKey'
+      - name: rsaEncryptedKey
         type: String
         sensitive: true
         description: |
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
-      - name: 'kmsKeySelfLink'
+      - name: kmsKeySelfLink
         type: String
         api_name: kmsKeyName
-        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
+        diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+        custom_flatten: templates/terraform/custom_flatten/image_kms_key_name.go.tmpl
         description: |
           The self link of the encryption key used to decrypt this resource. Also called KmsKeyName
           in the cloud console. Your project's Compute Engine System service account
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-      - name: 'kmsKeyServiceAccount'
+      - name: kmsKeyServiceAccount
         type: String
         description: |
           The service account being used for the encryption request for the
           given KMS key. If absent, the Compute Engine default service
           account is used.
+collection_url_key: items
+has_self_link: true
+iam_policy:
+  allowed_iam_role: roles/compute.imageUser
+  parent_resource_attribute: image
+  iam_conditions_request_type: QUERY_PARAM
+immutable: true
+include_in_tgc_next: true

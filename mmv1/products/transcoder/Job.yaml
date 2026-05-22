@@ -19,7 +19,6 @@ references:
     Transcoder: https://cloud.google.com/transcoder/docs/
   api: https://cloud.google.com/transcoder/docs/reference/rest/v1/projects.locations.jobs
 base_url: projects/{{project}}/locations/{{location}}/jobs
-immutable: true
 self_link: '{{name}}'
 create_url: projects/{{project}}/locations/{{location}}/jobs
 import_format:
@@ -27,51 +26,61 @@ import_format:
   - '{{name}}'
 custom_code:
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
-examples:
+samples:
   - name: transcoder_job_basic
     primary_resource_id: default
-    ignore_read_extra:
-      - state
-      - end_time
-    vars:
-      bucket_name: transcoder-job
-      job_template_id: example-job-template
+    steps:
+      - name: transcoder_job_basic
+        resource_id_vars:
+          bucket_name: transcoder-job
+          job_template_id: example-job-template
+        ignore_read_extra:
+          - state
+          - end_time
   - name: transcoder_job_pubsub
     primary_resource_id: default
-    ignore_read_extra:
-      - state
-      - end_time
-    vars:
-      bucket_name: transcoder-job
-      job_template_id: example-job-template
-      pub_sub_topic_name: transcoder-notifications
+    steps:
+      - name: transcoder_job_pubsub
+        resource_id_vars:
+          bucket_name: transcoder-job
+          job_template_id: example-job-template
+          pub_sub_topic_name: transcoder-notifications
+        ignore_read_extra:
+          - state
+          - end_time
   - name: transcoder_job_encryptions
-    primary_resource_id: default
     min_version: beta
-    ignore_read_extra:
-      - state
-      - end_time
-    vars:
-      bucket_name: transcoder-job
-      job_template_id: example-job-template
-      secret_manager_secret_id: transcoder-encryption-key
+    primary_resource_id: default
+    steps:
+      - name: transcoder_job_encryptions
+        resource_id_vars:
+          bucket_name: transcoder-job
+          job_template_id: example-job-template
+          secret_manager_secret_id: transcoder-encryption-key
+        ignore_read_extra:
+          - state
+          - end_time
   - name: transcoder_job_overlays
     primary_resource_id: default
-    ignore_read_extra:
-      - state
-      - end_time
-    vars:
-      bucket_name: transcoder-job
-      job_template_id: example-job-template
+    steps:
+      - name: transcoder_job_overlays
+        resource_id_vars:
+          bucket_name: transcoder-job
+          job_template_id: example-job-template
+        ignore_read_extra:
+          - state
+          - end_time
   - name: transcoder_job_manifests
     primary_resource_id: default
-    ignore_read_extra:
-      - state
-      - start_time
-      - end_time
-    vars:
-      bucket_name: transcoder-job
-      job_template_id: example-job-template
+    steps:
+      - name: transcoder_job_manifests
+        resource_id_vars:
+          bucket_name: transcoder-job
+          job_template_id: example-job-template
+        ignore_read_extra:
+          - state
+          - start_time
+          - end_time
 parameters:
   - name: location
     type: String
@@ -558,3 +567,4 @@ properties:
                   required: true
                   description: |
                     The name of the Secret Version containing the encryption key in the following format: projects/{project}/secrets/{secret_id}/versions/{version_number}.
+immutable: true

@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'InstanceGroupMembership'
+name: InstanceGroupMembership
+kind: compute#instanceGroup
 api_resource_type_kind: InstanceGroup
 api_variant_patterns:
-  - 'projects/{project}/zones/{zone}/instanceGroups/{instanceGroup}'
-kind: 'compute#instanceGroup'
+  - projects/{project}/zones/{zone}/instanceGroups/{instanceGroup}
 description: |
   Represents the Instance membership to the Instance Group.
 
@@ -30,79 +30,80 @@ description: |
   with the lifecycle `replace_triggered_by` method, with the passed Instance's ID.
 references:
   guides:
-    'Add instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/addInstances'
-    'Remove instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/removeInstances'
-    'List instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/listInstances'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups'
+    Add instances: https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/addInstances
+    Remove instances: https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/removeInstances
+    List instances: https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/listInstances
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups
 docs:
 id_format: '{{project}}/{{zone}}/{{instance_group}}/{{instance}}'
-base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}'
-self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/listInstances'
-create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/addInstances'
-read_verb: 'POST'
-delete_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/removeInstances'
-delete_verb: 'POST'
-immutable: true
-mutex: 'instanceGroups/{{project}}/zones/{{zone}}/{{instance_group}}'
+base_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}
+self_link: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/listInstances
+create_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/addInstances
+mutex: instanceGroups/{{project}}/zones/{{zone}}/{{instance_group}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-identity:
-  - instance
-nested_query:
-  keys:
-    - items
-  is_list_of_ids: false
-  modify_by_patch: false
 custom_code:
-  encoder: 'templates/terraform/encoders/compute_instance_group_membership.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/compute_instance_group_membership.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/compute_instance_group_membership.go.tmpl'
-exclude_tgc: true
-examples:
-  - name: 'instance_group_membership'
-    vars:
-      network_name: 'network'
-      instance_group_name: 'instance-group'
-      instance_name: 'instance'
-    test_vars_overrides:
-      # for backward compatible
-      network_name: '"network" + randomSuffix'
-      # for backward compatible
-      instance_name: '"instance" + randomSuffix'
+  encoder: templates/terraform/encoders/compute_instance_group_membership.go.tmpl
+  pre_delete: templates/terraform/pre_delete/compute_instance_group_membership.go.tmpl
+  custom_import: templates/terraform/custom_import/compute_instance_group_membership.go.tmpl
+samples:
+  - name: instance_group_membership
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+      - name: instance_group_membership
+        resource_id_vars:
+          instance_group_name: instance-group
+          instance_name: instance
+          network_name: network
+        test_vars_overrides:
+          instance_name: '"instance" + randomSuffix'
+          network_name: '"network" + randomSuffix'
 parameters:
-  - name: 'zone'
+  - name: zone
     type: ResourceRef
-    description: 'A reference to the zone where the instance group resides.'
+    description: A reference to the zone where the instance group resides.
     url_param_only: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Zone'
-    imports: 'name'
-  - name: 'instanceGroup'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Zone
+    imports: name
+  - name: instanceGroup
     type: ResourceRef
     description: |
       Represents an Instance Group resource name that the instance belongs to.
     url_param_only: true
     required: true
     ignore_read: true
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
-    resource: 'InstanceGroup'
-    imports: 'name'
+    diff_suppress_func: tpgresource.CompareResourceNames
+    resource: InstanceGroup
+    imports: name
 properties:
-  - name: 'instance'
+  - name: instance
     type: ResourceRef
-    description: 'An instance being added to the InstanceGroup'
+    description: An instance being added to the InstanceGroup
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Instance'
-    imports: 'selfLink'
+    custom_flatten: templates/terraform/custom_flatten/full_to_relative_path.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Instance
+    imports: selfLink
+delete_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/removeInstances
+delete_verb: POST
+exclude_tgc: true
+identity:
+  - instance
+immutable: true
+nested_query:
+  keys:
+    - items
+  is_list_of_ids: false
+  modify_by_patch: false
+read_verb: POST

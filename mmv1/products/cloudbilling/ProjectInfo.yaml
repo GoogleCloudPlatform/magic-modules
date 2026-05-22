@@ -20,25 +20,25 @@ references:
   guides:
     Enable, disable, or change billing for a project: https://cloud.google.com/billing/docs/how-to/modify-project
   api: https://cloud.google.com/billing/docs/reference/rest/v1/projects
+id_format: projects/{{project}}
 base_url: projects/{{project}}/billingInfo
 create_verb: PUT
-delete_verb: PUT
-id_format: projects/{{project}}
 import_format:
   - projects/{{%project}}
   - '{{%project}}'
-cai_asset_name_format: projects/{{project}}/billingInfo
 custom_code:
   encoder: templates/terraform/encoders/billing_project_info.go.tmpl
   decoder: templates/terraform/decoders/billing_project_info.go.tmpl
   test_check_destroy: templates/terraform/custom_check_destroy/billing_project_info.go.tmpl
-examples:
+samples:
   - name: billing_project_info_basic
     primary_resource_id: default
-    exclude_import_test: true
-    test_env_vars:
-      billing_account: BILLING_ACCT
-      org_id: ORG_ID
+    steps:
+      - name: billing_project_info_basic
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+        exclude_import_test: true
 properties:
   - name: billing_account
     type: String
@@ -47,3 +47,5 @@ properties:
       The ID of the billing account associated with the project, if
       any. Set to empty string to disable billing for the project.
       For example, `"012345-567890-ABCDEF"` or `""`.
+cai_asset_name_format: projects/{{project}}/billingInfo
+delete_verb: PUT

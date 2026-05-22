@@ -12,58 +12,56 @@
 # limitations under the License.
 
 ---
-name: 'TargetSslProxy'
-kind: 'compute#targetSslProxy'
+name: TargetSslProxy
+kind: compute#targetSslProxy
 description: |
   Represents a TargetSslProxy resource, which is used by one or more
   global forwarding rule to route incoming SSL requests to a backend
   service.
 references:
   guides:
-    'Setting Up SSL proxy for Google Cloud Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/targetSslProxies'
+    Setting Up SSL proxy for Google Cloud Load Balancing: https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/
+  api: https://cloud.google.com/compute/docs/reference/v1/targetSslProxies
 docs:
-base_url: 'projects/{{project}}/global/targetSslProxies'
-has_self_link: true
-immutable: true
+base_url: projects/{{project}}/global/targetSslProxies
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
-include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'target_ssl_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      target_ssl_proxy_name: 'test-proxy'
-      ssl_certificate_name: 'default-cert'
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+samples:
+  - name: target_ssl_proxy_basic
+    primary_resource_id: default
+    steps:
+      - name: target_ssl_proxy_basic
+        resource_id_vars:
+          backend_service_name: backend-service
+          health_check_name: health-check
+          ssl_certificate_name: default-cert
+          target_ssl_proxy_name: test-proxy
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     immutable: true
-  - name: 'proxyId'
+  - name: proxyId
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     api_name: id
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -75,59 +73,63 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'proxyHeader'
+  - name: proxyHeader
     type: Enum
     description: |
       Specifies the type of proxy header to append before sending data to
       the backend.
-    update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setProxyHeader'
-    update_verb: 'POST'
-    default_value: "NONE"
+    update_url: projects/{{project}}/global/targetSslProxies/{{name}}/setProxyHeader
+    update_verb: POST
+    default_value: NONE
     enum_values:
-      - 'NONE'
-      - 'PROXY_V1'
-  - name: 'backendService'
+      - NONE
+      - PROXY_V1
+  - name: backendService
     type: ResourceRef
     description: |
       A reference to the BackendService resource.
     api_name: service
     required: true
-    update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setBackendService'
-    update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'BackendService'
-    imports: 'selfLink'
-  - name: 'sslCertificates'
+    update_url: projects/{{project}}/global/targetSslProxies/{{name}}/setBackendService
+    update_verb: POST
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: BackendService
+    imports: selfLink
+  - name: sslCertificates
     type: Array
     description: |
       A list of SslCertificate resources that are used to authenticate
       connections between users and the load balancer. At least one
       SSL certificate must be specified.
-    update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'
-    update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    update_url: projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates
+    update_verb: POST
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'sslCertificate'
+      name: sslCertificate
       type: ResourceRef
-      description: 'The SSL certificates used by this TargetSslProxy'
-      resource: 'SslCertificate'
-      imports: 'selfLink'
-  - name: 'certificateMap'
+      description: The SSL certificates used by this TargetSslProxy
+      resource: SslCertificate
+      imports: selfLink
+  - name: certificateMap
     type: String
     description: |
       A reference to the CertificateMap resource uri that identifies a certificate map
       associated with the given target proxy. This field can only be set for global target proxies.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
-    update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setCertificateMap'
-    update_verb: 'POST'
-  - name: 'sslPolicy'
+    update_url: projects/{{project}}/global/targetSslProxies/{{name}}/setCertificateMap
+    update_verb: POST
+  - name: sslPolicy
     type: ResourceRef
     description: |
       A reference to the SslPolicy resource that will be associated with
       the TargetSslProxy resource. If not set, the TargetSslProxy
       resource will not have any SSL policy configured.
-    update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslPolicy'
-    update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'SslPolicy'
-    imports: 'selfLink'
+    update_url: projects/{{project}}/global/targetSslProxies/{{name}}/setSslPolicy
+    update_verb: POST
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: SslPolicy
+    imports: selfLink
+collection_url_key: items
+has_self_link: true
+immutable: true
+include_in_tgc_next: true

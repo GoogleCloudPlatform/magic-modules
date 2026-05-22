@@ -29,10 +29,10 @@ docs:
 base_url: projects/{{project}}/locations/{{region}}/clusters
 self_link: projects/{{project}}/locations/{{region}}/clusters/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints
-update_url: projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints
-update_mask: true
 create_verb: PATCH
+update_url: projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints
 update_verb: PATCH
+update_mask: true
 timeouts:
   insert_minutes: 60
   update_minutes: 120
@@ -40,51 +40,49 @@ timeouts:
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_async: true
 custom_code:
   custom_delete: templates/terraform/custom_delete/redis_cluster_user_created_connections.go.tmpl
-examples:
+samples:
   - name: redis_cluster_user_created_connections
     primary_resource_id: cluster-user-conn
-    vars:
-      cluster_name: cluster-user-conn
-      forwarding_rule1_network1_name: fwd1-net1
-      forwarding_rule1_network2_name: fwd1-net2
-      forwarding_rule2_network1_name: fwd2-net1
-      forwarding_rule2_network2_name: fwd2-net2
-      ip1_network1_name: ip1-net1
-      ip1_network2_name: ip1-net2
-      ip2_network1_name: ip2-net1
-      ip2_network2_name: ip2-net2
-      network1_name: net1
-      network2_name: network2
-      subnet_network1_name: subnet-net1
-      subnet_network2_name: subnet-net2
-    test_vars_overrides:
-      # for backward compatible
-      network1_name: '"net1" + randomSuffix'
-      # for backward compatible
-      network2_name: '"network2" + randomSuffix'
+    steps:
+      - name: redis_cluster_user_created_connections
+        resource_id_vars:
+          cluster_name: cluster-user-conn
+          forwarding_rule1_network1_name: fwd1-net1
+          forwarding_rule1_network2_name: fwd1-net2
+          forwarding_rule2_network1_name: fwd2-net1
+          forwarding_rule2_network2_name: fwd2-net2
+          ip1_network1_name: ip1-net1
+          ip1_network2_name: ip1-net2
+          ip2_network1_name: ip2-net1
+          ip2_network2_name: ip2-net2
+          network1_name: net1
+          network2_name: network2
+          subnet_network1_name: subnet-net1
+          subnet_network2_name: subnet-net2
+        test_vars_overrides:
+          network1_name: '"net1" + randomSuffix'
+          network2_name: '"network2" + randomSuffix'
   - name: redis_cluster_user_and_auto_created_connections
     primary_resource_id: cluster-user-auto-conn
-    vars:
-      cluster_name: cluster-user-auto-conn
-      forwarding_rule1_network2_name: fwd1-net2
-      forwarding_rule2_network2_name: fwd2-net2
-      ip1_network2_name: ip1-net2
-      ip2_network2_name: ip2-net2
-      network1_name: net1
-      network2_name: network2
-      policy_name: scpolicy
-      subnet_network1_name: subnet-net1
-      subnet_network2_name: subnet-net2
-    test_vars_overrides:
-      # for backward compatible
-      network1_name: '"net1" + randomSuffix'
-      # for backward compatible
-      network2_name: '"network2" + randomSuffix'
-      # for backward compatible
-      policy_name: '"scpolicy" + randomSuffix'
+    steps:
+      - name: redis_cluster_user_and_auto_created_connections
+        resource_id_vars:
+          cluster_name: cluster-user-auto-conn
+          forwarding_rule1_network2_name: fwd1-net2
+          forwarding_rule2_network2_name: fwd2-net2
+          ip1_network2_name: ip1-net2
+          ip2_network2_name: ip2-net2
+          network1_name: net1
+          network2_name: network2
+          policy_name: scpolicy
+          subnet_network1_name: subnet-net1
+          subnet_network2_name: subnet-net2
+        test_vars_overrides:
+          network1_name: '"net1" + randomSuffix'
+          network2_name: '"network2" + randomSuffix'
+          policy_name: '"scpolicy" + randomSuffix'
 parameters:
   - name: name
     type: String
@@ -162,3 +160,4 @@ properties:
                       - CONNECTION_TYPE_READER
                       - CONNECTION_TYPE_PRIMARY
                       - CONNECTION_TYPE_DISCOVERY
+autogen_async: true

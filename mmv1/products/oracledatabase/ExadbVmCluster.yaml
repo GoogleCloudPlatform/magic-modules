@@ -14,76 +14,21 @@
 ---
 name: ExadbVmCluster
 description: Description
+id_format: projects/{{project}}/locations/{{location}}/exadbVmClusters/{{exadb_vm_cluster_id}}
 base_url: projects/{{project}}/locations/{{location}}/exadbVmClusters
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/exadbVmClusters/{{exadb_vm_cluster_id}}
 create_url: projects/{{project}}/locations/{{location}}/exadbVmClusters?exadbVmClusterId={{exadb_vm_cluster_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/exadbVmClusters/{{exadb_vm_cluster_id}}
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/exadbVmClusters/{{exadb_vm_cluster_id}}
-examples:
-  - name: oracledatabase_exadb_vm_cluster_basic
-    primary_resource_id: "my_exadb_vm_cluster"
-    vars:
-      project: "my-project"
-      exadb_vm_cluster_id: "my-instance"
-      exascale_db_storage_vault_id: "my-storage-vault"
-      odb_network: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork"
-      odb_subnet: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet"
-      backup_odb_subnet: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet"
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      "deletion_protection": "false"
-      "project": '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      exadb_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-exadb-vm-cluster-basic-%s", acctest.RandString(t, 10))'
-      exascale_db_storage_vault_id: 'fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-      backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
-  - name: oracledatabase_exadb_vm_cluster_full
-    primary_resource_id: "my_exadb_vm_cluster"
-    vars:
-      project: "my-project"
-      exadb_vm_cluster_id: "my-instance"
-      exascale_db_storage_vault_id: "my-storage-vault"
-      odb_network: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork"
-      odb_subnet: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet"
-      backup_odb_subnet: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet"
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      "deletion_protection": "false"
-      "project": '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      exadb_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-exadb-vm-cluster-basic-%s", acctest.RandString(t, 10))'
-      exascale_db_storage_vault_id: 'fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-      backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
-virtual_fields:
-  - name: "deletion_protection"
-    type: Boolean
-    default_value: true
-    description: "Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail."
-autogen_async: true
 async:
   operation:
     timeouts:
       insert_minutes: 120
       update_minutes: 60
       delete_minutes: 60
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
@@ -93,8 +38,52 @@ async:
     resource_inside_response: true
   include_project: false
 custom_code:
-  pre_delete: "templates/terraform/pre_delete/oracledatabase_exadb_vm_cluster.go.tmpl"
-autogen_status: RXhhZGJWbUNsdXN0ZXI=
+  pre_delete: templates/terraform/pre_delete/oracledatabase_exadb_vm_cluster.go.tmpl
+samples:
+  - name: oracledatabase_exadb_vm_cluster_basic
+    primary_resource_id: my_exadb_vm_cluster
+    steps:
+      - name: oracledatabase_exadb_vm_cluster_basic
+        resource_id_vars:
+          backup_odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet
+          deletion_protection: "true"
+          exadb_vm_cluster_id: my-instance
+          exascale_db_storage_vault_id: my-storage-vault
+          odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          project: my-project
+        test_vars_overrides:
+          backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+          deletion_protection: "false"
+          exadb_vm_cluster_id: fmt.Sprintf("ofake-tf-test-exadb-vm-cluster-basic-%s", acctest.RandString(t, 10))
+          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))
+          odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          project: '"oci-terraform-testing-prod"'
+        ignore_read_extra:
+          - deletion_protection
+  - name: oracledatabase_exadb_vm_cluster_full
+    primary_resource_id: my_exadb_vm_cluster
+    steps:
+      - name: oracledatabase_exadb_vm_cluster_full
+        resource_id_vars:
+          backup_odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet
+          deletion_protection: "true"
+          exadb_vm_cluster_id: my-instance
+          exascale_db_storage_vault_id: my-storage-vault
+          odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          project: my-project
+        test_vars_overrides:
+          backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+          deletion_protection: "false"
+          exadb_vm_cluster_id: fmt.Sprintf("ofake-tf-test-exadb-vm-cluster-basic-%s", acctest.RandString(t, 10))
+          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))
+          odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          project: '"oci-terraform-testing-prod"'
+        ignore_read_extra:
+          - deletion_protection
 parameters:
   - name: location
     type: String
@@ -332,3 +321,10 @@ properties:
               This field is used to calculate the total storage allocation for the
               exadbvmcluster.
             required: true
+autogen_async: true
+autogen_status: RXhhZGJWbUNsdXN0ZXI=
+virtual_fields:
+  - name: deletion_protection
+    type: Boolean
+    default_value: true
+    description: Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.

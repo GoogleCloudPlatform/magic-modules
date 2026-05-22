@@ -16,33 +16,30 @@ name: NativeDashboard
 description: A configuration for a native dashboard within a Google SecOps (Chronicle) instance.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.nativeDashboards'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.nativeDashboards
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards
-self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}'
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards
-id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}'
+update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/nativeDashboards/{{dashboard_id}}
-
-update_mask: true
-update_verb: PATCH
-
-examples:
+samples:
   - name: chronicle_nativedashboard_basic
     primary_resource_id: my_basic_dashboard
-    ignore_read_extra:
-      - "last_viewed_time"
-    vars:
-      dashboard_name: 'dashboard'
-      dashboard_description: 'dashboard_description'
-    test_vars_overrides:
-      # for backward compatible
-      dashboard_name: '"dashboard" + randomSuffix'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
-autogen_status: TmF0aXZlRGFzaGJvYXJk
+    steps:
+      - name: chronicle_nativedashboard_basic
+        resource_id_vars:
+          dashboard_description: dashboard_description
+          dashboard_name: dashboard
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        test_vars_overrides:
+          dashboard_name: '"dashboard" + randomSuffix'
+        ignore_read_extra:
+          - last_viewed_time
 parameters:
   - name: location
     type: String
@@ -56,20 +53,17 @@ parameters:
     immutable: true
     url_param_only: true
     description: The ID of the Chronicle instance.
-
 properties:
   - name: name
     type: String
     output: true
     description: The full resource name of the dashboard.
-
   - name: dashboardId
     type: String
     output: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
     description: The unique ID of the Dashboard.
-
   - name: access
     type: String
     description: |-
@@ -77,17 +71,14 @@ properties:
       Possible values:
       DASHBOARD_PRIVATE
       DASHBOARD_PUBLIC
-
   - name: createTime
     type: String
     output: true
     description: The creation time of the dashboard.
-
   - name: createUserId
     type: String
     output: true
     description: The ID of the user who created the dashboard.
-
   - name: dashboardUserData
     type: NestedObject
     flatten_object: true
@@ -101,7 +92,6 @@ properties:
         type: String
         output: true
         description: The time when this dashboard was last viewed.
-
   - name: definition
     type: NestedObject
     flatten_object: true
@@ -144,7 +134,6 @@ properties:
               item_type:
                 type: String
               description: List of dashboard filter IDs applied to this chart.
-
       - name: filters
         type: Array
         description: Global filters defined for the dashboard.
@@ -187,24 +176,24 @@ properties:
                   - name: filterOperator
                     type: Enum
                     enum_values:
-                      - 'EQUAL'
-                      - 'NOT_EQUAL'
-                      - 'IN'
-                      - 'GREATER_THAN'
-                      - 'GREATER_THAN_OR_EQUAL_TO'
-                      - 'LESS_THAN'
-                      - 'LESS_THAN_OR_EQUAL_TO'
-                      - 'BETWEEN'
-                      - 'PAST'
-                      - 'IS_NULL'
-                      - 'IS_NOT_NULL'
-                      - 'STARTS_WITH'
-                      - 'ENDS_WITH'
-                      - 'DOES_NOT_STARTS_WITH'
-                      - 'DOES_NOT_ENDS_WITH'
-                      - 'NOT_IN'
-                      - 'CONTAINS'
-                      - 'DOES_NOT_CONTAIN'
+                      - EQUAL
+                      - NOT_EQUAL
+                      - IN
+                      - GREATER_THAN
+                      - GREATER_THAN_OR_EQUAL_TO
+                      - LESS_THAN
+                      - LESS_THAN_OR_EQUAL_TO
+                      - BETWEEN
+                      - PAST
+                      - IS_NULL
+                      - IS_NOT_NULL
+                      - STARTS_WITH
+                      - ENDS_WITH
+                      - DOES_NOT_STARTS_WITH
+                      - DOES_NOT_ENDS_WITH
+                      - NOT_IN
+                      - CONTAINS
+                      - DOES_NOT_CONTAIN
                     description: The operator to apply to the field.
             - name: id
               type: String
@@ -219,41 +208,35 @@ properties:
             - name: isStandardTimeRangeFilterEnabled
               type: Boolean
               description: Whether the standard time range filter is currently enabled.
-
       - name: fingerprint
         type: String
         output: true
         description: The server-generated fingerprint of the dashboard definition.
-
   - name: description
     type: String
     description: A description of the dashboard.
-
   - name: displayName
     type: String
     required: true
     description: The display name/title of the dashboard visible to users.
-
   - name: etag
     type: String
     output: true
     description: |-
       Server-computed checksum for optimistic concurrency control,
       sent on update and delete requests.
-
   - name: type
     type: String
     description: |-
       The type of dashboard.
       Possible values:
       CURATED, PRIVATE, PUBLIC, CUSTOM, MARKETPLACE
-
   - name: updateTime
     type: String
     output: true
     description: The time when the dashboard was last edited.
-
   - name: updateUserId
     type: String
     output: true
     description: The ID of the user who last edited the dashboard.
+autogen_status: TmF0aXZlRGFzaGJvYXJk

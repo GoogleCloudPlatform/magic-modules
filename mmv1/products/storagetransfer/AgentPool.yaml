@@ -12,41 +12,41 @@
 # limitations under the License.
 
 ---
-name: 'AgentPool'
+name: AgentPool
 api_resource_type_kind: agentPools
-collection_url_key: agentPools
-description: 'Represents an On-Premises Agent pool.'
+description: Represents an On-Premises Agent pool.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/storage-transfer/docs/on-prem-agent-pools'
-  api: 'https://cloud.google.com/storage-transfer/docs/reference/rest/v1/projects.agentPools'
+    Official Documentation: https://cloud.google.com/storage-transfer/docs/on-prem-agent-pools
+  api: https://cloud.google.com/storage-transfer/docs/reference/rest/v1/projects.agentPools
 docs:
-base_url: 'projects/{{project}}/agentPools'
-self_link: 'projects/{{project}}/agentPools/{{name}}'
-create_url: 'projects/{{project}}/agentPools?agentPoolId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/agentPools
+self_link: projects/{{project}}/agentPools/{{name}}
+create_url: projects/{{project}}/agentPools?agentPoolId={{name}}
+update_verb: PATCH
 update_mask: true
 timeouts:
   insert_minutes: 30
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/agent_pool.go.tmpl'
-  post_create: 'templates/terraform/post_create/agent_pool.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/agent_pool.go.tmpl'
-  post_import: 'templates/terraform/post_import/agent_pool.go.tmpl'
-examples:
-  - name: 'agent_pool_basic'
-    primary_resource_id: 'example'
-    vars:
-      agent-pool-name: 'agent-pool-example'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      # Skip generating this test as the example is covered in resource_storage_transfer_agent_pool_test.go
+  constants: templates/terraform/constants/agent_pool.go.tmpl
+  post_create: templates/terraform/post_create/agent_pool.go.tmpl
+  pre_update: templates/terraform/pre_update/agent_pool.go.tmpl
+  post_import: templates/terraform/post_import/agent_pool.go.tmpl
+samples:
+  - name: agent_pool_basic
+    primary_resource_id: example
     exclude_test: true
+    steps:
+      - name: agent_pool_basic
+        resource_id_vars:
+          agent-pool-name: agent-pool-example
+        test_env_vars:
+          project_id: PROJECT_NAME
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The ID of the agent pool to create.
@@ -62,25 +62,24 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'displayName'
+  - name: displayName
     type: String
-    description: 'Specifies the client-specified AgentPool description.'
-  - name: 'state'
+    description: Specifies the client-specified AgentPool description.
+  - name: state
     type: Enum
-    description: 'Specifies the state of the AgentPool.'
+    description: Specifies the state of the AgentPool.
     output: true
     enum_values:
-      - 'CREATING'
-      - 'CREATED'
-      - 'DELETING'
-  - name: 'bandwidthLimit'
+      - CREATING
+      - CREATED
+      - DELETING
+  - name: bandwidthLimit
     type: NestedObject
     description: |
       Specifies the bandwidth limit details. If this field is unspecified, the default value is set as 'No Limit'.
     properties:
-      - name: 'limitMbps'
+      - name: limitMbps
         type: String
-        description:
-          'Bandwidth rate in megabytes per second, distributed across all the
-          agents in the pool.'
+        description: Bandwidth rate in megabytes per second, distributed across all the agents in the pool.
         required: true
+collection_url_key: agentPools

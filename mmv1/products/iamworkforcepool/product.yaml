@@ -12,13 +12,13 @@
 # limitations under the License.
 
 ---
-name: 'IAMWorkforcePool'
-legacy_name: 'iam'
-display_name: 'Cloud IAM'
-versions:
-  - name: 'beta'
-    base_url: 'https://iam.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://iam.googleapis.com/v1/'
+name: IAMWorkforcePool
+display_name: Cloud IAM
+legacy_name: iam
 scopes:
-  - 'https://www.googleapis.com/auth/iam'
+  - https://www.googleapis.com/auth/iam
+versions:
+  - name: beta
+    base_url: https://iam.googleapis.com/v1/
+  - name: ga
+    base_url: https://iam.googleapis.com/v1/

@@ -12,74 +12,179 @@
 # limitations under the License.
 
 ---
-name: 'PrivateConnection'
+name: PrivateConnection
 description: |
   The PrivateConnection resource is used to establish private connectivity between Datastream and a customer's network.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/datastream/docs/create-a-private-connectivity-configuration'
-  api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.privateConnections'
+    Official Documentation: https://cloud.google.com/datastream/docs/create-a-private-connectivity-configuration
+  api: https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.privateConnections
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
-self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}&force={{create_without_validation}}'
-immutable: true
+id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
+base_url: projects/{{project}}/locations/{{location}}/privateConnections
+self_link: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
+create_url: projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}&force={{create_without_validation}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
-deletion_policy_custom_docs: true
-deletion_policy_default: "FORCE"
+  - projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
 timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-  constants: 'templates/terraform/constants/private_connection.go.tmpl'
-  post_create: 'templates/terraform/post_create/private_connection.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/private_connection.go.tmpl'
-  post_import: 'templates/terraform/post_import/private_connection.go.tmpl'
-  tgc_decoder: 'templates/tgc_next/decoders/datastream_private_connection.go.tmpl'
+  constants: templates/terraform/constants/private_connection.go.tmpl
+  post_create: templates/terraform/post_create/private_connection.go.tmpl
+  pre_delete: templates/terraform/pre_delete/private_connection.go.tmpl
+  post_import: templates/terraform/post_import/private_connection.go.tmpl
+  tgc_decoder: templates/tgc_next/decoders/datastream_private_connection.go.tmpl
+samples:
+  - name: datastream_private_connection_full
+    primary_resource_id: default
+    steps:
+      - name: datastream_private_connection_full
+        resource_id_vars:
+          network_name: my-network
+          private_connection_id: my-connection
+        ignore_read_extra:
+          - deletion_policy
+  - name: datastream_private_connection_force_delete
+    primary_resource_id: default
+    steps:
+      - name: datastream_private_connection_force_delete
+        resource_id_vars:
+          network_name: my-network
+          private_connection_id: my-connection
+        ignore_read_extra:
+          - deletion_policy
+  - name: datastream_private_connection_psc_interface
+    primary_resource_id: default
+    steps:
+      - name: datastream_private_connection_psc_interface
+        resource_id_vars:
+          network_attachment_name: my-network-attachment
+          network_name: my-network
+          private_connection_id: my-connection
+          subnetwork_name: my-subnetwork
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+          project: PROJECT_NAME
+          project_number: PROJECT_NUMBER
+        ignore_read_extra:
+          - deletion_policy
+parameters:
+  - name: privateConnectionId
+    type: String
+    description: The private connectivity identifier.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: create_without_validation
+    type: Boolean
+    description: If set to true, will skip validations.
+    url_param_only: true
+    required: false
+    immutable: true
+    default_value: false
+  - name: location
+    type: String
+    description: |
+      The name of the location this private connection is located in.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: The resource's name.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels.
+  - name: displayName
+    type: String
+    description: Display name.
+    required: true
+  - name: state
+    type: Enum
+    description: |
+      State of the PrivateConnection.
+    output: true
+    enum_values:
+      - CREATING
+      - CREATED
+      - FAILED
+      - DELETING
+      - FAILED_TO_DELETE
+  - name: error
+    type: NestedObject
+    description: |
+      The PrivateConnection error in case of failure.
+    output: true
+    properties:
+      - name: message
+        type: String
+        description: |
+          A message containing more information about the error that occurred.
+      - name: details
+        type: KeyValuePairs
+        description: |
+          A list of messages that carry the error details.
+  - name: vpcPeeringConfig
+    type: NestedObject
+    description: |
+      The VPC Peering configuration is used to create VPC peering
+      between Datastream and the consumer's VPC.
+    exactly_one_of:
+      - vpc_peering_config
+      - psc_interface_config
+    properties:
+      - name: vpc
+        type: String
+        description: |
+          Fully qualified name of the VPC that Datastream will peer to.
+          Format: projects/{project}/global/{networks}/{name}
+        required: true
+      - name: subnet
+        type: String
+        description: |
+          A free subnet for peering. (CIDR of /29)
+        required: true
+  - name: pscInterfaceConfig
+    is_missing_in_cai: true
+    type: NestedObject
+    description: |
+      The PSC Interface configuration is used to create PSC Interface
+      between Datastream and the consumer's PSC.
+    exactly_one_of:
+      - vpc_peering_config
+      - psc_interface_config
+    properties:
+      - name: networkAttachment
+        type: String
+        description: |
+          Fully qualified name of the network attachment that Datastream will connect to.
+          Format: projects/{project}/regions/{region}/networkAttachments/{name}
+
+          To get Datastream project for the accepted list:
+          `gcloud datastream private-connections create [PC ID] --location=[LOCATION] --network-attachment=[NA URI] --validate-only --display-name=[ANY STRING]`
+          Add Datastream project to the attachment accepted list:
+          `gcloud compute network-attachments update [NA URI] --region=[NA region] --producer-accept-list=[TP from prev command]`
+        required: true
+deletion_policy_custom_docs: true
+deletion_policy_default: FORCE
+immutable: true
 include_in_tgc_next: true
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'datastream_private_connection_full'
-    primary_resource_id: 'default'
-    vars:
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-    ignore_read_extra:
-      - 'deletion_policy'
-  - name: 'datastream_private_connection_force_delete'
-    primary_resource_id: 'default'
-    vars:
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-    ignore_read_extra:
-      - 'deletion_policy'
-  - name: 'datastream_private_connection_psc_interface'
-    primary_resource_id: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    vars:
-      private_connection_id: 'my-connection'
-      network_attachment_name: 'my-network-attachment'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork'
-    ignore_read_extra:
-      - 'deletion_policy'
 virtual_fields:
-  - name: 'deletion_policy'
+  - name: deletion_policy
     description: |
       The deletion policy for the private connection. Setting `FORCE` will also delete any child
       routes that belong to this private connection. Setting `DEFAULT` will fail the delete if
@@ -92,104 +197,3 @@ virtual_fields:
       When set to "DELETE", the command will behave as if set to "DEFAULT".
     type: String
     exclude: true
-parameters:
-  - name: 'privateConnectionId'
-    type: String
-    description: |-
-      The private connectivity identifier.
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'create_without_validation'
-    type: Boolean
-    description: |-
-      If set to true, will skip validations.
-    url_param_only: true
-    required: false
-    immutable: true
-    default_value: false
-  - name: 'location'
-    type: String
-    description: |
-      The name of the location this private connection is located in.
-    url_param_only: true
-    required: true
-    immutable: true
-properties:
-  - name: 'name'
-    type: String
-    description: The resource's name.
-    output: true
-  - name: 'labels'
-    type: KeyValueLabels
-    description: Labels.
-  - name: 'displayName'
-    type: String
-    description: Display name.
-    required: true
-  - name: 'state'
-    type: Enum
-    description: |
-      State of the PrivateConnection.
-    output: true
-    enum_values:
-      - 'CREATING'
-      - 'CREATED'
-      - 'FAILED'
-      - 'DELETING'
-      - 'FAILED_TO_DELETE'
-  - name: 'error'
-    type: NestedObject
-    description: |
-      The PrivateConnection error in case of failure.
-    output: true
-    properties:
-      - name: 'message'
-        type: String
-        description: |
-          A message containing more information about the error that occurred.
-      - name: 'details'
-        type: KeyValuePairs
-        description: |
-          A list of messages that carry the error details.
-  - name: 'vpcPeeringConfig'
-    type: NestedObject
-    description: |
-      The VPC Peering configuration is used to create VPC peering
-      between Datastream and the consumer's VPC.
-    exactly_one_of:
-      - 'vpc_peering_config'
-      - 'psc_interface_config'
-    properties:
-      - name: 'vpc'
-        type: String
-        description: |
-          Fully qualified name of the VPC that Datastream will peer to.
-          Format: projects/{project}/global/{networks}/{name}
-        required: true
-      - name: 'subnet'
-        type: String
-        description: |
-          A free subnet for peering. (CIDR of /29)
-        required: true
-  - name: 'pscInterfaceConfig'
-    is_missing_in_cai: true
-    type: NestedObject
-    description: |
-      The PSC Interface configuration is used to create PSC Interface
-      between Datastream and the consumer's PSC.
-    exactly_one_of:
-      - 'vpc_peering_config'
-      - 'psc_interface_config'
-    properties:
-      - name: 'networkAttachment'
-        type: String
-        description: |
-          Fully qualified name of the network attachment that Datastream will connect to.
-          Format: projects/{project}/regions/{region}/networkAttachments/{name}
-
-          To get Datastream project for the accepted list:
-          `gcloud datastream private-connections create [PC ID] --location=[LOCATION] --network-attachment=[NA URI] --validate-only --display-name=[ANY STRING]`
-          Add Datastream project to the attachment accepted list:
-          `gcloud compute network-attachments update [NA URI] --region=[NA region] --producer-accept-list=[TP from prev command]`
-        required: true

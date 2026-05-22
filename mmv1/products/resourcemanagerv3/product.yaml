@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'ResourceManagerV3'
-legacy_name: 'resource_manager'
-display_name: 'Resource Manager'
-versions:
-  - name: 'ga'
-    base_url: 'https://cloudresourcemanager.googleapis.com/v3/'
-scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+name: ResourceManagerV3
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+display_name: Resource Manager
+legacy_name: resource_manager
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://cloudresourcemanager.googleapis.com/v3/

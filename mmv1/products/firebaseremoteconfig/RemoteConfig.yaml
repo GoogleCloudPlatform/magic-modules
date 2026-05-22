@@ -14,25 +14,26 @@
 ---
 name: RemoteConfig
 description: A RemoteConfig represents a Remote Config template.
+references:
+  guides:
+    Remote Config Introduction: https://firebase.google.com/docs/remote-config
+  api: https://firebase.google.com/docs/reference/remote-config/rest/v1/projects/getRemoteConfig
 base_url: projects/{{project}}/remoteConfig
 self_link: projects/{{project}}/remoteConfig
 create_url: projects/{{project}}/remoteConfig
 create_verb: PUT
+exclude_delete: true
 import_format:
   - projects/{{project}}/remoteConfig
-exclude_delete: true
-autogen_status: UmVtb3RlQ29uZmln
-references:
-  guides:
-    'Remote Config Introduction': 'https://firebase.google.com/docs/remote-config'
-  api: 'https://firebase.google.com/docs/reference/remote-config/rest/v1/projects/getRemoteConfig'
-examples:
-  - name: firebase_remote_config_basic
-    primary_resource_id: basic
-    exclude_test: true
 custom_code:
   pre_create: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
   pre_update: templates/terraform/pre_update/firebase_remote_config_remote_config.go.tmpl
+samples:
+  - name: firebase_remote_config_basic
+    primary_resource_id: basic
+    exclude_test: true
+    steps:
+      - name: firebase_remote_config_basic
 properties:
   - name: name
     type: String
@@ -295,3 +296,4 @@ properties:
         description: |-
           The version number of the version's corresponding
           Remote Config template.
+autogen_status: UmVtb3RlQ29uZmln

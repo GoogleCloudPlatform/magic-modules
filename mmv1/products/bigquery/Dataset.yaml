@@ -12,163 +12,156 @@
 # limitations under the License.
 
 ---
-name: 'Dataset'
-kind: 'bigquery#dataset'
+name: Dataset
+kind: bigquery#dataset
 description: |
   Datasets allow you to organize and control access to your tables.
 references:
   guides:
-    'Datasets Intro': 'https://cloud.google.com/bigquery/docs/datasets-intro'
-  api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
+    Datasets Intro: https://cloud.google.com/bigquery/docs/datasets-intro
+  api: https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets
 docs:
   warning: |
     You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
-base_url: 'projects/{{project}}/datasets'
-self_link: 'projects/{{project}}/datasets/{{dataset_id}}'
-has_self_link: true
-create_url: 'projects/{{project}}/datasets?accessPolicyVersion=3'
-update_url: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'
-delete_url: 'projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}'
+base_url: projects/{{project}}/datasets
+self_link: projects/{{project}}/datasets/{{dataset_id}}
+create_url: projects/{{project}}/datasets?accessPolicyVersion=3
+update_url: projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3
 import_format:
-  - 'projects/{{project}}/datasets/{{dataset_id}}'
+  - projects/{{project}}/datasets/{{dataset_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-include_in_tgc_next: true
 custom_code:
-  constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
-custom_diff:
-  - 'customCollationDiff'
-# exluding resource_identity due to dataset_id field
-exclude_identity_generation: true
-exclude_sweeper: true
-examples:
-  - name: 'bigquery_dataset_basic'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-  - name: 'bigquery_dataset_with_max_time_travel_hours'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    exclude_docs: true
-  - name: 'bigquery_dataset_cmek'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+  constants: templates/terraform/constants/bigquery_dataset.go.tmpl
+  pre_read: templates/terraform/pre_read/bigquery_dataset.go.tmpl
+samples:
+  - name: bigquery_dataset_basic
+    primary_resource_id: dataset
+    steps:
+      - name: bigquery_dataset_basic
+        resource_id_vars:
+          account_name: bqowner
+          dataset_id: example_dataset
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+  - name: bigquery_dataset_with_max_time_travel_hours
+    primary_resource_id: dataset
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_dataset_with_max_time_travel_hours
+        resource_id_vars:
+          account_name: bqowner
+          dataset_id: example_dataset
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+  - name: bigquery_dataset_cmek
+    primary_resource_id: dataset
     exclude_test: true
-  - name: 'bigquery_dataset_authorized_dataset'
-    primary_resource_id: 'dataset'
-    vars:
-      private: 'private'
-      public: 'public'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      private: '"private" + randomSuffix'
-      # for backward compatible
-      public: '"public" + randomSuffix'
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-  - name: 'bigquery_dataset_authorized_routine'
-    primary_resource_id: 'private'
-    vars:
-      private_dataset: 'private_dataset'
-      public_dataset: 'public_dataset'
-      public_routine: 'public_routine'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-  - name: 'bigquery_dataset_case_insensitive_names'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    exclude_docs: true
-  - name: 'bigquery_dataset_default_collation_set'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
-    test_vars_overrides:
-      # for backward compatible
-      account_name: '"bqowner" + randomSuffix'
-    exclude_docs: true
-  - name: 'bigquery_dataset_external_reference_aws'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
+    steps:
+      - name: bigquery_dataset_cmek
+        resource_id_vars:
+          dataset_id: example_dataset
+          key_name: example-key
+          keyring_name: example-keyring
+  - name: bigquery_dataset_authorized_dataset
+    primary_resource_id: dataset
+    steps:
+      - name: bigquery_dataset_authorized_dataset
+        resource_id_vars:
+          account_name: bqowner
+          private: private
+          public: public
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+          private: '"private" + randomSuffix'
+          public: '"public" + randomSuffix'
+  - name: bigquery_dataset_authorized_routine
+    primary_resource_id: private
+    steps:
+      - name: bigquery_dataset_authorized_routine
+        resource_id_vars:
+          private_dataset: private_dataset
+          public_dataset: public_dataset
+          public_routine: public_routine
+        test_env_vars:
+          service_account: SERVICE_ACCT
+  - name: bigquery_dataset_case_insensitive_names
+    primary_resource_id: dataset
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_dataset_case_insensitive_names
+        resource_id_vars:
+          account_name: bqowner
+          dataset_id: example_dataset
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+  - name: bigquery_dataset_default_collation_set
+    primary_resource_id: dataset
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_dataset_default_collation_set
+        resource_id_vars:
+          account_name: bqowner
+          dataset_id: example_dataset
+        test_vars_overrides:
+          account_name: '"bqowner" + randomSuffix'
+  - name: bigquery_dataset_external_reference_aws
+    primary_resource_id: dataset
     exclude_test: true
-  - name: 'bigquery_dataset_external_catalog_dataset_options'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-  - name: 'bigquery_dataset_resource_tags'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'dataset'
-      tag_key1: 'tag_key1'
-      tag_value1: 'tag_value1'
-      tag_key2: 'tag_key2'
-      tag_value2: 'tag_value2'
-    test_vars_overrides:
-      # for backward compatible
-      dataset_id: '"dataset" + randomSuffix'
-    exclude_docs: true
-virtual_fields:
-  - name: 'delete_contents_on_destroy'
-    description: |
-      If set to `true`, delete all the tables in the
-      dataset when destroying the resource; otherwise,
-      destroying the resource will fail if tables are present.
-    type: Boolean
-    default_value: false
+    steps:
+      - name: bigquery_dataset_external_reference_aws
+        resource_id_vars:
+          dataset_id: example_dataset
+  - name: bigquery_dataset_external_catalog_dataset_options
+    primary_resource_id: dataset
+    steps:
+      - name: bigquery_dataset_external_catalog_dataset_options
+        resource_id_vars:
+          dataset_id: example_dataset
+  - name: bigquery_dataset_resource_tags
+    primary_resource_id: dataset
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_dataset_resource_tags
+        resource_id_vars:
+          dataset_id: dataset
+          tag_key1: tag_key1
+          tag_key2: tag_key2
+          tag_value1: tag_value1
+          tag_value2: tag_value2
+        test_vars_overrides:
+          dataset_id: '"dataset" + randomSuffix'
 parameters:
 properties:
-  - name: 'maxTimeTravelHours'
+  - name: maxTimeTravelHours
     type: String
-    description:
-      'Defines the time travel window in hours. The value can be from 48 to 168
-      hours (2 to 7 days).'
+    description: Defines the time travel window in hours. The value can be from 48 to 168 hours (2 to 7 days).
     default_from_api: true
-  - name: 'access'
+  - name: access
     type: Array
-    description:
-      'An array of objects that define dataset access for one or more entities.'
+    description: An array of objects that define dataset access for one or more entities.
     is_set: true
     default_from_api: true
     is_missing_in_cai: true
-    set_hash_func: 'resourceBigqueryDatasetAccessHash'
+    set_hash_func: resourceBigqueryDatasetAccessHash
     item_type:
       type: NestedObject
       properties:
-        - name: 'domain'
+        - name: domain
           type: String
           description: |
             A domain to grant access to. Any users signed in with the
             domain specified will be granted the specified access
-        - name: 'groupByEmail'
+        - name: groupByEmail
           type: String
           description: An email address of a Google Group to grant access to.
-          custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
-          custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
-        - name: 'role'
+          custom_expand: templates/terraform/custom_expand/string_to_lower_case.go.tmpl
+          custom_flatten: templates/terraform/custom_flatten/string_to_lower_case.go.tmpl
+        - name: role
           type: String
           description: |
             Describes the rights granted to the user specified by the other
@@ -176,7 +169,7 @@ properties:
             are supported. Predefined roles that have equivalent basic roles
             are swapped by the API to their basic counterparts. See
             [official docs](https://cloud.google.com/bigquery/docs/access-control).
-        - name: 'specialGroup'
+        - name: specialGroup
           type: String
           description: |
             A special group to grant access to. Possible values include:
@@ -184,19 +177,19 @@ properties:
             * `projectReaders`: Readers of the enclosing project.
             * `projectWriters`: Writers of the enclosing project.
             * `allAuthenticatedUsers`: All authenticated BigQuery users.
-        - name: 'iamMember'
+        - name: iamMember
           type: String
           description: |
             Some other type of member that appears in the IAM Policy but isn't a user,
             group, domain, or special group. For example: `allUsers`
-        - name: 'userByEmail'
+        - name: userByEmail
           type: String
           description: |
             An email address of a user to grant access to. For example:
             fred@example.com
-          custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
-          custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
-        - name: 'view'
+          custom_expand: templates/terraform/custom_expand/string_to_lower_case.go.tmpl
+          custom_flatten: templates/terraform/custom_flatten/string_to_lower_case.go.tmpl
+        - name: view
           type: NestedObject
           description: |
             A view from a different dataset to grant access to. Queries
@@ -205,41 +198,41 @@ properties:
             set. If that view is updated by any user, access to the view
             needs to be granted again via an update operation.
           properties:
-            - name: 'datasetId'
+            - name: datasetId
               type: String
               description: The ID of the dataset containing this table.
               required: true
-            - name: 'projectId'
+            - name: projectId
               type: String
               description: The ID of the project containing this table.
               required: true
-            - name: 'tableId'
+            - name: tableId
               type: String
               description: |
                 The ID of the table. The ID must contain only letters (a-z,
                 A-Z), numbers (0-9), or underscores (_). The maximum length
                 is 1,024 characters.
               required: true
-        - name: 'dataset'
+        - name: dataset
           type: NestedObject
           description: |
             Grants all resources of particular types in a particular dataset read access to the current dataset.
           properties:
-            - name: 'dataset'
+            - name: dataset
               type: NestedObject
               description: |
                 The dataset this entry applies to
               required: true
               properties:
-                - name: 'datasetId'
+                - name: datasetId
                   type: String
                   description: The ID of the dataset containing this table.
                   required: true
-                - name: 'projectId'
+                - name: projectId
                   type: String
                   description: The ID of the project containing this table.
                   required: true
-            - name: 'targetTypes'
+            - name: targetTypes
               type: Array
               description: |
                 Which resources in the dataset this entry applies to. Currently, only views are supported,
@@ -247,7 +240,7 @@ properties:
               required: true
               item_type:
                 type: String
-        - name: 'routine'
+        - name: routine
           type: NestedObject
           description: |
             A routine from a different dataset to grant access to. Queries
@@ -256,22 +249,22 @@ properties:
             set. If that routine is updated by any user, access to the routine
             needs to be granted again via an update operation.
           properties:
-            - name: 'datasetId'
+            - name: datasetId
               type: String
               description: The ID of the dataset containing this table.
               required: true
-            - name: 'projectId'
+            - name: projectId
               type: String
               description: The ID of the project containing this table.
               required: true
-            - name: 'routineId'
+            - name: routineId
               type: String
               description: |
                 The ID of the routine. The ID must contain only letters (a-z,
                 A-Z), numbers (0-9), or underscores (_). The maximum length
                 is 256 characters.
               required: true
-        - name: 'condition'
+        - name: condition
           type: NestedObject
           description: |
             Condition for the binding. If CEL expression in this field is true, this
@@ -297,20 +290,20 @@ properties:
               description: |
                 String indicating the location of the expression for error reporting, e.g. a file
                 name and a position in the file.
-  - name: 'creationTime'
+  - name: creationTime
     type: Integer
     description: |
       The time when this dataset was created, in milliseconds since the
       epoch.
     output: true
-  - name: 'datasetReference'
+  - name: datasetReference
     type: NestedObject
-    description: 'A reference that identifies the dataset.'
+    description: A reference that identifies the dataset.
     required: true
     immutable: true
     flatten_object: true
     properties:
-      - name: 'datasetId'
+      - name: datasetId
         type: String
         description: |
           A unique ID for this dataset, without the project name. The ID
@@ -319,8 +312,8 @@ properties:
         required: true
         immutable: true
         validation:
-          function: 'validateDatasetId'
-  - name: 'defaultTableExpirationMs'
+          function: validateDatasetId
+  - name: defaultTableExpirationMs
     type: Integer
     description: |
       The default lifetime of all tables in the dataset, in milliseconds.
@@ -335,8 +328,8 @@ properties:
       creating a table, that value takes precedence over the default
       expiration time indicated by this property.
     validation:
-      function: 'validateDefaultTableExpirationMs'
-  - name: 'defaultPartitionExpirationMs'
+      function: validateDefaultTableExpirationMs
+  - name: defaultPartitionExpirationMs
     type: Integer
     description: |
       The default partition expiration for all partitioned tables in
@@ -352,49 +345,49 @@ properties:
       table. If you provide an explicit `timePartitioning.expirationMs` when
       creating or updating a partitioned table, that value takes precedence
       over the default partition expiration time indicated by this property.
-  - name: 'description'
+  - name: description
     type: String
     description: A user-friendly description of the dataset
-  - name: 'etag'
+  - name: etag
     type: String
     description: |
       A hash of the resource.
     output: true
-  - name: 'externalDatasetReference'
+  - name: externalDatasetReference
     type: NestedObject
     description: |
-     Information about the external metadata storage where the dataset is defined.
+      Information about the external metadata storage where the dataset is defined.
     immutable: true
     properties:
-      - name: 'externalSource'
+      - name: externalSource
         type: String
         description: |
           External source that backs this dataset.
         required: true
         immutable: true
-      - name: 'connection'
+      - name: connection
         type: String
         description: |
           The connection id that is used to access the externalSource.
           Format: projects/{projectId}/locations/{locationId}/connections/{connectionId}
         required: true
         immutable: true
-  - name: 'friendlyName'
+  - name: friendlyName
     type: String
     description: A descriptive name for the dataset
     send_empty_value: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       The labels associated with this dataset. You can use these to
       organize and group your datasets.
-  - name: 'lastModifiedTime'
+  - name: lastModifiedTime
     type: Integer
     description: |
       The date when this dataset or any of its tables was last modified, in
       milliseconds since the epoch.
     output: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the dataset should reside.
@@ -406,24 +399,24 @@ properties:
       The default value is multi-regional location `US`.
       Changing this forces a new resource to be created.
     immutable: true
-    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
-    default_value: "US"
-  - name: 'defaultEncryptionConfiguration'
+    diff_suppress_func: tpgresource.CaseDiffSuppress
+    custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl
+    default_value: US
+  - name: defaultEncryptionConfiguration
     type: NestedObject
     description: |
       The default encryption key for all tables in the dataset. Once this property is set,
       all newly-created partitioned tables in the dataset will have encryption key set to
       this value, unless table creation request (or query) overrides the key.
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           Describes the Cloud KMS encryption key that will be used to protect destination
           BigQuery table. The BigQuery Service Account associated with your project requires
           access to this encryption key.
         required: true
-  - name: 'isCaseInsensitive'
+  - name: isCaseInsensitive
     type: Boolean
     description: |
       TRUE if the dataset and its table names are case-insensitive, otherwise FALSE.
@@ -435,7 +428,7 @@ properties:
     # by default during tfplan2cai.
     # Use exclude_false_in_cai: true to override the default behavior during tfplan2cai conversion.
     exclude_false_in_cai: true
-  - name: 'defaultCollation'
+  - name: defaultCollation
     type: String
     description: |
       Defines the default collation specification of future tables created
@@ -450,8 +443,8 @@ properties:
       - '': empty string. Default to case-sensitive behavior.
     default_from_api: true
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_default_collation.go.tmpl'
-  - name: 'storageBillingModel'
+    custom_expand: templates/terraform/custom_expand/bigquery_dataset_default_collation.go.tmpl
+  - name: storageBillingModel
     type: String
     description: |
       Specifies the storage billing model for the dataset.
@@ -460,7 +453,7 @@ properties:
 
       LOGICAL is the default if this flag isn't specified.
     default_from_api: true
-  - name: 'resourceTags'
+  - name: resourceTags
     type: KeyValuePairs
     description: |
       The tags attached to this table. Tag keys are globally unique. Tag key is expected to be
@@ -468,19 +461,35 @@ properties:
       ID of the parent organization or project resource for this tag key. Tag value is expected
       to be the short name, for example "Production". See [Tag definitions](https://cloud.google.com/iam/docs/tags-access-control#definitions)
       for more details.
-  - name: 'externalCatalogDatasetOptions'
+  - name: externalCatalogDatasetOptions
     type: NestedObject
     description: |
       Options defining open source compatible datasets living in the BigQuery catalog. Contains
       metadata of open source database, schema or namespace represented by the current dataset.
     properties:
-      - name: 'parameters'
+      - name: parameters
         type: KeyValuePairs
         description: |
           A map of key value pairs defining the parameters and properties of the open source schema.
           Maximum size of 2Mib.
-      - name: 'defaultStorageLocationUri'
+      - name: defaultStorageLocationUri
         type: String
         description: |
           The storage location URI for all tables in the dataset. Equivalent to hive metastore's
           database locationUri. Maximum length of 1024 characters.
+custom_diff:
+  - customCollationDiff
+delete_url: projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}
+# exluding resource_identity due to dataset_id field
+exclude_identity_generation: true
+exclude_sweeper: true
+has_self_link: true
+include_in_tgc_next: true
+virtual_fields:
+  - name: delete_contents_on_destroy
+    description: |
+      If set to `true`, delete all the tables in the
+      dataset when destroying the resource; otherwise,
+      destroying the resource will fail if tables are present.
+    type: Boolean
+    default_value: false

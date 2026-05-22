@@ -23,17 +23,14 @@ references:
 base_url: projects/{{project}}/locations/{{location}}/meshes
 self_link: projects/{{project}}/locations/{{location}}/meshes/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/meshes?meshId={{name}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/meshes/{{name}}
 timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-sweeper:
-  url_substitutions:
-    - region: global
 async:
   operation:
     timeouts:
@@ -41,22 +38,25 @@ async:
       update_minutes: 30
       delete_minutes: 30
     base_url: '{{op_id}}'
-schema_version: 1
-state_upgraders: true
-autogen_async: true
-examples:
+samples:
   - name: network_services_mesh_basic
     primary_resource_id: default
-    vars:
-      resource_name: my-mesh
+    steps:
+      - name: network_services_mesh_basic
+        resource_id_vars:
+          resource_name: my-mesh
   - name: network_services_mesh_no_port
     primary_resource_id: default
-    vars:
-      resource_name: my-mesh-noport
+    steps:
+      - name: network_services_mesh_no_port
+        resource_id_vars:
+          resource_name: my-mesh-noport
   - name: network_services_mesh_location
     primary_resource_id: default
-    vars:
-      resource_name: my-mesh
+    steps:
+      - name: network_services_mesh_location
+        resource_id_vars:
+          resource_name: my-mesh
 parameters:
   - name: name
     type: String
@@ -104,3 +104,9 @@ properties:
     url_param_only: true
     validation:
       regex: ^global$
+autogen_async: true
+schema_version: 1
+state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: global

@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'RuntimeConfig'
-legacy_name: 'runtimeconfig'
-display_name: 'Runtime Configurator'
-versions:
-  - name: 'beta'
-    base_url: 'https://runtimeconfig.googleapis.com/v1beta1/'
+name: RuntimeConfig
+display_name: Runtime Configurator
+legacy_name: runtimeconfig
 scopes:
-  - 'https://www.googleapis.com/auth/cloudruntimeconfig'
+  - https://www.googleapis.com/auth/cloudruntimeconfig
+versions:
+  - name: beta
+    base_url: https://runtimeconfig.googleapis.com/v1beta1/

@@ -15,7 +15,6 @@
 name: ReportConfig
 description: ReportConfig defines the configuration and criteria used to generate Migration Center reports.
 base_url: projects/{{project}}/locations/{{location}}/reportConfigs
-immutable: true
 self_link: projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config_id}}
 create_url: projects/{{project}}/locations/{{location}}/reportConfigs?reportConfigId={{report_config_id}}
 import_format:
@@ -28,15 +27,15 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: UmVwb3J0Q29uZmln
-autogen_async: true
-examples:
-  - name: 'migration_center_report_config_basic'
-    primary_resource_id: 'default'
-    vars:
-      report_config_id: 'report-config-test'
-      pref_set_id: 'pref-set-test'
-      group_id: 'group-test'
+samples:
+  - name: migration_center_report_config_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_report_config_basic
+        resource_id_vars:
+          group_id: group-test
+          pref_set_id: pref-set-test
+          report_config_id: report-config-test
 parameters:
   - name: location
     type: String
@@ -89,3 +88,6 @@ properties:
     type: String
     description: The timestamp when the resource was last updated.
     output: true
+autogen_async: true
+autogen_status: UmVwb3J0Q29uZmln
+immutable: true

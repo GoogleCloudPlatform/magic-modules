@@ -18,29 +18,27 @@ description: |-
   When this resource is created, the template is locked.
   When this resource is deleted, the template is unlocked.
 min_version: beta
+id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 base_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-immutable: true
+create_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=true
+create_verb: POST
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-exclude_sweeper: true
-examples:
+custom_code:
+  # We read the PromptTemplate to verify it is locked
+  post_read: templates/terraform/post_read/firebase_ai_logic_prompt_template_lock.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/firebase_ai_logic_prompt_template_lock.go.tmpl
+samples:
   - name: firebaseailogic_prompt_template_lock_basic
     min_version: beta
     primary_resource_id: basic_lock
-    vars:
-      template_id: 'lock-template'
-    test_env_vars:
-      project_id: PROJECT_NAME
-create_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=true
-create_verb: POST
-delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=false
-delete_verb: POST
-custom_code:
-  # We read the PromptTemplate to verify it is locked
-  post_read: 'templates/terraform/post_read/firebase_ai_logic_prompt_template_lock.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_ai_logic_prompt_template_lock.go.tmpl'
+    steps:
+      - name: firebaseailogic_prompt_template_lock_basic
+        resource_id_vars:
+          template_id: lock-template
+        test_env_vars:
+          project_id: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -66,3 +64,7 @@ properties:
       Indicates if the prompt template is currently locked.
       This is verified against the server-side PromptTemplate resource.
     output: true
+delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=false
+delete_verb: POST
+exclude_sweeper: true
+immutable: true

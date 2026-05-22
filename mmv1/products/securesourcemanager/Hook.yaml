@@ -21,59 +21,62 @@ docs: null
 id_format: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/hooks/{{hook_id}}
 base_url: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/hooks?hook_id={{hook_id}}
 self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/hooks/{{hook_id}}
+update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/hooks/{{hook_id}}
-  - "{{hook_id}}"
+  - '{{hook_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-update_verb: PATCH
-update_mask: true
 async:
   actions:
     - create
     - delete
   type: OpAsync
   operation:
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   result:
     resource_inside_response: false
 custom_code: null
-examples:
+samples:
   - name: secure_source_manager_hook_basic
     primary_resource_id: basic
-    vars:
-      hook_id: my-basic-hook
-      repository_id: my-basic-repository
-      instance_id: my-basic-instance
-      prevent_destroy: "true"
-      deletion_policy: '"PREVENT"'
-    test_vars_overrides:
-      prevent_destroy: "false"
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      prevent_destroy: "false"
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: secure_source_manager_hook_basic
+        resource_id_vars:
+          deletion_policy: '"PREVENT"'
+          hook_id: my-basic-hook
+          instance_id: my-basic-instance
+          prevent_destroy: "true"
+          repository_id: my-basic-repository
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+          prevent_destroy: "false"
+        ignore_read_extra:
+          - deletion_policy
   - name: secure_source_manager_hook_with_fields
     primary_resource_id: default
-    vars:
-      hook_id: my-initial-hook
-      repository_id: my-initial-repository
-      instance_id: my-initial-instance
-      prevent_destroy: "true"
-      deletion_policy: '"PREVENT"'
-    test_vars_overrides:
-      prevent_destroy: "false"
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      prevent_destroy: "false"
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: secure_source_manager_hook_with_fields
+        resource_id_vars:
+          deletion_policy: '"PREVENT"'
+          hook_id: my-initial-hook
+          instance_id: my-initial-instance
+          prevent_destroy: "true"
+          repository_id: my-initial-repository
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+          prevent_destroy: "false"
+        ignore_read_extra:
+          - deletion_policy
 parameters:
   - name: hook_id
     type: String
@@ -156,3 +159,4 @@ properties:
           Specified as glob pattern. If empty or *, events for all branches are
           reported. Examples: main, {main,release*}.
           See https://pkg.go.dev/github.com/gobwas/glob documentation.
+autogen_async: true

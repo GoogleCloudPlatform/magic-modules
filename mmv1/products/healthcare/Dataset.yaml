@@ -12,49 +12,50 @@
 # limitations under the License.
 
 ---
-name: 'Dataset'
-kind: 'healthcare#dataset'
+name: Dataset
+kind: healthcare#dataset
 description: |
   A Healthcare `Dataset` is a toplevel logical grouping of `dicomStores`, `fhirStores` and `hl7V2Stores`.
 references:
   guides:
-    'Creating a dataset': 'https://cloud.google.com/healthcare/docs/how-tos/datasets'
-  api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets'
+    Creating a dataset: https://cloud.google.com/healthcare/docs/how-tos/datasets
+  api: https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
-update_verb: 'PATCH'
+id_format: projects/{{project}}/locations/{{location}}/datasets/{{name}}
+base_url: projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}
+self_link: projects/{{project}}/locations/{{location}}/datasets/{{name}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
+  - projects/{{project}}/locations/{{location}}/datasets/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
-error_retry_predicates:
-
-  - 'transport_tpg.HealthcareDatasetNotInitialized'
-examples:
-  - name: 'healthcare_dataset_basic'
-    primary_resource_id: 'default'
-    vars:
-      dataset_name: 'example-dataset'
-      location: 'us-central1'
-      time_zone: 'America/New_York'
-  - name: 'healthcare_dataset_cmek'
-    primary_resource_id: 'default'
+  decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl
+samples:
+  - name: healthcare_dataset_basic
+    primary_resource_id: default
+    steps:
+      - name: healthcare_dataset_basic
+        resource_id_vars:
+          dataset_name: example-dataset
+          location: us-central1
+          time_zone: America/New_York
+  - name: healthcare_dataset_cmek
+    primary_resource_id: default
     exclude_test: true
-    vars:
-      dataset_name: 'example-dataset'
-      location: 'us-central1'
-      time_zone: 'America/New_York'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+    steps:
+      - name: healthcare_dataset_cmek
+        resource_id_vars:
+          dataset_name: example-dataset
+          key_name: example-key
+          keyring_name: example-keyring
+          location: us-central1
+          time_zone: America/New_York
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location for the Dataset.
@@ -62,13 +63,13 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the Dataset.
     required: true
     immutable: true
-  - name: 'timeZone'
+  - name: timeZone
     type: String
     description: |
       The default timezone used by this dataset. Must be a either a valid IANA time zone name such as
@@ -76,19 +77,19 @@ properties:
       (e.g., HL7 messages) where no explicit timezone is specified.
     required: false
     default_from_api: true
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       The fully qualified name of this dataset
     ignore_read: true
     output: true
-  - name: 'encryptionSpec'
+  - name: encryptionSpec
     type: NestedObject
     required: false
     immutable: true
     default_from_api: true
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           KMS encryption key that is used to secure this dataset and its sub-resources. The key used for
@@ -97,3 +98,5 @@ properties:
           projects/{projectId}/locations/{locationId}/keyRings/{keyRingId}/cryptoKeys/{keyId}.
         required: false
         immutable: true
+error_retry_predicates:
+  - transport_tpg.HealthcareDatasetNotInitialized

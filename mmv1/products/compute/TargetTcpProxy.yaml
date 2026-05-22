@@ -13,6 +13,7 @@
 
 ---
 name: TargetTcpProxy
+kind: compute#targetTcpProxy
 description: |
   Represents a TargetTcpProxy resource, which is used by one or more
   global forwarding rule to route incoming TCP requests to a Backend
@@ -21,43 +22,46 @@ references:
   guides:
     Setting Up TCP proxy for Google Cloud Load Balancing: https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy
   api: https://cloud.google.com/compute/docs/reference/v1/targetTcpProxies
-base_url: projects/{{project}}/global/targetTcpProxies
-immutable: true
-has_self_link: true
-collection_url_key: items
-kind: compute#targetTcpProxy
 id_format: projects/{{project}}/global/targetTcpProxies/{{name}}
+base_url: projects/{{project}}/global/targetTcpProxies
 async:
   operation:
     base_url: '{{op_id}}'
-include_in_tgc_next: true
-examples:
+samples:
   - name: target_tcp_proxy_basic
     primary_resource_id: default
-    vars:
-      backend_service_name: backend-service
-      health_check_name: health-check
-      target_tcp_proxy_name: test-proxy
+    steps:
+      - name: target_tcp_proxy_basic
+        resource_id_vars:
+          backend_service_name: backend-service
+          health_check_name: health-check
+          target_tcp_proxy_name: test-proxy
   - name: target_tcp_proxy_basic_beta
-    primary_resource_id: default
     min_version: beta
-    vars:
-      backend_service_name: backend-service
-      health_check_name: health-check
-      target_tcp_proxy_name: test-proxy
+    primary_resource_id: default
+    steps:
+      - name: target_tcp_proxy_basic_beta
+        resource_id_vars:
+          backend_service_name: backend-service
+          health_check_name: health-check
+          target_tcp_proxy_name: test-proxy
   - name: target_tcp_proxy_backendless
     min_version: beta
     primary_resource_id: default
-    vars:
-      target_tcp_proxy_name: test-proxy
+    steps:
+      - name: target_tcp_proxy_backendless
+        resource_id_vars:
+          target_tcp_proxy_name: test-proxy
   - name: target_tcp_proxy_tls_route
     min_version: beta
     primary_resource_id: default
-    vars:
-      backend_service_name: backend-service
-      health_check_name: health-check
-      target_tcp_proxy_name: test-proxy
-      tls_route_name: tls-route-check
+    steps:
+      - name: target_tcp_proxy_tls_route
+        resource_id_vars:
+          backend_service_name: backend-service
+          health_check_name: health-check
+          target_tcp_proxy_name: test-proxy
+          tls_route_name: tls-route-check
 properties:
   - name: creationTimestamp
     type: Time
@@ -129,3 +133,7 @@ properties:
       - EXTERNAL
       - EXTERNAL_MANAGED
       - INTERNAL_MANAGED
+collection_url_key: items
+has_self_link: true
+immutable: true
+include_in_tgc_next: true

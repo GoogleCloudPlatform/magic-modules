@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'TenantDefaultSupportedIdpConfig'
+name: TenantDefaultSupportedIdpConfig
 api_resource_type_kind: DefaultSupportedIdpConfig
 description: |
   Configurations options for the tenant for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
@@ -21,30 +21,31 @@ description: |
   [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
   the marketplace prior to using this resource.
 docs:
-base_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs'
-self_link: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}'
-create_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs?idpId={{idp_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs
+self_link: projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}
+create_url: projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs?idpId={{idp_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}'
+  - projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-exclude_sweeper: true
-examples:
-  - name: 'identity_platform_tenant_default_supported_idp_config_basic'
-    primary_resource_id: 'idp_config'
+samples:
+  - name: identity_platform_tenant_default_supported_idp_config_basic
+    primary_resource_id: idp_config
+    steps:
+      - name: identity_platform_tenant_default_supported_idp_config_basic
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the default supported IDP config resource
     output: true
-  - name: 'idpId'
+  - name: idpId
     type: String
     description: |
       ID of the IDP. Possible values include:
@@ -68,28 +69,28 @@ properties:
       * `twitter.com`
 
       * `yahoo.com`
-
     url_param_only: true
     required: true
     immutable: true
-  - name: 'tenant'
+  - name: tenant
     type: String
     description: |
       The name of the tenant where this DefaultSupportedIdpConfig resource exists
     url_param_only: true
     required: true
     immutable: true
-  - name: 'clientId'
+  - name: clientId
     type: String
     description: |
       OAuth client ID
     required: true
-  - name: 'clientSecret'
+  - name: clientSecret
     type: String
     description: |
       OAuth client secret
     required: true
-  - name: 'enabled'
+  - name: enabled
     type: Boolean
     description: |
       If this IDP allows the user to sign in
+exclude_sweeper: true

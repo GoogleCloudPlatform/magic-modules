@@ -12,51 +12,42 @@
 # limitations under the License.
 
 ---
-name: 'Lien'
-api_resource_field: "."
-description:
-  A Lien represents an encumbrance on the actions that can be performed on a
-  resource.
+name: Lien
+description: A Lien represents an encumbrance on the actions that can be performed on a resource.
 references:
   guides:
-    'Create a Lien': 'https://docs.cloud.google.com/resource-manager/docs/project-liens'
-  api: 'https://docs.cloud.google.com/resource-manager/reference/rest'
+    Create a Lien: https://docs.cloud.google.com/resource-manager/docs/project-liens
+  api: https://docs.cloud.google.com/resource-manager/reference/rest
 docs:
 id_format: '{{name}}'
-base_url: 'liens'
+base_url: liens
 # This resource has some issues - it returns a list when you query for it.
 # You can't use the same URL for GET and DELETE.  This here is the URL that
 # we use for GET, and the DELETE is in custom code.  If this happens a lot,
 # we might build a more general solution, but this is the only resource I know
 # of where that happens.
-self_link: 'liens?parent={{parent}}'
-immutable: true
+self_link: liens?parent={{parent}}
 import_format:
   - '{{parent}}/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-identity:
-  - name
-nested_query:
-  keys:
-    - liens
-  is_list_of_ids: false
-  modify_by_patch: false
 custom_code:
-  constants: 'templates/terraform/constants/resourcemanager_lien.go.tmpl'
-  decoder: 'templates/terraform/decoders/avoid_meaningless_project_update.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/modify_delete_url.tmpl'
-  post_import: 'templates/terraform/post_import/lien_import.tmpl'
-examples:
-  - name: 'resource_manager_lien'
-    primary_resource_id: 'lien'
-    vars:
-      project_id: 'staging-project'
+  constants: templates/terraform/constants/resourcemanager_lien.go.tmpl
+  decoder: templates/terraform/decoders/avoid_meaningless_project_update.tmpl
+  pre_delete: templates/terraform/pre_delete/modify_delete_url.tmpl
+  post_import: templates/terraform/post_import/lien_import.tmpl
+samples:
+  - name: resource_manager_lien
+    primary_resource_id: lien
     exclude_test: true
+    steps:
+      - name: resource_manager_lien
+        resource_id_vars:
+          project_id: staging-project
 parameters:
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       A reference to the resource this Lien is attached to.
@@ -65,7 +56,7 @@ parameters:
       prefix (e.g. "projects/my-project-name").
     required: true
     immutable: true
-  - name: 'restrictions'
+  - name: restrictions
     type: Array
     description: |
       The types of operations which should be blocked as a result of this Lien.
@@ -78,19 +69,19 @@ parameters:
     item_type:
       type: String
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: A system-generated unique identifier for this Lien.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'reason'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: reason
     type: String
     description: |
       Concise user-visible strings indicating why an action cannot be performed
       on a resource. Maximum length of 200 characters.
     required: true
     immutable: true
-  - name: 'origin'
+  - name: origin
     type: String
     description: |
       A stable, user-visible/meaningful string identifying the origin
@@ -98,7 +89,16 @@ properties:
       200 characters.
     required: true
     immutable: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
-    description: 'Time of creation'
+    description: Time of creation
     output: true
+api_resource_field: .
+identity:
+  - name
+immutable: true
+nested_query:
+  keys:
+    - liens
+  is_list_of_ids: false
+  modify_by_patch: false

@@ -12,42 +12,45 @@
 # limitations under the License.
 
 ---
-name: 'SecurityMonitoringCondition'
+name: SecurityMonitoringCondition
 description: |
   Security monitoring condition for risk assessment version 2 in Apigee.
 references:
   guides:
-    'Creating a security monitoring condition': 'https://cloud.google.com/apigee/docs/api-security/security-scores#monitoring-conditions'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityMonitoringConditions/create'
+    Creating a security monitoring condition: https://cloud.google.com/apigee/docs/api-security/security-scores#monitoring-conditions
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityMonitoringConditions/create
 docs:
 base_url: '{{org_id}}/securityMonitoringConditions'
 self_link: '{{org_id}}/securityMonitoringConditions/{{condition_id}}'
 create_url: '{{org_id}}/securityMonitoringConditions?security_monitoring_condition_id={{condition_id}}'
-update_verb: 'PATCH'
-delete_url: "{{org_id}}/securityMonitoringConditions/{{condition_id}}"
-immutable: false
+update_verb: PATCH
 import_format:
   - '{{org_id}}/securityMonitoringConditions/{{condition_id}}'
   - '{{org_id}}/{{condition_id}}'
-exclude_identity_generation: true
 custom_code:
-  custom_import: "templates/terraform/custom_import/apigee_security_monitoring_condition.go.tmpl"
-examples:
-  - name: 'apigee_security_monitoring_condition_basic'
-    vars:
-      environment_name: 'my-environment'
-      security_monitoring_condition_id: 'my-condition'
+  custom_import: templates/terraform/custom_import/apigee_security_monitoring_condition.go.tmpl
+samples:
+  - name: apigee_security_monitoring_condition_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_security_monitoring_condition_basic_test'
-    primary_resource_id: 'security_monitoring_condition'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    steps:
+      - name: apigee_security_monitoring_condition_basic
+        resource_id_vars:
+          environment_name: my-environment
+          security_monitoring_condition_id: my-condition
+  - name: apigee_security_monitoring_condition_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+      - time
+    primary_resource_id: security_monitoring_condition
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_security_monitoring_condition_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee Security Monitoring Condition,
@@ -55,7 +58,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'conditionId'
+  - name: conditionId
     type: String
     description: |
       Resource ID of the security monitoring condition.
@@ -63,23 +66,23 @@ parameters:
     url_param_only: true
     required: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the security monitoring condition resource,
       in the format `organizations/{{org_name}}/securityMonitoringConditions/{{condition_id}}`.
     output: true
-  - name: 'profile'
+  - name: profile
     type: String
     description: |
       ID of security profile of the security monitoring condition.
     required: true
-  - name: 'scope'
+  - name: scope
     type: String
     description: |
       ID of security profile of the security monitoring condition.
     required: true
-  - name: 'includeAllResources'
+  - name: includeAllResources
     type: NestedObject
     exactly_one_of:
       - include_all_resources
@@ -111,23 +114,26 @@ properties:
   #   exactly_one_of:
   #     - include_all_resources
   #     - include
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The timestamp at which this profile was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The timestamp at which this profile was most recently updated.
     output: true
-  - name: 'totalMonitoredResources'
+  - name: totalMonitoredResources
     type: Integer
     description: |
       Total number of monitored resources within this condition.
     output: true
-  - name: 'totalDeployedResources'
+  - name: totalDeployedResources
     type: Integer
     description: |
       Total number of deployed resources within scope.
     output: true
+delete_url: '{{org_id}}/securityMonitoringConditions/{{condition_id}}'
+exclude_identity_generation: true
+immutable: false

@@ -12,123 +12,110 @@
 # limitations under the License.
 
 ---
-name: 'DataExchange'
+name: DataExchange
 description: A Bigquery Analytics Hub data exchange
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
-  api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges'
+    Official Documentation: https://cloud.google.com/bigquery/docs/analytics-hub-introduction
+  api: https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/dataExchanges'
-self_link: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges?data_exchange_id={{data_exchange_id}}'
-update_verb: 'PATCH'
+id_format: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}
+base_url: projects/{{project}}/locations/{{location}}/dataExchanges
+self_link: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}
+create_url: projects/{{project}}/locations/{{location}}/dataExchanges?data_exchange_id={{data_exchange_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}'
+  - projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}
   - '{{data_exchange_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'data_exchange_id'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}'
-    - '{{data_exchange_id}}'
 custom_code:
-sweeper:
-  url_substitutions:
-    - region: "US"
-examples:
-  - name: 'bigquery_analyticshub_data_exchange_basic'
-    primary_resource_id: 'data_exchange'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      desc: 'example data exchange'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example data exchange" + randomSuffix'
-  - name: 'bigquery_analyticshub_data_exchange_dcr'
-    primary_resource_id: 'data_exchange'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'dcr_data_exchange'
-      desc: 'example dcr data exchange'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example dcr data exchange" + randomSuffix'
-  - name: 'bigquery_analyticshub_data_exchange_log_linked_dataset_query_user'
-    primary_resource_id: 'data_exchange'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'tf_test_log_email_data_exchange'
-      description: 'Example for log email test for data exchange'
-    test_vars_overrides:
-      # for backward compatible
-      description: '"Example for log email test for data exchange" + randomSuffix'
-  - name: 'bigquery_analyticshub_public_data_exchange'
-    primary_resource_id: 'data_exchange'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'public_data_exchange'
-      desc: 'Example for public data exchange'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"Example for public data exchange" + randomSuffix'
+samples:
+  - name: bigquery_analyticshub_data_exchange_basic
+    primary_resource_id: data_exchange
+    steps:
+      - name: bigquery_analyticshub_data_exchange_basic
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          desc: example data exchange
+        test_vars_overrides:
+          desc: '"example data exchange" + randomSuffix'
+    region_override: US
+  - name: bigquery_analyticshub_data_exchange_dcr
+    primary_resource_id: data_exchange
+    steps:
+      - name: bigquery_analyticshub_data_exchange_dcr
+        resource_id_vars:
+          data_exchange_id: dcr_data_exchange
+          desc: example dcr data exchange
+        test_vars_overrides:
+          desc: '"example dcr data exchange" + randomSuffix'
+    region_override: US
+  - name: bigquery_analyticshub_data_exchange_log_linked_dataset_query_user
+    primary_resource_id: data_exchange
+    steps:
+      - name: bigquery_analyticshub_data_exchange_log_linked_dataset_query_user
+        resource_id_vars:
+          data_exchange_id: tf_test_log_email_data_exchange
+          description: Example for log email test for data exchange
+        test_vars_overrides:
+          description: '"Example for log email test for data exchange" + randomSuffix'
+    region_override: US
+  - name: bigquery_analyticshub_public_data_exchange
+    primary_resource_id: data_exchange
+    steps:
+      - name: bigquery_analyticshub_public_data_exchange
+        resource_id_vars:
+          data_exchange_id: public_data_exchange
+          desc: Example for public data exchange
+        test_vars_overrides:
+          desc: '"Example for public data exchange" + randomSuffix'
+    region_override: US
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |-
       The resource name of the data exchange, for example:
       "projects/myproject/locations/US/dataExchanges/123"
     output: true
-  - name: 'data_exchange_id'
+  - name: data_exchange_id
     type: String
-    description: |-
-      The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
+    description: The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The name of the location this data exchange.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'displayName'
+  - name: displayName
     type: String
-    description: |-
-      Human-readable display name of the data exchange. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), and must not start or end with spaces.
+    description: Human-readable display name of the data exchange. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), and must not start or end with spaces.
     required: true
-  - name: 'description'
+  - name: description
     type: String
-    description: |-
-      Description of the data exchange.
-  - name: 'primaryContact'
+    description: Description of the data exchange.
+  - name: primaryContact
     type: String
-    description: |-
-      Email or URL of the primary point of contact of the data exchange.
-  - name: 'documentation'
+    description: Email or URL of the primary point of contact of the data exchange.
+  - name: documentation
     type: String
-    description: |-
-      Documentation describing the data exchange.
-  - name: 'listingCount'
+    description: Documentation describing the data exchange.
+  - name: listingCount
     type: Integer
-    description: |-
-      Number of listings contained in the data exchange.
+    description: Number of listings contained in the data exchange.
     output: true
-  - name: 'icon'
+  - name: icon
     type: String
-    description: |-
-      Base64 encoded image representing the data exchange.
-  - name: 'sharingEnvironmentConfig'
+    description: Base64 encoded image representing the data exchange.
+  - name: sharingEnvironmentConfig
     type: NestedObject
     description: |
       Configurable data sharing environment option for a data exchange.
@@ -136,7 +123,7 @@ properties:
     immutable: true
     default_from_api: true
     properties:
-      - name: 'defaultExchangeConfig'
+      - name: defaultExchangeConfig
         type: NestedObject
         description: |
           Default Analytics Hub data exchange, used for secured data sharing.
@@ -144,11 +131,10 @@ properties:
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'sharing_environment_config.0.default_exchange_config'
-          - 'sharing_environment_config.0.dcr_exchange_config'
-        properties:
-          []
-      - name: 'dcrExchangeConfig'
+          - sharing_environment_config.0.default_exchange_config
+          - sharing_environment_config.0.dcr_exchange_config
+        properties: []
+      - name: dcrExchangeConfig
         type: NestedObject
         description: |
           Data Clean Room (DCR), used for privacy-safe and secured data sharing.
@@ -156,18 +142,26 @@ properties:
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'sharing_environment_config.0.default_exchange_config'
-          - 'sharing_environment_config.0.dcr_exchange_config'
-        properties:
-          []
-  - name: 'discoveryType'
+          - sharing_environment_config.0.default_exchange_config
+          - sharing_environment_config.0.dcr_exchange_config
+        properties: []
+  - name: discoveryType
     type: Enum
     enum_values:
-      - 'DISCOVERY_TYPE_PRIVATE'
-      - 'DISCOVERY_TYPE_PUBLIC'
+      - DISCOVERY_TYPE_PRIVATE
+      - DISCOVERY_TYPE_PUBLIC
     default_from_api: true
     description: Type of discovery on the discovery page for all the listings under this exchange. Cannot be set for a Data Clean Room. Updating this field also updates (overwrites) the discoveryType field for all the listings under this exchange.
-  - name: 'logLinkedDatasetQueryUserEmail'
+  - name: logLinkedDatasetQueryUserEmail
     type: Boolean
-    description:
-      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user. Once enabled, this setting cannot be turned off.
+    description: If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user. Once enabled, this setting cannot be turned off.
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: data_exchange_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}
+    - '{{data_exchange_id}}'
+sweeper:
+  url_substitutions:
+    - region: US

@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'SourceRepo'
-legacy_name: 'sourcerepo'
-display_name: 'Cloud Source Repositories'
-versions:
-  - name: 'ga'
-    base_url: 'https://sourcerepo.googleapis.com/v1/'
+name: SourceRepo
+display_name: Cloud Source Repositories
+legacy_name: sourcerepo
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://sourcerepo.googleapis.com/v1/

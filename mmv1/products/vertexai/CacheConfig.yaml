@@ -12,40 +12,41 @@
 # limitations under the License.
 
 ---
-name: 'CacheConfig'
-description: |-
-  Config of GenAI caching features. This is a singleton resource.
+name: CacheConfig
+description: Config of GenAI caching features. This is a singleton resource.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/Shared.Types/CacheConfig'
-  api: 'https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects/updateCacheConfig'
+    Official Documentation: https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/Shared.Types/CacheConfig
+  api: https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects/updateCacheConfig
 docs:
-import_format:
-  - 'projects/{{project}}/cacheConfig'
-base_url: 'projects/{{project}}/cacheConfig'
-self_link: 'projects/{{project}}/cacheConfig'
-examples:
-  - name: 'vertex_ai_cache_config'
-    primary_resource_id: 'cache_config'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/cacheConfig
+self_link: projects/{{project}}/cacheConfig
+create_verb: PATCH
+update_verb: PATCH
 exclude_delete: true
+import_format:
+  - projects/{{project}}/cacheConfig
 async:
-  actions: ['create', 'update']
-  type: 'OpAsync'
+  actions: [create, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+samples:
+  - name: vertex_ai_cache_config
+    primary_resource_id: cache_config
+    steps:
+      - name: vertex_ai_cache_config
+        test_env_vars:
+          project: PROJECT_NAME
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Identifier. name of the cache config. Format: - `projects/{project}/cacheConfig`.
     output: true
-  - name: 'disableCache'
+  - name: disableCache
     type: Boolean
     description: |
       If set to true, disables GenAI caching. Otherwise caching is enabled.

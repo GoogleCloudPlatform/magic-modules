@@ -12,53 +12,54 @@
 # limitations under the License.
 
 ---
-name: 'TargetSite'
+name: TargetSite
 api_variant_patterns:
-  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}/siteSearchEngine/targetSites/{targetSite}'
+  - projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}/siteSearchEngine/targetSites/{targetSite}
 description: |
   TargetSite represents a URI pattern that the users want to confine their
   search.
 references:
   guides:
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.siteSearchEngine.targetSites'
+  api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.siteSearchEngine.targetSites
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
+base_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites
 self_link: '{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
-delete_url: '{{name}}'
-immutable: true
+create_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites/{{target_site_id}}'
+  - projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites/{{target_site_id}}
 timeouts:
   # 8 hour timeout to allow for indexing/unindexing as needed
   insert_minutes: 480
   update_minutes: 480
   delete_minutes: 480
-autogen_async: false
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.tmpl'
-examples:
-  - name: 'discoveryengine_targetsite_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-    ignore_read_extra:
-      - 'project'
-  - name: 'discoveryengine_targetsite_advanced'
-    primary_resource_id: 'advanced'
-    vars:
-      data_store_id: 'data-store-id'
-    ignore_read_extra:
-      - 'project'
+  custom_import: templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.tmpl
+samples:
+  - name: discoveryengine_targetsite_basic
+    primary_resource_id: basic
+    steps:
+      - name: discoveryengine_targetsite_basic
+        resource_id_vars:
+          data_store_id: data-store-id
+        ignore_read_extra:
+          - project
+  - name: discoveryengine_targetsite_advanced
+    primary_resource_id: advanced
+    steps:
+      - name: discoveryengine_targetsite_advanced
+        resource_id_vars:
+          data_store_id: data-store-id
+        ignore_read_extra:
+          - project
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the data store should reside. The value can
@@ -66,14 +67,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'dataStoreId'
+  - name: dataStoreId
     type: String
     description: |
       The unique id of the data store.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'targetSiteId'
+  - name: targetSiteId
     type: String
     description: |
       The unique id of the target site.
@@ -81,7 +82,7 @@ parameters:
     immutable: true
     output: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique full resource name of the target site. Values are of the format
@@ -89,21 +90,21 @@ properties:
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
     output: true
-  - name: 'providedUriPattern'
+  - name: providedUriPattern
     type: String
     description: |
       The user provided URI pattern from which the `generated_uri_pattern` is
       generated.
     required: true
     ignore_read: true
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       The possible target site types.
     enum_values:
-      - 'INCLUDE'
-      - 'EXCLUDE'
-  - name: 'exactMatch'
+      - INCLUDE
+      - EXCLUDE
+  - name: exactMatch
     type: Boolean
     description: |
       If set to false, a uri_pattern is generated to include all pages whose
@@ -113,62 +114,65 @@ properties:
       provided_uri_pattern is always normalized to generate the URI pattern to
       be used by the search engine.
     default_value: false
-  - name: 'generatedUriPattern'
+  - name: generatedUriPattern
     type: String
     description: |
       This is system-generated based on the `provided_uri_pattern`.
     output: true
-  - name: 'rootDomainUri'
+  - name: rootDomainUri
     type: String
     description: |
       Root domain of the `provided_uri_pattern`.
     output: true
-  - name: 'siteVerificationInfo'
+  - name: siteVerificationInfo
     type: NestedObject
     description: |
       Site ownership and validity verification status.
     output: true
     properties:
-      - name: 'siteVerificationState'
+      - name: siteVerificationState
         type: Enum
         description: |
           Site verification state indicating the ownership and validity.
         enum_values:
-          - 'VERIFIED'
-          - 'UNVERIFIED'
-          - 'EXEMPTED'
-      - name: 'verifyTime'
+          - VERIFIED
+          - UNVERIFIED
+          - EXEMPTED
+      - name: verifyTime
         type: Time
         description: |
           Latest site verification time.
-  - name: 'indexingStatus'
+  - name: indexingStatus
     type: Enum
     description: |
       The indexing status.
     output: true
     enum_values:
-      - 'PENDING'
-      - 'FAILED'
-      - 'SUCCEEDED'
-      - 'DELETING'
-  - name: 'updateTime'
+      - PENDING
+      - FAILED
+      - SUCCEEDED
+      - DELETING
+  - name: updateTime
     type: Time
     description: |
       The target site's last updated time.
     output: true
-  - name: 'failureReason'
+  - name: failureReason
     type: NestedObject
     description: |
       Site search indexing failure reasons.
     output: true
     properties:
-      - name: 'quotaFailure'
+      - name: quotaFailure
         type: NestedObject
         description: |
           Site verification state indicating the ownership and validity.
         properties:
-          - name: 'totalRequiredQuota'
+          - name: totalRequiredQuota
             type: Integer
             description: |
               This number is an estimation on how much total quota this project
               needs to successfully complete indexing.
+autogen_async: false
+delete_url: '{{name}}'
+immutable: true

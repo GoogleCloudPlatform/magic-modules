@@ -12,42 +12,44 @@
 # limitations under the License.
 
 ---
-name: 'UserCreds'
+name: UserCreds
 description: |
   User credentials for a Cloud Firestore with MongoDB compatibility database.
   The resource is owned by the database and is deleted along with the database.
 references:
   guides:
-    'Authenticate and connect to a database': 'https://cloud.google.com/firestore/mongodb-compatibility/docs/connect'
-  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.userCreds'
-base_url: 'projects/{{project}}/databases/{{database}}/userCreds'
-self_link: 'projects/{{project}}/databases/{{database}}/userCreds/{{name}}'
-immutable: true
-create_url: 'projects/{{project}}/databases/{{database}}/userCreds?userCredsId={{name}}'
-autogen_async: false
+    Authenticate and connect to a database: https://cloud.google.com/firestore/mongodb-compatibility/docs/connect
+  api: https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.userCreds
+base_url: projects/{{project}}/databases/{{database}}/userCreds
+self_link: projects/{{project}}/databases/{{database}}/userCreds/{{name}}
+create_url: projects/{{project}}/databases/{{database}}/userCreds?userCredsId={{name}}
 custom_code:
   post_create: templates/terraform/post_create/firestore_user_creds.go.tmpl
-examples:
-  - name: 'firestore_user_creds_basic'
-    primary_resource_id: 'my-user-creds'
-    vars:
-      database_id: 'database-id-mongodb-compatible'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_user_creds_with_secret_manager'
-    primary_resource_id: 'my-user-creds'
-    vars:
-      database_id: 'database-id-mongodb-compatible'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: firestore_user_creds_basic
+    primary_resource_id: my-user-creds
+    steps:
+      - name: firestore_user_creds_basic
+        resource_id_vars:
+          database_id: database-id-mongodb-compatible
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: firestore_user_creds_with_secret_manager
+    primary_resource_id: my-user-creds
+    steps:
+      - name: firestore_user_creds_with_secret_manager
+        resource_id_vars:
+          database_id: database-id-mongodb-compatible
+        test_env_vars:
+          project_id: PROJECT_NAME
 parameters:
-  - name: 'database'
+  - name: database
     type: String
     description: |
       The Firestore database ID.
     required: true
     url_param_only: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The ID to use for the user creds, which will become the final component
@@ -57,25 +59,25 @@ parameters:
       with first character a letter and the last a letter or a number. Must not
       be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/shortname_to_url.go.tmpl
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The timestamp at which these user creds were created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The timestamp at which these user creds were updated.
     output: true
-  - name: 'state'
+  - name: state
     type: String
     description: |
       The state of the user creds.
     output: true
-  - name: 'securePassword'
+  - name: securePassword
     type: String
     description: |
       The plaintext server-generated password for the user creds.
@@ -83,15 +85,17 @@ properties:
     sensitive: true
     # Only returned in the create call.
     ignore_read: true
-  - name: 'resourceIdentity'
+  - name: resourceIdentity
     type: NestedObject
     description: |
       Describes the Resource Identity principal.
     output: true
     properties:
-      - name: 'principal'
+      - name: principal
         type: String
         description: |
           The principal identifier string.
           See https://cloud.google.com/iam/docs/principal-identifiers.
         output: true
+autogen_async: false
+immutable: true

@@ -15,25 +15,26 @@
 name: Framework
 description: Frameworks allow you to monitor and enforce compliance and security requirements. Manage compliance by assigning built-in or custom frameworks to resources.
 references:
-  api: "https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworks"
+  api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworks
+id_format: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
 base_url: organizations/{{organization}}/locations/{{location}}/frameworks
-update_mask: true
 self_link: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
 create_url: organizations/{{organization}}/locations/{{location}}/frameworks?frameworkId={{framework_id}}
 update_verb: PATCH
-id_format: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
+update_mask: true
 import_format:
   - organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
-examples:
-  - name: "cloudsecuritycompliance_framework_basic"
-    primary_resource_id: "example"
-    vars:
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
-autogen_status: RnJhbWV3b3Jr
 custom_code:
-  encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"
+  encoder: templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl
+samples:
+  - name: cloudsecuritycompliance_framework_basic
+    primary_resource_id: example
+    steps:
+      - name: cloudsecuritycompliance_framework_basic
+        resource_id_vars:
+          framework_name: example-framework
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
   - name: organization
     type: String
@@ -191,3 +192,4 @@ properties:
       BUILT_IN
       CUSTOM
     output: true
+autogen_status: RnJhbWV3b3Jr

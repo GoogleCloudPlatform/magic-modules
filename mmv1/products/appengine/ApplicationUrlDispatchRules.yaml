@@ -18,30 +18,27 @@ description: |
   Rules to match an HTTP request and dispatch that request to a service.
 references:
   api: https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule
+id_format: '{{project}}'
 base_url: apps/{{project}}
 create_url: apps/{{project}}?updateMask=dispatch_rules
-delete_url: apps/{{project}}?updateMask=dispatch_rules
-update_url: apps/{{project}}?updateMask=dispatch_rules
 create_verb: PATCH
+update_url: apps/{{project}}?updateMask=dispatch_rules
 update_verb: PATCH
-delete_verb: PATCH
-id_format: '{{project}}'
+mutex: apps/{{project}}
 import_format:
   - '{{project}}'
-mutex: apps/{{project}}
-exclude_sweeper: true
 async:
   operation:
     base_url: '{{op_id}}'
-error_retry_predicates:
-  - transport_tpg.IsAppEngineRetryableError
 custom_code:
   test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.tmpl
-examples:
+samples:
   - name: app_engine_application_url_dispatch_rules_basic
     primary_resource_id: web_service
-    vars:
-      bucket_name: appengine-test-bucket
+    steps:
+      - name: app_engine_application_url_dispatch_rules_basic
+        resource_id_vars:
+          bucket_name: appengine-test-bucket
 properties:
   - name: dispatchRules
     type: Array
@@ -69,3 +66,8 @@ properties:
           description: |
             Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
             The sum of the lengths of the domain and path may not exceed 100 characters.
+delete_url: apps/{{project}}?updateMask=dispatch_rules
+delete_verb: PATCH
+error_retry_predicates:
+  - transport_tpg.IsAppEngineRetryableError
+exclude_sweeper: true

@@ -12,62 +12,61 @@
 # limitations under the License.
 
 ---
-name: 'Database'
-kind: 'sql#database'
+name: Database
+kind: sql#database
 description: |
   Represents a SQL database inside the Cloud SQL instance, hosted in
   Google's cloud.
 docs:
-base_url: 'projects/{{project}}/instances/{{instance}}/databases'
-has_self_link: true
-mutex: 'google-sql-database-instance-{{project}}-{{instance}}'
+base_url: projects/{{project}}/instances/{{instance}}/databases
+mutex: google-sql-database-instance-{{project}}-{{instance}}
 import_format:
-  - 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
+  - projects/{{project}}/instances/{{instance}}/databases/{{name}}
   - '{{project}}/{{instance}}/{{name}}'
-  - 'instances/{{instance}}/databases/{{name}}'
+  - instances/{{instance}}/databases/{{name}}
   - '{{instance}}/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
-    base_url: 'projects/{{project}}/operations/{{op_id}}'
+    base_url: projects/{{project}}/operations/{{op_id}}
   result:
     resource_inside_response: false
-collection_url_key: 'items'
 custom_code:
-  pre_read: 'templates/terraform/pre_read/sql_database_activation_policy.tmpl'
-# Sweeper skipped as this resource has customized deletion.
-exclude_sweeper: true
-read_error_transform: 'transformSQLDatabaseReadError'
-examples:
-  - name: 'sql_database_basic'
-    primary_resource_id: 'database'
-    vars:
-      database_name: 'my-database'
-      database_instance_name: 'my-database-instance'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'sql_database_deletion_policy'
-    primary_resource_id: 'database_deletion_policy'
-    vars:
-      database_name: 'my-database'
-      database_instance_name: 'my-database-instance'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_policy'
+  pre_read: templates/terraform/pre_read/sql_database_activation_policy.tmpl
+samples:
+  - name: sql_database_basic
+    primary_resource_id: database
+    steps:
+      - name: sql_database_basic
+        resource_id_vars:
+          database_instance_name: my-database-instance
+          database_name: my-database
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: sql_database_deletion_policy
+    primary_resource_id: database_deletion_policy
+    steps:
+      - name: sql_database_deletion_policy
+        resource_id_vars:
+          database_instance_name: my-database-instance
+          database_name: my-database
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - deletion_policy
 parameters:
-  - name: 'instance'
+  - name: instance
     type: String
     description: |
       The name of the Cloud SQL instance. This does not include the project
@@ -75,7 +74,7 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'charset'
+  - name: charset
     type: String
     description: |
       The charset value. See MySQL's
@@ -84,8 +83,8 @@ properties:
       for more details and supported values. Postgres databases only support
       a value of `UTF8` at creation time.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-  - name: 'collation'
+    diff_suppress_func: tpgresource.CaseDiffSuppress
+  - name: collation
     type: String
     description: |
       The collation value. See MySQL's
@@ -94,10 +93,15 @@ properties:
       for more details and supported values. Postgres databases only support
       a value of `en_US.UTF8` at creation time.
     default_from_api: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the database in the Cloud SQL instance.
       This does not include the project ID or instance name.
     required: true
     immutable: true
+collection_url_key: items
+# Sweeper skipped as this resource has customized deletion.
+exclude_sweeper: true
+has_self_link: true
+read_error_transform: transformSQLDatabaseReadError

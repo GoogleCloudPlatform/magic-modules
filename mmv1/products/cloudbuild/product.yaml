@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'CloudBuild'
-legacy_name: 'cloudbuild'
-display_name: 'Cloud Build'
-versions:
-  - name: 'ga'
-    base_url: 'https://cloudbuild.googleapis.com/v1/'
+name: CloudBuild
+display_name: Cloud Build
+legacy_name: cloudbuild
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://cloudbuild.googleapis.com/v1/

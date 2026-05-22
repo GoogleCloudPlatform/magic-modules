@@ -12,71 +12,67 @@
 # limitations under the License.
 
 ---
-name: 'RegionDiskType'
-kind: 'compute#diskType'
+name: RegionDiskType
+kind: compute#diskType
 description: |
   Represents a regional DiskType resource. A DiskType resource represents
   the type of disk to use, such as a pd-ssd, pd-balanced or pd-standard. To reference a
   disk type, use the disk type's full or partial URL.
-exclude: true
-readonly: true
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/diskTypes'
-has_self_link: true
+base_url: projects/{{project}}/regions/{{region}}/diskTypes
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-collection_url_key: 'items'
 custom_code:
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
-    description: 'A reference to the region where the disk type resides.'
+    description: A reference to the region where the disk type resides.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'defaultDiskSizeGb'
+  - name: defaultDiskSizeGb
     type: Integer
-    description: 'Server-defined default disk size in GB.'
+    description: Server-defined default disk size in GB.
     output: true
-  - name: 'deprecated'
+  - name: deprecated
     type: NestedObject
-    description: 'The deprecation status associated with this disk type.'
+    description: The deprecation status associated with this disk type.
     output: true
     properties:
-      - name: 'deleted'
+      - name: deleted
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DELETED.
         output: true
-      - name: 'deprecated'
+      - name: deprecated
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DEPRECATED.
         output: true
-      - name: 'obsolete'
+      - name: obsolete
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to OBSOLETE.
         output: true
-      - name: 'replacement'
+      - name: replacement
         type: String
         description: |
           The URL of the suggested replacement for a deprecated resource. The
           suggested replacement resource must be the same kind of resource as
           the deprecated resource.
         output: true
-      - name: 'state'
+      - name: state
         type: Enum
         description: |
           The deprecation state of this resource. This can be DEPRECATED,
@@ -87,23 +83,27 @@ properties:
           and result in an error.
         output: true
         enum_values:
-          - 'DEPRECATED'
-          - 'OBSOLETE'
-          - 'DELETED'
-  - name: 'description'
+          - DEPRECATED
+          - OBSOLETE
+          - DELETED
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     output: true
-  - name: 'id'
+  - name: id
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     output: true
-  - name: 'name'
+  - name: name
     type: String
-    description: 'Name of the resource.'
-  - name: 'validDiskSize'
+    description: Name of the resource.
+  - name: validDiskSize
     type: String
     description: |
       An optional textual description of the valid disk size, such as
       "10GB-10TB".
     output: true
+collection_url_key: items
+exclude: true
+has_self_link: true
+readonly: true

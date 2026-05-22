@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'CloudFunctions'
-legacy_name: 'cloudfunctions'
-display_name: 'Cloud Functions'
-versions:
-  - name: 'ga'
-    base_url: 'https://cloudfunctions.googleapis.com/v1/'
+name: CloudFunctions
+display_name: Cloud Functions
+legacy_name: cloudfunctions
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://cloudfunctions.googleapis.com/v1/

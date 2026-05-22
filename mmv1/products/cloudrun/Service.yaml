@@ -12,195 +12,158 @@
 # limitations under the License.
 
 ---
-name: 'Service'
-kind: 'Service'
-description: |-
-  A Cloud Run service has a unique endpoint and autoscales containers.
+name: Service
+kind: Service
+description: A Cloud Run service has a unique endpoint and autoscales containers.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/run/docs/'
-  api: 'https://cloud.google.com/run/docs/reference/rest/v1/namespaces.services'
+    Official Documentation: https://cloud.google.com/run/docs/
+  api: https://cloud.google.com/run/docs/reference/rest/v1/namespaces.services
 docs:
   warning: |
     We recommend using the `google_cloud_run_v2_service` resource which offers a better
     developer experience and broader support of Cloud Run features.
-id_format: 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
-base_url: 'apis/serving.knative.dev/v1/namespaces/{{project}}/services'
-cai_base_url: 'projects/{{project}}/locations/{{location}}/services'
-cai_asset_name_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
+id_format: locations/{{location}}/namespaces/{{project}}/services/{{name}}
+base_url: apis/serving.knative.dev/v1/namespaces/{{project}}/services
 import_format:
-  - 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
-datasource_experimental:
-  generate: true
-  exclude_test: true
-generate_list_resource: true
+  - locations/{{location}}/namespaces/{{project}}/services/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: 'PollAsync'
-  check_response_func_existence: 'PollCheckKnativeStatusFunc(res)'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  type: PollAsync
+  check_response_func_existence: PollCheckKnativeStatusFunc(res)
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: false
   target_occurrences: 1
-  actions: ['create', 'update']
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_attribute: 'service'
-  base_url: 'v1/projects/{{project}}/locations/{{location}}/services/{{service}}'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/services/{{service}}'
-    - '{{service}}'
+  actions: [create, update]
 custom_code:
-  constants: 'templates/terraform/constants/cloud_run_service.go.tmpl'
-  encoder: 'templates/terraform/encoders/cloud_run_service.go.tmpl'
-  decoder: 'templates/terraform/decoders/cloud_run.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/cloudrun_service.go.tmpl'
-custom_diff:
-  - 'revisionNameCustomizeDiff'
-error_retry_predicates:
-
-  - 'transport_tpg.IsCloudRunCreationConflict'
-schema_version: 2
-state_upgrade_base_schema_version: 1
-state_upgraders: true
-sweeper:
-  url_substitutions:
-    - region: "us-central1"
-    - region: "europe-west1"
-    - region: "europe-north1"
+  constants: templates/terraform/constants/cloud_run_service.go.tmpl
+  encoder: templates/terraform/encoders/cloud_run_service.go.tmpl
+  decoder: templates/terraform/decoders/cloud_run.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/cloudrun_service.go.tmpl
 samples:
-  - name: 'cloud_run_service_basic'
-    primary_resource_id: 'default'
+  - name: cloud_run_service_basic
+    primary_resource_id: default
     steps:
-      - name: 'cloud_run_service_basic'
+      - name: cloud_run_service_basic
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
+          cloud_run_service_name: cloudrun-srv
         test_env_vars:
-          project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_gpu'
-    primary_resource_id: 'default'
+          project: PROJECT_NAME
+  - name: cloud_run_service_gpu
+    primary_resource_id: default
     steps:
-      - name: 'cloud_run_service_gpu'
+      - name: cloud_run_service_gpu
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
+          cloud_run_service_name: cloudrun-srv
         test_env_vars:
-          project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_sql'
-    primary_resource_id: 'default'
+          project: PROJECT_NAME
+  - name: cloud_run_service_sql
+    primary_resource_id: default
     steps:
-      - name: 'cloud_run_service_sql'
+      - name: cloud_run_service_sql
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
-          cloud_run_sql_name: 'cloudrun-sql'
+          cloud_run_service_name: cloudrun-srv
+          cloud_run_sql_name: cloudrun-sql
         vars:
-          deletion_protection: 'true'
+          deletion_protection: "true"
         test_vars_overrides:
-          'deletion_protection': 'false'
+          deletion_protection: "false"
         oics_vars_overrides:
-          'deletion_protection': 'false'
+          deletion_protection: "false"
         ignore_read_extra:
-          - 'autogenerate_revision_name'
-  - name: 'cloud_run_service_noauth'
-    primary_resource_id: 'default'
+          - autogenerate_revision_name
+  - name: cloud_run_service_noauth
+    primary_resource_id: default
     steps:
-      - name: 'cloud_run_service_noauth'
+      - name: cloud_run_service_noauth
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
+          cloud_run_service_name: cloudrun-srv
         test_env_vars:
-          project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_multiple_environment_variables'
-    primary_resource_id: 'default'
+          project: PROJECT_NAME
+  - name: cloud_run_service_multiple_environment_variables
+    primary_resource_id: default
     exclude_basic_doc: true
     steps:
-      - name: 'cloud_run_service_multiple_environment_variables'
+      - name: cloud_run_service_multiple_environment_variables
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
+          cloud_run_service_name: cloudrun-srv
         test_env_vars:
-          project: 'PROJECT_NAME'
+          project: PROJECT_NAME
         ignore_read_extra:
-          - 'autogenerate_revision_name'
-  - name: 'cloud_run_service_secret_environment_variables'
-    primary_resource_id: 'default'
+          - autogenerate_revision_name
+  - name: cloud_run_service_secret_environment_variables
+    primary_resource_id: default
     exclude_basic_doc: true
     steps:
-      - name: 'cloud_run_service_secret_environment_variables'
+      - name: cloud_run_service_secret_environment_variables
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
-          secret_id: 'secret'
+          cloud_run_service_name: cloudrun-srv
+          secret_id: secret
         test_vars_overrides:
           # for backward compatible
           secret_id: '"secret" + randomSuffix'
         test_env_vars:
-          project: 'PROJECT_NAME'
+          project: PROJECT_NAME
         ignore_read_extra:
-          - 'autogenerate_revision_name'
-  - name: 'cloud_run_service_secret_volumes'
-    primary_resource_id: 'default'
+          - autogenerate_revision_name
+  - name: cloud_run_service_secret_volumes
+    primary_resource_id: default
     exclude_basic_doc: true
     steps:
-      - name: 'cloud_run_service_secret_volumes'
+      - name: cloud_run_service_secret_volumes
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
-          secret_id: 'secret'
+          cloud_run_service_name: cloudrun-srv
+          secret_id: secret
         test_vars_overrides:
           # for backward compatible
           secret_id: '"secret" + randomSuffix'
         test_env_vars:
-          project: 'PROJECT_NAME'
+          project: PROJECT_NAME
         ignore_read_extra:
-          - 'autogenerate_revision_name'
-  - name: 'cloud_run_service_probes'
-    primary_resource_id: 'default'
+          - autogenerate_revision_name
+  - name: cloud_run_service_probes
+    primary_resource_id: default
     steps:
-      - name: 'cloud_run_service_probes'
+      - name: cloud_run_service_probes
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
-  - name: 'cloud_run_service_readiness_probe'
-    primary_resource_id: 'default'
+          cloud_run_service_name: cloudrun-srv
+  - name: cloud_run_service_readiness_probe
+    primary_resource_id: default
     steps:
-      - name: 'cloud_run_service_readiness_probe'
+      - name: cloud_run_service_readiness_probe
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv-rp'
+          cloud_run_service_name: cloudrun-srv-rp
         test_env_vars:
-          project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_multicontainer'
-    primary_resource_id: 'default'
-    min_version: 'beta'
+          project: PROJECT_NAME
+  - name: cloud_run_service_multicontainer
+    primary_resource_id: default
+    min_version: beta
     steps:
-      - name: 'cloud_run_service_multicontainer'
+      - name: cloud_run_service_multicontainer
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
+          cloud_run_service_name: cloudrun-srv
         test_env_vars:
-          project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_iap'
-    primary_resource_id: 'default'
+          project: PROJECT_NAME
+  - name: cloud_run_service_iap
+    primary_resource_id: default
     steps:
-      - name: 'cloud_run_service_iap'
+      - name: cloud_run_service_iap
         resource_id_vars:
-          cloud_run_service_name: 'cloudrun-srv'
+          cloud_run_service_name: cloudrun-srv
         test_env_vars:
-          project: 'PROJECT_NAME'
-virtual_fields:
-  - name: 'autogenerate_revision_name'
-    description: |
-      If set to `true`, the revision name (template.metadata.name) will be omitted and
-      autogenerated by Cloud Run. This cannot be set to `true` while `template.metadata.name`
-      is also set.
-      (For legacy support, if `template.metadata.name` is unset in state while
-      this field is set to false, the revision name will still autogenerate.)
-    type: Boolean
-    default_value: false
+          project: PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: The location of the cloud run instance. eg us-central1
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |-
       Name must be unique within a Google Cloud project and region.
@@ -211,13 +174,13 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'spec'
+  - name: spec
     type: NestedObject
     description: Spec holds the desired state of the Service (from the client).
     required: true
     flatten_object: true
     properties:
-      - name: 'traffic'
+      - name: traffic
         type: Array
         description: |-
           Traffic specifies how to distribute traffic over a collection of Knative Revisions
@@ -226,34 +189,31 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'revisionName'
+            - name: revisionName
               type: String
-              description: |-
-                RevisionName of a specific revision to which to send this portion of traffic.
-            - name: 'percent'
+              description: RevisionName of a specific revision to which to send this portion of traffic.
+            - name: percent
               type: Integer
-              description: |-
-                Percent specifies percent of the traffic to this Revision or Configuration.
+              description: Percent specifies percent of the traffic to this Revision or Configuration.
               required: true
-            - name: 'tag'
+            - name: tag
               type: String
-              description: |-
-                Tag is optionally used to expose a dedicated url for referencing this target exclusively.
-            - name: 'latestRevision'
+              description: Tag is optionally used to expose a dedicated url for referencing this target exclusively.
+            - name: latestRevision
               type: Boolean
               description: |-
                 LatestRevision may be optionally provided to indicate that the latest ready
                 Revision of the Configuration should be used for this traffic target. When
                 provided LatestRevision must be true if RevisionName is empty; it must be
                 false when RevisionName is non-empty.
-            - name: 'url'
+            - name: url
               type: String
               description: |-
                 URL displays the URL for accessing tagged traffic targets. URL is displayed in status,
                 and is disallowed on spec. URL must contain a scheme (e.g. http://) and a hostname,
                 but may not contain anything else (e.g. basic auth, url path, etc.)
               output: true
-      - name: 'template'
+      - name: template
         type: NestedObject
         description: |-
           template holds the latest specification for the Revision to
@@ -267,7 +227,7 @@ properties:
           Cloud Run does not currently support referencing a build that is
           responsible for materializing the container image from source.
         properties:
-          - name: 'metadata'
+          - name: metadata
             type: NestedObject
             description: |-
               Optional metadata for this Revision, including labels and annotations.
@@ -279,19 +239,18 @@ properties:
               annotation key.
             default_from_api: true
             properties:
-              - name: 'labels'
+              - name: labels
                 type: KeyValuePairs
                 description: |-
                   Map of string keys and values that can be used to organize and categorize
                   (scope and select) objects.
                 default_from_api: true
-                diff_suppress_func: 'cloudrunTemplateLabelDiffSuppress'
-              - name: 'generation'
+                diff_suppress_func: cloudrunTemplateLabelDiffSuppress
+              - name: generation
                 type: Integer
-                description: |-
-                  A sequence number representing a specific generation of the desired state.
+                description: A sequence number representing a specific generation of the desired state.
                 output: true
-              - name: 'resourceVersion'
+              - name: resourceVersion
                 type: String
                 description: |-
                   An opaque value that represents the internal version of this object that
@@ -300,25 +259,24 @@ properties:
                   resource or set of resources. They may only be valid for a
                   particular resource or set of resources.
                 output: true
-              - name: 'selfLink'
+              - name: selfLink
                 type: String
-                description: |-
-                  SelfLink is a URL representing this object.
+                description: SelfLink is a URL representing this object.
                 output: true
-              - name: 'uid'
+              - name: uid
                 type: String
                 description: |-
                   UID is a unique id generated by the server on successful creation of a resource and is not
                   allowed to change on PUT operations.
                 output: true
-              - name: 'namespace'
+              - name: namespace
                 type: String
                 description: |-
                   In Cloud Run the namespace must be equal to either the
                   project ID or project number. It will default to the resource's project.
                 default_from_api: true
-                custom_expand: 'templates/terraform/custom_expand/default_to_project.go.tmpl'
-              - name: 'annotations'
+                custom_expand: templates/terraform/custom_expand/default_to_project.go.tmpl
+              - name: annotations
                 type: KeyValuePairs
                 description: |-
                   Annotations is a key value map stored with a resource that
@@ -368,37 +326,34 @@ properties:
                     [GPU zonal redundancy](https://cloud.google.com/run/docs/configuring/services/gpu-zonal-redundancy) for the Revision.
                   - `run.googleapis.com/health-check-disabled` disabled health checking containers during deployment.
                 default_from_api: true
-                diff_suppress_func: 'cloudrunTemplateAnnotationDiffSuppress'
-              - name: 'name'
+                diff_suppress_func: cloudrunTemplateAnnotationDiffSuppress
+              - name: name
                 type: String
                 description: |-
                   Name must be unique within a Google Cloud project and region.
                   Is required when creating resources. Name is primarily intended
                   for creation idempotence and configuration definition. Cannot be updated.
                 default_from_api: true
-                custom_expand: 'templates/terraform/custom_expand/cloud_run_service_revision_name.tmpl'
-          - name: 'spec'
+                custom_expand: templates/terraform/custom_expand/cloud_run_service_revision_name.tmpl
+          - name: spec
             type: NestedObject
-            description:
-              RevisionSpec holds the desired state of the Revision (from the
-              client).
+            description: RevisionSpec holds the desired state of the Revision (from the client).
             required: true
             default_from_api: true
             properties:
-              - name: 'containers'
+              - name: containers
                 type: Array
-                description: |-
-                  Containers defines the unit of execution for this Revision.
+                description: Containers defines the unit of execution for this Revision.
                 required: true
                 default_from_api: true
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'name'
+                    - name: name
                       type: String
                       description: Name of the container
                       default_from_api: true
-                    - name: 'workingDir'
+                    - name: workingDir
                       type: String
                       description: |-
                         Container's working directory.
@@ -406,14 +361,14 @@ properties:
                         might be configured in the container image.
                       immutable: true
                       deprecation_message: '`working_dir` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.'
-                    - name: 'args'
+                    - name: args
                       type: Array
                       description: |-
                         Arguments to the entrypoint.
                         The docker image's CMD is used if this is not provided.
                       item_type:
                         type: String
-                    - name: 'envFrom'
+                    - name: envFrom
                       type: Array
                       description: |-
                         List of sources to populate environment variables in the container.
@@ -426,96 +381,85 @@ properties:
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: 'prefix'
+                          - name: prefix
                             type: String
-                            description: |-
-                              An optional identifier to prepend to each key in the ConfigMap.
-                          - name: 'configMapRef'
+                            description: An optional identifier to prepend to each key in the ConfigMap.
+                          - name: configMapRef
                             type: NestedObject
-                            description: |-
-                              The ConfigMap to select from.
+                            description: The ConfigMap to select from.
                             properties:
-                              - name: 'optional'
+                              - name: optional
                                 type: Boolean
-                                description: |-
-                                  Specify whether the ConfigMap must be defined
-                              - name: 'localObjectReference'
+                                description: Specify whether the ConfigMap must be defined
+                              - name: localObjectReference
                                 type: NestedObject
                                 description: The ConfigMap to select from.
                                 properties:
-                                  - name: 'name'
+                                  - name: name
                                     type: String
-                                    description: |-
-                                      Name of the referent.
+                                    description: Name of the referent.
                                     required: true
-                          - name: 'secretRef'
+                          - name: secretRef
                             type: NestedObject
-                            description: |-
-                              The Secret to select from.
+                            description: The Secret to select from.
                             properties:
-                              - name: 'localObjectReference'
+                              - name: localObjectReference
                                 type: NestedObject
                                 description: The Secret to select from.
                                 properties:
-                                  - name: 'name'
+                                  - name: name
                                     type: String
-                                    description: |-
-                                      Name of the referent.
+                                    description: Name of the referent.
                                     required: true
-                              - name: 'optional'
+                              - name: optional
                                 type: Boolean
-                                description: |-
-                                  Specify whether the Secret must be defined
-                    - name: 'image'
+                                description: Specify whether the Secret must be defined
+                    - name: image
                       type: String
                       description: |-
                         Docker image name. This is most often a reference to a container located
                         in the container registry, such as gcr.io/cloudrun/hello
                       required: true
-                    - name: 'command'
+                    - name: command
                       type: Array
                       description: |-
                         Entrypoint array. Not executed within a shell.
                         The docker image's ENTRYPOINT is used if this is not provided.
                       item_type:
                         type: String
-                    - name: 'env'
+                    - name: env
                       type: Array
-                      description: |-
-                        List of environment variables to set in the container.
+                      description: List of environment variables to set in the container.
                       is_set: true
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: 'name'
+                          - name: name
                             type: String
                             description: Name of the environment variable.
-                          - name: 'value'
+                          - name: value
                             type: String
                             # env is a set.
                             # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
                             # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
                             default_value: ""
-                            description: |-
-                              Defaults to "".
-                          - name: 'valueFrom'
+                            description: Defaults to "".
+                          - name: valueFrom
                             type: NestedObject
-                            description: |-
-                              Source for the environment variable's value. Only supports secret_key_ref.
+                            description: Source for the environment variable's value. Only supports secret_key_ref.
                             properties:
-                              - name: 'secretKeyRef'
+                              - name: secretKeyRef
                                 type: NestedObject
-                                description: |-
-                                  Selects a key (version) of a secret in Secret Manager.
+                                description: Selects a key (version) of a secret in Secret Manager.
                                 required: true
                                 properties:
-                                  - name: 'key'
+                                  - name: key
                                     type: String
                                     description: |-
                                       A Cloud Secret Manager secret version. Must be 'latest' for the latest
                                       version or an integer for a specific version.
                                     required: true
-                                  - name: 'name'
+                                  - name: name
                                     type: String
                                     description: |-
                                       The name of the secret in Cloud Secret Manager. By default, the secret is assumed to be in the same project.
@@ -525,39 +469,29 @@ properties:
                                       If multiple alias definitions are needed, they must be separated by commas.
                                       The alias definitions must be set on the run.googleapis.com/secrets annotation.
                                     required: true
-                    - name: 'ports'
+                    - name: ports
                       type: Array
-                      description: |-
-                        List of open ports in the container.
+                      description: List of open ports in the container.
                       default_from_api: true
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: 'name'
+                          - name: name
                             type: String
-                            description:
-                              If specified, used to specify which protocol to
-                              use. Allowed values are "http1" (HTTP/1) and "h2c"
-                              (HTTP/2 end-to-end). Defaults to "http1".
+                            description: If specified, used to specify which protocol to use. Allowed values are "http1" (HTTP/1) and "h2c" (HTTP/2 end-to-end). Defaults to "http1".
                             default_from_api: true
-                          - name: 'protocol'
+                          - name: protocol
                             type: String
-                            description:
-                              Protocol for port. Must be "TCP". Defaults to
-                              "TCP".
-                          - name: 'containerPort'
+                            description: Protocol for port. Must be "TCP". Defaults to "TCP".
+                          - name: containerPort
                             type: Integer
-                            description:
-                              Port number the container listens on. This must be
-                              a valid port number (between 1 and 65535).
-                              Defaults to "8080".
-                    - name: 'resources'
+                            description: Port number the container listens on. This must be a valid port number (between 1 and 65535). Defaults to "8080".
+                    - name: resources
                       type: NestedObject
-                      description: |-
-                        Compute Resources required by this container. Used to set values such as max memory
+                      description: Compute Resources required by this container. Used to set values such as max memory
                       default_from_api: true
                       properties:
-                        - name: 'limits'
+                        - name: limits
                           type: KeyValuePairs
                           description: |-
                             Limits describes the maximum amount of compute resources allowed.
@@ -568,7 +502,7 @@ properties:
                             The values of the map is string form of the 'quantity' k8s type:
                             https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                           default_from_api: true
-                        - name: 'requests'
+                        - name: requests
                           type: KeyValuePairs
                           description: |-
                             Requests describes the minimum amount of compute resources required.
@@ -576,7 +510,7 @@ properties:
                             explicitly specified, otherwise to an implementation-defined value.
                             The values of the map is string form of the 'quantity' k8s type:
                             https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
-                    - name: 'volumeMounts'
+                    - name: volumeMounts
                       type: Array
                       description: |-
                         Volume to mount into the container's filesystem.
@@ -584,22 +518,20 @@ properties:
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: 'mountPath'
+                          - name: mountPath
                             type: String
                             description: |-
                               Path within the container at which the volume should be mounted.  Must
                               not contain ':'.
                             required: true
-                          - name: 'subPath'
+                          - name: subPath
                             type: String
-                            description: |-
-                              Path within the volume from which the container's volume should be mounted.
-                          - name: 'name'
+                            description: Path within the volume from which the container's volume should be mounted.
+                          - name: name
                             type: String
-                            description: |-
-                              This must match the Name of a Volume.
+                            description: This must match the Name of a Volume.
                             required: true
-                    - name: 'startupProbe'
+                    - name: startupProbe
                       type: NestedObject
                       description: |-
                         Startup probe of application within the container.
@@ -607,295 +539,276 @@ properties:
                         succeeds. Container will not be added to service endpoints if the probe fails.
                       default_from_api: true
                       properties:
-                        - name: 'initialDelaySeconds'
+                        - name: initialDelaySeconds
                           type: Integer
                           description: |-
                             Number of seconds after the container has started before the probe is
                             initiated.
                             Defaults to 0 seconds. Minimum value is 0. Maximum value is 240.
                           default_value: 0
-                        - name: 'timeoutSeconds'
+                        - name: timeoutSeconds
                           type: Integer
                           description: |-
                             Number of seconds after which the probe times out.
                             Defaults to 1 second. Minimum value is 1. Maximum value is 3600.
                             Must be smaller than periodSeconds.
                           default_value: 1
-                        - name: 'periodSeconds'
+                        - name: periodSeconds
                           type: Integer
                           description: |-
                             How often (in seconds) to perform the probe.
                             Default to 10 seconds. Minimum value is 1. Maximum value is 240.
                           default_value: 10
-                        - name: 'failureThreshold'
+                        - name: failureThreshold
                           type: Integer
                           description: |-
                             Minimum consecutive failures for the probe to be considered failed after
                             having succeeded. Defaults to 3. Minimum value is 1.
                           default_value: 3
-                        - name: 'tcpSocket'
+                        - name: tcpSocket
                           type: NestedObject
-                          description: |-
-                            TcpSocket specifies an action involving a TCP port.
+                          description: TcpSocket specifies an action involving a TCP port.
                           send_empty_value: true
                           allow_empty_object: true
                           exactly_one_of:
-                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                            - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
+                            - template.0.spec.0.containers.0.startup_probe.0.http_get
+                            - template.0.spec.0.containers.0.startup_probe.0.grpc
                           properties:
-                            - name: 'port'
+                            - name: port
                               type: Integer
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
                                 If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
-                        - name: 'httpGet'
+                        - name: httpGet
                           type: NestedObject
-                          description: |-
-                            HttpGet specifies the http request to perform.
+                          description: HttpGet specifies the http request to perform.
                           send_empty_value: true
                           allow_empty_object: true
                           exactly_one_of:
-                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                            - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
+                            - template.0.spec.0.containers.0.startup_probe.0.http_get
+                            - template.0.spec.0.containers.0.startup_probe.0.grpc
                           properties:
-                            - name: 'path'
+                            - name: path
                               type: String
-                              description: |-
-                                Path to access on the HTTP server. If set, it should not be empty string.
-                              default_value: "/"
-                            - name: 'port'
+                              description: Path to access on the HTTP server. If set, it should not be empty string.
+                              default_value: /
+                            - name: port
                               type: Integer
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
                                 If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
-                            - name: 'httpHeaders'
+                            - name: httpHeaders
                               type: Array
-                              description: |-
-                                Custom headers to set in the request. HTTP allows repeated headers.
+                              description: Custom headers to set in the request. HTTP allows repeated headers.
                               item_type:
                                 type: NestedObject
                                 properties:
-                                  - name: 'name'
+                                  - name: name
                                     type: String
-                                    description: |-
-                                      The header field name.
+                                    description: The header field name.
                                     required: true
-                                  - name: 'value'
+                                  - name: value
                                     type: String
-                                    description: |-
-                                      The header field value.
+                                    description: The header field value.
                                     send_empty_value: true
                                     default_value: ""
-                        - name: 'grpc'
+                        - name: grpc
                           type: NestedObject
-                          description: |-
-                            GRPC specifies an action involving a GRPC port.
+                          description: GRPC specifies an action involving a GRPC port.
                           send_empty_value: true
                           allow_empty_object: true
                           exactly_one_of:
-                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                            - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
+                            - template.0.spec.0.containers.0.startup_probe.0.http_get
+                            - template.0.spec.0.containers.0.startup_probe.0.grpc
                           properties:
-                            - name: 'port'
+                            - name: port
                               type: Integer
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
                                 If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
-                            - name: 'service'
+                            - name: service
                               type: String
                               description: |-
                                 The name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                                 If this is not specified, the default behavior is defined by gRPC.
-                    - name: 'readinessProbe'
+                    - name: readinessProbe
                       type: NestedObject
-                      description: |-
-                        Periodic probe of container readiness.
+                      description: Periodic probe of container readiness.
                       properties:
-                        - name: 'timeoutSeconds'
+                        - name: timeoutSeconds
                           type: Integer
                           description: |-
                             Number of seconds after which the probe times out.
                             Defaults to 1 second. Must be smaller than period_seconds.
                           default_from_api: true
-                        - name: 'periodSeconds'
+                        - name: periodSeconds
                           type: Integer
                           description: |-
                             How often (in seconds) to perform the probe.
                             Default to 10 seconds.
                           default_from_api: true
-                        - name: 'failureThreshold'
+                        - name: failureThreshold
                           type: Integer
                           description: |-
                             Minimum consecutive failures for the probe to be considered failed after
                             having succeeded. Defaults to 3.
                           default_from_api: true
-                        - name: 'successThreshold'
+                        - name: successThreshold
                           type: Integer
                           description: |-
                             Minimum consecutive successes for the probe to be considered successful after having failed.
                             Defaults to 2.
                           default_from_api: true
-                        - name: 'httpGet'
+                        - name: httpGet
                           type: NestedObject
-                          description: |-
-                            HttpGet specifies the http request to perform.
+                          description: HttpGet specifies the http request to perform.
                           send_empty_value: true
                           allow_empty_object: true
                           exactly_one_of:
-                            - 'template.0.spec.0.containers.0.readiness_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.readiness_probe.0.grpc'
+                            - template.0.spec.0.containers.0.readiness_probe.0.http_get
+                            - template.0.spec.0.containers.0.readiness_probe.0.grpc
                           properties:
-                            - name: 'path'
+                            - name: path
                               type: String
-                              description: |-
-                                Path to access on the HTTP server. If set, it should not be empty string.
+                              description: Path to access on the HTTP server. If set, it should not be empty string.
                               default_from_api: true
-                            - name: 'port'
+                            - name: port
                               type: Integer
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
                                 If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
-                        - name: 'grpc'
+                        - name: grpc
                           type: NestedObject
-                          description: |-
-                            GRPC specifies an action involving a GRPC port.
+                          description: GRPC specifies an action involving a GRPC port.
                           send_empty_value: true
                           allow_empty_object: true
                           exactly_one_of:
-                            - 'template.0.spec.0.containers.0.readiness_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.readiness_probe.0.grpc'
+                            - template.0.spec.0.containers.0.readiness_probe.0.http_get
+                            - template.0.spec.0.containers.0.readiness_probe.0.grpc
                           properties:
-                            - name: 'port'
+                            - name: port
                               type: Integer
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
                                 If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
-                            - name: 'service'
+                            - name: service
                               type: String
                               description: |-
                                 The name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                                 If this is not specified, the default behavior is defined by gRPC.
-                    - name: 'livenessProbe'
+                    - name: livenessProbe
                       type: NestedObject
-                      description: |-
-                        Periodic probe of container liveness. Container will be restarted if the probe fails.
+                      description: Periodic probe of container liveness. Container will be restarted if the probe fails.
                       properties:
-                        - name: 'initialDelaySeconds'
+                        - name: initialDelaySeconds
                           type: Integer
                           description: |-
                             Number of seconds after the container has started before the probe is
                             initiated.
                             Defaults to 0 seconds. Minimum value is 0. Maximum value is 3600.
                           default_value: 0
-                        - name: 'timeoutSeconds'
+                        - name: timeoutSeconds
                           type: Integer
                           description: |-
                             Number of seconds after which the probe times out.
                             Defaults to 1 second. Minimum value is 1. Maximum value is 3600.
                             Must be smaller than period_seconds.
                           default_value: 1
-                        - name: 'periodSeconds'
+                        - name: periodSeconds
                           type: Integer
                           description: |-
                             How often (in seconds) to perform the probe.
                             Default to 10 seconds. Minimum value is 1. Maximum value is 3600.
                           default_value: 10
-                        - name: 'failureThreshold'
+                        - name: failureThreshold
                           type: Integer
                           description: |-
                             Minimum consecutive failures for the probe to be considered failed after
                             having succeeded. Defaults to 3. Minimum value is 1.
                           default_value: 3
-                        - name: 'httpGet'
+                        - name: httpGet
                           type: NestedObject
-                          description: |-
-                            HttpGet specifies the http request to perform.
+                          description: HttpGet specifies the http request to perform.
                           send_empty_value: true
                           allow_empty_object: true
                           exactly_one_of:
-                            - 'template.0.spec.0.containers.0.liveness_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.liveness_probe.0.grpc'
+                            - template.0.spec.0.containers.0.liveness_probe.0.http_get
+                            - template.0.spec.0.containers.0.liveness_probe.0.grpc
                           properties:
-                            - name: 'path'
+                            - name: path
                               type: String
-                              description: |-
-                                Path to access on the HTTP server. If set, it should not be empty string.
-                              default_value: "/"
-                            - name: 'port'
+                              description: Path to access on the HTTP server. If set, it should not be empty string.
+                              default_value: /
+                            - name: port
                               type: Integer
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
                                 If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
-                            - name: 'httpHeaders'
+                            - name: httpHeaders
                               type: Array
-                              description: |-
-                                Custom headers to set in the request. HTTP allows repeated headers.
+                              description: Custom headers to set in the request. HTTP allows repeated headers.
                               item_type:
                                 type: NestedObject
                                 properties:
-                                  - name: 'name'
+                                  - name: name
                                     type: String
-                                    description: |-
-                                      The header field name.
+                                    description: The header field name.
                                     required: true
-                                  - name: 'value'
+                                  - name: value
                                     type: String
-                                    description: |-
-                                      The header field value.
+                                    description: The header field value.
                                     send_empty_value: true
                                     default_value: ""
-                        - name: 'grpc'
+                        - name: grpc
                           type: NestedObject
-                          description: |-
-                            GRPC specifies an action involving a GRPC port.
+                          description: GRPC specifies an action involving a GRPC port.
                           send_empty_value: true
                           allow_empty_object: true
                           exactly_one_of:
-                            - 'template.0.spec.0.containers.0.liveness_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.liveness_probe.0.grpc'
+                            - template.0.spec.0.containers.0.liveness_probe.0.http_get
+                            - template.0.spec.0.containers.0.liveness_probe.0.grpc
                           properties:
-                            - name: 'port'
+                            - name: port
                               type: Integer
                               description: |-
                                 Port number to access on the container. Number must be in the range 1 to 65535.
                                 If not specified, defaults to the same value as container.ports[0].containerPort.
                               default_from_api: true
-                            - name: 'service'
+                            - name: service
                               type: String
                               description: |-
                                 The name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                                 If this is not specified, the default behavior is defined by gRPC.
-              - name: 'nodeSelector'
+              - name: nodeSelector
                 type: KeyValuePairs
                 description: |-
                   Node Selector describes the hardware requirements of the resources.
                   Use the following node selector keys to configure features on a Revision:
                     - `run.googleapis.com/accelerator` sets the [type of GPU](https://cloud.google.com/run/docs/configuring/services/gpu) required by the Revision to run.
-              - name: 'containerConcurrency'
+              - name: containerConcurrency
                 type: Integer
                 description: |-
                   ContainerConcurrency specifies the maximum allowed in-flight (concurrent)
                   requests per container of the Revision. If not specified or 0, defaults to 80 when
                   requested CPU >= 1 and defaults to 1 when requested CPU < 1.
                 default_from_api: true
-              - name: 'timeoutSeconds'
+              - name: timeoutSeconds
                 type: Integer
-                description: |-
-                  TimeoutSeconds holds the max duration the instance is allowed for responding to a request.
+                description: TimeoutSeconds holds the max duration the instance is allowed for responding to a request.
                 default_from_api: true
-              - name: 'serviceAccountName'
+              - name: serviceAccountName
                 type: String
                 description: |-
                   Email address of the IAM service account associated with the revision of the
@@ -903,26 +816,24 @@ properties:
                   and determines what permissions the revision has. If not provided, the revision
                   will use the project's default service account.
                 default_from_api: true
-              - name: 'volumes'
+              - name: volumes
                 type: Array
-                description: |-
-                  Volume represents a named volume in a container.
+                description: Volume represents a named volume in a container.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'name'
+                    - name: name
                       type: String
-                      description: |-
-                        Volume's name.
+                      description: Volume's name.
                       required: true
-                    - name: 'secret'
+                    - name: secret
                       type: NestedObject
                       description: |-
                         The secret's value will be presented as the content of a file whose
                         name is defined in the item path. If no items are defined, the name of
                         the file is the secret_name.
                       properties:
-                        - name: 'secretName'
+                        - name: secretName
                           type: String
                           description: |-
                             The name of the secret in Cloud Secret Manager. By default, the secret
@@ -935,14 +846,14 @@ properties:
                             The alias definitions must be set on the run.googleapis.com/secrets
                             annotation.
                           required: true
-                        - name: 'defaultMode'
+                        - name: defaultMode
                           type: Integer
                           description: |-
                             Mode bits to use on created files by default. Must be a value between 0000
                             and 0777. Defaults to 0644. Directories within the path are not affected by
                             this setting. This might be in conflict with other options that affect the
                             file mode, like fsGroup, and the result can be other mode bits set.
-                        - name: 'items'
+                        - name: items
                           type: Array
                           description: |-
                             If unspecified, the volume will expose a file whose name is the
@@ -953,13 +864,13 @@ properties:
                           item_type:
                             type: NestedObject
                             properties:
-                              - name: 'key'
+                              - name: key
                                 type: String
                                 description: |-
                                   The Cloud Secret Manager secret version.
                                   Can be 'latest' for the latest value or an integer for a specific version.
                                 required: true
-                              - name: 'path'
+                              - name: path
                                 type: String
                                 description: |-
                                   The relative path of the file to map the key to.
@@ -967,70 +878,62 @@ properties:
                                   May not contain the path element '..'.
                                   May not start with the string '..'.
                                 required: true
-                              - name: 'mode'
+                              - name: mode
                                 type: Integer
                                 description: |-
                                   Mode bits to use on this file, must be a value between 0000 and 0777. If
                                   not specified, the volume defaultMode will be used. This might be in
                                   conflict with other options that affect the file mode, like fsGroup, and
                                   the result can be other mode bits set.
-                    - name: 'emptyDir'
+                    - name: emptyDir
                       type: NestedObject
-                      description: |-
-                        Ephemeral storage which can be backed by real disks (HD, SSD), network storage or memory (i.e. tmpfs). For now only in memory (tmpfs) is supported. It is ephemeral in the sense that when the sandbox is taken down, the data is destroyed with it (it does not persist across sandbox runs).
+                      description: Ephemeral storage which can be backed by real disks (HD, SSD), network storage or memory (i.e. tmpfs). For now only in memory (tmpfs) is supported. It is ephemeral in the sense that when the sandbox is taken down, the data is destroyed with it (it does not persist across sandbox runs).
                       properties:
-                        - name: 'medium'
+                        - name: medium
                           type: String
-                          description: |-
-                            The medium on which the data is stored. The default is "" which means to use the node's default medium. Must be an empty string (default) or Memory.
-                        - name: 'sizeLimit'
+                          description: The medium on which the data is stored. The default is "" which means to use the node's default medium. Must be an empty string (default) or Memory.
+                        - name: sizeLimit
                           type: String
-                          description: |-
-                            Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
-                    - name: 'csi'
+                          description: 'Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field''s values are of the ''Quantity'' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.'
+                    - name: csi
                       type: NestedObject
-                      description: |-
-                        A filesystem specified by the Container Storage Interface (CSI).
+                      description: A filesystem specified by the Container Storage Interface (CSI).
                       properties:
-                        - name: 'driver'
+                        - name: driver
                           type: String
                           description: |-
                             Unique name representing the type of file system to be created. Cloud Run supports the following values:
                               * gcsfuse.run.googleapis.com: Mount a Google Cloud Storage bucket using GCSFuse. This driver requires the
                                 run.googleapis.com/execution-environment annotation to be unset or set to "gen2"
                           required: true
-                        - name: 'readOnly'
+                        - name: readOnly
                           type: Boolean
-                          description: |-
-                            If true, all mounts created from this volume will be read-only.
+                          description: If true, all mounts created from this volume will be read-only.
                           default_from_api: true
-                        - name: 'volumeAttributes'
+                        - name: volumeAttributes
                           type: KeyValuePairs
                           description: |-
                             Driver-specific attributes. The following options are supported for available drivers:
                               * gcsfuse.run.googleapis.com
                                 * bucketName: The name of the Cloud Storage Bucket that backs this volume. The Cloud Run Service identity must have access to this bucket.
-                    - name: 'nfs'
+                    - name: nfs
                       type: NestedObject
                       description: |-
                         A filesystem backed by a Network File System share. This filesystem requires the
                         run.googleapis.com/execution-environment annotation to be unset or set to "gen2"
                       properties:
-                        - name: 'server'
+                        - name: server
                           type: String
-                          description: |-
-                            IP address or hostname of the NFS server
+                          description: IP address or hostname of the NFS server
                           required: true
-                        - name: 'path'
+                        - name: path
                           type: String
-                          description: |-
-                            Path exported by the NFS server
+                          description: Path exported by the NFS server
                           required: true
-                        - name: 'readOnly'
+                        - name: readOnly
                           type: Boolean
-                          description: |-
-                            If true, mount the NFS volume as read only in all mounts. Defaults to false.
-              - name: 'servingState'
+                          description: If true, mount the NFS volume as read only in all mounts. Defaults to false.
+              - name: servingState
                 type: Enum
                 description: |-
                   ServingState holds a value describing the state the resources
@@ -1040,48 +943,45 @@ properties:
                 output: true
                 deprecation_message: '`serving_state` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.'
                 enum_values:
-                  - 'ACTIVE'
-                  - 'RESERVE'
-                  - 'RETIRED'
-  - name: 'status'
+                  - ACTIVE
+                  - RESERVE
+                  - RETIRED
+  - name: status
     type: NestedObject
     description: The current status of the Service.
     output: true
     properties:
-      - name: 'conditions'
+      - name: conditions
         type: Array
-        description: |-
-          Array of observed Service Conditions, indicating the current ready state of the service.
+        description: Array of observed Service Conditions, indicating the current ready state of the service.
         output: true
         item_type:
           type: NestedObject
           properties:
-            - name: 'message'
+            - name: message
               type: String
-              description: |-
-                Human readable message indicating details about the current status.
+              description: Human readable message indicating details about the current status.
               output: true
-            - name: 'status'
+            - name: status
               type: String
               description: Status of the condition, one of True, False, Unknown.
               output: true
-            - name: 'reason'
+            - name: reason
               type: String
-              description: |-
-                One-word CamelCase reason for the condition's current status.
+              description: One-word CamelCase reason for the condition's current status.
               output: true
-            - name: 'type'
+            - name: type
               type: String
               description: Type of domain mapping condition.
               output: true
-      - name: 'url'
+      - name: url
         type: String
         description: |-
           From RouteStatus. URL holds the url that will distribute traffic over the provided traffic
           targets. It generally has the form
           https://{route-hash}-{project-hash}-{cluster-level-suffix}.a.run.app
         output: true
-      - name: 'observedGeneration'
+      - name: observedGeneration
         type: Integer
         description: |-
           ObservedGeneration is the 'Generation' of the Route that was last processed by the
@@ -1090,21 +990,21 @@ properties:
           Clients polling for completed reconciliation should poll until observedGeneration =
           metadata.generation and the Ready condition's status is True or False.
         output: true
-      - name: 'latestCreatedRevisionName'
+      - name: latestCreatedRevisionName
         type: String
         description: |-
           From ConfigurationStatus. LatestCreatedRevisionName is the last revision that was created
           from this Service's Configuration. It might not be ready yet, for that use
           LatestReadyRevisionName.
         output: true
-      - name: 'latestReadyRevisionName'
+      - name: latestReadyRevisionName
         type: String
         description: |-
           From ConfigurationStatus. LatestReadyRevisionName holds the name of the latest Revision
           stamped out from this Service's Configuration that has had its "Ready" condition become
           "True".
         output: true
-      - name: 'traffic'
+      - name: traffic
         type: Array
         description: |-
           Traffic specifies how to distribute traffic over a collection of Knative Revisions
@@ -1113,22 +1013,19 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'revisionName'
+            - name: revisionName
               type: String
-              description: |-
-                RevisionName of a specific revision to which to send this portion of traffic.
+              description: RevisionName of a specific revision to which to send this portion of traffic.
               output: true
-            - name: 'percent'
+            - name: percent
               type: Integer
-              description: |-
-                Percent specifies percent of the traffic to this Revision or Configuration.
+              description: Percent specifies percent of the traffic to this Revision or Configuration.
               output: true
-            - name: 'tag'
+            - name: tag
               type: String
-              description: |-
-                Tag is optionally used to expose a dedicated url for referencing this target exclusively.
+              description: Tag is optionally used to expose a dedicated url for referencing this target exclusively.
               output: true
-            - name: 'latestRevision'
+            - name: latestRevision
               type: Boolean
               description: |-
                 LatestRevision may be optionally provided to indicate that the latest ready
@@ -1136,15 +1033,14 @@ properties:
                 provided LatestRevision must be true if RevisionName is empty; it must be
                 false when RevisionName is non-empty.
               output: true
-            - name: 'url'
+            - name: url
               type: String
               description: |-
                 URL displays the URL for accessing tagged traffic targets. URL is displayed in status,
                 and is disallowed on spec. URL must contain a scheme (e.g. http://) and a hostname,
                 but may not contain anything else (e.g. basic auth, url path, etc.)
-
               output: true
-  - name: 'metadata'
+  - name: metadata
     type: NestedObject
     description: |-
       Metadata associated with this Service, including name, namespace, labels,
@@ -1152,18 +1048,17 @@ properties:
     required: false
     default_from_api: true
     properties:
-      - name: 'labels'
+      - name: labels
         type: KeyValueLabels
         description: |-
           Map of string keys and values that can be used to organize and categorize
           (scope and select) objects. May match selectors of replication controllers
           and routes.
-      - name: 'generation'
+      - name: generation
         type: Integer
-        description: |-
-          A sequence number representing a specific generation of the desired state.
+        description: A sequence number representing a specific generation of the desired state.
         output: true
-      - name: 'resourceVersion'
+      - name: resourceVersion
         type: String
         description: |-
           An opaque value that represents the internal version of this object that
@@ -1172,27 +1067,26 @@ properties:
           resource or set of resources. They may only be valid for a
           particular resource or set of resources.
         output: true
-      - name: 'selfLink'
+      - name: selfLink
         type: String
-        description: |-
-          SelfLink is a URL representing this object.
+        description: SelfLink is a URL representing this object.
         output: true
-      - name: 'uid'
+      - name: uid
         type: String
         description: |-
           UID is a unique id generated by the server on successful creation of a resource and is not
           allowed to change on PUT operations.
         output: true
-      - name: 'namespace'
+      - name: namespace
         type: String
         description: |-
           In Cloud Run the namespace must be equal to either the
           project ID or project number.
         required: false
         default_from_api: true
-        custom_flatten: 'templates/terraform/custom_flatten/set_to_project.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/default_to_project.go.tmpl'
-      - name: 'annotations'
+        custom_flatten: templates/terraform/custom_flatten/set_to_project.go.tmpl
+        custom_expand: templates/terraform/custom_expand/default_to_project.go.tmpl
+      - name: annotations
         type: KeyValueAnnotations
         description: |-
           Annotations is a key value map stored with a resource that
@@ -1219,3 +1113,38 @@ properties:
           - `run.googleapis.com/minScale` sets the [minimum number of container instances](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--min) of the Service.
           - `run.googleapis.com/scalingMode` sets the type of scaling mode for the service. The supported values for scaling mode are "manual" and "automatic". If not provided, it defaults to "automatic".
           - `run.googleapis.com/manualInstanceCount` sets the total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.
+cai_asset_name_format: projects/{{project}}/locations/{{location}}/services/{{name}}
+cai_base_url: projects/{{project}}/locations/{{location}}/services
+custom_diff:
+  - revisionNameCustomizeDiff
+datasource_experimental:
+  generate: true
+  exclude_test: true
+error_retry_predicates:
+  - transport_tpg.IsCloudRunCreationConflict
+generate_list_resource: true
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: service
+  base_url: v1/projects/{{project}}/locations/{{location}}/services/{{service}}
+  import_format:
+    - projects/{{project}}/locations/{{location}}/services/{{service}}
+    - '{{service}}'
+schema_version: 2
+state_upgrade_base_schema_version: 1
+state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: europe-west1
+    - region: europe-north1
+virtual_fields:
+  - name: autogenerate_revision_name
+    description: |
+      If set to `true`, the revision name (template.metadata.name) will be omitted and
+      autogenerated by Cloud Run. This cannot be set to `true` while `template.metadata.name`
+      is also set.
+      (For legacy support, if `template.metadata.name` is unset in state while
+      this field is set to false, the revision name will still autogenerate.)
+    type: Boolean
+    default_value: false

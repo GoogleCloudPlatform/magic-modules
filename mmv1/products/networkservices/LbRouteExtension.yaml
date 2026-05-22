@@ -12,94 +12,94 @@
 # limitations under the License.
 
 ---
-name: 'LbRouteExtension'
+name: LbRouteExtension
 description: |
   LbRouteExtension is a resource that lets you control where traffic is routed to for a given request.
 references:
   guides:
-    'Configure a route extension': 'https://cloud.google.com/service-extensions/docs/configure-callout#configure_a_route_extension'
-  api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1/projects.locations.lbRouteExtensions'
+    Configure a route extension: https://cloud.google.com/service-extensions/docs/configure-callout#configure_a_route_extension
+  api: https://cloud.google.com/service-extensions/docs/reference/rest/v1/projects.locations.lbRouteExtensions
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions'
-self_link: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions?lbRouteExtensionId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/lbRouteExtensions
+self_link: projects/{{project}}/locations/{{location}}/lbRouteExtensions/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/lbRouteExtensions?lbRouteExtensionId={{name}}
+update_verb: PATCH
 update_mask: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/network_services_lb_route_extension.go.tmpl'
-sweeper:
-  url_substitutions:
-    - region: "us-west1"
-examples:
-  - name: 'network_services_lb_route_extension_basic'
-    primary_resource_id: 'default'
-    vars:
-      ilb_network_name: 'l7-ilb-network'
-      proxy_subnet_name: 'l7-ilb-proxy-subnet'
-      backend_subnet_name: 'l7-ilb-subnet'
-      forwarding_rule_name: 'l7-ilb-forwarding-rule'
-      target_http_proxy_name: 'l7-ilb-target-http-proxy'
-      regional_url_map_name: 'l7-ilb-regional-url-map'
-      backend_service_name: 'l7-ilb-backend-subnet'
-      mig_template_name: 'l7-ilb-mig-template'
-      hc_name: 'l7-ilb-hc'
-      mig_name: 'l7-ilb-mig1'
-      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
-      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
-      vm_test_name: 'l7-ilb-test-vm'
-      lb_route_extension_name: 'l7-ilb-route-ext'
-      callouts_instance_name: 'l7-ilb-callouts-ins'
-      callouts_instance_group: 'l7-ilb-callouts-ins-group'
-      callouts_hc_name: 'l7-ilb-callouts-hc'
-      callouts_backend_name: 'l7-ilb-callouts-backend'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-  - name: 'network_services_lb_route_extension_observability'
-    primary_resource_id: 'default'
-    vars:
-      ilb_network_name: 'l7-ilb-network'
-      proxy_subnet_name: 'l7-ilb-proxy-subnet'
-      backend_subnet_name: 'l7-ilb-subnet'
-      forwarding_rule_name: 'l7-ilb-forwarding-rule'
-      target_http_proxy_name: 'l7-ilb-target-http-proxy'
-      regional_url_map_name: 'l7-ilb-regional-url-map'
-      backend_service_name: 'l7-ilb-backend-subnet'
-      mig_template_name: 'l7-ilb-mig-template'
-      hc_name: 'l7-ilb-hc'
-      mig_name: 'l7-ilb-mig1'
-      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
-      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
-      vm_test_name: 'l7-ilb-test-vm'
-      lb_route_extension_name: 'l7-ilb-route-ext'
-      callouts_instance_name: 'l7-ilb-callouts-ins'
-      callouts_instance_group: 'l7-ilb-callouts-ins-group'
-      callouts_hc_name: 'l7-ilb-callouts-hc'
-      callouts_backend_name: 'l7-ilb-callouts-backend'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
+  constants: templates/terraform/constants/network_services_lb_route_extension.go.tmpl
+samples:
+  - name: network_services_lb_route_extension_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_lb_route_extension_basic
+        resource_id_vars:
+          backend_service_name: l7-ilb-backend-subnet
+          backend_subnet_name: l7-ilb-subnet
+          callouts_backend_name: l7-ilb-callouts-backend
+          callouts_hc_name: l7-ilb-callouts-hc
+          callouts_instance_group: l7-ilb-callouts-ins-group
+          callouts_instance_name: l7-ilb-callouts-ins
+          forwarding_rule_name: l7-ilb-forwarding-rule
+          fw_allow_iap_hc_name: l7-ilb-fw-allow-iap-hc
+          fw_allow_ilb_to_backends_name: l7-ilb-fw-allow-ilb-to-backends
+          hc_name: l7-ilb-hc
+          ilb_network_name: l7-ilb-network
+          lb_route_extension_name: l7-ilb-route-ext
+          mig_name: l7-ilb-mig1
+          mig_template_name: l7-ilb-mig-template
+          proxy_subnet_name: l7-ilb-proxy-subnet
+          regional_url_map_name: l7-ilb-regional-url-map
+          target_http_proxy_name: l7-ilb-target-http-proxy
+          vm_test_name: l7-ilb-test-vm
+        ignore_read_extra:
+          - port_range
+          - target
+  - name: network_services_lb_route_extension_observability
+    primary_resource_id: default
+    steps:
+      - name: network_services_lb_route_extension_observability
+        resource_id_vars:
+          backend_service_name: l7-ilb-backend-subnet
+          backend_subnet_name: l7-ilb-subnet
+          callouts_backend_name: l7-ilb-callouts-backend
+          callouts_hc_name: l7-ilb-callouts-hc
+          callouts_instance_group: l7-ilb-callouts-ins-group
+          callouts_instance_name: l7-ilb-callouts-ins
+          forwarding_rule_name: l7-ilb-forwarding-rule
+          fw_allow_iap_hc_name: l7-ilb-fw-allow-iap-hc
+          fw_allow_ilb_to_backends_name: l7-ilb-fw-allow-ilb-to-backends
+          hc_name: l7-ilb-hc
+          ilb_network_name: l7-ilb-network
+          lb_route_extension_name: l7-ilb-route-ext
+          mig_name: l7-ilb-mig1
+          mig_template_name: l7-ilb-mig-template
+          proxy_subnet_name: l7-ilb-proxy-subnet
+          regional_url_map_name: l7-ilb-regional-url-map
+          target_http_proxy_name: l7-ilb-target-http-proxy
+          vm_test_name: l7-ilb-test-vm
+        ignore_read_extra:
+          - port_range
+          - target
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the route extension
     url_param_only: true
     required: true
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the LbRouteExtension resource in the following format: projects/{project}/locations/{location}/lbRouteExtensions/{lbRouteExtension}
@@ -107,23 +107,23 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A human-readable description of the resource.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'Set of labels associated with the LbRouteExtension resource.'
-  - name: 'forwardingRules'
+    description: Set of labels associated with the LbRouteExtension resource.
+  - name: forwardingRules
     type: Array
     description: |
       A list of references to the forwarding rules to which this service extension is attached to.
       At least one forwarding rule is required. There can be only one LbRouteExtension resource per forwarding rule.
     required: true
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
     item_type:
       type: String
-  - name: 'extensionChains'
+  - name: extensionChains
     type: Array
     description: |
       A set of ordered extension chains that contain the match conditions and extensions to execute.
@@ -135,7 +135,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           description: |
             The name for this extension chain. The name is logged as part of the HTTP request logs.
@@ -143,18 +143,18 @@ properties:
             and can have a maximum length of 63 characters. Additionally, the first character must be a letter
             and the last character must be a letter or a number.
           required: true
-        - name: 'matchCondition'
+        - name: matchCondition
           type: NestedObject
           description: |
-             Conditions under which this chain is invoked for a request.
+            Conditions under which this chain is invoked for a request.
           required: true
           properties:
-            - name: 'celExpression'
+            - name: celExpression
               type: String
               description: |
                 A Common Expression Language (CEL) expression that is used to match requests for which the extension chain is executed.
               required: true
-        - name: 'extensions'
+        - name: extensions
           type: Array
           description: |
             A set of extensions to execute for the matching request.
@@ -165,7 +165,7 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: 'name'
+              - name: name
                 type: String
                 description: |
                   The name for this extension. The name is logged as part of the HTTP request logs.
@@ -173,11 +173,11 @@ properties:
                   and can have a maximum length of 63 characters. Additionally, the first character must be a letter
                   and the last a letter or a number.
                 required: true
-              - name: 'authority'
+              - name: authority
                 type: String
                 description: |
                   The :authority header in the gRPC request sent from Envoy to the extension service.
-              - name: 'service'
+              - name: service
                 type: String
                 description: |
                   The reference to the service that runs the extension.
@@ -185,30 +185,30 @@ properties:
                   * To configure a callout extension, service must be a fully-qualified reference to a backend service.
                   * To configure a plugin extension, service must be a reference to a WasmPlugin resource.
                 required: true
-                diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-              - name: 'timeout'
+                diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+              - name: timeout
                 type: String
                 description: |
                   Specifies the timeout for each individual message on the stream. The timeout must be between 10-1000 milliseconds.
                   A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-                diff_suppress_func: 'tpgresource.DurationDiffSuppress'
-              - name: 'failOpen'
+                diff_suppress_func: tpgresource.DurationDiffSuppress
+              - name: failOpen
                 type: Boolean
                 description: |
-                   Determines how the proxy behaves if the call to the extension fails or times out.
-                   When set to TRUE, request or response processing continues without error.
-                   Any subsequent extensions in the extension chain are also executed.
-                   When set to FALSE: * If response headers have not been delivered to the downstream client,
-                   a generic 500 error is returned to the client. The error response can be tailored by
-                   configuring a custom error response in the load balancer.
-              - name: 'forwardHeaders'
+                  Determines how the proxy behaves if the call to the extension fails or times out.
+                  When set to TRUE, request or response processing continues without error.
+                  Any subsequent extensions in the extension chain are also executed.
+                  When set to FALSE: * If response headers have not been delivered to the downstream client,
+                  a generic 500 error is returned to the client. The error response can be tailored by
+                  configuring a custom error response in the load balancer.
+              - name: forwardHeaders
                 type: Array
                 description: |
                   List of the HTTP headers to forward to the extension (from the client or backend).
                   If omitted, all headers are sent. Each element is a string indicating the header name.
                 item_type:
                   type: String
-              - name: 'supportedEvents'
+              - name: supportedEvents
                 type: Array
                 is_set: true
                 description: |
@@ -218,8 +218,8 @@ properties:
                 item_type:
                   type: String
                   validation:
-                    function: 'ValidateSupportedEvent'
-              - name: 'metadata'
+                    function: ValidateSupportedEvent
+              - name: metadata
                 type: KeyValuePairs
                 description: |
                   The metadata provided here is included as part of the `metadata_context` (of type `google.protobuf.Struct`)
@@ -227,7 +227,7 @@ properties:
                   The metadata is available under the namespace `com.google.lb_route_extension.<resource_name>.<chain_name>.<extension_name>`.
                   The following variables are supported in the metadata: `{forwarding_rule_id}` - substituted with the forwarding rule's fully qualified resource name.
                   This field must not be set for plugin extensions. Setting it results in a validation error.
-              - name: 'requestBodySendMode'
+              - name: requestBodySendMode
                 type: Enum
                 description: |
                   Configures the send mode for request body processing.
@@ -237,10 +237,10 @@ properties:
                   This field can be set only when the `service` field of the extension points to a `BackendService`.
                   Only `FULL_DUPLEX_STREAMED` mode is supported for `LbRouteExtension` resources.
                 enum_values:
-                  - 'BODY_SEND_MODE_UNSPECIFIED'
-                  - 'BODY_SEND_MODE_STREAMED'
-                  - 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
-              - name: 'observabilityMode'
+                  - BODY_SEND_MODE_UNSPECIFIED
+                  - BODY_SEND_MODE_STREAMED
+                  - BODY_SEND_MODE_FULL_DUPLEX_STREAMED
+              - name: observabilityMode
                 type: Boolean
                 description: |
                   When set to `TRUE`, enables `observability_mode` on the `ext_proc` filter.
@@ -249,7 +249,7 @@ properties:
                   This field is helpful when you want to try out the extension in async log-only mode.
                   Supported by regional `LbTrafficExtension` and `LbRouteExtension` resources.
                   Only `STREAMED` (default) body processing mode is supported.
-  - name: 'loadBalancingScheme'
+  - name: loadBalancingScheme
     type: Enum
     description: |
       All backend services and forwarding rules referenced by this extension must share the same load balancing scheme.
@@ -258,5 +258,9 @@ properties:
     required: true
     immutable: true
     enum_values:
-      - 'INTERNAL_MANAGED'
-      - 'EXTERNAL_MANAGED'
+      - INTERNAL_MANAGED
+      - EXTERNAL_MANAGED
+autogen_async: true
+sweeper:
+  url_substitutions:
+    - region: us-west1

@@ -19,22 +19,25 @@ references:
   guides:
     Introduction to Reservations: https://cloud.google.com/bigquery/docs/reservations-intro
   api: https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations/create
+id_format: projects/{{project}}/locations/{{location}}/reservations/{{name}}
 base_url: projects/{{project}}/locations/{{location}}/reservations
 create_url: projects/{{project}}/locations/{{location}}/reservations?reservationId={{name}}
-update_mask: true
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/reservations/{{name}}
-exclude_sweeper: true
-examples:
+update_mask: true
+samples:
   - name: bigquery_reservation_basic
     primary_resource_id: reservation
-    vars:
-      name: my-reservation
+    steps:
+      - name: bigquery_reservation_basic
+        resource_id_vars:
+          name: my-reservation
   - name: bigquery_reservation_with_disaster_recovery
     primary_resource_id: reservation
-    exclude_docs: true
-    vars:
-      name: my-reservation
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_reservation_with_disaster_recovery
+        resource_id_vars:
+          name: my-reservation
 parameters:
   - name: location
     type: String
@@ -255,3 +258,4 @@ properties:
     resource: ReservationGroup
     imports: name
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+exclude_sweeper: true

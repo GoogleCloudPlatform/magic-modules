@@ -12,8 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'Deployment'
-kind: 'deploymentmanager#deployment'
+name: Deployment
+kind: deploymentmanager#deployment
 description: |
   A collection of resources that are deployed and managed together using
   a configuration file
@@ -31,49 +31,48 @@ docs:
     deployments in preview as recreate-only for any update operation other
     than actually deploying an in-preview deployment (i.e. `preview=true` to
     `preview=false`).
-id_format: 'projects/{{project}}/deployments/{{name}}'
-base_url: 'projects/{{project}}/global/deployments'
-self_link: 'projects/{{project}}/global/deployments/{{name}}'
-create_url: 'projects/{{project}}/global/deployments?preview={{preview}}&createPolicy={{create_policy}}'
-update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
-update_verb: 'PATCH'
-delete_url: 'projects/{{project}}/global/deployments/{{name}}?deletePolicy={{delete_policy}}'
-# A deployment is updatable, but we need to have custom update behavior.
-immutable: true
+id_format: projects/{{project}}/deployments/{{name}}
+base_url: projects/{{project}}/global/deployments
+self_link: projects/{{project}}/global/deployments/{{name}}
+create_url: projects/{{project}}/global/deployments?preview={{preview}}&createPolicy={{create_policy}}
+update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/deployments/{{name}}'
+  - projects/{{project}}/deployments/{{name}}
 # Very long to support very long deployments
 timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   result:
     resource_inside_response: false
 custom_code:
   # Custom diff to force new if 'preview' is true
-  constants: 'templates/terraform/constants/deployment_manager_deployment.go.tmpl'
+  constants: templates/terraform/constants/deployment_manager_deployment.go.tmpl
   # post-create failure: Delete deployment if an invalid deployment was created
-  post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.tmpl'
-custom_diff:
-  - 'customDiffDeploymentManagerDeployment'
-examples:
-  - name: 'deployment_manager_deployment_basic'
-    primary_resource_id: 'deployment'
-    vars:
-      deployment_name: 'my-deployment'
+  post_create_failure: templates/terraform/post_create_failure/delete_on_failure.go.tmpl
+samples:
+  - name: deployment_manager_deployment_basic
+    primary_resource_id: deployment
     exclude_test: true
-  - name: 'deployment_manager_deployment_imports'
-    primary_resource_id: 'deployment'
-    vars:
-      deployment_name: 'my-deployment'
+    steps:
+      - name: deployment_manager_deployment_basic
+        resource_id_vars:
+          deployment_name: my-deployment
+  - name: deployment_manager_deployment_imports
+    primary_resource_id: deployment
     exclude_test: true
+    steps:
+      - name: deployment_manager_deployment_imports
+        resource_id_vars:
+          deployment_name: my-deployment
 parameters:
   # These properties are query parameters given on create/update/delete.
   # They should be tracked and updatable.
-  - name: 'createPolicy'
+  - name: createPolicy
     type: Enum
     description: |
       Set the policy to use for creating new resources. Only used on
@@ -82,11 +81,11 @@ parameters:
       the deployment will fail. Note that updating this field does not
       actually affect the deployment, just how it is updated.
     url_param_only: true
-    default_value: "CREATE_OR_ACQUIRE"
+    default_value: CREATE_OR_ACQUIRE
     enum_values:
-      - 'ACQUIRE'
-      - 'CREATE_OR_ACQUIRE'
-  - name: 'deletePolicy'
+      - ACQUIRE
+      - CREATE_OR_ACQUIRE
+  - name: deletePolicy
     type: Enum
     description: |
       Set the policy to use for deleting new resources on update/delete.
@@ -96,12 +95,12 @@ parameters:
       and is not actually deleted. Note that updating this field does not
       actually change the deployment, just how it is updated.
     url_param_only: true
-    default_value: "DELETE"
+    default_value: DELETE
     enum_values:
-      - 'ABANDON'
-      - 'DELETE'
+      - ABANDON
+      - DELETE
   # Custom Update
-  - name: 'preview'
+  - name: preview
     type: Boolean
     description: |
       If set to true, a deployment is created with "shell" resources
@@ -113,69 +112,69 @@ parameters:
       Terraform will force-recreate deployments if either preview is updated
       to true or if other fields are updated while preview is true.
     url_param_only: true
-    update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
-    update_id: '0_preview'
-    fingerprint_name: 'fingerprint'
+    update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+    update_id: 0_preview
+    fingerprint_name: fingerprint
     default_value: false
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Unique name for the deployment
     required: true
     # Custom Update
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Optional user-provided description of deployment.
-    update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
-    update_id: '1_non-preview'
-    fingerprint_name: 'fingerprint'
+    update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+    update_id: 1_non-preview
+    fingerprint_name: fingerprint
     # Custom Update
-  - name: 'labels'
+  - name: labels
     type: Array
     description: |
       Key-value pairs to apply to this labels.
     is_set: true
     send_empty_value: true
-    update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
-    update_id: '1_non-preview'
-    fingerprint_name: 'fingerprint'
+    update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+    update_id: 1_non-preview
+    fingerprint_name: fingerprint
     item_type:
       type: NestedObject
       properties:
-        - name: 'key'
+        - name: key
           type: String
           description: |
             Key for label.
-        - name: 'value'
+        - name: value
           type: String
           description: |
             Value of label.
-    # Custom Update
-  - name: 'target'
+          # Custom Update
+  - name: target
     type: NestedObject
     description: |
       Parameters that define your deployment, including the deployment
       configuration and relevant templates.
     required: true
     ignore_read: true
-    update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
-    update_id: '1_non-preview'
-    fingerprint_name: 'fingerprint'
+    update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+    update_id: 1_non-preview
+    fingerprint_name: fingerprint
     properties:
-      - name: 'config'
+      - name: config
         type: NestedObject
         description: |
           The root configuration file to use for this deployment.
         required: true
         properties:
-          - name: 'content'
+          - name: content
             type: String
             description: |
               The full YAML contents of your configuration file.
             required: true
-      - name: 'imports'
+      - name: imports
         type: Array
         description: |
           Specifies import files for this configuration. This can be
@@ -184,29 +183,34 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'content'
+            - name: content
               type: String
               description: |
                 The full contents of the template that you want to import.
-            - name: 'name'
+            - name: name
               type: String
               description: |
                 The name of the template to import, as declared in the YAML
                 configuration.
-  - name: 'deployment_id'
+  - name: deployment_id
     type: String
     description: |
       Unique identifier for deployment. Output only.
     api_name: id
     output: true
-  - name: 'manifest'
+  - name: manifest
     type: String
     description: |
       Output only. URL of the manifest representing the last manifest that
       was successfully deployed.
     output: true
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       Output only. Server defined URL for the resource.
     output: true
+custom_diff:
+  - customDiffDeploymentManagerDeployment
+delete_url: projects/{{project}}/global/deployments/{{name}}?deletePolicy={{delete_policy}}
+# A deployment is updatable, but we need to have custom update behavior.
+immutable: true

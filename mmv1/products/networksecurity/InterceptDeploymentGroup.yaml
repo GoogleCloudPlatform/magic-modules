@@ -12,55 +12,50 @@
 # limitations under the License.
 
 ---
-name: 'InterceptDeploymentGroup'
+name: InterceptDeploymentGroup
 description: |-
   A deployment group aggregates many zonal intercept backends (deployments)
   into a single global intercept service. Consumers can connect this service
   using an endpoint group.
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/interceptDeploymentGroups/{{intercept_deployment_group_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/interceptDeploymentGroups'
-self_link: 'projects/{{project}}/locations/{{location}}/interceptDeploymentGroups/{{intercept_deployment_group_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/interceptDeploymentGroups?interceptDeploymentGroupId={{intercept_deployment_group_id}}'
-update_verb: 'PATCH'
+id_format: projects/{{project}}/locations/{{location}}/interceptDeploymentGroups/{{intercept_deployment_group_id}}
+base_url: projects/{{project}}/locations/{{location}}/interceptDeploymentGroups
+self_link: projects/{{project}}/locations/{{location}}/interceptDeploymentGroups/{{intercept_deployment_group_id}}
+create_url: projects/{{project}}/locations/{{location}}/interceptDeploymentGroups?interceptDeploymentGroupId={{intercept_deployment_group_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/interceptDeploymentGroups/{{intercept_deployment_group_id}}'
+  - projects/{{project}}/locations/{{location}}/interceptDeploymentGroups/{{intercept_deployment_group_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-sweeper:
-  dependencies:
-    - "google_network_security_intercept_endpoint_group"
-  url_substitutions:
-    - region: "global"
-examples:
-  - name: 'network_security_intercept_deployment_group_basic'
-    config_path: 'templates/terraform/examples/network_security_intercept_deployment_group_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      subnetwork_name: 'example-subnet'
-      deployment_group_id: 'example-dg'
+samples:
+  - name: network_security_intercept_deployment_group_basic
+    primary_resource_id: default
+    steps:
+      - name: network_security_intercept_deployment_group_basic
+        config_path: templates/terraform/samples/services/networksecurity/network_security_intercept_deployment_group_basic.tf.tmpl
+        resource_id_vars:
+          deployment_group_id: example-dg
+          network_name: example-network
+          subnetwork_name: example-subnet
 parameters:
-  - name: 'location'
+  - name: location
     type: String
-    description: |-
-      The cloud location of the deployment group, currently restricted to `global`.
+    description: The cloud location of the deployment group, currently restricted to `global`.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'interceptDeploymentGroupId'
+  - name: interceptDeploymentGroupId
     type: String
     description: |-
       The ID to use for the new deployment group, which will become the final
@@ -69,30 +64,29 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |-
       The resource name of this deployment group, for example:
       `projects/123456789/locations/global/interceptDeploymentGroups/my-dg`.
       See https://google.aip.dev/122 for more details.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |-
       The timestamp when the resource was created.
       See https://google.aip.dev/148#timestamps.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |-
       The timestamp when the resource was most recently updated.
       See https://google.aip.dev/148#timestamps.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: |-
-      Labels are key/value pairs that help to organize and filter resources.
-  - name: 'network'
+    description: Labels are key/value pairs that help to organize and filter resources.
+  - name: network
     type: String
     description: |-
       The network that will be used for all child deployments, for example:
@@ -100,22 +94,21 @@ properties:
       See https://google.aip.dev/124.
     required: true
     immutable: true
-  - name: 'connectedEndpointGroups'
+  - name: connectedEndpointGroups
     type: Array
-    description: |-
-      The list of endpoint groups that are connected to this resource.
+    description: The list of endpoint groups that are connected to this resource.
     output: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           description: |-
             The connected endpoint group's resource name, for example:
             `projects/123456789/locations/global/interceptEndpointGroups/my-eg`.
             See https://google.aip.dev/124.
           output: true
-  - name: 'state'
+  - name: state
     type: String
     description: |-
       The current state of the deployment group.
@@ -126,7 +119,7 @@ properties:
       CREATING
       DELETING
     output: true
-  - name: 'reconciling'
+  - name: reconciling
     type: Boolean
     description: |-
       The current state of the resource does not match the user's intended state,
@@ -134,21 +127,20 @@ properties:
       operation (e.g. adding a new deployment to the group)
       See https://google.aip.dev/128.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |-
       User-provided description of the deployment group.
       Used as additional context for the deployment group.
-  - name: 'locations'
+  - name: locations
     type: Array
     is_set: true
-    description: |-
-      The list of locations where the deployment group is present.
+    description: The list of locations where the deployment group is present.
     output: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'state'
+        - name: state
           type: String
           description: |-
             The current state of the association in this location.
@@ -157,8 +149,13 @@ properties:
             ACTIVE
             OUT_OF_SYNC
           output: true
-        - name: 'location'
+        - name: location
           type: String
-          description: |-
-            The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+          description: The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
           output: true
+autogen_async: true
+sweeper:
+  dependencies:
+    - google_network_security_intercept_endpoint_group
+  url_substitutions:
+    - region: global

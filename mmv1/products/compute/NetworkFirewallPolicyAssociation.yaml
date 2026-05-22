@@ -12,71 +12,73 @@
 # limitations under the License.
 
 ---
-name: 'NetworkFirewallPolicyAssociation'
+name: NetworkFirewallPolicyAssociation
+kind: compute#firewallPolicyAssociation
 api_resource_type_kind: FirewallPolicy
-api_resource_field: 'associations'
-kind: 'compute#firewallPolicyAssociation'
 description: |
   The Compute NetworkFirewallPolicyAssociation resource
 references:
   guides:
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networkFirewallPolicies/addAssociation'
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/networkFirewallPolicies/addAssociation
 docs:
-id_format: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
-base_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}'
-self_link: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
-create_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addAssociation'
-delete_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
-delete_verb: 'POST'
-immutable: true
-legacy_long_form_project: true
+id_format: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}
+base_url: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}
+self_link: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}
+create_url: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addAssociation
 import_format:
-  - 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
+  - projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}
   - '{{project}}/{{firewall_policy}}/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
-  - name: 'network_firewall_policy_association'
-    primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-      association_name: 'my-association'
-      network_name: 'my-network'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: network_firewall_policy_association
+    primary_resource_id: default
+    steps:
+      - name: network_firewall_policy_association
+        resource_id_vars:
+          association_name: my-association
+          network_name: my-network
+          policy_name: my-policy
+        test_env_vars:
+          project_name: PROJECT_NAME
 parameters:
-  - name: 'firewallPolicy'
+  - name: firewallPolicy
     type: ResourceRef
     description: |
       The firewall policy of the resource.
     url_param_only: true
     required: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    resource: 'NetworkFirewallPolicy'
-    imports: 'name'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    resource: NetworkFirewallPolicy
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name for an association.
     required: true
-  - name: 'attachmentTarget'
+  - name: attachmentTarget
     type: String
     description: |
       The target that the firewall policy is attached to.
     required: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'shortName'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: shortName
     type: String
     description: |
       The short name of the firewall policy of the association.
     output: true
+api_resource_field: associations
+delete_url: projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}
+delete_verb: POST
+immutable: true
+legacy_long_form_project: true

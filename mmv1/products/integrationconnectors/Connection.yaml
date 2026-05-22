@@ -22,8 +22,8 @@ references:
 base_url: projects/{{project}}/locations/{{location}}/connections
 self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 timeouts:
   insert_minutes: 30
   update_minutes: 30
@@ -37,73 +37,86 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_async: true
 custom_code:
   constants: templates/terraform/constants/integration_connectors_connection.go.tmpl
   post_create: templates/terraform/post_create/integration_connectors_connection.go.tmpl
   post_update: templates/terraform/post_update/integration_connectors_connection.go.tmpl
   post_import: templates/terraform/post_import/integration_connectors_connection.go.tmpl
-examples:
+samples:
   - name: integration_connectors_connection_basic
     primary_resource_id: pubsubconnection
-    ignore_read_extra:
-      - status.0.description
     exclude_test: true
-    vars:
-      connection_name: test-pubsub
+    steps:
+      - name: integration_connectors_connection_basic
+        resource_id_vars:
+          connection_name: test-pubsub
+        ignore_read_extra:
+          - status.0.description
   - name: integration_connectors_connection_advanced
     primary_resource_id: zendeskconnection
-    ignore_read_extra:
-      - status.0.description
     exclude_test: true
-    vars:
-      connection_name: test-zendesk
-      secret_id: test-secret
+    steps:
+      - name: integration_connectors_connection_advanced
+        resource_id_vars:
+          connection_name: test-zendesk
+          secret_id: test-secret
+        ignore_read_extra:
+          - status.0.description
   - name: integration_connectors_connection_sa
     primary_resource_id: zendeskconnection
-    ignore_read_extra:
-      - status.0.description
     exclude_test: true
-    exclude_docs: true
-    vars:
-      connection_name: test-zendesk
-      secret_id: test-secret
+    exclude_basic_doc: true
+    steps:
+      - name: integration_connectors_connection_sa
+        resource_id_vars:
+          connection_name: test-zendesk
+          secret_id: test-secret
+        ignore_read_extra:
+          - status.0.description
   - name: integration_connectors_connection_oauth
     primary_resource_id: boxconnection
-    ignore_read_extra:
-      - status.0.description
     exclude_test: true
-    exclude_docs: true
-    vars:
-      connection_name: test-box
-      secret_id: test-secret
+    exclude_basic_doc: true
+    steps:
+      - name: integration_connectors_connection_oauth
+        resource_id_vars:
+          connection_name: test-box
+          secret_id: test-secret
+        ignore_read_extra:
+          - status.0.description
   - name: integration_connectors_connection_oauth_ssh
     primary_resource_id: boxconnection
-    ignore_read_extra:
-      - status.0.description
     exclude_test: true
-    exclude_docs: true
-    vars:
-      connection_name: test-box
-      secret_id: test-secret
+    exclude_basic_doc: true
+    steps:
+      - name: integration_connectors_connection_oauth_ssh
+        resource_id_vars:
+          connection_name: test-box
+          secret_id: test-secret
+        ignore_read_extra:
+          - status.0.description
   - name: integration_connectors_connection_oauth_cc
     primary_resource_id: boxconnection
-    ignore_read_extra:
-      - status.0.description
     exclude_test: true
-    exclude_docs: true
-    vars:
-      connection_name: test-box
-      secret_id: test-secret
+    exclude_basic_doc: true
+    steps:
+      - name: integration_connectors_connection_oauth_cc
+        resource_id_vars:
+          connection_name: test-box
+          secret_id: test-secret
+        ignore_read_extra:
+          - status.0.description
   - name: integration_connectors_connection_oauth_jwt
     primary_resource_id: boxconnection
-    ignore_read_extra:
-      - status.0.description
     exclude_test: true
-    exclude_docs: true
-    vars:
-      connection_name: test-box
-      secret_id: test-secret
+    exclude_basic_doc: true
+    steps:
+      - name: integration_connectors_connection_oauth_jwt
+        resource_id_vars:
+          connection_name: test-box
+          secret_id: test-secret
+        ignore_read_extra:
+          - status.0.description
 parameters:
   - name: location
     type: String
@@ -921,3 +934,4 @@ properties:
         description: |
           Max QPS supported by the connector version before throttling of requests.
         output: true
+autogen_async: true

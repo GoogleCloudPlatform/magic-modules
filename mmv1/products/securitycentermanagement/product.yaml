@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'SecurityCenterManagement'
-legacy_name: 'scc_management'
-display_name: 'Security Command Center Management (SCC)'
-versions:
-  - name: 'ga'
-    base_url: 'https://securitycentermanagement.googleapis.com/v1/'
+name: SecurityCenterManagement
+display_name: Security Command Center Management (SCC)
+legacy_name: scc_management
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://securitycentermanagement.googleapis.com/v1/

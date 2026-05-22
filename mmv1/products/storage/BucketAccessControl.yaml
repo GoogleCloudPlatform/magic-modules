@@ -13,6 +13,7 @@
 
 ---
 name: BucketAccessControl
+kind: storage#bucketAccessControl
 description: |
   Bucket ACLs can be managed authoritatively using the
   [`storage_bucket_acl`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_acl)
@@ -35,22 +36,19 @@ references:
   guides:
     Official Documentation: https://cloud.google.com/storage/docs/access-control/lists
   api: https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls
+id_format: '{{bucket}}/{{entity}}'
 base_url: b/{{bucket}}/acl
 self_link: b/{{bucket}}/acl/{{entity}}
-collection_url_key: items
-identity:
-  - entity
-kind: storage#bucketAccessControl
-id_format: '{{bucket}}/{{entity}}'
+mutex: storage/buckets/{{bucket}}
 import_format:
   - '{{bucket}}/{{entity}}'
-mutex: storage/buckets/{{bucket}}
-exclude_sweeper: true
-examples:
+samples:
   - name: storage_bucket_access_control_public_bucket
     primary_resource_id: public_rule
-    vars:
-      bucket_name: static-content-bucket
+    steps:
+      - name: storage_bucket_access_control_public_bucket
+        resource_id_vars:
+          bucket_name: static-content-bucket
 properties:
   - name: bucket
     type: ResourceRef
@@ -94,3 +92,7 @@ properties:
       - OWNER
       - READER
       - WRITER
+collection_url_key: items
+exclude_sweeper: true
+identity:
+  - entity

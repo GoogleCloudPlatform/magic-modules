@@ -19,20 +19,10 @@ description: |
   which will be applied to this disk for scheduling snapshot creation.
 
   ~> **Note:** This resource does not support zonal disks (`google_compute_disk`). For zonal disks, please refer to [`google_compute_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk_resource_policy_attachment)
+id_format: '{{project}}/{{region}}/{{disk}}/{{name}}'
 base_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}
-immutable: true
 self_link: projects/{{project}}/regions/{{region}}/disks/{{disk}}
 create_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/addResourcePolicies
-delete_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/removeResourcePolicies
-delete_verb: POST
-identity:
-  - name
-nested_query:
-  keys:
-    - resourcePolicies
-  is_list_of_ids: true
-  modify_by_patch: false
-id_format: '{{project}}/{{region}}/{{disk}}/{{name}}'
 async:
   operation:
     base_url: '{{op_id}}'
@@ -40,14 +30,16 @@ custom_code:
   encoder: templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.tmpl
   decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl
   pre_delete: templates/terraform/pre_delete/compute_region_disk_resource_policies_attachment.go.tmpl
-examples:
+samples:
   - name: region_disk_resource_policy_attachment_basic
     primary_resource_id: attachment
-    vars:
-      base_disk_name: my-base-disk
-      disk_name: my-disk
-      policy_name: my-resource-policy
-      snapshot_name: my-snapshot
+    steps:
+      - name: region_disk_resource_policy_attachment_basic
+        resource_id_vars:
+          base_disk_name: my-base-disk
+          disk_name: my-disk
+          policy_name: my-resource-policy
+          snapshot_name: my-snapshot
 parameters:
   - name: disk
     type: ResourceRef
@@ -71,3 +63,13 @@ properties:
     description: |
       The resource policy to be attached to the disk for scheduling snapshot
       creation. Do not specify the self link.
+delete_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/removeResourcePolicies
+delete_verb: POST
+identity:
+  - name
+immutable: true
+nested_query:
+  keys:
+    - resourcePolicies
+  is_list_of_ids: true
+  modify_by_patch: false

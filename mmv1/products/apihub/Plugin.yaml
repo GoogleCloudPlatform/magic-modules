@@ -14,23 +14,22 @@
 ---
 name: Plugin
 description: A plugin resource in the API hub.
+id_format: projects/{{project}}/locations/{{location}}/plugins/{{plugin_id}}
 base_url: projects/{{project}}/locations/{{location}}/plugins
-immutable: true
 self_link: projects/{{project}}/locations/{{location}}/plugins/{{plugin_id}}
 create_url: projects/{{project}}/locations/{{location}}/plugins?pluginId={{plugin_id}}
-id_format: projects/{{project}}/locations/{{location}}/plugins/{{plugin_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/plugins/{{plugin_id}}
-examples:
+samples:
   - name: apihub_plugin_full
+    external_providers:
+      - time
     primary_resource_id: apihub_plugin_full
-    vars:
-      plugin_id: 'plugin-full'
-    # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
     exclude_test: true
-    external_providers: ["time"]
-autogen_async: true
-autogen_status: UGx1Z2lu
+    steps:
+      - name: apihub_plugin_full
+        resource_id_vars:
+          plugin_id: plugin-full
 parameters:
   - name: location
     type: String
@@ -122,7 +121,6 @@ properties:
   - name: pluginCategory
     type: String
     description: |2-
-
       Possible values:
       PLUGIN_CATEGORY_UNSPECIFIED
       API_GATEWAY
@@ -260,3 +258,6 @@ properties:
     type: String
     description: Timestamp indicating when the plugin was last updated.
     output: true
+autogen_async: true
+autogen_status: UGx1Z2lu
+immutable: true

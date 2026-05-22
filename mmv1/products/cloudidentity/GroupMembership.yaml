@@ -12,14 +12,14 @@
 # limitations under the License.
 
 ---
-name: 'GroupMembership'
+name: GroupMembership
 api_resource_type_kind: Membership
 description: |
   A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/memberships-google-groups'
-  api: 'https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships'
+    Official Documentation: https://cloud.google.com/identity/docs/how-to/memberships-google-groups
+  api: https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships
 docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
@@ -29,7 +29,6 @@ docs:
     `billing_project` you defined.
 base_url: '{{group}}/memberships'
 self_link: '{{name}}'
-immutable: true
 import_format:
   - '{{%name}}'
 timeouts:
@@ -38,65 +37,59 @@ timeouts:
   delete_minutes: 20
 custom_code:
   pre_create: templates/terraform/pre_create/cloud_identity_group_membership.go.tmpl
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
-  custom_update: 'templates/terraform/custom_update/cloud_identity_group_membership.go.tmpl'
-  post_import: 'templates/terraform/post_import/cloud_identity_group_membership.go.tmpl'
-exclude_sweeper: true
-read_error_transform: 'transformCloudIdentityGroupMembershipReadError'
-examples:
-  - name: 'cloud_identity_group_membership'
-    primary_resource_id: 'cloud_identity_group_membership_basic'
-    vars:
-      id_group: 'my-identity-group'
-    test_env_vars:
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
-    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+  post_create: templates/terraform/post_create/set_computed_name.tmpl
+  custom_update: templates/terraform/custom_update/cloud_identity_group_membership.go.tmpl
+  post_import: templates/terraform/post_import/cloud_identity_group_membership.go.tmpl
+samples:
+  - name: cloud_identity_group_membership
+    primary_resource_id: cloud_identity_group_membership_basic
     exclude_test: true
-  - name: 'cloud_identity_group_membership_user'
-    primary_resource_id: 'cloud_identity_group_membership_basic'
-    vars:
-      id_group: 'my-identity-group'
-    test_env_vars:
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
-      identity_user: 'IDENTITY_USER'
-    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    steps:
+      - name: cloud_identity_group_membership
+        resource_id_vars:
+          id_group: my-identity-group
+        test_env_vars:
+          cust_id: CUST_ID
+          org_domain: ORG_DOMAIN
+  - name: cloud_identity_group_membership_user
+    primary_resource_id: cloud_identity_group_membership_basic
     exclude_test: true
-virtual_fields:
-  - name: 'create_ignore_already_exists'
-    description: |
-      If set to true, skip group member creation if a membership with the same name already exists. Defaults to false.
-    type: Boolean
-    default_value: false
+    steps:
+      - name: cloud_identity_group_membership_user
+        resource_id_vars:
+          id_group: my-identity-group
+        test_env_vars:
+          cust_id: CUST_ID
+          identity_user: IDENTITY_USER
+          org_domain: ORG_DOMAIN
 parameters:
-  - name: 'group'
+  - name: group
     type: ResourceRef
     description: |
       The name of the Group to create this membership in.
     url_param_only: true
     required: true
     immutable: true
-    resource: 'Group'
-    imports: 'name'
+    resource: Group
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the Membership, of the form groups/{group_id}/memberships/{membership_id}.
     output: true
-  - name: 'memberKey'
+  - name: memberKey
     type: NestedObject
     description: |
       EntityKey of the member.
-    min_version: 'beta'
+    min_version: beta
     immutable: true
     default_from_api: true
     exactly_one_of:
-      - 'member_key'
-      - 'preferred_member_key'
+      - member_key
+      - preferred_member_key
     properties:
-      - name: 'id'
+      - name: id
         type: String
         description: |
           The ID of the entity.
@@ -110,7 +103,7 @@ properties:
           Must be unique within a namespace.
         required: true
         immutable: true
-      - name: 'namespace'
+      - name: namespace
         type: String
         description: |
           The namespace in which the entity exists.
@@ -122,17 +115,17 @@ properties:
           The namespace must correspond to an identity source created in Admin Console
           and must be in the form of `identitysources/{identity_source_id}`.
         immutable: true
-  - name: 'preferredMemberKey'
+  - name: preferredMemberKey
     type: NestedObject
     description: |
       EntityKey of the member.
     immutable: true
     default_from_api: true
     exactly_one_of:
-      - 'member_key'
-      - 'preferred_member_key'
+      - member_key
+      - preferred_member_key
     properties:
-      - name: 'id'
+      - name: id
         type: String
         description: |
           The ID of the entity.
@@ -146,7 +139,7 @@ properties:
           Must be unique within a namespace.
         required: true
         immutable: true
-      - name: 'namespace'
+      - name: namespace
         type: String
         description: |
           The namespace in which the entity exists.
@@ -158,17 +151,17 @@ properties:
           The namespace must correspond to an identity source created in Admin Console
           and must be in the form of `identitysources/{identity_source_id}`.
         immutable: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The time when the Membership was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The time when the Membership was last updated.
     output: true
-  - name: 'roles'
+  - name: roles
     type: Array
     description: |
       The MembershipRoles that apply to the Membership.
@@ -176,26 +169,26 @@ properties:
     is_set: true
     required: true
     update_url: '{{name}}:modifyMembershipRoles'
-    update_verb: 'POST'
+    update_verb: POST
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: Enum
           description: |
             The name of the MembershipRole. Must be one of OWNER, MANAGER, MEMBER.
           required: true
           enum_values:
-            - 'OWNER'
-            - 'MANAGER'
-            - 'MEMBER'
-        - name: 'expiryDetail'
+            - OWNER
+            - MANAGER
+            - MEMBER
+        - name: expiryDetail
           type: NestedObject
           description: |
             The MembershipRole expiry details, only supported for MEMBER role.
             Other roles cannot be accompanied with MEMBER role having expiry.
           properties:
-            - name: 'expireTime'
+            - name: expireTime
               type: String
               description: |
                 The time at which the MembershipRole will expire.
@@ -205,8 +198,17 @@ properties:
 
                 Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
               required: true
-  - name: 'type'
+  - name: type
     type: String
     description: |
       The type of the membership.
     output: true
+exclude_sweeper: true
+immutable: true
+read_error_transform: transformCloudIdentityGroupMembershipReadError
+virtual_fields:
+  - name: create_ignore_already_exists
+    description: |
+      If set to true, skip group member creation if a membership with the same name already exists. Defaults to false.
+    type: Boolean
+    default_value: false

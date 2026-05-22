@@ -12,48 +12,49 @@
 # limitations under the License.
 
 ---
-name: 'Endpoint'
+name: Endpoint
 description: |
   An individual endpoint that provides a service.
 references:
   guides:
-    'Configuring an endpoint': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_an_endpoint'
-  api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1/projects.locations.namespaces.services.endpoints'
+    Configuring an endpoint: https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_an_endpoint
+  api: https://cloud.google.com/service-directory/docs/reference/rest/v1/projects.locations.namespaces.services.endpoints
 docs:
 base_url: '{{name}}'
 self_link: '{{name}}'
 create_url: '{{service}}/endpoints?endpointId={{endpoint_id}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}'
+  - projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/service_directory_endpoint.go.tmpl'
-  encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
-  decoder: 'templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/service_directory_endpoint.go.tmpl'
-# exluding resource_identity due to custom_import
-exclude_identity_generation: true
-exclude_sweeper: true
-examples:
-  - name: 'service_directory_endpoint_basic'
-    primary_resource_id: 'example'
-    vars:
-      service_id: 'example-service'
-      namespace_id: 'example-namespace'
-      endpoint_id: 'example-endpoint'
-  - name: 'service_directory_endpoint_with_network'
-    primary_resource_id: 'example'
-    vars:
-      service_id: 'example-service'
-      namespace_id: 'example-namespace'
-      endpoint_id: 'example-endpoint'
-      network_name: 'example-network'
+  custom_import: templates/terraform/custom_import/service_directory_endpoint.go.tmpl
+  encoder: templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl
+  decoder: templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl
+  pre_update: templates/terraform/pre_update/service_directory_endpoint.go.tmpl
+samples:
+  - name: service_directory_endpoint_basic
+    primary_resource_id: example
+    steps:
+      - name: service_directory_endpoint_basic
+        resource_id_vars:
+          endpoint_id: example-endpoint
+          namespace_id: example-namespace
+          service_id: example-service
+  - name: service_directory_endpoint_with_network
+    primary_resource_id: example
+    steps:
+      - name: service_directory_endpoint_with_network
+        resource_id_vars:
+          endpoint_id: example-endpoint
+          namespace_id: example-namespace
+          network_name: example-network
+          service_id: example-service
 parameters:
-  - name: 'service'
+  - name: service
     type: String
     description: |
       The resource name of the service that this endpoint provides.
@@ -61,7 +62,7 @@ parameters:
     required: true
     immutable: true
     ignore_read: true
-  - name: 'endpointId'
+  - name: endpointId
     type: String
     description: |
       The Resource ID must be 1-63 characters long, including digits,
@@ -70,36 +71,39 @@ parameters:
     required: true
     immutable: true
     validation:
-      function: 'verify.ValidateRFC1035Name(2, 63)'
+      function: verify.ValidateRFC1035Name(2, 63)
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the endpoint in the format
       `projects/*/locations/*/namespaces/*/services/*/endpoints/*`.
     output: true
-  - name: 'address'
+  - name: address
     type: String
     description: |
       IPv4 or IPv6 address of the endpoint.
     validation:
-      function: 'verify.ValidateIpAddress'
-  - name: 'port'
+      function: verify.ValidateIpAddress
+  - name: port
     type: Integer
     description: |
       Port that the endpoint is running on, must be in the
       range of [0, 65535]. If unspecified, the default is 0.
     validation:
-      function: 'validation.IntBetween(0, 65535)'
-  - name: 'metadata'
+      function: validation.IntBetween(0, 65535)
+  - name: metadata
     type: KeyValuePairs
     description: |
       Metadata for the endpoint. This data can be consumed
       by service clients. The entire metadata dictionary may contain
       up to 512 characters, spread across all key-value pairs.
       Metadata that goes beyond any these limits will be rejected.
-  - name: 'network'
+  - name: network
     type: String
     description: |
       The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.
     immutable: true
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
+exclude_sweeper: true

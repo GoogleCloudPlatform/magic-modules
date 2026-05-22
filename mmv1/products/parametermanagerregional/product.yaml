@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'ParameterManagerRegional'
-legacy_name: 'parameter_manager'
-display_name: 'Parameter Manager'
-versions:
-  - name: 'beta'
-    base_url: 'https://parametermanager.{{location}}.rep.googleapis.com/v1/'
-    cai_base_url: 'https://parametermanager.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://parametermanager.{{location}}.rep.googleapis.com/v1/'
-    cai_base_url: 'https://parametermanager.googleapis.com/v1/'
+name: ParameterManagerRegional
+display_name: Parameter Manager
+legacy_name: parameter_manager
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: beta
+    base_url: https://parametermanager.{{location}}.rep.googleapis.com/v1/
+    cai_base_url: https://parametermanager.googleapis.com/v1/
+  - name: ga
+    base_url: https://parametermanager.{{location}}.rep.googleapis.com/v1/
+    cai_base_url: https://parametermanager.googleapis.com/v1/

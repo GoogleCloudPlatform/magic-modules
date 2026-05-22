@@ -13,14 +13,14 @@
 
 ---
 name: ModelArmorGlobal
-legacy_name: model_armor
 display_name: Model Armor
+legacy_name: model_armor
 scopes:
- - https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
- - name: ga
-   base_url: 'https://modelarmor.googleapis.com/v1/'
-   cai_base_url: "https://modelarmor.googleapis.com/v1/"
- - name: beta
-   base_url: 'https://modelarmor.googleapis.com/v1beta/'
-   cai_base_url: "https://modelarmor.googleapis.com/v1beta/"
+  - name: ga
+    base_url: https://modelarmor.googleapis.com/v1/
+    cai_base_url: https://modelarmor.googleapis.com/v1/
+  - name: beta
+    base_url: https://modelarmor.googleapis.com/v1beta/
+    cai_base_url: https://modelarmor.googleapis.com/v1beta/

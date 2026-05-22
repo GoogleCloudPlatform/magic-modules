@@ -12,20 +12,20 @@
 # limitations under the License.
 
 ---
-name: 'Hl7V2Store'
-kind: 'healthcare#hl7V2Store'
+name: Hl7V2Store
+kind: healthcare#hl7V2Store
 description: |
   A Hl7V2Store is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/hl7V2/STU3/)
   standard for Healthcare information exchange
 references:
   guides:
-    'Creating a HL7v2 Store': 'https://cloud.google.com/healthcare/docs/how-tos/hl7v2'
-  api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.hl7V2Stores'
+    Creating a HL7v2 Store: https://cloud.google.com/healthcare/docs/how-tos/hl7v2
+  api: https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.hl7V2Stores
 docs:
 id_format: '{{dataset}}/hl7V2Stores/{{name}}'
 base_url: '{{dataset}}/hl7V2Stores?hl7V2StoreId={{name}}'
 self_link: '{{dataset}}/hl7V2Stores/{{name}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{dataset}}/hl7V2Stores/{{name}}'
@@ -34,30 +34,35 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/healthcare_hl7_v2_store.go.tmpl'
-exclude_sweeper: true
-examples:
-  - name: 'healthcare_hl7_v2_store_basic'
-    primary_resource_id: 'store'
-    vars:
-      dataset_name: 'example-dataset'
-      hl7_v2_store_name: 'example-hl7-v2-store'
-      pubsub_topic: 'hl7-v2-notifications'
-  - name: 'healthcare_hl7_v2_store_parser_config'
-    primary_resource_id: 'store'
-    min_version: 'beta'
-    vars:
-      dataset_name: 'example-dataset'
-      hl7_v2_store_name: 'example-hl7-v2-store'
-  - name: 'healthcare_hl7_v2_store_unschematized'
-    primary_resource_id: 'store'
-    min_version: 'beta'
-    vars:
-      dataset_name: 'example-dataset'
-      hl7_v2_store_name: 'example-hl7-v2-store'
+  decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl
+  custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.tmpl
+samples:
+  - name: healthcare_hl7_v2_store_basic
+    primary_resource_id: store
+    steps:
+      - name: healthcare_hl7_v2_store_basic
+        resource_id_vars:
+          dataset_name: example-dataset
+          hl7_v2_store_name: example-hl7-v2-store
+          pubsub_topic: hl7-v2-notifications
+  - name: healthcare_hl7_v2_store_parser_config
+    min_version: beta
+    primary_resource_id: store
+    steps:
+      - name: healthcare_hl7_v2_store_parser_config
+        resource_id_vars:
+          dataset_name: example-dataset
+          hl7_v2_store_name: example-hl7-v2-store
+  - name: healthcare_hl7_v2_store_unschematized
+    min_version: beta
+    primary_resource_id: store
+    steps:
+      - name: healthcare_hl7_v2_store_unschematized
+        resource_id_vars:
+          dataset_name: example-dataset
+          hl7_v2_store_name: example-hl7-v2-store
 parameters:
-  - name: 'dataset'
+  - name: dataset
     type: ResourceRef
     description: |
       Identifies the dataset addressed by this request. Must be in the format
@@ -65,10 +70,10 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    resource: 'Dataset'
-    imports: 'selfLink'
+    resource: Dataset
+    imports: selfLink
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the Hl7V2Store.
@@ -76,67 +81,67 @@ properties:
       ** Changing this property may recreate the Hl7v2 store (removing all data) **
     required: true
     immutable: true
-  - name: 'rejectDuplicateMessage'
+  - name: rejectDuplicateMessage
     type: Boolean
     description: |
       Determines whether duplicate messages are allowed.
     required: false
     default_value: false
-  - name: 'parserConfig'
+  - name: parserConfig
     type: NestedObject
     required: false
     default_from_api: true
     update_mask_fields:
-      - 'parser_config.allow_null_header'
-      - 'parser_config.segment_terminator'
-      - 'parser_config.schema'
+      - parser_config.allow_null_header
+      - parser_config.segment_terminator
+      - parser_config.schema
     properties:
-      - name: 'allowNullHeader'
+      - name: allowNullHeader
         type: Boolean
         description: |
           Determines whether messages with no header are allowed.
         at_least_one_of:
-          - 'parser_config.0.allow_null_header'
-          - 'parser_config.0.segment_terminator'
-          - 'parser_config.0.schema'
-      - name: 'segmentTerminator'
+          - parser_config.0.allow_null_header
+          - parser_config.0.segment_terminator
+          - parser_config.0.schema
+      - name: segmentTerminator
         type: String
         description: |
           Byte(s) to be used as the segment terminator. If this is unset, '\r' will be used as segment terminator.
 
           A base64-encoded string.
         at_least_one_of:
-          - 'parser_config.0.allow_null_header'
-          - 'parser_config.0.segment_terminator'
-          - 'parser_config.0.schema'
+          - parser_config.0.allow_null_header
+          - parser_config.0.segment_terminator
+          - parser_config.0.schema
         validation:
-          function: 'verify.ValidateBase64String'
-      - name: 'schema'
+          function: verify.ValidateBase64String
+      - name: schema
         type: String
         description: |
           JSON encoded string for schemas used to parse messages in this
           store if schematized parsing is desired.
         at_least_one_of:
-          - 'parser_config.0.allow_null_header'
-          - 'parser_config.0.segment_terminator'
-          - 'parser_config.0.schema'
-          - 'parser_config.0.version'
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+          - parser_config.0.allow_null_header
+          - parser_config.0.segment_terminator
+          - parser_config.0.schema
+          - parser_config.0.version
+        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
         validation:
-          function: 'validation.StringIsJSON'
-      - name: 'version'
+          function: validation.StringIsJSON
+      - name: version
         type: Enum
         description: |
           The version of the unschematized parser to be used when a custom `schema` is not set.
         immutable: true
-        default_value: "V1"
+        default_value: V1
         enum_values:
-          - 'V1'
-          - 'V2'
-          - 'V3'
-  - name: 'labels'
+          - V1
+          - V2
+          - V3
+  - name: labels
     type: KeyValueLabels
     description: |
       User-supplied key-value pairs used to organize HL7v2 stores.
@@ -152,7 +157,7 @@ properties:
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
     required: false
-  - name: 'notificationConfigs'
+  - name: notificationConfigs
     type: Array
     description: |-
       A list of notification configs. Each configuration uses a filter to determine whether to publish a
@@ -161,7 +166,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'pubsubTopic'
+        - name: pubsubTopic
           type: String
           description: |
             The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
@@ -173,7 +178,7 @@ properties:
 
             If a notification cannot be published to Cloud Pub/Sub, errors will be logged to Stackdriver
           required: true
-        - name: 'filter'
+        - name: filter
           type: String
           description: |
             Restricts notifications sent for messages matching a filter. If this is empty, all messages
@@ -187,13 +192,13 @@ properties:
             * sendFacility, the care center that the message came from, from the MSH-4 segment. For example, sendFacility = "ABC".
             * PatientId(value, type), which matches if the message lists a patient having an ID of the given value and type in the PID-2, PID-3, or PID-4 segments. For example, PatientId("123456", "MRN").
             * labels.x, a string value of the label with key x as set using the Message.labels map. For example, labels."priority"="high". The operator :* can be used to assert the existence of a label. For example, labels."priority":*.
-  - name: 'notificationConfig'
+  - name: notificationConfig
     type: NestedObject
     removed_message: This field has been replaced by notificationConfigs
     exact_version: ga
     required: false
     properties:
-      - name: 'pubsubTopic'
+      - name: pubsubTopic
         type: String
         description: |
           The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
@@ -203,13 +208,13 @@ properties:
           project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
           Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
         required: true
-  - name: 'notificationConfig'
+  - name: notificationConfig
     type: NestedObject
-    exact_version: 'beta'
+    exact_version: beta
     required: false
     deprecation_message: '`notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.'
     properties:
-      - name: 'pubsubTopic'
+      - name: pubsubTopic
         type: String
         description: |
           The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
@@ -219,9 +224,10 @@ properties:
           project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
           Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
         required: true
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       The fully qualified name of this dataset
     ignore_read: true
     output: true
+exclude_sweeper: true

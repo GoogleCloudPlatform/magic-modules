@@ -12,33 +12,28 @@
 # limitations under the License.
 
 ---
-name: 'Zone'
-kind: 'compute#zone'
-description: 'Represents a Zone resource.'
-# Used as a resource reference
-exclude: true
-readonly: true
+name: Zone
+kind: compute#zone
+description: Represents a Zone resource.
 docs:
-base_url: 'projects/{{project}}/zones'
-has_self_link: true
+base_url: projects/{{project}}/zones
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-collection_url_key: 'items'
 custom_code:
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'deprecated'
+  - name: deprecated
     type: NestedObject
-    description: 'The deprecation status associated with this machine type.'
+    description: The deprecation status associated with this machine type.
     output: true
     properties:
-      - name: 'deleted'
+      - name: deleted
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the state of this
@@ -46,7 +41,7 @@ properties:
           informational and the status will not change unless the client
           explicitly changes it.
         output: true
-      - name: 'deprecated'
+      - name: deprecated
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the state of this
@@ -54,7 +49,7 @@ properties:
           informational and the status will not change unless the client
           explicitly changes it.
         output: true
-      - name: 'obsolete'
+      - name: obsolete
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the state of this
@@ -62,14 +57,14 @@ properties:
           informational and the status will not change unless the client
           explicitly changes it.
         output: true
-      - name: 'replacement'
+      - name: replacement
         type: String
         description: |
           The URL of the suggested replacement for a deprecated resource.
           The suggested replacement resource must be the same kind of
           resource as the deprecated resource.
         output: true
-      - name: 'state'
+      - name: state
         type: Enum
         description: |
           The deprecation state of this resource. This can be DEPRECATED,
@@ -80,37 +75,42 @@ properties:
           will be rejected and result in an error.
         output: true
         enum_values:
-          - 'DEPRECATED'
-          - 'OBSOLETE'
-          - 'DELETED'
-  - name: 'description'
+          - DEPRECATED
+          - OBSOLETE
+          - DELETED
+  - name: description
     type: String
-    description: 'An optional textual description of the resource.'
+    description: An optional textual description of the resource.
     output: true
-  - name: 'id'
+  - name: id
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     output: true
-  - name: 'name'
+  - name: name
     type: String
-    description: 'Name of the resource.'
-  - name: 'region'
+    description: Name of the resource.
+  - name: region
     type: ResourceRef
-    description: 'The region where the zone is located.'
+    description: The region where the zone is located.
     output: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'selfLink'
-  - name: 'status'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: selfLink
+  - name: status
     type: Enum
-    description: 'The status of the zone.'
+    description: The status of the zone.
     output: true
     enum_values:
-      - 'UP'
-      - 'DOWN'
-  - name: 'availableCpuPlatforms'
+      - UP
+      - DOWN
+  - name: availableCpuPlatforms
     type: Array
-    description: 'The available CPU platforms in this zone'
+    description: The available CPU platforms in this zone
     output: true
     item_type:
       type: String
+collection_url_key: items
+# Used as a resource reference
+exclude: true
+has_self_link: true
+readonly: true

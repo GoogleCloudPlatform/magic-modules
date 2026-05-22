@@ -12,124 +12,116 @@
 # limitations under the License.
 
 ---
-name: 'Instance'
-include_in_tgc_next: true
+name: Instance
 description: |
   A Google Cloud Looker instance.
 references:
   guides:
-    'Create a Looker (Google Cloud core) instance': 'https://cloud.google.com/looker/docs/looker-core-instance-create'
-    'Configure a Looker (Google Cloud core) instance': 'https://cloud.google.com/looker/docs/looker-core-instance-setup'
-  api: 'https://cloud.google.com/looker/docs/reference/rest/v1/projects.locations.instances'
+    Create a Looker (Google Cloud core) instance: https://cloud.google.com/looker/docs/looker-core-instance-create
+    Configure a Looker (Google Cloud core) instance: https://cloud.google.com/looker/docs/looker-core-instance-setup
+  api: https://cloud.google.com/looker/docs/reference/rest/v1/projects.locations.instances
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/instances'
-create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{region}}/instances
+create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
+update_verb: PATCH
 update_mask: true
 timeouts:
   insert_minutes: 90
   update_minutes: 90
   delete_minutes: 90
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-deletion_policy_default: "DEFAULT"
-deletion_policy_custom_docs: true
-exclude_sweeper: true
-error_abort_predicates:
-  - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'looker_instance_basic'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-  - name: 'looker_instance_full'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-  - name: 'looker_instance_fips'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance-fips'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-  - name: 'looker_instance_enterprise_full'
-    primary_resource_id: 'looker-instance'
-    vars:
-      network_name: 'looker-network'
-      kms_key_ring_name: 'looker-kms-ring'
-      kms_key_name: 'looker-kms-key'
-      address_name: 'looker-range'
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-    exclude_test: true
-  - name: 'looker_instance_enterprise_full_test'
-    primary_resource_id: 'looker-instance'
-    vars:
-      network_name: 'looker-network'
-      kms_key_ring_name: 'looker-kms-ring'
-      kms_key_name: 'looker-kms-key'
-      address_name: 'looker-range'
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-    test_vars_overrides:
-      'address_name': 'compute.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", compute.AddressWithPrefixLength(8))'
-      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", servicenetworking.ServiceNetworkWithPrefixLength(8))'
-    exclude_docs: true
-  - name: 'looker_instance_custom_domain'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-      custom_domain: 'my-custom-domain'
-  - name: 'looker_instance_psc'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-  - name: 'looker_instance_force_delete'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-    ignore_read_extra:
-      - 'deletion_policy'
-virtual_fields:
-  - name: 'deletion_policy'
-    type: String
-    description: |
-      Policy to determine if the cluster should be deleted forcefully.
-      If setting deletion_policy = "FORCE", the Looker instance will be deleted regardless
-      of its nested resources. If set to "DEFAULT", Looker instances that still have
-      nested resources will return an error.
-
-      When a 'terraform destroy' or 'terraform apply' would delete the resource,
-      the command will fail if this field is set to "PREVENT" in Terraform state.
-      When set to "ABANDON", the command will remove the resource from Terraform
-      management without updating or deleting the resource in the API.
-      When set to "DELETE", the command will behave as if set to "DEFAULT".
-
-      Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
-    exclude: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
+samples:
+  - name: looker_instance_basic
+    primary_resource_id: looker-instance
+    steps:
+      - name: looker_instance_basic
+        resource_id_vars:
+          client_id: my-client-id
+          client_secret: my-client-secret
+          instance_name: my-instance
+  - name: looker_instance_full
+    primary_resource_id: looker-instance
+    steps:
+      - name: looker_instance_full
+        resource_id_vars:
+          client_id: my-client-id
+          client_secret: my-client-secret
+          instance_name: my-instance
+  - name: looker_instance_fips
+    primary_resource_id: looker-instance
+    steps:
+      - name: looker_instance_fips
+        resource_id_vars:
+          client_id: my-client-id
+          client_secret: my-client-secret
+          instance_name: my-instance-fips
+  - name: looker_instance_enterprise_full
+    primary_resource_id: looker-instance
+    exclude_test: true
+    steps:
+      - name: looker_instance_enterprise_full
+        resource_id_vars:
+          address_name: looker-range
+          client_id: my-client-id
+          client_secret: my-client-secret
+          instance_name: my-instance
+          kms_key_name: looker-kms-key
+          kms_key_ring_name: looker-kms-ring
+          network_name: looker-network
+  - name: looker_instance_enterprise_full_test
+    primary_resource_id: looker-instance
+    exclude_basic_doc: true
+    steps:
+      - name: looker_instance_enterprise_full_test
+        resource_id_vars:
+          address_name: looker-range
+          client_id: my-client-id
+          client_secret: my-client-secret
+          instance_name: my-instance
+          kms_key_name: looker-kms-key
+          kms_key_ring_name: looker-kms-ring
+          network_name: looker-network
+        test_vars_overrides:
+          address_name: compute.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", compute.AddressWithPrefixLength(8))
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", servicenetworking.ServiceNetworkWithPrefixLength(8))
+  - name: looker_instance_custom_domain
+    primary_resource_id: looker-instance
+    steps:
+      - name: looker_instance_custom_domain
+        resource_id_vars:
+          client_id: my-client-id
+          client_secret: my-client-secret
+          custom_domain: my-custom-domain
+          instance_name: my-instance
+  - name: looker_instance_psc
+    primary_resource_id: looker-instance
+    steps:
+      - name: looker_instance_psc
+        resource_id_vars:
+          client_id: my-client-id
+          client_secret: my-client-secret
+          instance_name: my-instance
+  - name: looker_instance_force_delete
+    primary_resource_id: looker-instance
+    steps:
+      - name: looker_instance_force_delete
+        resource_id_vars:
+          client_id: my-client-id
+          client_secret: my-client-secret
+          instance_name: my-instance
+        ignore_read_extra:
+          - deletion_policy
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: |
       The name of the Looker region of the instance.
@@ -138,14 +130,14 @@ parameters:
     default_from_api: true
 properties:
   # Admin Settings Object
-  - name: 'adminSettings'
+  - name: adminSettings
     type: NestedObject
     description: |
       Looker instance Admin settings.
     update_mask_fields:
-      - 'admin_settings.allowed_email_domains'
+      - admin_settings.allowed_email_domains
     properties:
-      - name: 'allowedEmailDomains'
+      - name: allowedEmailDomains
         type: Array
         description: |
           Email domain allowlist for the instance.
@@ -157,26 +149,26 @@ properties:
         item_type:
           type: String
   # Admin Settings Object - End
-  - name: 'consumerNetwork'
+  - name: consumerNetwork
     type: String
     description: |
       Network name in the consumer project in the format of: projects/{project}/global/networks/{network}
       Note that the consumer network may be in a different GCP project than the consumer
       project that is hosting the Looker Instance.
   # Controlled Egress Config Object
-  - name: 'controlledEgressConfig'
+  - name: controlledEgressConfig
     type: NestedObject
     description: |
       Controlled egress configuration.
     update_mask_fields:
-      - 'controlled_egress_config.marketplace_enabled'
-      - 'controlled_egress_config.egress_fqdns'
+      - controlled_egress_config.marketplace_enabled
+      - controlled_egress_config.egress_fqdns
     properties:
-      - name: 'marketplaceEnabled'
+      - name: marketplaceEnabled
         type: Boolean
         description: |
           Whether the Looker Marketplace is enabled.
-      - name: 'egressFqdns'
+      - name: egressFqdns
         type: Array
         description: |
           List of fully qualified domain names to be added to the allowlist for
@@ -184,18 +176,18 @@ properties:
         item_type:
           type: String
   # Controlled Egress Config Object - End
-  - name: 'controlledEgressEnabled'
+  - name: controlledEgressEnabled
     type: Boolean
     description: |
       Whether controlled egress is enabled on the Looker instance.
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       The time the instance was created in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
   # Deny Maintenance Period Object
-  - name: 'denyMaintenancePeriod'
+  - name: denyMaintenancePeriod
     type: NestedObject
     description: |
       Maintenance denial period for this instance.
@@ -203,151 +195,151 @@ properties:
       You must allow at least 14 days of maintenance availability
       between any two deny maintenance periods.
     properties:
-      - name: 'startDate'
+      - name: startDate
         type: NestedObject
         description: |
           Required. Start date of the deny maintenance period
         required: true
         properties:
-          - name: 'year'
+          - name: year
             type: Integer
             description: |
               Year of the date. Must be from 1 to 9999, or 0 to specify a date without
               a year.
             validation:
-              function: 'validation.IntBetween(0,10000)'
-          - name: 'month'
+              function: validation.IntBetween(0,10000)
+          - name: month
             type: Integer
             description: |
               Month of a year. Must be from 1 to 12, or 0 to specify a year without a
               month and day.
             validation:
-              function: 'validation.IntBetween(0,13)'
-          - name: 'day'
+              function: validation.IntBetween(0,13)
+          - name: day
             type: Integer
             description: |
               Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
               to specify a year by itself or a year and month where the day isn't significant.
             validation:
-              function: 'validation.IntBetween(0,32)'
-      - name: 'endDate'
+              function: validation.IntBetween(0,32)
+      - name: endDate
         type: NestedObject
         description: |
           Required. Start date of the deny maintenance period
         required: true
         properties:
-          - name: 'year'
+          - name: year
             type: Integer
             description: |
               Year of the date. Must be from 1 to 9999, or 0 to specify a date without
               a year.
             validation:
-              function: 'validation.IntBetween(0,10000)'
-          - name: 'month'
+              function: validation.IntBetween(0,10000)
+          - name: month
             type: Integer
             description: |
               Month of a year. Must be from 1 to 12, or 0 to specify a year without a
               month and day.
             validation:
-              function: 'validation.IntBetween(0,13)'
-          - name: 'day'
+              function: validation.IntBetween(0,13)
+          - name: day
             type: Integer
             description: |
               Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
               to specify a year by itself or a year and month where the day isn't significant.
             validation:
-              function: 'validation.IntBetween(0,32)'
-      - name: 'time'
+              function: validation.IntBetween(0,32)
+      - name: time
         type: NestedObject
         description: |
           Required. Start time of the window in UTC time.
         required: true
         properties:
-          - name: 'hours'
+          - name: hours
             type: Integer
             description: |
               Hours of day in 24 hour format. Should be from 0 to 23.
             validation:
-              function: 'validation.IntBetween(0,23)'
-          - name: 'minutes'
+              function: validation.IntBetween(0,23)
+          - name: minutes
             type: Integer
             description: |
               Minutes of hour of day. Must be from 0 to 59.
             validation:
-              function: 'validation.IntBetween(0,60)'
-          - name: 'seconds'
+              function: validation.IntBetween(0,60)
+          - name: seconds
             type: Integer
             description: |
               Seconds of minutes of the time. Must normally be from 0 to 59.
             validation:
-              function: 'validation.IntBetween(0,60)'
-          - name: 'nanos'
+              function: validation.IntBetween(0,60)
+          - name: nanos
             type: Integer
             description: |
               Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
             validation:
-              function: 'validation.IntBetween(0,999999999)'
+              function: validation.IntBetween(0,999999999)
   # Deny Maintenance Period Object - End
-  - name: 'egressPublicIp'
+  - name: egressPublicIp
     type: String
     description: |
       Public Egress IP (IPv4).
     output: true
   # Encryption Config Object
-  - name: 'encryptionConfig'
+  - name: encryptionConfig
     type: NestedObject
     description: |
       Looker instance encryption settings.
     default_from_api: true
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           Name of the customer managed encryption key (CMEK) in KMS.
-      - name: 'kmsKeyState'
+      - name: kmsKeyState
         type: Enum
         description: |
           Status of the customer managed encryption key (CMEK) in KMS.
         output: true
         enum_values:
-          - 'VALID'
-          - 'REVOKED'
-      - name: 'kmsKeyNameVersion'
+          - VALID
+          - REVOKED
+      - name: kmsKeyNameVersion
         type: String
         description: |
           Full name and version of the CMEK key currently in use to encrypt Looker data.
         output: true
   # Encryption Config  Object - End
-  - name: 'fipsEnabled'
+  - name: fipsEnabled
     type: Boolean
     description: |
       FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
-  - name: 'geminiEnabled'
+  - name: geminiEnabled
     type: Boolean
     description: |
       Gemini enablement for Looker (Google Cloud Core).
-  - name: 'ingressPrivateIp'
+  - name: ingressPrivateIp
     type: String
     description: |
       Private Ingress IP (IPv4).
     output: true
-  - name: 'ingressPublicIp'
+  - name: ingressPublicIp
     type: String
     description: |
       Public Ingress IP (IPv4).
     output: true
-  - name: 'lookerVersion'
+  - name: lookerVersion
     type: String
     description: |
       The Looker version that the instance is using.
     output: true
-  - name: 'lookerUri'
+  - name: lookerUri
     type: String
     description: |
       Looker instance URI which can be used to access the Looker Instance UI.
     output: true
   # Maintenance Window Object
-  - name: 'maintenanceWindow'
+  - name: maintenanceWindow
     type: NestedObject
     description: |
       Maintenance window for an instance.
@@ -356,7 +348,7 @@ properties:
       your instance to be restarted during updates, which will temporarily
       disrupt service.
     properties:
-      - name: 'dayOfWeek'
+      - name: dayOfWeek
         type: Enum
         description: |
           Required. Day of the week for this MaintenanceWindow (in UTC).
@@ -370,45 +362,45 @@ properties:
           - SUNDAY: Sunday
         required: true
         enum_values:
-          - 'MONDAY'
-          - 'TUESDAY'
-          - 'WEDNESDAY'
-          - 'THURSDAY'
-          - 'FRIDAY'
-          - 'SATURDAY'
-          - 'SUNDAY'
-      - name: 'startTime'
+          - MONDAY
+          - TUESDAY
+          - WEDNESDAY
+          - THURSDAY
+          - FRIDAY
+          - SATURDAY
+          - SUNDAY
+      - name: startTime
         type: NestedObject
         description: |
           Required. Start time of the window in UTC time.
         required: true
         properties:
-          - name: 'hours'
+          - name: hours
             type: Integer
             description: |
               Hours of day in 24 hour format. Should be from 0 to 23.
             validation:
-              function: 'validation.IntBetween(0,23)'
-          - name: 'minutes'
+              function: validation.IntBetween(0,23)
+          - name: minutes
             type: Integer
             description: |
               Minutes of hour of day. Must be from 0 to 59.
             validation:
-              function: 'validation.IntBetween(0,60)'
-          - name: 'seconds'
+              function: validation.IntBetween(0,60)
+          - name: seconds
             type: Integer
             description: |
               Seconds of minutes of the time. Must normally be from 0 to 59.
             validation:
-              function: 'validation.IntBetween(0,60)'
-          - name: 'nanos'
+              function: validation.IntBetween(0,60)
+          - name: nanos
             type: Integer
             description: |
               Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
             validation:
-              function: 'validation.IntBetween(0,999999999)'
+              function: validation.IntBetween(0,999999999)
   # Maintenance Window Object - End
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The ID of the instance or a fully qualified identifier for the instance.
@@ -416,79 +408,79 @@ properties:
     required: true
     immutable: true
     validation:
-      regex: '^[a-z][a-z0-9-]{0,61}[a-z0-9]$'
+      regex: ^[a-z][a-z0-9-]{0,61}[a-z0-9]$
   # Oauth Object
-  - name: 'oauthConfig'
+  - name: oauthConfig
     type: NestedObject
     description: |
       Looker Instance OAuth login settings.
     ignore_read: true
     required: true
     properties:
-      - name: 'clientId'
+      - name: clientId
         type: String
         description: |
           The client ID for the Oauth config.
         required: true
-      - name: 'clientSecret'
+      - name: clientSecret
         type: String
         description: |
           The client secret for the Oauth config.
         required: true
   # Oauth Object - End
   # Periodic Export Config Object
-  - name: 'periodicExportConfig'
+  - name: periodicExportConfig
     type: NestedObject
     description: |
       Configuration for periodic export.
     update_mask_fields:
-      - 'periodic_export_config'
+      - periodic_export_config
     properties:
-      - name: 'kmsKey'
+      - name: kmsKey
         type: String
         description: |
           Name of the CMEK key in KMS.
           Format:
           projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}
         required: true
-      - name: 'gcsUri'
+      - name: gcsUri
         type: String
         description: |
           Cloud Storage bucket URI for periodic export.
           Format: gs://{bucket_name}
         required: true
-      - name: 'startTime'
+      - name: startTime
         type: NestedObject
         description: |
           Time in UTC to start the periodic export job.
         required: true
         properties:
-          - name: 'hours'
+          - name: hours
             type: Integer
             description: |
               Hours of day in 24 hour format. Should be from 0 to 23.
             validation:
-              function: 'validation.IntBetween(0,23)'
-          - name: 'minutes'
+              function: validation.IntBetween(0,23)
+          - name: minutes
             type: Integer
             description: |
               Minutes of hour of day. Must be from 0 to 59.
             validation:
-              function: 'validation.IntBetween(0,60)'
-          - name: 'seconds'
+              function: validation.IntBetween(0,60)
+          - name: seconds
             type: Integer
             description: |
               Seconds of minutes of the time. Must normally be from 0 to 59.
             validation:
-              function: 'validation.IntBetween(0,60)'
-          - name: 'nanos'
+              function: validation.IntBetween(0,60)
+          - name: nanos
             type: Integer
             description: |
               Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
             validation:
-              function: 'validation.IntBetween(0,999999999)'
+              function: validation.IntBetween(0,999999999)
   # Periodic Export Config Object - End
-  - name: 'platformEdition'
+  - name: platformEdition
     type: Enum
     description: |
       Platform editions for a Looker instance. Each edition maps to a set of instance features, like its size. Must be one of these values:
@@ -504,94 +496,94 @@ properties:
       - LOOKER_CORE_TRIAL_ENTERPRISE: An enterprise trial edition of Looker (Google Cloud core) product.
       - LOOKER_CORE_TRIAL_EMBED: An embed trial edition of Looker (Google Cloud core) product.
     immutable: true
-    default_value: "LOOKER_CORE_TRIAL"
+    default_value: LOOKER_CORE_TRIAL
     enum_values:
-      - 'LOOKER_CORE_TRIAL'
-      - 'LOOKER_CORE_STANDARD'
-      - 'LOOKER_CORE_STANDARD_ANNUAL'
-      - 'LOOKER_CORE_ENTERPRISE_ANNUAL'
-      - 'LOOKER_CORE_EMBED_ANNUAL'
-      - 'LOOKER_CORE_NONPROD_STANDARD_ANNUAL'
-      - 'LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL'
-      - 'LOOKER_CORE_NONPROD_EMBED_ANNUAL'
-      - 'LOOKER_CORE_TRIAL_STANDARD'
-      - 'LOOKER_CORE_TRIAL_ENTERPRISE'
-      - 'LOOKER_CORE_TRIAL_EMBED'
-  - name: 'privateIpEnabled'
+      - LOOKER_CORE_TRIAL
+      - LOOKER_CORE_STANDARD
+      - LOOKER_CORE_STANDARD_ANNUAL
+      - LOOKER_CORE_ENTERPRISE_ANNUAL
+      - LOOKER_CORE_EMBED_ANNUAL
+      - LOOKER_CORE_NONPROD_STANDARD_ANNUAL
+      - LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL
+      - LOOKER_CORE_NONPROD_EMBED_ANNUAL
+      - LOOKER_CORE_TRIAL_STANDARD
+      - LOOKER_CORE_TRIAL_ENTERPRISE
+      - LOOKER_CORE_TRIAL_EMBED
+  - name: privateIpEnabled
     type: Boolean
     description: |
       Whether private IP is enabled on the Looker instance.
     default_value: false
   # PscConfig Object
-  - name: 'pscConfig'
+  - name: pscConfig
     type: NestedObject
     description: |
       Information for Private Service Connect (PSC) setup for a Looker instance.
     default_from_api: true
     update_mask_fields:
-      - 'psc_config.allowed_vpcs'
-      - 'psc_config.service_attachments'
+      - psc_config.allowed_vpcs
+      - psc_config.service_attachments
     properties:
-      - name: 'allowedVpcs'
+      - name: allowedVpcs
         type: Array
         description: |
           List of VPCs that are allowed ingress into the Looker instance.
         item_type:
           type: String
-      - name: 'lookerServiceAttachmentUri'
+      - name: lookerServiceAttachmentUri
         type: String
         description: |
           URI of the Looker service attachment.
         output: true
-      - name: 'serviceAttachments'
+      - name: serviceAttachments
         type: Array
         description: |
           List of egress service attachment configurations.
         item_type:
           type: NestedObject
           properties:
-            - name: 'connectionStatus'
+            - name: connectionStatus
               type: Enum
               description: |
                 Status of the service attachment connection.
               output: true
               enum_values:
-                - 'ACCEPTED'
-                - 'PENDING'
-                - 'REJECTED'
-                - 'NEEDS_ATTENTION'
-                - 'CLOSED'
-            - name: 'localFqdn'
+                - ACCEPTED
+                - PENDING
+                - REJECTED
+                - NEEDS_ATTENTION
+                - CLOSED
+            - name: localFqdn
               type: String
               description: |
                 Fully qualified domain name that will be used in the private DNS record created for the service attachment.
-            - name: 'targetServiceAttachmentUri'
+            - name: targetServiceAttachmentUri
               type: String
               description: |
                 URI of the service attachment to connect to.
   # PscConfig Object - End
-  - name: 'pscEnabled'
+  - name: pscEnabled
     type: Boolean
     description: |
       Whether Public Service Connect (PSC) is enabled on the Looker instance
-  - name: 'publicIpEnabled'
+  - name: publicIpEnabled
     type: Boolean
     description: |
       Whether public IP is enabled on the Looker instance.
     default_value: true
-  - name: 'reservedRange'
+  - name: reservedRange
     type: String
     description: |
       Name of a reserved IP address range within the consumer network, to be used for
       private service access connection. User may or may not specify this in a request.
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       The time the instance was updated in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
   # UserMetadata Object
-  - name: 'userMetadata'
+  - name: userMetadata
     type: NestedObject
     description: |
       Metadata about users for a Looker instance.
@@ -605,31 +597,55 @@ properties:
       With the Standard edition of Looker (Google Cloud core), you can provision up to 50
       total users, distributed across Viewer, Standard, and Developer.
     properties:
-      - name: 'additionalViewerUserCount'
+      - name: additionalViewerUserCount
         type: Integer
         description: |
           Number of additional Viewer Users to allocate to the Looker Instance.
-      - name: 'additionalStandardUserCount'
+      - name: additionalStandardUserCount
         type: Integer
         description: |
           Number of additional Standard Users to allocate to the Looker Instance.
-      - name: 'additionalDeveloperUserCount'
+      - name: additionalDeveloperUserCount
         type: Integer
         description: |
           Number of additional Developer Users to allocate to the Looker Instance.
   # UserMetadata Object - End
   # CustomDomain Object
-  - name: 'customDomain'
+  - name: customDomain
     type: NestedObject
     description: |
       Custom domain settings for a Looker instance.
     properties:
-      - name: 'domain'
+      - name: domain
         type: String
         description: |
           Domain name
-      - name: 'state'
+      - name: state
         type: String
         description: |
           Status of the custom domain.
         output: true
+autogen_async: true
+deletion_policy_custom_docs: true
+deletion_policy_default: DEFAULT
+error_abort_predicates:
+  - transport_tpg.Is429QuotaError
+exclude_sweeper: true
+include_in_tgc_next: true
+virtual_fields:
+  - name: deletion_policy
+    type: String
+    description: |
+      Policy to determine if the cluster should be deleted forcefully.
+      If setting deletion_policy = "FORCE", the Looker instance will be deleted regardless
+      of its nested resources. If set to "DEFAULT", Looker instances that still have
+      nested resources will return an error.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+      Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
+    exclude: true

@@ -12,28 +12,27 @@
 # limitations under the License.
 
 ---
-name: 'EdgeCacheOrigin'
+name: EdgeCacheOrigin
 description: |
   EdgeCacheOrigin represents a HTTP-reachable backend for an EdgeCacheService.
 references:
   guides:
-  api: 'https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheOrigins'
+  api: https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheOrigins
 docs:
-base_url: 'projects/{{project}}/locations/global/edgeCacheOrigins'
-self_link: 'projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}'
-create_url: 'projects/{{project}}/locations/global/edgeCacheOrigins?edgeCacheOriginId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/global/edgeCacheOrigins
+self_link: projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}
+create_url: projects/{{project}}/locations/global/edgeCacheOrigins?edgeCacheOriginId={{name}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}'
+  - projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}
 timeouts:
   insert_minutes: 120
   update_minutes: 120
   delete_minutes: 120
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
     timeouts:
@@ -43,29 +42,35 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_services_edge_cache_origin_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-origin'
-    ignore_read_extra:
-      - 'timeout'
-  - name: 'network_services_edge_cache_origin_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-origin'
-      resource_name_2: 'my-fallback'
-    ignore_read_extra:
-      - 'timeout'
-  - name: 'network_services_edge_cache_origin_v4auth'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-origin'
-      secret_name: 'secret-name'
-    ignore_read_extra:
-      - 'timeout'
+samples:
+  - name: network_services_edge_cache_origin_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_edge_cache_origin_basic
+        resource_id_vars:
+          resource_name: my-origin
+        ignore_read_extra:
+          - timeout
+  - name: network_services_edge_cache_origin_advanced
+    primary_resource_id: default
+    steps:
+      - name: network_services_edge_cache_origin_advanced
+        resource_id_vars:
+          resource_name: my-origin
+          resource_name_2: my-fallback
+        ignore_read_extra:
+          - timeout
+  - name: network_services_edge_cache_origin_v4auth
+    primary_resource_id: default
+    steps:
+      - name: network_services_edge_cache_origin_v4auth
+        resource_id_vars:
+          resource_name: my-origin
+          secret_name: secret-name
+        ignore_read_extra:
+          - timeout
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource; provided by the client when the resource is created.
@@ -75,14 +80,14 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A human-readable description of the resource.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'Set of label tags associated with the EdgeCache resource.'
-  - name: 'originAddress'
+    description: Set of label tags associated with the EdgeCache resource.
+  - name: originAddress
     type: String
     description: |
       A fully qualified domain name (FQDN) or IP address reachable over the public Internet, or the address of a Google Cloud Storage bucket.
@@ -93,7 +98,7 @@ properties:
       If a Cloud Storage bucket is provided, it must be in the canonical "gs://bucketname" format. Other forms, such as "storage.googleapis.com", will be rejected.
     required: true
   # default http2 from api
-  - name: 'protocol'
+  - name: protocol
     type: Enum
     description: |
       The protocol to use to connect to the configured origin. Defaults to HTTP2, and it is strongly recommended that users use HTTP2 for both security & performance.
@@ -101,17 +106,17 @@ properties:
       When using HTTP2 or HTTPS as the protocol, a valid, publicly-signed, unexpired TLS (SSL) certificate must be presented by the origin server.
     default_from_api: true
     enum_values:
-      - 'HTTP2'
-      - 'HTTPS'
-      - 'HTTP'
+      - HTTP2
+      - HTTPS
+      - HTTP
   # default from api
-  - name: 'port'
+  - name: port
     type: Integer
     description: |
       The port to connect to the origin on.
       Defaults to port 443 for HTTP2 and HTTPS protocols, and port 80 for HTTP.
     default_from_api: true
-  - name: 'maxAttempts'
+  - name: maxAttempts
     type: Integer
     description: |
       The maximum number of attempts to cache fill from this origin. Another attempt is made when a cache fill fails with one of the retryConditions.
@@ -127,8 +132,8 @@ properties:
 
       Defaults to 1. Must be a value greater than 0 and less than 4.
     validation:
-      function: 'validation.IntBetween(0, 4)'
-  - name: 'failoverOrigin'
+      function: validation.IntBetween(0, 4)
+  - name: failoverOrigin
     type: String
     description: |
       The Origin resource to try when the current origin cannot be reached.
@@ -136,9 +141,9 @@ properties:
 
       The value of timeout.maxAttemptsTimeout dictates the timeout across all origins.
       A reference to a Topic resource.
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    diff_suppress_func: tpgresource.CompareResourceNames
   # default CONNECT_FAILURE from api
-  - name: 'retryConditions'
+  - name: retryConditions
     type: Array
     description: |
       Specifies one or more retry conditions for the configured origin.
@@ -166,19 +171,19 @@ properties:
         This field only has a name and description because of MM
         limitations. It should not appear in downstreams.
       enum_values:
-        - 'CONNECT_FAILURE'
-        - 'HTTP_5XX'
-        - 'GATEWAY_ERROR'
-        - 'RETRIABLE_4XX'
-        - 'NOT_FOUND'
-        - 'FORBIDDEN'
-  - name: 'timeout'
+        - CONNECT_FAILURE
+        - HTTP_5XX
+        - GATEWAY_ERROR
+        - RETRIABLE_4XX
+        - NOT_FOUND
+        - FORBIDDEN
+  - name: timeout
     type: NestedObject
     description: |
       The connection and HTTP timeout configuration for this origin.
-    custom_flatten: 'templates/terraform/custom_flatten/network_services_timeout_mirror.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/network_services_timeout_mirror.go.tmpl
     properties:
-      - name: 'connectTimeout'
+      - name: connectTimeout
         type: String
         description: |
           The maximum duration to wait for a single origin connection to be established, including DNS lookup, TLS handshake and TCP/QUIC connection establishment.
@@ -186,13 +191,12 @@ properties:
           Defaults to 5 seconds. The timeout must be a value between 1s and 15s.
 
           The connectTimeout capped by the deadline set by the request's maxAttemptsTimeout.  The last connection attempt may have a smaller connectTimeout in order to adhere to the overall maxAttemptsTimeout.
-
         at_least_one_of:
-          - 'timeout.0.connect_timeout'
-          - 'timeout.0.max_attempts_timeout'
-          - 'timeout.0.response_timeout'
-          - 'timeout.0.read_timeout'
-      - name: 'maxAttemptsTimeout'
+          - timeout.0.connect_timeout
+          - timeout.0.max_attempts_timeout
+          - timeout.0.response_timeout
+          - timeout.0.read_timeout
+      - name: maxAttemptsTimeout
         type: String
         description: |
           The maximum time across all connection attempts to the origin, including failover origins, before returning an error to the client. A HTTP 504 will be returned if the timeout is reached before a response is returned.
@@ -201,11 +205,11 @@ properties:
 
           If a failoverOrigin is specified, the maxAttemptsTimeout of the first configured origin sets the deadline for all connection attempts across all failoverOrigins.
         at_least_one_of:
-          - 'timeout.0.connect_timeout'
-          - 'timeout.0.max_attempts_timeout'
-          - 'timeout.0.response_timeout'
-          - 'timeout.0.read_timeout'
-      - name: 'responseTimeout'
+          - timeout.0.connect_timeout
+          - timeout.0.max_attempts_timeout
+          - timeout.0.response_timeout
+          - timeout.0.read_timeout
+      - name: responseTimeout
         type: String
         description: |
           The maximum duration to wait for the last byte of a response to arrive when reading from the HTTP connection/stream.
@@ -218,11 +222,11 @@ properties:
 
           If the response headers have already been written to the connection, the response will be truncated and logged.
         at_least_one_of:
-          - 'timeout.0.connect_timeout'
-          - 'timeout.0.max_attempts_timeout'
-          - 'timeout.0.response_timeout'
-          - 'timeout.0.read_timeout'
-      - name: 'readTimeout'
+          - timeout.0.connect_timeout
+          - timeout.0.max_attempts_timeout
+          - timeout.0.response_timeout
+          - timeout.0.read_timeout
+      - name: readTimeout
         type: String
         description: |
           The maximum duration to wait between reads of a single HTTP connection/stream.
@@ -233,45 +237,45 @@ properties:
 
           If the response headers have already been written to the connection, the response will be truncated and logged.
         at_least_one_of:
-          - 'timeout.0.connect_timeout'
-          - 'timeout.0.max_attempts_timeout'
-          - 'timeout.0.response_timeout'
-          - 'timeout.0.read_timeout'
-  - name: 'awsV4Authentication'
+          - timeout.0.connect_timeout
+          - timeout.0.max_attempts_timeout
+          - timeout.0.response_timeout
+          - timeout.0.read_timeout
+  - name: awsV4Authentication
     type: NestedObject
     description: |
       Enable AWS Signature Version 4 origin authentication.
     properties:
-      - name: 'accessKeyId'
+      - name: accessKeyId
         type: String
         description: |
           The access key ID your origin uses to identify the key.
         required: true
-      - name: 'secretAccessKeyVersion'
+      - name: secretAccessKeyVersion
         type: String
         description: |
           The Secret Manager secret version of the secret access key used by your origin.
 
           This is the resource name of the secret version in the format `projects/*/secrets/*/versions/*` where the `*` values are replaced by the project, secret, and version you require.
         required: true
-      - name: 'originRegion'
+      - name: originRegion
         type: String
         description: |
           The name of the AWS region that your origin is in.
         required: true
-  - name: 'originOverrideAction'
+  - name: originOverrideAction
     type: NestedObject
     description: |
       The override actions, including url rewrites and header
       additions, for requests that use this origin.
     properties:
-      - name: 'urlRewrite'
+      - name: urlRewrite
         type: NestedObject
         description: |
           The URL rewrite configuration for request that are
           handled by this origin.
         properties:
-          - name: 'hostRewrite'
+          - name: hostRewrite
             type: String
             description: |
               Prior to forwarding the request to the selected
@@ -279,13 +283,13 @@ properties:
               contents of the hostRewrite.
 
               This value must be between 1 and 255 characters.
-      - name: 'headerAction'
+      - name: headerAction
         type: NestedObject
         description: |
           The header actions, including adding and removing
           headers, for request handled by this origin.
         properties:
-          - name: 'requestHeadersToAdd'
+          - name: requestHeadersToAdd
             type: Array
             description: |
               Describes a header to add.
@@ -294,17 +298,17 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'headerName'
+                - name: headerName
                   type: String
                   description: |
                     The name of the header to add.
                   required: true
-                - name: 'headerValue'
+                - name: headerValue
                   type: String
                   description: |
                     The value of the header to add.
                   required: true
-                - name: 'replace'
+                - name: replace
                   type: Boolean
                   description: |
                     Whether to replace all existing headers with the same name.
@@ -317,12 +321,12 @@ properties:
                     To overwrite existing values, set `replace` to `true`.
             min_size: 1
             max_size: 25
-  - name: 'originRedirect'
+  - name: originRedirect
     type: NestedObject
     description: |
       Follow redirects from this origin.
     properties:
-      - name: 'redirectConditions'
+      - name: redirectConditions
         type: Array
         description: |
           The set of redirect response codes that the CDN
@@ -332,7 +336,7 @@ properties:
         item_type:
           type: String
         max_size: 5
-  - name: 'flexShielding'
+  - name: flexShielding
     type: NestedObject
     description: |
       The FlexShieldingOptions to be used for all routes to this origin.
@@ -351,7 +355,8 @@ properties:
           description: |
             Available regions for flexible shielding caching layer.
           enum_values:
-            - 'AFRICA_SOUTH1'
-            - 'ME_CENTRAL1'
+            - AFRICA_SOUTH1
+            - ME_CENTRAL1
         min_size: 1
         max_size: 1
+autogen_async: true

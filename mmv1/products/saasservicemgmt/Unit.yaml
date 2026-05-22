@@ -14,29 +14,29 @@
 ---
 name: Unit
 description: A Unit is the fundamental structural building block of a SaaS offering. Each Unit is an instance of a UnitKind. It is a versioned, manageable component of a service that has its own lifecycle, representing elements like infrastructure, workloads, or an entire application stack that a service producer intends to manage as a single entity.
+id_format: projects/{{project}}/locations/{{location}}/units/{{unit_id}}
 base_url: projects/{{project}}/locations/{{location}}/units
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/units/{{unit_id}}
 create_url: projects/{{project}}/locations/{{location}}/units?unitId={{unit_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/units/{{unit_id}}
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/units/{{unit_id}}
-examples:
+samples:
   - name: saas_runtime_unit_basic
-    primary_resource_id: "example"
-    min_version: "beta"
-    vars:
-      saas_name: example-saas
-      unitkind_name: example-unitkind
-      unit_name: example-unit
-    test_env_vars:
-      project: "PROJECT_NAME"
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
-autogen_async: false
-autogen_status: VW5pdA==
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    primary_resource_id: example
+    steps:
+      - name: saas_runtime_unit_basic
+        resource_id_vars:
+          saas_name: example-saas
+          unit_name: example-unit
+          unitkind_name: example-unitkind
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -297,3 +297,5 @@ properties:
       change to the resource made by users must refresh this value.
       Changes to a resource made by the service should refresh this value.
     output: true
+autogen_async: false
+autogen_status: VW5pdA==

@@ -17,54 +17,65 @@ description: Description
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/guardrails
 self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/guardrails/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/guardrails?guardrailId={{guardrail_id}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/guardrails/{{name}}
-autogen_status: R3VhcmRyYWls
-examples:
+samples:
   - name: ces_guardrail_basic
     primary_resource_id: ces_guardrail_basic
-    vars:
-      app_display_name: my-app
-      app_id: app-id
-      guardrail_display_name: my-guardrail
-      guardrail_id: guardrail-id
+    steps:
+      - name: ces_guardrail_basic
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          guardrail_display_name: my-guardrail
+          guardrail_id: guardrail-id
   - name: ces_guardrail_transfer_agent_content_filter
     primary_resource_id: ces_guardrail_transfer_agent_content_filter
-    vars:
-      app_display_name: my-app
-      app_id: app-id
-      guardrail_display_name: my-guardrail
-      guardrail_id: guardrail-id
+    steps:
+      - name: ces_guardrail_transfer_agent_content_filter
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          guardrail_display_name: my-guardrail
+          guardrail_id: guardrail-id
   - name: ces_guardrail_generative_answer_llm_prompt_security
     primary_resource_id: ces_guardrail_generative_answer_llm_prompt_security
-    vars:
-      app_display_name: my-app
-      app_id: app-id
-      guardrail_display_name: my-guardrail
-      guardrail_id: guardrail-id
+    steps:
+      - name: ces_guardrail_generative_answer_llm_prompt_security
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          guardrail_display_name: my-guardrail
+          guardrail_id: guardrail-id
   - name: ces_guardrail_llm_prompt_security_fail_open
     primary_resource_id: ces_guardrail_llm_prompt_security_fail_open
-    vars:
-      app_display_name: my-app
-      app_id: app-id
-      guardrail_display_name: my-guardrail
-      guardrail_id: guardrail-id
+    steps:
+      - name: ces_guardrail_llm_prompt_security_fail_open
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          guardrail_display_name: my-guardrail
+          guardrail_id: guardrail-id
   - name: ces_guardrail_code_callback
     primary_resource_id: ces_guardrail_code_callback
-    vars:
-      app_display_name: my-app
-      app_id: app-id
-      guardrail_display_name: my-guardrail
-      guardrail_id: guardrail-id
+    steps:
+      - name: ces_guardrail_code_callback
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          guardrail_display_name: my-guardrail
+          guardrail_id: guardrail-id
   - name: ces_guardrail_llm_policy
     primary_resource_id: ces_guardrail_llm_policy
-    vars:
-      app_display_name: my-app
-      app_id: app-id
-      guardrail_display_name: my-guardrail
-      guardrail_id: guardrail-id
+    steps:
+      - name: ces_guardrail_llm_policy
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          guardrail_display_name: my-guardrail
+          guardrail_id: guardrail-id
 parameters:
   - name: location
     type: String
@@ -461,3 +472,4 @@ properties:
     type: String
     description: Timestamp when the guardrail was last updated.
     output: true
+autogen_status: R3VhcmRyYWls

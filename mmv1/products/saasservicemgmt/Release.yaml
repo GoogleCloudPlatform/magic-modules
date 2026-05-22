@@ -14,31 +14,31 @@
 ---
 name: Release
 description: A version to be propagated and deployed to Units. It points to a specific version of a Blueprint that can be applied to Units, for example, via a Rollout.
+min_version: beta
+id_format: projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 base_url: projects/{{project}}/locations/{{location}}/releases
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 create_url: projects/{{project}}/locations/{{location}}/releases?releaseId={{release_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/releases/{{release_id}}
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/releases/{{release_id}}
-min_version: beta
-examples:
+samples:
   - name: saas_runtime_release_basic
-    primary_resource_id: "example"
-    min_version: "beta"
-    vars:
-      saas_name: example-saas
-      unitkind_name: example-unitkind
-      release_name: example-release
-      previous_release_name: previous-release
-    test_env_vars:
-      project: "PROJECT_NAME"
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
-autogen_async: false
-autogen_status: UmVsZWFzZQ==
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    primary_resource_id: example
+    steps:
+      - name: saas_runtime_release_basic
+        resource_id_vars:
+          previous_release_name: previous-release
+          release_name: example-release
+          saas_name: example-saas
+          unitkind_name: example-unitkind
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -103,12 +103,12 @@ properties:
       properties:
         - name: type
           type: Enum
-          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          description: Name of a supported variable type. Supported types are STRING, INT, BOOL.
           enum_values:
-            - "TYPE_UNSPECIFIED"
-            - "STRING"
-            - "INT"
-            - "BOOL"
+            - TYPE_UNSPECIFIED
+            - STRING
+            - INT
+            - BOOL
           immutable: true
         - name: value
           type: String
@@ -129,12 +129,12 @@ properties:
       properties:
         - name: type
           type: Enum
-          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          description: Name of a supported variable type. Supported types are STRING, INT, BOOL.
           enum_values:
-            - "TYPE_UNSPECIFIED"
-            - "STRING"
-            - "INT"
-            - "BOOL"
+            - TYPE_UNSPECIFIED
+            - STRING
+            - INT
+            - BOOL
           immutable: true
         - name: value
           type: String
@@ -168,12 +168,12 @@ properties:
       properties:
         - name: type
           type: Enum
-          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          description: Name of a supported variable type. Supported types are STRING, INT, BOOL.
           enum_values:
-            - "TYPE_UNSPECIFIED"
-            - "STRING"
-            - "INT"
-            - "BOOL"
+            - TYPE_UNSPECIFIED
+            - STRING
+            - INT
+            - BOOL
           immutable: true
         - name: value
           type: String
@@ -219,3 +219,5 @@ properties:
       change to the resource made by users must refresh this value.
       Changes to a resource made by the service should refresh this value.
     output: true
+autogen_async: false
+autogen_status: UmVsZWFzZQ==

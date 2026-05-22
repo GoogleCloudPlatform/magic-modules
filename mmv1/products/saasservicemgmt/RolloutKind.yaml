@@ -14,26 +14,27 @@
 ---
 name: RolloutKind
 description: A RolloutKind is a reusable configuration resource that defines the policies, strategies, and targeting for Rollout operations. It acts as a template for repeatable Rollouts, providing guardrails and ensuring that updates are executed in a consistent manner across a fleet of Units.
-base_url: projects/{{project}}/locations/{{location}}/rolloutKinds
 min_version: beta
+base_url: projects/{{project}}/locations/{{location}}/rolloutKinds
 self_link: projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
 create_url: projects/{{project}}/locations/{{location}}/rolloutKinds?rolloutKindId={{rollout_kind_id}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
-autogen_status: Um9sbG91dEtpbmQ=
-examples:
+samples:
   - name: saas_runtime_rollout_kind_basic
-    primary_resource_id: example
     bootstrap_iam:
       - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
         role: roles/saasservicemgmt.serviceAgent
     min_version: beta
-    vars:
-      rolloutkind_name: example-rolloutkind
-      saas_name: example-saas
-      unitkind_name: example-unitkind
+    primary_resource_id: example
+    steps:
+      - name: saas_runtime_rollout_kind_basic
+        resource_id_vars:
+          rolloutkind_name: example-rolloutkind
+          saas_name: example-saas
+          unitkind_name: example-unitkind
 parameters:
   - name: location
     type: String
@@ -141,3 +142,4 @@ properties:
     enum_values:
       - UPDATE_UNIT_KIND_STRATEGY_ON_START
       - UPDATE_UNIT_KIND_STRATEGY_NEVER
+autogen_status: Um9sbG91dEtpbmQ=

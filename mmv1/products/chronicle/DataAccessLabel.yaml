@@ -16,27 +16,26 @@ name: DataAccessLabel
 description: A DataAccessLabel is a label on events to define user access to data.
 references:
   guides:
-    'Introduction to data RBAC': 'https://cloud.google.com/chronicle/docs/onboard/onboard-datarbac'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataAccessLabels'
+    Introduction to data RBAC: https://cloud.google.com/chronicle/docs/onboard/onboard-datarbac
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataAccessLabels
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels?dataAccessLabelId={{data_access_label_id}}
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
-import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
 update_verb: PATCH
 update_mask: true
-autogen_status: RGF0YUFjY2Vzc0xhYmVs
-
-examples:
-  - name: 'chronicle_dataaccesslabel_basic'
-    primary_resource_id: 'example'
-    vars:
-      data_access_label_id: label-id
-      description: label-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
+samples:
+  - name: chronicle_dataaccesslabel_basic
+    primary_resource_id: example
+    steps:
+      - name: chronicle_dataaccesslabel_basic
+        resource_id_vars:
+          data_access_label_id: label-id
+          description: label-description
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String
@@ -95,3 +94,4 @@ properties:
     type: String
     description: Output only. The time at which the data access label was last updated.
     output: true
+autogen_status: RGF0YUFjY2Vzc0xhYmVs

@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'Service'
-legacy_name: 'google_monitoring_custom_service'
+name: Service
 description: |
   A Service is a discrete, autonomous, and network-accessible unit,
   designed to solve an individual concern. In Cloud Monitoring,
@@ -21,16 +20,16 @@ description: |
   the service are accessible
 references:
   guides:
-    'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
-    'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
-    'Service-orientation on Wikipedia': 'https://en.wikipedia.org/wiki/Service-orientation'
-  api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
+    Service Monitoring: https://cloud.google.com/monitoring/service-monitoring
+    Monitoring API Documentation: https://cloud.google.com/monitoring/api/v3/
+    Service-orientation on Wikipedia: https://en.wikipedia.org/wiki/Service-orientation
+  api: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services
 docs:
 id_format: '{{name}}'
-base_url: 'v3/projects/{{project}}/services'
-self_link: 'v3/{{name}}'
-create_url: 'v3/projects/{{project}}/services?serviceId={{service_id}}'
-update_verb: 'PATCH'
+base_url: v3/projects/{{project}}/services
+self_link: v3/{{name}}
+create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{project}} {{name}}'
@@ -40,22 +39,20 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/monitoring_service.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-error_retry_predicates:
-
-  - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'monitoring_service_custom'
-    primary_resource_id: 'custom'
-    vars:
-      service_id: 'custom-srv'
-      resource_name: '//product.googleapis.com/foo/foo/services/test'
-    test_vars_overrides:
-      # for backward compatible
-      resource_name: '"//product.googleapis.com/foo/foo/services/test" + randomSuffix'
+  encoder: templates/terraform/encoders/monitoring_service.go.tmpl
+  custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
+samples:
+  - name: monitoring_service_custom
+    primary_resource_id: custom
+    steps:
+      - name: monitoring_service_custom
+        resource_id_vars:
+          resource_name: //product.googleapis.com/foo/foo/services/test
+          service_id: custom-srv
+        test_vars_overrides:
+          resource_name: '"//product.googleapis.com/foo/foo/services/test" + randomSuffix'
 parameters:
-  - name: 'serviceId'
+  - name: serviceId
     type: String
     description: |
       An optional service ID to use. If not given, the server will generate a
@@ -63,21 +60,21 @@ parameters:
     api_name: name
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
     validation:
-      regex: '^[a-zA-Z0-9\-_:.]+$'
+      regex: ^[a-zA-Z0-9\-_:.]+$
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The full resource name for this service. The syntax is:
       projects/[PROJECT_ID]/services/[SERVICE_ID].
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       Name used for UI elements listing this Service.
-  - name: 'userLabels'
+  - name: userLabels
     type: KeyValuePairs
     description: |
       Labels which have been used to annotate the service. Label keys must start
@@ -87,14 +84,17 @@ properties:
       label entries may be stored. For labels which do not have a semantic value,
       the empty string may be supplied for the label value.
     send_empty_value: true
-  - name: 'telemetry'
+  - name: telemetry
     type: NestedObject
     description: |
       Configuration for how to query telemetry on a Service.
     properties:
-      - name: 'resourceName'
+      - name: resourceName
         type: String
         description: |
           The full name of the resource that defines this service.
           Formatted as described in
           https://cloud.google.com/apis/design/resource_names.
+error_retry_predicates:
+  - transport_tpg.IsMonitoringConcurrentEditError
+legacy_name: google_monitoring_custom_service

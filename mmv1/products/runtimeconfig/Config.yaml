@@ -12,43 +12,45 @@
 # limitations under the License.
 
 ---
-name: 'Config'
+name: Config
 description: |
   A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
   A RuntimeConfig resource consists of metadata and a hierarchy of variables.
-min_version: 'beta'
-exclude_resource: true
+min_version: beta
 docs:
-base_url: 'projects/{{project}}/configs'
-self_link: 'projects/{{project}}/configs/{{name}}'
+base_url: projects/{{project}}/configs
+self_link: projects/{{project}}/configs/{{name}}
 import_format:
-  - 'projects/{{project}}/configs/{{config}}'
+  - projects/{{project}}/configs/{{config}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_attribute: 'config'
 custom_code:
-exclude_tgc: true
-examples:
-  - name: 'runtimeconfig_config_basic'
-    primary_resource_id: 'config'
-    min_version: 'beta'
-    vars:
-      config_name: 'my-config'
+samples:
+  - name: runtimeconfig_config_basic
+    min_version: beta
+    primary_resource_id: config
+    steps:
+      - name: runtimeconfig_config_basic
+        resource_id_vars:
+          config_name: my-config
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the runtime config.
-    min_version: 'beta'
+    min_version: beta
     required: true
     immutable: true
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       The description to associate with the runtime config.
-    min_version: 'beta'
+    min_version: beta
+exclude_resource: true
+exclude_tgc: true
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: config

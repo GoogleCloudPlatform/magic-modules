@@ -12,84 +12,88 @@
 # limitations under the License.
 
 ---
-name: 'ReservationAssignment'
+name: ReservationAssignment
 api_resource_type_kind: Assignment
-api_resource_field: "."
 description: |
   The BigqueryReservation Assignment resource.
 references:
   guides:
-    'Work with reservation assignments': 'https://cloud.google.com/bigquery/docs/reservations-assignments'
-  api: 'https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations.assignments'
+    Work with reservation assignments: https://cloud.google.com/bigquery/docs/reservations-assignments
+  api: https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations.assignments
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments'
-self_link: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments'
-create_url: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments'
-delete_url: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}'
-immutable: true
+id_format: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}
+base_url: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
+self_link: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
+create_url: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}'
+  - projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-nested_query:
-  keys:
-    - assignments
-  is_list_of_ids: false
-  modify_by_patch: false
 custom_code:
-  pre_create: 'templates/terraform/pre_create/bigquery_reservation_assignment.go.tmpl'
-legacy_long_form_project: true
-examples:
-  - name: 'bigquery_reservation_assignment_basic'
-    primary_resource_id: 'assignment'
-    vars:
-      reservation_name: 'example-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'bigquery_reservation_assignment_full'
-    primary_resource_id: 'assignment'
-    vars:
-      reservation_name: 'example-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
+  pre_create: templates/terraform/pre_create/bigquery_reservation_assignment.go.tmpl
+samples:
+  - name: bigquery_reservation_assignment_basic
+    primary_resource_id: assignment
+    steps:
+      - name: bigquery_reservation_assignment_basic
+        resource_id_vars:
+          reservation_name: example-reservation
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: bigquery_reservation_assignment_full
+    primary_resource_id: assignment
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_reservation_assignment_full
+        resource_id_vars:
+          reservation_name: example-reservation
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: The location for the resource
     url_param_only: true
     immutable: true
     default_from_api: true
-  - name: 'reservation'
+  - name: reservation
     type: ResourceRef
     description: The reservation for the resource
     url_param_only: true
     required: true
     immutable: true
-    resource: 'reservation'
-    imports: 'name'
+    resource: reservation
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: Output only. The resource name of the assignment.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'assignee'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: assignee
     type: String
     description: The resource which will use the reservation. E.g. projects/myproject, folders/123, organizations/456.
     required: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'jobType'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: jobType
     type: String
     description: |
       Types of job, which could be specified when using the reservation. Possible values: JOB_TYPE_UNSPECIFIED, PIPELINE, QUERY, CONTINUOUS
     required: true
-  - name: 'state'
+  - name: state
     type: String
     description: |
       Assignment will remain in PENDING state if no active capacity commitment is present. It will become ACTIVE when some capacity commitment becomes active.
       Possible values: STATE_UNSPECIFIED, PENDING, ACTIVE
     output: true
+api_resource_field: .
+delete_url: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}
+immutable: true
+legacy_long_form_project: true
+nested_query:
+  keys:
+    - assignments
+  is_list_of_ids: false
+  modify_by_patch: false

@@ -16,28 +16,16 @@ name: MulticastGroupRange
 description: Create a multicast group range in the current project.
 references:
   guides:
-    'Create Multicast Group Range': 'https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#create_a_group_range'
-  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupRanges'
+    Create Multicast Group Range: https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#create_a_group_range
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupRanges
+id_format: projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
 base_url: projects/{{project}}/locations/{{location}}/multicastGroupRanges
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
 create_url: projects/{{project}}/locations/{{location}}/multicastGroupRanges?multicastGroupRangeId={{multicast_group_range_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
-sweeper:
-  url_substitutions:
-    - location: "global"
-examples:
-  - name: network_services_multicast_group_range_basic
-    primary_resource_id: mgr_test
-    vars:
-      network_name: test-mgr-network
-      domain_name: test-mgr-domain
-      internal_range_name: test-mgr-internal-range
-      group_range_name: test-mgr-group-range
-autogen_async: true
 async:
   operation:
     timeouts:
@@ -53,7 +41,16 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: TXVsdGljYXN0R3JvdXBSYW5nZQ==
+samples:
+  - name: network_services_multicast_group_range_basic
+    primary_resource_id: mgr_test
+    steps:
+      - name: network_services_multicast_group_range_basic
+        resource_id_vars:
+          domain_name: test-mgr-domain
+          group_range_name: test-mgr-group-range
+          internal_range_name: test-mgr-internal-range
+          network_name: test-mgr-network
 parameters:
   - name: location
     type: String
@@ -181,3 +178,8 @@ properties:
       [Output only] The timestamp when the multicast group range was most
       recently updated.
     output: true
+autogen_async: true
+autogen_status: TXVsdGljYXN0R3JvdXBSYW5nZQ==
+sweeper:
+  url_substitutions:
+    - location: global

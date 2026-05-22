@@ -12,77 +12,77 @@
 # limitations under the License.
 
 ---
-name: 'ApiDeployment'
+name: ApiDeployment
 description: |
   Manages a deployment of an API proxy.
 references:
   guides:
-    'QUICKSTART_TITLE': 'https://cloud.google.com/apigee/docs/api-platform/deploy/ui-deploy-overview'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments'
-base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
-self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
+    QUICKSTART_TITLE: https://cloud.google.com/apigee/docs/api-platform/deploy/ui-deploy-overview
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments
+base_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
+self_link: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
+create_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
+update_verb: POST
+update_mask: false
 import_format:
-  - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
-  - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}'
+  - organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
+  - organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}
   - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}/deployments'
   - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}'
-immutable: true
-
-create_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
-
-update_verb: 'POST'
-update_mask: false
-
+samples:
+  - name: apigee_api_deployment_basic
+    skip_vcr: true
+    primary_resource_id: api_deployment_test
+    exclude_test: true
+    steps:
+      - name: apigee_api_deployment_basic
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+  - name: apigee_api_deployment_basic_test
+    skip_vcr: true
+    external_providers:
+      - time
+    primary_resource_id: api_deployment_test
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_api_deployment_basic_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'org_id'
+  - name: org_id
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The Apigee Organization associated with the Apigee API deployment.
-  - name: 'environment'
+  - name: environment
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The Apigee Environment associated with the Apigee API deployment.
-  - name: 'proxy_id'
+  - name: proxy_id
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The Apigee API associated with the Apigee API deployment.
-  - name: 'revision'
+  - name: revision
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The revision of the API proxy to be deployed.
-
 properties:
-  - name: 'id'
+  - name: id
     type: String
     description: |
       The ID of the API deployment in the format `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments`.
     output: true
-
-examples:
-  - name: 'apigee_api_deployment_basic'
-    primary_resource_id: 'api_deployment_test'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    skip_vcr: true
-    exclude_test: true
-  - name: 'apigee_api_deployment_basic_test'
-    primary_resource_id: 'api_deployment_test'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ['time']
-    skip_vcr: true
-    exclude_docs: true
+immutable: true

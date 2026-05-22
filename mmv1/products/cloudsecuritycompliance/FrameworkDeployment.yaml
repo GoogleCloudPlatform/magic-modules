@@ -16,45 +16,18 @@ name: FrameworkDeployment
 description: Framework deployments represent the assignment of a framework to a target resource. Supported target resources are organizations, folders, and projects.
 references:
   api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworkDeployments
+id_format: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
 base_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments
-immutable: true
 self_link: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
 create_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}
-id_format: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
 import_format:
   - organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
-examples:
-  - name: "cloudsecuritycompliance_framework_deployment_basic"
-    primary_resource_id: "example"
-    vars:
-      deployment_name: "example-deployment"
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
-  - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
-    primary_resource_id: "example"
-    vars:
-      deployment_name: "example-deployment-folder"
-      framework_name: "example-framework-folder"
-      folder_display_name: "cm-folder"
-    test_env_vars:
-      org_id: "ORG_ID"
-  - name: "cloudsecuritycompliance_framework_deployment_project_creation"
-    primary_resource_id: "example"
-    vars:
-      deployment_name: "example-deployment-project"
-      framework_name: "example-framework-project"
-      project_display_name: "cm-project"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
-autogen_async: true
 async:
   operation:
     timeouts:
       insert_minutes: 20
       delete_minutes: 20
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
@@ -62,7 +35,37 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: RnJhbWV3b3JrRGVwbG95bWVudA==
+samples:
+  - name: cloudsecuritycompliance_framework_deployment_basic
+    primary_resource_id: example
+    steps:
+      - name: cloudsecuritycompliance_framework_deployment_basic
+        resource_id_vars:
+          deployment_name: example-deployment
+          framework_name: example-framework
+        test_env_vars:
+          org_id: ORG_ID
+  - name: cloudsecuritycompliance_framework_deployment_folder_creation
+    primary_resource_id: example
+    steps:
+      - name: cloudsecuritycompliance_framework_deployment_folder_creation
+        resource_id_vars:
+          deployment_name: example-deployment-folder
+          folder_display_name: cm-folder
+          framework_name: example-framework-folder
+        test_env_vars:
+          org_id: ORG_ID
+  - name: cloudsecuritycompliance_framework_deployment_project_creation
+    primary_resource_id: example
+    steps:
+      - name: cloudsecuritycompliance_framework_deployment_project_creation
+        resource_id_vars:
+          deployment_name: example-deployment-project
+          framework_name: example-framework-project
+          project_display_name: cm-project
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
   - name: organization
     type: String
@@ -264,8 +267,7 @@ properties:
         required: true
       - name: majorRevisionId
         type: String
-        description: |-
-          Major revision id of the framework.
+        description: Major revision id of the framework.
         required: true
   - name: name
     type: String
@@ -286,16 +288,16 @@ properties:
           CRM node in format organizations/{organization}, folders/{folder},
           or projects/{project}
         exactly_one_of:
-          - "target_resource_config.0.existing_target_resource"
-          - "target_resource_config.0.target_resource_creation_config"
+          - target_resource_config.0.existing_target_resource
+          - target_resource_config.0.target_resource_creation_config
       - name: targetResourceCreationConfig
         type: NestedObject
         description: |-
           TargetResourceCreationConfig contains the config to create a new resource to
           be used as the target_resource of a deployment.
         exactly_one_of:
-          - "target_resource_config.0.existing_target_resource"
-          - "target_resource_config.0.target_resource_creation_config"
+          - target_resource_config.0.existing_target_resource
+          - target_resource_config.0.target_resource_creation_config
         properties:
           - name: folderCreationConfig
             type: NestedObject
@@ -303,8 +305,8 @@ properties:
               FolderCreationConfig contains the config to create a new folder to be used
               as the target_resource of a deployment.
             exactly_one_of:
-              - "target_resource_config.0.target_resource_creation_config.0.folder_creation_config"
-              - "target_resource_config.0.target_resource_creation_config.0.project_creation_config"
+              - target_resource_config.0.target_resource_creation_config.0.folder_creation_config
+              - target_resource_config.0.target_resource_creation_config.0.project_creation_config
             properties:
               - name: folderDisplayName
                 type: String
@@ -322,8 +324,8 @@ properties:
               ProjectCreationConfig contains the config to create a new project to be used
               as the target_resource of a deployment.
             exactly_one_of:
-              - "target_resource_config.0.target_resource_creation_config.0.folder_creation_config"
-              - "target_resource_config.0.target_resource_creation_config.0.project_creation_config"
+              - target_resource_config.0.target_resource_creation_config.0.folder_creation_config
+              - target_resource_config.0.target_resource_creation_config.0.project_creation_config
             properties:
               - name: billingAccountId
                 type: String
@@ -345,3 +347,6 @@ properties:
     type: String
     description: The time at which the resource last updated.
     output: true
+autogen_async: true
+autogen_status: RnJhbWV3b3JrRGVwbG95bWVudA==
+immutable: true

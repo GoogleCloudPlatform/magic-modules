@@ -17,28 +17,13 @@ description: |-
   An ApiHubInstance represents the instance resources of the API Hub.
   Currently, only one ApiHub instance is allowed for each project.
   Currently, updation/deletion of ApiHub instance is not allowed.
+id_format: '{{name}}'
 base_url: projects/{{project}}/locations/{{location}}/apiHubInstances
-immutable: true
 self_link: '{{name}}'
 create_url: projects/{{project}}/locations/{{location}}/apiHubInstances?apiHubInstanceId={{api_hub_instance_id}}
-id_format: '{{name}}'
+exclude_delete: true
 import_format:
   - projects/{{project}}/locations/{{location}}/apiHubInstances/{{api_hub_instance_id}}
-custom_code:
-  custom_import: 'templates/terraform/custom_import/apihub_api_hub_instance_set_id.go.tmpl'
-examples:
-  - name: apihub_api_hub_instance_basic
-    primary_resource_id: apihub-instance-without-search
-    vars:
-      instance_id: test-instance-basic
-    exclude_test: true
-  - name: apihub_api_hub_instance_full
-    primary_resource_id: apihub-instance-search
-    vars:
-      instance_id: test-instance-full
-    exclude_test: true
-autogen_async: true
-exclude_delete: true
 async:
   operation:
     timeouts:
@@ -54,7 +39,23 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: QXBpSHViSW5zdGFuY2U=
+custom_code:
+  custom_import: templates/terraform/custom_import/apihub_api_hub_instance_set_id.go.tmpl
+samples:
+  - name: apihub_api_hub_instance_basic
+    primary_resource_id: apihub-instance-without-search
+    exclude_test: true
+    steps:
+      - name: apihub_api_hub_instance_basic
+        resource_id_vars:
+          instance_id: test-instance-basic
+  - name: apihub_api_hub_instance_full
+    primary_resource_id: apihub-instance-search
+    exclude_test: true
+    steps:
+      - name: apihub_api_hub_instance_full
+        resource_id_vars:
+          instance_id: test-instance-full
 parameters:
   - name: location
     type: String
@@ -148,3 +149,6 @@ properties:
       Optional. Instance labels to represent user-provided metadata.
       Refer to cloud documentation on labels for more details.
       https://cloud.google.com/compute/docs/labeling-resources
+autogen_async: true
+autogen_status: QXBpSHViSW5zdGFuY2U=
+immutable: true

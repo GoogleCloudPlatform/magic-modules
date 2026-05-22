@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'MirroringEndpointGroup'
+name: MirroringEndpointGroup
 description: |-
   An endpoint group is a consumer frontend for a deployment group (backend).
   In order to configure mirroring for a network, consumers must create:
@@ -21,53 +21,52 @@ description: |-
   - A mirroring rule that references the security profile (group).
 references:
   guides:
-    'Mirroring endpoint group overview': 'https://cloud.google.com/network-security-integration/docs/out-of-band/endpoint-groups-overview'
-  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1/projects.locations.mirroringEndpointGroups'
+    Mirroring endpoint group overview: https://cloud.google.com/network-security-integration/docs/out-of-band/endpoint-groups-overview
+  api: https://cloud.google.com/network-security-integration/docs/reference/rest/v1/projects.locations.mirroringEndpointGroups
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroups/{{mirroring_endpoint_group_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroups'
-self_link: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroups/{{mirroring_endpoint_group_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroups?mirroringEndpointGroupId={{mirroring_endpoint_group_id}}'
-update_verb: 'PATCH'
+id_format: projects/{{project}}/locations/{{location}}/mirroringEndpointGroups/{{mirroring_endpoint_group_id}}
+base_url: projects/{{project}}/locations/{{location}}/mirroringEndpointGroups
+self_link: projects/{{project}}/locations/{{location}}/mirroringEndpointGroups/{{mirroring_endpoint_group_id}}
+create_url: projects/{{project}}/locations/{{location}}/mirroringEndpointGroups?mirroringEndpointGroupId={{mirroring_endpoint_group_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroups/{{mirroring_endpoint_group_id}}'
-autogen_async: true
+  - projects/{{project}}/locations/{{location}}/mirroringEndpointGroups/{{mirroring_endpoint_group_id}}
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
-sweeper:
-  url_substitutions:
-    - region: "global"
-examples:
-  - name: 'network_security_mirroring_endpoint_group_basic'
-    config_path: 'templates/terraform/examples/network_security_mirroring_endpoint_group_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      deployment_group_id: 'example-dg'
-      endpoint_group_id: 'example-eg'
-  - name: 'network_security_mirroring_endpoint_group_broker_basic'
-    config_path: 'templates/terraform/examples/network_security_mirroring_endpoint_group_broker_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      deployment_group_id: 'example-dg'
-      endpoint_group_id: 'example-eg'
+samples:
+  - name: network_security_mirroring_endpoint_group_basic
+    primary_resource_id: default
+    steps:
+      - name: network_security_mirroring_endpoint_group_basic
+        config_path: templates/terraform/samples/services/networksecurity/network_security_mirroring_endpoint_group_basic.tf.tmpl
+        resource_id_vars:
+          deployment_group_id: example-dg
+          endpoint_group_id: example-eg
+          network_name: example-network
+  - name: network_security_mirroring_endpoint_group_broker_basic
+    primary_resource_id: default
+    steps:
+      - name: network_security_mirroring_endpoint_group_broker_basic
+        config_path: templates/terraform/samples/services/networksecurity/network_security_mirroring_endpoint_group_broker_basic.tf.tmpl
+        resource_id_vars:
+          deployment_group_id: example-dg
+          endpoint_group_id: example-eg
+          network_name: example-network
 parameters:
-  - name: 'location'
+  - name: location
     type: String
-    description: |-
-      The cloud location of the endpoint group, currently restricted to `global`.
+    description: The cloud location of the endpoint group, currently restricted to `global`.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'mirroringEndpointGroupId'
+  - name: mirroringEndpointGroupId
     type: String
     description: |-
       The ID to use for the endpoint group, which will become the final component
@@ -76,7 +75,7 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |-
       The resource name of this endpoint group, for example:
@@ -84,23 +83,22 @@ properties:
       See https://google.aip.dev/122 for more details.
     immutable: true
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |-
       The timestamp when the resource was created.
       See https://google.aip.dev/148#timestamps.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |-
       The timestamp when the resource was most recently updated.
       See https://google.aip.dev/148#timestamps.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: |-
-      Labels are key/value pairs that help to organize and filter resources.
-  - name: 'mirroringDeploymentGroup'
+    description: Labels are key/value pairs that help to organize and filter resources.
+  - name: mirroringDeploymentGroup
     type: String
     description: |-
       The deployment group that this DIRECT endpoint group is connected to, for example:
@@ -110,7 +108,7 @@ properties:
     exactly_one_of:
       - mirroring_deployment_group
       - mirroring_deployment_groups
-  - name: 'mirroringDeploymentGroups'
+  - name: mirroringDeploymentGroups
     type: Array
     description: |-
       A list of the deployment groups that this BROKER endpoint group is
@@ -123,7 +121,7 @@ properties:
     exactly_one_of:
       - mirroring_deployment_group
       - mirroring_deployment_groups
-  - name: 'state'
+  - name: state
     type: String
     description: |-
       The current state of the endpoint group.
@@ -137,7 +135,7 @@ properties:
       OUT_OF_SYNC
       DELETE_FAILED
     output: true
-  - name: 'reconciling'
+  - name: reconciling
     type: Boolean
     description: |-
       The current state of the resource does not match the user's intended state,
@@ -145,7 +143,7 @@ properties:
       operation (e.g. adding a new association to the group).
       See https://google.aip.dev/128.
     output: true
-  - name: 'type'
+  - name: type
     type: String
     description: |-
       The type of the endpoint group.
@@ -153,7 +151,7 @@ properties:
       Possible values:
       DIRECT
       BROKER
-    default_value: 'DIRECT'
+    default_value: DIRECT
     immutable: true
   - name: description
     type: String
@@ -163,8 +161,7 @@ properties:
   - name: associations
     type: Array
     is_set: true
-    description: |-
-      List of associations to this endpoint group.
+    description: List of associations to this endpoint group.
     output: true
     item_type:
       type: NestedObject
@@ -234,3 +231,7 @@ properties:
                   ACTIVE
                   OUT_OF_SYNC
                 output: true
+autogen_async: true
+sweeper:
+  url_substitutions:
+    - region: global

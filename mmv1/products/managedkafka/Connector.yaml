@@ -17,29 +17,31 @@ description: A Managed Service for Kafka Connect Connectors.
 base_url: projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors
 self_link: projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors/{{connector_id}}
 create_url: projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors?connectorId={{connector_id}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors/{{connector_id}}
 timeouts:
   insert_minutes: 60
   update_minutes: 30
   delete_minutes: 30
-examples:
+samples:
   - name: managedkafka_connector_basic
-    primary_resource_id: example
-    vars:
-      cluster_id: my-cluster
-      connect_cluster_id: my-connect-cluster
-      connector_id: my-connector
-      cps_topic_name: my-cps-topic
-      secondary_subnet_id: my-secondary-subnetwork-00
-      topic_id: my-topic
-    test_env_vars:
-      billing_account: BILLING_ACCT
-      org_id: ORG_ID
     external_providers:
       - time
+    primary_resource_id: example
+    steps:
+      - name: managedkafka_connector_basic
+        resource_id_vars:
+          cluster_id: my-cluster
+          connect_cluster_id: my-connect-cluster
+          connector_id: my-connector
+          cps_topic_name: my-cps-topic
+          secondary_subnet_id: my-secondary-subnetwork-00
+          topic_id: my-topic
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
   - name: location
     type: String

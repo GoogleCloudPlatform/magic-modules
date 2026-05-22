@@ -16,50 +16,48 @@ name: Vm
 api_resource_type_kind: Node
 description: |
   A Cloud TPU VM instance.
+min_version: beta
 references:
   guides:
     Official Documentation: https://cloud.google.com/tpu/docs/
   api: https://cloud.google.com/tpu/docs/reference/rest/v2/projects.locations.nodes
 base_url: projects/{{project}}/locations/{{zone}}/nodes
-min_version: beta
 self_link: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
 update_url: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
-update_mask: true
 update_verb: PATCH
-custom_diff:
-  - acceleratorTypeCustomizeDiff
-sweeper:
-  url_substitutions:
-    - zone: us-central1-c
+update_mask: true
 async:
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_async: true
 custom_code:
   constants: templates/terraform/constants/tpu_vm.go.tmpl
-examples:
+samples:
   - name: tpu_v2_vm_basic
-    primary_resource_id: tpu
-    min_version: beta
-    vars:
-      vm_name: test-tpu
     skip_vcr: true
-  - name: tpu_v2_vm_full
-    primary_resource_id: tpu
     min_version: beta
-    vars:
-      disk_name: tpu-disk
-      network_name: tpu-net
-      sa_id: tpu-sa
-      subnet_name: tpu-subnet
-      vm_name: test-tpu
+    primary_resource_id: tpu
+    steps:
+      - name: tpu_v2_vm_basic
+        resource_id_vars:
+          vm_name: test-tpu
+  - name: tpu_v2_vm_full
     skip_vcr: true
     external_providers:
       - random
       - time
+    min_version: beta
+    primary_resource_id: tpu
+    steps:
+      - name: tpu_v2_vm_full
+        resource_id_vars:
+          disk_name: tpu-disk
+          network_name: tpu-net
+          sa_id: tpu-sa
+          subnet_name: tpu-subnet
+          vm_name: test-tpu
 parameters:
   - name: zone
     type: String
@@ -448,3 +446,9 @@ properties:
             A string used to uniquely distinguish a worker within a TPU node.
           output: true
           min_version: beta
+autogen_async: true
+custom_diff:
+  - acceleratorTypeCustomizeDiff
+sweeper:
+  url_substitutions:
+    - zone: us-central1-c

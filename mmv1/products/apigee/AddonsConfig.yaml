@@ -12,51 +12,58 @@
 # limitations under the License.
 
 ---
-name: 'AddonsConfig'
+name: AddonsConfig
 description: |
   Configures the add-ons for the Apigee organization. The existing add-on configuration will be fully replaced.
 references:
   guides:
-    'Creating an API organization': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations#setaddons'
+    Creating an API organization: https://cloud.google.com/apigee/docs/api-platform/get-started/create-org
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations#setaddons
 docs:
-base_url: 'organizations'
-self_link: 'organizations/{{org}}'
-create_url: 'organizations/{{org}}:setAddons'
-update_url: 'organizations/{{org}}:setAddons'
-update_verb: 'POST'
-delete_url: 'organizations/{{org}}:setAddons'
-delete_verb: 'POST'
+base_url: organizations
+self_link: organizations/{{org}}
+create_url: organizations/{{org}}:setAddons
+update_url: organizations/{{org}}:setAddons
+update_verb: POST
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'update', 'delete']
-  type: 'OpAsync'
+  actions: [create, update, delete]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
 custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_addons.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/apigee_addons_override.go.tmpl'
+  custom_import: templates/terraform/custom_import/apigee_addons.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/apigee_addons_override.go.tmpl
   custom_identity:
-    - 'org'
-examples:
-  - name: 'apigee_addons_basic'
+    - org
+samples:
+  - name: apigee_addons_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_addons_full'
+    steps:
+      - name: apigee_addons_basic
+  - name: apigee_addons_full
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_addons_test'
-    primary_resource_id: 'apigee_org_addons'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+    steps:
+      - name: apigee_addons_full
+  - name: apigee_addons_test
+    external_providers:
+      - time
+    primary_resource_id: apigee_org_addons
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_addons_test
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'org'
+  - name: org
     type: String
     description: |
       Name of the Apigee organization.
@@ -64,61 +71,52 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'addonsConfig'
+  - name: addonsConfig
     type: NestedObject
     description: Addon configurations of the Apigee organization.
     properties:
-      - name: 'advancedApiOpsConfig'
+      - name: advancedApiOpsConfig
         type: NestedObject
         description: Configuration for the Advanced API Ops add-on.
         properties:
-          - name: 'enabled'
+          - name: enabled
             type: Boolean
-            description:
-              Flag that specifies whether the Advanced API Ops add-on is
-              enabled.
-      - name: 'integrationConfig'
+            description: Flag that specifies whether the Advanced API Ops add-on is enabled.
+      - name: integrationConfig
         type: NestedObject
         description: Configuration for the Integration add-on.
         properties:
-          - name: 'enabled'
+          - name: enabled
             type: Boolean
-            description:
-              Flag that specifies whether the Integration add-on is
-              enabled.
-      - name: 'monetizationConfig'
+            description: Flag that specifies whether the Integration add-on is enabled.
+      - name: monetizationConfig
         type: NestedObject
         description: Configuration for the Monetization add-on.
         properties:
-          - name: 'enabled'
+          - name: enabled
             type: Boolean
-            description:
-              Flag that specifies whether the Monetization add-on is enabled.
-      - name: 'apiSecurityConfig'
+            description: Flag that specifies whether the Monetization add-on is enabled.
+      - name: apiSecurityConfig
         type: NestedObject
         description: Configuration for the API Security add-on.
         properties:
-          - name: 'enabled'
+          - name: enabled
             type: Boolean
-            description:
-              Flag that specifies whether the API security add-on is enabled.
-          - name: 'expiresAt'
+            description: Flag that specifies whether the API security add-on is enabled.
+          - name: expiresAt
             type: String
-            description:
-              Time at which the API Security add-on expires in in milliseconds since epoch.
-              If unspecified, the add-on will never expire.
+            description: Time at which the API Security add-on expires in in milliseconds since epoch. If unspecified, the add-on will never expire.
             output: true
-      - name: 'connectorsPlatformConfig'
+      - name: connectorsPlatformConfig
         type: NestedObject
         description: Configuration for the Monetization add-on.
         properties:
-          - name: 'enabled'
+          - name: enabled
             type: Boolean
-            description:
-              Flag that specifies whether the Connectors Platform add-on is enabled.
-          - name: 'expiresAt'
+            description: Flag that specifies whether the Connectors Platform add-on is enabled.
+          - name: expiresAt
             type: String
-            description:
-              Time at which the Connectors Platform add-on expires in milliseconds since epoch.
-              If unspecified, the add-on will never expire.
+            description: Time at which the Connectors Platform add-on expires in milliseconds since epoch. If unspecified, the add-on will never expire.
             output: true
+delete_url: organizations/{{org}}:setAddons
+delete_verb: POST

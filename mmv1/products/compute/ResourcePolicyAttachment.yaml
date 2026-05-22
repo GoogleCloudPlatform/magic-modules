@@ -21,20 +21,10 @@ description: |
   This resource can be used instead of setting the resource_policy directly in the
   compute instance resource to avoid dependency issues when using instance-level IAM
   permissions.
+id_format: '{{project}}/{{zone}}/{{instance}}/{{name}}'
 base_url: projects/{{project}}/zones/{{zone}}/instances/{{instance}}
-immutable: true
 self_link: projects/{{project}}/zones/{{zone}}/instances/{{instance}}
 create_url: projects/{{project}}/zones/{{zone}}/instances/{{instance}}/addResourcePolicies
-delete_url: projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies
-delete_verb: POST
-identity:
-  - name
-nested_query:
-  keys:
-    - resourcePolicies
-  is_list_of_ids: true
-  modify_by_patch: false
-id_format: '{{project}}/{{zone}}/{{instance}}/{{name}}'
 async:
   operation:
     base_url: '{{op_id}}'
@@ -42,12 +32,14 @@ custom_code:
   encoder: templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl
   decoder: templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl
   pre_delete: templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl
-examples:
+samples:
   - name: compute_resource_policy_attachment_basic
     primary_resource_id: attachment
-    vars:
-      instance_name: my-instance
-      policy_name: my-resource-policy
+    steps:
+      - name: compute_resource_policy_attachment_basic
+        resource_id_vars:
+          instance_name: my-instance
+          policy_name: my-resource-policy
 parameters:
   - name: instance
     type: ResourceRef
@@ -72,3 +64,13 @@ properties:
     description: |
       The resource policy to be attached to the instance for scheduling start/stop
       operations. Do not specify the self link.
+delete_url: projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies
+delete_verb: POST
+identity:
+  - name
+immutable: true
+nested_query:
+  keys:
+    - resourcePolicies
+  is_list_of_ids: true
+  modify_by_patch: false

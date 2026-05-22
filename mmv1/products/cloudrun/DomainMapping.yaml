@@ -13,20 +13,16 @@
 
 ---
 name: DomainMapping
+kind: DomainMapping
 description: Resource to hold the state and status of a user's domain mapping.
 references:
   guides:
     Official Documentation: https://cloud.google.com/run/docs/mapping-custom-domains
   api: https://cloud.google.com/run/docs/reference/rest/v1/projects.locations.domainmappings
-base_url: apis/domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
-immutable: true
-cai_base_url: projects/{{project}}/locations/{{location}}/DomainMappings
-kind: DomainMapping
 id_format: locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
+base_url: apis/domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
 import_format:
   - locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
-custom_diff:
-  - hasMetadata
 async:
   type: PollAsync
   actions:
@@ -35,23 +31,20 @@ async:
   check_response_func_existence: PollCheckKnativeStatusFunc(res)
   check_response_func_absence: transport_tpg.PollCheckForAbsence
   target_occurrences: 1
-error_retry_predicates:
-  - transport_tpg.IsCloudRunCreationConflict
-schema_version: 1
-state_upgraders: true
-cai_asset_name_format: projects/{{project}}/locations/{{location}}/domainmappings/{{name}}
 custom_code:
   encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
   decoder: templates/terraform/decoders/cloud_run.go.tmpl
   constants: templates/terraform/constants/cloud_run_domain_mapping.go.tmpl
   test_check_destroy: templates/terraform/custom_check_destroy/cloudrun_domain_mapping.go.tmpl
-examples:
+samples:
   - name: cloud_run_domain_mapping_basic
     primary_resource_id: default
-    vars:
-      cloud_run_service_name: cloudrun-srv
-    test_env_vars:
-      namespace: PROJECT_NAME
+    steps:
+      - name: cloud_run_domain_mapping_basic
+        resource_id_vars:
+          cloud_run_service_name: cloudrun-srv
+        test_env_vars:
+          namespace: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -218,3 +211,12 @@ properties:
           **Note**: The Cloud Run API may add additional annotations that were not provided in your config.
           If terraform plan shows a diff where a server-side annotation is added, you can add it to your config
           or apply the lifecycle.ignore_changes rule to the metadata.0.annotations field.
+cai_asset_name_format: projects/{{project}}/locations/{{location}}/domainmappings/{{name}}
+cai_base_url: projects/{{project}}/locations/{{location}}/DomainMappings
+custom_diff:
+  - hasMetadata
+error_retry_predicates:
+  - transport_tpg.IsCloudRunCreationConflict
+immutable: true
+schema_version: 1
+state_upgraders: true

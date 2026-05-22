@@ -16,39 +16,41 @@ name: RuleDeployment
 description: The RuleDeployment resource represents the deployment state of a Rule.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/RuleDeployment'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/RuleDeployment
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rules}}/deployments
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
-import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 create_verb: PATCH
 update_verb: PATCH
 update_mask: true
 exclude_delete: true
-autogen_status: UnVsZURlcGxveW1lbnQ=
-
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 custom_code:
-  constants: 'templates/terraform/constants/chronicle_rule_deployment.go.tmpl'
-  custom_create: 'templates/terraform/custom_create/chronicle_rule_deployment.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/chronicle_rule_deployment.go.tmpl'
-
-examples:
-  - name: 'chronicle_ruledeployment_basic'
-    primary_resource_id: 'example'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_ruledeployment_disabled'
-    primary_resource_id: 'example'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_ruledeployment_run_frequency_missing'
-    primary_resource_id: 'example'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
+  constants: templates/terraform/constants/chronicle_rule_deployment.go.tmpl
+  custom_create: templates/terraform/custom_create/chronicle_rule_deployment.go.tmpl
+  pre_update: templates/terraform/pre_update/chronicle_rule_deployment.go.tmpl
+samples:
+  - name: chronicle_ruledeployment_basic
+    primary_resource_id: example
+    steps:
+      - name: chronicle_ruledeployment_basic
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+  - name: chronicle_ruledeployment_disabled
+    primary_resource_id: example
+    steps:
+      - name: chronicle_ruledeployment_disabled
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+  - name: chronicle_ruledeployment_run_frequency_missing
+    primary_resource_id: example
+    steps:
+      - name: chronicle_ruledeployment_run_frequency_missing
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String
@@ -99,14 +101,12 @@ properties:
       updated.
   - name: archiveTime
     type: String
-    description: Output only. The timestamp when the rule deployment archive state was last set to true.
-      If the rule deployment's current archive state is not set to true, the field will be empty.
+    description: Output only. The timestamp when the rule deployment archive state was last set to true. If the rule deployment's current archive state is not set to true, the field will be empty.
     output: true
   - name: runFrequency
     type: String
-    diff_suppress_func: 'chronicleRuleDeploymentNilRunFrequencyDiffSuppressFunc'
+    diff_suppress_func: chronicleRuleDeploymentNilRunFrequencyDiffSuppressFunc
     description: |2-
-
       The run frequency of the rule deployment.
       Possible values:
       LIVE
@@ -115,7 +115,6 @@ properties:
   - name: executionState
     type: String
     description: |2-
-
       The execution state of the rule deployment.
       Possible values:
       DEFAULT
@@ -124,7 +123,7 @@ properties:
     output: true
   - name: producerRules
     type: Array
-    description: |2-
+    description: |-
       Output only. The names of the associated/chained producer rules. Rules are considered
       producers for this rule if this rule explicitly filters on their ruleid.
       Format:
@@ -134,7 +133,7 @@ properties:
       type: String
   - name: consumerRules
     type: Array
-    description: |2-
+    description: |-
       Output only. The names of the associated/chained consumer rules. Rules are considered
       consumers of this rule if their rule text explicitly filters on this rule's ruleid.
       Format:
@@ -144,7 +143,6 @@ properties:
       type: String
   - name: lastAlertStatusChangeTime
     type: String
-    description: Output only. The timestamp when the rule deployment alert state was lastly changed.
-      This is filled regardless of the current alert state.E.g. if the current alert status is false,
-      this timestamp will be the timestamp when the alert status was changed to false.
+    description: Output only. The timestamp when the rule deployment alert state was lastly changed. This is filled regardless of the current alert state.E.g. if the current alert status is false, this timestamp will be the timestamp when the alert status was changed to false.
     output: true
+autogen_status: UnVsZURlcGxveW1lbnQ=

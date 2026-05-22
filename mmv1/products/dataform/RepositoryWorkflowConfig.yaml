@@ -15,32 +15,33 @@
 name: RepositoryWorkflowConfig
 api_resource_type_kind: WorkflowConfig
 description: A resource represents a Dataform workflow configuration
+min_version: beta
 references:
   guides:
     Official Documentation: https://cloud.google.com/dataform/docs/workflow-configurations
   api: https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories.workflowConfigs
+id_format: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs/{{name}}
 base_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs
-min_version: beta
 create_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs?workflowConfigId={{name}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs/{{name}}
 import_format:
   - projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs/{{name}}
-examples:
+samples:
   - name: dataform_repository_workflow_config
-    primary_resource_id: workflow
     min_version: beta
-    vars:
-      data: secret-data
-      dataform_repository_name: dataform_repository
-      git_repository_name: my/repository
-      release_name: my_release
-      secret_name: my_secret
-      service_account_name: dataform-sa
-      workflow_name: my_workflow
-    test_vars_overrides:
-      # for backward compatible
-      git_repository_name: '"my/repository" + randomSuffix'
+    primary_resource_id: workflow
+    steps:
+      - name: dataform_repository_workflow_config
+        resource_id_vars:
+          data: secret-data
+          dataform_repository_name: dataform_repository
+          git_repository_name: my/repository
+          release_name: my_release
+          secret_name: my_secret
+          service_account_name: dataform-sa
+          workflow_name: my_workflow
+        test_vars_overrides:
+          git_repository_name: '"my/repository" + randomSuffix'
 parameters:
   - name: region
     type: String

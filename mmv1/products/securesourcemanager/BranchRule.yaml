@@ -20,8 +20,8 @@ references:
   api: https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories.branchRules
 base_url: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules?branch_rule_id={{branch_rule_id}}
 self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}
   - '{{branch_rule_id}}'
@@ -31,34 +31,37 @@ async:
   actions:
     - create
     - delete
-autogen_async: true
-examples:
+samples:
   - name: secure_source_manager_branch_rule_basic
     primary_resource_id: basic
-    ignore_read_extra:
-      - deletion_policy
-    vars:
-      branch_rule_id: my-basic-branchrule
-      deletion_policy: PREVENT
-      instance_id: my-basic-instance
-      repository_id: my-basic-repository
-    test_vars_overrides:
-      deletion_policy: '"DELETE"'
-    oics_vars_overrides:
-      deletion_policy: '"DELETE"'
+    steps:
+      - name: secure_source_manager_branch_rule_basic
+        resource_id_vars:
+          branch_rule_id: my-basic-branchrule
+          deletion_policy: PREVENT
+          instance_id: my-basic-instance
+          repository_id: my-basic-repository
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
   - name: secure_source_manager_branch_rule_with_fields
     primary_resource_id: default
-    ignore_read_extra:
-      - deletion_policy
-    vars:
-      branch_rule_id: my-initial-branchrule
-      deletion_policy: PREVENT
-      instance_id: my-initial-instance
-      repository_id: my-initial-repository
-    test_vars_overrides:
-      deletion_policy: '"DELETE"'
-    oics_vars_overrides:
-      deletion_policy: '"DELETE"'
+    steps:
+      - name: secure_source_manager_branch_rule_with_fields
+        resource_id_vars:
+          branch_rule_id: my-initial-branchrule
+          deletion_policy: PREVENT
+          instance_id: my-initial-instance
+          repository_id: my-initial-repository
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
 parameters:
   - name: branch_rule_id
     type: String
@@ -132,3 +135,4 @@ properties:
     type: Boolean
     description: |
       Determines if require linear history before merging to the branch.
+autogen_async: true

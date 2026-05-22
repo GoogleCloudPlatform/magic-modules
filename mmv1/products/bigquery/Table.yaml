@@ -12,57 +12,51 @@
 # limitations under the License.
 
 ---
-name: 'Table'
-kind: 'bigquery#table'
+name: Table
+kind: bigquery#table
 description: |
   A Table that belongs to a Dataset
-exclude_resource: true
 docs:
 id_format: '{{table_id}}'
-base_url: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
-self_link: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
+base_url: projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
+self_link: projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
 import_format:
-  - 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
+  - projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
   - '{{table_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_type: 'google_bigquery_table'
-  fetch_iam_policy_verb: 'POST'
-  allowed_iam_role: 'roles/bigquery.dataOwner'
-  parent_resource_attribute: 'table_id'
-  iam_policy_version: '1'
 custom_code:
-examples:
-  - name: 'bigquery_bigquery_table'
-    primary_resource_id: 'test'
-    vars:
-      dataset_id: 'dataset_id'
-      table_id: 'table_id'
+samples:
+  - name: bigquery_bigquery_table
+    primary_resource_id: test
+    steps:
+      - name: bigquery_bigquery_table
+        resource_id_vars:
+          dataset_id: dataset_id
+          table_id: table_id
 parameters:
   # TODO: Remove once we have support for placing
   # nested object fields in URL
-  - name: 'dataset'
+  - name: dataset
     type: String
     description: Name of the dataset
 properties:
-  - name: 'tableReference'
+  - name: tableReference
     type: NestedObject
     description: Reference describing the ID of this table
     properties:
-      - name: 'datasetId'
+      - name: datasetId
         type: String
         description: The ID of the dataset containing this table
-      - name: 'projectId'
+      - name: projectId
         type: String
         description: The ID of the project containing this table
-      - name: 'tableId'
+      - name: tableId
         type: String
         description: The ID of the the table
-  - name: 'clustering'
+  - name: clustering
     type: Array
     description: |
       One or more fields on which data should be clustered. Only
@@ -72,89 +66,89 @@ properties:
       determines the sort order of the data.
     item_type:
       type: String
-  - name: 'creationTime'
+  - name: creationTime
     type: Integer
     description: |
       The time when this dataset was created, in milliseconds since the
       epoch.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: A user-friendly description of the dataset
-  - name: 'friendlyName'
+  - name: friendlyName
     type: String
     description: A descriptive name for this table
-  - name: 'id'
+  - name: id
     type: String
-    description: 'An opaque ID uniquely identifying the table.'
+    description: An opaque ID uniquely identifying the table.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       The labels associated with this dataset. You can use these to
       organize and group your datasets
-  - name: 'lastModifiedTime'
+  - name: lastModifiedTime
     type: Integer
     description: |
       The time when this table was last modified, in milliseconds since the
       epoch.
     output: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the table resides. This value is
       inherited from the dataset.
     output: true
-  - name: 'name'
+  - name: name
     type: String
-    description: 'Name of the table'
-  - name: 'numBytes'
+    description: Name of the table
+  - name: numBytes
     type: Integer
     description: |
       The size of this table in bytes, excluding any data in the streaming
       buffer.
     output: true
-  - name: 'numLongTermBytes'
+  - name: numLongTermBytes
     type: Integer
     description: |
       The number of bytes in the table that are considered "long-term
       storage".
     output: true
-  - name: 'numRows'
+  - name: numRows
     type: Integer
     description: |
       The number of rows of data in this table, excluding any data in the
       streaming buffer.
-  - name: 'requirePartitionFilter'
+  - name: requirePartitionFilter
     type: Boolean
     description: |
       If set to true, queries over this table require a partition filter
       that can be used for partition elimination to be specified.
     output: true
-  - name: 'type'
+  - name: type
     type: Enum
-    description: 'Describes the table type'
+    description: Describes the table type
     output: true
     enum_values:
-      - 'TABLE'
-      - 'VIEW'
-      - 'EXTERNAL'
-  - name: 'view'
+      - TABLE
+      - VIEW
+      - EXTERNAL
+  - name: view
     type: NestedObject
     description: The view definition.
     properties:
-      - name: 'useLegacySql'
+      - name: useLegacySql
         type: Boolean
         description: |
           Specifies whether to use BigQuery's legacy SQL for this view
-      - name: 'userDefinedFunctionResources'
+      - name: userDefinedFunctionResources
         type: Array
         description: |
           Describes user-defined function resources used in the query.
         item_type:
           type: NestedObject
           properties:
-            - name: 'inlineCode'
+            - name: inlineCode
               type: String
               description: |
                 An inline resource that contains code for a user-defined
@@ -162,17 +156,17 @@ properties:
                 equivalent to providing a URI for a file containing the
                 same code.
             # TODO: Convert into cross-product ResourceRef
-            - name: 'resourceUri'
+            - name: resourceUri
               type: String
               description: |
                 A code resource to load from a Google Cloud Storage URI
                 (gs://bucket/path).
-  - name: 'timePartitioning'
+  - name: timePartitioning
     type: NestedObject
     description: |
       If specified, configures time-based partitioning for this table.
     properties:
-      - name: 'expirationMs'
+      - name: expirationMs
         type: Integer
         description: |
           Number of milliseconds for which to keep the storage for a
@@ -180,7 +174,7 @@ properties:
           that has `defaultPartitionExpirationMs`, it will inherit
           the value of `defaultPartitionExpirationMs` from the dataset.
           To specify a unlimited expiration, set the value to 0.
-      - name: 'field'
+      - name: field
         type: String
         description: |
           If not set, the table is partitioned by pseudo column,
@@ -189,14 +183,14 @@ properties:
           is instead partitioned by this field. The field must be a
           top-level TIMESTAMP or DATE field. Its mode must be NULLABLE or
           REQUIRED.
-      - name: 'type'
+      - name: type
         type: Enum
         description: |
           The only type supported is DAY, which will generate one partition
           per day.
         enum_values:
-          - 'DAY'
-  - name: 'streamingBuffer'
+          - DAY
+  - name: streamingBuffer
     type: NestedObject
     description: |
       Contains information regarding this table's streaming buffer, if one
@@ -204,150 +198,150 @@ properties:
       streamed to or if there is no data in the streaming buffer.
     output: true
     properties:
-      - name: 'estimatedBytes'
+      - name: estimatedBytes
         type: Integer
         description: |
           A lower-bound estimate of the number of bytes currently in the
           streaming buffer.
         output: true
-      - name: 'estimatedRows'
+      - name: estimatedRows
         type: Integer
         description: |
           A lower-bound estimate of the number of rows currently in the
           streaming buffer.
         output: true
-      - name: 'oldestEntryTime'
+      - name: oldestEntryTime
         type: Integer
         description: |
           Contains the timestamp of the oldest entry in the streaming
           buffer, in milliseconds since the epoch, if the streaming buffer
           is available.
         output: true
-  - name: 'schema'
+  - name: schema
     type: NestedObject
     description: Describes the schema of this table
     properties:
-      - name: 'fields'
+      - name: fields
         type: Array
         description: Describes the fields in a table.
         item_type:
           type: NestedObject
           properties:
-            - name: 'description'
+            - name: description
               type: String
               description: |
                 The field description. The maximum length is 1,024
                 characters.
-            - name: 'fields'
+            - name: fields
               type: Array
               description: |
                 Describes the nested schema fields if the type property is
                 set to RECORD.
               item_type:
                 type: String
-            - name: 'mode'
+            - name: mode
               type: Enum
               description: The field mode
               enum_values:
-                - 'NULLABLE'
-                - 'REQUIRED'
-                - 'REPEATED'
-            - name: 'name'
+                - NULLABLE
+                - REQUIRED
+                - REPEATED
+            - name: name
               type: String
               description: The field name
-            - name: 'type'
+            - name: type
               type: Enum
-              description: 'The field data type'
+              description: The field data type
               enum_values:
-                - 'STRING'
-                - 'BYTES'
-                - 'INTEGER'
-                - 'FLOAT'
-                - 'TIMESTAMP'
-                - 'DATE'
-                - 'TIME'
-                - 'DATETIME'
-                - 'RECORD'
-                - 'FOREIGN'
-            - name: 'foreignTypeDefinition'
+                - STRING
+                - BYTES
+                - INTEGER
+                - FLOAT
+                - TIMESTAMP
+                - DATE
+                - TIME
+                - DATETIME
+                - RECORD
+                - FOREIGN
+            - name: foreignTypeDefinition
               type: String
               description: |
                 Definition of the foreign data type.
                 Only valid for top-level schema fields (not nested fields).
                 If the type is FOREIGN, this field is required.
-  - name: 'schemaForeignTypeInfo'
+  - name: schemaForeignTypeInfo
     type: NestedObject
     description: |
       Specifies metadata of the foreign data type definition in field schema.
     properties:
-      - name: 'typeSystem'
+      - name: typeSystem
         type: Enum
         description: |
           The foreign type of the table.
         required: true
         enum_values:
-          - 'HIVE'
-  - name: 'encryptionConfiguration'
+          - HIVE
+  - name: encryptionConfiguration
     type: NestedObject
     description: Custom encryption configuration
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           Describes the Cloud KMS encryption key that will be used to
           protect destination BigQuery table. The BigQuery Service Account
           associated with your project requires access to this encryption
           key.
-  - name: 'expirationTime'
+  - name: expirationTime
     type: Integer
     description: |
       The time when this table expires, in milliseconds since the epoch. If
       not present, the table will persist indefinitely.
-  - name: 'externalDataConfiguration'
+  - name: externalDataConfiguration
     type: NestedObject
     description: |
       Describes the data format, location, and other properties of a table
       stored outside of BigQuery. By defining these properties, the data
       source can then be queried as if it were a standard BigQuery table.
     properties:
-      - name: 'autodetect'
+      - name: autodetect
         type: Boolean
         description: |
           Try to detect schema and format options automatically. Any option
           specified explicitly will be honored.
-      - name: 'compression'
+      - name: compression
         type: Enum
         description: The compression type of the data source
         enum_values:
-          - 'GZIP'
-          - 'NONE'
-      - name: 'ignoreUnknownValues'
+          - GZIP
+          - NONE
+      - name: ignoreUnknownValues
         type: Boolean
         description: |
           Indicates if BigQuery should allow extra values that are not
           represented in the table schema
-      - name: 'maxBadRecords'
+      - name: maxBadRecords
         type: Integer
         description: |
           The maximum number of bad records that BigQuery can ignore when reading data
         default_value: 0
-      - name: 'sourceFormat'
+      - name: sourceFormat
         type: Enum
         description: The data format
         enum_values:
-          - 'CSV'
-          - 'GOOGLE_SHEETS'
-          - 'NEWLINE_DELIMITED_JSON'
-          - 'AVRO'
-          - 'DATASTORE_BACKUP'
-          - 'BIGTABLE'
-          - 'ORC'
-          - 'PARQUET'
-          - 'ICEBERG'
-          - 'DELTA_LAKE'
+          - CSV
+          - GOOGLE_SHEETS
+          - NEWLINE_DELIMITED_JSON
+          - AVRO
+          - DATASTORE_BACKUP
+          - BIGTABLE
+          - ORC
+          - PARQUET
+          - ICEBERG
+          - DELTA_LAKE
       # TODO: Investigate if this is feasible as a ResourceRef
       # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
-      - name: 'sourceUris'
+      - name: sourceUris
         type: Array
         description: |
           The fully-qualified URIs that point to your data in Google Cloud.
@@ -361,109 +355,106 @@ properties:
           allowed.
         item_type:
           type: String
-      - name: 'schema'
+      - name: schema
         type: NestedObject
-        description:
-          'The schema for the data. Schema is required for CSV and JSON formats'
+        description: The schema for the data. Schema is required for CSV and JSON formats
         properties:
-          - name: 'fields'
+          - name: fields
             type: Array
-            description: 'Describes the fields in a table.'
+            description: Describes the fields in a table.
             item_type:
               type: NestedObject
               properties:
-                - name: 'description'
+                - name: description
                   type: String
                   description: The field description
-                - name: 'fields'
+                - name: fields
                   type: Array
                   description: |
                     Describes the nested schema fields if the type property
                     is set to RECORD
                   item_type:
                     type: String
-                - name: 'mode'
+                - name: mode
                   type: Enum
                   description: Field mode.
                   enum_values:
-                    - 'NULLABLE'
-                    - 'REQUIRED'
-                    - 'REPEATED'
-                - name: 'name'
+                    - NULLABLE
+                    - REQUIRED
+                    - REPEATED
+                - name: name
                   type: String
                   description: Field name
-                - name: 'type'
+                - name: type
                   type: Enum
                   description: Field data type
                   enum_values:
-                    - 'STRING'
-                    - 'BYTES'
-                    - 'INTEGER'
-                    - 'FLOAT'
-                    - 'TIMESTAMP'
-                    - 'DATE'
-                    - 'TIME'
-                    - 'DATETIME'
-                    - 'RECORD'
-      - name: 'googleSheetsOptions'
+                    - STRING
+                    - BYTES
+                    - INTEGER
+                    - FLOAT
+                    - TIMESTAMP
+                    - DATE
+                    - TIME
+                    - DATETIME
+                    - RECORD
+      - name: googleSheetsOptions
         type: NestedObject
-        description:
-          'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
+        description: Additional options if sourceFormat is set to GOOGLE_SHEETS.
         properties:
-          - name: 'skipLeadingRows'
+          - name: skipLeadingRows
             type: Integer
             description: |
               The number of rows at the top of a Google Sheet that BigQuery
               will skip when reading the data.
             default_value: 0
-      - name: 'csvOptions'
+      - name: csvOptions
         type: NestedObject
         description: Additional properties to set if sourceFormat is set to CSV.
         properties:
-          - name: 'allowJaggedRows'
+          - name: allowJaggedRows
             type: Boolean
             description: |
               Indicates if BigQuery should accept rows that are missing
               trailing optional columns
-          - name: 'allowQuotedNewlines'
+          - name: allowQuotedNewlines
             type: Boolean
             description: |
               Indicates if BigQuery should allow quoted data sections that
               contain newline characters in a CSV file
-          - name: 'encoding'
+          - name: encoding
             type: Enum
-            description: 'The character encoding of the data'
+            description: The character encoding of the data
             enum_values:
-              - 'UTF-8'
-              - 'ISO-8859-1'
-          - name: 'fieldDelimiter'
+              - UTF-8
+              - ISO-8859-1
+          - name: fieldDelimiter
             type: String
-            description: 'The separator for fields in a CSV file'
-          - name: 'quote'
+            description: The separator for fields in a CSV file
+          - name: quote
             type: String
-            description:
-              'The value that is used to quote data sections in a CSV file'
-          - name: 'skipLeadingRows'
+            description: The value that is used to quote data sections in a CSV file
+          - name: skipLeadingRows
             type: Integer
             description: |
               The number of rows at the top of a CSV file that BigQuery
               will skip when reading the data.
             default_value: 0
-      - name: 'bigtableOptions'
+      - name: bigtableOptions
         type: NestedObject
-        description: 'Additional options if sourceFormat is set to BIGTABLE.'
+        description: Additional options if sourceFormat is set to BIGTABLE.
         properties:
-          - name: 'ignoreUnspecifiedColumnFamilies'
+          - name: ignoreUnspecifiedColumnFamilies
             type: Boolean
             description: |
               If field is true, then the column families that are not specified in
               columnFamilies list are not exposed in the table schema
-          - name: 'readRowkeyAsString'
+          - name: readRowkeyAsString
             type: Boolean
             description: |
               If field is true, then the rowkey column families will be
               read and converted to string.
-          - name: 'columnFamilies'
+          - name: columnFamilies
             type: Array
             description: |
               List of column families to expose in the table schema along
@@ -471,7 +462,7 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'columns'
+                - name: columns
                   type: Array
                   description: |
                     Lists of columns that should be exposed as individual
@@ -479,64 +470,60 @@ properties:
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'encoding'
+                      - name: encoding
                         type: Enum
-                        description:
-                          The encoding of the values when the type is not STRING
+                        description: The encoding of the values when the type is not STRING
                         enum_values:
-                          - 'TEXT'
-                          - 'BINARY'
-                      - name: 'fieldName'
+                          - TEXT
+                          - BINARY
+                      - name: fieldName
                         type: String
                         description: |
                           If the qualifier is not a valid BigQuery field
                           identifier, a valid identifier must be provided as
                           the column field name and is used as field name in
                           queries.
-                      - name: 'onlyReadLatest'
+                      - name: onlyReadLatest
                         type: Boolean
                         description: |
                           If this is set, only the latest version of value in this column are exposed
-                      - name: 'qualifierString'
+                      - name: qualifierString
                         type: String
                         description: Qualifier of the column
                         required: true
-                      - name: 'type'
+                      - name: type
                         type: Enum
-                        description:
-                          The type to convert the value in cells of this column
+                        description: The type to convert the value in cells of this column
                         enum_values:
-                          - 'BYTES'
-                          - 'STRING'
-                          - 'INTEGER'
-                          - 'FLOAT'
-                          - 'BOOLEAN'
-                - name: 'encoding'
+                          - BYTES
+                          - STRING
+                          - INTEGER
+                          - FLOAT
+                          - BOOLEAN
+                - name: encoding
                   type: Enum
-                  description:
-                    The encoding of the values when the type is not STRING
+                  description: The encoding of the values when the type is not STRING
                   enum_values:
-                    - 'TEXT'
-                    - 'BINARY'
-                - name: 'familyId'
+                    - TEXT
+                    - BINARY
+                - name: familyId
                   type: String
                   description: Identifier of the column family.
-                - name: 'onlyReadLatest'
+                - name: onlyReadLatest
                   type: Boolean
                   description: |
                     If this is set only the latest version of value are
                     exposed for all columns in this column family
-                - name: 'type'
+                - name: type
                   type: Enum
-                  description:
-                    The type to convert the value in cells of this column family
+                  description: The type to convert the value in cells of this column family
                   enum_values:
-                    - 'BYTES'
-                    - 'STRING'
-                    - 'INTEGER'
-                    - 'FLOAT'
-                    - 'BOOLEAN'
-      - name: 'decimalTargetTypes'
+                    - BYTES
+                    - STRING
+                    - INTEGER
+                    - FLOAT
+                    - BOOLEAN
+      - name: decimalTargetTypes
         type: Array
         is_set: true
         description: |
@@ -554,31 +541,31 @@ properties:
           Defaults to ["NUMERIC", "STRING"] for ORC and ["NUMERIC"] for the other file formats.
         item_type:
           type: String
-  - name: 'tableReplicationInfo'
+  - name: tableReplicationInfo
     type: NestedObject
     description: |
       Replication info of a table created using "AS REPLICA" DDL like:
       `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
     properties:
-      - name: 'sourceProjectId'
+      - name: sourceProjectId
         type: String
         description: The ID of the source project.
         required: true
-      - name: 'sourceDatasetId'
+      - name: sourceDatasetId
         type: String
         description: The ID of the source dataset.
         required: true
-      - name: 'sourceTableId'
+      - name: sourceTableId
         type: String
         description: The ID of the source materialized view.
         required: true
-      - name: 'replicationIntervalMs'
+      - name: replicationIntervalMs
         type: Integer
         description: |
           The interval at which the source materialized view is polled for updates. The default is
           300000.
         default_value: 300000
-  - name: 'resourceTags'
+  - name: resourceTags
     type: KeyValuePairs
     description: |
       The tags attached to this table. Tag keys are globally unique. Tag key is expected to be
@@ -591,43 +578,43 @@ properties:
     description: |
       Options defining open source compatible table.
     properties:
-      - name: 'parameters'
+      - name: parameters
         type: KeyValuePairs
         description: |
           A map of key value pairs defining the parameters and properties of the open source table.
           Corresponds with hive meta store table parameters. Maximum size of 4Mib.
-      - name: 'storageDescriptor'
+      - name: storageDescriptor
         type: NestedObject
         description: |
           A storage descriptor containing information about the physical storage of this table.
         properties:
-          - name: 'storageUri'
+          - name: storageUri
             type: String
             description: |
               The physical location of the table (e.g. `gs://spark-dataproc-data/pangea-data/case_sensitive/`
               or `gs://spark-dataproc-data/pangea-data/*`). The maximum length is 2056 bytes.
-          - name: 'inputFormat'
+          - name: inputFormat
             type: String
             description: |
               Specifies the fully qualified class name of the InputFormat
               (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat").
               The maximum length is 128 characters.
-          - name: 'outputFormat'
+          - name: outputFormat
             type: String
             description: |
               Specifies the fully qualified class name of the OutputFormat
               (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat").
               The maximum length is 128 characters.
-          - name: 'serdeInfo'
+          - name: serdeInfo
             type: NestedObject
             description: |
               Serializer and deserializer information.
             properties:
-              - name: 'name'
+              - name: name
                 type: String
                 description: |
                   Name of the SerDe. The maximum length is 256 characters.
-              - name: 'serializationLibrary'
+              - name: serializationLibrary
                 type: String
                 description: |
                   Specifies a fully-qualified class name of the serialization library that is
@@ -635,30 +622,38 @@ properties:
                   underlying low-level input and output format structures.
                   The maximum length is 256 characters.
                 required: true
-              - name: 'parameters'
+              - name: parameters
                 type: KeyValuePairs
                 description: |
                   Key-value pairs that define the initialization parameters for the serialization
                   library. Maximum size 10 Kib.
-      - name: 'connectionId'
+      - name: connectionId
         type: String
         description: |
           The connection specifying the credentials to be used to read external storage, such as
           Azure Blob, Cloud Storage, or S3. The connection is needed to read the open source table
           from BigQuery Engine. The connection_id can have the form `<project_id>.<location_id>.<connection_id>`
           or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
+exclude_resource: true
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: google_bigquery_table
+  fetch_iam_policy_verb: POST
+  allowed_iam_role: roles/bigquery.dataOwner
+  parent_resource_attribute: table_id
+  iam_policy_version: '1'
 virtual_fields:
-  - name: 'table_metadata_view'
+  - name: table_metadata_view
     type: String
     description: |
       View sets the optional parameter "view": Specifies the view that determines which table information is
       returned. By default, basic table information and storage statistics (STORAGE_STATS) are returned.
       Possible values: TABLE_METADATA_VIEW_UNSPECIFIED, BASIC, STORAGE_STATS, FULL
-  - name: 'ignore_auto_generated_schema'
+  - name: ignore_auto_generated_schema
     type: Boolean
     description: |
       If set to true, Terraform will prevent implicitly added columns in schema from showing diff.
-  - name: 'generated_schema_columns'
+  - name: generated_schema_columns
     type: String
     description: |
       (Output-only) A list of autogenerated schema fields.

@@ -12,13 +12,13 @@
 # limitations under the License.
 
 ---
-name: 'Group'
+name: Group
 description: |
   A Cloud Identity resource representing a Group.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/setup'
-  api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups'
+    Official Documentation: https://cloud.google.com/identity/docs/how-to/setup
+  api: https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups
 docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
@@ -26,10 +26,10 @@ docs:
     in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-base_url: 'groups?initialGroupConfig={{initial_group_config}}'
+base_url: groups?initialGroupConfig={{initial_group_config}}
 self_link: '{{name}}'
 update_url: '{{name}}'
-update_verb: 'PATCH'
+update_verb: PATCH
 update_mask: true
 import_format:
   - '{{name}}'
@@ -38,28 +38,28 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: 'PollAsync'
-  check_response_func_existence: 'transport_tpg.PollCheckForExistenceWith403'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsenceWith403'
+  type: PollAsync
+  check_response_func_existence: transport_tpg.PollCheckForExistenceWith403
+  check_response_func_absence: transport_tpg.PollCheckForAbsenceWith403
   suppress_error: false
   target_occurrences: 10
-  actions: ['create', 'update', 'delete']
+  actions: [create, update, delete]
 custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/cloud_identity_group_import.go.tmpl'
-exclude_sweeper: true
-examples:
-  - name: 'cloud_identity_groups_basic'
-    primary_resource_id: 'cloud_identity_group_basic'
-    vars:
-      id_group: 'my-identity-group'
-    test_env_vars:
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
-    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+  post_create: templates/terraform/post_create/set_computed_name.tmpl
+  custom_import: templates/terraform/custom_import/cloud_identity_group_import.go.tmpl
+samples:
+  - name: cloud_identity_groups_basic
+    primary_resource_id: cloud_identity_group_basic
     exclude_test: true
+    steps:
+      - name: cloud_identity_groups_basic
+        resource_id_vars:
+          id_group: my-identity-group
+        test_env_vars:
+          cust_id: CUST_ID
+          org_domain: ORG_DOMAIN
 parameters:
-  - name: 'initialGroupConfig'
+  - name: initialGroupConfig
     type: Enum
     description: |
       The initial configuration options for creating a Group.
@@ -69,26 +69,26 @@ parameters:
       for possible values.
     url_param_only: true
     immutable: true
-    default_value: "EMPTY"
+    default_value: EMPTY
     enum_values:
-      - 'INITIAL_GROUP_CONFIG_UNSPECIFIED'
-      - 'WITH_INITIAL_OWNER'
-      - 'EMPTY'
+      - INITIAL_GROUP_CONFIG_UNSPECIFIED
+      - WITH_INITIAL_OWNER
+      - EMPTY
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Resource name of the Group in the format: groups/{group_id}, where group_id
       is the unique ID assigned to the Group.
     output: true
-  - name: 'groupKey'
+  - name: groupKey
     type: NestedObject
     description: |
       EntityKey of the Group.
     required: true
     immutable: true
     properties:
-      - name: 'id'
+      - name: id
         type: String
         description: |
           The ID of the entity.
@@ -102,7 +102,7 @@ properties:
           Must be unique within a namespace.
         required: true
         immutable: true
-      - name: 'namespace'
+      - name: namespace
         type: String
         description: |
           The namespace in which the entity exists.
@@ -114,7 +114,7 @@ properties:
           The namespace must correspond to an identity source created in Admin Console
           and must be in the form of `identitysources/{identity_source_id}`.
         immutable: true
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The resource name of the entity under which this Group resides in the
@@ -124,23 +124,23 @@ properties:
       groups or customers/{customer_id} for Google Groups.
     required: true
     immutable: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       The display name of the Group.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An extended description to help users determine the purpose of a Group.
       Must not be longer than 4,096 characters.
-  - name: 'additionalGroupKeys'
+  - name: additionalGroupKeys
     type: Array
-    description: 'Additional group keys associated with the Group'
+    description: Additional group keys associated with the Group
     output: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'id'
+        - name: id
           type: String
           description: |
             The ID of the entity.
@@ -153,7 +153,7 @@ properties:
 
             Must be unique within a namespace.
           output: true
-        - name: 'namespace'
+        - name: namespace
           type: String
           description: |
             The namespace in which the entity exists.
@@ -165,17 +165,17 @@ properties:
             The namespace must correspond to an identity source created in Admin Console
             and must be in the form of `identitysources/{identity_source_id}`.
           output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The time when the Group was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The time when the Group was last updated.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValuePairs
     description: |
       One or more label entries that apply to the Group. Currently supported labels contain a key with an empty value.
@@ -188,3 +188,4 @@ properties:
 
       Identity-mapped groups for Cloud Search have a label with a key of system/groups/external and an empty value.
     required: true
+exclude_sweeper: true

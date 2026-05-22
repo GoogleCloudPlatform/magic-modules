@@ -14,25 +14,22 @@
 ---
 name: ReleaseChannelSetting
 description: The resource for managing ReleaseChannel settings for Admin Control.
+id_format: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
 base_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
 create_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings?releaseChannelSettingId={{release_channel_setting_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
+update_mask: true
+mutex: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
-mutex: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
-sweeper:
-  url_substitutions:
-    - region: "global"
-examples:
+samples:
   - name: gemini_release_channel_setting_basic
     primary_resource_id: example
-    vars:
-      release_channel_setting_id: ls1-tf
-autogen_async: false
-autogen_status: UmVsZWFzZUNoYW5uZWxTZXR0aW5n
+    steps:
+      - name: gemini_release_channel_setting_basic
+        resource_id_vars:
+          release_channel_setting_id: ls1-tf
 parameters:
   - name: location
     type: String
@@ -42,8 +39,7 @@ parameters:
     required: true
   - name: releaseChannelSettingId
     type: String
-    description: |-
-      Id of the Release Channel Setting.
+    description: Id of the Release Channel Setting.
     immutable: true
     url_param_only: true
     required: true
@@ -72,3 +68,8 @@ properties:
       Identifier. Name of the resource.
       Format:projects/{project}/locations/{location}/releaseChannelSettings/{releaseChannelSetting}
     output: true
+autogen_async: false
+autogen_status: UmVsZWFzZUNoYW5uZWxTZXR0aW5n
+sweeper:
+  url_substitutions:
+    - region: global

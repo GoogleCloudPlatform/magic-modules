@@ -15,19 +15,21 @@
 name: QaScorecardRevision
 description: A revision of a QaScorecard.
 base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions
-immutable: true
 self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{qa_scorecard_revision_id}}
 create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions?qaScorecardRevisionId={{qa_scorecard_revision_id}}
 exclude_delete: true
 import_format:
   - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{qa_scorecard_revision_id}}
-autogen_status: UWFTY29yZWNhcmRSZXZpc2lvbg==
-examples:
+custom_code:
+  pre_create: templates/terraform/pre_create/contact_center_insights_qa_scorecard_revision.go.tmpl
+samples:
   - name: contact_center_insights_qa_scorecard_revision_basic
     primary_resource_id: default
-    vars:
-      scorecard_id: qa-scorecard
-      revision_id: qa-revision
+    steps:
+      - name: contact_center_insights_qa_scorecard_revision_basic
+        resource_id_vars:
+          revision_id: qa-revision
+          scorecard_id: qa-scorecard
 parameters:
   - name: location
     type: String
@@ -51,8 +53,6 @@ parameters:
     immutable: true
     url_param_only: true
     default_from_api: true
-custom_code:
-  pre_create: 'templates/terraform/pre_create/contact_center_insights_qa_scorecard_revision.go.tmpl'
 properties:
   - name: alternateIds
     type: Array
@@ -124,3 +124,5 @@ properties:
       DELETING
       TRAINING_CANCELLED
     output: true
+autogen_status: UWFTY29yZWNhcmRSZXZpc2lvbg==
+immutable: true

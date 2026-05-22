@@ -13,32 +13,19 @@
 
 ---
 name: MulticastProducerAssociation
-description: Create a multicast producer association in the specified location
-  of the current project.
+description: Create a multicast producer association in the specified location of the current project.
 references:
   guides:
-    'Create Multicast Producer Association': 'https://docs.cloud.google.com/vpc/docs/multicast/enable-producer-network#create-producer'
-  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastProducerAssociations'
+    Create Multicast Producer Association: https://docs.cloud.google.com/vpc/docs/multicast/enable-producer-network#create-producer
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastProducerAssociations
+id_format: projects/{{project}}/locations/{{location}}/multicastProducerAssociations/{{multicast_producer_association_id}}
 base_url: projects/{{project}}/locations/{{location}}/multicastProducerAssociations
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastProducerAssociations/{{multicast_producer_association_id}}
 create_url: projects/{{project}}/locations/{{location}}/multicastProducerAssociations?multicastProducerAssociationId={{multicast_producer_association_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/multicastProducerAssociations/{{multicast_producer_association_id}}
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastProducerAssociations/{{multicast_producer_association_id}}
-sweeper:
-  url_substitutions:
-    - location: "us-central1-b"
-examples:
-  - name: network_services_multicast_producer_association_basic
-    primary_resource_id: mpa_test
-    vars:
-      network_name: test-network-mpa
-      domain_name: test-domain-mpa
-      domain_activation_name: test-domain-activation-mpa
-      producer_association_name: test-producer-association-mpa
-autogen_async: true
 async:
   operation:
     timeouts:
@@ -54,7 +41,16 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: TXVsdGljYXN0UHJvZHVjZXJBc3NvY2lhdGlvbg==
+samples:
+  - name: network_services_multicast_producer_association_basic
+    primary_resource_id: mpa_test
+    steps:
+      - name: network_services_multicast_producer_association_basic
+        resource_id_vars:
+          domain_activation_name: test-domain-activation-mpa
+          domain_name: test-domain-mpa
+          network_name: test-network-mpa
+          producer_association_name: test-producer-association-mpa
 parameters:
   - name: location
     type: String
@@ -141,3 +137,8 @@ properties:
       [Output only] The timestamp when the Multicast Producer Association was
       most recently updated.
     output: true
+autogen_async: true
+autogen_status: TXVsdGljYXN0UHJvZHVjZXJBc3NvY2lhdGlvbg==
+sweeper:
+  url_substitutions:
+    - location: us-central1-b

@@ -30,14 +30,13 @@ references:
 base_url: '{{parent}}/locations/{{location}}/postureDeployments'
 self_link: '{{parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
 create_url: '{{parent}}/locations/{{location}}/postureDeployments?postureDeploymentId={{posture_deployment_id}}'
-update_mask: true
 update_verb: PATCH
+update_mask: true
 import_format:
   - '{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_async: true
 parameters:
   - name: parent
     type: String
@@ -146,3 +145,4 @@ properties:
       CREATE_FAILED or DELETE_FAILED. It will have the failure message for posture deployment's
       CREATE/UPDATE/DELETE methods.
     output: true
+autogen_async: true
