@@ -73,22 +73,43 @@ func DataSourceOracleDatabaseGoldengateConnectionTypesRead(d *schema.ResourceDat
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
 
-	if err != nil {
-		return fmt.Errorf("Error reading GoldengateConnectionTypes: %s", err)
+	var goldengateConnectionTypes []map[string]interface{}
+	params := make(map[string]string)
+
+	for {
+		listURL, err := transport_tpg.AddQueryParams(url, params)
+		if err != nil {
+			return err
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    listURL,
+			UserAgent: userAgent,
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error reading GoldengateConnectionTypes: %s", err)
+		}
+
+		pageConnectionTypes := flattenGoldengateConnectionTypes(res["goldengateConnectionTypes"], d, config)
+		goldengateConnectionTypes = append(goldengateConnectionTypes, pageConnectionTypes...)
+
+		pToken, ok := res["nextPageToken"]
+		if ok && pToken != nil && pToken.(string) != "" {
+			params["pageToken"] = pToken.(string)
+		} else {
+			break
+		}
 	}
 
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("goldengate_connection_types", flattenGoldengateConnectionTypes(res["goldengateConnectionTypes"], d, config)); err != nil {
+	if err := d.Set("goldengate_connection_types", goldengateConnectionTypes); err != nil {
 		return fmt.Errorf("Error setting goldengate_connection_types: %s", err)
 	}
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/goldengateConnectionTypes")
@@ -103,10 +124,16 @@ func flattenGoldengateConnectionTypes(v interface{}, d *schema.ResourceData, con
 	if v == nil {
 		return nil
 	}
-	l := v.([]interface{})
+	l, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
 	transformed := make([]map[string]interface{}, 0)
 	for _, raw := range l {
-		original := raw.(map[string]interface{})
+		original, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
 		transformed = append(transformed, map[string]interface{}{
 			"name":             original["name"],
 			"connection_type":  original["connectionType"],
