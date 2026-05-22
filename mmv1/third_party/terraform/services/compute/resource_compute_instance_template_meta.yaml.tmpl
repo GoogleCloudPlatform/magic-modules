@@ -129,6 +129,12 @@ fields:
     api_field: 'properties.networkInterfaces.aliasIpRanges.ipCidrRange'
   - field: 'network_interface.alias_ip_range.subnetwork_range_name'
     api_field: 'properties.networkInterfaces.aliasIpRanges.subnetworkRangeName'
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'network_interface.alias_ipv6_range.ip_cidr_range'
+    api_field: 'properties.networkInterfaces.aliasIpv6Ranges.ipCidrRange'
+  - field: 'network_interface.alias_ipv6_range.subnetwork_range_name'
+    api_field: 'properties.networkInterfaces.aliasIpv6Ranges.subnetworkRangeName'
+{{- end }}
   - field: 'network_interface.internal_ipv6_prefix_length'
     api_field: 'properties.networkInterfaces.internalIpv6PrefixLength'
   - field: 'network_interface.ipv6_access_config.external_ipv6'

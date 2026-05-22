@@ -16,6 +16,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
@@ -285,6 +288,35 @@ func TestAccComputeInstanceTemplate_IPv6(t *testing.T) {
 		},
 	})
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeInstanceTemplate_aliasIpv6Range(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_aliasIpv6Range(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "network_interface.0.alias_ipv6_range.0.ip_cidr_range", "/96"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+{{- end }}
 
 func TestAccComputeInstanceTemplate_networkTier(t *testing.T) {
 	t.Parallel()
@@ -5665,3 +5697,48 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, context)
 }
+
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInstanceTemplate_aliasIpv6Range(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "custom-test" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+  enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "custom-test" {
+  name             = "tf-test-subnetwork-%s"
+  region           = "us-central1"
+  network          = google_compute_network.custom-test.id
+  stack_type       = "IPV6_ONLY"
+  ipv6_access_type = "INTERNAL"
+
+  secondary_ip_range {
+    range_name    = "v6-ula"
+    ip_version    = "IPV6"
+  }
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "tf-test-template-%s"
+  machine_type = "e2-medium"
+
+  disk {
+    source_image = "debian-cloud/debian-11"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.custom-test.name
+    stack_type = "IPV6_ONLY"
+    alias_ipv6_range {
+      ip_cidr_range         = "/96"
+    }
+  }
+}
+`, suffix, suffix, suffix)
+}
+{{- end }}

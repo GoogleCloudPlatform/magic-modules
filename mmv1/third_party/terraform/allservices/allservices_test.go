@@ -1,4 +1,4 @@
-package acctest_test
+package allservices_test
 
 import (
 	"context"
@@ -15,6 +15,7 @@ import (
 	fwtypes "github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/allservices"
 	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	"github.com/hashicorp/terraform-provider-google/google/registry"

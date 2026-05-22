@@ -839,8 +839,8 @@ properties:
                   allow_empty_object: true
                   send_empty_value: true
                   properties: []  # Meant to be an empty object with no properties.
-                # Although ResponseMessage has a field named "toolCall", we can't include it here because it references the Tool resource, which hasn't been available on Terraform.
-                # See https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3beta1/ResponseMessage
+          # Although ResponseMessage has a field named "toolCall", we can't include it here because it references the Tool resource, which hasn't been available on Terraform.
+          # See https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3beta1/ResponseMessage
           - name: 'webhook'
             type: String
             description: |

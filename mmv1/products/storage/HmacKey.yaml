@@ -74,7 +74,7 @@ properties:
     fingerprint_name: 'etag'
     default_value: "ACTIVE"
     enum_values:
-    # - :DELETED (not directly settable)
+      # - :DELETED (not directly settable)
       - 'ACTIVE'
       - 'INACTIVE'
   - name: 'secret'
